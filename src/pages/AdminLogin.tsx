@@ -79,17 +79,12 @@ export default function AdminLogin() {
       }
 
       if (data.user) {
-        // Check if user has admin privileges
-        const { data: userRoles, error: roleError } = await supabase
-          .from('user_roles')
-          .select(`
-            role,
-            users!inner(auth_user_id)
-          `)
-          .eq('users.auth_user_id', data.user.id);
+        // Verify admin privileges via secure RPC (avoids FK join issues)
+        const { data: isAdminFlag, error: adminCheckError } = await supabase
+          .rpc('is_admin', { _user_id: data.user.id });
 
-        if (roleError) {
-          console.error('Error fetching user roles:', roleError);
+        if (adminCheckError) {
+          console.error('Error verifying admin privileges:', adminCheckError);
           await supabase.auth.signOut();
           toast({
             title: "Access Denied",
@@ -99,21 +94,7 @@ export default function AdminLogin() {
           return;
         }
 
-        if (!userRoles || userRoles.length === 0) {
-          await supabase.auth.signOut();
-          toast({
-            title: "Access Denied",
-            description: "This account does not have admin privileges",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        const hasAdminRole = userRoles.some(
-          (ur: any) => ur.role === 'admin' || ur.role === 'super_admin'
-        );
-
-        if (!hasAdminRole) {
+        if (!isAdminFlag) {
           await supabase.auth.signOut();
           toast({
             title: "Access Denied",
@@ -129,6 +110,7 @@ export default function AdminLogin() {
         });
 
         navigate('/admin');
+
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
