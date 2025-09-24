@@ -30,11 +30,11 @@ const Dashboard = () => {
   const handleLogout = async () => {
     try {
       await signOut();
-      navigate("/");
+      navigate("/auth");
     } catch (error) {
       console.error("Error during logout:", error);
       // Force navigation even if signOut fails
-      navigate("/");
+      navigate("/auth");
     }
   };
   
