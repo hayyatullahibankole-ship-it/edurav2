@@ -39,12 +39,16 @@ const Navbar = () => {
           {/* Desktop Auth Buttons */}
           {user ? (
             <div className="hidden md:flex items-center space-x-4">
-              <Link to="/dashboard">
-                <Button variant="ghost">Dashboard</Button>
+              <Link to={isAdmin ? "/admin" : "/dashboard"}>
+                <Button variant="ghost">
+                  {isAdmin ? "Admin Panel" : "Dashboard"}
+                </Button>
               </Link>
-              <Link to="/admin/login">
-                <Button variant="outline" size="sm">Admin</Button>
-              </Link>
+              {!isAdmin && (
+                <Link to="/admin/login">
+                  <Button variant="outline" size="sm">Admin</Button>
+                </Link>
+              )}
             </div>
           ) : (
             <div className="hidden md:flex items-center space-x-4">
@@ -107,12 +111,16 @@ const Navbar = () => {
               <div className="px-3 py-2 space-y-2">
                 {user ? (
                   <>
-                    <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full">Dashboard</Button>
+                    <Link to={isAdmin ? "/admin" : "/dashboard"} onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full">
+                        {isAdmin ? "Admin Panel" : "Dashboard"}
+                      </Button>
                     </Link>
-                    <Link to="/admin/login" onClick={() => setIsMenuOpen(false)}>
-                      <Button variant="outline" className="w-full">Admin Login</Button>
-                    </Link>
+                    {!isAdmin && (
+                      <Link to="/admin/login" onClick={() => setIsMenuOpen(false)}>
+                        <Button variant="outline" className="w-full">Admin Login</Button>
+                      </Link>
+                    )}
                   </>
                 ) : (
                   <>
