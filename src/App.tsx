@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminPortal from "./pages/AdminPortal";
 import AdminLogin from "./pages/AdminLogin";
 import CBTExam from "./pages/CBTExam";
 import Demo from "./pages/Demo";
@@ -39,6 +40,11 @@ const App = () => (
             } />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={
+              <ProtectedRoute requireAdmin>
+                <AdminPortal />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/dashboard" element={
               <ProtectedRoute requireAdmin>
                 <Layout showNavbar={false}><AdminDashboard /></Layout>
               </ProtectedRoute>
