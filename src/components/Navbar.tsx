@@ -3,17 +3,10 @@ import { GraduationCap, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, isAdmin, signOut } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/');
-  };
+  const { user, isAdmin } = useAuth();
 
   return (
     <nav className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
@@ -52,9 +45,6 @@ const Navbar = () => {
               <Link to="/admin/login">
                 <Button variant="outline" size="sm">Admin</Button>
               </Link>
-              <Button variant="destructive" size="sm" onClick={handleLogout}>
-                Logout
-              </Button>
             </div>
           ) : (
             <div className="hidden md:flex items-center space-x-4">
@@ -123,16 +113,6 @@ const Navbar = () => {
                     <Link to="/admin/login" onClick={() => setIsMenuOpen(false)}>
                       <Button variant="outline" className="w-full">Admin Login</Button>
                     </Link>
-                    <Button 
-                      variant="destructive" 
-                      className="w-full" 
-                      onClick={() => {
-                        handleLogout();
-                        setIsMenuOpen(false);
-                      }}
-                    >
-                      Logout
-                    </Button>
                   </>
                 ) : (
                   <>

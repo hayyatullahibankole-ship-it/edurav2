@@ -243,15 +243,7 @@ export default function AdminLogin() {
             </Button>
           </form>
 
-          <div className="text-center space-y-3">
-            <Button 
-              variant="outline" 
-              onClick={() => {/* TODO: Add account creation logic */}}
-              className="w-full text-sm"
-            >
-              + Add Admin Account
-            </Button>
-            
+          <div className="text-center">
             <Button 
               variant="ghost" 
               onClick={() => navigate('/')}
