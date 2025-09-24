@@ -61,13 +61,6 @@ const Dashboard = () => {
               <Badge className="bg-accent text-accent-foreground">
                 Premium Member
               </Badge>
-              {isAdmin && (
-                <Link to="/admin">
-                  <Button variant="outline" size="sm">
-                    Admin Dashboard
-                  </Button>
-                </Link>
-              )}
             </div>
           </div>
         </div>
