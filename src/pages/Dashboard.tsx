@@ -18,13 +18,25 @@ import {
   Settings,
   LogOut
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import ProfileSettings from "@/components/ProfileSettings";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      // Force navigation even if signOut fails
+      navigate("/");
+    }
+  };
   
   const recentTests = [
     { subject: "Mathematics", score: 85, date: "2024-01-15", duration: "1h 30m" },
@@ -68,7 +80,7 @@ const Dashboard = () => {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="dashboard">
               <Target className="h-4 w-4 mr-2" />
               Dashboard
@@ -81,11 +93,18 @@ const Dashboard = () => {
               <Settings className="h-4 w-4 mr-2" />
               Settings
             </TabsTrigger>
-            <TabsTrigger value="logout" onClick={signOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </TabsTrigger>
           </TabsList>
+
+          <div className="mt-4 flex justify-end">
+            <Button 
+              variant="outline" 
+              onClick={handleLogout}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
 
           <TabsContent value="dashboard" className="mt-8">
             {/* Quick Stats */}
