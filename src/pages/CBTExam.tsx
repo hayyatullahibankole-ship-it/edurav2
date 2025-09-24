@@ -21,6 +21,7 @@ const CBTExam = () => {
   const [timeLeft, setTimeLeft] = useState(90 * 60); // 90 minutes in seconds
   const [answers, setAnswers] = useState<{[key: number]: string}>({});
   const [flagged, setFlagged] = useState<Set<number>>(new Set());
+  const [examStarted, setExamStarted] = useState(true);
 
   // Sample questions data
   const questions = [
@@ -108,7 +109,23 @@ const CBTExam = () => {
     });
     
     const percentage = Math.round((score / questions.length) * 100);
-    navigate('/results', { state: { score: percentage, totalQuestions: questions.length, correctAnswers: score } });
+    const unansweredCount = questions.length - Object.keys(answers).length;
+    const resultData = {
+      score: percentage,
+      totalQuestions: questions.length,
+      correctAnswers: score,
+      wrongAnswers: questions.length - score,
+      unanswered: unansweredCount,
+      timeTaken: Math.floor((90 * 60 - timeLeft) / 60),
+      timeAllotted: 90,
+      subjects: [
+        { name: "Mathematics", score: 80, total: 2, correct: 1.6 },
+        { name: "English", score: percentage, total: 1, correct: percentage/100 },
+        { name: "Physics", score: 70, total: 1, correct: 0.7 },
+        { name: "Chemistry", score: 65, total: 1, correct: 0.65 }
+      ]
+    };
+    navigate('/results', { state: resultData });
   };
 
   const getQuestionStatus = (index: number) => {

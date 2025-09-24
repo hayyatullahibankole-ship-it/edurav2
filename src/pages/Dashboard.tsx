@@ -21,6 +21,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import ProfileSettings from "@/components/ProfileSettings";
+import ScheduleTestModal from "@/components/ScheduleTestModal";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -262,9 +263,11 @@ const Dashboard = () => {
                           <p className="text-xs text-primary">{test.time}</p>
                         </div>
                       ))}
-                      <Button variant="outline" className="w-full">
-                        Schedule New Test
-                      </Button>
+                      <ScheduleTestModal>
+                        <Button variant="outline" className="w-full">
+                          Schedule New Test
+                        </Button>
+                      </ScheduleTestModal>
                     </div>
                   </CardContent>
                 </Card>
@@ -279,7 +282,9 @@ const Dashboard = () => {
                     <div className="text-center">
                       <div className="text-4xl font-bold text-accent mb-2">7</div>
                       <p className="text-sm text-muted-foreground">Days in a row</p>
-                      <Button className="w-full mt-4">Continue Streak</Button>
+                      <Link to="/practice">
+                        <Button className="w-full mt-4">Continue Streak</Button>
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>
@@ -294,9 +299,11 @@ const Dashboard = () => {
                     <div className="text-center">
                       <Badge className="mb-4 bg-accent text-accent-foreground">Active</Badge>
                       <p className="text-sm text-muted-foreground mb-4">Expires on Mar 15, 2024</p>
-                      <Button variant="outline" className="w-full">
-                        Manage Subscription
-                      </Button>
+                      <Link to="/pricing">
+                        <Button variant="outline" className="w-full">
+                          Manage Subscription
+                        </Button>
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>
