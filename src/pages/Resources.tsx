@@ -81,6 +81,65 @@ const Resources = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const handleResourceAccess = async (resource: any) => {
+    try {
+      if (resource.access_level === 'premium') {
+        // Redirect to pricing
+        window.location.href = '/pricing';
+        return;
+      }
+
+      // Generate proper storage URL for the file
+      let fileUrl = resource.file_url;
+      
+      // If the file_url is a relative path, construct the full Supabase storage URL
+      if (!fileUrl.startsWith('http')) {
+        // Extract bucket and file path
+        const pathParts = fileUrl.split('/');
+        const bucketName = pathParts[0] || 'resources';
+        const filePath = pathParts.slice(1).join('/');
+        
+        // Get public URL from Supabase storage
+        const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+        fileUrl = data.publicUrl;
+      }
+
+      // Increment download count
+      await supabase
+        .from('resources')
+        .update({ 
+          download_count: (resource.download_count || 0) + 1 
+        })
+        .eq('id', resource.id);
+
+      // Open the file
+      if (resource.file_type?.startsWith('video')) {
+        window.open(fileUrl, '_blank');
+      } else {
+        // For documents, trigger download
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = resource.title;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      toast({
+        title: "Success",
+        description: resource.file_type?.startsWith('video') ? "Opening video..." : "Download started"
+      });
+
+    } catch (error) {
+      console.error('Error accessing resource:', error);
+      toast({
+        title: "Error",
+        description: "Failed to access resource. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const filteredResources = resources.filter(resource => {
     const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          resource.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -277,21 +336,7 @@ const Resources = () => {
                     <Button 
                       className="w-full" 
                       variant={resource.access_level === 'premium' ? "default" : "outline"}
-                      onClick={() => {
-                        if (resource.access_level === 'premium') {
-                          // Redirect to pricing
-                          window.location.href = '/pricing';
-                        } else {
-                          // Handle download/view
-                          if (resource.file_type?.startsWith('video')) {
-                            // Open video in new tab
-                            window.open(resource.file_url, '_blank');
-                          } else {
-                            // Trigger download
-                            window.open(resource.file_url, '_blank');
-                          }
-                        }
-                      }}
+                      onClick={() => handleResourceAccess(resource)}
                     >
                       {resource.file_type?.startsWith('video') ? (
                         <>
