@@ -27,10 +27,13 @@ import {
   Lock,
   Database,
   Monitor,
-  Zap
+  Zap,
+  FileText
 } from 'lucide-react';
 import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
+import QuestionManagement from '@/components/admin/QuestionManagement';
+import ResourceManagement from '@/components/admin/ResourceManagement';
 import SecurityCenter from '@/components/admin/SecurityCenter';
 import AnalyticsHub from '@/components/admin/AnalyticsHub';
 import SystemConfig from '@/components/admin/SystemConfig';
@@ -184,6 +187,22 @@ export default function AdminPortal() {
               >
                 <BookOpen className="w-4 h-4 mr-3" />
                 Exam Control
+              </Button>
+              <Button
+                variant={activeSection === 'questions' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left"
+                onClick={() => setActiveSection('questions')}
+              >
+                <FileText className="w-4 h-4 mr-3" />
+                Question Bank
+              </Button>
+              <Button
+                variant={activeSection === 'resources' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left"
+                onClick={() => setActiveSection('resources')}
+              >
+                <Upload className="w-4 h-4 mr-3" />
+                Resources
               </Button>
               <Button
                 variant={activeSection === 'security' ? 'secondary' : 'ghost'}
@@ -356,6 +375,10 @@ export default function AdminPortal() {
           
           {activeSection === 'exams' && <ExamControl />}
           
+          {activeSection === 'questions' && <QuestionManagement />}
+          
+          {activeSection === 'resources' && <ResourceManagement />}
+          
           {activeSection === 'security' && <SecurityCenter suspiciousActivities={recentActivities} />}
           
           {activeSection === 'analytics' && <AnalyticsHub />}
@@ -363,7 +386,7 @@ export default function AdminPortal() {
           {activeSection === 'settings' && <SystemConfig />}
 
           {/* Other sections can be implemented similarly */}
-          {activeSection !== 'dashboard' && activeSection !== 'users' && (
+          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'settings'].includes(activeSection) && (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
