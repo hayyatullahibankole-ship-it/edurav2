@@ -21,6 +21,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import ProfileSettings from "@/components/ProfileSettings";
+import ScheduleTestModal from "@/components/ScheduleTestModal";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -166,12 +167,12 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <Link to="/practice">
+                      <ScheduleTestModal>
                         <Button className="w-full h-20 flex-col gap-2">
                           <Play className="h-6 w-6" />
-                          Start Practice Test
+                          Start Test
                         </Button>
-                      </Link>
+                      </ScheduleTestModal>
                       <Link to="/resources">
                         <Button variant="outline" className="w-full h-20 flex-col gap-2">
                           <FileText className="h-6 w-6" />
@@ -254,12 +255,12 @@ const Dashboard = () => {
                     <CardDescription>Jump into practice mode</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Link to="/practice">
+                    <ScheduleTestModal>
                       <Button className="w-full">
                         <Play className="h-4 w-4 mr-2" />
                         Start Test
                       </Button>
-                    </Link>
+                    </ScheduleTestModal>
                   </CardContent>
                 </Card>
 
@@ -273,9 +274,9 @@ const Dashboard = () => {
                     <div className="text-center">
                       <div className="text-4xl font-bold text-accent mb-2">7</div>
                       <p className="text-sm text-muted-foreground">Days in a row</p>
-                      <Link to="/practice">
+                      <ScheduleTestModal>
                         <Button className="w-full mt-4">Continue Streak</Button>
-                      </Link>
+                      </ScheduleTestModal>
                     </div>
                   </CardContent>
                 </Card>
