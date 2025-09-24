@@ -32,25 +32,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Fetch user profile and role
           setTimeout(async () => {
             try {
-              const [profileResponse, roleResponse] = await Promise.all([
-                supabase
-                  .from('users')
-                  .select('*')
-                  .eq('auth_user_id', session.user.id)
-                  .single(),
-                supabase
-                  .from('user_roles')
-                  .select('role')
-                  .eq('user_id', session.user.id)
-                  .single()
-              ]);
+              // First get the user profile
+              const profileResponse = await supabase
+                .from('users')
+                .select('*')
+                .eq('auth_user_id', session.user.id)
+                .single();
 
               if (profileResponse.data) {
                 setUserProfile(profileResponse.data);
-              }
-              
-              if (roleResponse.data) {
-                setUserRole(roleResponse.data.role);
+                
+                // Then get the user role using the profile ID
+                const roleResponse = await supabase
+                  .from('user_roles')
+                  .select('role')
+                  .eq('user_id', profileResponse.data.id)
+                  .single();
+                
+                if (roleResponse.data) {
+                  setUserRole(roleResponse.data.role);
+                }
               }
             } catch (error) {
               console.error('Error fetching user data:', error);
