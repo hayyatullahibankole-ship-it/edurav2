@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import ScheduleTestModal from '@/components/ScheduleTestModal';
 
 export default function ExamControl() {
   const { toast } = useToast();
@@ -152,10 +153,12 @@ export default function ExamControl() {
         
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-green-600 hover:bg-green-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Create New Exam
-            </Button>
+                      <ScheduleTestModal>
+                        <Button className="bg-green-600 hover:bg-green-700">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create New Exam
+                        </Button>
+                      </ScheduleTestModal>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
