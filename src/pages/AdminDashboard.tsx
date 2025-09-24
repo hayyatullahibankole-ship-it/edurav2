@@ -24,7 +24,13 @@ import {
   Edit,
   Trash2,
   Plus,
-  Download
+  Download,
+  LogOut,
+  Bell,
+  Search,
+  Filter,
+  MoreHorizontal,
+  Activity
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,7 +38,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
 export default function AdminDashboard() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -54,7 +60,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!isAdmin) {
-      navigate('/dashboard');
+      navigate('/admin/login');
       return;
     }
     fetchAdminData();
@@ -133,6 +139,15 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/admin/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   if (!isAdmin) {
     return null;
   }
@@ -157,94 +172,165 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
-            <p className="text-muted-foreground">Manage your CBT platform</p>
-          </div>
-          <div className="flex items-center gap-4 mt-4 md:mt-0">
-            <Badge variant="destructive">
-              <Shield className="w-4 h-4 mr-2" />
-              Super Admin
-            </Badge>
-            <Button variant="outline" onClick={() => navigate('/dashboard')}>
-              Back to Student View
-            </Button>
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/5">
+      {/* Admin Navigation Header */}
+      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold">EduCBT Admin</h1>
+                  <p className="text-xs text-muted-foreground">Administration Portal</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm">
+                  <Bell className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="sm">
+                  <Search className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              <div className="h-6 w-px bg-border" />
+              
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className="text-sm font-medium">{user?.email}</p>
+                  <Badge variant="destructive" className="text-xs">
+                    Super Admin
+                  </Badge>
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+
+      <div className="container mx-auto py-8 px-4">
 
         {/* Security Alert */}
         {dashboardStats.suspiciousActivities.length > 0 && (
-          <Alert className="mb-6 border-orange-500">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
+          <Alert className="mb-6 border-orange-500 bg-orange-50/50">
+            <AlertTriangle className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-800">
               {dashboardStats.suspiciousActivities.length} suspicious exam activities detected. 
-              <Button variant="link" className="p-0 h-auto ml-2" onClick={() => setActiveTab('security')}>
-                Review now
+              <Button variant="link" className="p-0 h-auto ml-2 text-orange-600" onClick={() => setActiveTab('security')}>
+                Review now →
               </Button>
             </AlertDescription>
           </Alert>
         )}
 
-        {/* Stats Overview */}
+        {/* Enhanced Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Users</p>
-                <p className="text-2xl font-bold">{dashboardStats.totalUsers}</p>
+          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200 dark:from-blue-950/50 dark:to-blue-900/25 dark:border-blue-800">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Users</p>
+                  <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">{dashboardStats.totalUsers}</p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">+12% from last month</p>
+                </div>
+                <div className="relative">
+                  <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                    <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                </div>
               </div>
-              <Users className="h-8 w-8 text-primary" />
-            </div>
+            </CardContent>
           </Card>
           
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Active Subscriptions</p>
-                <p className="text-2xl font-bold">{dashboardStats.activeSubscriptions}</p>
+          <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 to-green-100/50 border-green-200 dark:from-green-950/50 dark:to-green-900/25 dark:border-green-800">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-700 dark:text-green-300">Active Subscriptions</p>
+                  <p className="text-3xl font-bold text-green-900 dark:text-green-100">{dashboardStats.activeSubscriptions}</p>
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">+8% from last month</p>
+                </div>
+                <div className="relative">
+                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                    <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
+                  </div>
+                </div>
               </div>
-              <DollarSign className="h-8 w-8 text-primary" />
-            </div>
+            </CardContent>
           </Card>
           
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Exams</p>
-                <p className="text-2xl font-bold">{dashboardStats.totalExams}</p>
+          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200 dark:from-purple-950/50 dark:to-purple-900/25 dark:border-purple-800">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Total Exams</p>
+                  <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">{dashboardStats.totalExams}</p>
+                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">+5 new this week</p>
+                </div>
+                <div className="relative">
+                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+                    <Trophy className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                  </div>
+                </div>
               </div>
-              <Trophy className="h-8 w-8 text-primary" />
-            </div>
+            </CardContent>
           </Card>
           
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Suspicious Activities</p>
-                <p className="text-2xl font-bold text-orange-500">
-                  {dashboardStats.suspiciousActivities.length}
-                </p>
+          <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200 dark:from-orange-950/50 dark:to-orange-900/25 dark:border-orange-800">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Security Alerts</p>
+                  <p className="text-3xl font-bold text-orange-900 dark:text-orange-100">
+                    {dashboardStats.suspiciousActivities.length}
+                  </p>
+                  <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                    {dashboardStats.suspiciousActivities.length === 0 ? 'All clear' : 'Needs attention'}
+                  </p>
+                </div>
+                <div className="relative">
+                  <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
+                    <AlertTriangle className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                  </div>
+                </div>
               </div>
-              <AlertTriangle className="h-8 w-8 text-orange-500" />
-            </div>
+            </CardContent>
           </Card>
         </div>
 
-        {/* Main Admin Interface */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="exams">Exams</TabsTrigger>
-            <TabsTrigger value="questions">Questions</TabsTrigger>
-            <TabsTrigger value="resources">Resources</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
-          </TabsList>
+        {/* Enhanced Admin Interface */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <TabsList className="grid grid-cols-4 lg:grid-cols-7 w-full lg:w-auto">
+              <TabsTrigger value="overview" className="text-xs lg:text-sm">Overview</TabsTrigger>
+              <TabsTrigger value="users" className="text-xs lg:text-sm">Users</TabsTrigger>
+              <TabsTrigger value="exams" className="text-xs lg:text-sm">Exams</TabsTrigger>
+              <TabsTrigger value="questions" className="text-xs lg:text-sm">Questions</TabsTrigger>
+              <TabsTrigger value="resources" className="text-xs lg:text-sm">Resources</TabsTrigger>
+              <TabsTrigger value="analytics" className="text-xs lg:text-sm">Analytics</TabsTrigger>
+              <TabsTrigger value="security" className="text-xs lg:text-sm">Security</TabsTrigger>
+            </TabsList>
+
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                <Filter className="w-4 h-4 mr-2" />
+                Filter
+              </Button>
+              <Button variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </div>
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

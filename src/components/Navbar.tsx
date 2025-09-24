@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import { GraduationCap, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isAdmin } = useAuth();
 
   return (
     <nav className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
@@ -35,14 +37,32 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Link to="/auth">
-              <Button variant="ghost">Login</Button>
-            </Link>
-            <Link to="/auth">
-              <Button>Get Started</Button>
-            </Link>
-          </div>
+          {user ? (
+            <div className="hidden md:flex items-center space-x-4">
+              <Link to={isAdmin ? "/admin" : "/dashboard"}>
+                <Button variant="ghost">
+                  {isAdmin ? "Admin Panel" : "Dashboard"}
+                </Button>
+              </Link>
+              {!isAdmin && (
+                <Link to="/admin/login">
+                  <Button variant="outline" size="sm">Admin</Button>
+                </Link>
+              )}
+            </div>
+          ) : (
+            <div className="hidden md:flex items-center space-x-4">
+              <Link to="/auth">
+                <Button variant="ghost">Login</Button>
+              </Link>
+              <Link to="/auth">
+                <Button>Get Started</Button>
+              </Link>
+              <Link to="/admin/login">
+                <Button variant="outline" size="sm">Admin</Button>
+              </Link>
+            </div>
+          )}
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
@@ -89,12 +109,32 @@ const Navbar = () => {
                 Pricing
               </Link>
               <div className="px-3 py-2 space-y-2">
-                <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full">Login</Button>
-                </Link>
-                <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full">Get Started</Button>
-                </Link>
+                {user ? (
+                  <>
+                    <Link to={isAdmin ? "/admin" : "/dashboard"} onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full">
+                        {isAdmin ? "Admin Panel" : "Dashboard"}
+                      </Button>
+                    </Link>
+                    {!isAdmin && (
+                      <Link to="/admin/login" onClick={() => setIsMenuOpen(false)}>
+                        <Button variant="outline" className="w-full">Admin Login</Button>
+                      </Link>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full">Login</Button>
+                    </Link>
+                    <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full">Get Started</Button>
+                    </Link>
+                    <Link to="/admin/login" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="outline" className="w-full">Admin Login</Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
