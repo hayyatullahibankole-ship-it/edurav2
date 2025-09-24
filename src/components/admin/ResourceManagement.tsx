@@ -112,6 +112,8 @@ export default function ResourceManagement() {
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
     const file = event.target.files?.[0];
     if (file) {
       setNewResource(prev => ({
@@ -123,7 +125,11 @@ export default function ResourceManagement() {
     }
   };
 
-  const handleUploadResource = async () => {
+  const handleUploadResource = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     try {
       setLoading(true);
       
@@ -327,13 +333,26 @@ export default function ResourceManagement() {
 
                 <div className="flex gap-3 pt-4">
                   <Button 
-                    onClick={handleBulkUpload} 
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleBulkUpload();
+                    }} 
                     disabled={loading || !bulkFiles || bulkFiles.length === 0}
                     className="flex-1"
                   >
                     {loading ? 'Uploading...' : `Upload ${bulkFiles?.length || 0} Resources`}
                   </Button>
-                  <Button variant="outline" onClick={() => setIsBulkUploadOpen(false)}>
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsBulkUploadOpen(false);
+                    }}
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -454,10 +473,27 @@ export default function ResourceManagement() {
                 </div>
 
                 <div className="flex gap-3 pt-4">
-                  <Button onClick={handleUploadResource} disabled={loading} className="flex-1">
+                  <Button 
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleUploadResource(e);
+                    }} 
+                    disabled={loading} 
+                    className="flex-1"
+                  >
                     {loading ? 'Uploading...' : 'Upload Resource'}
                   </Button>
-                  <Button variant="outline" onClick={() => setIsUploadModalOpen(false)}>
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsUploadModalOpen(false);
+                    }}
+                  >
                     Cancel
                   </Button>
                 </div>
