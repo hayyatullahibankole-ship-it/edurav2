@@ -80,16 +80,26 @@ export default function AdminLogin() {
 
       if (data.user) {
         // Check if user has admin privileges
-        const { data: userData, error: userError } = await supabase
-          .from('users')
+        const { data: userRoles, error: roleError } = await supabase
+          .from('user_roles')
           .select(`
-            id,
-            user_roles!inner(role)
+            role,
+            users!inner(auth_user_id)
           `)
-          .eq('auth_user_id', data.user.id)
-          .single();
+          .eq('users.auth_user_id', data.user.id);
 
-        if (userError || !userData) {
+        if (roleError) {
+          console.error('Error fetching user roles:', roleError);
+          await supabase.auth.signOut();
+          toast({
+            title: "Access Denied",
+            description: "Error verifying admin privileges",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (!userRoles || userRoles.length === 0) {
           await supabase.auth.signOut();
           toast({
             title: "Access Denied",
@@ -99,7 +109,7 @@ export default function AdminLogin() {
           return;
         }
 
-        const hasAdminRole = userData.user_roles.some(
+        const hasAdminRole = userRoles.some(
           (ur: any) => ur.role === 'admin' || ur.role === 'super_admin'
         );
 
