@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading, isAdmin, userRole } = useAuth();
 
   if (loading) {
     return (
@@ -23,8 +23,19 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     return <Navigate to="/auth" replace />;
   }
 
-  if (requireAdmin && !isAdmin) {
-    return <Navigate to="/dashboard" replace />;
+  // For admin routes, wait until userRole is loaded
+  if (requireAdmin) {
+    if (userRole === null) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      );
+    }
+    
+    if (!isAdmin) {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   return <>{children}</>;

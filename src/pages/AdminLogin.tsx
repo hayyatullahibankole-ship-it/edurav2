@@ -109,7 +109,10 @@ export default function AdminLogin() {
           description: "Successfully logged into admin dashboard",
         });
 
-        navigate('/admin');
+        // Use a slight delay to ensure admin role is loaded
+        setTimeout(() => {
+          navigate('/admin', { replace: true });
+        }, 100);
 
       }
     } catch (error) {
