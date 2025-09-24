@@ -29,6 +29,11 @@ import {
   Monitor,
   Zap
 } from 'lucide-react';
+import UserManagement from '@/components/admin/UserManagement';
+import ExamControl from '@/components/admin/ExamControl';
+import SecurityCenter from '@/components/admin/SecurityCenter';
+import AnalyticsHub from '@/components/admin/AnalyticsHub';
+import SystemConfig from '@/components/admin/SystemConfig';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -347,57 +352,15 @@ export default function AdminPortal() {
             </div>
           )}
 
-          {activeSection === 'users' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-white">User Management</h2>
-                <div className="flex items-center space-x-3">
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add User
-                  </Button>
-                  <Button variant="outline">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export
-                  </Button>
-                </div>
-              </div>
-
-              <Card className="bg-slate-800 border-slate-700">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    {users.map((user: any) => (
-                      <div key={user.id} className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-slate-600 rounded-full flex items-center justify-center">
-                            <Users className="w-5 h-5 text-slate-300" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-white">{user.first_name} {user.last_name}</p>
-                            <p className="text-sm text-slate-400">{user.email}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {user.is_suspended && (
-                            <Badge className="bg-red-600 text-white">Suspended</Badge>
-                          )}
-                          <Button variant="ghost" size="sm">
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                     ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          {activeSection === 'users' && <UserManagement users={users} onRefresh={fetchAdminData} />}
+          
+          {activeSection === 'exams' && <ExamControl />}
+          
+          {activeSection === 'security' && <SecurityCenter suspiciousActivities={recentActivities} />}
+          
+          {activeSection === 'analytics' && <AnalyticsHub />}
+          
+          {activeSection === 'settings' && <SystemConfig />}
 
           {/* Other sections can be implemented similarly */}
           {activeSection !== 'dashboard' && activeSection !== 'users' && (
