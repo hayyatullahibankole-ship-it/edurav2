@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +25,9 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ScheduleTestModalProps {
   children: React.ReactNode;
@@ -35,6 +37,12 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
   const { isPremium, loading: subscriptionLoading } = useSubscription();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [availableQuestions, setAvailableQuestions] = useState<{ [key: string]: number }>({});
+  const [loading, setLoading] = useState(false);
+
   const [testConfig, setTestConfig] = useState({
     title: "",
     description: "",
@@ -49,6 +57,46 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
     showResults: true
   });
 
+  useEffect(() => {
+    if (open) {
+      fetchSubjectsAndQuestions();
+    }
+  }, [open]);
+
+  const fetchSubjectsAndQuestions = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch subjects and count questions for each
+      const [subjectsResp, questionsResp] = await Promise.all([
+        supabase.from('subjects').select('*').eq('is_active', true),
+        supabase.from('questions').select('subject_id, is_active').eq('is_active', true)
+      ]);
+
+      if (subjectsResp.data) {
+        setSubjects(subjectsResp.data);
+        
+        // Count questions per subject
+        const questionCounts: { [key: string]: number } = {};
+        if (questionsResp.data) {
+          questionsResp.data.forEach(q => {
+            questionCounts[q.subject_id] = (questionCounts[q.subject_id] || 0) + 1;
+          });
+        }
+        setAvailableQuestions(questionCounts);
+      }
+    } catch (error) {
+      console.error('Error fetching subjects and questions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load available subjects",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const examTypes = [
     { value: "jamb", label: "JAMB Practice", description: "Joint Admissions and Matriculation Board" },
     { value: "waec", label: "WAEC Practice", description: "West African Examinations Council" },
@@ -57,7 +105,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
     { value: "custom", label: "Custom Test", description: "Create your own test format" }
   ];
 
-  const subjects = [
+  const subjects_old = [
     "Mathematics", "English Language", "Physics", "Chemistry", 
     "Biology", "Economics", "Geography", "Literature", 
     "Government", "History", "Agricultural Science", "Commerce"
@@ -70,16 +118,16 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
     { value: "mixed", label: "Mixed", description: "Combination of all difficulty levels" }
   ];
 
-  const handleSubjectToggle = (subject: string) => {
+  const handleSubjectToggle = (subjectId: string) => {
     setTestConfig(prev => ({
       ...prev,
-      subjects: prev.subjects.includes(subject)
-        ? prev.subjects.filter(s => s !== subject)
-        : [...prev.subjects, subject]
+      subjects: prev.subjects.includes(subjectId)
+        ? prev.subjects.filter(s => s !== subjectId)
+        : [...prev.subjects, subjectId]
     }));
   };
 
-  const handleScheduleTest = () => {
+  const handleScheduleTest = async () => {
     if (!testConfig.title || !testConfig.examType || testConfig.subjects.length === 0) {
       toast({
         title: "Missing Information",
@@ -89,27 +137,123 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
       return;
     }
 
-    // Here you would typically save to database
-    toast({
-      title: "Test Started Successfully!",
-      description: `${testConfig.title} has been started`,
+    // Check if selected subjects have enough questions
+    const insufficientSubjects = testConfig.subjects.filter(subjectId => {
+      const availableCount = availableQuestions[subjectId] || 0;
+      return availableCount < testConfig.questionCount;
     });
-    
-    setOpen(false);
-    setStep(1);
-    setTestConfig({
-      title: "",
-      description: "",
-      examType: "",
-      duration: 90,
-      date: new Date(),
-      time: "",
-      subjects: [],
-      difficulty: "mixed",
-      questionCount: 40,
-      autoSubmit: true,
-      showResults: true
-    });
+
+    if (insufficientSubjects.length > 0) {
+      const subjectNames = insufficientSubjects.map(id => 
+        subjects.find(s => s.id === id)?.name || 'Unknown'
+      ).join(', ');
+      
+      toast({
+        title: "Insufficient Questions",
+        description: `Not enough questions available for: ${subjectNames}. Please reduce questions per subject or select different subjects.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Create exam record
+      const examData = {
+        title: testConfig.title,
+        description: testConfig.description,
+        type: testConfig.examType.toUpperCase() as 'JAMB' | 'WAEC' | 'CUSTOM',
+        duration_minutes: testConfig.duration,
+        total_questions: testConfig.subjects.length * testConfig.questionCount,
+        is_published: true,
+        instructions: "Read each question carefully and select the best answer."
+      };
+
+      const { data: exam, error: examError } = await supabase
+        .from('exams')
+        .insert(examData)
+        .select()
+        .single();
+
+      if (examError) throw examError;
+
+      // Create exam_subjects records
+      const examSubjects = testConfig.subjects.map(subjectId => ({
+        exam_id: exam.id,
+        subject_id: subjectId,
+        subject_name: subjects.find(s => s.id === subjectId)?.name || '',
+        question_count: testConfig.questionCount,
+        is_mandatory: true
+      }));
+
+      const { error: subjectsError } = await supabase
+        .from('exam_subjects')
+        .insert(examSubjects);
+
+      if (subjectsError) throw subjectsError;
+
+      // Create attempt record
+      const { data: userProfile } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user?.id)
+        .single();
+
+      if (!userProfile) {
+        throw new Error('User profile not found');
+      }
+
+      const attemptData = {
+        exam_id: exam.id,
+        user_id: userProfile.id,
+        selected_subjects: testConfig.subjects,
+        status: 'STARTED' as 'STARTED',
+        time_remaining_seconds: testConfig.duration * 60
+      };
+
+      const { data: attempt, error: attemptError } = await supabase
+        .from('attempts')
+        .insert(attemptData)
+        .select()
+        .single();
+
+      if (attemptError) throw attemptError;
+
+      toast({
+        title: "Test Started Successfully!",
+        description: `${testConfig.title} has been started`,
+      });
+      
+      setOpen(false);
+      setStep(1);
+      setTestConfig({
+        title: "",
+        description: "",
+        examType: "",
+        duration: 90,
+        date: new Date(),
+        time: "",
+        subjects: [],
+        difficulty: "mixed",
+        questionCount: 40,
+        autoSubmit: true,
+        showResults: true
+      });
+
+      // Navigate to exam page with attempt ID
+      navigate(`/practice?attempt=${attempt.id}`);
+      
+    } catch (error) {
+      console.error('Error starting test:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start test. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderStep1 = () => (
@@ -205,25 +349,48 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
     <div className="space-y-6">
       <div>
         <Label className="text-base font-medium mb-4 block">Select Subjects *</Label>
-        <div className="grid md:grid-cols-3 gap-3">
-          {subjects.map((subject) => (
-            <div
-              key={subject}
-              className={`p-3 border rounded-lg cursor-pointer transition-all hover:bg-muted/50 ${
-                testConfig.subjects.includes(subject) ? 'border-primary bg-primary/5' : 'border-border'
-              }`}
-              onClick={() => handleSubjectToggle(subject)}
-            >
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  checked={testConfig.subjects.includes(subject)}
-                  onChange={() => {}}
-                />
-                <span className="text-sm font-medium">{subject}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-sm text-muted-foreground">Loading subjects...</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-3">
+            {subjects.map((subject) => {
+              const questionCount = availableQuestions[subject.id] || 0;
+              const hasEnoughQuestions = questionCount >= testConfig.questionCount;
+              
+              return (
+                <div
+                  key={subject.id}
+                  className={`p-3 border rounded-lg cursor-pointer transition-all hover:bg-muted/50 ${
+                    testConfig.subjects.includes(subject.id) ? 'border-primary bg-primary/5' : 'border-border'
+                  } ${!hasEnoughQuestions ? 'opacity-50' : ''}`}
+                  onClick={() => hasEnoughQuestions && handleSubjectToggle(subject.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        checked={testConfig.subjects.includes(subject.id)}
+                        disabled={!hasEnoughQuestions}
+                        onChange={() => {}}
+                      />
+                      <span className="text-sm font-medium">{subject.name}</span>
+                    </div>
+                    <Badge variant={hasEnoughQuestions ? "secondary" : "destructive"} className="text-xs">
+                      {questionCount} questions
+                    </Badge>
+                  </div>
+                  {!hasEnoughQuestions && (
+                    <p className="text-xs text-destructive mt-1">
+                      Need {testConfig.questionCount} questions minimum
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
         <p className="text-sm text-muted-foreground mt-2">
           Selected: {testConfig.subjects.length} subjects
         </p>
@@ -273,7 +440,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
         <Button variant="outline" onClick={() => setStep(2)}>
           Back
         </Button>
-        <Button onClick={() => setStep(4)} disabled={testConfig.subjects.length === 0}>
+        <Button onClick={() => setStep(4)} disabled={testConfig.subjects.length === 0 || loading}>
           Next: Start Test
         </Button>
       </div>
@@ -335,7 +502,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
               <span className="font-medium">Duration:</span> {testConfig.duration} minutes
             </div>
             <div>
-              <span className="font-medium">Subjects:</span> {testConfig.subjects.length} selected
+              <span className="font-medium">Subjects:</span> {testConfig.subjects.map(id => subjects.find(s => s.id === id)?.name).join(', ')}
             </div>
             <div>
               <span className="font-medium">Questions:</span> {testConfig.questionCount} per subject
@@ -351,9 +518,9 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
         <Button variant="outline" onClick={() => setStep(3)}>
           Back
         </Button>
-        <Button onClick={handleScheduleTest} className="flex-1">
+        <Button onClick={handleScheduleTest} className="flex-1" disabled={loading}>
           <Plus className="mr-2 h-4 w-4" />
-          Start Test
+          {loading ? 'Starting...' : 'Start Test'}
         </Button>
       </div>
     </div>

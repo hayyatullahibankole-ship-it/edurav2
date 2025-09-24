@@ -1,97 +1,213 @@
 import { useState, useEffect } from "react";
 import ExamInterface from "@/components/ExamInterface";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const CBTExam = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [examData, setExamData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const attemptId = searchParams.get('attempt');
 
-  // Sample questions data - in real app this would come from props/API
-  const questions = [
-    {
-      id: 1,
-      subject: "Mathematics",
-      question: "If 3x + 5 = 20, what is the value of x?",
-      options: ["A) 3", "B) 5", "C) 8", "D) 15"],
-      correct: "B",
-      explanation: "To solve 3x + 5 = 20, subtract 5 from both sides: 3x = 15, then divide by 3: x = 5",
-      difficulty: "easy" as const
-    },
-    {
-      id: 2,
-      subject: "English",
-      question: "Choose the correct spelling:",
-      options: ["A) Recieve", "B) Receive", "C) Receeve", "D) Recive"],
-      correct: "B",
-      explanation: "The correct spelling follows the rule 'i before e except after c'",
-      difficulty: "medium" as const
-    },
-    {
-      id: 3,
-      subject: "Physics",
-      question: "The SI unit of force is:",
-      options: ["A) Joule", "B) Watt", "C) Newton", "D) Pascal"],
-      correct: "C",
-      explanation: "Newton (N) is the SI unit of force, named after Sir Isaac Newton",
-      difficulty: "easy" as const
-    },
-    {
-      id: 4,
-      subject: "Chemistry",
-      question: "What is the chemical symbol for Gold?",
-      options: ["A) Go", "B) Gd", "C) Au", "D) Ag"],
-      correct: "C",
-      explanation: "Au comes from the Latin word 'aurum' meaning gold",
-      difficulty: "medium" as const
-    },
-    {
-      id: 5,
-      subject: "Biology",
-      question: "The powerhouse of the cell is:",
-      options: ["A) Nucleus", "B) Mitochondria", "C) Ribosome", "D) Cytoplasm"],
-      correct: "B",
-      explanation: "Mitochondria produce ATP, the energy currency of the cell",
-      difficulty: "easy" as const
+  useEffect(() => {
+    if (attemptId) {
+      fetchExamData();
+    } else {
+      // If no attempt ID, redirect to dashboard
+      navigate('/dashboard');
     }
-  ];
+  }, [attemptId, navigate]);
 
-  const handleExamSubmit = (answers: {[key: number]: string}, timeTaken: number) => {
-    // Calculate score
-    let score = 0;
-    questions.forEach((question, index) => {
-      if (answers[index] === question.correct) {
-        score++;
+  const fetchExamData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch attempt and exam data
+      const { data: attempt, error: attemptError } = await supabase
+        .from('attempts')
+        .select(`
+          *,
+          exams (
+            *,
+            exam_subjects (
+              subject_id,
+              subject_name,
+              question_count
+            )
+          )
+        `)
+        .eq('id', attemptId)
+        .single();
+
+      if (attemptError) throw attemptError;
+
+      setExamData(attempt);
+
+      // Fetch questions for selected subjects
+      const selectedSubjects = Array.isArray(attempt.selected_subjects) 
+        ? attempt.selected_subjects as string[]
+        : [];
+      const questionsPerSubject = attempt.exams.exam_subjects.reduce((acc: any, es: any) => {
+        acc[es.subject_id] = es.question_count;
+        return acc;
+      }, {});
+
+      const allQuestions: any[] = [];
+
+      for (const subjectId of selectedSubjects) {
+        const questionCount = questionsPerSubject[subjectId] || 40;
+        
+        const { data: subjectQuestions, error } = await supabase
+          .from('questions')
+          .select('*')
+          .eq('subject_id', subjectId)
+          .eq('is_active', true)
+          .limit(questionCount);
+
+        if (error) throw error;
+
+        if (subjectQuestions) {
+          // Transform questions to match the expected format
+          const transformedQuestions = subjectQuestions.map((q, index) => ({
+            id: allQuestions.length + index + 1,
+            subject: attempt.exams.exam_subjects.find((es: any) => es.subject_id === subjectId)?.subject_name || 'Unknown',
+            question: q.question_text,
+            options: Array.isArray(q.options) ? (q.options as string[]).map((opt: string, i: number) => `${String.fromCharCode(65 + i)}) ${opt}`) : [],
+            correct: Array.isArray(q.options) ? String.fromCharCode(65 + (typeof q.correct_answer === 'number' ? q.correct_answer : 0)) : 'A',
+            explanation: q.explanation || '',
+            difficulty: q.difficulty_level === 1 ? 'easy' as const : q.difficulty_level === 2 ? 'medium' as const : 'hard' as const,
+            originalId: q.id
+          }));
+
+          allQuestions.push(...transformedQuestions);
+        }
       }
-    });
-    
-    const percentage = Math.round((score / questions.length) * 100);
-    const unansweredCount = questions.length - Object.keys(answers).length;
-    
-    const resultData = {
-      score: percentage,
-      totalQuestions: questions.length,
-      correctAnswers: score,
-      wrongAnswers: questions.length - score,
-      unanswered: unansweredCount,
-      timeTaken: timeTaken,
-      timeAllotted: 90,
-      subjects: [
-        { name: "Mathematics", score: answers[0] === questions[0].correct ? 100 : 0, total: 1, correct: answers[0] === questions[0].correct ? 1 : 0 },
-        { name: "English", score: answers[1] === questions[1].correct ? 100 : 0, total: 1, correct: answers[1] === questions[1].correct ? 1 : 0 },
-        { name: "Physics", score: answers[2] === questions[2].correct ? 100 : 0, total: 1, correct: answers[2] === questions[2].correct ? 1 : 0 },
-        { name: "Chemistry", score: answers[3] === questions[3].correct ? 100 : 0, total: 1, correct: answers[3] === questions[3].correct ? 1 : 0 },
-        { name: "Biology", score: answers[4] === questions[4].correct ? 100 : 0, total: 1, correct: answers[4] === questions[4].correct ? 1 : 0 }
-      ]
-    };
-    
-    navigate('/results', { state: resultData });
+
+      // Shuffle questions
+      const shuffledQuestions = allQuestions.sort(() => Math.random() - 0.5);
+      setQuestions(shuffledQuestions);
+
+    } catch (error) {
+      console.error('Error fetching exam data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load exam data",
+        variant: "destructive"
+      });
+      navigate('/dashboard');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleExamSubmit = async (answers: {[key: number]: string}, timeTaken: number) => {
+    try {
+      // Update attempt status and save answers
+      const { error: attemptError } = await supabase
+        .from('attempts')
+        .update({ 
+          status: 'SUBMITTED' as 'SUBMITTED',
+          submitted_at: new Date().toISOString()
+        })
+        .eq('id', attemptId);
+
+      if (attemptError) throw attemptError;
+
+      // Calculate score
+      let correctCount = 0;
+      const answerRecords = questions.map((question, index) => {
+        const isCorrect = answers[index] === question.correct;
+        if (isCorrect) correctCount++;
+        
+        return {
+          attempt_id: attemptId,
+          question_id: question.originalId,
+          answer: answers[index] || null,
+          is_correct: isCorrect,
+          time_spent_seconds: Math.floor(timeTaken / questions.length)
+        };
+      });
+
+      const { error: answersError } = await supabase
+        .from('attempt_answers')
+        .insert(answerRecords);
+
+      if (answersError) throw answersError;
+
+      const percentage = (correctCount / questions.length) * 100;
+      const wrongCount = questions.length - correctCount;
+      const unansweredCount = questions.length - Object.keys(answers).length;
+
+      const { error: resultError } = await supabase
+        .from('results')
+        .insert({
+          attempt_id: attemptId,
+          raw_score: correctCount,
+          total_questions: questions.length,
+          correct_answers: correctCount,
+          wrong_answers: wrongCount,
+          unanswered: unansweredCount,
+          percentage: percentage,
+          time_taken_minutes: Math.floor(timeTaken / 60)
+        });
+
+      if (resultError) throw resultError;
+
+      toast({
+        title: "Exam Submitted!",
+        description: `You scored ${correctCount}/${questions.length} (${percentage.toFixed(1)}%)`,
+      });
+
+      navigate(`/results?attempt=${attemptId}`);
+    } catch (error) {
+      console.error('Error submitting exam:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit exam. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading your exam...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!examData || questions.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg font-medium mb-2">No exam data found</p>
+          <p className="text-muted-foreground mb-4">Unable to load the exam. Please try again.</p>
+          <button 
+            onClick={() => navigate('/dashboard')}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <ExamInterface
-      examTitle="JAMB Practice Test"
-      examDescription="Mixed Subjects Practice Examination"
+      examTitle={examData?.exams?.title || "Practice Test"}
+      examDescription={examData?.exams?.description || "Practice Examination"}
       questions={questions}
-      duration={90} // 90 minutes
+      duration={examData?.exams?.duration_minutes || 90}
       onSubmit={handleExamSubmit}
       allowReview={true}
       showExplanations={false}

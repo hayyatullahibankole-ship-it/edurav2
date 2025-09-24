@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,70 +13,89 @@ import {
   Star,
   Filter,
   Play,
-  Lock
+  Lock,
+  Eye,
+  Globe
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Resources = () => {
-  const resourceCategories = [
-    { name: "All Resources", count: 2450 },
-    { name: "Past Questions", count: 850 },
-    { name: "Study Guides", count: 320 },
-    { name: "Video Tutorials", count: 180 },
-    { name: "Practice Tests", count: 650 },
-    { name: "Exam Tips", count: 150 }
-  ];
+  const { toast } = useToast();
+  const [resources, setResources] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedSubject, setSelectedSubject] = useState('all');
 
-  const subjects = [
-    "Mathematics", "English Language", "Physics", "Chemistry", "Biology",
-    "Geography", "Economics", "Government", "Literature", "History"
-  ];
+  useEffect(() => {
+    fetchResourcesData();
+  }, []);
 
-  const featuredResources = [
-    {
-      type: "PDF",
-      title: "JAMB Mathematics Past Questions (2015-2024)",
-      description: "Complete collection of JAMB Mathematics questions with detailed solutions",
-      subject: "Mathematics",
-      year: "2024",
-      downloads: 15420,
-      rating: 4.9,
-      premium: false,
-      icon: <FileText className="h-6 w-6" />
-    },
-    {
-      type: "Video",
-      title: "Mastering WAEC English Language Comprehension",
-      description: "Step-by-step guide to excel in English comprehension passages",
-      subject: "English Language", 
-      duration: "45 mins",
-      views: 8932,
-      rating: 4.8,
-      premium: true,
-      icon: <Video className="h-6 w-6" />
-    },
-    {
-      type: "PDF",
-      title: "Chemistry Practical Guide for WAEC",
-      description: "Laboratory procedures and experiment analysis for Chemistry practical",
-      subject: "Chemistry",
-      year: "2024",
-      downloads: 12650,
-      rating: 4.7,
-      premium: false,
-      icon: <FileText className="h-6 w-6" />
-    },
-    {
-      type: "Video",
-      title: "Physics Problem Solving Techniques",
-      description: "Master complex Physics calculations with proven methods",
-      subject: "Physics",
-      duration: "62 mins",
-      views: 6741,
-      rating: 4.9,
-      premium: true,
-      icon: <Video className="h-6 w-6" />
+  const fetchResourcesData = async () => {
+    try {
+      setLoading(true);
+      
+      const [resourcesResp, subjectsResp] = await Promise.all([
+        supabase.from('resources').select(`
+          *,
+          subjects(name, code)
+        `).eq('is_active', true).order('created_at', { ascending: false }),
+        supabase.from('subjects').select('*').eq('is_active', true)
+      ]);
+
+      setResources(resourcesResp.data || []);
+      setSubjects(subjectsResp.data || []);
+      
+    } catch (error) {
+      console.error('Error fetching resources:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load resources",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const getFileIcon = (fileType: string) => {
+    if (fileType.startsWith('video/') || fileType === 'video/youtube') {
+      return <Video className="h-6 w-6" />;
+    } else if (fileType.startsWith('image/')) {
+      return <Video className="h-6 w-6" />; // Using video icon for now
+    } else if (fileType === 'text/html') {
+      return <Globe className="h-6 w-6" />;
+    } else {
+      return <FileText className="h-6 w-6" />;
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const filteredResources = resources.filter(resource => {
+    const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         resource.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSubject = selectedSubject === 'all' || resource.subject_id === selectedSubject;
+    
+    return matchesSearch && matchesSubject;
+  });
+
+  const resourceCategories = [
+    { name: "All Resources", count: resources.length },
+    { name: "Past Questions", count: resources.filter(r => r.tags?.includes?.('past-questions')).length },
+    { name: "Study Guides", count: resources.filter(r => r.tags?.includes?.('study-guide')).length },
+    { name: "Video Tutorials", count: resources.filter(r => r.file_type?.startsWith('video')).length },
+    { name: "Practice Tests", count: resources.filter(r => r.tags?.includes?.('practice')).length },
+    { name: "Exam Tips", count: resources.filter(r => r.tags?.includes?.('tips')).length }
   ];
 
   return (
@@ -99,6 +119,8 @@ const Resources = () => {
               <Input 
                 placeholder="Search for resources, subjects, or topics..." 
                 className="pl-12 pr-4 py-6 text-lg"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
               <Button className="absolute right-2 top-1/2 transform -translate-y-1/2">
                 Search
@@ -122,7 +144,10 @@ const Resources = () => {
                 {resourceCategories.map((category, index) => (
                   <button 
                     key={index}
-                    className="w-full text-left p-3 rounded-lg hover:bg-muted/50 transition-colors flex justify-between items-center"
+                    className={`w-full text-left p-3 rounded-lg hover:bg-muted/50 transition-colors flex justify-between items-center ${
+                      selectedCategory === category.name.toLowerCase().replace(' ', '-') ? 'bg-primary/10 text-primary' : ''
+                    }`}
+                    onClick={() => setSelectedCategory(category.name.toLowerCase().replace(' ', '-'))}
                   >
                     <span>{category.name}</span>
                     <Badge variant="secondary" className="text-xs">
@@ -137,13 +162,21 @@ const Resources = () => {
             <div className="lg:w-3/4">
               <h3 className="font-semibold mb-4">Filter by Subject</h3>
               <div className="flex flex-wrap gap-2">
-                {subjects.map((subject, index) => (
+                <Badge 
+                  variant={selectedSubject === 'all' ? 'default' : 'outline'}
+                  className="px-3 py-2 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                  onClick={() => setSelectedSubject('all')}
+                >
+                  All Subjects
+                </Badge>
+                {subjects.map((subject) => (
                   <Badge 
-                    key={index}
-                    variant="outline" 
+                    key={subject.id}
+                    variant={selectedSubject === subject.id ? 'default' : 'outline'}
                     className="px-3 py-2 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                    onClick={() => setSelectedSubject(subject.id)}
                   >
-                    {subject}
+                    {subject.name}
                   </Badge>
                 ))}
               </div>
@@ -173,96 +206,120 @@ const Resources = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {featuredResources.map((resource, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className={`p-2 rounded-lg ${
-                      resource.type === 'Video' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
-                    }`}>
-                      {resource.icon}
+            {loading ? (
+              Array.from({ length: 8 }, (_, index) => (
+                <Card key={index} className="animate-pulse">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between">
+                      <div className="p-2 bg-gray-200 rounded-lg w-10 h-10"></div>
+                      <div className="w-16 h-6 bg-gray-200 rounded"></div>
                     </div>
-                    {resource.premium && (
-                      <Badge className="bg-accent/10 text-accent border-accent/20">
-                        <Lock className="h-3 w-3 mr-1" />
-                        Premium
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 h-5 bg-gray-200 rounded"></div>
+                      <div className="w-12 h-5 bg-gray-200 rounded"></div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="w-full h-4 bg-gray-200 rounded"></div>
+                    <div className="w-3/4 h-4 bg-gray-200 rounded"></div>
+                    <div className="w-full h-10 bg-gray-200 rounded"></div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : filteredResources.length > 0 ? (
+              filteredResources.map((resource) => (
+                <Card key={resource.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between">
+                      <div className={`p-2 rounded-lg ${
+                        resource.file_type?.startsWith('video') ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
+                      }`}>
+                        {getFileIcon(resource.file_type)}
+                      </div>
+                      {resource.access_level === 'premium' && (
+                        <Badge className="bg-accent/10 text-accent border-accent/20">
+                          <Lock className="h-3 w-3 mr-1" />
+                          Premium
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {resource.subjects?.name || 'General'}
                       </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {resource.subject}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {resource.type}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-4">
-                  <div>
-                    <CardTitle className="text-lg leading-tight mb-2">
-                      {resource.title}
-                    </CardTitle>
-                    <CardDescription className="text-sm">
-                      {resource.description}
-                    </CardDescription>
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span>{resource.rating}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {resource.file_type?.startsWith('video') ? 'Video' : 'Document'}
+                      </Badge>
                     </div>
-                    <div className="flex items-center gap-1">
-                      {resource.type === 'Video' ? (
+                  </CardHeader>
+                  
+                  <CardContent className="space-y-4">
+                    <div>
+                      <CardTitle className="text-lg leading-tight mb-2">
+                        {resource.title}
+                      </CardTitle>
+                      <CardDescription className="text-sm">
+                        {resource.description}
+                      </CardDescription>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Eye className="h-4 w-4" />
+                        <span>{resource.view_count || 0}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Download className="h-4 w-4" />
+                        <span>{resource.download_count || 0}</span>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      className="w-full" 
+                      variant={resource.access_level === 'premium' ? "default" : "outline"}
+                      onClick={() => {
+                        if (resource.access_level === 'premium') {
+                          // Redirect to pricing
+                          window.location.href = '/pricing';
+                        } else {
+                          // Handle download/view
+                          if (resource.file_type?.startsWith('video')) {
+                            // Open video in new tab
+                            window.open(resource.file_url, '_blank');
+                          } else {
+                            // Trigger download
+                            window.open(resource.file_url, '_blank');
+                          }
+                        }
+                      }}
+                    >
+                      {resource.file_type?.startsWith('video') ? (
                         <>
-                          <Clock className="h-4 w-4" />
-                          <span>{resource.duration}</span>
+                          <Play className="h-4 w-4 mr-2" />
+                          {resource.access_level === 'premium' ? 'Premium Required' : 'Watch Video'}
                         </>
                       ) : (
                         <>
-                          <Download className="h-4 w-4" />
-                          <span>{resource.downloads?.toLocaleString()}</span>
+                          <Download className="h-4 w-4 mr-2" />
+                          {resource.access_level === 'premium' ? 'Premium Required' : 'Download'}
                         </>
                       )}
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    className="w-full" 
-                    variant={resource.premium ? "default" : "outline"}
-                    onClick={() => {
-                      if (resource.premium) {
-                        // Redirect to pricing
-                        window.location.href = '/pricing';
-                      } else {
-                        // Handle download/view
-                        if (resource.type === 'Video') {
-                          // Open video in new tab
-                          window.open('#', '_blank');
-                        } else {
-                          // Trigger download
-                          console.log(`Downloading: ${resource.title}`);
-                        }
-                      }
-                    }}
-                  >
-                    {resource.type === 'Video' ? (
-                      <>
-                        <Play className="h-4 w-4 mr-2" />
-                        {resource.premium ? 'Premium Required' : 'Watch Video'}
-                      </>
-                    ) : (
-                      <>
-                        <Download className="h-4 w-4 mr-2" />
-                        {resource.premium ? 'Premium Required' : 'Download PDF'}
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">No resources found</h3>
+                <p className="text-sm text-muted-foreground">
+                  {searchTerm || selectedSubject !== 'all' 
+                    ? 'Try adjusting your search or filters'
+                    : 'No resources have been uploaded yet'
+                  }
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </section>
