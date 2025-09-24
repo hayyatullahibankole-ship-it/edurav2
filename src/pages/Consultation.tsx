@@ -15,8 +15,11 @@ import {
   ArrowRight
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { sendConsultationBooking, contactSupport } from "@/utils/whatsapp";
+import { useToast } from "@/hooks/use-toast";
 
 const Consultation = () => {
+  const { toast } = useToast();
   const consultationTypes = [
     {
       title: "1-on-1 Academic Consultation",
@@ -193,7 +196,24 @@ const Consultation = () => {
                       </div>
                     ))}
                   </div>
-                  <Button className="w-full">
+                  <Button 
+                    className="w-full"
+                    onClick={() => {
+                      try {
+                        sendConsultationBooking("Available Tutor", type.title);
+                        toast({
+                          title: "Opening WhatsApp",
+                          description: "You'll be redirected to WhatsApp to complete your booking.",
+                        });
+                      } catch (error) {
+                        toast({
+                          title: "Error",
+                          description: "Failed to open WhatsApp. Please try again.",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
                     Book Session
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -251,11 +271,46 @@ const Consultation = () => {
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button className="flex-1" variant="outline">
+                    <Button 
+                      className="flex-1" 
+                      variant="outline"
+                      onClick={() => {
+                        try {
+                          contactSupport(`Message for ${tutor.name}`, `I would like to get in touch with ${tutor.name} regarding ${tutor.specialty} tutoring. Please connect me. Thank you!`);
+                          toast({
+                            title: "Opening WhatsApp",
+                            description: "You'll be connected with the tutor via WhatsApp.",
+                          });
+                        } catch (error) {
+                          toast({
+                            title: "Error", 
+                            description: "Failed to open WhatsApp. Please try again.",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    >
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Message
                     </Button>
-                    <Button className="flex-1">
+                    <Button 
+                      className="flex-1"
+                      onClick={() => {
+                        try {
+                          sendConsultationBooking(tutor.name, "1-on-1 consultation");
+                          toast({
+                            title: "Opening WhatsApp",
+                            description: "You'll be redirected to WhatsApp to book your session.",
+                          });
+                        } catch (error) {
+                          toast({
+                            title: "Error",
+                            description: "Failed to open WhatsApp. Please try again.",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    >
                       <Calendar className="h-4 w-4 mr-2" />
                       Book
                     </Button>
@@ -309,7 +364,23 @@ const Consultation = () => {
                         <Video className="h-4 w-4 mr-2" />
                         Details
                       </Button>
-                      <Button>
+                      <Button
+                        onClick={() => {
+                          try {
+                            sendConsultationBooking(session.tutor, session.title);
+                            toast({
+                              title: "Opening WhatsApp",
+                              description: "You'll be redirected to WhatsApp to join this session.",
+                            });
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to open WhatsApp. Please try again.",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                      >
                         Join Session
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
@@ -333,7 +404,25 @@ const Consultation = () => {
               Don't struggle alone. Get the guidance you need to excel in your exams.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary">
+              <Button 
+                size="lg" 
+                variant="secondary"
+                onClick={() => {
+                  try {
+                    contactSupport("General Consultation Inquiry", "I'm interested in booking a consultation session. Please provide me with more information about available tutors and scheduling options. Thank you!");
+                    toast({
+                      title: "Opening WhatsApp",
+                      description: "You'll be connected with our support team via WhatsApp.",
+                    });
+                  } catch (error) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to open WhatsApp. Please try again.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
                 <Calendar className="mr-2 h-5 w-5" />
                 Book Consultation
               </Button>

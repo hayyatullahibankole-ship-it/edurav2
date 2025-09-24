@@ -9,8 +9,10 @@ import {
   Zap
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Pricing = () => {
+  const { user } = useAuth();
   const plans = [
     {
       name: "Free",
@@ -161,7 +163,7 @@ const Pricing = () => {
                     </div>
                   )}
                   
-                  <Link to={plan.href} className="block">
+                  <Link to={user ? "/dashboard" : "/auth"} className="block">
                     <Button 
                       className={`w-full ${
                         plan.popular 
@@ -170,7 +172,7 @@ const Pricing = () => {
                       }`}
                       variant={plan.popular ? 'default' : 'outline'}
                     >
-                      {plan.cta}
+                      {user ? (plan.name === "Free" ? "Current Plan" : "Upgrade Now") : plan.cta}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
@@ -229,9 +231,9 @@ const Pricing = () => {
               Join over 50,000 students who achieved their dream scores with EduCBT
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/signup">
+              <Link to={user ? "/dashboard" : "/auth"}>
                 <Button size="lg" variant="secondary">
-                  Start Free Trial
+                  {user ? "Manage Subscription" : "Start Free Trial"}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>

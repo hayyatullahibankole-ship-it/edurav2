@@ -232,7 +232,21 @@ const Resources = () => {
                   <Button 
                     className="w-full" 
                     variant={resource.premium ? "default" : "outline"}
-                    disabled={resource.premium}
+                    onClick={() => {
+                      if (resource.premium) {
+                        // Redirect to pricing
+                        window.location.href = '/pricing';
+                      } else {
+                        // Handle download/view
+                        if (resource.type === 'Video') {
+                          // Open video in new tab
+                          window.open('#', '_blank');
+                        } else {
+                          // Trigger download
+                          console.log(`Downloading: ${resource.title}`);
+                        }
+                      }
+                    }}
                   >
                     {resource.type === 'Video' ? (
                       <>
