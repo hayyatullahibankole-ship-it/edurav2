@@ -21,7 +21,6 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import ProfileSettings from "@/components/ProfileSettings";
-import ScheduleTestModal from "@/components/ScheduleTestModal";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -179,7 +178,7 @@ const Dashboard = () => {
                           Browse Resources
                         </Button>
                       </Link>
-                      <Link to="/videos">
+                      <Link to="/resources">
                         <Button variant="outline" className="w-full h-20 flex-col gap-2">
                           <Video className="h-6 w-6" />
                           Watch Tutorials
@@ -248,27 +247,19 @@ const Dashboard = () => {
 
               {/* Sidebar */}
               <div className="space-y-6">
-                {/* Upcoming Tests */}
+                {/* Start Test */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Upcoming Tests</CardTitle>
-                    <CardDescription>Scheduled practice sessions</CardDescription>
+                    <CardTitle>Quick Test</CardTitle>
+                    <CardDescription>Jump into practice mode</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {upcomingTests.map((test, index) => (
-                        <div key={index} className="p-3 border border-border rounded-lg">
-                          <h4 className="font-semibold text-sm">{test.title}</h4>
-                          <p className="text-xs text-muted-foreground">{test.date}</p>
-                          <p className="text-xs text-primary">{test.time}</p>
-                        </div>
-                      ))}
-                      <ScheduleTestModal>
-                        <Button variant="outline" className="w-full">
-                          Schedule New Test
-                        </Button>
-                      </ScheduleTestModal>
-                    </div>
+                    <Link to="/practice">
+                      <Button className="w-full">
+                        <Play className="h-4 w-4 mr-2" />
+                        Start Test
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
 
