@@ -91,37 +91,75 @@ serve(async (req) => {
       )
     }
 
-    // Create the admin user
-    const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
-      email: body.email,
-      password: body.password,
-      email_confirm: true, // Auto-confirm email for admin accounts
-      user_metadata: {
-        first_name: body.firstName,
-        last_name: body.lastName,
-        phone: body.phone || '',
-        created_by_admin: true
-      }
-    })
+    let userData;
+    let isNewUser = false;
 
-    if (userError) {
-      console.error('Error creating user:', userError)
+    // Try to create new auth user first
+    try {
+      const { data: newUserData, error: userError } = await supabaseAdmin.auth.admin.createUser({
+        email: body.email,
+        password: body.password,
+        email_confirm: true,
+        user_metadata: {
+          first_name: body.firstName,
+          last_name: body.lastName,
+          phone: body.phone || '',
+          created_by_admin: true
+        }
+      });
+
+      if (userError) {
+        if (userError.message.includes('already registered')) {
+          console.log(`User with email ${body.email} already exists, will update profile/role`);
+          
+          // Get existing user by email
+          const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+          
+          if (listError) {
+            console.error('Error listing users:', listError);
+            return new Response(
+              JSON.stringify({ error: 'Failed to check existing users' }),
+              { 
+                status: 500, 
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+              }
+            );
+          }
+
+          const existingUser = existingUsers.users.find(u => u.email === body.email);
+          if (!existingUser) {
+            return new Response(
+              JSON.stringify({ error: 'User lookup failed' }),
+              { 
+                status: 500, 
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+              }
+            );
+          }
+
+          userData = { user: existingUser };
+        } else {
+          throw userError;
+        }
+      } else {
+        userData = newUserData;
+        isNewUser = true;
+        console.log(`Created new auth user for ${body.email}`);
+      }
+    } catch (error) {
+      console.error('Error with user creation/lookup:', error);
       return new Response(
-        JSON.stringify({ 
-          error: userError.message.includes('already registered') 
-            ? 'An account with this email already exists'
-            : 'Failed to create admin account'
-        }),
+        JSON.stringify({ error: 'Failed to process admin account' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
-      )
+      );
     }
 
-    if (!userData.user) {
+    if (!userData?.user) {
       return new Response(
-        JSON.stringify({ error: 'Failed to create user account' }),
+        JSON.stringify({ error: 'Failed to process user account' }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -129,17 +167,18 @@ serve(async (req) => {
       )
     }
 
-    // Get the created user profile
-    const { data: userProfile } = await supabaseAdmin
+    // Check if user profile exists
+    let userProfile;
+    const { data: existingProfile, error: profileCheckError } = await supabaseAdmin
       .from('users')
       .select('id')
       .eq('auth_user_id', userData.user.id)
-      .single()
+      .maybeSingle();
 
-    if (!userProfile) {
-      console.error('User profile not found after creation')
+    if (profileCheckError) {
+      console.error('Error checking user profile:', profileCheckError);
       return new Response(
-        JSON.stringify({ error: 'User profile creation failed' }),
+        JSON.stringify({ error: 'Failed to check user profile' }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -147,23 +186,56 @@ serve(async (req) => {
       )
     }
 
-    // Assign admin role to the user
-    const { error: roleError } = await supabaseAdmin
+    if (!existingProfile) {
+      // Create user profile
+      console.log(`Creating profile for user ${body.email}`);
+      const { data: newProfile, error: createProfileError } = await supabaseAdmin
+        .from('users')
+        .insert({
+          auth_user_id: userData.user.id,
+          email: body.email,
+          first_name: body.firstName,
+          last_name: body.lastName,
+          phone: body.phone || null
+        })
+        .select('id')
+        .single();
+
+      if (createProfileError) {
+        console.error('Error creating user profile:', createProfileError);
+        
+        // Clean up auth user if it was newly created
+        if (isNewUser) {
+          await supabaseAdmin.auth.admin.deleteUser(userData.user.id);
+        }
+        
+        return new Response(
+          JSON.stringify({ error: 'Failed to create user profile' }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+
+      userProfile = newProfile;
+    } else {
+      userProfile = existingProfile;
+      console.log(`Using existing profile for user ${body.email}`);
+    }
+
+    // Check if admin role exists
+    const { data: existingRole, error: roleCheckError } = await supabaseAdmin
       .from('user_roles')
-      .insert({
-        user_id: userProfile.id,
-        role: 'admin',
-        assigned_by: null // System assigned
-      })
+      .select('role')
+      .eq('user_id', userProfile.id)
+      .eq('role', 'admin')
+      .maybeSingle();
 
-    if (roleError) {
-      console.error('Error assigning admin role:', roleError)
-      
-      // Clean up: delete the created user if role assignment fails
-      await supabaseAdmin.auth.admin.deleteUser(userData.user.id)
-      
+    if (roleCheckError) {
+      console.error('Error checking admin role:', roleCheckError);
       return new Response(
-        JSON.stringify({ error: 'Failed to assign admin privileges' }),
+        JSON.stringify({ error: 'Failed to check admin role' }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -171,18 +243,53 @@ serve(async (req) => {
       )
     }
 
-    console.log(`Admin account created successfully for ${body.email}`)
+    if (!existingRole) {
+      // Assign admin role
+      console.log(`Assigning admin role to user ${body.email}`);
+      const { error: roleError } = await supabaseAdmin
+        .from('user_roles')
+        .insert({
+          user_id: userProfile.id,
+          role: 'admin',
+          assigned_by: null // System assigned
+        })
+
+      if (roleError) {
+        console.error('Error assigning admin role:', roleError)
+        
+        // Clean up if this was a new user creation
+        if (isNewUser) {
+          await supabaseAdmin.auth.admin.deleteUser(userData.user.id)
+        }
+        
+        return new Response(
+          JSON.stringify({ error: 'Failed to assign admin privileges' }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+    }
+
+    const messageText = isNewUser 
+      ? `New admin account created successfully for ${body.email}`
+      : existingRole 
+        ? `User ${body.email} already has admin privileges`
+        : `Admin privileges granted to existing user ${body.email}`;
+    
+    console.log(messageText);
     
     return new Response(
       JSON.stringify({ 
-        message: 'Admin account created successfully',
+        message: messageText,
         user: {
           id: userData.user.id,
           email: userData.user.email
         }
       }),
       { 
-        status: 201, 
+        status: isNewUser || !existingRole ? 201 : 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )
