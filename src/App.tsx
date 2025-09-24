@@ -9,6 +9,10 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import CBTExam from "./pages/CBTExam";
+import Demo from "./pages/Demo";
+import Pricing from "./pages/Pricing";
+import Resources from "./pages/Resources";
+import Consultation from "./pages/Consultation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +30,10 @@ const App = () => (
           <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
           <Route path="/practice" element={<Layout showNavbar={false}><CBTExam /></Layout>} />
           <Route path="/exam" element={<Layout showNavbar={false}><CBTExam /></Layout>} />
+          <Route path="/demo" element={<Layout><Demo /></Layout>} />
+          <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
+          <Route path="/resources" element={<Layout><Resources /></Layout>} />
+          <Route path="/consultation" element={<Layout><Consultation /></Layout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
