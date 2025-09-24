@@ -63,7 +63,7 @@ export default function QuestionManagement() {
 
   const [newQuestion, setNewQuestion] = useState({
     question_text: '',
-    type: 'MCQ_SINGLE' as const,
+    type: 'MCQ_SINGLE' as 'MCQ_SINGLE' | 'MCQ_MULTI' | 'TRUE_FALSE' | 'FILL_IN' | 'MATCHING' | 'ESSAY',
     options: ['', '', '', '', ''],
     correct_answer: 0,
     explanation: '',
@@ -176,7 +176,7 @@ export default function QuestionManagement() {
   const resetNewQuestion = () => {
     setNewQuestion({
       question_text: '',
-      type: 'MCQ_SINGLE',
+      type: 'MCQ_SINGLE' as 'MCQ_SINGLE' | 'MCQ_MULTI' | 'TRUE_FALSE' | 'FILL_IN' | 'MATCHING' | 'ESSAY',
       options: ['', '', '', '', ''],
       correct_answer: 0,
       explanation: '',
