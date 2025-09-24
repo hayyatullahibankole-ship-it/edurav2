@@ -28,7 +28,9 @@ import {
   Database,
   Monitor,
   Zap,
-  FileText
+  FileText,
+  DollarSign,
+  Newspaper
 } from 'lucide-react';
 import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
@@ -37,6 +39,8 @@ import ResourceManagement from '@/components/admin/ResourceManagement';
 import SecurityCenter from '@/components/admin/SecurityCenter';
 import AnalyticsHub from '@/components/admin/AnalyticsHub';
 import SystemConfig from '@/components/admin/SystemConfig';
+import PricingManager from '@/components/admin/PricingManager';
+import BlogManager from '@/components/admin/BlogManager';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -221,6 +225,22 @@ export default function AdminPortal() {
                 Analytics Hub
               </Button>
               <Button
+                variant={activeSection === 'pricing' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left"
+                onClick={() => setActiveSection('pricing')}
+              >
+                <DollarSign className="w-4 h-4 mr-3" />
+                Pricing Management
+              </Button>
+              <Button
+                variant={activeSection === 'blog' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left"
+                onClick={() => setActiveSection('blog')}
+              >
+                <Newspaper className="w-4 h-4 mr-3" />
+                Blog Management
+              </Button>
+              <Button
                 variant={activeSection === 'settings' ? 'secondary' : 'ghost'}
                 className="w-full justify-start text-left"
                 onClick={() => setActiveSection('settings')}
@@ -383,10 +403,14 @@ export default function AdminPortal() {
           
           {activeSection === 'analytics' && <AnalyticsHub />}
           
+          {activeSection === 'pricing' && <PricingManager />}
+          
+          {activeSection === 'blog' && <BlogManager />}
+          
           {activeSection === 'settings' && <SystemConfig />}
 
           {/* Other sections can be implemented similarly */}
-          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'settings'].includes(activeSection) && (
+          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'blog', 'settings'].includes(activeSection) && (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
