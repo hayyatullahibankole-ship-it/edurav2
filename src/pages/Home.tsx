@@ -16,6 +16,7 @@ import {
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-students.jpg";
 import BlogSection from "@/components/BlogSection";
+import Footer from "@/components/Footer";
 
 const Home = () => {
   const features = [
@@ -237,6 +238,9 @@ const Home = () => {
 
       {/* Blog Section */}
       <BlogSection />
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

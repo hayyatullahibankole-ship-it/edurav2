@@ -10,6 +10,7 @@ import {
   TrendingUp,
   BookOpen
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 interface BlogPost {
@@ -146,10 +147,12 @@ const BlogSection = () => {
                   <CardDescription className="text-base mb-4 leading-relaxed">
                     {featuredPost.excerpt}
                   </CardDescription>
-                  <Button className="group">
-                    Read Full Article
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
+                   <Link to={`/blog/${featuredPost.slug}`}>
+                     <Button className="group">
+                       Read Full Article
+                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                     </Button>
+                   </Link>
                 </CardContent>
               </Card>
             </div>
@@ -186,9 +189,11 @@ const BlogSection = () => {
                       <TrendingUp className="w-3 h-3 mr-1" />
                       {post.view_count} views
                     </span>
-                    <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
-                      Read more →
-                    </Button>
+                     <Link to={`/blog/${post.slug}`}>
+                       <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                         Read more →
+                       </Button>
+                     </Link>
                   </div>
                 </CardContent>
               </Card>
@@ -206,10 +211,12 @@ const BlogSection = () => {
 
         {(posts.length > 0 || featuredPost) && (
           <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
-              View All Posts
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+             <Link to="/blog">
+               <Button variant="outline" size="lg">
+                 View All Posts
+                 <ArrowRight className="w-4 h-4 ml-2" />
+               </Button>
+             </Link>
           </div>
         )}
       </div>

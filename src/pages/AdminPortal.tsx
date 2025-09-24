@@ -124,26 +124,26 @@ export default function AdminPortal() {
     <div className="min-h-screen bg-slate-950 text-white">
       {/* Admin Portal Header */}
       <div className="bg-slate-900 border-b border-slate-800">
-        <div className="px-6 py-4">
+        <div className="px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-red-600 to-orange-600 rounded-lg flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-white" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-600 to-orange-600 rounded-lg flex items-center justify-center">
+                  <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-white">EduCBT Control Center</h1>
-                  <p className="text-sm text-slate-400">Administrator Portal</p>
+                  <h1 className="text-lg sm:text-xl font-bold text-white">EduCBT Control Center</h1>
+                  <p className="text-xs sm:text-sm text-slate-400">Administrator Portal</p>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
                 <Bell className="w-4 h-4" />
               </Button>
-              <div className="flex items-center space-x-3">
-                <div className="text-right">
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="text-right hidden sm:block">
                   <p className="text-sm font-medium text-white">{user?.email}</p>
                   <Badge className="bg-red-600 hover:bg-red-700 text-white text-xs">
                     System Administrator
@@ -163,97 +163,107 @@ export default function AdminPortal() {
         </div>
       </div>
 
-      <div className="flex">
+      <div className="flex flex-col lg:flex-row">
         {/* Sidebar Navigation */}
-        <div className="w-64 bg-slate-900 border-r border-slate-800 min-h-screen">
+        <div className="lg:w-64 bg-slate-900 border-r border-slate-800 lg:min-h-screen">
           <div className="p-4">
-            <nav className="space-y-2">
+            <nav className="grid grid-cols-2 lg:grid-cols-1 gap-2 lg:space-y-2 lg:grid-cols-none">
               <Button
                 variant={activeSection === 'dashboard' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left"
+                className="w-full justify-start text-left text-xs sm:text-sm"
                 onClick={() => setActiveSection('dashboard')}
               >
-                <Monitor className="w-4 h-4 mr-3" />
-                System Overview
+                <Monitor className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">System Overview</span>
+                <span className="sm:hidden">Overview</span>
               </Button>
               <Button
                 variant={activeSection === 'users' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left"
+                className="w-full justify-start text-left text-xs sm:text-sm"
                 onClick={() => setActiveSection('users')}
               >
-                <Users className="w-4 h-4 mr-3" />
-                User Management
+                <Users className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">User Management</span>
+                <span className="sm:hidden">Users</span>
               </Button>
               <Button
                 variant={activeSection === 'exams' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left"
+                className="w-full justify-start text-left text-xs sm:text-sm"
                 onClick={() => setActiveSection('exams')}
               >
-                <BookOpen className="w-4 h-4 mr-3" />
-                Exam Control
+                <BookOpen className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Exam Control</span>
+                <span className="sm:hidden">Exams</span>
               </Button>
               <Button
                 variant={activeSection === 'questions' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left"
+                className="w-full justify-start text-left text-xs sm:text-sm"
                 onClick={() => setActiveSection('questions')}
               >
-                <FileText className="w-4 h-4 mr-3" />
-                Question Bank
+                <FileText className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Question Bank</span>
+                <span className="sm:hidden">Questions</span>
               </Button>
               <Button
                 variant={activeSection === 'resources' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left"
+                className="w-full justify-start text-left text-xs sm:text-sm"
                 onClick={() => setActiveSection('resources')}
               >
-                <Upload className="w-4 h-4 mr-3" />
-                Resources
+                <Upload className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Resources</span>
+                <span className="sm:hidden">Resources</span>
               </Button>
               <Button
                 variant={activeSection === 'security' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left"
+                className="w-full justify-start text-left text-xs sm:text-sm"
                 onClick={() => setActiveSection('security')}
               >
-                <Lock className="w-4 h-4 mr-3" />
-                Security Center
+                <Lock className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Security Center</span>
+                <span className="sm:hidden">Security</span>
               </Button>
               <Button
                 variant={activeSection === 'analytics' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left"
+                className="w-full justify-start text-left text-xs sm:text-sm"
                 onClick={() => setActiveSection('analytics')}
               >
-                <BarChart3 className="w-4 h-4 mr-3" />
-                Analytics Hub
+                <BarChart3 className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Analytics Hub</span>
+                <span className="sm:hidden">Analytics</span>
               </Button>
               <Button
                 variant={activeSection === 'pricing' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left"
+                className="w-full justify-start text-left text-xs sm:text-sm"
                 onClick={() => setActiveSection('pricing')}
               >
-                <DollarSign className="w-4 h-4 mr-3" />
-                Pricing Management
+                <DollarSign className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Pricing Management</span>
+                <span className="sm:hidden">Pricing</span>
               </Button>
               <Button
                 variant={activeSection === 'blog' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left"
+                className="w-full justify-start text-left text-xs sm:text-sm"
                 onClick={() => setActiveSection('blog')}
               >
-                <Newspaper className="w-4 h-4 mr-3" />
-                Blog Management
+                <Newspaper className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Blog Management</span>
+                <span className="sm:hidden">Blog</span>
               </Button>
               <Button
                 variant={activeSection === 'settings' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left"
+                className="w-full justify-start text-left text-xs sm:text-sm col-span-2 lg:col-span-1"
                 onClick={() => setActiveSection('settings')}
               >
-                <Settings className="w-4 h-4 mr-3" />
-                System Config
+                <Settings className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">System Config</span>
+                <span className="sm:hidden">Settings</span>
               </Button>
             </nav>
           </div>
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-4 lg:p-6">
           {activeSection === 'dashboard' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
@@ -278,16 +288,16 @@ export default function AdminPortal() {
               )}
 
               {/* System Metrics */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                 <Card className="bg-slate-800 border-slate-700">
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-slate-400">Total Users</p>
-                        <p className="text-3xl font-bold text-blue-400">{stats.totalUsers}</p>
+                        <p className="text-xs sm:text-sm text-slate-400">Total Users</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-blue-400">{stats.totalUsers}</p>
                       </div>
-                      <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-                        <Users className="w-6 h-6 text-blue-400" />
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                        <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                       </div>
                     </div>
                   </CardContent>
@@ -337,7 +347,7 @@ export default function AdminPortal() {
               </div>
 
               {/* Recent Activities */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 <Card className="bg-slate-800 border-slate-700">
                   <CardHeader>
                     <CardTitle className="text-white">Recent System Activities</CardTitle>
