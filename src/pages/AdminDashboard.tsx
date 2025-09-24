@@ -1,0 +1,470 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  Users, 
+  BookOpen, 
+  Trophy, 
+  DollarSign, 
+  Settings, 
+  AlertTriangle,
+  FileText,
+  BarChart3,
+  Shield,
+  Upload,
+  Eye,
+  Edit,
+  Trash2,
+  Plus,
+  Download
+} from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+
+export default function AdminDashboard() {
+  const { user, isAdmin } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+  
+  const [dashboardStats, setDashboardStats] = useState({
+    totalUsers: 0,
+    activeSubscriptions: 0,
+    totalRevenue: 0,
+    totalExams: 0,
+    recentActivities: [],
+    suspiciousActivities: []
+  });
+
+  const [users, setUsers] = useState([]);
+  const [exams, setExams] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [questions, setQuestions] = useState([]);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      navigate('/dashboard');
+      return;
+    }
+    fetchAdminData();
+  }, [isAdmin, navigate]);
+
+  const fetchAdminData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch dashboard statistics
+      const [usersResp, subscriptionsResp, examsResp, attemptsResp] = await Promise.all([
+        supabase.from('users').select('id, created_at, is_suspended'),
+        supabase.from('subscriptions').select('id, status', { count: 'exact' }),
+        supabase.from('exams').select('id, title, type, is_published'),
+        supabase.from('attempts').select(`
+          id, 
+          suspicious_activity_count, 
+          created_at,
+          users(first_name, last_name, email),
+          exams(title)
+        `).order('created_at', { ascending: false }).limit(10)
+      ]);
+
+      const totalUsers = usersResp.data?.length || 0;
+      const activeSubscriptions = subscriptionsResp.data?.filter(s => s.status === 'ACTIVE').length || 0;
+      const totalExams = examsResp.data?.length || 0;
+      
+      // Get suspicious activities
+      const suspiciousActivities = attemptsResp.data?.filter(a => a.suspicious_activity_count > 0) || [];
+
+      setDashboardStats({
+        totalUsers,
+        activeSubscriptions,
+        totalRevenue: 0, // Calculate from transactions
+        totalExams,
+        recentActivities: attemptsResp.data?.slice(0, 5) || [],
+        suspiciousActivities
+      });
+
+      setUsers(usersResp.data || []);
+      setExams(examsResp.data || []);
+      
+    } catch (error) {
+      console.error('Error fetching admin data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load admin dashboard data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUserAction = async (userId: string, action: 'suspend' | 'activate' | 'delete') => {
+    try {
+      if (action === 'delete') {
+        const { error } = await supabase.from('users').delete().eq('id', userId);
+        if (error) throw error;
+        toast({ title: "User deleted successfully" });
+      } else {
+        const { error } = await supabase
+          .from('users')
+          .update({ is_suspended: action === 'suspend' })
+          .eq('id', userId);
+        if (error) throw error;
+        toast({ title: `User ${action}d successfully` });
+      }
+      fetchAdminData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to ${action} user`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (!isAdmin) {
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto py-8 px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="p-6">
+                <div className="animate-pulse space-y-2">
+                  <div className="h-4 bg-muted rounded w-1/2"></div>
+                  <div className="h-8 bg-muted rounded w-3/4"></div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-8 px-4">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
+            <p className="text-muted-foreground">Manage your CBT platform</p>
+          </div>
+          <div className="flex items-center gap-4 mt-4 md:mt-0">
+            <Badge variant="destructive">
+              <Shield className="w-4 h-4 mr-2" />
+              Super Admin
+            </Badge>
+            <Button variant="outline" onClick={() => navigate('/dashboard')}>
+              Back to Student View
+            </Button>
+          </div>
+        </div>
+
+        {/* Security Alert */}
+        {dashboardStats.suspiciousActivities.length > 0 && (
+          <Alert className="mb-6 border-orange-500">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              {dashboardStats.suspiciousActivities.length} suspicious exam activities detected. 
+              <Button variant="link" className="p-0 h-auto ml-2" onClick={() => setActiveTab('security')}>
+                Review now
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Users</p>
+                <p className="text-2xl font-bold">{dashboardStats.totalUsers}</p>
+              </div>
+              <Users className="h-8 w-8 text-primary" />
+            </div>
+          </Card>
+          
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Active Subscriptions</p>
+                <p className="text-2xl font-bold">{dashboardStats.activeSubscriptions}</p>
+              </div>
+              <DollarSign className="h-8 w-8 text-primary" />
+            </div>
+          </Card>
+          
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Exams</p>
+                <p className="text-2xl font-bold">{dashboardStats.totalExams}</p>
+              </div>
+              <Trophy className="h-8 w-8 text-primary" />
+            </div>
+          </Card>
+          
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Suspicious Activities</p>
+                <p className="text-2xl font-bold text-orange-500">
+                  {dashboardStats.suspiciousActivities.length}
+                </p>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-orange-500" />
+            </div>
+          </Card>
+        </div>
+
+        {/* Main Admin Interface */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-7">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="exams">Exams</TabsTrigger>
+            <TabsTrigger value="questions">Questions</TabsTrigger>
+            <TabsTrigger value="resources">Resources</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Recent Activity */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Exam Activities</CardTitle>
+                  <CardDescription>Latest exam attempts by students</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {dashboardStats.recentActivities.map((activity: any) => (
+                    <div key={activity.id} className="flex items-center justify-between p-3 border rounded">
+                      <div>
+                        <p className="font-medium">
+                          {activity.users?.first_name} {activity.users?.last_name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {activity.exams?.title}
+                        </p>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {new Date(activity.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* System Health */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Status</CardTitle>
+                  <CardDescription>Platform health indicators</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span>Database Status</span>
+                    <Badge variant="default">Healthy</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Authentication</span>
+                    <Badge variant="default">Active</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>File Storage</span>
+                    <Badge variant="default">Connected</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Anti-Cheat System</span>
+                    <Badge variant="default">Monitoring</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="users" className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>User Management</CardTitle>
+                  <CardDescription>Manage registered users and their permissions</CardDescription>
+                </div>
+                <Button>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Users
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {users.slice(0, 10).map((user: any) => (
+                    <div key={user.id} className="flex items-center justify-between p-4 border rounded">
+                      <div>
+                        <p className="font-medium">{user.email}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Joined: {new Date(user.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {user.is_suspended && (
+                          <Badge variant="destructive">Suspended</Badge>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUserAction(user.id, user.is_suspended ? 'activate' : 'suspend')}
+                        >
+                          {user.is_suspended ? 'Activate' : 'Suspend'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="exams" className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Exam Management</CardTitle>
+                  <CardDescription>Create and manage exam templates</CardDescription>
+                </div>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Exam
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {exams.map((exam: any) => (
+                    <div key={exam.id} className="flex items-center justify-between p-4 border rounded">
+                      <div>
+                        <p className="font-medium">{exam.title}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline">{exam.type}</Badge>
+                          <Badge variant={exam.is_published ? 'default' : 'secondary'}>
+                            {exam.is_published ? 'Published' : 'Draft'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="questions" className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Question Bank</CardTitle>
+                  <CardDescription>Manage exam questions and bulk import</CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Bulk Import
+                  </Button>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Question
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Question management interface will be displayed here</p>
+                  <p className="text-sm">Upload questions via CSV/Excel or create individually</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="security" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-orange-500" />
+                  Security Dashboard
+                </CardTitle>
+                <CardDescription>Monitor suspicious activities and security events</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {dashboardStats.suspiciousActivities.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No suspicious activities detected</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {dashboardStats.suspiciousActivities.map((activity: any) => (
+                      <div key={activity.id} className="p-4 border border-orange-200 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="font-medium">
+                            {activity.users?.first_name} {activity.users?.last_name}
+                          </p>
+                          <Badge variant="destructive">
+                            {activity.suspicious_activity_count} violations
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {activity.exams?.title} • {new Date(activity.created_at).toLocaleString()}
+                        </p>
+                        <div className="mt-2">
+                          <Button variant="outline" size="sm">
+                            Review Details
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Add other tab contents as needed */}
+        </Tabs>
+      </div>
+    </div>
+  );
+}
