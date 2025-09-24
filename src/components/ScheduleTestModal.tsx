@@ -35,7 +35,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
     description: "",
     examType: "",
     duration: 90,
-    date: undefined as Date | undefined,
+    date: new Date() as Date | undefined,
     time: "",
     subjects: [] as string[],
     difficulty: "mixed",
@@ -86,8 +86,8 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
 
     // Here you would typically save to database
     toast({
-      title: "Test Scheduled Successfully!",
-      description: `${testConfig.title} has been scheduled for ${testConfig.date ? format(testConfig.date, "PPP") : 'the selected date'}`,
+      title: "Test Started Successfully!",
+      description: `${testConfig.title} has been started`,
     });
     
     setOpen(false);
@@ -97,7 +97,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
       description: "",
       examType: "",
       duration: 90,
-      date: undefined,
+      date: new Date(),
       time: "",
       subjects: [],
       difficulty: "mixed",
@@ -269,7 +269,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
           Back
         </Button>
         <Button onClick={() => setStep(4)} disabled={testConfig.subjects.length === 0}>
-          Next: Schedule
+          Next: Start Test
         </Button>
       </div>
     </div>
@@ -348,7 +348,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
         </Button>
         <Button onClick={handleScheduleTest} className="flex-1">
           <Plus className="mr-2 h-4 w-4" />
-          Schedule Test
+          Start Test
         </Button>
       </div>
     </div>
@@ -358,7 +358,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
     1: "Choose Exam Type",
     2: "Test Configuration",
     3: "Select Subjects & Difficulty",
-    4: "Schedule & Confirm"
+    4: "Start & Confirm"
   };
 
   return (
