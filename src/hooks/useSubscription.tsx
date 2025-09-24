@@ -12,6 +12,7 @@ interface SubscriptionData {
     name: string;
     price: number;
     resource_access_level: string;
+    features?: any;
   };
 }
 
@@ -28,6 +29,7 @@ export function useSubscription() {
       }
 
       try {
+        // Get the user's active subscription (including free accounts)
         const { data, error } = await supabase
           .from('subscriptions')
           .select(`
@@ -35,12 +37,15 @@ export function useSubscription() {
             subscription_plans (
               name,
               price,
-              resource_access_level
+              resource_access_level,
+              features
             )
           `)
           .eq('user_id', userProfile.id)
           .eq('status', 'ACTIVE')
           .gte('end_date', new Date().toISOString())
+          .order('created_at', { ascending: false })
+          .limit(1)
           .single();
 
         if (error && error.code !== 'PGRST116') {
@@ -58,13 +63,24 @@ export function useSubscription() {
     fetchSubscription();
   }, [user, userProfile]);
 
+  // User has access if they have any active subscription (free or premium)
   const hasPremiumAccess = !loading && subscription && subscription.status === 'ACTIVE';
-  const isPremium = hasPremiumAccess && subscription?.subscription_plans?.resource_access_level !== 'basic';
+  
+  // User is premium only if they have a paid subscription with premium access level
+  const isPremium = hasPremiumAccess && 
+    subscription?.subscription_plans?.resource_access_level === 'premium' &&
+    subscription?.subscription_plans?.price > 0;
+  
+  // User is on free plan if they have basic access level or price = 0
+  const isFree = hasPremiumAccess && 
+    (subscription?.subscription_plans?.resource_access_level === 'basic' || 
+     subscription?.subscription_plans?.price === 0);
 
   return {
     subscription,
     loading,
     hasPremiumAccess: !!hasPremiumAccess,
     isPremium: !!isPremium,
+    isFree: !!isFree,
   };
 }

@@ -182,7 +182,7 @@ async function handleStartExam(req: Request, supabaseClient: any, userId: string
   
   if (exam.type === 'JAMB') {
     // JAMB: English (60) + 3 selected subjects (40 each)
-    const allSubjects = ['English Language', ...selectedSubjects];
+    const allSubjects = ['English Language', ...(selectedSubjects || [])];
     questionQuery = questionQuery.in('subject_id', allSubjects);
   } else if (exam.type === 'WAEC' && selectedSubjects) {
     questionQuery = questionQuery.in('subject_id', selectedSubjects);
