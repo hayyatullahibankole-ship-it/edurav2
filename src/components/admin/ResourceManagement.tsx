@@ -652,19 +652,88 @@ export default function ResourceManagement() {
                     </div>
                     
                     <div className="flex items-center space-x-2 ml-4">
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          toast({
+                            title: "Preview",
+                            description: `Viewing ${resource.title}`
+                          });
+                        }}
+                      >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          if (resource.file_url.startsWith('http')) {
+                            window.open(resource.file_url, '_blank');
+                          } else {
+                            const { data } = supabase.storage
+                              .from('resources')
+                              .getPublicUrl(resource.file_url);
+                            if (data.publicUrl) {
+                              window.open(data.publicUrl, '_blank');
+                            }
+                          }
+                        }}
+                      >
                         <Download className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          toast({
+                            title: "Edit Resource",
+                            description: "Edit functionality coming soon"
+                          });
+                        }}
+                      >
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          toast({
+                            title: "Analytics",
+                            description: `Analytics for ${resource.title}`
+                          });
+                        }}
+                      >
                         <BarChart3 className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={async () => {
+                          if (confirm(`Are you sure you want to delete "${resource.title}"?`)) {
+                            try {
+                              const { error } = await supabase
+                                .from('resources')
+                                .delete()
+                                .eq('id', resource.id);
+                              
+                              if (error) throw error;
+                              
+                              toast({
+                                title: "Success",
+                                description: "Resource deleted successfully"
+                              });
+                              fetchData();
+                            } catch (error) {
+                              toast({
+                                title: "Error",
+                                description: "Failed to delete resource",
+                                variant: "destructive"
+                              });
+                            }
+                          }
+                        }}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
