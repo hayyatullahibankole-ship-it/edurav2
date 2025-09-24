@@ -36,10 +36,10 @@ const Navbar = () => {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/login">
+            <Link to="/auth">
               <Button variant="ghost">Login</Button>
             </Link>
-            <Link to="/signup">
+            <Link to="/auth">
               <Button>Get Started</Button>
             </Link>
           </div>
@@ -89,10 +89,10 @@ const Navbar = () => {
                 Pricing
               </Link>
               <div className="px-3 py-2 space-y-2">
-                <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
                   <Button variant="ghost" className="w-full">Login</Button>
                 </Link>
-                <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full">Get Started</Button>
                 </Link>
               </div>

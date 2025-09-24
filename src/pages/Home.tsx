@@ -90,7 +90,7 @@ const Home = () => {
               Join successful students who achieved their dream scores.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/signup">
+              <Link to="/auth">
                 <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
                   Start Free Practice
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -218,7 +218,7 @@ const Home = () => {
               Start your journey to exam success today. Free trial available - no credit card required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/signup">
+              <Link to="/auth">
                 <Button size="lg" variant="secondary">
                   Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
