@@ -30,14 +30,12 @@ const Dashboard = () => {
   const handleLogout = async () => {
     try {
       await signOut();
-      // Wait a moment for the auth state to clear
-      setTimeout(() => {
-        navigate("/auth");
-      }, 100);
+      // Navigate immediately after clearing auth state
+      navigate("/auth", { replace: true });
     } catch (error) {
       console.error("Error during logout:", error);
       // Force navigation even if signOut fails
-      navigate("/auth");
+      navigate("/auth", { replace: true });
     }
   };
   
