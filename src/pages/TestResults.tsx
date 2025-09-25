@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import ScheduleTestModal from "@/components/ScheduleTestModal";
 
 const TestResults = () => {
   const location = useLocation();
@@ -245,15 +246,50 @@ const TestResults = () => {
             </div>
 
             <div className="flex flex-wrap gap-4 justify-center">
-              <Button onClick={() => navigate('/practice')}>
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Take Another Test
-              </Button>
-              <Button variant="outline">
+              <ScheduleTestModal>
+                <Button>
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Take Another Test
+                </Button>
+              </ScheduleTestModal>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: 'My Test Results',
+                      text: `I scored ${results.score}% on my recent test!`,
+                      url: window.location.href,
+                    });
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast({
+                      title: "Link Copied!",
+                      description: "Results link copied to clipboard",
+                    });
+                  }
+                }}
+              >
                 <Share2 className="mr-2 h-4 w-4" />
                 Share Results
               </Button>
-              <Button variant="outline">
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  // Simple download functionality - could be enhanced later
+                  const dataStr = JSON.stringify(results, null, 2);
+                  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                  const exportFileDefaultName = `test-results-${new Date().toISOString().split('T')[0]}.json`;
+                  const linkElement = document.createElement('a');
+                  linkElement.setAttribute('href', dataUri);
+                  linkElement.setAttribute('download', exportFileDefaultName);
+                  linkElement.click();
+                  toast({
+                    title: "Download Started",
+                    description: "Test results downloaded successfully",
+                  });
+                }}
+              >
                 <Download className="mr-2 h-4 w-4" />
                 Download Report
               </Button>

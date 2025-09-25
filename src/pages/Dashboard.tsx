@@ -59,7 +59,6 @@ const Dashboard = () => {
         .from('attempts')
         .select(`
           *,
-          exams(title, type),
           results(*)
         `)
         .eq('user_id', userProfile.id)
@@ -101,8 +100,13 @@ const Dashboard = () => {
       const recentTestsData = resultsWithScores.slice(0, 3).map(attempt => {
         const result = Array.isArray(attempt.results) ? attempt.results[0] : attempt.results;
         const timeTaken = result?.time_taken_minutes || 0;
+        
+        // Get subject info from proctoring_data
+        const proctoringData = attempt.proctoring_data as any || {};
+        const testTitle = proctoringData.title || 'Practice Test';
+        
         return {
-          subject: attempt.exams?.title || 'Unknown Subject',
+          subject: testTitle,
           score: Math.round(result?.percentage || 0),
           date: new Date(attempt.submitted_at).toLocaleDateString(),
           duration: `${Math.floor(timeTaken / 60)}h ${timeTaken % 60}m`
