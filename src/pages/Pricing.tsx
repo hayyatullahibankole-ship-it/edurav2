@@ -231,9 +231,9 @@ const Pricing = () => {
               Join over 50,000 students who achieved their dream scores with EduCBT
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to={user ? "/dashboard" : "/auth"}>
+              <Link to={user ? "/payment?plan=premium" : "/auth"}>
                 <Button size="lg" variant="secondary">
-                  {user ? "Manage Subscription" : "Start Free Trial"}
+                  {user ? "Upgrade to Premium" : "Start Free Trial"}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
