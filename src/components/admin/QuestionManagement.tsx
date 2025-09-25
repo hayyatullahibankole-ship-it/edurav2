@@ -740,11 +740,44 @@ export default function QuestionManagement() {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => {
-                          toast({
-                            title: "Duplicate",
-                            description: "Question duplicated successfully"
-                          });
+                        onClick={async () => {
+                          try {
+                            // Create a duplicate of the question
+                            const duplicateData = {
+                              question_text: question.question_text + " (Copy)",
+                              type: question.type,
+                              subject_id: question.subject_id,
+                              options: question.options,
+                              correct_answer: question.correct_answer,
+                              explanation: question.explanation,
+                              difficulty_level: question.difficulty_level,
+                              points: question.points,
+                              tags: question.tags,
+                              is_active: true
+                            };
+
+                            const { error } = await supabase
+                              .from('questions')
+                              .insert(duplicateData);
+
+                            if (error) throw error;
+
+                            toast({
+                              title: "Success",
+                              description: "Question duplicated successfully"
+                            });
+
+                            // Refresh the questions list
+                            fetchData();
+                            
+                          } catch (error) {
+                            console.error('Error duplicating question:', error);
+                            toast({
+                              title: "Error",
+                              description: "Failed to duplicate question",
+                              variant: "destructive"
+                            });
+                          }
                         }}
                       >
                         <Copy className="w-4 h-4" />

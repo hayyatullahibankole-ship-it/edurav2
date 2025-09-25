@@ -43,6 +43,48 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
     role: 'student'
   });
 
+  const exportUsers = async () => {
+    try {
+      // Create CSV content
+      const headers = ['Email', 'First Name', 'Last Name', 'Phone', 'Country', 'Created At', 'Last Login', 'Is Suspended'];
+      const csvContent = [
+        headers.join(','),
+        ...users.map(user => [
+          user.email || '',
+          user.first_name || '',
+          user.last_name || '',
+          user.phone || '',
+          user.country || '',
+          new Date(user.created_at).toLocaleDateString(),
+          user.last_login_at ? new Date(user.last_login_at).toLocaleDateString() : 'Never',
+          user.is_suspended ? 'Yes' : 'No'
+        ].map(field => `"${field}"`).join(','))
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `users_export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Success",
+        description: "Users exported successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to export users",
+        variant: "destructive"
+      });
+    }
+  };
+
   const filteredUsers = users.filter(user => 
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
@@ -137,6 +179,7 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
     
     try {
       setLoading(true);
+      console.log('Starting delete for user:', userId);
       
       // First, get user's attempts to delete related records
       const { data: userAttempts } = await supabase
@@ -144,22 +187,38 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
         .select('id')
         .eq('user_id', userId);
 
+      console.log('User attempts:', userAttempts);
+
       // Delete attempt-related records if any exist
       if (userAttempts && userAttempts.length > 0) {
         const attemptIds = userAttempts.map(a => a.id);
         
         // Delete attempt answers and results first
-        await supabase.from('attempt_answers').delete().in('attempt_id', attemptIds);
-        await supabase.from('results').delete().in('attempt_id', attemptIds);
-        await supabase.from('attempts').delete().eq('user_id', userId);
+        const { error: answersError } = await supabase.from('attempt_answers').delete().in('attempt_id', attemptIds);
+        if (answersError) console.error('Error deleting answers:', answersError);
+        
+        const { error: resultsError } = await supabase.from('results').delete().in('attempt_id', attemptIds);
+        if (resultsError) console.error('Error deleting results:', resultsError);
+        
+        const { error: attemptsError } = await supabase.from('attempts').delete().eq('user_id', userId);
+        if (attemptsError) console.error('Error deleting attempts:', attemptsError);
       }
       
       // Delete other user-related records
-      await supabase.from('user_roles').delete().eq('user_id', userId);
-      await supabase.from('subscriptions').delete().eq('user_id', userId);
-      await supabase.from('transactions').delete().eq('user_id', userId);
-      await supabase.from('notifications').delete().eq('user_id', userId);
-      await supabase.from('bookings').delete().eq('user_id', userId);
+      const { error: rolesError } = await supabase.from('user_roles').delete().eq('user_id', userId);
+      if (rolesError) console.error('Error deleting roles:', rolesError);
+      
+      const { error: subscriptionsError } = await supabase.from('subscriptions').delete().eq('user_id', userId);
+      if (subscriptionsError) console.error('Error deleting subscriptions:', subscriptionsError);
+      
+      const { error: transactionsError } = await supabase.from('transactions').delete().eq('user_id', userId);
+      if (transactionsError) console.error('Error deleting transactions:', transactionsError);
+      
+      const { error: notificationsError } = await supabase.from('notifications').delete().eq('user_id', userId);
+      if (notificationsError) console.error('Error deleting notifications:', notificationsError);
+      
+      const { error: bookingsError } = await supabase.from('bookings').delete().eq('user_id', userId);
+      if (bookingsError) console.error('Error deleting bookings:', bookingsError);
 
       // Finally delete the user
       const { error } = await supabase
@@ -167,7 +226,12 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
         .delete()
         .eq('id', userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting user:', error);
+        throw error;
+      }
+
+      console.log('User deleted successfully');
 
       toast({
         title: "Success",
@@ -180,7 +244,7 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
       console.error('Error deleting user:', error);
       toast({
         title: "Error", 
-        description: "Failed to delete user",
+        description: `Failed to delete user: ${error.message || 'Unknown error'}`,
         variant: "destructive"
       });
     } finally {
@@ -305,7 +369,7 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
             </DialogContent>
           </Dialog>
 
-          <Button variant="outline">
+          <Button variant="outline" onClick={exportUsers}>
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>

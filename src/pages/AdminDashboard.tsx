@@ -394,7 +394,33 @@ export default function AdminDashboard() {
                   <CardTitle>User Management</CardTitle>
                   <CardDescription>Manage registered users and their permissions</CardDescription>
                 </div>
-                <Button>
+                <Button onClick={() => {
+                  // Export users functionality
+                  try {
+                    const headers = ['Email', 'First Name', 'Last Name', 'Created At'];
+                    const csvContent = [
+                      headers.join(','),
+                      ...users.map(user => [
+                        user.email || '',
+                        user.first_name || '',
+                        user.last_name || '',
+                        new Date(user.created_at).toLocaleDateString()
+                      ].map(field => `"${field}"`).join(','))
+                    ].join('\n');
+
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `users_export_${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  } catch (error) {
+                    console.error('Export failed:', error);
+                  }
+                }}>
                   <Download className="w-4 h-4 mr-2" />
                   Export Users
                 </Button>
