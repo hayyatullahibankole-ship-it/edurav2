@@ -9,16 +9,16 @@ All colors MUST be HSL for consistency across light/dark modes.
 @layer base {
   :root {
     /* Core backgrounds */
-    --background: 218 100% 98%;
-    --foreground: 215 25% 15%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
 
     /* Card system */
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 222.2 84% 4.9%;
 
     /* Popover system */
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 222.2 84% 4.9%;
 
     /* Primary - Educational green for CTAs and focus */
     --primary: 142 76% 36%;
@@ -26,12 +26,12 @@ All colors MUST be HSL for consistency across light/dark modes.
     --primary-hover: 142 76% 32%;
 
     /* Secondary - Light blue for subtle elements */
-    --secondary: 214 100% 95%;
-    --secondary-foreground: 215 25% 15%;
+    --secondary: 210 40% 98%;
+    --secondary-foreground: 222.2 84% 4.9%;
 
     /* Muted elements */
-    --muted: 214 50% 96%;
-    --muted-foreground: 215 15% 45%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
     /* Accent - Success green for correct answers */
     --accent: 160 84% 39%;
