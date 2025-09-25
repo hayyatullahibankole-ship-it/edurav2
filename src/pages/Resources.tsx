@@ -400,7 +400,7 @@ const Resources = () => {
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/pricing">
+                <Link to="/payment?plan=premium">
                   <Button size="lg" className="bg-accent hover:bg-accent/90">
                     Upgrade to Premium
                   </Button>

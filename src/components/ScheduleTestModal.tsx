@@ -576,7 +576,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
                     Priority support
                   </div>
                 </div>
-                <Link to="/pricing">
+                <Link to="/payment?plan=premium">
                   <Button className="w-full">
                     Upgrade Now
                   </Button>

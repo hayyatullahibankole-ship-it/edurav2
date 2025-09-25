@@ -163,7 +163,7 @@ const Pricing = () => {
                     </div>
                   )}
                   
-                  <Link to={user ? "/dashboard" : "/auth"} className="block">
+                  <Link to={user ? (plan.name === "Free" ? "/dashboard" : `/payment?plan=${plan.name.toLowerCase()}`) : "/auth"} className="block">
                     <Button 
                       className={`w-full ${
                         plan.popular 

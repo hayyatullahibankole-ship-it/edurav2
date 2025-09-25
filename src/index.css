@@ -20,10 +20,10 @@ All colors MUST be HSL for consistency across light/dark modes.
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
 
-    /* Primary - Educational blue for CTAs and focus */
-    --primary: 214 100% 40%;
+    /* Primary - Educational green for CTAs and focus */
+    --primary: 142 76% 36%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 214 100% 35%;
+    --primary-hover: 142 76% 32%;
 
     /* Secondary - Light blue for subtle elements */
     --secondary: 214 100% 95%;
@@ -48,17 +48,17 @@ All colors MUST be HSL for consistency across light/dark modes.
     /* Borders and inputs */
     --border: 214 20% 90%;
     --input: 214 20% 94%;
-    --ring: 214 100% 40%;
+    --ring: 142 76% 36%;
 
     --radius: 0.75rem;
 
     /* Gradients for hero sections */
-    --gradient-hero: linear-gradient(135deg, hsl(214 100% 40%), hsl(214 100% 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 42%));
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(214 50% 98%));
 
     /* Shadows */
     --shadow-card: 0 4px 6px -1px hsl(214 20% 70% / 0.1), 0 2px 4px -1px hsl(214 20% 70% / 0.06);
-    --shadow-hover: 0 10px 15px -3px hsl(214 100% 40% / 0.1), 0 4px 6px -2px hsl(214 100% 40% / 0.05);
+    --shadow-hover: 0 10px 15px -3px hsl(142 76% 36% / 0.1), 0 4px 6px -2px hsl(142 76% 36% / 0.05);
 
     /* Animation durations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -84,9 +84,9 @@ All colors MUST be HSL for consistency across light/dark modes.
     --popover: 215 25% 10%;
     --popover-foreground: 214 50% 95%;
 
-    --primary: 214 100% 60%;
+    --primary: 142 76% 45%;
     --primary-foreground: 215 25% 8%;
-    --primary-hover: 214 100% 55%;
+    --primary-hover: 142 76% 40%;
 
     --secondary: 215 20% 15%;
     --secondary-foreground: 214 50% 90%;
@@ -105,7 +105,7 @@ All colors MUST be HSL for consistency across light/dark modes.
 
     --border: 215 20% 20%;
     --input: 215 20% 15%;
-    --ring: 214 100% 60%;
+    --ring: 142 76% 45%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
