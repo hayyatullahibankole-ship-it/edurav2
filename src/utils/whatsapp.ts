@@ -80,7 +80,7 @@ export const sendWhatsAppMessage = (phone: string, message: string) => {
 export const sendConsultationBooking = (tutorName: string, sessionType: string) => {
   const message = `Hello! I would like to book a ${sessionType} session with ${tutorName}. Please let me know about available dates and times. Thank you!`;
   
-  // EduCore support WhatsApp number
+  // Edura support WhatsApp number
   const supportPhone = '+2348101466977';
   
   sendWhatsAppMessage(supportPhone, message);
@@ -90,7 +90,7 @@ export const sendConsultationBooking = (tutorName: string, sessionType: string) 
  * General support message
  */
 export const contactSupport = (subject: string, message: string) => {
-  const fullMessage = `Subject: ${subject}\n\n${message}\n\nSent from EduCore Platform`;
+  const fullMessage = `Subject: ${subject}\n\n${message}\n\nSent from Edura Platform`;
   const supportPhone = '+2348101466977';
   
   sendWhatsAppMessage(supportPhone, fullMessage);

@@ -43,7 +43,7 @@ const Footer = () => {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <BookOpen className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">EduCore</span>
+              <span className="text-2xl font-bold">Edura</span>
             </div>
             <p className="text-muted-foreground">
               Your trusted partner for WAEC and JAMB exam preparation. 
@@ -102,7 +102,7 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span className="text-sm">support@educore.com</span>
+                <span className="text-sm">support@edura.com</span>
               </div>
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <Phone className="h-4 w-4" />
@@ -161,7 +161,7 @@ const Footer = () => {
             ))}
           </div>
           <div className="text-sm text-muted-foreground text-center md:text-right">
-            © 2024 EduCore. All rights reserved.
+            © 2024 Edura. All rights reserved.
           </div>
         </div>
       </div>

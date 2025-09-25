@@ -354,7 +354,7 @@ const BlogManager = () => {
                   id="featured_image"
                   value={formData.featured_image_url}
                   onChange={(e) => setFormData({...formData, featured_image_url: e.target.value})}
-                  placeholder="https://educore.com/images/blog-image.jpg"
+                  placeholder="https://edura.com/images/blog-image.jpg"
                   className="bg-slate-700 border-slate-600 text-white"
                 />
               </div>

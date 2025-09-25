@@ -305,7 +305,7 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
                     type="email"
                     value={newUser.email}
                     onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                    placeholder="user@educore.com"
+                    placeholder="user@edura.com"
                   />
                 </div>
 

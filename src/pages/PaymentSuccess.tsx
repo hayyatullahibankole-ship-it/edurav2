@@ -116,7 +116,7 @@ const PaymentSuccess = () => {
             <div className="space-y-6">
               <div className="text-center">
                 <h2 className="text-xl font-semibold mb-2">Payment Receipt</h2>
-                <p className="text-muted-foreground">EduCore - Educational Platform</p>
+                <p className="text-muted-foreground">Edura - Educational Platform</p>
               </div>
 
               <div className="border rounded-lg p-4 bg-muted/30">
