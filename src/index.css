@@ -27,11 +27,11 @@ All colors MUST be HSL for consistency across light/dark modes.
 
     /* Secondary - Light blue for subtle elements */
     --secondary: 214 100% 95%;
-    --secondary-foreground: 215 25% 20%;
+    --secondary-foreground: 215 25% 15%;
 
     /* Muted elements */
     --muted: 214 50% 96%;
-    --muted-foreground: 215 15% 55%;
+    --muted-foreground: 215 15% 45%;
 
     /* Accent - Success green for correct answers */
     --accent: 160 84% 39%;
