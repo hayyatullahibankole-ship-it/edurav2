@@ -421,35 +421,35 @@ Explanation: Capitalism is an economic system characterized by private ownership
     <Card className="h-full flex flex-col min-h-0">
       {/* Static Header */}
       <CardHeader className="flex-shrink-0 border-b">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3">
           <Sparkles className="h-6 w-6 text-accent" />
           <CardTitle className="text-xl">WAEC/JAMB Question Import</CardTitle>
         </div>
-        
-        <Alert className="border-accent/20 bg-accent/5">
-          <CheckCircle className="h-4 w-4" />
-          <AlertDescription>
-            <div className="space-y-3">
-              <p className="font-medium">✅ Manual Upload is the Best Approach</p>
-              <p className="text-sm">For 10,000+ authentic WAEC/JAMB questions, manual bulk upload ensures:</p>
-              <ul className="text-sm space-y-1 ml-4">
-                <li>• <strong>100% Authenticity:</strong> Real past questions from official sources</li>
-                <li>• <strong>Zero Duplicates:</strong> Complete control over content</li>
-                <li>• <strong>Proper Quality:</strong> Each question manually verified</li>
-                <li>• <strong>Fast Processing:</strong> Upload thousands at once</li>
-              </ul>
-              <div className="mt-2 p-2 bg-muted rounded text-xs">
-                <strong>💡 Pro Tip:</strong> This upload will clear ALL existing questions first to prevent any duplicates, then upload your fresh content.
-              </div>
-            </div>
-          </AlertDescription>
-        </Alert>
       </CardHeader>
 
       {/* Scrollable Content */}
       <CardContent className="flex-1 min-h-0 p-0 overflow-hidden">
         <ScrollArea className="h-full">
           <div className="p-6 space-y-6">
+            <Alert className="border-accent/20 bg-accent/5">
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                <div className="space-y-3">
+                  <p className="font-medium">✅ Manual Upload is the Best Approach</p>
+                  <p className="text-sm">For 10,000+ authentic WAEC/JAMB questions, manual bulk upload ensures:</p>
+                  <ul className="text-sm space-y-1 ml-4">
+                    <li>• <strong>100% Authenticity:</strong> Real past questions from official sources</li>
+                    <li>• <strong>Zero Duplicates:</strong> Complete control over content</li>
+                    <li>• <strong>Proper Quality:</strong> Each question manually verified</li>
+                    <li>• <strong>Fast Processing:</strong> Upload thousands at once</li>
+                  </ul>
+                  <div className="mt-2 p-2 bg-muted rounded text-xs">
+                    <strong>💡 Pro Tip:</strong> This upload will clear ALL existing questions first to prevent any duplicates, then upload your fresh content.
+                  </div>
+                </div>
+              </AlertDescription>
+            </Alert>
+
             <Alert className="border-warning/20 bg-warning/5">
               <ExternalLink className="h-4 w-4" />
               <AlertDescription>
