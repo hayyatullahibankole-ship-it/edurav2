@@ -133,11 +133,35 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+    if (!confirm('Are you sure you want to delete this user? This will permanently delete all their data including exam attempts, results, and subscriptions.')) return;
     
     try {
       setLoading(true);
       
+      // First, get user's attempts to delete related records
+      const { data: userAttempts } = await supabase
+        .from('attempts')
+        .select('id')
+        .eq('user_id', userId);
+
+      // Delete attempt-related records if any exist
+      if (userAttempts && userAttempts.length > 0) {
+        const attemptIds = userAttempts.map(a => a.id);
+        
+        // Delete attempt answers and results first
+        await supabase.from('attempt_answers').delete().in('attempt_id', attemptIds);
+        await supabase.from('results').delete().in('attempt_id', attemptIds);
+        await supabase.from('attempts').delete().eq('user_id', userId);
+      }
+      
+      // Delete other user-related records
+      await supabase.from('user_roles').delete().eq('user_id', userId);
+      await supabase.from('subscriptions').delete().eq('user_id', userId);
+      await supabase.from('transactions').delete().eq('user_id', userId);
+      await supabase.from('notifications').delete().eq('user_id', userId);
+      await supabase.from('bookings').delete().eq('user_id', userId);
+
+      // Finally delete the user
       const { error } = await supabase
         .from('users')
         .delete()
@@ -147,7 +171,7 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
 
       toast({
         title: "Success",
-        description: "User deleted successfully"
+        description: "User and all associated data deleted successfully"
       });
 
       onRefresh();
@@ -242,7 +266,7 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
                     type="email"
                     value={newUser.email}
                     onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                    placeholder="john.doe@example.com"
+                    placeholder="user@educore.com"
                   />
                 </div>
 

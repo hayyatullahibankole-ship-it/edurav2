@@ -405,7 +405,7 @@ export default function ResourceManagement() {
                       id="url"
                       value={newResource.youtube_url}
                       onChange={(e) => setNewResource({...newResource, youtube_url: e.target.value})}
-                      placeholder="https://youtube.com/watch?v=... or https://example.com"
+                      placeholder="https://youtube.com/watch?v=... or https://educore.com"
                     />
                   </div>
                 )}

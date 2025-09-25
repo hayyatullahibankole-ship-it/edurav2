@@ -88,7 +88,7 @@ const Signup = () => {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="john@example.com"
+                    placeholder="student@educore.com"
                     className="pl-9"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
