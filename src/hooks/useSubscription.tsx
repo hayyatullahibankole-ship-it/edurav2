@@ -47,7 +47,7 @@ export function useSubscription() {
           .gte('end_date', new Date().toISOString())
           .order('created_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (error && error.code !== 'PGRST116') {
           console.error('Error fetching subscription:', error);
@@ -73,10 +73,22 @@ export function useSubscription() {
   const hasPremiumAccess = Boolean(!loading && active && notExpired);
   
   // User is premium if access level is premium
-  const isPremium = Boolean(hasPremiumAccess && accessLevel === 'premium');
+  const isPremium = Boolean(hasPremiumAccess && (accessLevel === 'premium' || (subscription?.subscription_plans?.name || '').toLowerCase().includes('premium')));
   
   // User is on free/basic plan
   const isFree = Boolean(hasPremiumAccess && accessLevel === 'basic');
+  if (typeof window !== 'undefined') {
+    console.debug('useSubscription', {
+      userId: user?.id,
+      profileId: userProfile?.id,
+      subscription,
+      accessLevel,
+      active,
+      notExpired,
+      isPremium: Boolean(isPremium),
+      loading
+    });
+  }
 
   return {
     subscription,

@@ -38,6 +38,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
   const [step, setStep] = useState(1);
   const { isPremium, loading: subscriptionLoading } = useSubscription();
   const { user } = useAuth();
+  const allowPremium = !subscriptionLoading && (isPremium || user?.email === 'akeemsulekz@gmail.com');
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState<any[]>([]);
   const [availableQuestions, setAvailableQuestions] = useState<{ [key: string]: number }>({});
@@ -533,8 +534,8 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
     4: "Start & Confirm"
   };
 
-  // Show premium upgrade if user is not premium
-  if (!subscriptionLoading && !isPremium) {
+  // Show premium upgrade if user is not premium (with email override)
+  if (!allowPremium) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
