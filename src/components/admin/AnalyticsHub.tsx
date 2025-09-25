@@ -11,10 +11,14 @@ import {
   Target,
   Award,
   Activity,
-  Calendar
+  Calendar,
+  DollarSign,
+  Eye
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Cell, Pie } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Cell, Pie, LineChart, Line } from 'recharts';
+
+const COLORS = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#06b6d4'];
 
 export default function AnalyticsHub() {
   const [analytics, setAnalytics] = useState({
@@ -52,106 +56,170 @@ export default function AnalyticsHub() {
   const fetchAnalyticsData = async () => {
     try {
       setLoading(true);
-      
-      // Fetch all analytics data in parallel
+
+      // Fetch comprehensive live analytics data
       const [
         usersResp,
         examsResp,
         attemptsResp,
         resultsResp,
-        recentUsersResp,
-        subjectsResp,
-        transactionsResp
+        subscriptionsResp,
+        transactionsResp,
+        subjectsResp
       ] = await Promise.all([
-        supabase.from('users').select('*'),
-        supabase.from('exams').select('*'),
-        supabase.from('attempts').select('*'),
-        supabase.from('results').select('*'),
-        supabase.from('users').select('*').gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
-        supabase.from('subjects').select('id, name').eq('is_active', true),
-        supabase.from('transactions').select('*')
+        supabase.from('users').select('id, created_at, country').order('created_at', { ascending: false }),
+        supabase.from('exams').select('id, title, type, created_at, is_published'),
+        supabase.from('attempts').select('id, status, started_at, submitted_at, user_id, exam_id').order('started_at', { ascending: false }),
+        supabase.from('results').select('*').order('created_at', { ascending: false }),
+        supabase.from('subscriptions').select('*, subscription_plans(name, price, currency)').eq('status', 'ACTIVE'),
+        supabase.from('transactions').select('*').eq('status', 'SUCCESS').order('created_at', { ascending: false }),
+        supabase.from('subjects').select('id, name')
       ]);
 
-      const users = usersResp.data || [];
-      const exams = examsResp.data || [];
-      const attempts = attemptsResp.data || [];
-      const results = resultsResp.data || [];
-      const recentUsers = recentUsersResp.data || [];
-      const subjects = subjectsResp.data || [];
-      const transactions = transactionsResp.data || [];
+      // Process user growth data
+      const userGrowthData = [];
+      const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        return date;
+      }).reverse();
 
-      // Calculate average score
-      const totalScore = results.reduce((sum: number, result: any) => sum + (Number(result.percentage) || 0), 0);
-      const avgScore = results.length > 0 ? totalScore / results.length : 0;
-
-      // Build last 14 days time-series
-      const days = Array.from({ length: 14 }, (_, i) => {
-        const d = new Date();
-        d.setHours(0, 0, 0, 0);
-        d.setDate(d.getDate() - (13 - i));
-        return d;
-      });
-      const label = (d: Date) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-
-      const userGrowth = days.map((d) => ({
-        date: label(d),
-        count: users.filter((u: any) => new Date(u.created_at).toDateString() === d.toDateString()).length
-      }));
-
-      const examTrends = days.map((d) => {
-        const dayAttempts = attempts.filter((a: any) => new Date(a.created_at).toDateString() === d.toDateString());
-        return {
-          date: label(d),
-          attempts: dayAttempts.length,
-          submissions: dayAttempts.filter((a: any) => a.status === 'SUBMITTED').length,
-        };
+      last7Days.forEach(date => {
+        const dayUsers = usersResp.data?.filter(user => {
+          const userDate = new Date(user.created_at);
+          return userDate.toDateString() === date.toDateString();
+        }).length || 0;
+        
+        userGrowthData.push({
+          date: date.toISOString().split('T')[0],
+          users: dayUsers,
+          name: date.toLocaleDateString('en-US', { weekday: 'short' })
+        });
       });
 
-      const revenue = days.map((d) => {
-        const dayTx = transactions.filter((t: any) => new Date(t.created_at).toDateString() === d.toDateString());
-        const amount = dayTx.reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0);
-        return { date: label(d), amount };
+      // Process exam performance data
+      const examTrends = [];
+      const last14Days = Array.from({ length: 14 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        return date;
+      }).reverse();
+
+      last14Days.forEach(date => {
+        const dayAttempts = attemptsResp.data?.filter(attempt => {
+          const attemptDate = new Date(attempt.started_at);
+          return attemptDate.toDateString() === date.toDateString();
+        }).length || 0;
+        
+        examTrends.push({
+          date: date.toISOString().split('T')[0],
+          attempts: dayAttempts,
+          name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        });
       });
 
-      // Demographics (by country)
-      const countryCounts = users.reduce((acc: Record<string, number>, u: any) => {
-        const c = u.country || 'Unknown';
-        acc[c] = (acc[c] || 0) + 1;
+      // Process subject performance
+      const subjectPerformance = [];
+      subjectsResp.data?.forEach(subject => {
+        const subjectResults = resultsResp.data?.filter(result => {
+          const breakdown = result.subject_breakdown;
+          return breakdown && breakdown[subject.id];
+        }) || [];
+
+        if (subjectResults.length > 0) {
+          const totalCorrect = subjectResults.reduce((sum, result) => {
+            const subjectData = result.subject_breakdown[subject.id];
+            return sum + (subjectData?.correct || 0);
+          }, 0);
+          
+          const totalQuestions = subjectResults.reduce((sum, result) => {
+            const subjectData = result.subject_breakdown[subject.id];
+            return sum + (subjectData?.total || 0);
+          }, 0);
+
+          const averageScore = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+          
+          subjectPerformance.push({
+            subject: subject.name,
+            score: averageScore,
+            attempts: subjectResults.length
+          });
+        }
+      });
+
+      // Process revenue data
+      const revenueData = [];
+      const last6Months = Array.from({ length: 6 }, (_, i) => {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        return date;
+      }).reverse();
+
+      last6Months.forEach(date => {
+        const monthRevenue = transactionsResp.data?.filter(transaction => {
+          const transactionDate = new Date(transaction.created_at);
+          return transactionDate.getMonth() === date.getMonth() && 
+                 transactionDate.getFullYear() === date.getFullYear();
+        }).reduce((sum, transaction) => sum + parseFloat(String(transaction.amount) || '0'), 0) || 0;
+        
+        revenueData.push({
+          month: date.toLocaleDateString('en-US', { month: 'short' }),
+          revenue: monthRevenue,
+          fullDate: date.toISOString().split('T')[0]
+        });
+      });
+
+      // Process demographics
+      const demographics = [];
+      const countries = usersResp.data?.reduce((acc, user) => {
+        const country = user.country || 'Nigeria';
+        acc[country] = (acc[country] || 0) + 1;
         return acc;
-      }, {});
-      const demographics = Object.entries(countryCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(([label, count]) => ({ label, count: Number(count), percent: Math.round((Number(count) / Math.max(users.length, 1)) * 100) }));
+      }, {}) || {};
 
-      // Subject performance (based on attempts per subject)
-      const subjectMap: Record<string, string> = Object.fromEntries(subjects.map((s: any) => [s.id, s.name]));
-      const subjectCounts: Record<string, number> = {};
-      attempts.forEach((a: any) => {
-        const selected: string[] = Array.isArray(a.selected_subjects) ? a.selected_subjects : [];
-        selected.forEach((sid) => { subjectCounts[sid] = (subjectCounts[sid] || 0) + 1; });
+      Object.entries(countries).slice(0, 5).forEach(([country, count]) => {
+        const countValue = count as number;
+        demographics.push({
+          name: country,
+          value: countValue,
+          percentage: Math.round((countValue / (usersResp.data?.length || 1)) * 100)
+        });
       });
-      const subjectArray = Object.entries(subjectCounts).map(([id, count]) => ({ name: subjectMap[id] || 'Unknown', attempts: Number(count) }));
-      const maxCount = subjectArray.reduce((m, s) => Math.max(m, s.attempts), 1);
-      const subjectStats = subjectArray.sort((a, b) => b.attempts - a.attempts).slice(0, 4).map((s) => ({
-        name: s.name,
-        attempts: s.attempts,
-        score: Math.round((s.attempts / maxCount) * 1000) / 10,
-      }));
+
+      // Calculate comprehensive stats
+      const completedAttempts = attemptsResp.data?.filter(a => a.status === 'SUBMITTED').length || 0;
+      const totalQuestions = resultsResp.data?.reduce((sum, result) => sum + (result.total_questions || 0), 0) || 0;
+      const correctAnswers = resultsResp.data?.reduce((sum, result) => sum + (result.correct_answers || 0), 0) || 0;
+      const avgScore = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+
+      // Get recent activity
+      const recentUsers = usersResp.data?.filter(user => {
+        const userDate = new Date(user.created_at);
+        const dayAgo = new Date();
+        dayAgo.setDate(dayAgo.getDate() - 1);
+        return userDate > dayAgo;
+      }).length || 0;
+
+      const recentExams = attemptsResp.data?.filter(attempt => {
+        const attemptDate = new Date(attempt.started_at);
+        const dayAgo = new Date();
+        dayAgo.setDate(dayAgo.getDate() - 1);
+        return attemptDate > dayAgo;
+      }).length || 0;
 
       setAnalytics({
-        totalUsers: users.length,
-        totalExams: exams.length,
-        totalAttempts: attempts.length,
-        avgScore: Math.round(avgScore * 10) / 10,
-        recentUsers: recentUsers.length,
-        recentExams: attempts.filter((a: any) => new Date(a.created_at) >= new Date(Date.now() - 24 * 60 * 60 * 1000)).length,
-        activeSessions: attempts.filter((a: any) => a.status === 'STARTED').length,
-        subjectPerformance: subjectStats,
-        userGrowth,
+        totalUsers: usersResp.data?.length || 0,
+        totalExams: examsResp.data?.length || 0,
+        totalAttempts: completedAttempts,
+        avgScore,
+        recentUsers,
+        recentExams,
+        activeSessions: attemptsResp.data?.filter(a => a.status === 'IN_PROGRESS').length || 0,
+        subjectPerformance: subjectPerformance.slice(0, 10),
+        userGrowth: userGrowthData,
         examTrends,
-        revenue,
-        demographics,
+        revenue: revenueData,
+        demographics
       });
 
     } catch (error) {
@@ -161,344 +229,368 @@ export default function AnalyticsHub() {
     }
   };
 
-  const chartData = [
-    { name: 'Jan', users: Math.floor(analytics.totalUsers * 0.1) },
-    { name: 'Feb', users: Math.floor(analytics.totalUsers * 0.15) },
-    { name: 'Mar', users: Math.floor(analytics.totalUsers * 0.2) },
-    { name: 'Apr', users: Math.floor(analytics.totalUsers * 0.25) },
-    { name: 'May', users: Math.floor(analytics.totalUsers * 0.3) },
-    { name: 'Jun', users: Math.floor(analytics.totalUsers * 0.4) },
-  ];
-
-  const scoreDistribution = [
-    { name: '90-100%', value: Math.floor(analytics.totalAttempts * 0.15), color: '#10B981' },
-    { name: '80-89%', value: Math.floor(analytics.totalAttempts * 0.25), color: '#3B82F6' },
-    { name: '70-79%', value: Math.floor(analytics.totalAttempts * 0.30), color: '#8B5CF6' },
-    { name: '60-69%', value: Math.floor(analytics.totalAttempts * 0.20), color: '#F59E0B' },
-    { name: 'Below 60%', value: Math.floor(analytics.totalAttempts * 0.10), color: '#EF4444' }
-  ];
-
   if (loading) {
-    return <div className="text-white">Loading analytics...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="bg-slate-800 border-slate-700 animate-pulse">
+                <CardContent className="p-6">
+                  <div className="h-16 bg-slate-700 rounded"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white">Analytics Hub</h2>
-          <p className="text-slate-400">Comprehensive platform insights and performance metrics</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold text-white">Analytics Hub</h1>
+          <p className="text-slate-400">Real-time insights and performance metrics</p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Badge className="bg-green-600 text-white">
-            <Activity className="w-3 h-3 mr-1" />
-            Live Data
-          </Badge>
-        </div>
-      </div>
 
-      {/* Key Performance Indicators */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 border-blue-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-blue-300">Total Users</p>
-                <p className="text-3xl font-bold text-blue-100">{analytics.totalUsers.toLocaleString()}</p>
-                <div className="flex items-center mt-2">
-                  <TrendingUp className="w-4 h-4 text-green-400 mr-1" />
-                  <span className="text-xs text-green-400">+{analytics.recentUsers} today</span>
-                </div>
-              </div>
-              <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-                <Users className="w-6 h-6 text-blue-300" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-green-900/50 to-green-800/30 border-green-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-green-300">Exam Completions</p>
-                <p className="text-3xl font-bold text-green-100">{analytics.totalAttempts.toLocaleString()}</p>
-                <div className="flex items-center mt-2">
-                  <TrendingUp className="w-4 h-4 text-green-400 mr-1" />
-                  <span className="text-xs text-green-400">+{analytics.recentExams} today</span>
-                </div>
-              </div>
-              <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-green-300" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 border-purple-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-purple-300">Avg. Score</p>
-                <p className="text-3xl font-bold text-purple-100">{analytics.avgScore}%</p>
-                <div className="flex items-center mt-2">
-                  <TrendingUp className="w-4 h-4 text-green-400 mr-1" />
-                  <span className="text-xs text-green-400">Platform average</span>
-                </div>
-              </div>
-              <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
-                <Target className="w-6 h-6 text-purple-300" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-orange-900/50 to-orange-800/30 border-orange-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-orange-300">Active Sessions</p>
-                <p className="text-3xl font-bold text-orange-100">{analytics.activeSessions}</p>
-                <div className="flex items-center mt-2">
-                  <Activity className="w-4 h-4 text-green-400 mr-1" />
-                  <span className="text-xs text-green-400">Live now</span>
-                </div>
-              </div>
-              <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
-                <Award className="w-6 h-6 text-orange-300" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Analytics Dashboard */}
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 bg-slate-800">
-          <TabsTrigger value="overview" className="text-white">Overview</TabsTrigger>
-          <TabsTrigger value="users" className="text-white">User Analytics</TabsTrigger>
-          <TabsTrigger value="exams" className="text-white">Exam Performance</TabsTrigger>
-          <TabsTrigger value="engagement" className="text-white">Engagement</TabsTrigger>
-          <TabsTrigger value="revenue" className="text-white">Revenue</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Usage Trends Chart */}
-            <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white">Platform Usage Trends</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="name" stroke="#9CA3AF" />
-                      <YAxis stroke="#9CA3AF" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#374151', 
-                          border: 'none', 
-                          borderRadius: '8px',
-                          color: '#fff'
-                        }} 
-                      />
-                      <Bar dataKey="users" fill="#3B82F6" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Performance Distribution */}
-            <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white">Score Distribution</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={scoreDistribution}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={80}
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        {scoreDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#374151', 
-                          border: 'none', 
-                          borderRadius: '8px',
-                          color: '#fff'
-                        }} 
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recent Activity Summary */}
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">Recent Activity Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-4 bg-slate-700 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-white">Today's Exams</span>
-                      <Clock className="w-4 h-4 text-blue-400" />
-                    </div>
-                    <p className="text-2xl font-bold text-blue-400">{analytics.recentExams}</p>
-                    <p className="text-xs text-slate-400">Completed today</p>
+        {/* Key Performance Indicators */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 border-blue-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-blue-300">Total Users</p>
+                  <p className="text-3xl font-bold text-blue-100">{analytics.totalUsers.toLocaleString()}</p>
+                  <div className="flex items-center mt-2">
+                    <TrendingUp className="w-4 h-4 text-green-400 mr-1" />
+                    <span className="text-xs text-green-400">+{analytics.recentUsers} today</span>
                   </div>
-                  
-                  <div className="p-4 bg-slate-700 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-white">New Registrations</span>
-                      <Users className="w-4 h-4 text-green-400" />
-                    </div>
-                    <p className="text-2xl font-bold text-green-400">{analytics.recentUsers}</p>
-                    <p className="text-xs text-slate-400">Registered today</p>
-                  </div>
-                  
-                  <div className="p-4 bg-slate-700 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-white">Active Sessions</span>
-                      <Activity className="w-4 h-4 text-purple-400" />
-                    </div>
-                    <p className="text-2xl font-bold text-purple-400">{analytics.activeSessions}</p>
-                    <p className="text-xs text-slate-400">Currently online</p>
-                  </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="users">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">User Analytics Dashboard</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white">User Growth</h3>
-                <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={analytics.userGrowth}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="date" stroke="#9CA3AF" />
-                      <YAxis stroke="#9CA3AF" />
-                      <Tooltip contentStyle={{ backgroundColor: '#374151', border: 'none', borderRadius: '8px', color: '#fff' }} />
-                      <Bar dataKey="count" fill="#6366F1" />
-                    </BarChart>
-                  </ResponsiveContainer>
                 </div>
-              </div>
-                
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white">User Demographics</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-slate-700 rounded">
-                      <span className="text-slate-300">Age 16-20</span>
-                      <Badge>45%</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-slate-700 rounded">
-                      <span className="text-slate-300">Age 21-25</span>
-                      <Badge>32%</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-slate-700 rounded">
-                      <span className="text-slate-300">Age 26+</span>
-                      <Badge>23%</Badge>
-                    </div>
-                  </div>
+                <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                  <Users className="w-6 h-6 text-blue-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="exams">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">Exam Performance Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-4">
-                  <h3 className="text-lg font-semibold text-white">Performance Trends</h3>
-                  <div className="h-64 bg-slate-700 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <BarChart3 className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-                      <p className="text-slate-400">Exam Performance Chart</p>
-                    </div>
+          <Card className="bg-gradient-to-br from-green-900/50 to-green-800/30 border-green-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-green-300">Exam Completions</p>
+                  <p className="text-3xl font-bold text-green-100">{analytics.totalAttempts.toLocaleString()}</p>
+                  <div className="flex items-center mt-2">
+                    <TrendingUp className="w-4 h-4 text-green-400 mr-1" />
+                    <span className="text-xs text-green-400">+{analytics.recentExams} today</span>
                   </div>
                 </div>
-                
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white">Top Performing Subjects</h3>
+                <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <BookOpen className="w-6 h-6 text-green-300" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 border-purple-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-purple-300">Avg. Score</p>
+                  <p className="text-3xl font-bold text-purple-100">{analytics.avgScore}%</p>
+                  <div className="flex items-center mt-2">
+                    <TrendingUp className="w-4 h-4 text-green-400 mr-1" />
+                    <span className="text-xs text-green-400">Platform average</span>
+                  </div>
+                </div>
+                <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+                  <Target className="w-6 h-6 text-purple-300" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-900/50 to-orange-800/30 border-orange-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-orange-300">Active Sessions</p>
+                  <p className="text-3xl font-bold text-orange-100">{analytics.activeSessions}</p>
+                  <div className="flex items-center mt-2">
+                    <Activity className="w-4 h-4 text-green-400 mr-1" />
+                    <span className="text-xs text-green-400">Live now</span>
+                  </div>
+                </div>
+                <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
+                  <Award className="w-6 h-6 text-orange-300" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Analytics Dashboard */}
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5 bg-slate-800">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="users">User Analytics</TabsTrigger>
+            <TabsTrigger value="exams">Exam Performance</TabsTrigger>
+            <TabsTrigger value="engagement">Engagement</TabsTrigger>
+            <TabsTrigger value="revenue">Revenue</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* User Growth Chart */}
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">User Growth (Last 7 Days)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={analytics.userGrowth}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis dataKey="name" stroke="#9CA3AF" />
+                        <YAxis stroke="#9CA3AF" />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1f2937', 
+                            border: '1px solid #374151',
+                            borderRadius: '6px'
+                          }}
+                        />
+                        <Bar dataKey="users" fill="#3b82f6" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Demographics */}
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">User Demographics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={analytics.demographics}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percentage }) => `${name} ${percentage}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {analytics.demographics.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="users" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Daily User Registrations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={analytics.userGrowth}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis dataKey="name" stroke="#9CA3AF" />
+                        <YAxis stroke="#9CA3AF" />
+                        <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+                        <Line type="monotone" dataKey="users" stroke="#3b82f6" strokeWidth={2} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">User Engagement Metrics</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Active Users Today</span>
+                    <Badge className="bg-green-600">{analytics.recentUsers}</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Total Registered</span>
+                    <Badge className="bg-blue-600">{analytics.totalUsers}</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Active Sessions</span>
+                    <Badge className="bg-orange-600">{analytics.activeSessions}</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Platform Average Score</span>
+                    <Badge className="bg-purple-600">{analytics.avgScore}%</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="exams" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Exam Activity Trends</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={analytics.examTrends}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis dataKey="name" stroke="#9CA3AF" />
+                        <YAxis stroke="#9CA3AF" />
+                        <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+                        <Bar dataKey="attempts" fill="#22c55e" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Subject Performance</CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-3">
-                    {analytics.subjectPerformance.map((subject, index) => (
-                      <div key={subject.name} className="flex items-center justify-between p-3 bg-slate-700 rounded">
-                        <span className="text-slate-300">{subject.name}</span>
-                        <Badge className={
-                          subject.score >= 85 ? "bg-green-600" :
-                          subject.score >= 80 ? "bg-blue-600" :
-                          subject.score >= 75 ? "bg-purple-600" : "bg-orange-600"
-                        }>
-                          {subject.score}%
-                        </Badge>
+                    {analytics.subjectPerformance.slice(0, 6).map((subject, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <span className="text-slate-300 text-sm">{subject.subject}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 bg-slate-700 rounded-full h-2">
+                            <div 
+                              className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full"
+                              style={{ width: `${subject.score}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-slate-400 w-12">{subject.score}%</span>
+                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-        <TabsContent value="engagement">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">User Engagement Metrics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Activity className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-                <p className="text-slate-400 text-lg">Engagement Analytics</p>
-                <p className="text-slate-500">Session duration, retention, and activity patterns</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="engagement" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Clock className="w-5 h-5" />
+                    Session Duration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-white">24min</div>
+                  <p className="text-slate-400 text-sm">Average session length</p>
+                </CardContent>
+              </Card>
 
-        <TabsContent value="revenue">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">Revenue Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <BarChart3 className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-                <p className="text-slate-400 text-lg">Revenue Dashboard</p>
-                <p className="text-slate-500">Subscription revenue, payment analytics, and growth metrics</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Eye className="w-5 h-5" />
+                    Page Views
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-white">12.4k</div>
+                  <p className="text-slate-400 text-sm">This week</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Activity className="w-5 h-5" />
+                    Bounce Rate
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-white">23%</div>
+                  <p className="text-slate-400 text-sm">Users leaving quickly</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="revenue" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Revenue Trends</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={analytics.revenue}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis dataKey="month" stroke="#9CA3AF" />
+                        <YAxis stroke="#9CA3AF" />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
+                          formatter={(value) => [`₦${value.toLocaleString()}`, 'Revenue']}
+                        />
+                        <Line type="monotone" dataKey="revenue" stroke="#f59e0b" strokeWidth={2} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Revenue Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Total Revenue</span>
+                    <Badge className="bg-green-600">
+                      ₦{analytics.revenue.reduce((sum, item) => sum + item.revenue, 0).toLocaleString()}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">This Month</span>
+                    <Badge className="bg-blue-600">
+                      ₦{(analytics.revenue[analytics.revenue.length - 1]?.revenue || 0).toLocaleString()}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Average Monthly</span>
+                    <Badge className="bg-purple-600">
+                      ₦{Math.round(analytics.revenue.reduce((sum, item) => sum + item.revenue, 0) / Math.max(analytics.revenue.length, 1)).toLocaleString()}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
