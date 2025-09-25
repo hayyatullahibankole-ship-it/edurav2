@@ -341,9 +341,37 @@ const PricingManager = () => {
   };
 
   const handleDelete = async (planId: string) => {
-    if (!confirm('Are you sure you want to delete this plan?')) return;
+    if (!confirm('Are you sure you want to delete this plan? This will also affect existing subscriptions.')) return;
 
     try {
+      // First check if there are active subscriptions using this plan
+      const { data: activeSubscriptions } = await supabase
+        .from('subscriptions')
+        .select('id')
+        .eq('plan_id', planId)
+        .eq('status', 'ACTIVE');
+
+      if (activeSubscriptions && activeSubscriptions.length > 0) {
+        const confirmForce = confirm(`This plan has ${activeSubscriptions.length} active subscriptions. Do you want to deactivate the plan instead of deleting it?`);
+        
+        if (confirmForce) {
+          // Deactivate instead of delete
+          const { error } = await supabase
+            .from('subscription_plans')
+            .update({ is_active: false })
+            .eq('id', planId);
+
+          if (error) throw error;
+          
+          toast({
+            title: "Plan Deactivated",
+            description: "Plan has been deactivated due to active subscriptions",
+          });
+        }
+        return;
+      }
+
+      // If no active subscriptions, proceed with deletion
       const { error } = await supabase
         .from('subscription_plans')
         .delete()
@@ -360,7 +388,7 @@ const PricingManager = () => {
       console.error('Error deleting plan:', error);
       toast({
         title: "Error",
-        description: "Failed to delete subscription plan",
+        description: "Failed to delete subscription plan. It may be referenced by existing subscriptions.",
         variant: "destructive",
       });
     }

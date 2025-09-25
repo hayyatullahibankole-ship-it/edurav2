@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
@@ -9,13 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Upload, 
-  FileText, 
   CheckCircle, 
-  XCircle, 
-  Download,
   Loader2,
   Sparkles,
-  Info
+  Copy
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -32,8 +29,7 @@ interface SimpleBulkUploadProps {
 
 export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleBulkUploadProps) {
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [questionsText, setQuestionsText] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -43,53 +39,74 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
     errors: string[];
   } | null>(null);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.name.endsWith('.csv')) {
-      toast({
-        title: "Invalid File Type",
-        description: "Please select a CSV file",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setSelectedFile(file);
-    setUploadResults(null);
-  };
-
-  const processCSVFile = (csvText: string): any[] => {
-    const lines = csvText.split('\n').filter(line => line.trim());
-    const data = [];
+  const parseQuestionsText = (text: string): any[] => {
+    const lines = text.trim().split('\n').filter(line => line.trim());
+    const questions = [];
     
-    // Skip header row
-    for (let i = 1; i < lines.length; i++) {
-      const row = lines[i].split(',').map(cell => cell.trim().replace(/"/g, ''));
+    let currentQuestion = null;
+    
+    for (let line of lines) {
+      line = line.trim();
       
-      if (row.length >= 7) { // Minimum required columns
-        data.push({
-          question_text: row[0],
-          option_a: row[1],
-          option_b: row[2],
-          option_c: row[3],
-          option_d: row[4],
-          option_e: row[5] || null,
-          correct_answer: row[6]?.toUpperCase(),
-          explanation: row[7] || null
-        });
+      // Check if this line starts a new question (contains a question mark or starts with a number)
+      if (line.match(/^\d+[.)]\s*/) || line.includes('?') || (!currentQuestion && line.length > 10)) {
+        // Save previous question if exists
+        if (currentQuestion && currentQuestion.question_text && currentQuestion.options.length >= 4) {
+          questions.push(currentQuestion);
+        }
+        
+        // Start new question
+        currentQuestion = {
+          question_text: line.replace(/^\d+[.)]\s*/, '').trim(),
+          options: [],
+          correct_answer: null,
+          explanation: null
+        };
+      } else if (line.match(/^[A-E][.)]\s*/)) {
+        // This is an option
+        if (currentQuestion) {
+          const optionText = line.replace(/^[A-E][.)]\s*/, '').trim();
+          currentQuestion.options.push(optionText);
+        }
+      } else if (line.toLowerCase().includes('answer:') || line.toLowerCase().includes('correct:')) {
+        // This is the correct answer
+        if (currentQuestion) {
+          const match = line.match(/[A-E]/i);
+          if (match) {
+            currentQuestion.correct_answer = match[0].toUpperCase();
+          }
+        }
+      } else if (line.toLowerCase().includes('explanation:')) {
+        // This is an explanation
+        if (currentQuestion) {
+          currentQuestion.explanation = line.replace(/explanation:\s*/i, '').trim();
+        }
+      } else if (currentQuestion && line.length > 0) {
+        // Continuation of question text or explanation
+        if (currentQuestion.options.length === 0) {
+          currentQuestion.question_text += ' ' + line;
+        } else if (!currentQuestion.correct_answer) {
+          // Could be part of last option
+          if (currentQuestion.options.length > 0) {
+            currentQuestion.options[currentQuestion.options.length - 1] += ' ' + line;
+          }
+        }
       }
     }
     
-    return data;
+    // Add the last question
+    if (currentQuestion && currentQuestion.question_text && currentQuestion.options.length >= 4) {
+      questions.push(currentQuestion);
+    }
+    
+    return questions;
   };
 
   const handleUpload = async () => {
-    if (!selectedFile || !selectedSubject) {
+    if (!questionsText.trim() || !selectedSubject) {
       toast({
         title: "Missing Information",
-        description: "Please select both a file and a subject",
+        description: "Please enter questions text and select a subject",
         variant: "destructive"
       });
       return;
@@ -100,11 +117,10 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
     setUploadResults(null);
 
     try {
-      const fileText = await selectedFile.text();
-      const questions = processCSVFile(fileText);
+      const questions = parseQuestionsText(questionsText);
       
       if (questions.length === 0) {
-        throw new Error("No valid questions found in the CSV file");
+        throw new Error("No valid questions found in the text");
       }
 
       let successCount = 0;
@@ -118,22 +134,10 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
         
         for (const questionData of batch) {
           try {
-            // Create options array
-            const options = [
-              questionData.option_a,
-              questionData.option_b,
-              questionData.option_c,
-              questionData.option_d
-            ];
-            
-            if (questionData.option_e) {
-              options.push(questionData.option_e);
-            }
-
             // Validate correct answer
             const correctIndex = ['A', 'B', 'C', 'D', 'E'].indexOf(questionData.correct_answer);
-            if (correctIndex === -1 || correctIndex >= options.length) {
-              throw new Error(`Invalid correct answer: ${questionData.correct_answer}`);
+            if (correctIndex === -1 || correctIndex >= questionData.options.length) {
+              throw new Error(`Invalid correct answer: ${questionData.correct_answer} for question starting with: ${questionData.question_text.substring(0, 50)}...`);
             }
 
             const { error } = await supabase
@@ -141,7 +145,7 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
               .insert({
                 question_text: questionData.question_text,
                 type: 'MCQ_SINGLE',
-                options: options,
+                options: questionData.options,
                 correct_answer: correctIndex,
                 explanation: questionData.explanation,
                 subject_id: selectedSubject,
@@ -191,28 +195,42 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
   };
 
   const resetUpload = () => {
-    setSelectedFile(null);
+    setQuestionsText('');
     setSelectedSubject('');
     setUploadResults(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
-  const downloadTemplate = () => {
-    const templateContent = `Question,Option A,Option B,Option C,Option D,Option E,Correct Answer,Explanation
-"What is the capital of Nigeria?","Lagos","Abuja","Port Harcourt","Kano","","B","Abuja is the federal capital territory of Nigeria"
-"Which planet is closest to the sun?","Earth","Venus","Mercury","Mars","","C","Mercury is the closest planet to the sun"`;
+  const copyTemplate = () => {
+    const templateContent = `1. What is the capital of Nigeria?
+A) Lagos
+B) Abuja
+C) Port Harcourt
+D) Kano
+Answer: B
+Explanation: Abuja is the federal capital territory of Nigeria
 
-    const blob = new Blob([templateContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'question_template.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+2. Which planet is closest to the sun?
+A) Earth
+B) Venus
+C) Mercury
+D) Mars
+Answer: C
+Explanation: Mercury is the closest planet to the sun in our solar system
+
+3. What is the chemical symbol for water?
+A) H2O
+B) CO2
+C) NaCl
+D) O2
+Answer: A
+Explanation: Water is composed of two hydrogen atoms and one oxygen atom`;
+
+    navigator.clipboard.writeText(templateContent).then(() => {
+      toast({
+        title: "Template Copied!",
+        description: "Question template has been copied to your clipboard",
+      });
+    });
   };
 
   return (
@@ -224,44 +242,44 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Template Download */}
+        {/* Template Example */}
         <Alert className="border-blue-600/20 bg-blue-950/20">
-          <Info className="h-4 w-4" />
+          <Copy className="h-4 w-4" />
           <AlertDescription className="text-slate-300">
             <div className="flex items-center justify-between">
-              <span>Download our CSV template to get started</span>
+              <span>Copy our question format template to get started</span>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={downloadTemplate}
+                onClick={copyTemplate}
                 className="border-slate-600 text-slate-300 hover:bg-slate-700"
               >
-                <Download className="h-4 w-4 mr-2" />
-                Download Template
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Template
               </Button>
             </div>
           </AlertDescription>
         </Alert>
 
-        {/* File Upload */}
+        {/* Questions Text Input */}
         <div className="space-y-4">
           <div>
-            <Label className="text-white">CSV File</Label>
+            <Label className="text-white">Questions Text</Label>
             <div className="mt-2">
-              <Input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv"
-                onChange={handleFileSelect}
-                className="bg-slate-700 border-slate-600 text-white file:bg-slate-600 file:text-white file:border-0"
+              <Textarea
+                value={questionsText}
+                onChange={(e) => setQuestionsText(e.target.value)}
+                placeholder="Paste your questions here in the format shown in the template..."
+                className="bg-slate-700 border-slate-600 text-white min-h-[200px]"
                 disabled={isUploading}
               />
             </div>
-            {selectedFile && (
+            {questionsText && (
               <div className="mt-2 flex items-center gap-2">
-                <FileText className="h-4 w-4 text-green-400" />
-                <span className="text-sm text-slate-300">{selectedFile.name}</span>
-                <Badge variant="secondary">{selectedFile.size} bytes</Badge>
+                <CheckCircle className="h-4 w-4 text-green-400" />
+                <span className="text-sm text-slate-300">
+                  {questionsText.split('\n').filter(line => line.match(/^\d+[.)]\s*/) || line.includes('?')).length} questions detected
+                </span>
               </div>
             )}
           </div>
@@ -330,7 +348,7 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
         <div className="flex gap-3">
           <Button
             onClick={handleUpload}
-            disabled={!selectedFile || !selectedSubject || isUploading}
+            disabled={!questionsText.trim() || !selectedSubject || isUploading}
             className="flex-1"
           >
             {isUploading ? (
@@ -352,10 +370,12 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
 
         {/* Format Instructions */}
         <div className="text-xs text-slate-400 space-y-1">
-          <p><strong>CSV Format:</strong></p>
-          <p>• Columns: Question, Option A, Option B, Option C, Option D, Option E (optional), Correct Answer, Explanation (optional)</p>
-          <p>• Correct Answer should be A, B, C, D, or E</p>
-          <p>• Use quotes for text containing commas</p>
+          <p><strong>Text Format:</strong></p>
+          <p>• Start each question with a number: "1. Question text?"</p>
+          <p>• List options as: "A) Option text", "B) Option text", etc.</p>
+          <p>• Specify answer as: "Answer: A" or "Correct: A"</p>
+          <p>• Add explanation as: "Explanation: Your explanation text"</p>
+          <p>• Leave blank lines between questions for better parsing</p>
         </div>
       </CardContent>
     </Card>

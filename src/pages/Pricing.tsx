@@ -7,98 +7,90 @@ import {
   Star,
   Crown,
   Zap,
-  CreditCard
+  CreditCard,
+  Loader2
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { createSubscriptionPayment } from "@/utils/paystack";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Pricing = () => {
   const { user, userProfile } = useAuth();
-  
+  const { toast } = useToast();
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const fetchPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('subscription_plans')
+        .select('*')
+        .eq('is_active', true)
+        .order('price', { ascending: true });
+
+      if (error) throw error;
+
+      // Process plans and add UI-specific data
+      const processedPlans = data.map((plan: any) => ({
+        ...plan,
+        displayPrice: plan.price === 0 ? '₦0' : `₦${plan.price.toLocaleString()}`,
+        period: plan.price === 0 ? 'forever' : `per ${Math.floor(plan.duration_days / 30) === 1 ? 'month' : Math.floor(plan.duration_days / 30) + ' months'}`,
+        icon: plan.price === 0 ? <Zap className="h-6 w-6" /> : 
+              plan.price < 3000 ? <Star className="h-6 w-6" /> : 
+              <Crown className="h-6 w-6" />,
+        popular: plan.name.toLowerCase().includes('premium'),
+        paystack: plan.price > 0,
+        cta: plan.price === 0 ? "Start Free" : `Choose ${plan.name}`
+      }));
+
+      setPlans(processedPlans);
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load pricing plans",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePaystackPayment = (planName: string, amount: number) => {
     if (!user || !userProfile?.email) {
-      alert("Please login first to subscribe");
+      toast({
+        title: "Authentication Required", 
+        description: "Please login first to subscribe",
+        variant: "destructive"
+      });
       return;
     }
     
     createSubscriptionPayment(planName, userProfile.email, amount);
   };
-  
-  const plans = [
-    {
-      name: "Free",
-      price: 0,
-      displayPrice: "₦0",
-      period: "forever",
-      description: "Perfect for getting started",
-      icon: <Zap className="h-6 w-6" />,
-      features: [
-        "5 practice tests per month",
-        "Basic performance analytics",
-        "Access to 2024 past questions",
-        "Community forum access",
-        "Email support"
-      ],
-      limitations: [
-        "Limited question bank access",
-        "No video tutorials",
-        "No consultation booking"
-      ],
-      popular: false,
-      cta: "Start Free",
-      paystack: false
-    },
-    {
-      name: "Premium",
-      price: 2500,
-      displayPrice: "₦2,500",
-      period: "per month",
-      description: "Most popular for serious students",
-      icon: <Star className="h-6 w-6" />,
-      features: [
-        "Unlimited practice tests",
-        "Advanced analytics & insights",
-        "Complete question bank (2015-2024)",
-        "Video tutorials for all subjects",
-        "PDF study materials download",
-        "Priority email support",
-        "Performance predictions",
-        "Subject-wise weak area analysis"
-      ],
-      limitations: [],
-      popular: true,
-      cta: "Choose Premium",
-      paystack: true
-    },
-    {
-      name: "Pro",
-      price: 4500,
-      displayPrice: "₦4,500",
-      period: "per month",
-      description: "Complete exam preparation solution",
-      icon: <Crown className="h-6 w-6" />,
-      features: [
-        "Everything in Premium",
-        "1-on-1 consultation booking (2 sessions/month)",
-        "Group study sessions access",
-        "Custom study plans",
-        "WhatsApp support group",
-        "Exam strategy workshops",
-        "Mock exam certificates",
-        "University admission guidance"
-      ],
-      limitations: [],
-      popular: false,
-      cta: "Choose Pro",
-      paystack: true
-    }
-  ];
 
   const yearlyDiscount = {
-    premium: "₦25,000",
+    premium: "₦25,000", 
     pro: "₦45,000"
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
+          <p className="text-lg">Loading pricing plans...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -123,7 +115,7 @@ const Pricing = () => {
       <section className="py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {plans.map((plan, index) => (
+            {plans.map((plan: any, index: number) => (
               <Card 
                 key={index} 
                 className={`relative ${plan.popular ? 'border-accent shadow-lg scale-105' : ''} hover:shadow-lg transition-all`}
@@ -152,17 +144,21 @@ const Pricing = () => {
                 
                 <CardContent className="space-y-6">
                   <div className="space-y-3">
-                    {plan.features.map((feature, idx) => (
+                    {Array.isArray(plan.features) ? plan.features.map((feature: string, idx: number) => (
                       <div key={idx} className="flex items-center gap-3">
                         <div className="bg-accent/10 rounded-full p-1">
                           <Check className="h-4 w-4 text-accent" />
                         </div>
                         <span className="text-sm">{feature}</span>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="text-sm text-muted-foreground">
+                        {plan.description || "Features coming soon"}
+                      </div>
+                    )}
                   </div>
                   
-                  {plan.name !== "Free" && (
+                  {plan.name !== "Free" && plan.price > 0 && (
                     <div className="pt-4 border-t">
                       <p className="text-sm text-muted-foreground mb-2">
                         Save with yearly billing:
@@ -190,7 +186,7 @@ const Pricing = () => {
                       disabled={!user}
                     >
                       <CreditCard className="mr-2 h-4 w-4" />
-                      {user ? "Subscribe with Paystack" : "Login to Subscribe"}
+                      {user ? `Subscribe with Paystack` : "Login to Subscribe"}
                     </Button>
                   ) : (
                     <Link to={user ? "/dashboard" : "/auth"} className="block">
@@ -198,7 +194,7 @@ const Pricing = () => {
                         className="w-full"
                         variant="outline"
                       >
-                        {user ? "Current Plan" : "Start Free"}
+                        {user ? "Current Plan" : plan.cta}
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
