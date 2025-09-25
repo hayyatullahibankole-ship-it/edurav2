@@ -427,7 +427,7 @@ const Consultation = () => {
                 Book Consultation
               </Button>
               <Link to="/pricing">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
+                <Button size="lg" variant="outline" className="bg-card text-foreground border-primary-foreground hover:bg-card/90">
                   View Pricing Plans
                 </Button>
               </Link>
