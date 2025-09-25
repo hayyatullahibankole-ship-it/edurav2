@@ -19,15 +19,58 @@ export const sendWhatsAppMessage = (phone: string, message: string) => {
     // Encode the message for URL
     const encodedMessage = encodeURIComponent(validatedData.message);
     
-    // Create WhatsApp URL (remove + from phone number for WhatsApp API)
+    // Create WhatsApp URL (remove + from phone number)
     const cleanPhone = validatedData.phone.replace('+', '');
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
     
-    // Open in new tab
-    window.open(whatsappUrl, '_blank');
+    // Try multiple WhatsApp URL formats as fallback
+    const whatsappUrls = [
+      `https://wa.me/${cleanPhone}?text=${encodedMessage}`,
+      `https://web.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`,
+      `whatsapp://send?phone=${cleanPhone}&text=${encodedMessage}`
+    ];
+    
+    // Try opening WhatsApp with fallback options
+    let opened = false;
+    
+    // First try wa.me (most reliable)
+    try {
+      const popup = window.open(whatsappUrls[0], '_blank');
+      if (popup && !popup.closed) {
+        opened = true;
+      }
+    } catch (e) {
+      console.warn('wa.me failed, trying alternatives');
+    }
+    
+    // If wa.me failed, try web.whatsapp.com
+    if (!opened) {
+      try {
+        const popup = window.open(whatsappUrls[1], '_blank');
+        if (popup && !popup.closed) {
+          opened = true;
+        }
+      } catch (e) {
+        console.warn('web.whatsapp.com failed, trying mobile protocol');
+      }
+    }
+    
+    // Last resort: try mobile protocol (works on mobile devices)
+    if (!opened) {
+      try {
+        window.location.href = whatsappUrls[2];
+        opened = true;
+      } catch (e) {
+        console.error('All WhatsApp methods failed');
+      }
+    }
+    
+    if (!opened) {
+      throw new Error('Unable to open WhatsApp. Please ensure WhatsApp is installed or try accessing WhatsApp Web directly.');
+    }
+    
   } catch (error) {
-    console.error('Invalid WhatsApp message data:', error);
-    throw new Error('Failed to send WhatsApp message');
+    console.error('WhatsApp message error:', error);
+    throw error instanceof Error ? error : new Error('Failed to send WhatsApp message');
   }
 };
 
