@@ -198,7 +198,7 @@ const Payment = () => {
                       disabled={!user}
                     >
                       <CreditCard className="mr-2 h-4 w-4" />
-                      {user ? `Subscribe with Paystack` : "Login to Subscribe"}
+                      {user ? `Get Started Now` : "Login to Subscribe"}
                     </Button>
                   ) : (
                     <Link to={user ? "/dashboard" : "/auth"} className="block">
