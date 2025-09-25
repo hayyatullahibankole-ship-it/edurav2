@@ -19,13 +19,11 @@ import {
   Edit,
   Trash2,
   Copy,
-  FileText,
   BarChart3,
   CheckCircle,
   XCircle,
   AlertTriangle,
-  Download,
-  Loader2
+  Download
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -63,16 +61,6 @@ export default function QuestionManagement() {
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
 
-  const [previewQuestion, setPreviewQuestion] = useState<Question | null>(null);
-  const [editQuestion, setEditQuestion] = useState<Question | null>(null);
-  const [analyticsQuestion, setAnalyticsQuestion] = useState<Question | null>(null);
-  const [analyticsData, setAnalyticsData] = useState<{ total: number; correct: number; accuracy: number; avgTime: number; lastAnswered?: string } | null>(null);
-  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
-  const [savingEdit, setSavingEdit] = useState(false);
-  const [editForm, setEditForm] = useState<any>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [questionsPerSubject, setQuestionsPerSubject] = useState(100);
-
   const [newQuestion, setNewQuestion] = useState({
     question_text: '',
     type: 'MCQ_SINGLE' as 'MCQ_SINGLE' | 'MCQ_MULTI' | 'TRUE_FALSE' | 'FILL_IN' | 'MATCHING' | 'ESSAY',
@@ -85,59 +73,9 @@ export default function QuestionManagement() {
     points: 1
   });
 
-  const [bulkUpload, setBulkUpload] = useState({
-    file: null as File | null,
-    preview: [] as any[],
-    errors: [] as string[],
-    mapping: {
-      question: 0,
-      optionA: 1,
-      optionB: 2,
-      optionC: 3,
-      optionD: 4,
-      optionE: 5,
-      correct: 6,
-      explanation: 7,
-      subject: 8,
-      difficulty: 9,
-      tags: 10
-    }
-  });
-
   useEffect(() => {
     fetchData();
   }, []);
-
-  useEffect(() => {
-    const loadAnalytics = async () => {
-      if (!analyticsQuestion) {
-        setAnalyticsData(null);
-        return;
-      }
-      try {
-        setLoadingAnalytics(true);
-        const { data, error } = await supabase
-          .from('attempt_answers')
-          .select('is_correct, time_spent_seconds, answered_at')
-          .eq('question_id', analyticsQuestion.id);
-        if (error) throw error;
-        const total = data?.length || 0;
-        const correct = data?.filter(d => d.is_correct).length || 0;
-        const avgTime = total > 0 ? Math.round((data?.reduce((sum, d) => sum + (d.time_spent_seconds || 0), 0) || 0) / total) : 0;
-        const lastAnswered = total > 0 ? data!.reduce((latest, d) => {
-          const t = d.answered_at ? new Date(d.answered_at).getTime() : 0;
-          return t > latest ? t : latest;
-        }, 0) : 0;
-        setAnalyticsData({ total, correct, accuracy: total ? Math.round((correct / total) * 100) : 0, avgTime, lastAnswered: lastAnswered ? new Date(lastAnswered).toISOString() : undefined });
-      } catch (e) {
-        console.error('Analytics load error', e);
-        setAnalyticsData(null);
-      } finally {
-        setLoadingAnalytics(false);
-      }
-    };
-    loadAnalytics();
-  }, [analyticsQuestion]);
 
   const fetchData = async () => {
     try {
@@ -182,7 +120,7 @@ export default function QuestionManagement() {
           ? newQuestion.correct_answer
           : newQuestion.type === 'TRUE_FALSE'
           ? newQuestion.correct_answer
-          : newQuestion.options[0], // For fill in blank
+          : newQuestion.options[0],
         explanation: newQuestion.explanation,
         difficulty_level: newQuestion.difficulty_level,
         tags: newQuestion.tags,
@@ -230,164 +168,13 @@ export default function QuestionManagement() {
     });
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setBulkUpload(prev => ({ ...prev, file }));
-    
-    // Parse CSV/Excel file
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      const rows = text.split('\n').map(row => row.split(','));
-      const preview = rows.slice(0, 10); // Show first 10 rows
-      
-      setBulkUpload(prev => ({ ...prev, preview }));
-    };
-    reader.readAsText(file);
-  };
-
-  const processBulkUpload = async () => {
-    if (!bulkUpload.file || !bulkUpload.preview.length) return;
-
-    try {
-      setLoading(true);
-      const errors: string[] = [];
-      const questionsToInsert: any[] = [];
-
-      bulkUpload.preview.slice(1).forEach((row, index) => {
-        if (row.length < 7) {
-          errors.push(`Row ${index + 2}: Insufficient columns`);
-          return;
-        }
-
-        const question = {
-          question_text: row[bulkUpload.mapping.question]?.trim(),
-          type: 'MCQ_SINGLE',
-          options: [
-            row[bulkUpload.mapping.optionA]?.trim(),
-            row[bulkUpload.mapping.optionB]?.trim(),
-            row[bulkUpload.mapping.optionC]?.trim(),
-            row[bulkUpload.mapping.optionD]?.trim(),
-            row[bulkUpload.mapping.optionE]?.trim()
-          ].filter(opt => opt),
-          correct_answer: parseInt(row[bulkUpload.mapping.correct]) || 0,
-          explanation: row[bulkUpload.mapping.explanation]?.trim() || '',
-          difficulty_level: parseInt(row[bulkUpload.mapping.difficulty]) || 1,
-          tags: row[bulkUpload.mapping.tags]?.split(';').map(t => t.trim()) || [],
-          subject_id: subjects.find(s => s.name.toLowerCase() === row[bulkUpload.mapping.subject]?.toLowerCase())?.id,
-          points: 1,
-          is_active: true
-        };
-
-        if (!question.question_text) {
-          errors.push(`Row ${index + 2}: Missing question text`);
-          return;
-        }
-
-        if (!question.subject_id) {
-          errors.push(`Row ${index + 2}: Invalid subject "${row[bulkUpload.mapping.subject]}"`);
-          return;
-        }
-
-        questionsToInsert.push(question);
-      });
-
-      if (errors.length > 0) {
-        setBulkUpload(prev => ({ ...prev, errors }));
-        return;
-      }
-
-      const { error } = await supabase.from('questions').insert(questionsToInsert);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: `${questionsToInsert.length} questions uploaded successfully`
-      });
-
-      setIsBulkUploadOpen(false);
-      setBulkUpload({
-        file: null,
-        preview: [],
-        errors: [],
-        mapping: {
-          question: 0,
-          optionA: 1,
-          optionB: 2,
-          optionC: 3,
-          optionD: 4,
-          optionE: 5,
-          correct: 6,
-          explanation: 7,
-          subject: 8,
-          difficulty: 9,
-          tags: 10
-        }
-      });
-      fetchData();
-
-    } catch (error) {
-      console.error('Error uploading questions:', error);
-      toast({
-        title: "Error",
-        description: "Failed to upload questions",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGenerateQuestions = async (clearExisting = false) => {
-    try {
-      setIsGenerating(true);
-      
-      const { data, error } = await supabase.functions.invoke('generate-questions', {
-        body: { questionsPerSubject, clearExisting }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: data.status === 'processing' 
-          ? `Started generating ${data.totalTargeted} questions in background`
-          : `Successfully generated ${data.totalGenerated} questions`,
-      });
-
-      // Refresh the questions list
-      fetchData();
-      
-    } catch (error) {
-      console.error('Error generating questions:', error);
-      toast({
-        title: "Error", 
-        description: "Failed to generate questions. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  // Auto-generate questions on component mount if no questions exist
-  useEffect(() => {
-    if (!loading && questions.length === 0 && subjects.length > 0 && !isGenerating) {
-      console.log('No questions found, auto-generating...');
-      handleGenerateQuestions(false);
-    }
-  }, [loading, questions.length, subjects.length, isGenerating]);
-
   const filteredQuestions = questions.filter(question => {
     const matchesSearch = question.question_text.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          question.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesSubject = selectedSubject === 'all' || question.subject_id === selectedSubject;
     const matchesDifficulty = selectedDifficulty === 'all' || question.difficulty_level.toString() === selectedDifficulty;
     
-  return matchesSearch && matchesSubject && matchesDifficulty;
+    return matchesSearch && matchesSubject && matchesDifficulty;
   });
 
   const activeQuestions = filteredQuestions.filter(q => q.is_active);
@@ -445,153 +232,29 @@ export default function QuestionManagement() {
               </div>
               
               <div className="flex items-center space-x-2 ml-4">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setPreviewQuestion(question)}
-                >
+                <Button variant="ghost" size="sm">
                   <Eye className="w-4 h-4" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => { setEditQuestion(question); setEditForm({ ...question }); }}
-                >
+                <Button variant="ghost" size="sm">
                   <Edit className="w-4 h-4" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={async () => {
-                    try {
-                      // Create a duplicate of the question
-                      const duplicateData = {
-                        question_text: question.question_text + " (Copy)",
-                        type: question.type,
-                        subject_id: question.subject_id,
-                        options: question.options,
-                        correct_answer: question.correct_answer,
-                        explanation: question.explanation,
-                        difficulty_level: question.difficulty_level,
-                        points: question.points,
-                        tags: question.tags,
-                        is_active: true
-                      };
-
-                      const { error } = await supabase
-                        .from('questions')
-                        .insert(duplicateData);
-
-                      if (error) throw error;
-
-                      toast({
-                        title: "Success",
-                        description: "Question duplicated successfully"
-                      });
-
-                      // Refresh the questions list
-                      fetchData();
-                      
-                    } catch (error) {
-                      console.error('Error duplicating question:', error);
-                      toast({
-                        title: "Error",
-                        description: "Failed to duplicate question",
-                        variant: "destructive"
-                      });
-                    }
-                  }}
-                >
+                <Button variant="ghost" size="sm">
                   <Copy className="w-4 h-4" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => { setAnalyticsQuestion(question); }}
-                >
+                <Button variant="ghost" size="sm">
                   <BarChart3 className="w-4 h-4" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={async () => {
-                    const confirmMessage = `Are you sure you want to delete the question: "${question.question_text.substring(0, 50)}..."?`;
-                    if (confirm(confirmMessage)) {
-                      try {
-                        setLoading(true);
-                        
-                        // First check if question is being used in any attempts
-                        const { data: attemptAnswers } = await supabase
-                          .from('attempt_answers')
-                          .select('id')
-                          .eq('question_id', question.id)
-                          .limit(1);
-                        
-                        if (attemptAnswers && attemptAnswers.length > 0) {
-                          // Soft delete by setting is_active to false
-                          const { error } = await supabase
-                            .from('questions')
-                            .update({ is_active: false })
-                            .eq('id', question.id);
-                          
-                          if (error) throw error;
-                          
-                          toast({
-                            title: "Question Deactivated",
-                            description: "Question has been deactivated as it's being used in exam attempts"
-                          });
-                        } else {
-                          // Hard delete if not used
-                          const { error } = await supabase
-                            .from('questions')
-                            .delete()
-                            .eq('id', question.id);
-                          
-                          if (error) throw error;
-                          
-                          toast({
-                            title: "Success",
-                            description: "Question deleted successfully"
-                          });
-                        }
-                        
-                        await fetchData();
-                      } catch (error) {
-                        console.error('Delete error:', error);
-                        toast({
-                          title: "Error",
-                          description: "Failed to delete question. Please try again.",
-                          variant: "destructive"
-                        });
-                      } finally {
-                        setLoading(false);
-                      }
-                    }
-                  }}
-                  disabled={loading}
-                >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                <Button variant="ghost" size="sm">
+                  <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
           ))}
-
-          {list.length === 0 && (
-            <div className="text-center py-8">
-              <BookOpen className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-              <p className="text-slate-400">No questions found</p>
-              <p className="text-sm text-slate-500 mt-2">
-                {searchTerm || selectedSubject !== 'all' || selectedDifficulty !== 'all' 
-                  ? 'Try adjusting your search filters'
-                  : 'Create your first question to get started'
-                }
-              </p>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
   );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -600,68 +263,19 @@ export default function QuestionManagement() {
           <p className="text-slate-400">Create, upload, and manage examination questions</p>
         </div>
         
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Label className="text-white">Questions per subject:</Label>
-              <Input
-                type="number"
-                min="50"
-                max="5000"
-                step="50"
-                value={questionsPerSubject}
-                onChange={(e) => setQuestionsPerSubject(Number(e.target.value))}
-                className="w-24 bg-slate-700 border-slate-600 text-white"
-              />
-            </div>
-            
-            <Button 
-              onClick={() => handleGenerateQuestions(false)}
-              disabled={isGenerating || loading}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <FileText className="w-4 h-4 mr-2" />
-                  Generate Questions
-                </>
-              )}
-            </Button>
-
-            <Button 
-              onClick={() => handleGenerateQuestions(true)}
-              disabled={isGenerating || loading}
-              variant="destructive"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Clearing & Generating...
-                </>
-              ) : (
-                <>
-                  <FileText className="w-4 h-4 mr-2" />
-                  Clear & Regenerate All
-                </>
-              )}
-            </Button>
-
-            <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Bulk Upload
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[800px]">
-                <DialogHeader>
-                  <DialogTitle>Bulk Upload Questions</DialogTitle>
-                </DialogHeader>
+        <div className="flex items-center gap-4 flex-wrap">
+          <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                <Upload className="w-4 h-4 mr-2" />
+                Bulk Upload Questions
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[900px] max-h-[90vh] flex flex-col">
+              <DialogHeader>
+                <DialogTitle>Bulk Upload WAEC/JAMB Questions</DialogTitle>
+              </DialogHeader>
+              <div className="flex-1 overflow-hidden">
                 <SimpleBulkUpload 
                   subjects={subjects} 
                   onUploadComplete={() => {
@@ -669,20 +283,21 @@ export default function QuestionManagement() {
                     fetchData();
                   }} 
                 />
-              </DialogContent>
-            </Dialog>
+              </div>
+            </DialogContent>
+          </Dialog>
 
-            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-green-600 hover:bg-green-700">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Question
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[700px]">
-                <DialogHeader>
-                  <DialogTitle>Create New Question</DialogTitle>
-                </DialogHeader>
+          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-green-600 hover:bg-green-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Single Question
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[700px]">
+              <DialogHeader>
+                <DialogTitle>Create New Question</DialogTitle>
+              </DialogHeader>
               <div className="space-y-4 max-h-[70vh] overflow-y-auto">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -700,7 +315,6 @@ export default function QuestionManagement() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
                   <div>
                     <Label htmlFor="type">Question Type</Label>
                     <Select value={newQuestion.type} onValueChange={(value: any) => setNewQuestion({...newQuestion, type: value})}>
@@ -708,14 +322,13 @@ export default function QuestionManagement() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="MCQ_SINGLE">Multiple Choice</SelectItem>
+                        <SelectItem value="MCQ_SINGLE">Multiple Choice (Single)</SelectItem>
                         <SelectItem value="TRUE_FALSE">True/False</SelectItem>
-                        <SelectItem value="FILL_IN">Fill in the Blank</SelectItem>
+                        <SelectItem value="ESSAY">Essay</SelectItem>
                       </SelectContent>
                     </Select>
-          </div>
-        </div>
-      </div>
+                  </div>
+                </div>
 
                 <div>
                   <Label htmlFor="question">Question Text</Label>
@@ -723,63 +336,44 @@ export default function QuestionManagement() {
                     id="question"
                     value={newQuestion.question_text}
                     onChange={(e) => setNewQuestion({...newQuestion, question_text: e.target.value})}
-                    placeholder="Enter your question here..."
-                    rows={3}
+                    placeholder="Enter your question..."
+                    className="min-h-[100px]"
                   />
                 </div>
 
                 {newQuestion.type === 'MCQ_SINGLE' && (
-                  <div>
-                    <Label>Answer Options</Label>
-                    <div className="space-y-2">
-                      {newQuestion.options.map((option, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <span className="w-8 text-sm text-slate-400">{String.fromCharCode(65 + index)}.</span>
-                          <Input
-                            value={option}
-                            onChange={(e) => {
-                              const newOptions = [...newQuestion.options];
-                              newOptions[index] = e.target.value;
-                              setNewQuestion({...newQuestion, options: newOptions});
-                            }}
-                            placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                          />
-                          <input
-                            type="radio"
-                            name="correct"
-                            checked={newQuestion.correct_answer === index}
-                            onChange={() => setNewQuestion({...newQuestion, correct_answer: index})}
-                            className="w-4 h-4"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {newQuestion.type === 'TRUE_FALSE' && (
-                  <div>
-                    <Label>Correct Answer</Label>
-                    <Select value={newQuestion.correct_answer.toString()} onValueChange={(value) => setNewQuestion({...newQuestion, correct_answer: parseInt(value)})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">True</SelectItem>
-                        <SelectItem value="1">False</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="space-y-3">
+                    <Label>Options</Label>
+                    {['A', 'B', 'C', 'D'].map((letter, index) => (
+                      <div key={letter} className="flex items-center space-x-2">
+                        <Label className="w-8">{letter}.</Label>
+                        <Input
+                          value={newQuestion.options[index]}
+                          onChange={(e) => {
+                            const newOptions = [...newQuestion.options];
+                            newOptions[index] = e.target.value;
+                            setNewQuestion({...newQuestion, options: newOptions});
+                          }}
+                          placeholder={`Option ${letter}`}
+                        />
+                        <input
+                          type="radio"
+                          name="correct"
+                          checked={newQuestion.correct_answer === index}
+                          onChange={() => setNewQuestion({...newQuestion, correct_answer: index})}
+                        />
+                      </div>
+                    ))}
                   </div>
                 )}
 
                 <div>
-                  <Label htmlFor="explanation">Explanation (Optional)</Label>
+                  <Label htmlFor="explanation">Explanation</Label>
                   <Textarea
                     id="explanation"
                     value={newQuestion.explanation}
                     onChange={(e) => setNewQuestion({...newQuestion, explanation: e.target.value})}
-                    placeholder="Explain the correct answer..."
-                    rows={2}
+                    placeholder="Explain why this answer is correct..."
                   />
                 </div>
 
@@ -791,13 +385,12 @@ export default function QuestionManagement() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">Easy</SelectItem>
+                        <SelectItem value="1">Easy</SelectItem>  
                         <SelectItem value="2">Medium</SelectItem>
                         <SelectItem value="3">Hard</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  
                   <div>
                     <Label htmlFor="points">Points</Label>
                     <Input
@@ -828,9 +421,9 @@ export default function QuestionManagement() {
                     Cancel
                   </Button>
                 </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -853,9 +446,7 @@ export default function QuestionManagement() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400">Active Questions</p>
-                <p className="text-2xl font-bold text-green-400">
-                  {questions.filter(q => q.is_active).length}
-                </p>
+                <p className="text-2xl font-bold text-green-400">{activeQuestions.length}</p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-400" />
             </div>
@@ -866,10 +457,10 @@ export default function QuestionManagement() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Subjects Covered</p>
+                <p className="text-sm text-slate-400">Subjects</p>
                 <p className="text-2xl font-bold text-purple-400">{subjects.length}</p>
               </div>
-              <FileText className="w-8 h-8 text-purple-400" />
+              <BookOpen className="w-8 h-8 text-purple-400" />
             </div>
           </CardContent>
         </Card>
@@ -878,95 +469,101 @@ export default function QuestionManagement() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Avg Difficulty</p>
-                <p className="text-2xl font-bold text-yellow-400">
-                  {questions.length > 0 ? (questions.reduce((sum, q) => sum + q.difficulty_level, 0) / questions.length).toFixed(1) : '0'}
-                </p>
+                <p className="text-sm text-slate-400">Inactive Questions</p>
+                <p className="text-2xl font-bold text-red-400">{inactiveQuestions.length}</p>
               </div>
-              <BarChart3 className="w-8 h-8 text-yellow-400" />
+              <XCircle className="w-8 h-8 text-red-400" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Search and Filters */}
+      {/* Filters */}
       <Card className="bg-slate-800 border-slate-700">
         <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <Input
                   placeholder="Search questions..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-slate-700 border-slate-600 text-white"
                 />
               </div>
             </div>
-            <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="All Subjects" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Subjects</SelectItem>
-                {subjects.map(subject => (
-                  <SelectItem key={subject.id} value={subject.id}>
-                    {subject.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="All Difficulties" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Difficulties</SelectItem>
-                <SelectItem value="1">Easy</SelectItem>
-                <SelectItem value="2">Medium</SelectItem>
-                <SelectItem value="3">Hard</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex gap-3 items-center">
+              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                <SelectTrigger className="w-40 bg-slate-700 border-slate-600 text-white">
+                  <SelectValue placeholder="All Subjects" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Subjects</SelectItem>
+                  {subjects.map(subject => (
+                    <SelectItem key={subject.id} value={subject.id}>
+                      {subject.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                <SelectTrigger className="w-32 bg-slate-700 border-slate-600 text-white">
+                  <SelectValue placeholder="All Levels" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="1">Easy</SelectItem>
+                  <SelectItem value="2">Medium</SelectItem>
+                  <SelectItem value="3">Hard</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Questions List */}
-      <Tabs defaultValue="all" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-slate-800">
-          <TabsTrigger value="all" className="text-white">All Questions</TabsTrigger>
-          <TabsTrigger value="active" className="text-white">Active</TabsTrigger>
-          <TabsTrigger value="inactive" className="text-white">Inactive</TabsTrigger>
-          <TabsTrigger value="analytics" className="text-white">Analytics</TabsTrigger>
+      <Tabs defaultValue="active" className="space-y-4">
+        <TabsList className="bg-slate-800 border-slate-700">
+          <TabsTrigger value="active" className="text-white">
+            Active Questions ({activeQuestions.length})
+          </TabsTrigger>
+          <TabsTrigger value="inactive" className="text-white">
+            Inactive Questions ({inactiveQuestions.length})
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="all" className="space-y-4">
-          {renderQuestionList(filteredQuestions)}
-        </TabsContent>
-
         <TabsContent value="active">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardContent className="p-6">
-              <p className="text-slate-400">Active questions will be shown here</p>
-            </CardContent>
-          </Card>
+          {activeQuestions.length > 0 ? (
+            renderQuestionList(activeQuestions)
+          ) : (
+            <Card className="bg-slate-800 border-slate-700">
+              <CardContent className="p-12 text-center">
+                <BookOpen className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-white mb-2">No Active Questions</h3>
+                <p className="text-slate-400 mb-4">Start by uploading questions using the bulk upload feature.</p>
+                <Button onClick={() => setIsBulkUploadOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Bulk Upload Questions
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="inactive">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardContent className="p-6">
-              <p className="text-slate-400">Inactive questions will be shown here</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="analytics">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardContent className="p-6">
-              <p className="text-slate-400">Question analytics will be shown here</p>
-            </CardContent>
-          </Card>
+          {inactiveQuestions.length > 0 ? (
+            renderQuestionList(inactiveQuestions)
+          ) : (
+            <Card className="bg-slate-800 border-slate-700">
+              <CardContent className="p-12 text-center">
+                <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-white mb-2">No Inactive Questions</h3>
+                <p className="text-slate-400">All questions are currently active.</p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>
