@@ -55,7 +55,7 @@ const Demo = () => {
                   Start Demo Test
                 </Button>
               </Link>
-              <Link to="/signup">
+              <Link to="/auth">
                 <Button size="lg" variant="outline">
                   Skip Demo - Sign Up Free
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -168,7 +168,7 @@ const Demo = () => {
                   Try Full Demo
                 </Button>
               </Link>
-              <Link to="/signup">
+              <Link to="/auth">
                 <Button size="lg" variant="outline">
                   Create Free Account
                   <ArrowRight className="ml-2 h-5 w-5" />

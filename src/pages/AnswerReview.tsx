@@ -58,7 +58,7 @@ const AnswerReview = () => {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate('/login');
+        navigate('/auth');
         return;
       }
 

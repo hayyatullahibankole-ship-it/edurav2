@@ -7,8 +7,6 @@ import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminPortal from "./pages/AdminPortal";
@@ -37,8 +35,6 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Layout><Home /></Layout>} />
             <Route path="/auth" element={<Layout showNavbar={false}><Auth /></Layout>} />
-            <Route path="/login" element={<Layout showNavbar={false}><Login /></Layout>} />
-            <Route path="/signup" element={<Layout showNavbar={false}><Signup /></Layout>} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Layout><Dashboard /></Layout>

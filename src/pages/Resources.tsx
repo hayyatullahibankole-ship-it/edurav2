@@ -405,7 +405,7 @@ const Resources = () => {
                     Upgrade to Premium
                   </Button>
                 </Link>
-                <Link to="/signup">
+                <Link to="/auth">
                   <Button size="lg" variant="outline">
                     Start Free Trial
                   </Button>
