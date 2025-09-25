@@ -112,12 +112,18 @@ const CBTExam = () => {
 
       if (attemptError) throw attemptError;
 
-      // Calculate score
+      // Calculate score and prepare answers
       let correctCount = 0;
+      const subjectStats: Record<string, { total: number; correct: number }> = {};
       const answerRecords = questions.map((question, index) => {
         const isCorrect = answers[index] === question.correct;
-        if (isCorrect) correctCount++;
-        
+        const subject = question.subject || 'General';
+        subjectStats[subject] = subjectStats[subject] || { total: 0, correct: 0 };
+        subjectStats[subject].total += 1;
+        if (isCorrect) {
+          correctCount++;
+          subjectStats[subject].correct += 1;
+        }
         return {
           attempt_id: attemptId,
           question_id: question.originalId,
@@ -137,6 +143,16 @@ const CBTExam = () => {
       const wrongCount = questions.length - correctCount;
       const unansweredCount = questions.length - Object.keys(answers).length;
 
+      // Build subject breakdown for analytics
+      const subject_breakdown: Record<string, { total: number; correct: number; percentage: number }> = {};
+      Object.entries(subjectStats).forEach(([subject, stats]) => {
+        subject_breakdown[subject] = {
+          total: stats.total,
+          correct: stats.correct,
+          percentage: Math.round((stats.correct / stats.total) * 100)
+        };
+      });
+
       const { error: resultError } = await supabase
         .from('results')
         .insert({
@@ -147,7 +163,8 @@ const CBTExam = () => {
           wrong_answers: wrongCount,
           unanswered: unansweredCount,
           percentage: percentage,
-          time_taken_minutes: Math.floor(timeTaken / 60)
+          time_taken_minutes: Math.floor(timeTaken / 60),
+          subject_breakdown
         });
 
       if (resultError) throw resultError;

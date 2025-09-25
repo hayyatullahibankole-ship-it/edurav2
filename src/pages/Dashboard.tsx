@@ -97,7 +97,7 @@ const Dashboard = () => {
       });
 
       // Recent test results
-      const recentTestsData = resultsWithScores.slice(0, 3).map(attempt => {
+      const recentTestsData = resultsWithScores.slice(0, 3).map((attempt: any) => {
         const result = Array.isArray(attempt.results) ? attempt.results[0] : attempt.results;
         const timeTaken = result?.time_taken_minutes || 0;
         
@@ -106,6 +106,7 @@ const Dashboard = () => {
         const testTitle = proctoringData.title || 'Practice Test';
         
         return {
+          attemptId: attempt.id,
           subject: testTitle,
           score: Math.round(result?.percentage || 0),
           date: new Date(attempt.submitted_at).toLocaleDateString(),
@@ -305,22 +306,24 @@ const Dashboard = () => {
                       {loading ? (
                         <div className="text-center text-muted-foreground">Loading...</div>
                       ) : recentTests.length > 0 ? (
-                        recentTests.map((test, index) => (
-                          <div key={index} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                            <div className="flex items-center gap-4">
-                              <div className="bg-primary/10 p-2 rounded-lg">
-                                <BookOpen className="h-5 w-5 text-primary" />
+                        recentTests.map((test: any, index: number) => (
+                          <Link key={index} to={`/results?attempt=${test.attemptId}`} className="block">
+                            <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                              <div className="flex items-center gap-4">
+                                <div className="bg-primary/10 p-2 rounded-lg">
+                                  <BookOpen className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold">{test.subject}</h4>
+                                  <p className="text-sm text-muted-foreground">{test.date}</p>
+                                </div>
                               </div>
-                              <div>
-                                <h4 className="font-semibold">{test.subject}</h4>
-                                <p className="text-sm text-muted-foreground">{test.date}</p>
+                              <div className="text-right">
+                                <div className="text-lg font-bold text-accent">{test.score}%</div>
+                                <p className="text-sm text-muted-foreground">{test.duration}</p>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <div className="text-lg font-bold text-accent">{test.score}%</div>
-                              <p className="text-sm text-muted-foreground">{test.duration}</p>
-                            </div>
-                          </div>
+                          </Link>
                         ))
                       ) : (
                         <div className="text-center text-muted-foreground">
