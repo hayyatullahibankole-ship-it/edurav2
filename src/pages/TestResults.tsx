@@ -1,5 +1,5 @@
-import React from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -18,28 +18,98 @@ import {
   Home,
   Share2,
   Download,
-  BarChart3
+  BarChart3,
+  Loader2
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const TestResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
   
-  // Get results from navigation state or use defaults
-  const results = location.state || {
-    score: 75,
-    totalQuestions: 40,
-    correctAnswers: 30,
-    wrongAnswers: 8,
-    unanswered: 2,
-    timeTaken: 85,
-    timeAllotted: 90,
-    subjects: [
-      { name: "Mathematics", score: 80, total: 10, correct: 8 },
-      { name: "English", score: 85, total: 10, correct: 8.5 },
-      { name: "Physics", score: 70, total: 10, correct: 7 },
-      { name: "Chemistry", score: 65, total: 10, correct: 6.5 }
-    ]
+  const attemptId = searchParams.get('attempt');
+
+  useEffect(() => {
+    if (location.state) {
+      // Results passed from navigation
+      setResults(location.state);
+    } else if (attemptId) {
+      // Fetch results using attempt ID
+      fetchResultsByAttempt();
+    }
+  }, [location.state, attemptId]);
+
+  const fetchResultsByAttempt = async () => {
+    if (!attemptId) return;
+    
+    setLoading(true);
+    try {
+      // Fetch results from database
+      const { data: resultData, error: resultError } = await supabase
+        .from('results')
+        .select(`
+          *,
+          attempts!inner(
+            id,
+            exam_id,
+            user_id,
+            started_at,
+            submitted_at,
+            exams!inner(
+              title,
+              type,
+              duration_minutes
+            )
+          )
+        `)
+        .eq('attempt_id', attemptId)
+        .single();
+
+      if (resultError) {
+        console.error('Error fetching results:', resultError);
+        toast({
+          title: "Error",
+          description: "Failed to load test results",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (resultData) {
+        // Transform the data to match expected format
+        const transformedResults = {
+          score: Math.round(resultData.percentage || 0),
+          totalQuestions: resultData.total_questions,
+          correctAnswers: resultData.correct_answers,
+          wrongAnswers: resultData.wrong_answers,
+          unanswered: resultData.unanswered,
+          timeTaken: resultData.time_taken_minutes,
+          timeAllotted: resultData.attempts.exams.duration_minutes,
+          subjects: resultData.subject_breakdown ? Object.entries(resultData.subject_breakdown).map(([name, data]: [string, any]) => ({
+            name,
+            score: Math.round(data.percentage || 0),
+            total: data.total || 0,
+            correct: data.correct || 0
+          })) : []
+        };
+        
+        setResults(transformedResults);
+      }
+    } catch (error) {
+      console.error('Error fetching results:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load test results",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getScoreColor = (score: number) => {
@@ -55,7 +125,7 @@ const TestResults = () => {
     return { label: "Needs Improvement", color: "bg-red-100 text-red-800" };
   };
 
-  const scoreBadge = getScoreBadge(results.score);
+  const scoreBadge = results ? getScoreBadge(results.score) : { label: "Loading", color: "bg-gray-100 text-gray-800" };
 
   const recommendations = [
     {
@@ -72,7 +142,18 @@ const TestResults = () => {
     }
   ];
 
-  if (!location.state) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading your results...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!results) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="max-w-md w-full mx-4">
