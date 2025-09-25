@@ -66,10 +66,9 @@ export function useSubscription() {
   // User has access if they have any active subscription (free or premium)
   const hasPremiumAccess = !loading && subscription && subscription.status === 'ACTIVE';
   
-  // User is premium only if they have a paid subscription with premium access level
+  // User is premium if they have premium access level (regardless of price)
   const isPremium = hasPremiumAccess && 
-    subscription?.subscription_plans?.resource_access_level === 'premium' &&
-    subscription?.subscription_plans?.price > 0;
+    subscription?.subscription_plans?.resource_access_level === 'premium';
   
   // User is on free plan if they have basic access level or price = 0
   const isFree = hasPremiumAccess && 
