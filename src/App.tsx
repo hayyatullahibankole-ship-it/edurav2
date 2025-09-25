@@ -8,7 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
+
 import AdminPortal from "./pages/AdminPortal";
 import AdminLogin from "./pages/AdminLogin";
 import CBTExam from "./pages/CBTExam";
@@ -44,11 +44,6 @@ const App = () => (
             <Route path="/admin" element={
               <ProtectedRoute requireAdmin>
                 <AdminPortal />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/dashboard" element={
-              <ProtectedRoute requireAdmin>
-                <Layout showNavbar={false}><AdminDashboard /></Layout>
               </ProtectedRoute>
             } />
             <Route path="/practice" element={
