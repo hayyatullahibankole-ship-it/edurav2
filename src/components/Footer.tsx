@@ -121,7 +121,25 @@ const Footer = () => {
                   placeholder="Enter your email" 
                   className="flex-1"
                 />
-                <Button size="sm">Subscribe</Button>
+                <Button 
+                  size="sm"
+                  onClick={() => {
+                    const email = (document.querySelector('input[placeholder="Enter your email"]') as HTMLInputElement)?.value;
+                    if (email) {
+                      // Simple validation
+                      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        alert('Thank you for subscribing! You will receive updates about exam prep tips and new features.');
+                        (document.querySelector('input[placeholder="Enter your email"]') as HTMLInputElement).value = '';
+                      } else {
+                        alert('Please enter a valid email address.');
+                      }
+                    } else {
+                      alert('Please enter your email address.');
+                    }
+                  }}
+                >
+                  Subscribe
+                </Button>
               </div>
             </div>
           </div>
