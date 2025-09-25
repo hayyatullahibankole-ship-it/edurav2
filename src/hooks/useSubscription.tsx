@@ -24,7 +24,8 @@ export function useSubscription() {
   useEffect(() => {
     const fetchSubscription = async () => {
       if (!user || !userProfile) {
-        setLoading(false);
+        // Wait until auth and profile are ready before determining access
+        setLoading(true);
         return;
       }
 
