@@ -63,6 +63,14 @@ export default function QuestionManagement() {
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
 
+  const [previewQuestion, setPreviewQuestion] = useState<Question | null>(null);
+  const [editQuestion, setEditQuestion] = useState<Question | null>(null);
+  const [analyticsQuestion, setAnalyticsQuestion] = useState<Question | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<{ total: number; correct: number; accuracy: number; avgTime: number; lastAnswered?: string } | null>(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editForm, setEditForm] = useState<any>(null);
+
   const [newQuestion, setNewQuestion] = useState({
     question_text: '',
     type: 'MCQ_SINGLE' as 'MCQ_SINGLE' | 'MCQ_MULTI' | 'TRUE_FALSE' | 'FILL_IN' | 'MATCHING' | 'ESSAY',
@@ -97,6 +105,37 @@ export default function QuestionManagement() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const loadAnalytics = async () => {
+      if (!analyticsQuestion) {
+        setAnalyticsData(null);
+        return;
+      }
+      try {
+        setLoadingAnalytics(true);
+        const { data, error } = await supabase
+          .from('attempt_answers')
+          .select('is_correct, time_spent_seconds, answered_at')
+          .eq('question_id', analyticsQuestion.id);
+        if (error) throw error;
+        const total = data?.length || 0;
+        const correct = data?.filter(d => d.is_correct).length || 0;
+        const avgTime = total > 0 ? Math.round((data?.reduce((sum, d) => sum + (d.time_spent_seconds || 0), 0) || 0) / total) : 0;
+        const lastAnswered = total > 0 ? data!.reduce((latest, d) => {
+          const t = d.answered_at ? new Date(d.answered_at).getTime() : 0;
+          return t > latest ? t : latest;
+        }, 0) : 0;
+        setAnalyticsData({ total, correct, accuracy: total ? Math.round((correct / total) * 100) : 0, avgTime, lastAnswered: lastAnswered ? new Date(lastAnswered).toISOString() : undefined });
+      } catch (e) {
+        console.error('Analytics load error', e);
+        setAnalyticsData(null);
+      } finally {
+        setLoadingAnalytics(false);
+      }
+    };
+    loadAnalytics();
+  }, [analyticsQuestion]);
 
   const fetchData = async () => {
     try {
@@ -306,8 +345,11 @@ export default function QuestionManagement() {
     const matchesSubject = selectedSubject === 'all' || question.subject_id === selectedSubject;
     const matchesDifficulty = selectedDifficulty === 'all' || question.difficulty_level.toString() === selectedDifficulty;
     
-    return matchesSearch && matchesSubject && matchesDifficulty;
+  return matchesSearch && matchesSubject && matchesDifficulty;
   });
+
+  const activeQuestions = filteredQuestions.filter(q => q.is_active);
+  const inactiveQuestions = filteredQuestions.filter(q => !q.is_active);
 
   const getDifficultyLabel = (level: number) => {
     switch(level) {
@@ -327,6 +369,187 @@ export default function QuestionManagement() {
     }
   };
 
+  const renderQuestionList = (list: Question[]) => (
+    <Card className="bg-slate-800 border-slate-700">
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          {list.map((question) => (
+            <div key={question.id} className="flex items-start justify-between p-4 bg-slate-700 rounded-lg border border-slate-600">
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Badge className={`${getDifficultyColor(question.difficulty_level)} text-white`}>
+                    {getDifficultyLabel(question.difficulty_level)}
+                  </Badge>
+                  <Badge variant="outline" className="text-slate-300">
+                    {question.type.replace('_', ' ')}
+                  </Badge>
+                  <Badge variant="secondary">
+                    {subjects.find(s => s.id === question.subject_id)?.name || 'Unknown'}
+                  </Badge>
+                  {!question.is_active && (
+                    <Badge variant="destructive">Inactive</Badge>
+                  )}
+                </div>
+                <p className="text-white font-medium mb-2 line-clamp-2">
+                  {question.question_text}
+                </p>
+                <div className="flex items-center space-x-4 text-sm text-slate-400">
+                  <span>{question.points} point{question.points !== 1 ? 's' : ''}</span>
+                  <span>{new Date(question.created_at).toLocaleDateString()}</span>
+                  {question.tags && Array.isArray(question.tags) && question.tags.length > 0 && (
+                    <span>Tags: {question.tags.join(', ')}</span>
+                  )}
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2 ml-4">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setPreviewQuestion(question)}
+                >
+                  <Eye className="w-4 h-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => { setEditQuestion(question); setEditForm({ ...question }); }}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      // Create a duplicate of the question
+                      const duplicateData = {
+                        question_text: question.question_text + " (Copy)",
+                        type: question.type,
+                        subject_id: question.subject_id,
+                        options: question.options,
+                        correct_answer: question.correct_answer,
+                        explanation: question.explanation,
+                        difficulty_level: question.difficulty_level,
+                        points: question.points,
+                        tags: question.tags,
+                        is_active: true
+                      };
+
+                      const { error } = await supabase
+                        .from('questions')
+                        .insert(duplicateData);
+
+                      if (error) throw error;
+
+                      toast({
+                        title: "Success",
+                        description: "Question duplicated successfully"
+                      });
+
+                      // Refresh the questions list
+                      fetchData();
+                      
+                    } catch (error) {
+                      console.error('Error duplicating question:', error);
+                      toast({
+                        title: "Error",
+                        description: "Failed to duplicate question",
+                        variant: "destructive"
+                      });
+                    }
+                  }}
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => { setAnalyticsQuestion(question); }}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={async () => {
+                    const confirmMessage = `Are you sure you want to delete the question: "${question.question_text.substring(0, 50)}..."?`;
+                    if (confirm(confirmMessage)) {
+                      try {
+                        setLoading(true);
+                        
+                        // First check if question is being used in any attempts
+                        const { data: attemptAnswers } = await supabase
+                          .from('attempt_answers')
+                          .select('id')
+                          .eq('question_id', question.id)
+                          .limit(1);
+                        
+                        if (attemptAnswers && attemptAnswers.length > 0) {
+                          // Soft delete by setting is_active to false
+                          const { error } = await supabase
+                            .from('questions')
+                            .update({ is_active: false })
+                            .eq('id', question.id);
+                          
+                          if (error) throw error;
+                          
+                          toast({
+                            title: "Question Deactivated",
+                            description: "Question has been deactivated as it's being used in exam attempts"
+                          });
+                        } else {
+                          // Hard delete if not used
+                          const { error } = await supabase
+                            .from('questions')
+                            .delete()
+                            .eq('id', question.id);
+                          
+                          if (error) throw error;
+                          
+                          toast({
+                            title: "Success",
+                            description: "Question deleted successfully"
+                          });
+                        }
+                        
+                        await fetchData();
+                      } catch (error) {
+                        console.error('Delete error:', error);
+                        toast({
+                          title: "Error",
+                          description: "Failed to delete question. Please try again.",
+                          variant: "destructive"
+                        });
+                      } finally {
+                        setLoading(false);
+                      }
+                    }
+                  }}
+                  disabled={loading}
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+          ))}
+
+          {list.length === 0 && (
+            <div className="text-center py-8">
+              <BookOpen className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+              <p className="text-slate-400">No questions found</p>
+              <p className="text-sm text-slate-500 mt-2">
+                {searchTerm || selectedSubject !== 'all' || selectedDifficulty !== 'all' 
+                  ? 'Try adjusting your search filters'
+                  : 'Create your first question to get started'
+                }
+              </p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -626,200 +849,7 @@ export default function QuestionManagement() {
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                {filteredQuestions.map((question) => (
-                  <div key={question.id} className="flex items-start justify-between p-4 bg-slate-700 rounded-lg border border-slate-600">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <Badge className={`${getDifficultyColor(question.difficulty_level)} text-white`}>
-                          {getDifficultyLabel(question.difficulty_level)}
-                        </Badge>
-                        <Badge variant="outline" className="text-slate-300">
-                          {question.type.replace('_', ' ')}
-                        </Badge>
-                        <Badge variant="secondary">
-                          {subjects.find(s => s.id === question.subject_id)?.name || 'Unknown'}
-                        </Badge>
-                        {!question.is_active && (
-                          <Badge variant="destructive">Inactive</Badge>
-                        )}
-                      </div>
-                      <p className="text-white font-medium mb-2 line-clamp-2">
-                        {question.question_text}
-                      </p>
-                      <div className="flex items-center space-x-4 text-sm text-slate-400">
-                        <span>{question.points} point{question.points !== 1 ? 's' : ''}</span>
-                        <span>{new Date(question.created_at).toLocaleDateString()}</span>
-                        {question.tags && Array.isArray(question.tags) && question.tags.length > 0 && (
-                          <span>Tags: {question.tags.join(', ')}</span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 ml-4">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => {
-                          toast({
-                            title: "Preview",
-                            description: `Viewing question: ${question.question_text.substring(0, 50)}...`
-                          });
-                        }}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => {
-                          toast({
-                            title: "Edit Question",
-                            description: "Edit functionality coming soon"
-                          });
-                        }}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={async () => {
-                          try {
-                            // Create a duplicate of the question
-                            const duplicateData = {
-                              question_text: question.question_text + " (Copy)",
-                              type: question.type,
-                              subject_id: question.subject_id,
-                              options: question.options,
-                              correct_answer: question.correct_answer,
-                              explanation: question.explanation,
-                              difficulty_level: question.difficulty_level,
-                              points: question.points,
-                              tags: question.tags,
-                              is_active: true
-                            };
-
-                            const { error } = await supabase
-                              .from('questions')
-                              .insert(duplicateData);
-
-                            if (error) throw error;
-
-                            toast({
-                              title: "Success",
-                              description: "Question duplicated successfully"
-                            });
-
-                            // Refresh the questions list
-                            fetchData();
-                            
-                          } catch (error) {
-                            console.error('Error duplicating question:', error);
-                            toast({
-                              title: "Error",
-                              description: "Failed to duplicate question",
-                              variant: "destructive"
-                            });
-                          }
-                        }}
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => {
-                          toast({
-                            title: "Analytics",
-                            description: `Analytics for question: ${question.question_text.substring(0, 30)}...`
-                          });
-                        }}
-                      >
-                        <BarChart3 className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={async () => {
-                          const confirmMessage = `Are you sure you want to delete the question: "${question.question_text.substring(0, 50)}..."?`;
-                          if (confirm(confirmMessage)) {
-                            try {
-                              setLoading(true);
-                              
-                              // First check if question is being used in any attempts
-                              const { data: attemptAnswers } = await supabase
-                                .from('attempt_answers')
-                                .select('id')
-                                .eq('question_id', question.id)
-                                .limit(1);
-                              
-                              if (attemptAnswers && attemptAnswers.length > 0) {
-                                // Soft delete by setting is_active to false
-                                const { error } = await supabase
-                                  .from('questions')
-                                  .update({ is_active: false })
-                                  .eq('id', question.id);
-                                
-                                if (error) throw error;
-                                
-                                toast({
-                                  title: "Question Deactivated",
-                                  description: "Question has been deactivated as it's being used in exam attempts"
-                                });
-                              } else {
-                                // Hard delete if not used
-                                const { error } = await supabase
-                                  .from('questions')
-                                  .delete()
-                                  .eq('id', question.id);
-                                
-                                if (error) throw error;
-                                
-                                toast({
-                                  title: "Success",
-                                  description: "Question deleted successfully"
-                                });
-                              }
-                              
-                              await fetchData();
-                            } catch (error) {
-                              console.error('Delete error:', error);
-                              toast({
-                                title: "Error",
-                                description: "Failed to delete question. Please try again.",
-                                variant: "destructive"
-                              });
-                            } finally {
-                              setLoading(false);
-                            }
-                          }
-                        }}
-                        disabled={loading}
-                      >
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                
-                {filteredQuestions.length === 0 && (
-                  <div className="text-center py-8">
-                    <BookOpen className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-                    <p className="text-slate-400">No questions found</p>
-                    <p className="text-sm text-slate-500 mt-2">
-                      {searchTerm || selectedSubject !== 'all' || selectedDifficulty !== 'all' 
-                        ? 'Try adjusting your search filters'
-                        : 'Create your first question to get started'
-                      }
-                    </p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {renderQuestionList(filteredQuestions)}
         </TabsContent>
 
         <TabsContent value="active">
