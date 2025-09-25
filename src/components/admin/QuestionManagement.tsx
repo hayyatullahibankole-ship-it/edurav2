@@ -71,6 +71,7 @@ export default function QuestionManagement() {
   const [savingEdit, setSavingEdit] = useState(false);
   const [editForm, setEditForm] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [questionsPerSubject, setQuestionsPerSubject] = useState(100);
 
   const [newQuestion, setNewQuestion] = useState({
     question_text: '',
@@ -340,19 +341,21 @@ export default function QuestionManagement() {
     }
   };
 
-  const handleGenerateQuestions = async () => {
+  const handleGenerateQuestions = async (clearExisting = false) => {
     try {
       setIsGenerating(true);
       
       const { data, error } = await supabase.functions.invoke('generate-questions', {
-        body: {}
+        body: { questionsPerSubject, clearExisting }
       });
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: `Successfully generated ${data.totalQuestions} questions across ${data.subjects?.length || 0} subjects`,
+        description: data.status === 'processing' 
+          ? `Started generating ${data.totalTargeted} questions in background`
+          : `Successfully generated ${data.totalGenerated} questions`,
       });
 
       // Refresh the questions list
@@ -372,11 +375,11 @@ export default function QuestionManagement() {
 
   // Auto-generate questions on component mount if no questions exist
   useEffect(() => {
-    if (!loading && questions.length === 0 && subjects.length > 0) {
+    if (!loading && questions.length === 0 && subjects.length > 0 && !isGenerating) {
       console.log('No questions found, auto-generating...');
-      handleGenerateQuestions();
+      handleGenerateQuestions(false);
     }
-  }, [loading, questions.length, subjects.length]);
+  }, [loading, questions.length, subjects.length, isGenerating]);
 
   const filteredQuestions = questions.filter(question => {
     const matchesSearch = question.question_text.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -597,57 +600,89 @@ export default function QuestionManagement() {
           <p className="text-slate-400">Create, upload, and manage examination questions</p>
         </div>
         
-        <div className="flex space-x-3">
-          <Button 
-            onClick={handleGenerateQuestions}
-            disabled={isGenerating || loading}
-            className="bg-purple-600 hover:bg-purple-700"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <FileText className="w-4 h-4 mr-2" />
-                Generate 100 Questions/Subject
-              </>
-            )}
-          </Button>
-
-          <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Upload className="w-4 h-4 mr-2" />
-                Bulk Upload
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[800px]">
-              <DialogHeader>
-                <DialogTitle>Bulk Upload Questions</DialogTitle>
-              </DialogHeader>
-              <SimpleBulkUpload 
-                subjects={subjects} 
-                onUploadComplete={() => {
-                  setIsBulkUploadOpen(false);
-                  fetchData();
-                }} 
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Label className="text-white">Questions per subject:</Label>
+              <Input
+                type="number"
+                min="50"
+                max="5000"
+                step="50"
+                value={questionsPerSubject}
+                onChange={(e) => setQuestionsPerSubject(Number(e.target.value))}
+                className="w-24 bg-slate-700 border-slate-600 text-white"
               />
-            </DialogContent>
-          </Dialog>
+            </div>
+            
+            <Button 
+              onClick={() => handleGenerateQuestions(false)}
+              disabled={isGenerating || loading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Generate Questions
+                </>
+              )}
+            </Button>
 
-          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-green-600 hover:bg-green-700">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Question
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[700px]">
-              <DialogHeader>
-                <DialogTitle>Create New Question</DialogTitle>
-              </DialogHeader>
+            <Button 
+              onClick={() => handleGenerateQuestions(true)}
+              disabled={isGenerating || loading}
+              variant="destructive"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Clearing & Generating...
+                </>
+              ) : (
+                <>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Clear & Regenerate All
+                </>
+              )}
+            </Button>
+
+            <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Bulk Upload
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[800px]">
+                <DialogHeader>
+                  <DialogTitle>Bulk Upload Questions</DialogTitle>
+                </DialogHeader>
+                <SimpleBulkUpload 
+                  subjects={subjects} 
+                  onUploadComplete={() => {
+                    setIsBulkUploadOpen(false);
+                    fetchData();
+                  }} 
+                />
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-green-600 hover:bg-green-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Question
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[700px]">
+                <DialogHeader>
+                  <DialogTitle>Create New Question</DialogTitle>
+                </DialogHeader>
               <div className="space-y-4 max-h-[70vh] overflow-y-auto">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -678,8 +713,9 @@ export default function QuestionManagement() {
                         <SelectItem value="FILL_IN">Fill in the Blank</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
-                </div>
+          </div>
+        </div>
+      </div>
 
                 <div>
                   <Label htmlFor="question">Question Text</Label>
@@ -792,9 +828,9 @@ export default function QuestionManagement() {
                     Cancel
                   </Button>
                 </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
 
