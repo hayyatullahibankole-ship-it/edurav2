@@ -44,6 +44,26 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
     errors: string[];
   } | null>(null);
 
+  // Debug logging
+  console.log('SimpleBulkUpload component loaded');
+  console.log('Subjects prop:', subjects);
+
+  if (!subjects) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-slate-400">Loading subjects...</p>
+      </div>
+    );
+  }
+
+  if (subjects.length === 0) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-slate-400">No subjects available. Please create subjects first.</p>
+      </div>
+    );
+  }
+
   const parseQuestionsText = (text: string): any[] => {
     const lines = text.trim().split('\n').filter(line => line.trim());
     const questions = [];
