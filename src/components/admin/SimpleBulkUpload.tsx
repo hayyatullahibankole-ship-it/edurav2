@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Upload, 
   CheckCircle, 
@@ -51,7 +52,7 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
   if (!subjects) {
     return (
       <div className="p-4 text-center">
-        <p className="text-slate-400">Loading subjects...</p>
+        <p className="text-muted-foreground">Loading subjects...</p>
       </div>
     );
   }
@@ -59,7 +60,7 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
   if (subjects.length === 0) {
     return (
       <div className="p-4 text-center">
-        <p className="text-slate-400">No subjects available. Please create subjects first.</p>
+        <p className="text-muted-foreground">No subjects available. Please create subjects first.</p>
       </div>
     );
   }
@@ -417,17 +418,17 @@ Explanation: Capitalism is an economic system characterized by private ownership
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <Card className="h-full flex flex-col">
       {/* Static Header */}
-      <div className="flex-shrink-0 p-6 border-b border-slate-700">
+      <CardHeader className="flex-shrink-0 border-b">
         <div className="flex items-center gap-3 mb-4">
           <Sparkles className="h-6 w-6 text-accent" />
-          <h3 className="text-xl font-bold text-white">WAEC/JAMB Question Import</h3>
+          <CardTitle className="text-xl">WAEC/JAMB Question Import</CardTitle>
         </div>
         
-        <Alert className="border-green-600/20 bg-green-950/20">
+        <Alert className="border-accent/20 bg-accent/5">
           <CheckCircle className="h-4 w-4" />
-          <AlertDescription className="text-slate-300">
+          <AlertDescription>
             <div className="space-y-3">
               <p className="font-medium">✅ Manual Upload is the Best Approach</p>
               <p className="text-sm">For 10,000+ authentic WAEC/JAMB questions, manual bulk upload ensures:</p>
@@ -437,199 +438,192 @@ Explanation: Capitalism is an economic system characterized by private ownership
                 <li>• <strong>Proper Quality:</strong> Each question manually verified</li>
                 <li>• <strong>Fast Processing:</strong> Upload thousands at once</li>
               </ul>
-              <div className="mt-2 p-2 bg-slate-800/50 rounded text-xs">
+              <div className="mt-2 p-2 bg-muted rounded text-xs">
                 <strong>💡 Pro Tip:</strong> This upload will clear ALL existing questions first to prevent any duplicates, then upload your fresh content.
               </div>
             </div>
           </AlertDescription>
         </Alert>
-      </div>
+      </CardHeader>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="space-y-6">
-          <Alert className="border-yellow-600/20 bg-yellow-950/20">
-            <ExternalLink className="h-4 w-4" />
-            <AlertDescription className="text-slate-300">
-              <div className="space-y-2">
-                <p className="font-medium">Sources for Authentic Past Questions:</p>
-                <ul className="text-sm space-y-1">
-                  <li>• <strong>WAEC:</strong> Official WAEC website (waec.org.ng) - Past Question Papers</li>
-                  <li>• <strong>JAMB:</strong> Official JAMB website (jamb.gov.ng) - Past Questions & Answers</li>
-                  <li>• <strong>Libraries:</strong> University/School libraries with archived question papers</li>
-                  <li>• <strong>Educational Publishers:</strong> Macmillan, Longman, Evans past question books</li>
-                  <li>• <strong>Online Platforms:</strong> MySchool, Prepclass, Edudelight past questions</li>
-                </ul>
-                <div className="mt-2 p-2 bg-slate-800/50 rounded text-xs">
-                  <strong>⚠️ Important:</strong> Always verify questions are from official sources. 
-                  Ensure you have proper licensing for commercial use of past questions.
-                </div>
-              </div>
-            </AlertDescription>
-          </Alert>
-
-          {/* Upload Method Tabs */}
-          <Tabs defaultValue="text" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-slate-700">
-              <TabsTrigger value="text" className="text-white">Text Format</TabsTrigger>
-              <TabsTrigger value="csv" className="text-white">CSV File</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="text" className="space-y-4">
-              <div>
-                <Label className="text-white">Questions Text</Label>
-                <div className="mt-2">
-                  <Textarea
-                    value={questionsText}
-                    onChange={(e) => setQuestionsText(e.target.value)}
-                    placeholder="Paste your questions here in the format shown in the template..."
-                    className="bg-slate-700 border-slate-600 text-white min-h-[300px]"
-                    disabled={isUploading}
-                  />
-                </div>
-                {questionsText && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-400" />
-                    <span className="text-sm text-slate-300">
-                      {questionsText.split('\n').filter(line => line.match(/^\d+[.)]\s*/) || line.includes('?')).length} questions detected
-                    </span>
+      <CardContent className="flex-1 p-0">
+        <ScrollArea className="h-full">
+          <div className="p-6 space-y-6">
+            <Alert className="border-warning/20 bg-warning/5">
+              <ExternalLink className="h-4 w-4" />
+              <AlertDescription>
+                <div className="space-y-2">
+                  <p className="font-medium">Sources for Authentic Past Questions:</p>
+                  <ul className="text-sm space-y-1">
+                    <li>• <strong>WAEC:</strong> Official WAEC website (waec.org.ng) - Past Question Papers</li>
+                    <li>• <strong>JAMB:</strong> Official JAMB website (jamb.gov.ng) - Past Questions & Answers</li>
+                    <li>• <strong>Libraries:</strong> University/School libraries with archived question papers</li>
+                    <li>• <strong>Educational Publishers:</strong> Macmillan, Longman, Evans past question books</li>
+                    <li>• <strong>Online Platforms:</strong> MySchool, Prepclass, Edudelight past questions</li>
+                  </ul>
+                  <div className="mt-2 p-2 bg-muted rounded text-xs">
+                    <strong>⚠️ Important:</strong> Always verify questions are from official sources. 
+                    Ensure you have proper licensing for commercial use of past questions.
                   </div>
-                )}
-              </div>
+                </div>
+              </AlertDescription>
+            </Alert>
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Upload Method Tabs */}
+            <Tabs defaultValue="text" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="text">Text Format</TabsTrigger>
+                <TabsTrigger value="csv">CSV File</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="text" className="space-y-4">
+                <div className="grid grid-cols-2 gap-2 mb-4">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={copyWAECTemplate}
-                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                    className="text-xs"
                   >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy WAEC Format Template
+                    <Copy className="h-3 w-3 mr-1" />
+                    Copy WAEC Template
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={copyJAMBTemplate}
-                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                    className="text-xs"
                   >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy JAMB Format Template
+                    <Copy className="h-3 w-3 mr-1" />
+                    Copy JAMB Template
                   </Button>
                 </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="csv" className="space-y-4">
-              <div>
-                <Label className="text-white">CSV File Upload</Label>
-                <div className="mt-2">
-                  <input
-                    id="csvFileInput"
-                    type="file"
-                    accept=".csv"
-                    onChange={handleFileUpload}
-                    className="block w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                    disabled={isUploading}
+                
+                <div className="space-y-3">
+                  <Label htmlFor="questionsText">Questions (Text Format)</Label>
+                  <Textarea
+                    id="questionsText"
+                    placeholder="Paste your WAEC/JAMB questions here in the format shown above..."
+                    value={questionsText}
+                    onChange={(e) => setQuestionsText(e.target.value)}
+                    className="min-h-[300px]"
                   />
                 </div>
-                {uploadFile && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-400" />
-                    <span className="text-sm text-slate-300">
-                      File selected: {uploadFile.name} ({(uploadFile.size / 1024).toFixed(1)} KB)
-                    </span>
-                  </div>
-                )}
-                <div className="text-xs text-slate-400 mt-2">
-                  <p><strong>CSV Format:</strong> Question,OptionA,OptionB,OptionC,OptionD,CorrectAnswer,Explanation</p>
-                  <p>Correct answer can be A/B/C/D or 0/1/2/3</p>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          {/* Subject Selection */}
-          <div>
-            <Label className="text-white">Subject</Label>
-            <Select value={selectedSubject} onValueChange={setSelectedSubject} disabled={isUploading}>
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                <SelectValue placeholder="Select a subject" />
-              </SelectTrigger>
-              <SelectContent>
-                {subjects.map((subject) => (
-                  <SelectItem key={subject.id} value={subject.id}>
-                    {subject.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Upload Progress */}
-          {isUploading && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin text-accent" />
-                <span className="text-sm text-slate-300">Uploading questions...</span>
-              </div>
-              <Progress value={uploadProgress} className="bg-slate-700" />
-            </div>
-          )}
-
-          {/* Upload Results */}
-          {uploadResults && (
-            <Alert className={uploadResults.success > 0 ? "border-green-600/20 bg-green-950/20" : "border-red-600/20 bg-red-950/20"}>
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription className="text-slate-300">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-4">
-                    <Badge variant="default" className="bg-green-600">
-                      {uploadResults.success} Successful
-                    </Badge>
-                    {uploadResults.failed > 0 && (
-                      <Badge variant="destructive">
-                        {uploadResults.failed} Failed
-                      </Badge>
+              </TabsContent>
+              
+              <TabsContent value="csv" className="space-y-4">
+                <Alert className="border-accent/20 bg-accent/5">
+                  <Download className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p className="font-medium">CSV Format Requirements:</p>
+                      <p className="text-sm">Your CSV should have these columns (case insensitive):</p>
+                      <ul className="text-sm space-y-1 ml-4">
+                        <li>• <strong>question</strong> or <strong>question_text</strong></li>
+                        <li>• <strong>option_a, option_b, option_c, option_d</strong> (or choice_a, choice_b, etc.)</li>
+                        <li>• <strong>correct_answer</strong> (A, B, C, D or 0, 1, 2, 3)</li>
+                        <li>• <strong>explanation</strong> (optional)</li>
+                      </ul>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+                
+                <div className="space-y-3">
+                  <Label htmlFor="csvFile">Upload CSV File</Label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      id="csvFileInput"
+                      type="file"
+                      accept=".csv"
+                      onChange={handleFileUpload}
+                      className="flex-1 p-3 border rounded-lg bg-background"
+                    />
+                    {uploadFile && (
+                      <Badge variant="secondary">{uploadFile.name}</Badge>
                     )}
                   </div>
-                  {uploadResults.errors.length > 0 && (
-                    <details className="mt-2">
-                      <summary className="cursor-pointer text-sm">View Errors</summary>
-                      <div className="mt-1 text-xs space-y-1">
-                        {uploadResults.errors.map((error, index) => (
-                          <div key={index} className="text-red-300">{error}</div>
-                        ))}
-                      </div>
-                    </details>
-                  )}
                 </div>
-              </AlertDescription>
-            </Alert>
-          )}
+              </TabsContent>
+            </Tabs>
 
-          {/* Format Instructions */}
-          <div className="text-xs text-slate-400 space-y-2">
-            <div>
-              <p><strong>Supported Text Formats:</strong></p>
-              <p>• Standard WAEC/JAMB format with numbered questions</p>
-              <p>• Options labeled as A), B), C), D) or A., B., C., D.</p>
-              <p>• Answer specified as "Answer: A" or "Correct: A"</p>
-              <p>• Optional explanations as "Explanation: [detailed solution]"</p>
-              <p>• Leave blank lines between questions for better parsing</p>
+            {/* Subject Selection */}
+            <div className="space-y-3">
+              <Label>Select Subject</Label>
+              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a subject" />
+                </SelectTrigger>
+                <SelectContent>
+                  {subjects.map((subject) => (
+                    <SelectItem key={subject.id} value={subject.id}>
+                      {subject.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Upload Progress */}
+            {isUploading && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Processing questions...</span>
+                  <span>{Math.round(uploadProgress)}%</span>
+                </div>
+                <Progress value={uploadProgress} />
+              </div>
+            )}
+
+            {/* Upload Results */}
+            {uploadResults && (
+              <Alert className={uploadResults.success > 0 ? "border-accent/20 bg-accent/5" : "border-destructive/20 bg-destructive/5"}>
+                <CheckCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="space-y-2">
+                    <div className="flex gap-4">
+                      <Badge variant="secondary">✅ Success: {uploadResults.success}</Badge>
+                      {uploadResults.failed > 0 && (
+                        <Badge variant="destructive">❌ Failed: {uploadResults.failed}</Badge>
+                      )}
+                    </div>
+                    
+                    {uploadResults.errors.length > 0 && (
+                      <details className="mt-3">
+                        <summary className="cursor-pointer font-medium text-sm">Show Errors ({uploadResults.errors.length})</summary>
+                        <div className="mt-1 text-xs space-y-1">
+                          {uploadResults.errors.map((error, index) => (
+                            <div key={index} className="text-destructive">{error}</div>
+                          ))}
+                        </div>
+                      </details>
+                    )}
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Format Instructions */}
+            <div className="text-xs text-muted-foreground space-y-2">
+              <div>
+                <p><strong>Supported Text Formats:</strong></p>
+                <p>• Standard WAEC/JAMB format with numbered questions</p>
+                <p>• Options labeled as A), B), C), D) or A., B., C., D.</p>
+                <p>• Answer specified as "Answer: A" or "Correct: A"</p>
+                <p>• Optional explanations as "Explanation: [detailed solution]"</p>
+                <p>• Leave blank lines between questions for better parsing</p>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </ScrollArea>
+      </CardContent>
 
       {/* Static Footer with Action Buttons */}
-      <div className="flex-shrink-0 p-6 border-t border-slate-700 bg-slate-800">
+      <div className="flex-shrink-0 p-6 border-t bg-card">
         <div className="flex gap-3">
           <Button
             onClick={handleUpload}
             disabled={(!questionsText.trim() && !uploadFile) || !selectedSubject || isUploading}
-            className="flex-1 bg-blue-600 hover:bg-blue-700"
+            className="flex-1"
           >
             {isUploading ? (
               <>
@@ -648,6 +642,6 @@ Explanation: Capitalism is an economic system characterized by private ownership
           </Button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
