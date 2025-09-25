@@ -426,7 +426,7 @@ const Consultation = () => {
                 <Calendar className="mr-2 h-5 w-5" />
                 Book Consultation
               </Button>
-              <Link to="/pricing">
+              <Link to="/payment">
                 <Button size="lg" variant="outline" className="bg-card text-foreground border-primary-foreground hover:bg-card/90">
                   View Pricing Plans
                 </Button>

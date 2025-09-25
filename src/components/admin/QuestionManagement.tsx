@@ -338,7 +338,7 @@ export default function QuestionManagement() {
         <div className="flex space-x-3">
           <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="border-slate-600">
+              <Button variant="outline">
                 <Upload className="w-4 h-4 mr-2" />
                 Bulk Upload
               </Button>
@@ -347,69 +347,13 @@ export default function QuestionManagement() {
               <DialogHeader>
                 <DialogTitle>Bulk Upload Questions</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="file">Upload CSV/Excel File</Label>
-                  <Input
-                    id="file"
-                    type="file"
-                    accept=".csv,.xlsx,.xls"
-                    onChange={handleFileUpload}
-                    className="mt-1"
-                  />
-                  <p className="text-sm text-slate-500 mt-1">
-                    Expected format: Question, Option A, Option B, Option C, Option D, Option E, Correct (0-4), Explanation, Subject, Difficulty (1-3), Tags
-                  </p>
-                </div>
-
-                {bulkUpload.preview.length > 0 && (
-                  <div>
-                    <h4 className="font-medium mb-2">Preview (First 10 rows)</h4>
-                    <div className="max-h-64 overflow-auto border rounded">
-                      <table className="w-full text-sm">
-                        <tbody>
-                          {bulkUpload.preview.map((row, index) => (
-                            <tr key={index} className={index === 0 ? 'bg-slate-100 font-medium' : ''}>
-                              {row.map((cell, cellIndex) => (
-                                <td key={cellIndex} className="p-2 border-r truncate max-w-32">
-                                  {cell}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-
-                {bulkUpload.errors.length > 0 && (
-                  <Alert variant="destructive">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                      <div>Validation Errors:</div>
-                      <ul className="mt-2 list-disc list-inside">
-                        {bulkUpload.errors.map((error, index) => (
-                          <li key={index} className="text-sm">{error}</li>
-                        ))}
-                      </ul>
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                <div className="flex gap-3 pt-4">
-                  <Button 
-                    onClick={processBulkUpload} 
-                    disabled={loading || !bulkUpload.file || bulkUpload.errors.length > 0}
-                    className="flex-1"
-                  >
-                    {loading ? 'Processing...' : 'Upload Questions'}
-                  </Button>
-                  <Button variant="outline" onClick={() => setIsBulkUploadOpen(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              </div>
+              <SimpleBulkUpload 
+                subjects={subjects} 
+                onUploadComplete={() => {
+                  setIsBulkUploadOpen(false);
+                  fetchData();
+                }} 
+              />
             </DialogContent>
           </Dialog>
 

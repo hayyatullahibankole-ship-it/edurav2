@@ -495,11 +495,11 @@ const PricingManager = () => {
         <div className="flex items-center gap-3">
           <Button 
             variant="outline" 
-            onClick={() => window.open('/pricing', '_blank')}
+            onClick={() => window.open('/payment', '_blank')}
             className="border-slate-600 text-slate-300 hover:bg-slate-700"
           >
             <ExternalLink className="w-4 h-4 mr-2" />
-            View Public Pricing
+            View Public Payment Page
           </Button>
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>

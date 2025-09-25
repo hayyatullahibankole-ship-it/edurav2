@@ -20,7 +20,7 @@ const Footer = () => {
     { label: 'Practice Tests', href: '/practice' },
     { label: 'Resources', href: '/resources' },
     { label: 'Consultation', href: '/consultation' },
-    { label: 'Pricing', href: '/pricing' }
+    { label: 'Pricing', href: '/payment' }
   ];
 
   const subjects = [

@@ -455,7 +455,7 @@ const Dashboard = () => {
                           : 'No expiration'
                         }
                       </p>
-                      <Link to="/pricing">
+                      <Link to="/payment">
                         <Button variant="outline" className="w-full">
                           {subscription ? 'Manage Subscription' : 'Upgrade Plan'}
                         </Button>

@@ -226,7 +226,7 @@ const Home = () => {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link to="/pricing">
+              <Link to="/payment">
                 <Button size="lg" variant="outline" className="bg-card text-foreground border-primary-foreground hover:bg-card/90">
                   View Pricing
                 </Button>

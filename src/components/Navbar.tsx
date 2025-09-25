@@ -34,7 +34,7 @@ const Navbar = () => {
             <Link to="/consultation" className="text-foreground hover:text-primary transition-colors">
               Consultation
             </Link>
-            <Link to="/pricing" className="text-foreground hover:text-primary transition-colors">
+            <Link to="/payment" className="text-foreground hover:text-primary transition-colors">
               Pricing
             </Link>
           </div>
@@ -108,7 +108,7 @@ const Navbar = () => {
                 Consultation
               </Link>
               <Link
-                to="/pricing"
+                to="/payment"
                 className="block px-3 py-2 text-foreground hover:bg-muted rounded-md"
                 onClick={() => setIsMenuOpen(false)}
               >

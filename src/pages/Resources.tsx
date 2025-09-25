@@ -84,8 +84,8 @@ const Resources = () => {
   const handleResourceAccess = async (resource: any) => {
     try {
       if (resource.access_level === 'premium') {
-        // Redirect to pricing
-        window.location.href = '/pricing';
+        // Redirect to payment page
+        window.location.href = '/payment';
         return;
       }
 

@@ -1,71 +1,84 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { CheckCircle, CreditCard, Shield, Zap } from 'lucide-react';
-import { createSubscriptionPayment } from '@/utils/paystack';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
-import Layout from '@/components/Layout';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Check, 
+  ArrowRight,
+  Star,
+  Crown,
+  Zap,
+  CreditCard,
+  Loader2
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { createSubscriptionPayment } from "@/utils/paystack";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Payment = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [selectedPlan, setSelectedPlan] = useState(searchParams.get('plan') || 'premium');
-  const [email, setEmail] = useState(user?.email || '');
+  const { user, userProfile } = useAuth();
+  const { toast } = useToast();
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const plans = {
-    basic: {
-      name: 'Basic Plan',
-      price: 2500,
-      duration: '1 Month',
-      features: [
-        'Access to practice tests',
-        'Basic study materials',
-        'Progress tracking',
-        'Email support'
-      ]
-    },
-    premium: {
-      name: 'Premium Plan',
-      price: 6000,
-      duration: '3 Months',
-      features: [
-        'Everything in Basic',
-        'Advanced practice tests',
-        'Video tutorials',
-        'Personalized study plan',
-        'Priority support',
-        'Performance analytics'
-      ]
-    },
-    pro: {
-      name: 'Pro Plan',
-      price: 10000,
-      duration: '6 Months',
-      features: [
-        'Everything in Premium',
-        'Unlimited practice tests',
-        'One-on-one tutoring sessions',
-        'Exam prediction insights',
-        'Mobile offline access',
-        '24/7 support'
-      ]
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const fetchPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('subscription_plans')
+        .select('*')
+        .eq('is_active', true)
+        .order('price', { ascending: true });
+
+      if (error) throw error;
+
+      // Process plans and add UI-specific data
+      const processedPlans = data.map((plan: any) => ({
+        ...plan,
+        displayPrice: plan.price === 0 ? '₦0' : `₦${plan.price.toLocaleString()}`,
+        period: plan.price === 0 ? 'forever' : `per ${Math.floor(plan.duration_days / 30) === 1 ? 'month' : Math.floor(plan.duration_days / 30) + ' months'}`,
+        icon: plan.price === 0 ? <Zap className="h-6 w-6" /> : 
+              plan.price < 3000 ? <Star className="h-6 w-6" /> : 
+              <Crown className="h-6 w-6" />,
+        popular: plan.name.toLowerCase().includes('premium'),
+        paystack: plan.price > 0,
+        cta: plan.price === 0 ? "Start Free" : `Choose ${plan.name}`
+      }));
+
+      setPlans(processedPlans);
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load pricing plans",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handlePayment = () => {
-    if (!email) {
-      toast.error('Please enter your email address');
+  const handlePaystackPayment = (planName: string, amount: number) => {
+    if (!user || !userProfile?.email) {
+      toast({
+        title: "Authentication Required", 
+        description: "Please login first to subscribe",
+        variant: "destructive"
+      });
       return;
     }
+    
+    createSubscriptionPayment(planName, userProfile.email, amount);
+  };
 
-    const plan = plans[selectedPlan as keyof typeof plans];
-    createSubscriptionPayment(selectedPlan, email, plan.price);
+  const yearlyDiscount = {
+    premium: "₦25,000", 
+    pro: "₦45,000"
   };
 
   useEffect(() => {
@@ -80,159 +93,195 @@ const Payment = () => {
     };
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
+          <p className="text-lg">Loading pricing plans...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Layout>
-      <div className="min-h-screen bg-background py-12">
-        <div className="container mx-auto px-4 max-w-4xl">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
-            <p className="text-muted-foreground text-lg">
-              Upgrade your learning experience with EduCore
+    <div className="min-h-screen bg-background">
+      {/* Hero Section */}
+      <section className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <Badge className="mb-4 bg-accent/10 text-accent border-accent/20">
+              💰 Affordable Plans
+            </Badge>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              Choose Your Success Plan
+            </h1>
+            <p className="text-xl mb-8 text-muted-foreground max-w-2xl mx-auto">
+              Flexible pricing designed for Nigerian students. Start free, upgrade when ready.
             </p>
           </div>
+        </div>
+      </section>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Plan Selection */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-primary" />
-                    Select Your Plan
-                  </CardTitle>
-                  <CardDescription>
-                    Choose the plan that best fits your learning needs
-                  </CardDescription>
+      {/* Pricing Cards */}
+      <section className="py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {plans.map((plan: any, index: number) => (
+              <Card 
+                key={index} 
+                className={`relative ${plan.popular ? 'border-accent shadow-lg scale-105' : ''} hover:shadow-lg transition-all`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-accent text-white">
+                      Most Popular
+                    </Badge>
+                  </div>
+                )}
+                
+                <CardHeader className="text-center pb-8">
+                  <div className={`mx-auto w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${
+                    plan.popular ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'
+                  }`}>
+                    {plan.icon}
+                  </div>
+                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                  <div className="mt-4">
+                    <span className="text-4xl font-bold">{plan.displayPrice}</span>
+                    <span className="text-muted-foreground">/{plan.period}</span>
+                  </div>
+                  <CardDescription className="mt-2">{plan.description}</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan}>
-                    {Object.entries(plans).map(([key, plan]) => (
-                      <div key={key} className="border rounded-lg p-4 space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value={key} id={key} />
-                          <Label htmlFor={key} className="flex-1 cursor-pointer">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <h3 className="font-semibold">{plan.name}</h3>
-                                <p className="text-sm text-muted-foreground">{plan.duration}</p>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-2xl font-bold text-primary">
-                                  ₦{plan.price.toLocaleString()}
-                                </div>
-                              </div>
-                            </div>
-                          </Label>
+                
+                <CardContent className="space-y-6">
+                  <div className="space-y-3">
+                    {Array.isArray(plan.features) ? plan.features.map((feature: string, idx: number) => (
+                      <div key={idx} className="flex items-center gap-3">
+                        <div className="bg-accent/10 rounded-full p-1">
+                          <Check className="h-4 w-4 text-accent" />
                         </div>
-                        {selectedPlan === key && (
-                          <div className="mt-3 pl-6">
-                            <ul className="space-y-1">
-                              {plan.features.map((feature, index) => (
-                                <li key={index} className="flex items-center gap-2 text-sm">
-                                  <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />
-                                  {feature}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
+                        <span className="text-sm">{feature}</span>
                       </div>
-                    ))}
-                  </RadioGroup>
+                    )) : (
+                      <div className="text-sm text-muted-foreground">
+                        {plan.description || "Features coming soon"}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {plan.name !== "Free" && plan.price > 0 && (
+                    <div className="pt-4 border-t">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Save with yearly billing:
+                      </p>
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <span className="font-semibold text-accent">
+                          {plan.name === "Premium" ? yearlyDiscount.premium : yearlyDiscount.pro}
+                        </span>
+                        <span className="text-sm text-muted-foreground ml-2">
+                          (2 months free!)
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {plan.paystack ? (
+                    <Button 
+                      onClick={() => handlePaystackPayment(plan.name, plan.price)}
+                      className={`w-full ${
+                        plan.popular 
+                          ? 'bg-accent hover:bg-accent/90' 
+                          : ''
+                      }`}
+                      variant={plan.popular ? 'default' : 'outline'}
+                      disabled={!user}
+                    >
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      {user ? `Subscribe with Paystack` : "Login to Subscribe"}
+                    </Button>
+                  ) : (
+                    <Link to={user ? "/dashboard" : "/auth"} className="block">
+                      <Button 
+                        className="w-full"
+                        variant="outline"
+                      >
+                        {user ? "Current Plan" : plan.cta}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  )}
                 </CardContent>
               </Card>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {/* Payment Details */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5 text-primary" />
-                    Payment Details
-                  </CardTitle>
-                  <CardDescription>
-                    Complete your subscription with secure payment
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-
-                  <div className="border-t pt-4 space-y-3">
-                    <div className="flex justify-between">
-                      <span>Plan</span>
-                      <span className="font-medium">
-                        {plans[selectedPlan as keyof typeof plans].name}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Duration</span>
-                      <span>{plans[selectedPlan as keyof typeof plans].duration}</span>
-                    </div>
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>Total</span>
-                      <span className="text-primary">
-                        ₦{plans[selectedPlan as keyof typeof plans].price.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-
-                  <Button 
-                    onClick={handlePayment} 
-                    className="w-full" 
-                    size="lg"
-                  >
-                    Pay with Paystack
-                  </Button>
-
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                    <Shield className="h-4 w-4" />
-                    Secured by Paystack
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Why Choose EduCore?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary" />
-                      Comprehensive WAEC & JAMB preparation
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary" />
-                      Expert-created content and practice tests
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary" />
-                      Progress tracking and analytics
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-primary" />
-                      24/7 customer support
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
+      {/* FAQ Section */}
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">
+              Frequently Asked Questions
+            </h2>
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Can I change my plan anytime?</h3>
+                <p className="text-muted-foreground">
+                  Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">What payment methods do you accept?</h3>
+                <p className="text-muted-foreground">
+                  We accept bank transfers, debit cards, and mobile money through Paystack and Flutterwave.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Is there a money-back guarantee?</h3>
+                <p className="text-muted-foreground">
+                  Yes! We offer a 7-day money-back guarantee if you're not satisfied with our platform.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Can I share my account with friends?</h3>
+                <p className="text-muted-foreground">
+                  Each account is for individual use only. We offer group discounts for schools and study groups.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </Layout>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-primary">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center text-primary-foreground">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Start Your Journey Today
+            </h2>
+            <p className="text-xl mb-8 opacity-90">
+              Join over 50,000 students who achieved their dream scores with Edura
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to={user ? "/payment?plan=premium" : "/auth"}>
+                <Button size="lg" variant="secondary">
+                  {user ? "Upgrade to Premium" : "Start Free Trial"}
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to="/demo">
+                <Button size="lg" variant="outline" className="bg-card text-foreground border-primary-foreground hover:bg-card/90">
+                  Try Demo First
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 };
 
