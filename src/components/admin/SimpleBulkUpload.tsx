@@ -418,7 +418,7 @@ Explanation: Capitalism is an economic system characterized by private ownership
   };
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col min-h-0">
       {/* Static Header */}
       <CardHeader className="flex-shrink-0 border-b">
         <div className="flex items-center gap-3 mb-4">
@@ -447,7 +447,7 @@ Explanation: Capitalism is an economic system characterized by private ownership
       </CardHeader>
 
       {/* Scrollable Content */}
-      <CardContent className="flex-1 p-0 overflow-hidden">
+      <CardContent className="flex-1 min-h-0 p-0 overflow-hidden">
         <ScrollArea className="h-full">
           <div className="p-6 space-y-6">
             <Alert className="border-warning/20 bg-warning/5">
