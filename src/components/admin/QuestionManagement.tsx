@@ -87,7 +87,7 @@ export default function QuestionManagement() {
         supabase.from('questions').select(`
           *,
           subjects(name, code)
-        `).order('created_at', { ascending: false }),
+        `).order('created_at', { ascending: false }).limit(5000),
         supabase.from('subjects').select('*').eq('is_active', true)
       ]);
 
@@ -427,12 +427,24 @@ export default function QuestionManagement() {
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Questions</p>
+                  <p className="text-sm text-muted-foreground">Total Questions (DB)</p>
+                  <p className="text-2xl font-bold text-primary">{questions.length}</p>
+                </div>
+                <BookOpen className="w-8 h-8 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Filtered Results</p>
                   <p className="text-2xl font-bold text-accent">{activeQuestions.length}</p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-accent" />
@@ -445,9 +457,9 @@ export default function QuestionManagement() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Subjects</p>
-                  <p className="text-2xl font-bold text-primary">{subjects.length}</p>
+                  <p className="text-2xl font-bold text-secondary">{subjects.length}</p>
                 </div>
-                <BookOpen className="w-8 h-8 text-primary" />
+                <BookOpen className="w-8 h-8 text-secondary" />
               </div>
             </CardContent>
           </Card>
@@ -456,14 +468,35 @@ export default function QuestionManagement() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Inactive Questions</p>
-                  <p className="text-2xl font-bold text-destructive">{inactiveQuestions.length}</p>
+                  <p className="text-sm text-muted-foreground">English Questions</p>
+                  <p className="text-2xl font-bold text-warning">{questions.filter(q => subjects.find(s => s.id === q.subject_id)?.name === 'English Language').length}</p>
                 </div>
-                <XCircle className="w-8 h-8 text-destructive" />
+                <AlertTriangle className="w-8 h-8 text-warning" />
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Subject Breakdown */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Questions by Subject (Database Totals)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {subjects.map(subject => {
+                const subjectQuestions = questions.filter(q => q.subject_id === subject.id);
+                return (
+                  <div key={subject.id} className="text-center p-3 border rounded-lg">
+                    <p className="font-medium text-sm">{subject.name}</p>
+                    <p className="text-2xl font-bold text-primary">{subjectQuestions.length}</p>
+                    <p className="text-xs text-muted-foreground">{subject.code}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Filters */}
         <Card>
