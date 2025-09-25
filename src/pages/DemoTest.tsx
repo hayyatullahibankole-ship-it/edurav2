@@ -119,7 +119,7 @@ const DemoTest = () => {
 
     // Navigate to signup page after demo
     setTimeout(() => {
-      navigate('/auth');
+      navigate('/');
     }, 2000);
   };
 
