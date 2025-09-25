@@ -17,7 +17,7 @@ import {
 const Footer = () => {
   const quickLinks = [
     { label: 'Home', href: '/' },
-    { label: 'Practice Tests', href: '/practice' },
+    { label: 'Practice Tests', href: '/demo' },
     { label: 'Resources', href: '/resources' },
     { label: 'Consultation', href: '/consultation' },
     { label: 'Pricing', href: '/payment' }

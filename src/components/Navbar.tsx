@@ -22,7 +22,7 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/practice" className="text-foreground hover:text-primary transition-colors">
+            <Link to="/demo" className="text-foreground hover:text-primary transition-colors">
               Practice Tests
             </Link>
             <Link to="/resources" className="text-foreground hover:text-primary transition-colors">
@@ -80,7 +80,7 @@ const Navbar = () => {
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-card rounded-lg mt-2 border border-border">
               <Link
-                to="/practice"
+                to="/demo"
                 className="block px-3 py-2 text-foreground hover:bg-muted rounded-md"
                 onClick={() => setIsMenuOpen(false)}
               >
