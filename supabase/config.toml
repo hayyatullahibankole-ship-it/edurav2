@@ -1,1 +1,23 @@
 project_id = "zqapbmllkywsuywpfava"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[functions.create-admin]
+verify_jwt = false
+
+[functions.get-rank]
+verify_jwt = false
+
+[functions.verify-payment]
+verify_jwt = false
+
+[functions.exam-api]
+verify_jwt = true
+
+[functions.generate-questions]
+verify_jwt = true

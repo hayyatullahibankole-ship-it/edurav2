@@ -70,6 +70,7 @@ export default function QuestionManagement() {
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
   const [editForm, setEditForm] = useState<any>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const [newQuestion, setNewQuestion] = useState({
     question_text: '',
@@ -339,6 +340,36 @@ export default function QuestionManagement() {
     }
   };
 
+  const handleGenerateQuestions = async () => {
+    try {
+      setIsGenerating(true);
+      
+      const { data, error } = await supabase.functions.invoke('generate-questions', {
+        body: {}
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Successfully generated ${data.totalQuestions} questions across ${data.subjects.length} subjects`,
+      });
+
+      // Refresh the questions list
+      fetchData();
+      
+    } catch (error) {
+      console.error('Error generating questions:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to generate questions. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const filteredQuestions = questions.filter(question => {
     const matchesSearch = question.question_text.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          question.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -559,6 +590,24 @@ export default function QuestionManagement() {
         </div>
         
         <div className="flex space-x-3">
+          <Button 
+            onClick={handleGenerateQuestions}
+            disabled={isGenerating || loading}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <FileText className="w-4 h-4 mr-2" />
+                Generate 500 Questions/Subject
+              </>
+            )}
+          </Button>
+
           <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">
