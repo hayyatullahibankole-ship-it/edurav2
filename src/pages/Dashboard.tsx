@@ -91,16 +91,22 @@ const Dashboard = () => {
         }, 0) / 60
       );
 
-      // Calculate user rank based on average score
-      const totalStudents = 500; // Mock data
+      // Live rank via edge function based on your latest attempt
       let rank = 0;
-      if (averageScore > 0) {
-        // Simple ranking: higher scores get better ranks
-        if (averageScore >= 90) rank = Math.floor(Math.random() * 10) + 1;
-        else if (averageScore >= 80) rank = Math.floor(Math.random() * 25) + 10;
-        else if (averageScore >= 70) rank = Math.floor(Math.random() * 50) + 35;
-        else if (averageScore >= 60) rank = Math.floor(Math.random() * 100) + 85;
-        else rank = Math.floor(Math.random() * 200) + 185;
+      let totalStudents = 0;
+      const latestAttemptId = resultsWithScores[0]?.id;
+      if (latestAttemptId) {
+        try {
+          const { data: rankData, error: rankError } = await supabase.functions.invoke('get-rank', {
+            body: { attemptId: latestAttemptId },
+          });
+          if (!rankError && rankData) {
+            rank = rankData.rank || 0;
+            totalStudents = rankData.total || 0;
+          }
+        } catch (e) {
+          console.error('Failed to fetch live rank', e);
+        }
       }
 
       setStats({

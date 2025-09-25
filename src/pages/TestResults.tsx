@@ -90,7 +90,7 @@ const TestResults = () => {
         const examDuration = proctoringData.duration_minutes || 120;
         
         // Transform the data to match expected format
-        const transformedResults = {
+        const transformedResults: any = {
           score: Math.round(resultData.percentage || 0),
           totalQuestions: resultData.total_questions,
           correctAnswers: resultData.correct_answers,
@@ -100,11 +100,62 @@ const TestResults = () => {
           timeAllotted: examDuration,
           subjects: resultData.subject_breakdown ? Object.entries(resultData.subject_breakdown as any).map(([name, data]: [string, any]) => ({
             name,
-            score: Math.round(data.percentage || 0),
-            total: data.total || 0,
-            correct: data.correct || 0
+            score: Math.round((data?.percentage ?? ((data?.correct ?? 0) / Math.max(1, data?.total ?? 0)) * 100) || 0),
+            total: data?.total || 0,
+            correct: data?.correct || 0
           })) : []
         };
+
+        // Fallback: build subject breakdown from attempt_answers if missing
+        if (!transformedResults.subjects || transformedResults.subjects.length === 0) {
+          try {
+            const { data: answers } = await supabase
+              .from('attempt_answers')
+              .select('question_id,is_correct')
+              .eq('attempt_id', attemptId);
+
+            const questionIds = (answers || []).map((a: any) => a.question_id).filter(Boolean);
+            if (questionIds.length > 0) {
+              const { data: questions } = await supabase
+                .from('questions')
+                .select('id, subject_id')
+                .in('id', questionIds);
+
+              const subjectIds = Array.from(new Set((questions || []).map((q: any) => q.subject_id).filter(Boolean)));
+              const { data: subjects } = await supabase
+                .from('subjects')
+                .select('id, name')
+                .in('id', subjectIds);
+
+              const qById: Record<string, any> = {};
+              (questions || []).forEach((q: any) => { qById[q.id] = q; });
+              const subjectNameById: Record<string, string> = {};
+              (subjects || []).forEach((s: any) => { subjectNameById[s.id] = s.name; });
+
+              const stats: Record<string, { total: number; correct: number; percentage: number }> = {};
+              (answers || []).forEach((a: any) => {
+                const subjId = qById[a.question_id]?.subject_id;
+                const subjName = subjectNameById[subjId] || 'General';
+                if (!stats[subjName]) stats[subjName] = { total: 0, correct: 0, percentage: 0 };
+                stats[subjName].total += 1;
+                if (a.is_correct) stats[subjName].correct += 1;
+              });
+              Object.keys(stats).forEach((key) => {
+                const s = stats[key];
+                s.percentage = Math.round((s.correct / Math.max(1, s.total)) * 100);
+              });
+
+              transformedResults.subjects = Object.entries(stats).map(([name, data]: [string, any]) => ({
+                name,
+                score: data.percentage,
+                total: data.total,
+                correct: data.correct
+              }));
+            }
+          } catch (e) {
+            console.warn('Fallback subject breakdown failed:', e);
+          }
+        }
         
         setResults(transformedResults);
       }
@@ -440,7 +491,7 @@ const TestResults = () => {
                           ))}
                         </div>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => navigate(`/resources?subject=${encodeURIComponent(rec.subject)}`)}>
                         Start Studying {rec.subject}
                       </Button>
                     </div>
