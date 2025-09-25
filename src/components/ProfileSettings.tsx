@@ -16,7 +16,10 @@ import {
   Shield,
   Bell,
   Eye,
-  EyeOff
+  EyeOff,
+  Camera,
+  Save,
+  Trash2
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,9 +38,12 @@ export default function ProfileSettings() {
     phone: '',
     address: '',
     state: '',
+    country: '',
     date_of_birth: '',
     two_fa_enabled: false
   });
+  const [profileImage, setProfileImage] = useState<string>('');
+  const [imageUploading, setImageUploading] = useState(false);
 
   useEffect(() => {
     if (userProfile) {
@@ -48,11 +54,56 @@ export default function ProfileSettings() {
         phone: userProfile.phone || '',
         address: userProfile.address || '',
         state: userProfile.state || '',
+        country: userProfile.country || 'Nigeria',
         date_of_birth: userProfile.date_of_birth || '',
         two_fa_enabled: userProfile.two_fa_enabled || false
       });
+      setProfileImage(userProfile.profile_image_url || '');
     }
   }, [userProfile]);
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImageUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}_${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(`avatars/${fileName}`, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(`avatars/${fileName}`);
+
+      setProfileImage(data.publicUrl);
+      
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ profile_image_url: data.publicUrl })
+        .eq('auth_user_id', user?.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Profile image updated",
+        description: "Your profile picture has been updated successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error uploading image",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setImageUploading(false);
+    }
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +118,7 @@ export default function ProfileSettings() {
           phone: formData.phone,
           address: formData.address,
           state: formData.state,
+          country: formData.country,
           date_of_birth: formData.date_of_birth,
           two_fa_enabled: formData.two_fa_enabled,
           updated_at: new Date().toISOString()
@@ -119,12 +171,28 @@ export default function ProfileSettings() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            <Avatar className="w-20 h-20">
-              <AvatarImage src={userProfile?.profile_image_url} />
-              <AvatarFallback className="text-lg">
-                {formData.first_name?.[0]}{formData.last_name?.[0]}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="w-20 h-20">
+                <AvatarImage src={profileImage || userProfile?.profile_image_url} />
+                <AvatarFallback className="text-lg">
+                  {formData.first_name?.[0]}{formData.last_name?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+                id="avatar-upload"
+                disabled={imageUploading}
+              />
+              <label
+                htmlFor="avatar-upload"
+                className="absolute bottom-0 right-0 bg-primary rounded-full p-1.5 cursor-pointer hover:bg-primary/80 transition-colors"
+              >
+                <Camera className="h-4 w-4 text-primary-foreground" />
+              </label>
+            </div>
             <div className="flex-1">
               <CardTitle className="text-2xl">
                 {formData.first_name} {formData.last_name}
@@ -205,7 +273,7 @@ export default function ProfileSettings() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="state">State</Label>
                 <Input
@@ -213,6 +281,15 @@ export default function ProfileSettings() {
                   value={formData.state}
                   onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                   placeholder="Enter your state"
+                />
+              </div>
+              <div>
+                <Label htmlFor="country">Country</Label>
+                <Input
+                  id="country"
+                  value={formData.country}
+                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                  placeholder="Enter your country"
                 />
               </div>
               <div>
@@ -237,9 +314,15 @@ export default function ProfileSettings() {
               />
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Updating..." : "Update Profile"}
-            </Button>
+            <div className="flex gap-3">
+              <Button type="submit" disabled={loading || imageUploading} className="flex-1">
+                <Save className="h-4 w-4 mr-2" />
+                {loading ? "Updating..." : "Save Changes"}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => window.location.reload()}>
+                Reset
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -271,7 +354,7 @@ export default function ProfileSettings() {
             />
           </div>
 
-          <div className="border-t pt-6">
+          <div className="border-t pt-6 space-y-6">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium">Password</h4>
@@ -281,6 +364,26 @@ export default function ProfileSettings() {
               </div>
               <Button variant="outline" onClick={handlePasswordReset}>
                 Reset Password
+              </Button>
+            </div>
+            
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div>
+                <h4 className="font-medium text-red-600">Delete Account</h4>
+                <p className="text-sm text-muted-foreground">
+                  Permanently delete your account and all data
+                </p>
+              </div>
+              <Button variant="destructive" onClick={() => {
+                if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+                  toast({
+                    title: "Account deletion requested",
+                    description: "Please contact support to complete account deletion.",
+                  });
+                }
+              }}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Account
               </Button>
             </div>
           </div>

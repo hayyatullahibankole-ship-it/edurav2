@@ -228,14 +228,41 @@ const PricingManager = () => {
         };
       });
 
+      // Real-time revenue tracking
+      const liveRevenue = transactions
+        .filter(t => {
+          const transDate = new Date(t.created_at);
+          const today = new Date();
+          return transDate.toDateString() === today.toDateString() && t.status === 'SUCCESS';
+        })
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+
+      // Subscription growth rate
+      const last30Days = subscriptions.filter(s => {
+        const subDate = new Date(s.created_at);
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        return subDate >= thirtyDaysAgo;
+      });
+
+      // Churn rate calculation
+      const churnRate = expiredSubscriptions.length > 0 
+        ? Math.round((expiredSubscriptions.length / subscriptions.length) * 100) 
+        : 0;
       setAnalytics({
         totalRevenue,
+        liveRevenue,
         activeSubscriptions: activeSubscriptions.length,
         expiredSubscriptions: expiredSubscriptions.length,
+        newSubscriptions: last30Days.length,
         conversionRate: subscriptions.length > 0 ? Math.round((activeSubscriptions.length / subscriptions.length) * 100) : 0,
+        churnRate,
         revenueByPlan,
         monthlyRevenue,
-        averageOrderValue: transactions.length > 0 ? totalRevenue / transactions.filter(t => t.status === 'SUCCESS').length : 0
+        averageOrderValue: transactions.length > 0 ? totalRevenue / transactions.filter(t => t.status === 'SUCCESS').length : 0,
+        revenueGrowth: monthlyRevenue.length > 1 
+          ? Math.round(((monthlyRevenue[monthlyRevenue.length - 1].revenue - monthlyRevenue[monthlyRevenue.length - 2].revenue) / monthlyRevenue[monthlyRevenue.length - 2].revenue) * 100) 
+          : 0
       });
     } catch (error) {
       console.error('Error calculating analytics:', error);

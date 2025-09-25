@@ -6,17 +6,30 @@ import {
   ArrowRight,
   Star,
   Crown,
-  Zap
+  Zap,
+  CreditCard
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { createSubscriptionPayment } from "@/utils/paystack";
 
 const Pricing = () => {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
+  
+  const handlePaystackPayment = (planName: string, amount: number) => {
+    if (!user || !userProfile?.email) {
+      alert("Please login first to subscribe");
+      return;
+    }
+    
+    createSubscriptionPayment(planName, userProfile.email, amount);
+  };
+  
   const plans = [
     {
       name: "Free",
-      price: "₦0",
+      price: 0,
+      displayPrice: "₦0",
       period: "forever",
       description: "Perfect for getting started",
       icon: <Zap className="h-6 w-6" />,
@@ -34,11 +47,12 @@ const Pricing = () => {
       ],
       popular: false,
       cta: "Start Free",
-      href: "/signup"
+      paystack: false
     },
     {
       name: "Premium",
-      price: "₦2,500",
+      price: 2500,
+      displayPrice: "₦2,500",
       period: "per month",
       description: "Most popular for serious students",
       icon: <Star className="h-6 w-6" />,
@@ -55,11 +69,12 @@ const Pricing = () => {
       limitations: [],
       popular: true,
       cta: "Choose Premium",
-      href: "/signup"
+      paystack: true
     },
     {
       name: "Pro",
-      price: "₦4,500",
+      price: 4500,
+      displayPrice: "₦4,500",
       period: "per month",
       description: "Complete exam preparation solution",
       icon: <Crown className="h-6 w-6" />,
@@ -76,7 +91,7 @@ const Pricing = () => {
       limitations: [],
       popular: false,
       cta: "Choose Pro",
-      href: "/signup"
+      paystack: true
     }
   ];
 
@@ -129,7 +144,7 @@ const Pricing = () => {
                   </div>
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
                   <div className="mt-4">
-                    <span className="text-4xl font-bold">{plan.price}</span>
+                    <span className="text-4xl font-bold">{plan.displayPrice}</span>
                     <span className="text-muted-foreground">/{plan.period}</span>
                   </div>
                   <CardDescription className="mt-2">{plan.description}</CardDescription>
@@ -163,19 +178,31 @@ const Pricing = () => {
                     </div>
                   )}
                   
-                  <Link to={user ? (plan.name === "Free" ? "/dashboard" : `/payment?plan=${plan.name.toLowerCase()}`) : "/auth"} className="block">
+                  {plan.paystack ? (
                     <Button 
+                      onClick={() => handlePaystackPayment(plan.name, plan.price)}
                       className={`w-full ${
                         plan.popular 
                           ? 'bg-accent hover:bg-accent/90' 
                           : ''
                       }`}
                       variant={plan.popular ? 'default' : 'outline'}
+                      disabled={!user}
                     >
-                      {user ? (plan.name === "Free" ? "Current Plan" : "Upgrade Now") : plan.cta}
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      {user ? "Subscribe with Paystack" : "Login to Subscribe"}
                     </Button>
-                  </Link>
+                  ) : (
+                    <Link to={user ? "/dashboard" : "/auth"} className="block">
+                      <Button 
+                        className="w-full"
+                        variant="outline"
+                      >
+                        {user ? "Current Plan" : "Start Free"}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  )}
                 </CardContent>
               </Card>
             ))}
