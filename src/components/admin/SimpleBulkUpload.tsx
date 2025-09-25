@@ -42,6 +42,7 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
   const [uploadResults, setUploadResults] = useState<{
     success: number;
     failed: number;
+    duplicates?: number;
     errors: string[];
   } | null>(null);
 
@@ -205,30 +206,26 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
       return;
     }
 
-    // Confirm before clearing existing questions
-    const shouldClear = confirm("This will first clear ALL existing questions in the database to prevent duplicates. Continue?");
-    if (!shouldClear) return;
-
     setIsUploading(true);
     setUploadProgress(0);
     setUploadResults(null);
 
     try {
-      // First, clear all existing questions
-      console.log('Clearing all existing questions...');
-      const { error: clearError } = await supabase
+      // First, get existing questions to check for duplicates
+      console.log('Fetching existing questions for duplicate detection...');
+      const { data: existingQuestions, error: fetchError } = await supabase
         .from('questions')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+        .select('question_text')
+        .eq('subject_id', selectedSubject);
       
-      if (clearError) {
-        throw new Error(`Failed to clear existing questions: ${clearError.message}`);
+      if (fetchError) {
+        throw new Error(`Failed to fetch existing questions: ${fetchError.message}`);
       }
 
-      toast({
-        title: "Database Cleared",
-        description: "All existing questions removed. Now uploading new questions...",
-      });
+      // Create a Set for O(1) duplicate checking
+      const existingQuestionTexts = new Set(
+        existingQuestions?.map(q => q.question_text.trim().toLowerCase()) || []
+      );
 
       let questions: any[] = [];
       
@@ -247,8 +244,9 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
 
       let successCount = 0;
       let failedCount = 0;
+      let duplicateCount = 0;
       const errors: string[] = [];
-      const usedQuestions = new Set<string>(); // Prevent duplicates
+      const usedQuestions = new Set<string>(); // Prevent duplicates within upload
 
       // Process questions in batches
       const batchSize = 10;
@@ -257,12 +255,22 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
         
         for (const questionData of batch) {
           try {
-            // Skip if we've already seen this question
             const questionKey = questionData.question_text.trim().toLowerCase();
+            
+            // Check for duplicates within current upload
             if (usedQuestions.has(questionKey)) {
-              console.log(`Skipping duplicate question: ${questionData.question_text.substring(0, 50)}...`);
+              duplicateCount++;
+              console.log(`Skipping duplicate within upload: ${questionData.question_text.substring(0, 50)}...`);
               continue;
             }
+
+            // Check for duplicates against existing questions in database
+            if (existingQuestionTexts.has(questionKey)) {
+              duplicateCount++;
+              console.log(`Skipping duplicate from database: ${questionData.question_text.substring(0, 50)}...`);
+              continue;
+            }
+
             usedQuestions.add(questionKey);
 
             // Validate correct answer
@@ -301,15 +309,22 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
       setUploadResults({
         success: successCount,
         failed: failedCount,
+        duplicates: duplicateCount,
         errors: errors.slice(0, 10) // Show first 10 errors only
       });
 
       if (successCount > 0) {
         toast({
           title: "Upload Complete!",
-          description: `Successfully imported ${successCount} unique questions`,
+          description: `Successfully imported ${successCount} new questions. ${duplicateCount} duplicates were skipped.`,
         });
         onUploadComplete();
+      } else if (duplicateCount > 0) {
+        toast({
+          title: "No New Questions",
+          description: `All ${duplicateCount} questions were duplicates and were skipped.`,
+          variant: "destructive"
+        });
       }
 
     } catch (error: any) {
@@ -435,16 +450,16 @@ Explanation: Capitalism is an economic system characterized by private ownership
               <CheckCircle className="h-4 w-4" />
               <AlertDescription>
                 <div className="space-y-3">
-                  <p className="font-medium">✅ Manual Upload is the Best Approach</p>
-                  <p className="text-sm">For 10,000+ authentic WAEC/JAMB questions, manual bulk upload ensures:</p>
+                  <p className="font-medium">✅ Smart Duplicate Detection</p>
+                  <p className="text-sm">Upload questions safely with built-in duplicate prevention:</p>
                   <ul className="text-sm space-y-1 ml-4">
-                    <li>• <strong>100% Authenticity:</strong> Real past questions from official sources</li>
-                    <li>• <strong>Zero Duplicates:</strong> Complete control over content</li>
-                    <li>• <strong>Proper Quality:</strong> Each question manually verified</li>
-                    <li>• <strong>Fast Processing:</strong> Upload thousands at once</li>
+                    <li>• <strong>Preserves Existing:</strong> No data loss - keeps all current questions</li>
+                    <li>• <strong>Detects Duplicates:</strong> Automatically skips questions already in database</li>
+                    <li>• <strong>Quality Control:</strong> Only adds new, unique questions</li>
+                    <li>• <strong>Safe Upload:</strong> No risk of losing existing content</li>
                   </ul>
                   <div className="mt-2 p-2 bg-muted rounded text-xs">
-                    <strong>💡 Pro Tip:</strong> This upload will clear ALL existing questions first to prevent any duplicates, then upload your fresh content.
+                    <strong>💡 Smart Feature:</strong> The system compares question text to detect duplicates, ensuring only fresh content is added.
                   </div>
                 </div>
               </AlertDescription>
@@ -580,10 +595,13 @@ Explanation: Capitalism is an economic system characterized by private ownership
                 <CheckCircle className="h-4 w-4" />
                 <AlertDescription>
                   <div className="space-y-2">
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 flex-wrap">
                       <Badge variant="secondary">✅ Success: {uploadResults.success}</Badge>
                       {uploadResults.failed > 0 && (
                         <Badge variant="destructive">❌ Failed: {uploadResults.failed}</Badge>
+                      )}
+                      {uploadResults.duplicates !== undefined && uploadResults.duplicates > 0 && (
+                        <Badge variant="outline">🔄 Duplicates Skipped: {uploadResults.duplicates}</Badge>
                       )}
                     </div>
                     
