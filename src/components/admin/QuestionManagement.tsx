@@ -275,7 +275,7 @@ export default function QuestionManagement() {
                   Bulk Upload Questions
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[900px] max-h-[90vh] flex flex-col">
+              <DialogContent className="sm:max-w-[900px] h-[80vh] max-h-[90vh] flex flex-col">
                 <DialogHeader>
                   <DialogTitle>Bulk Upload WAEC/JAMB Questions</DialogTitle>
                 </DialogHeader>
