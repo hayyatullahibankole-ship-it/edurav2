@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { MathRenderer } from "@/components/ui/math-renderer";
 import { 
   Clock, 
   ChevronLeft, 
@@ -383,9 +384,10 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
                         </Badge>
                       )}
                     </div>
-                    <CardTitle className="text-xl leading-relaxed">
-                      {questions[currentQuestion].question}
-                    </CardTitle>
+                    <MathRenderer 
+                      content={questions[currentQuestion].question}
+                      className="text-xl leading-relaxed font-semibold"
+                    />
                   </div>
                   <Button
                     variant="outline"
@@ -426,7 +428,10 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
                               <div className="w-2 h-2 rounded-full bg-white" />
                             )}
                           </div>
-                          <span className="flex-1">{option}</span>
+                          <MathRenderer 
+                            content={option} 
+                            className="flex-1"
+                          />
                         </div>
                       </div>
                     );
@@ -436,7 +441,10 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
                 {showExplanations && questions[currentQuestion].explanation && (
                   <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <h4 className="font-semibold text-blue-900 mb-2">Explanation:</h4>
-                    <p className="text-blue-800">{questions[currentQuestion].explanation}</p>
+                    <MathRenderer 
+                      content={questions[currentQuestion].explanation || ""}
+                      className="text-blue-800"
+                    />
                   </div>
                 )}
               </CardContent>

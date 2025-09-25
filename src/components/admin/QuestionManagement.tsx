@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { MathRenderer } from '@/components/ui/math-renderer';
 import { 
   BookOpen, 
   Plus, 
@@ -221,9 +222,10 @@ export default function QuestionManagement() {
                       <Badge variant="destructive">Inactive</Badge>
                     )}
                   </div>
-                  <p className="font-medium mb-2 line-clamp-2">
-                    {question.question_text}
-                  </p>
+                  <MathRenderer 
+                    content={question.question_text}
+                    className="font-medium mb-2 line-clamp-2"
+                  />
                   <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                     <span>{question.points} point{question.points !== 1 ? 's' : ''}</span>
                     <span>{new Date(question.created_at).toLocaleDateString()}</span>

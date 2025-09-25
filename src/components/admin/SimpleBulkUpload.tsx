@@ -530,7 +530,7 @@ Explanation: Capitalism is an economic system characterized by private ownership
                 <Alert className="border-accent/20 bg-accent/5">
                   <Download className="h-4 w-4" />
                   <AlertDescription>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <p className="font-medium">CSV Format Requirements:</p>
                       <p className="text-sm">Your CSV should have these columns (case insensitive):</p>
                       <ul className="text-sm space-y-1 ml-4">
@@ -539,6 +539,18 @@ Explanation: Capitalism is an economic system characterized by private ownership
                         <li>• <strong>correct_answer</strong> (A, B, C, D or 0, 1, 2, 3)</li>
                         <li>• <strong>explanation</strong> (optional)</li>
                       </ul>
+                      
+                      <div className="mt-3 pt-3 border-t border-accent/20">
+                        <p className="font-medium text-sm">📐 Mathematical Formulas Support:</p>
+                        <p className="text-xs">Use LaTeX syntax for mathematical expressions in questions and options:</p>
+                        <ul className="text-xs space-y-1 ml-4 mt-1">
+                          <li>• Inline math: {"$x^2 + y^2 = z^2$"}</li>
+                          <li>• Block math: {"$$\\frac{a}{b} = \\frac{c}{d}$$"}</li>
+                          <li>• Fractions: {"\\frac{numerator}{denominator}"}</li>
+                          <li>• Exponents: {"x^{2}"}, Subscripts: {"H_{2}O"}</li>
+                          <li>• Square roots: {"\\sqrt{x}"}, {"\\sqrt[3]{x}"}</li>
+                        </ul>
+                      </div>
                     </div>
                   </AlertDescription>
                 </Alert>
