@@ -60,15 +60,11 @@ const TestResults = () => {
             user_id,
             started_at,
             submitted_at,
-            exams!inner(
-              title,
-              type,
-              duration_minutes
-            )
+            proctoring_data
           )
         `)
         .eq('attempt_id', attemptId)
-        .single();
+        .maybeSingle();
 
       if (resultError) {
         console.error('Error fetching results:', resultError);
@@ -80,7 +76,18 @@ const TestResults = () => {
         return;
       }
 
+      if (!resultData) {
+        console.log('No results found for attempt:', attemptId);
+        // Don't show toast for missing results, just let the component show "No Results Found"
+        return;
+      }
+
       if (resultData) {
+        // Get exam info from attempt's proctoring_data or exam (for backward compatibility)
+        const proctoringData = resultData.attempts.proctoring_data as any || {};
+        const examTitle = proctoringData.title || 'Practice Test';
+        const examDuration = proctoringData.duration_minutes || 120;
+        
         // Transform the data to match expected format
         const transformedResults = {
           score: Math.round(resultData.percentage || 0),
@@ -89,8 +96,8 @@ const TestResults = () => {
           wrongAnswers: resultData.wrong_answers,
           unanswered: resultData.unanswered,
           timeTaken: resultData.time_taken_minutes,
-          timeAllotted: resultData.attempts.exams.duration_minutes,
-          subjects: resultData.subject_breakdown ? Object.entries(resultData.subject_breakdown).map(([name, data]: [string, any]) => ({
+          timeAllotted: examDuration,
+          subjects: resultData.subject_breakdown ? Object.entries(resultData.subject_breakdown as any).map(([name, data]: [string, any]) => ({
             name,
             score: Math.round(data.percentage || 0),
             total: data.total || 0,
