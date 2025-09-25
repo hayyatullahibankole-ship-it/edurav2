@@ -21,6 +21,7 @@ import Resources from "./pages/Resources";
 import Consultation from "./pages/Consultation";
 import Blog from "./pages/Blog";
 import Payment from "./pages/Payment";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +73,7 @@ const App = () => (
             <Route path="/resources" element={<Layout><Resources /></Layout>} />
             <Route path="/consultation" element={<Layout><Consultation /></Layout>} />
             <Route path="/payment" element={<Layout><Payment /></Layout>} />
+            <Route path="/payment-success" element={<Layout showNavbar={false}><PaymentSuccess /></Layout>} />
             <Route path="/blog" element={<Layout><Blog /></Layout>} />
             <Route path="/blog/:slug" element={<Layout><Blog /></Layout>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

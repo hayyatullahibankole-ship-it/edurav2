@@ -18,7 +18,8 @@ import {
   Calendar,
   TrendingUp,
   Package,
-  Settings
+  Settings,
+  ExternalLink
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -239,14 +240,23 @@ const PricingManager = () => {
           <h2 className="text-2xl font-bold text-white">Pricing Management</h2>
           <p className="text-slate-400">Manage subscription plans and pricing</p>
         </div>
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="w-4 h-4 mr-2" />
-              Create Plan
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl bg-slate-800 border-slate-700">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => window.open('/pricing', '_blank')}
+            className="border-slate-600 text-slate-300 hover:bg-slate-700"
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            View Public Pricing
+          </Button>
+          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Plan
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl bg-slate-800 border-slate-700">
             <DialogHeader>
               <DialogTitle className="text-white">
                 {editingPlan ? 'Edit Subscription Plan' : 'Create New Subscription Plan'}
@@ -388,6 +398,7 @@ const PricingManager = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Plans Overview Stats */}
