@@ -181,61 +181,36 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
       setLoading(true);
       console.log('Starting delete for user:', userId);
       
-      // First, get user's attempts to delete related records
-      const { data: userAttempts } = await supabase
-        .from('attempts')
-        .select('id')
-        .eq('user_id', userId);
-
-      console.log('User attempts:', userAttempts);
-
-      // Delete attempt-related records if any exist
-      if (userAttempts && userAttempts.length > 0) {
-        const attemptIds = userAttempts.map(a => a.id);
-        
-        // Delete attempt answers and results first
-        const { error: answersError } = await supabase.from('attempt_answers').delete().in('attempt_id', attemptIds);
-        if (answersError) console.error('Error deleting answers:', answersError);
-        
-        const { error: resultsError } = await supabase.from('results').delete().in('attempt_id', attemptIds);
-        if (resultsError) console.error('Error deleting results:', resultsError);
-        
-        const { error: attemptsError } = await supabase.from('attempts').delete().eq('user_id', userId);
-        if (attemptsError) console.error('Error deleting attempts:', attemptsError);
-      }
-      
-      // Delete other user-related records
-      const { error: rolesError } = await supabase.from('user_roles').delete().eq('user_id', userId);
-      if (rolesError) console.error('Error deleting roles:', rolesError);
-      
-      const { error: subscriptionsError } = await supabase.from('subscriptions').delete().eq('user_id', userId);
-      if (subscriptionsError) console.error('Error deleting subscriptions:', subscriptionsError);
-      
-      const { error: transactionsError } = await supabase.from('transactions').delete().eq('user_id', userId);
-      if (transactionsError) console.error('Error deleting transactions:', transactionsError);
-      
-      const { error: notificationsError } = await supabase.from('notifications').delete().eq('user_id', userId);
-      if (notificationsError) console.error('Error deleting notifications:', notificationsError);
-      
-      const { error: bookingsError } = await supabase.from('bookings').delete().eq('user_id', userId);
-      if (bookingsError) console.error('Error deleting bookings:', bookingsError);
-
-      // Finally delete the user
-      const { error } = await supabase
+      // Get the user's auth_user_id first
+      const { data: userData } = await supabase
         .from('users')
-        .delete()
-        .eq('id', userId);
+        .select('auth_user_id')
+        .eq('id', userId)
+        .single();
+
+      if (!userData?.auth_user_id) {
+        throw new Error('User auth ID not found');
+      }
+
+      // Use the database function to delete user completely
+      const { data, error } = await supabase.rpc('delete_user_completely', {
+        user_uuid: userData.auth_user_id
+      });
 
       if (error) {
-        console.error('Error deleting user:', error);
+        console.error('Error from delete function:', error);
         throw error;
+      }
+
+      if (!data) {
+        throw new Error('User deletion failed - user may not exist');
       }
 
       console.log('User deleted successfully');
 
       toast({
         title: "Success",
-        description: "User and all associated data deleted successfully"
+        description: "User and all associated data deleted permanently"
       });
 
       onRefresh();

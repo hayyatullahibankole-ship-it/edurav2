@@ -1012,6 +1012,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_user_completely: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
       expire_subscriptions: {
         Args: Record<PropertyKey, never>
         Returns: undefined

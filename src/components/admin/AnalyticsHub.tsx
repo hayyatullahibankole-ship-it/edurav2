@@ -11,11 +11,10 @@ import {
   Target,
   Award,
   Activity,
-  PieChart,
   Calendar
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Cell, Pie } from 'recharts';
 
 export default function AnalyticsHub() {
   const [analytics, setAnalytics] = useState({
@@ -249,8 +248,8 @@ export default function AnalyticsHub() {
               <CardContent>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <RechartsPie>
-                      <PieChart
+                    <PieChart>
+                      <Pie
                         data={scoreDistribution}
                         cx="50%"
                         cy="50%"
@@ -262,7 +261,7 @@ export default function AnalyticsHub() {
                         {scoreDistribution.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
-                      </PieChart>
+                      </Pie>
                       <Tooltip 
                         contentStyle={{ 
                           backgroundColor: '#374151', 
@@ -271,7 +270,7 @@ export default function AnalyticsHub() {
                           color: '#fff'
                         }} 
                       />
-                    </RechartsPie>
+                    </PieChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
