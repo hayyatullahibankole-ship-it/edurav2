@@ -68,20 +68,20 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
     try {
       setLoading(true);
       
-      // Fetch subjects and count questions for each
-      const [subjectsResp, questionsResp] = await Promise.all([
+      // Fetch subjects and question counts using the secure function
+      const [subjectsResp, questionCountsResp] = await Promise.all([
         supabase.from('subjects').select('*').eq('is_active', true),
-        supabase.from('questions').select('subject_id, is_active').eq('is_active', true)
+        supabase.rpc('get_subject_question_counts')
       ]);
 
       if (subjectsResp.data) {
         setSubjects(subjectsResp.data);
         
-        // Count questions per subject
+        // Map question counts by subject_id
         const questionCounts: { [key: string]: number } = {};
-        if (questionsResp.data) {
-          questionsResp.data.forEach(q => {
-            questionCounts[q.subject_id] = (questionCounts[q.subject_id] || 0) + 1;
+        if (questionCountsResp.data) {
+          questionCountsResp.data.forEach((item: any) => {
+            questionCounts[item.subject_id] = item.question_count;
           });
         }
         setAvailableQuestions(questionCounts);
