@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import ProfileSettings from "@/components/ProfileSettings";
 import ScheduleTestModal from "@/components/ScheduleTestModal";
 
@@ -27,37 +29,130 @@ const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
   const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // State for dashboard statistics
+  const [stats, setStats] = useState({
+    testsTaken: 0,
+    averageScore: 0,
+    studyHours: 0,
+    rank: 0,
+    totalStudents: 0
+  });
+  const [recentTests, setRecentTests] = useState([]);
+  const [subjectProgress, setSubjectProgress] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (userProfile?.id) {
+      fetchDashboardData();
+    }
+  }, [userProfile?.id]);
+
+  const fetchDashboardData = async () => {
+    if (!userProfile?.id) return;
+    
+    setLoading(true);
+    try {
+      // Fetch user's attempts and results
+      const { data: attempts, error: attemptsError } = await supabase
+        .from('attempts')
+        .select(`
+          *,
+          exams(title, type),
+          results(*)
+        `)
+        .eq('user_id', userProfile.id)
+        .eq('status', 'SUBMITTED')
+        .order('submitted_at', { ascending: false });
+
+      if (attemptsError) {
+        console.error('Error fetching attempts:', attemptsError);
+        return;
+      }
+
+      // Calculate statistics
+      const testsTaken = attempts?.length || 0;
+      const resultsWithScores = attempts?.filter(a => a.results && Array.isArray(a.results) && a.results.length > 0) || [];
+      const averageScore = resultsWithScores.length > 0 
+        ? Math.round(resultsWithScores.reduce((sum, a) => {
+            const result = Array.isArray(a.results) ? a.results[0] : a.results;
+            return sum + (result?.percentage || 0);
+          }, 0) / resultsWithScores.length)
+        : 0;
+
+      // Calculate study hours (estimated from time taken in exams)
+      const studyHours = Math.round(
+        resultsWithScores.reduce((sum, a) => {
+          const result = Array.isArray(a.results) ? a.results[0] : a.results;
+          return sum + (result?.time_taken_minutes || 0);
+        }, 0) / 60
+      );
+
+      setStats({
+        testsTaken,
+        averageScore,
+        studyHours,
+        rank: 0, // TODO: Implement ranking system
+        totalStudents: 500 // TODO: Get from actual data
+      });
+
+      // Recent test results
+      const recentTestsData = resultsWithScores.slice(0, 3).map(attempt => {
+        const result = Array.isArray(attempt.results) ? attempt.results[0] : attempt.results;
+        const timeTaken = result?.time_taken_minutes || 0;
+        return {
+          subject: attempt.exams?.title || 'Unknown Subject',
+          score: Math.round(result?.percentage || 0),
+          date: new Date(attempt.submitted_at).toLocaleDateString(),
+          duration: `${Math.floor(timeTaken / 60)}h ${timeTaken % 60}m`
+        };
+      });
+      setRecentTests(recentTestsData);
+
+      // Subject progress (calculate from subject breakdown in results)
+      const subjectScores: { [key: string]: number[] } = {};
+      resultsWithScores.forEach(attempt => {
+        const result = Array.isArray(attempt.results) ? attempt.results[0] : attempt.results;
+        const breakdown = result?.subject_breakdown || {};
+        if (typeof breakdown === 'object' && breakdown !== null) {
+          Object.entries(breakdown).forEach(([subject, data]: [string, any]) => {
+            if (!subjectScores[subject]) {
+              subjectScores[subject] = [];
+            }
+            subjectScores[subject].push(data?.percentage || 0);
+          });
+        }
+      });
+
+      const subjectProgressData = Object.entries(subjectScores).map(([subject, scores]) => ({
+        subject,
+        progress: Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length),
+        total: 100
+      }));
+      setSubjectProgress(subjectProgressData);
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load dashboard data",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
       await signOut();
-      // Navigate immediately after clearing auth state
       navigate("/auth", { replace: true });
     } catch (error) {
       console.error("Error during logout:", error);
-      // Force navigation even if signOut fails
       navigate("/auth", { replace: true });
     }
   };
-  
-  const recentTests = [
-    { subject: "Mathematics", score: 85, date: "2024-01-15", duration: "1h 30m" },
-    { subject: "English", score: 92, date: "2024-01-14", duration: "1h 45m" },
-    { subject: "Physics", score: 78, date: "2024-01-13", duration: "2h 00m" }
-  ];
-
-  const subjectProgress = [
-    { subject: "Mathematics", progress: 85, total: 100 },
-    { subject: "English", progress: 92, total: 100 },
-    { subject: "Physics", progress: 78, total: 100 },
-    { subject: "Chemistry", progress: 65, total: 100 },
-    { subject: "Biology", progress: 88, total: 100 }
-  ];
-
-  const upcomingTests = [
-    { title: "JAMB Mathematics Mock", date: "Jan 20, 2024", time: "10:00 AM" },
-    { title: "WAEC English Practice", date: "Jan 22, 2024", time: "2:00 PM" }
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -117,8 +212,8 @@ const Dashboard = () => {
                   <Target className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">24</div>
-                  <p className="text-xs text-muted-foreground">+3 from last week</p>
+                  <div className="text-2xl font-bold">{loading ? "..." : stats.testsTaken}</div>
+                  <p className="text-xs text-muted-foreground">Total attempts</p>
                 </CardContent>
               </Card>
               
@@ -128,8 +223,8 @@ const Dashboard = () => {
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">85%</div>
-                  <p className="text-xs text-muted-foreground">+5% improvement</p>
+                  <div className="text-2xl font-bold">{loading ? "..." : `${stats.averageScore}%`}</div>
+                  <p className="text-xs text-muted-foreground">Across all tests</p>
                 </CardContent>
               </Card>
               
@@ -139,8 +234,8 @@ const Dashboard = () => {
                   <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">42h</div>
-                  <p className="text-xs text-muted-foreground">This month</p>
+                  <div className="text-2xl font-bold">{loading ? "..." : `${stats.studyHours}h`}</div>
+                  <p className="text-xs text-muted-foreground">Time spent on tests</p>
                 </CardContent>
               </Card>
               
@@ -150,8 +245,8 @@ const Dashboard = () => {
                   <Trophy className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">#12</div>
-                  <p className="text-xs text-muted-foreground">Out of 500 students</p>
+                  <div className="text-2xl font-bold">{loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}</div>
+                  <p className="text-xs text-muted-foreground">Coming soon</p>
                 </CardContent>
               </Card>
             </div>
@@ -203,23 +298,31 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {recentTests.map((test, index) => (
-                        <div key={index} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                          <div className="flex items-center gap-4">
-                            <div className="bg-primary/10 p-2 rounded-lg">
-                              <BookOpen className="h-5 w-5 text-primary" />
+                      {loading ? (
+                        <div className="text-center text-muted-foreground">Loading...</div>
+                      ) : recentTests.length > 0 ? (
+                        recentTests.map((test, index) => (
+                          <div key={index} className="flex items-center justify-between p-4 border border-border rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="bg-primary/10 p-2 rounded-lg">
+                                <BookOpen className="h-5 w-5 text-primary" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold">{test.subject}</h4>
+                                <p className="text-sm text-muted-foreground">{test.date}</p>
+                              </div>
                             </div>
-                            <div>
-                              <h4 className="font-semibold">{test.subject}</h4>
-                              <p className="text-sm text-muted-foreground">{test.date}</p>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-accent">{test.score}%</div>
+                              <p className="text-sm text-muted-foreground">{test.duration}</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="text-lg font-bold text-accent">{test.score}%</div>
-                            <p className="text-sm text-muted-foreground">{test.duration}</p>
-                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center text-muted-foreground">
+                          No test results yet. Take your first test to see results here!
                         </div>
-                      ))}
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -232,15 +335,23 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">
-                      {subjectProgress.map((subject, index) => (
-                        <div key={index}>
-                          <div className="flex justify-between mb-2">
-                            <span className="font-medium">{subject.subject}</span>
-                            <span className="text-sm text-muted-foreground">{subject.progress}%</span>
+                      {loading ? (
+                        <div className="text-center text-muted-foreground">Loading...</div>
+                      ) : subjectProgress.length > 0 ? (
+                        subjectProgress.map((subject, index) => (
+                          <div key={index}>
+                            <div className="flex justify-between mb-2">
+                              <span className="font-medium">{subject.subject}</span>
+                              <span className="text-sm text-muted-foreground">{subject.progress}%</span>
+                            </div>
+                            <Progress value={subject.progress} className="h-2" />
                           </div>
-                          <Progress value={subject.progress} className="h-2" />
+                        ))
+                      ) : (
+                        <div className="text-center text-muted-foreground">
+                          Complete some tests to track your subject progress!
                         </div>
-                      ))}
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -272,10 +383,10 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="text-center">
-                      <div className="text-4xl font-bold text-accent mb-2">7</div>
-                      <p className="text-sm text-muted-foreground">Days in a row</p>
+                      <div className="text-4xl font-bold text-accent mb-2">{loading ? "..." : stats.testsTaken}</div>
+                      <p className="text-sm text-muted-foreground">Tests completed</p>
                       <ScheduleTestModal>
-                        <Button className="w-full mt-4">Continue Streak</Button>
+                        <Button className="w-full mt-4">Take Another Test</Button>
                       </ScheduleTestModal>
                     </div>
                   </CardContent>
