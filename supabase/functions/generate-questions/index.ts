@@ -309,7 +309,7 @@ serve(async (req) => {
     console.log(`Found ${subjects.length} subjects to generate questions for`);
 
     let totalGenerated = 0;
-    const questionsPerSubject = 500;
+    const questionsPerSubject = 100;
 
     for (const subject of subjects) {
       console.log(`\n--- Processing ${subject.name} ---`);

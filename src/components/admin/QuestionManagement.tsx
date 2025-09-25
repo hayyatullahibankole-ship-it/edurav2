@@ -603,7 +603,7 @@ export default function QuestionManagement() {
             ) : (
               <>
                 <FileText className="w-4 h-4 mr-2" />
-                Generate 500 Questions/Subject
+                Generate 100 Questions/Subject
               </>
             )}
           </Button>
