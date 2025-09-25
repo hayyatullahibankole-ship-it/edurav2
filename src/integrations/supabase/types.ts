@@ -1039,6 +1039,13 @@ export type Database = {
         Args: { question_id: string; user_id: string }
         Returns: string
       }
+      get_subject_question_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          question_count: number
+          subject_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
