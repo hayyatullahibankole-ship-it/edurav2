@@ -177,8 +177,8 @@ async function handleStartExam(req: Request, supabaseClient: any, userId: string
     });
   }
 
-  // Get questions for the attempt
-  let questionQuery = supabaseClient.from('questions').select('*');
+  // Get questions for the attempt - First get all available questions to select from
+  let questionQuery = supabaseClient.from('questions').select('id, subject_id, question_text, type, options, difficulty_level, media_urls, points, time_limit_seconds, tags');
   
   if (exam.type === 'JAMB') {
     // JAMB: English (60) + 3 selected subjects (40 each)
@@ -199,9 +199,22 @@ async function handleStartExam(req: Request, supabaseClient: any, userId: string
 
   // Select random questions based on exam configuration
   const selectedQuestions = selectQuestionsForExam(allQuestions, exam, selectedSubjects);
+  
+  // Get secure question data without answers using our secure function
+  const questionIds = selectedQuestions.map(q => q.id);
+  const { data: secureQuestions, error: secureError } = await supabaseClient
+    .rpc('get_exam_questions', { exam_question_ids: questionIds });
 
-  // Create attempt answers placeholders
-  const attemptAnswers = selectedQuestions.map(q => ({
+  if (secureError || !secureQuestions) {
+    console.error('Error getting secure questions:', secureError);
+    return new Response(JSON.stringify({ error: 'Failed to load exam questions' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Create attempt answers placeholders using the secure question data
+  const attemptAnswers = secureQuestions.map((q: any) => ({
     attempt_id: attempt.id,
     question_id: q.id,
     answer: null,
@@ -219,7 +232,7 @@ async function handleStartExam(req: Request, supabaseClient: any, userId: string
 
   return new Response(JSON.stringify({
     attemptId: attempt.id,
-    questions: selectedQuestions.map(q => ({
+    questions: secureQuestions.map((q: any) => ({
       ...q,
       options: shuffleArray(q.options || [])
     })),
@@ -254,22 +267,20 @@ async function handleSubmitAnswer(req: Request, supabaseClient: any, userId: str
     });
   }
 
-  // Get question to check correct answer
-  const { data: question } = await supabaseClient
-    .from('questions')
-    .select('correct_answer')
-    .eq('id', questionId)
-    .single();
+  // Use secure function to validate answer without exposing correct answer
+  const { data: isCorrect, error: validationError } = await supabaseClient
+    .rpc('validate_question_answer', {
+      question_id: questionId,
+      submitted_answer: answer
+    });
 
-  if (!question) {
-    return new Response(JSON.stringify({ error: 'Question not found' }), {
-      status: 404,
+  if (validationError) {
+    console.error('Answer validation error:', validationError);
+    return new Response(JSON.stringify({ error: 'Failed to validate answer' }), {
+      status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
-
-  // Calculate if answer is correct
-  const isCorrect = checkAnswerCorrectness(answer, question.correct_answer);
 
   // Update attempt answer
   const { error } = await supabaseClient
