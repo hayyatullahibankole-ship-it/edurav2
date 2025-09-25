@@ -16,6 +16,7 @@ import AdminLogin from "./pages/AdminLogin";
 import CBTExam from "./pages/CBTExam";
 import TestResults from "./pages/TestResults";
 import Demo from "./pages/Demo";
+import DemoTest from "./pages/DemoTest";
 import Pricing from "./pages/Pricing";
 import Resources from "./pages/Resources";
 import Consultation from "./pages/Consultation";
@@ -69,6 +70,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/demo" element={<Layout><Demo /></Layout>} />
+            <Route path="/demo-test" element={<Layout showNavbar={false}><DemoTest /></Layout>} />
             <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
             <Route path="/resources" element={<Layout><Resources /></Layout>} />
             <Route path="/consultation" element={<Layout><Consultation /></Layout>} />

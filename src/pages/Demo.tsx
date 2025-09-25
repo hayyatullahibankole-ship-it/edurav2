@@ -49,7 +49,7 @@ const Demo = () => {
               See exactly how our platform can help you excel in your exams.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/practice">
+              <Link to="/demo-test">
                 <Button size="lg" className="bg-accent hover:bg-accent/90">
                   <Play className="mr-2 h-5 w-5" />
                   Start Demo Test
@@ -162,7 +162,7 @@ const Demo = () => {
               Join thousands of students who improved their scores with our platform
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/practice">
+              <Link to="/demo-test">
                 <Button size="lg" className="bg-accent hover:bg-accent/90">
                   <Play className="mr-2 h-5 w-5" />
                   Try Full Demo
