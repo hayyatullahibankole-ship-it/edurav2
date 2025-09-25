@@ -375,9 +375,30 @@ serve(async (req) => {
 
     console.log(`Found ${subjects.length} subjects`);
 
-    // Clear existing questions if requested
+    // Clear existing questions if requested (with safety check)
     if (clearExisting) {
-      console.log('Clearing existing questions...');
+      console.log('WARNING: Clear existing questions requested');
+      console.log('This will delete ALL questions in the database');
+      
+      // Add a safety check - only allow if explicitly confirmed
+      const confirmationKey = Deno.env.get('ADMIN_CREATION_TOKEN');
+      const providedKey = req.headers.get('x-confirmation-key');
+      
+      if (providedKey !== confirmationKey) {
+        console.log('Deletion blocked - missing or invalid confirmation key');
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Deletion requires admin confirmation key in x-confirmation-key header'
+          }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+      
+      console.log('Clearing existing questions with admin confirmation...');
       const { error: deleteError } = await supabase
         .from('questions')
         .delete()
