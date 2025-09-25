@@ -11,8 +11,11 @@ import {
   Star,
   TrendingUp,
   BookOpen,
-  Filter
+  Filter,
+  ArrowLeft,
+  Share2
 } from 'lucide-react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 interface BlogPost {
@@ -20,6 +23,7 @@ interface BlogPost {
   title: string;
   slug: string;
   excerpt: string;
+  content?: string;
   featured_image_url?: string;
   is_featured: boolean;
   category: string;
@@ -30,7 +34,10 @@ interface BlogPost {
 }
 
 const Blog = () => {
+  const { slug } = useParams();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [currentPost, setCurrentPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -48,8 +55,12 @@ const Blog = () => {
   ];
 
   useEffect(() => {
-    fetchBlogPosts();
-  }, []);
+    if (slug) {
+      fetchSinglePost();
+    } else {
+      fetchBlogPosts();
+    }
+  }, [slug]);
 
   const fetchBlogPosts = async () => {
     try {
@@ -63,6 +74,33 @@ const Blog = () => {
       setPosts(data || []);
     } catch (error) {
       console.error('Error fetching blog posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSinglePost = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('is_published', true)
+        .single();
+
+      if (error) throw error;
+      
+      if (data) {
+        setCurrentPost(data);
+        // Update view count
+        await supabase
+          .from('blog_posts')
+          .update({ view_count: data.view_count + 1 })
+          .eq('id', data.id);
+      }
+    } catch (error) {
+      console.error('Error fetching blog post:', error);
+      navigate('/blog');
     } finally {
       setLoading(false);
     }
@@ -109,6 +147,114 @@ const Blog = () => {
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Single post view
+  if (slug && currentPost) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/blog')}
+            className="mb-6 text-primary hover:text-primary/80"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Blog
+          </Button>
+
+          <article className="max-w-4xl mx-auto">
+            {currentPost.featured_image_url && (
+              <div className="aspect-video mb-8 overflow-hidden rounded-lg">
+                <img 
+                  src={currentPost.featured_image_url} 
+                  alt={currentPost.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            <div className="mb-6">
+              <div className="flex items-center space-x-4 mb-4">
+                <Badge className={getCategoryColor(currentPost.category)}>
+                  {currentPost.category.replace('-', ' ').toUpperCase()}
+                </Badge>
+                {currentPost.is_featured && (
+                  <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                    <Star className="w-3 h-3 mr-1" />
+                    Featured
+                  </Badge>
+                )}
+              </div>
+
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
+                {currentPost.title}
+              </h1>
+
+              <div className="flex items-center justify-between text-muted-foreground">
+                <div className="flex items-center space-x-6">
+                  <span className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    {formatDate(currentPost.published_at)}
+                  </span>
+                  <span className="flex items-center">
+                    <TrendingUp className="w-4 h-4 mr-2" />
+                    {currentPost.view_count + 1} views
+                  </span>
+                </div>
+                <Button variant="outline" size="sm">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
+              </div>
+            </div>
+
+            <div className="prose prose-lg max-w-none dark:prose-invert">
+              <p className="text-xl text-muted-foreground leading-relaxed mb-8">
+                {currentPost.excerpt}
+              </p>
+              
+              {currentPost.content ? (
+                <div dangerouslySetInnerHTML={{ __html: currentPost.content }} />
+              ) : (
+                <div className="space-y-6 text-lg leading-relaxed">
+                  <p>This is a comprehensive article about {currentPost.title.toLowerCase()}. The content covers important aspects and provides valuable insights for students and professionals.</p>
+                  
+                  <p>Key topics covered include:</p>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>Understanding the fundamentals and core concepts</li>
+                    <li>Practical applications and real-world examples</li>
+                    <li>Best practices and recommended approaches</li>
+                    <li>Common challenges and how to overcome them</li>
+                    <li>Future trends and developments in this area</li>
+                  </ul>
+                  
+                  <p>This information is designed to help you make informed decisions and achieve better results in your academic and professional journey.</p>
+                  
+                  <p>For more detailed information and personalized guidance, consider booking a consultation with our experts who can provide tailored advice based on your specific needs and goals.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-12 pt-8 border-t">
+              <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+                <Link to="/blog">
+                  <Button variant="outline">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    View All Articles
+                  </Button>
+                </Link>
+                <Link to="/consultation">
+                  <Button>
+                    Get Expert Consultation
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     );
@@ -210,9 +356,11 @@ const Blog = () => {
                     <CardDescription className="text-base mb-4 leading-relaxed line-clamp-3">
                       {post.excerpt}
                     </CardDescription>
-                    <Button variant="ghost" className="text-primary p-0 h-auto group-hover:translate-x-1 transition-transform">
-                      Read Full Article →
-                    </Button>
+                    <Link to={`/blog/${post.slug}`}>
+                      <Button variant="ghost" className="text-primary p-0 h-auto group-hover:translate-x-1 transition-transform">
+                        Read Full Article →
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
