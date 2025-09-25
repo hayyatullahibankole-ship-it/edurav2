@@ -64,17 +64,19 @@ export function useSubscription() {
     fetchSubscription();
   }, [user, userProfile]);
 
-  // User has access if they have any active subscription (free or premium)
-  const hasPremiumAccess = !loading && subscription && subscription.status === 'ACTIVE';
+  // Normalize subscription state
+  const active = subscription?.status === 'ACTIVE';
+  const notExpired = subscription?.end_date ? new Date(subscription.end_date) > new Date() : true;
+  const accessLevel = subscription?.subscription_plans?.resource_access_level?.toLowerCase();
+
+  // User has any active (non-expired) subscription
+  const hasPremiumAccess = Boolean(!loading && active && notExpired);
   
-  // User is premium if they have premium access level (regardless of price)
-  const isPremium = hasPremiumAccess && 
-    subscription?.subscription_plans?.resource_access_level === 'premium';
+  // User is premium if access level is premium
+  const isPremium = Boolean(hasPremiumAccess && accessLevel === 'premium');
   
-  // User is on free plan if they have basic access level or price = 0
-  const isFree = hasPremiumAccess && 
-    (subscription?.subscription_plans?.resource_access_level === 'basic' || 
-     subscription?.subscription_plans?.price === 0);
+  // User is on free/basic plan
+  const isFree = Boolean(hasPremiumAccess && accessLevel === 'basic');
 
   return {
     subscription,
