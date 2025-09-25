@@ -13,7 +13,8 @@ import {
   Lightbulb,
   Target,
   Clock,
-  Loader2
+  Loader2,
+  Home
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -21,7 +22,8 @@ import { useToast } from "@/hooks/use-toast";
 interface QuestionReview {
   id: string;
   question_text: string;
-  options: string[];
+  type: string;
+  options: any[];
   user_answer: any;
   correct_answer: any;
   is_correct: boolean;
@@ -60,27 +62,69 @@ const AnswerReview = () => {
         return;
       }
 
-      // Fetch attempt details with answers
-      const { data: attempt } = await supabase
-        .from('attempts')
-        .select('*')
-        .eq('id', attemptId)
+      // First, get the user's internal ID
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
         .single();
 
-      if (!attempt) {
+      if (!userData) {
         toast({
           title: "Error",
-          description: "Exam attempt not found",
+          description: "User not found",
           variant: "destructive"
         });
         navigate('/dashboard');
         return;
       }
 
-      // Fetch answers with question details using secure function
+      // Fetch attempt details to verify ownership
+      const { data: attempt } = await supabase
+        .from('attempts')
+        .select('*')
+        .eq('id', attemptId)
+        .eq('user_id', userData.id)
+        .single();
+
+      if (!attempt) {
+        toast({
+          title: "Error",
+          description: "Exam attempt not found or access denied",
+          variant: "destructive"
+        });
+        navigate('/dashboard');
+        return;
+      }
+
+      // Only show review for completed attempts
+      if (attempt.status !== 'SUBMITTED') {
+        toast({
+          title: "Error",
+          description: "Answer review is only available for completed exams",
+          variant: "destructive"
+        });
+        navigate('/dashboard');
+        return;
+      }
+
+      // Fetch answers with question details
       const { data: answers } = await supabase
         .from('attempt_answers')
-        .select('*')
+        .select(`
+          *,
+          questions!inner(
+            id,
+            question_text,
+            type,
+            options,
+            correct_answer,
+            explanation,
+            difficulty_level,
+            subject_id,
+            subjects(name)
+          )
+        `)
         .eq('attempt_id', attemptId);
 
       if (!answers) {
@@ -92,46 +136,20 @@ const AnswerReview = () => {
         return;
       }
 
-      // Get question details securely (only for submitted attempts)
-      const questionIds = answers.map(a => a.question_id);
-      const questionDetails = [];
-
-      for (const questionId of questionIds) {
-        try {
-          // Use secure function to get explanation
-          const { data: explanation } = await supabase
-            .rpc('get_question_explanation', {
-              question_id: questionId,
-              user_id: user.id
-            });
-
-          // Get basic question data (without answers)
-          const { data: questionData } = await supabase
-            .rpc('get_exam_questions', {
-              exam_question_ids: [questionId]
-            });
-
-          if (questionData && questionData.length > 0) {
-            const question = questionData[0];
-            const answer = answers.find(a => a.question_id === questionId);
-            
-            questionDetails.push({
-              id: question.id,
-              question_text: question.question_text,
-              options: question.options || [],
-              user_answer: answer?.answer,
-              correct_answer: null, // Not exposed for security
-              is_correct: answer?.is_correct || false,
-              explanation: explanation || 'Explanation available after exam completion',
-              subject: 'Mixed', // Would need subject mapping
-              difficulty_level: question.difficulty_level || 1,
-              time_spent_seconds: answer?.time_spent_seconds || 0
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching question details:', error);
-        }
-      }
+      // Transform the data
+      const questionDetails: QuestionReview[] = answers.map(answer => ({
+        id: answer.questions.id,
+        question_text: answer.questions.question_text,
+        type: answer.questions.type,
+        options: Array.isArray(answer.questions.options) ? answer.questions.options : [],
+        user_answer: answer.answer,
+        correct_answer: answer.questions.correct_answer,
+        is_correct: answer.is_correct,
+        explanation: answer.questions.explanation || 'No explanation available',
+        subject: answer.questions.subjects?.name || 'Unknown Subject',
+        difficulty_level: answer.questions.difficulty_level || 1,
+        time_spent_seconds: answer.time_spent_seconds || 0
+      }));
 
       setQuestions(questionDetails);
     } catch (error) {
@@ -194,12 +212,20 @@ const AnswerReview = () => {
               Review your answers and learn from explanations
             </p>
           </div>
-          <Button asChild variant="outline">
-            <Link to="/dashboard">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline">
+              <Link to={`/results?attempt=${attemptId}`}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Results
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/dashboard">
+                <Home className="w-4 h-4 mr-2" />
+                Dashboard
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -293,26 +319,74 @@ const AnswerReview = () => {
                       <div className="space-y-2">
                         {question.options.map((option: string, optIndex: number) => {
                           const isUserAnswer = question.user_answer === optIndex;
+                          const isCorrectAnswer = question.correct_answer === optIndex;
+                          
+                          let bgColor = 'bg-muted';
+                          let borderColor = 'border-muted';
+                          let textColor = '';
+                          
+                          if (isCorrectAnswer && isUserAnswer) {
+                            // User got it right
+                            bgColor = 'bg-green-50';
+                            borderColor = 'border-green-200';
+                            textColor = 'text-green-800';
+                          } else if (isCorrectAnswer) {
+                            // Correct answer (user didn't choose this)
+                            bgColor = 'bg-green-50';
+                            borderColor = 'border-green-200';
+                            textColor = 'text-green-700';
+                          } else if (isUserAnswer) {
+                            // User's wrong answer
+                            bgColor = 'bg-red-50';
+                            borderColor = 'border-red-200';
+                            textColor = 'text-red-800';
+                          }
+                          
                           return (
                             <div 
                               key={optIndex} 
-                              className={`p-2 rounded border ${
-                                isUserAnswer 
-                                  ? question.is_correct 
-                                    ? 'bg-green-50 border-green-200 text-green-800' 
-                                    : 'bg-red-50 border-red-200 text-red-800'
-                                  : 'bg-muted'
-                              }`}
+                              className={`p-3 rounded border ${bgColor} ${borderColor} ${textColor}`}
                             >
-                              {formatOption(option, optIndex)}
-                              {isUserAnswer && (
-                                <Badge variant={question.is_correct ? "default" : "destructive"} className="ml-2">
-                                  Your Answer
-                                </Badge>
-                              )}
+                              <div className="flex items-center justify-between">
+                                <span>{formatOption(option, optIndex)}</span>
+                                <div className="flex gap-2">
+                                  {isCorrectAnswer && (
+                                    <Badge variant="default" className="bg-green-600 hover:bg-green-700">
+                                      ✓ Correct Answer
+                                    </Badge>
+                                  )}
+                                  {isUserAnswer && (
+                                    <Badge variant={question.is_correct ? "default" : "destructive"}>
+                                      Your Answer
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           );
                         })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Show answers for non-MCQ questions */}
+                  {(!question.options || question.options.length === 0) && (
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="font-medium mb-2">Your Answer:</h4>
+                        <div className={`p-3 rounded border ${
+                          question.is_correct 
+                            ? 'bg-green-50 border-green-200 text-green-800' 
+                            : 'bg-red-50 border-red-200 text-red-800'
+                        }`}>
+                          {question.user_answer || 'No answer provided'}
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-medium mb-2">Correct Answer:</h4>
+                        <div className="p-3 rounded border bg-green-50 border-green-200 text-green-700">
+                          {question.correct_answer || 'Not available'}
+                        </div>
                       </div>
                     </div>
                   )}

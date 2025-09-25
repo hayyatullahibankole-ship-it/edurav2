@@ -303,6 +303,14 @@ const TestResults = () => {
                   Take Another Test
                 </Button>
               </ScheduleTestModal>
+              {attemptId && (
+                <Link to={`/answer-review?attempt=${attemptId}`}>
+                  <Button variant="default">
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    Review Answers
+                  </Button>
+                </Link>
+              )}
               <Button 
                 variant="outline"
                 onClick={() => {
