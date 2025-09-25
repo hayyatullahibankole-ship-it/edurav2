@@ -25,12 +25,28 @@ export default function AnalyticsHub() {
     recentUsers: 0,
     recentExams: 0,
     activeSessions: 0,
-    subjectPerformance: []
+    subjectPerformance: [] as any[],
+    userGrowth: [] as any[],
+    examTrends: [] as any[],
+    revenue: [] as any[],
+    demographics: [] as any[]
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchAnalyticsData();
+
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => fetchAnalyticsData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'attempts' }, () => fetchAnalyticsData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'results' }, () => fetchAnalyticsData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => fetchAnalyticsData())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchAnalyticsData = async () => {
@@ -44,14 +60,16 @@ export default function AnalyticsHub() {
         attemptsResp,
         resultsResp,
         recentUsersResp,
-        subjectsResp
+        subjectsResp,
+        transactionsResp
       ] = await Promise.all([
         supabase.from('users').select('*'),
         supabase.from('exams').select('*'),
         supabase.from('attempts').select('*'),
         supabase.from('results').select('*'),
         supabase.from('users').select('*').gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
-        supabase.from('subjects').select('name').eq('is_active', true)
+        supabase.from('subjects').select('id, name').eq('is_active', true),
+        supabase.from('transactions').select('*')
       ]);
 
       const users = usersResp.data || [];
@@ -59,18 +77,67 @@ export default function AnalyticsHub() {
       const attempts = attemptsResp.data || [];
       const results = resultsResp.data || [];
       const recentUsers = recentUsersResp.data || [];
+      const subjects = subjectsResp.data || [];
+      const transactions = transactionsResp.data || [];
 
       // Calculate average score
-      const totalScore = results.reduce((sum, result) => sum + (result.percentage || 0), 0);
+      const totalScore = results.reduce((sum: number, result: any) => sum + (Number(result.percentage) || 0), 0);
       const avgScore = results.length > 0 ? totalScore / results.length : 0;
 
-      // Get subject performance data
-      const subjectStats = [
-        { name: 'Mathematics', score: 85.2, attempts: Math.floor(Math.random() * 100) + 50 },
-        { name: 'English', score: 82.7, attempts: Math.floor(Math.random() * 100) + 50 },
-        { name: 'Physics', score: 78.9, attempts: Math.floor(Math.random() * 100) + 50 },
-        { name: 'Chemistry', score: 75.4, attempts: Math.floor(Math.random() * 100) + 50 }
-      ];
+      // Build last 14 days time-series
+      const days = Array.from({ length: 14 }, (_, i) => {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() - (13 - i));
+        return d;
+      });
+      const label = (d: Date) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+      const userGrowth = days.map((d) => ({
+        date: label(d),
+        count: users.filter((u: any) => new Date(u.created_at).toDateString() === d.toDateString()).length
+      }));
+
+      const examTrends = days.map((d) => {
+        const dayAttempts = attempts.filter((a: any) => new Date(a.created_at).toDateString() === d.toDateString());
+        return {
+          date: label(d),
+          attempts: dayAttempts.length,
+          submissions: dayAttempts.filter((a: any) => a.status === 'SUBMITTED').length,
+        };
+      });
+
+      const revenue = days.map((d) => {
+        const dayTx = transactions.filter((t: any) => new Date(t.created_at).toDateString() === d.toDateString());
+        const amount = dayTx.reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0);
+        return { date: label(d), amount };
+      });
+
+      // Demographics (by country)
+      const countryCounts = users.reduce((acc: Record<string, number>, u: any) => {
+        const c = u.country || 'Unknown';
+        acc[c] = (acc[c] || 0) + 1;
+        return acc;
+      }, {});
+      const demographics = Object.entries(countryCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([label, count]) => ({ label, count: Number(count), percent: Math.round((Number(count) / Math.max(users.length, 1)) * 100) }));
+
+      // Subject performance (based on attempts per subject)
+      const subjectMap: Record<string, string> = Object.fromEntries(subjects.map((s: any) => [s.id, s.name]));
+      const subjectCounts: Record<string, number> = {};
+      attempts.forEach((a: any) => {
+        const selected: string[] = Array.isArray(a.selected_subjects) ? a.selected_subjects : [];
+        selected.forEach((sid) => { subjectCounts[sid] = (subjectCounts[sid] || 0) + 1; });
+      });
+      const subjectArray = Object.entries(subjectCounts).map(([id, count]) => ({ name: subjectMap[id] || 'Unknown', attempts: Number(count) }));
+      const maxCount = subjectArray.reduce((m, s) => Math.max(m, s.attempts), 1);
+      const subjectStats = subjectArray.sort((a, b) => b.attempts - a.attempts).slice(0, 4).map((s) => ({
+        name: s.name,
+        attempts: s.attempts,
+        score: Math.round((s.attempts / maxCount) * 1000) / 10,
+      }));
 
       setAnalytics({
         totalUsers: users.length,
@@ -78,9 +145,13 @@ export default function AnalyticsHub() {
         totalAttempts: attempts.length,
         avgScore: Math.round(avgScore * 10) / 10,
         recentUsers: recentUsers.length,
-        recentExams: attempts.filter(a => new Date(a.created_at) >= new Date(Date.now() - 24 * 60 * 60 * 1000)).length,
-        activeSessions: attempts.filter(a => a.status === 'STARTED').length,
-        subjectPerformance: subjectStats
+        recentExams: attempts.filter((a: any) => new Date(a.created_at) >= new Date(Date.now() - 24 * 60 * 60 * 1000)).length,
+        activeSessions: attempts.filter((a: any) => a.status === 'STARTED').length,
+        subjectPerformance: subjectStats,
+        userGrowth,
+        examTrends,
+        revenue,
+        demographics,
       });
 
     } catch (error) {
@@ -322,15 +393,20 @@ export default function AnalyticsHub() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white">User Growth</h3>
-                  <div className="h-48 bg-slate-700 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <TrendingUp className="w-8 h-8 text-slate-500 mx-auto mb-2" />
-                      <p className="text-slate-400">User Growth Chart</p>
-                    </div>
-                  </div>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-white">User Growth</h3>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={analytics.userGrowth}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis dataKey="date" stroke="#9CA3AF" />
+                      <YAxis stroke="#9CA3AF" />
+                      <Tooltip contentStyle={{ backgroundColor: '#374151', border: 'none', borderRadius: '8px', color: '#fff' }} />
+                      <Bar dataKey="count" fill="#6366F1" />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
+              </div>
                 
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white">User Demographics</h3>
