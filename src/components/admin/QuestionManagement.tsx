@@ -352,7 +352,7 @@ export default function QuestionManagement() {
 
       toast({
         title: "Success",
-        description: `Successfully generated ${data.totalQuestions} questions across ${data.subjects.length} subjects`,
+        description: `Successfully generated ${data.totalQuestions} questions across ${data.subjects?.length || 0} subjects`,
       });
 
       // Refresh the questions list
@@ -369,6 +369,14 @@ export default function QuestionManagement() {
       setIsGenerating(false);
     }
   };
+
+  // Auto-generate questions on component mount if no questions exist
+  useEffect(() => {
+    if (!loading && questions.length === 0 && subjects.length > 0) {
+      console.log('No questions found, auto-generating...');
+      handleGenerateQuestions();
+    }
+  }, [loading, questions.length, subjects.length]);
 
   const filteredQuestions = questions.filter(question => {
     const matchesSearch = question.question_text.toLowerCase().includes(searchTerm.toLowerCase()) ||
