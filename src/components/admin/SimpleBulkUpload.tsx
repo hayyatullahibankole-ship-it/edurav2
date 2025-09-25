@@ -447,8 +447,8 @@ Explanation: Capitalism is an economic system characterized by private ownership
       </CardHeader>
 
       {/* Scrollable Content */}
-      <CardContent className="flex-1 p-0">
-        <ScrollArea className="h-[65vh]">
+      <CardContent className="flex-1 p-0 overflow-hidden">
+        <ScrollArea className="h-full">
           <div className="p-6 space-y-6">
             <Alert className="border-warning/20 bg-warning/5">
               <ExternalLink className="h-4 w-4" />

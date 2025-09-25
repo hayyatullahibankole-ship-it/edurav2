@@ -275,11 +275,11 @@ export default function QuestionManagement() {
                   Bulk Upload Questions
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[900px] h-[80vh] max-h-[90vh] flex flex-col">
+              <DialogContent className="sm:max-w-[900px] h-[80vh] max-h-[90vh] flex flex-col overflow-hidden">
                 <DialogHeader>
                   <DialogTitle>Bulk Upload WAEC/JAMB Questions</DialogTitle>
                 </DialogHeader>
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-hidden min-h-0">
                   <SimpleBulkUpload 
                     subjects={subjects} 
                     onUploadComplete={() => {
