@@ -30,9 +30,9 @@ export default function SystemConfig() {
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
     // General Settings
-    siteName: 'EduCBT Platform',
+    siteName: 'Edura Platform',
     siteDescription: 'Advanced Computer-Based Testing Platform',
-    adminEmail: 'admin@educbt.com',
+    adminEmail: 'admin@edura.com',
     timezone: 'Africa/Lagos',
     
     // Exam Settings

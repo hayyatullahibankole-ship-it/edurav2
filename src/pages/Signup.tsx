@@ -37,7 +37,7 @@ const Signup = () => {
             <div className="bg-primary p-2 rounded-lg">
               <GraduationCap className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="font-inter font-bold text-2xl text-foreground">EduCBT</span>
+            <span className="font-inter font-bold text-2xl text-foreground">Edura</span>
           </Link>
         </div>
 

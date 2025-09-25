@@ -223,7 +223,7 @@ export default function AuthForm() {
             <div className="bg-primary p-2 rounded-lg">
               <GraduationCap className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold text-foreground">EduCBT</span>
+            <span className="text-2xl font-bold text-foreground">Edura</span>
           </Link>
         </div>
 

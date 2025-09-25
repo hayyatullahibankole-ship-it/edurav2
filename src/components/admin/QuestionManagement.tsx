@@ -24,10 +24,11 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
-  Download
+  Download,
+  Loader2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import BoverModule from './BoverModule';
 
 interface Question {
   id: string;
@@ -798,31 +799,62 @@ export default function QuestionManagement() {
                         variant="ghost" 
                         size="sm"
                         onClick={async () => {
-                          if (confirm(`Are you sure you want to delete this question?`)) {
+                          const confirmMessage = `Are you sure you want to delete the question: "${question.question_text.substring(0, 50)}..."?`;
+                          if (confirm(confirmMessage)) {
                             try {
-                              const { error } = await supabase
-                                .from('questions')
-                                .delete()
-                                .eq('id', question.id);
+                              setLoading(true);
                               
-                              if (error) throw error;
+                              // First check if question is being used in any attempts
+                              const { data: attemptAnswers } = await supabase
+                                .from('attempt_answers')
+                                .select('id')
+                                .eq('question_id', question.id)
+                                .limit(1);
                               
-                              toast({
-                                title: "Success",
-                                description: "Question deleted successfully"
-                              });
-                              fetchData();
+                              if (attemptAnswers && attemptAnswers.length > 0) {
+                                // Soft delete by setting is_active to false
+                                const { error } = await supabase
+                                  .from('questions')
+                                  .update({ is_active: false })
+                                  .eq('id', question.id);
+                                
+                                if (error) throw error;
+                                
+                                toast({
+                                  title: "Question Deactivated",
+                                  description: "Question has been deactivated as it's being used in exam attempts"
+                                });
+                              } else {
+                                // Hard delete if not used
+                                const { error } = await supabase
+                                  .from('questions')
+                                  .delete()
+                                  .eq('id', question.id);
+                                
+                                if (error) throw error;
+                                
+                                toast({
+                                  title: "Success",
+                                  description: "Question deleted successfully"
+                                });
+                              }
+                              
+                              await fetchData();
                             } catch (error) {
+                              console.error('Delete error:', error);
                               toast({
                                 title: "Error",
-                                description: "Failed to delete question",
+                                description: "Failed to delete question. Please try again.",
                                 variant: "destructive"
                               });
+                            } finally {
+                              setLoading(false);
                             }
                           }
                         }}
+                        disabled={loading}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                       </Button>
                     </div>
                   </div>

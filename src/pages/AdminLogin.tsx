@@ -155,7 +155,7 @@ export default function AdminLogin() {
           <div>
             <CardTitle className="text-2xl font-bold">Admin Portal</CardTitle>
             <CardDescription className="text-base">
-              Secure access to EduCBT administration
+              Secure access to Edura administration
             </CardDescription>
           </div>
         </CardHeader>
@@ -177,7 +177,7 @@ export default function AdminLogin() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="admin@educbt.com"
+                placeholder="admin@edura.com"
                 value={formData.email}
                 onChange={handleInputChange}
                 className={errors.email ? 'border-destructive' : ''}

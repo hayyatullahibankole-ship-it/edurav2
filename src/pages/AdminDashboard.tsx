@@ -183,7 +183,7 @@ export default function AdminDashboard() {
                   <Shield className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold">EduCBT Admin</h1>
+                  <h1 className="text-xl font-bold">Edura Admin</h1>
                   <p className="text-xs text-muted-foreground">Administration Portal</p>
                 </div>
               </div>

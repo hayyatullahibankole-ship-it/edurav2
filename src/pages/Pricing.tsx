@@ -228,7 +228,7 @@ const Pricing = () => {
               Start Your Journey Today
             </h2>
             <p className="text-xl mb-8 opacity-90">
-              Join over 50,000 students who achieved their dream scores with EduCBT
+              Join over 50,000 students who achieved their dream scores with Edura
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to={user ? "/payment?plan=premium" : "/auth"}>

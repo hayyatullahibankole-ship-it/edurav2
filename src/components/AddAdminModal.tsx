@@ -219,7 +219,7 @@ export default function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
               id="email"
               name="email"
               type="email"
-              placeholder="admin@educbt.com"
+              placeholder="admin@edura.com"
               value={formData.email}
               onChange={handleInputChange}
               className={errors.email ? 'border-destructive' : ''}

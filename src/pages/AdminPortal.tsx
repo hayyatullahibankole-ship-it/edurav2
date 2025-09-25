@@ -132,7 +132,7 @@ export default function AdminPortal() {
                   <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-lg sm:text-xl font-bold text-white">EduCBT Control Center</h1>
+                  <h1 className="text-lg sm:text-xl font-bold text-white">Edura Control Center</h1>
                   <p className="text-xs sm:text-sm text-slate-400">Administrator Portal</p>
                 </div>
               </div>
