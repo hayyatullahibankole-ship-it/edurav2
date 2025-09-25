@@ -204,11 +204,31 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
       return;
     }
 
+    // Confirm before clearing existing questions
+    const shouldClear = confirm("This will first clear ALL existing questions in the database to prevent duplicates. Continue?");
+    if (!shouldClear) return;
+
     setIsUploading(true);
     setUploadProgress(0);
     setUploadResults(null);
 
     try {
+      // First, clear all existing questions
+      console.log('Clearing all existing questions...');
+      const { error: clearError } = await supabase
+        .from('questions')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+      
+      if (clearError) {
+        throw new Error(`Failed to clear existing questions: ${clearError.message}`);
+      }
+
+      toast({
+        title: "Database Cleared",
+        description: "All existing questions removed. Now uploading new questions...",
+      });
+
       let questions: any[] = [];
       
       if (uploadFile) {
@@ -227,6 +247,7 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
       let successCount = 0;
       let failedCount = 0;
       const errors: string[] = [];
+      const usedQuestions = new Set<string>(); // Prevent duplicates
 
       // Process questions in batches
       const batchSize = 10;
@@ -235,6 +256,14 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
         
         for (const questionData of batch) {
           try {
+            // Skip if we've already seen this question
+            const questionKey = questionData.question_text.trim().toLowerCase();
+            if (usedQuestions.has(questionKey)) {
+              console.log(`Skipping duplicate question: ${questionData.question_text.substring(0, 50)}...`);
+              continue;
+            }
+            usedQuestions.add(questionKey);
+
             // Validate correct answer
             const correctIndex = ['A', 'B', 'C', 'D', 'E'].indexOf(questionData.correct_answer);
             if (correctIndex === -1 || correctIndex >= questionData.options.length) {
@@ -277,7 +306,7 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
       if (successCount > 0) {
         toast({
           title: "Upload Complete!",
-          description: `Successfully imported ${successCount} questions`,
+          description: `Successfully imported ${successCount} unique questions`,
         });
         onUploadComplete();
       }
@@ -398,30 +427,20 @@ Explanation: Capitalism is an economic system characterized by private ownership
       <CardContent className="space-y-6">
         {/* Templates and Sources */}
         <div className="space-y-4">
-          <Alert className="border-blue-600/20 bg-blue-950/20">
-            <FileText className="h-4 w-4" />
+          <Alert className="border-green-600/20 bg-green-950/20">
+            <CheckCircle className="h-4 w-4" />
             <AlertDescription className="text-slate-300">
               <div className="space-y-3">
-                <p className="font-medium">Authentic WAEC/JAMB Question Templates</p>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={copyWAECTemplate}
-                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    WAEC Format
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={copyJAMBTemplate}
-                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    JAMB Format
-                  </Button>
+                <p className="font-medium">✅ Manual Upload is the Best Approach</p>
+                <p className="text-sm">For 10,000+ authentic WAEC/JAMB questions, manual bulk upload ensures:</p>
+                <ul className="text-sm space-y-1 ml-4">
+                  <li>• <strong>100% Authenticity:</strong> Real past questions from official sources</li>
+                  <li>• <strong>Zero Duplicates:</strong> Complete control over content</li>
+                  <li>• <strong>Proper Quality:</strong> Each question manually verified</li>
+                  <li>• <strong>Fast Processing:</strong> Upload thousands at once</li>
+                </ul>
+                <div className="mt-2 p-2 bg-slate-800/50 rounded text-xs">
+                  <strong>💡 Pro Tip:</strong> This upload will clear ALL existing questions first to prevent any duplicates, then upload your fresh content.
                 </div>
               </div>
             </AlertDescription>
