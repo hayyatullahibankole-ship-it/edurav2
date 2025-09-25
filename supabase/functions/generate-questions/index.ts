@@ -109,22 +109,17 @@ function generateQuestion(subject: Subject, index: number) {
   // Generate specific content based on subject
   const questionText = generateSubjectSpecificQuestion(subject, index, template);
   const options = generateSubjectSpecificOptions(subject, index, template);
-  const correctAnswer = "A"; // For simplicity, always make A correct
+  const correctAnswerIndex = 0; // Make option A (index 0) correct for now
   const explanation = generateExplanation(subject, questionText, options[0]);
 
   return {
     question_text: questionText,
-    type: 'MULTIPLE_CHOICE' as const,
-    options: {
-      A: options[0],
-      B: options[1],
-      C: options[2],
-      D: options[3]
-    },
-    correct_answer: correctAnswer,
+    type: 'MCQ_SINGLE',
+    options: options,
+    correct_answer: correctAnswerIndex,
     explanation: explanation,
     difficulty_level: difficulty,
-    points: difficulty,
+    points: 1,
     subject_id: subject.id,
     is_active: true,
     tags: template.topics
@@ -298,7 +293,7 @@ serve(async (req) => {
       .from('subjects')
       .select('id, name, code')
       .eq('is_active', true)
-      .not('name', 'in', '("English Language", "Literature in English")');
+      .neq('code', 'ENG');
 
     if (subjectError) {
       throw new Error(`Failed to fetch subjects: ${subjectError.message}`);
