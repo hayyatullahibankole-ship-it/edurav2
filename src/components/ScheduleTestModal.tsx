@@ -160,41 +160,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
     try {
       setLoading(true);
 
-      // Create exam record
-      const examData = {
-        title: testConfig.title,
-        description: testConfig.description,
-        type: testConfig.examType.toUpperCase() as 'JAMB' | 'WAEC' | 'CUSTOM',
-        duration_minutes: testConfig.duration,
-        total_questions: testConfig.subjects.length * testConfig.questionCount,
-        is_published: true,
-        instructions: "Read each question carefully and select the best answer."
-      };
-
-      const { data: exam, error: examError } = await supabase
-        .from('exams')
-        .insert(examData)
-        .select()
-        .single();
-
-      if (examError) throw examError;
-
-      // Create exam_subjects records
-      const examSubjects = testConfig.subjects.map(subjectId => ({
-        exam_id: exam.id,
-        subject_id: subjectId,
-        subject_name: subjects.find(s => s.id === subjectId)?.name || '',
-        question_count: testConfig.questionCount,
-        is_mandatory: true
-      }));
-
-      const { error: subjectsError } = await supabase
-        .from('exam_subjects')
-        .insert(examSubjects);
-
-      if (subjectsError) throw subjectsError;
-
-      // Create attempt record
+      // Get user profile id
       const { data: userProfile } = await supabase
         .from('users')
         .select('id')
@@ -205,12 +171,19 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
         throw new Error('User profile not found');
       }
 
+      // Create attempt with practice config in proctoring_data
       const attemptData = {
-        exam_id: exam.id,
         user_id: userProfile.id,
         selected_subjects: testConfig.subjects,
         status: 'STARTED' as 'STARTED',
-        time_remaining_seconds: testConfig.duration * 60
+        time_remaining_seconds: testConfig.duration * 60,
+        proctoring_data: {
+          title: testConfig.title || `${examTypes.find(t => t.value === testConfig.examType)?.label || 'Practice'} Test`,
+          description: testConfig.description || 'Practice Examination',
+          exam_type: testConfig.examType,
+          question_count_per_subject: testConfig.questionCount,
+          duration_minutes: testConfig.duration
+        }
       };
 
       const { data: attempt, error: attemptError } = await supabase
@@ -223,7 +196,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
 
       toast({
         title: "Test Started Successfully!",
-        description: `${testConfig.title} has been started`,
+        description: `${testConfig.title || 'Practice Test'} has been started`,
       });
       
       setOpen(false);

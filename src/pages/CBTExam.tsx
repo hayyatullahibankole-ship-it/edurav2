@@ -27,20 +27,10 @@ const CBTExam = () => {
     try {
       setLoading(true);
 
-      // Fetch attempt and exam data
+      // Fetch attempt only (practice config stored in proctoring_data)
       const { data: attempt, error: attemptError } = await supabase
         .from('attempts')
-        .select(`
-          *,
-          exams (
-            *,
-            exam_subjects (
-              subject_id,
-              subject_name,
-              question_count
-            )
-          )
-        `)
+        .select('*')
         .eq('id', attemptId)
         .single();
 
@@ -52,15 +42,19 @@ const CBTExam = () => {
       const selectedSubjects = Array.isArray(attempt.selected_subjects) 
         ? attempt.selected_subjects as string[]
         : [];
-      const questionsPerSubject = attempt.exams.exam_subjects.reduce((acc: any, es: any) => {
-        acc[es.subject_id] = es.question_count;
-        return acc;
-      }, {});
+      const { data: subjectRows } = await supabase
+        .from('subjects')
+        .select('id, name')
+        .in('id', selectedSubjects);
+      const subjectNameMap: Record<string, string> = {};
+      (subjectRows || []).forEach((s: any) => subjectNameMap[s.id] = s.name);
+
+      const perSubject = (attempt.proctoring_data as any)?.question_count_per_subject || 40;
 
       const allQuestions: any[] = [];
 
       for (const subjectId of selectedSubjects) {
-        const questionCount = questionsPerSubject[subjectId] || 40;
+        const questionCount = perSubject;
         
         const { data: subjectQuestions, error } = await supabase
           .from('questions')
@@ -75,7 +69,7 @@ const CBTExam = () => {
           // Transform questions to match the expected format
           const transformedQuestions = subjectQuestions.map((q, index) => ({
             id: allQuestions.length + index + 1,
-            subject: attempt.exams.exam_subjects.find((es: any) => es.subject_id === subjectId)?.subject_name || 'Unknown',
+            subject: subjectNameMap[subjectId] || 'Unknown',
             question: q.question_text,
             options: Array.isArray(q.options) ? (q.options as string[]).map((opt: string, i: number) => `${String.fromCharCode(65 + i)}) ${opt}`) : [],
             correct: Array.isArray(q.options) ? String.fromCharCode(65 + (typeof q.correct_answer === 'number' ? q.correct_answer : 0)) : 'A',
@@ -204,10 +198,10 @@ const CBTExam = () => {
 
   return (
     <ExamInterface
-      examTitle={examData?.exams?.title || "Practice Test"}
-      examDescription={examData?.exams?.description || "Practice Examination"}
+      examTitle={(examData?.proctoring_data as any)?.title || "Practice Test"}
+      examDescription={(examData?.proctoring_data as any)?.description || "Practice Examination"}
       questions={questions}
-      duration={examData?.exams?.duration_minutes || 90}
+      duration={examData?.time_remaining_seconds ? Math.ceil(examData.time_remaining_seconds / 60) : ((examData?.proctoring_data as any)?.duration_minutes || 90)}
       onSubmit={handleExamSubmit}
       allowReview={true}
       showExplanations={false}
