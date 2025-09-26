@@ -499,24 +499,49 @@ function selectQuestionsForExam(allQuestions: any[], exam: any, selectedSubjects
   const questionsBySubject = groupBy(allQuestions, 'subject_id');
   const selectedQuestions: any[] = [];
 
+  // JAMB: English (60) + 3 selected subjects (40 each) = 180 total
   if (exam.type === 'JAMB') {
-    // English: 60 questions
-    const englishQuestions = questionsBySubject['English Language'] || [];
-    selectedQuestions.push(...shuffleArray(englishQuestions).slice(0, 60));
+    // Find English subject ID
+    const englishSubjectId = Object.keys(questionsBySubject).find(id => 
+      questionsBySubject[id].some((q: any) => q.subject_name?.toLowerCase().includes('english'))
+    );
     
-    // Other subjects: 40 each
-    selectedSubjects?.forEach(subject => {
-      const subjectQuestions = questionsBySubject[subject] || [];
-      selectedQuestions.push(...shuffleArray(subjectQuestions).slice(0, 40));
+    if (englishSubjectId) {
+      const englishQuestions = questionsBySubject[englishSubjectId] || [];
+      const englishSelected = shuffleArray([...englishQuestions]).slice(0, 60);
+      selectedQuestions.push(...englishSelected);
+    }
+    
+    // Add 40 questions from each of the 3 selected subjects
+    (selectedSubjects || []).slice(0, 3).forEach(subjectId => {
+      const subjectQuestions = questionsBySubject[subjectId] || [];
+      const subjectSelected = shuffleArray([...subjectQuestions]).slice(0, 40);
+      selectedQuestions.push(...subjectSelected);
+    });
+  } else if (exam.type === 'WAEC') {
+    // WAEC: 50-60 questions per subject based on subject requirements
+    (selectedSubjects || []).forEach(subjectId => {
+      const subjectQuestions = questionsBySubject[subjectId] || [];
+      // WAEC standard: 50-60 questions per paper
+      const questionCount = Math.min(Math.max(50, subjectQuestions.length), 60);
+      const subjectSelected = shuffleArray([...subjectQuestions]).slice(0, questionCount);
+      selectedQuestions.push(...subjectSelected);
     });
   } else {
-    // For WAEC and CUSTOM exams, use configured question counts
-    Object.entries(questionsBySubject).forEach(([subjectId, questions]) => {
-      const subjectQuestions = questions as any[];
-      // Use default question count or configured count
-      const questionCount = 40; // This could be made configurable
-      selectedQuestions.push(...shuffleArray(subjectQuestions).slice(0, questionCount));
-    });
+    // Custom exam - use exam configuration
+    if (exam.exam_subjects && exam.exam_subjects.length > 0) {
+      exam.exam_subjects.forEach((examSubject: any) => {
+        const subjectQuestions = questionsBySubject[examSubject.subject_id] || [];
+        const questionCount = Math.min(examSubject.question_count, subjectQuestions.length);
+        const subjectSelected = shuffleArray([...subjectQuestions]).slice(0, questionCount);
+        selectedQuestions.push(...subjectSelected);
+      });
+    } else {
+      // Fallback: select questions from all available subjects
+      const totalNeeded = exam.total_questions || 40;
+      const allShuffled = shuffleArray([...allQuestions]);
+      selectedQuestions.push(...allShuffled.slice(0, totalNeeded));
+    }
   }
 
   return shuffleArray(selectedQuestions);
@@ -524,27 +549,39 @@ function selectQuestionsForExam(allQuestions: any[], exam: any, selectedSubjects
 
 function calculateExamResults(answers: any[], examType: string, selectedSubjects?: string[]) {
   const totalQuestions = answers.length;
-  const correctAnswers = answers.filter(a => a.is_correct).length;
-  const wrongAnswers = answers.filter(a => !a.is_correct && a.answer !== null).length;
-  const unanswered = answers.filter(a => a.answer === null).length;
+  const correctAnswers = answers.filter((a: any) => a.is_correct).length;
+  const wrongAnswers = answers.filter((a: any) => !a.is_correct && a.answer !== null).length;
+  const unanswered = answers.filter((a: any) => a.answer === null).length;
 
-  // Calculate subject breakdown
-  const subjectBreakdown: Record<string, any> = {};
+  // Group by subject for breakdown
+  const subjectBreakdown: { [key: string]: { total: number; correct: number; percentage: number; grade?: string } } = {};
   
-  answers.forEach(answer => {
+  answers.forEach((answer: any) => {
     const subjectId = answer.questions?.subject_id;
-    if (subjectId) {
-      if (!subjectBreakdown[subjectId]) {
-        subjectBreakdown[subjectId] = { total: 0, correct: 0 };
-      }
-      subjectBreakdown[subjectId].total++;
-      if (answer.is_correct) {
-        subjectBreakdown[subjectId].correct++;
-      }
+    if (!subjectId) return;
+    
+    if (!subjectBreakdown[subjectId]) {
+      subjectBreakdown[subjectId] = { total: 0, correct: 0, percentage: 0 };
+    }
+    
+    subjectBreakdown[subjectId].total += 1;
+    if (answer.is_correct) {
+      subjectBreakdown[subjectId].correct += 1;
     }
   });
 
-  const percentage = Math.round((correctAnswers / totalQuestions) * 100 * 100) / 100;
+  // Calculate percentages and grades
+  Object.keys(subjectBreakdown).forEach(subjectId => {
+    const subject = subjectBreakdown[subjectId];
+    subject.percentage = Math.round((subject.correct / subject.total) * 100);
+    
+    // Add WAEC grade for each subject
+    if (examType === 'WAEC') {
+      subject.grade = getWAECGrade(subject.percentage);
+    }
+  });
+
+  const percentage = Math.round((correctAnswers / totalQuestions) * 100);
 
   let result: any = {
     totalQuestions,
@@ -552,15 +589,38 @@ function calculateExamResults(answers: any[], examType: string, selectedSubjects
     wrongAnswers,
     unanswered,
     percentage,
-    subjectBreakdown
+    subjectBreakdown,
+    examType
   };
 
+  // Apply exam-specific scoring
   if (examType === 'JAMB') {
-    // JAMB scaling: (rawCorrect / 180) * 400
-    result.scaledScore = Math.round((correctAnswers / 180) * 400);
+    // JAMB scaling: Raw score to 400-point scale (standard JAMB scoring)
+    result.scaledScore = Math.round((correctAnswers / totalQuestions) * 400);
+    result.rawScore = correctAnswers; // Out of 180 for JAMB
+  } else if (examType === 'WAEC') {
+    // WAEC uses percentage-based grading with letter grades
+    result.overallGrade = getWAECGrade(percentage);
+    result.rawScore = correctAnswers;
+  } else {
+    // Custom exam scoring
+    result.rawScore = correctAnswers;
   }
 
   return result;
+}
+
+// WAEC Grading Scale (Nigerian Standard)
+function getWAECGrade(percentage: number): string {
+  if (percentage >= 85) return 'A1'; // Excellent
+  if (percentage >= 75) return 'B2'; // Very Good
+  if (percentage >= 65) return 'B3'; // Good
+  if (percentage >= 55) return 'C4'; // Credit
+  if (percentage >= 50) return 'C5'; // Credit
+  if (percentage >= 45) return 'C6'; // Credit
+  if (percentage >= 40) return 'D7'; // Pass
+  if (percentage >= 35) return 'E8'; // Pass
+  return 'F9'; // Fail
 }
 
 function checkAnswerCorrectness(userAnswer: any, correctAnswer: any): boolean {

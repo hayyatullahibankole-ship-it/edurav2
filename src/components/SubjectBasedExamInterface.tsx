@@ -108,13 +108,20 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
   const currentQuestion = currentSubjectData?.questions[currentQuestionInSubject];
   const globalQuestionIndex = currentQuestion ? currentQuestion.id - 1 : 0;
 
-  // Timer effect
+  const handleAutoSubmit = useCallback(() => {
+    const totalTime = duration * 60;
+    const timeTaken = totalTime - timeLeft;
+    onSubmit(answers, timeTaken);
+  }, [answers, duration, timeLeft, onSubmit]);
+
+  // Timer effect with auto-submit on time expiry
   useEffect(() => {
     if (isPaused || timeLeft <= 0) return;
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
+          // Auto-submit all answers when time expires (JAMB/WAEC standard)
           handleAutoSubmit();
           return 0;
         }
@@ -123,7 +130,7 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isPaused, timeLeft]);
+  }, [isPaused, timeLeft, handleAutoSubmit]);
 
   // Anti-cheat monitoring
   useEffect(() => {
@@ -201,12 +208,6 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
       return newFlagged;
     });
   };
-
-  const handleAutoSubmit = useCallback(() => {
-    const totalTime = duration * 60;
-    const timeTaken = totalTime - timeLeft;
-    onSubmit(answers, timeTaken);
-  }, [answers, duration, timeLeft, onSubmit]);
 
   const confirmSubmit = () => {
     setShowSubmitDialog(false);
@@ -409,14 +410,16 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
 
                 <div className="space-y-3">
                   {currentQuestion.options.map((option, index) => {
-                    const optionLetter = option.split(')')[0];
+                    // Handle both pre-lettered options (A) text) and plain text options
+                    const optionLetter = option.includes(')') ? option.split(')')[0] : String.fromCharCode(65 + index);
+                    const optionText = option.includes(')') ? option : `${optionLetter}) ${option}`;
                     const isSelected = answers[globalQuestionIndex] === optionLetter;
                     const isCorrect = showExplanations && optionLetter === currentQuestion.correct;
                     const isWrong = showExplanations && isSelected && optionLetter !== currentQuestion.correct;
                     
                     return (
                       <div
-                        key={index}
+                        key={`${globalQuestionIndex}-${index}`} // Ensure unique keys for shuffled options
                         className={`p-4 border rounded-lg cursor-pointer transition-all hover:bg-muted/50 ${
                           isSelected ? "border-primary bg-primary/10" : 
                           isCorrect ? "border-green-500 bg-green-50" :
@@ -435,7 +438,7 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
                             )}
                           </div>
                           <MathRenderer 
-                            content={option} 
+                            content={optionText} 
                             className="flex-1"
                           />
                         </div>

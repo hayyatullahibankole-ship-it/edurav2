@@ -95,17 +95,21 @@ const TestResults = () => {
         // Transform the data to match expected format
         const transformedResults: any = {
           score: Math.round(resultData.percentage || 0),
+          scaledScore: resultData.scaled_score, // For JAMB (out of 400)
+          rawScore: resultData.raw_score || resultData.correct_answers,
           totalQuestions: resultData.total_questions,
           correctAnswers: resultData.correct_answers,
           wrongAnswers: resultData.wrong_answers,
           unanswered: resultData.unanswered,
           timeTaken: resultData.time_taken_minutes,
           timeAllotted: examDuration,
+          examType: proctoringData.examType || 'CUSTOM',
           subjects: resultData.subject_breakdown ? Object.entries(resultData.subject_breakdown as any).map(([name, data]: [string, any]) => ({
             name,
             score: Math.round((data?.percentage ?? ((data?.correct ?? 0) / Math.max(1, data?.total ?? 0)) * 100) || 0),
             total: data?.total || 0,
-            correct: data?.correct || 0
+            correct: data?.correct || 0,
+            grade: data?.grade || null // WAEC grades (A1-F9)
           })) : []
         };
 
@@ -257,14 +261,27 @@ const TestResults = () => {
         <Card className="mb-8">
           <CardContent className="pt-8">
             <div className="text-center mb-8">
-              <div className={`text-7xl font-bold mb-4 ${getScoreColor(results.score)}`}>
-                {results.score}%
-              </div>
+              {/* Display score based on exam type */}
+              {results.examType === 'JAMB' && results.scaledScore ? (
+                <div>
+                  <div className={`text-7xl font-bold mb-2 ${getScoreColor(results.score)}`}>
+                    {results.scaledScore}/400
+                  </div>
+                  <div className="text-xl text-muted-foreground mb-4">
+                    JAMB Score: {results.score}% ({results.rawScore}/{results.totalQuestions})
+                  </div>
+                </div>
+              ) : (
+                <div className={`text-7xl font-bold mb-4 ${getScoreColor(results.score)}`}>
+                  {results.score}%
+                </div>
+              )}
               <Badge className={scoreBadge.color} variant="secondary">
-                {scoreBadge.label}
+                {results.examType === 'WAEC' ? `Grade: ${scoreBadge.label}` : scoreBadge.label}
               </Badge>
               <p className="text-muted-foreground mt-2">
                 You scored {results.correctAnswers} out of {results.totalQuestions} questions correctly
+                {results.examType === 'JAMB' && ` (${results.rawScore} raw score scaled to ${results.scaledScore}/400)`}
               </p>
             </div>
 
@@ -400,9 +417,16 @@ const TestResults = () => {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">{subject.name}</CardTitle>
-                      <Badge className={getScoreColor(subject.score)}>
-                        {subject.score}%
-                      </Badge>
+                      <div className="flex gap-2">
+                        <Badge className={getScoreColor(subject.score)}>
+                          {subject.score}%
+                        </Badge>
+                        {subject.grade && results.examType === 'WAEC' && (
+                          <Badge variant="outline" className="font-bold">
+                            {subject.grade}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
