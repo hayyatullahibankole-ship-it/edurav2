@@ -83,16 +83,43 @@ export default function QuestionManagement() {
     try {
       setLoading(true);
       
-      const [questionsResp, subjectsResp] = await Promise.all([
-        supabase.from('questions').select(`
-          *,
-          subjects(name, code)
-        `).order('created_at', { ascending: false }).limit(5000),
-        supabase.from('subjects').select('*').eq('is_active', true)
-      ]);
+      // Fetch subjects
+      const { data: subjectsData, error: subjectsError } = await supabase
+        .from('subjects')
+        .select('*')
+        .eq('is_active', true);
 
-      setQuestions(questionsResp.data || []);
-      setSubjects(subjectsResp.data || []);
+      if (subjectsError) throw subjectsError;
+
+      // Fetch all questions in pages of 1000 to bypass PostgREST max-rows
+      const pageSize = 1000;
+      let from = 0;
+      let to = pageSize - 1;
+      let allQuestions: any[] = [];
+
+      // Loop until fewer than pageSize returned
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { data: batch, error: batchError } = await supabase
+          .from('questions')
+          .select(`
+            *,
+            subjects(name, code)
+          `)
+          .order('created_at', { ascending: false })
+          .range(from, to);
+
+        if (batchError) throw batchError;
+        if (!batch || batch.length === 0) break;
+
+        allQuestions = allQuestions.concat(batch);
+        if (batch.length < pageSize) break;
+        from += pageSize;
+        to += pageSize;
+      }
+
+      setQuestions(allQuestions);
+      setSubjects(subjectsData || []);
       
     } catch (error) {
       console.error('Error fetching data:', error);
