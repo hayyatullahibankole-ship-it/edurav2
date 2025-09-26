@@ -484,21 +484,9 @@ export default function QuestionManagement() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Active Subjects</p>
-                  <p className="text-2xl font-bold text-secondary">{subjects.length}</p>
+                  <p className="text-2xl font-bold text-foreground">{subjects.length}</p>
                 </div>
-                <BookOpen className="w-8 h-8 text-secondary" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">English Questions</p>
-                  <p className="text-2xl font-bold text-accent">{questions.filter(q => subjects.find(s => s.id === q.subject_id)?.name === 'English Language').length}</p>
-                </div>
-                <BookOpen className="w-8 h-8 text-accent" />
+                <BookOpen className="w-8 h-8 text-primary" />
               </div>
             </CardContent>
           </Card>
