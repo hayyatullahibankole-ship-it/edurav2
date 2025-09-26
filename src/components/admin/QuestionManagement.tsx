@@ -483,7 +483,7 @@ export default function QuestionManagement() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Subjects</p>
+                  <p className="text-sm text-muted-foreground">Active Subjects</p>
                   <p className="text-2xl font-bold text-secondary">{subjects.length}</p>
                 </div>
                 <BookOpen className="w-8 h-8 text-secondary" />
@@ -496,9 +496,9 @@ export default function QuestionManagement() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">English Questions</p>
-                  <p className="text-2xl font-bold text-warning">{questions.filter(q => subjects.find(s => s.id === q.subject_id)?.name === 'English Language').length}</p>
+                  <p className="text-2xl font-bold text-accent">{questions.filter(q => subjects.find(s => s.id === q.subject_id)?.name === 'English Language').length}</p>
                 </div>
-                <AlertTriangle className="w-8 h-8 text-warning" />
+                <BookOpen className="w-8 h-8 text-accent" />
               </div>
             </CardContent>
           </Card>
