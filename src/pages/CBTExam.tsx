@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ExamInterface from "@/components/ExamInterface";
+import SubjectBasedExamInterface from "@/components/SubjectBasedExamInterface";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -177,6 +177,8 @@ const CBTExam = () => {
 
   const handleExamSubmit = async (answers: {[key: number]: string}, timeTaken: number) => {
     try {
+      console.log('Starting exam submission...', { attemptId, answersCount: Object.keys(answers).length });
+      
       // Update attempt status and save answers
       const { error: attemptError } = await supabase
         .from('attempts')
@@ -186,34 +188,48 @@ const CBTExam = () => {
         })
         .eq('id', attemptId);
 
-      if (attemptError) throw attemptError;
+      if (attemptError) {
+        console.error('Error updating attempt:', attemptError);
+        throw attemptError;
+      }
 
-      // Calculate score and prepare answers
+      // Calculate score and prepare answers - Fix the indexing issue
       let correctCount = 0;
       const subjectStats: Record<string, { total: number; correct: number }> = {};
-      const answerRecords = questions.map((question, index) => {
-        const isCorrect = answers[index] === question.correct;
+      
+      const answerRecords = questions.map((question, questionIndex) => {
+        // Use the question's ID minus 1 to match the answer key
+        const answerKey = question.id - 1;
+        const userAnswer = answers[answerKey];
+        const isCorrect = userAnswer === question.correct;
         const subject = question.subject || 'General';
+        
         subjectStats[subject] = subjectStats[subject] || { total: 0, correct: 0 };
         subjectStats[subject].total += 1;
         if (isCorrect) {
           correctCount++;
           subjectStats[subject].correct += 1;
         }
+        
         return {
           attempt_id: attemptId,
           question_id: question.originalId,
-          answer: answers[index] || null,
+          answer: userAnswer || null,
           is_correct: isCorrect,
           time_spent_seconds: Math.floor(timeTaken / questions.length)
         };
       });
 
+      console.log('Inserting answer records...', { recordCount: answerRecords.length });
+      
       const { error: answersError } = await supabase
         .from('attempt_answers')
         .insert(answerRecords);
 
-      if (answersError) throw answersError;
+      if (answersError) {
+        console.error('Error inserting answers:', answersError);
+        throw answersError;
+      }
 
       const percentage = (correctCount / questions.length) * 100;
       const wrongCount = questions.length - correctCount;
@@ -229,6 +245,8 @@ const CBTExam = () => {
         };
       });
 
+      console.log('Inserting results...', { correctCount, totalQuestions: questions.length, percentage });
+
       const { error: resultError } = await supabase
         .from('results')
         .insert({
@@ -243,8 +261,13 @@ const CBTExam = () => {
           subject_breakdown
         });
 
-      if (resultError) throw resultError;
+      if (resultError) {
+        console.error('Error inserting results:', resultError);
+        throw resultError;
+      }
 
+      console.log('Exam submitted successfully!');
+      
       toast({
         title: "Exam Submitted!",
         description: `You scored ${correctCount}/${questions.length} (${percentage.toFixed(1)}%)`,
@@ -253,9 +276,22 @@ const CBTExam = () => {
       navigate(`/results?attempt=${attemptId}`);
     } catch (error) {
       console.error('Error submitting exam:', error);
+      
+      // More specific error messages
+      let errorMessage = "Failed to submit exam. Please try again.";
+      if (error instanceof Error) {
+        if (error.message.includes('foreign key')) {
+          errorMessage = "Error saving answers. Please contact support.";
+        } else if (error.message.includes('duplicate')) {
+          errorMessage = "This exam has already been submitted.";
+        } else if (error.message.includes('permission')) {
+          errorMessage = "Permission denied. Please log in again.";
+        }
+      }
+      
       toast({
-        title: "Error",
-        description: "Failed to submit exam. Please try again.",
+        title: "Submission Error",
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -295,7 +331,7 @@ const CBTExam = () => {
   }
 
   return (
-    <ExamInterface
+    <SubjectBasedExamInterface
       examTitle={(examData?.proctoring_data as any)?.title || "Practice Test"}
       examDescription={(examData?.proctoring_data as any)?.description || "Practice Examination"}
       questions={questions}
