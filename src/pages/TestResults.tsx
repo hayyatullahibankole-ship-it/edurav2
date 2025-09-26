@@ -23,13 +23,16 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import ScheduleTestModal from "@/components/ScheduleTestModal";
+import { generateExamReportPDF } from "@/utils/pdfGenerator";
 
 const TestResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { userProfile } = useAuth();
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   
@@ -334,19 +337,40 @@ const TestResults = () => {
               </Button>
               <Button 
                 variant="outline"
-                onClick={() => {
-                  // Simple download functionality - could be enhanced later
-                  const dataStr = JSON.stringify(results, null, 2);
-                  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                  const exportFileDefaultName = `test-results-${new Date().toISOString().split('T')[0]}.json`;
-                  const linkElement = document.createElement('a');
-                  linkElement.setAttribute('href', dataUri);
-                  linkElement.setAttribute('download', exportFileDefaultName);
-                  linkElement.click();
-                  toast({
-                    title: "Download Started",
-                    description: "Test results downloaded successfully",
-                  });
+                onClick={async () => {
+                  try {
+                    // Generate professional PDF report
+                    const reportData = {
+                      examTitle: results.examTitle || 'Practice Test',
+                      studentName: `${userProfile?.first_name || ''} ${userProfile?.last_name || ''}`.trim() || 'Student',
+                      studentEmail: userProfile?.email || 'No email',
+                      examDate: new Date(results.examDate || Date.now()).toLocaleDateString(),
+                      totalQuestions: results.totalQuestions,
+                      correctAnswers: results.correctAnswers,
+                      wrongAnswers: results.wrongAnswers,
+                      unanswered: results.unanswered,
+                      score: results.correctAnswers,
+                      percentage: results.score,
+                      timeTaken: results.timeTaken,
+                      timeAllotted: results.timeAllotted,
+                      subjectBreakdown: results.subjectBreakdown || {},
+                      attemptId: attemptId || 'unknown'
+                    };
+
+                    await generateExamReportPDF(reportData);
+                    
+                    toast({
+                      title: "PDF Generated!",
+                      description: "Professional exam report downloaded successfully",
+                    });
+                  } catch (error) {
+                    console.error('Error generating PDF:', error);
+                    toast({
+                      title: "Download Error",
+                      description: "Failed to generate PDF report. Please try again.",
+                      variant: "destructive"
+                    });
+                  }
                 }}
               >
                 <Download className="mr-2 h-4 w-4" />
