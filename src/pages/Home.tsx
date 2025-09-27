@@ -17,8 +17,11 @@ import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-students.jpg";
 import BlogSection from "@/components/BlogSection";
 import Footer from "@/components/Footer";
+import ScheduleTestModal from "@/components/ScheduleTestModal";
+import { useAuth } from "@/hooks/useAuth";
 
 const Home = () => {
+  const { user } = useAuth();
   const features = [
     {
       icon: <Target className="h-6 w-6" />,
@@ -92,12 +95,21 @@ const Home = () => {
               Join successful students who achieved their dream scores.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/auth">
-                <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
-                  Start Free Practice
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+              {user ? (
+                <ScheduleTestModal defaultExamType="jamb">
+                  <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
+                    Start JAMB Practice
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </ScheduleTestModal>
+              ) : (
+                <Link to="/auth">
+                  <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
+                    Start JAMB Practice
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              )}
               <Link to="/demo">
                 <Button size="lg" variant="outline" className="bg-card text-foreground border-primary-foreground hover:bg-card/90">
                   View Demo
@@ -108,8 +120,110 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Quick Practice Section */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Choose Your Exam Practice
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Practice with authentic JAMB and WAEC exam conditions and timing
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card className="text-center hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50">
+              <CardHeader className="pb-6">
+                <div className="mx-auto bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center text-primary mb-4">
+                  <Target className="h-8 w-8" />
+                </div>
+                <CardTitle className="text-2xl mb-2">JAMB Practice</CardTitle>
+                <CardDescription className="text-base">
+                  Practice with 180 questions (English + 3 subjects) in 120 minutes - official JAMB format
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    120 minutes
+                  </div>
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <FileText className="h-4 w-4" />
+                    180 questions total
+                  </div>
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <Trophy className="h-4 w-4" />
+                    Score out of 400
+                  </div>
+                </div>
+                {user ? (
+                  <ScheduleTestModal defaultExamType="jamb">
+                    <Button className="w-full" size="lg">
+                      Start JAMB Practice
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </ScheduleTestModal>
+                ) : (
+                  <Link to="/auth">
+                    <Button className="w-full" size="lg">
+                      Start JAMB Practice
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="text-center hover:shadow-xl transition-all duration-300 border-2 hover:border-accent/50">
+              <CardHeader className="pb-6">
+                <div className="mx-auto bg-accent/10 w-16 h-16 rounded-full flex items-center justify-center text-accent mb-4">
+                  <BookOpen className="h-8 w-8" />
+                </div>
+                <CardTitle className="text-2xl mb-2">WAEC Practice</CardTitle>
+                <CardDescription className="text-base">
+                  Subject-based practice with 50-60 questions per paper - authentic WAEC experience
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    Subject-specific timing
+                  </div>
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <FileText className="h-4 w-4" />
+                    50-60 questions per paper
+                  </div>
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <Trophy className="h-4 w-4" />
+                    A1-F9 grading system
+                  </div>
+                </div>
+                {user ? (
+                  <ScheduleTestModal defaultExamType="waec">
+                    <Button className="w-full" size="lg" variant="secondary">
+                      Start WAEC Practice
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </ScheduleTestModal>
+                ) : (
+                  <Link to="/auth">
+                    <Button className="w-full" size="lg" variant="secondary">
+                      Start WAEC Practice
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">

@@ -31,9 +31,10 @@ import { useAuth } from "@/hooks/useAuth";
 
 interface ScheduleTestModalProps {
   children: React.ReactNode;
+  defaultExamType?: string;
 }
 
-const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
+const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, defaultExamType }) => {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
   const { isPremium, loading: subscriptionLoading } = useSubscription();
@@ -61,8 +62,12 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children }) => {
   useEffect(() => {
     if (open) {
       fetchSubjectsAndQuestions();
+      // Set default exam type if provided
+      if (defaultExamType && defaultExamType !== testConfig.examType) {
+        setTestConfig(prev => ({ ...prev, examType: defaultExamType }));
+      }
     }
-  }, [open]);
+  }, [open, defaultExamType]);
 
   const fetchSubjectsAndQuestions = async () => {
     try {
