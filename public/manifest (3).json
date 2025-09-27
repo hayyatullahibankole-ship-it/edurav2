@@ -1,0 +1,53 @@
+{
+  "background_color": "#ffffff",
+  "description": "Edura - Nigeria's premier Computer-Based Test (CBT) platform for JAMB, WAEC, NECO, and Post-UTME preparation. Practice with authentic past questions, get instant results, and track your progress.",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Edura - Advanced CBT Exam Platform",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Edura - Advanced CBT Exam Platform",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "https://storage.googleapis.com/gpt-engineer-file-uploads/qbxQW8rAQxXOqqqHt7nazjc7N1w2/uploads/1758960166171-1002547319.png",
+      "type": "image/png",
+      "sizes": "1024x1024",
+      "isSquare": true,
+      "isPng": true,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 1024,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    },
+    {
+      "src": "https://storage.googleapis.com/gpt-engineer-file-uploads/qbxQW8rAQxXOqqqHt7nazjc7N1w2/social-images/social-1758960159527-1002547319.png",
+      "type": "image/png",
+      "sizes": "1024x1024",
+      "isSquare": true,
+      "isPng": true,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 1024,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    },
+    {
+      "src": "https://edura.space/favicon.ico",
+      "type": "image/png",
+      "sizes": "73x74",
+      "isSquare": false,
+      "isPng": true,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 73,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    }
+  ]
+}
