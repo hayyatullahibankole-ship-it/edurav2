@@ -15,7 +15,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
+            <img src={eduraLogo} alt="Edura" className="h-12 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}

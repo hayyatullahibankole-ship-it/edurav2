@@ -221,7 +221,7 @@ export default function AuthForm() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
-            <img src={eduraLogo} alt="Edura" className="h-10 w-auto" />
+            <img src={eduraLogo} alt="Edura" className="h-16 w-auto" />
           </Link>
         </div>
 
