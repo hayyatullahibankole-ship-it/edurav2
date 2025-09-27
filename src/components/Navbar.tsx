@@ -3,6 +3,7 @@ import { GraduationCap, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import eduraLogo from "@/assets/edura-logo.png";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,10 +15,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="bg-primary p-2 rounded-lg">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="font-inter font-bold text-xl text-foreground">Edura</span>
+            <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}

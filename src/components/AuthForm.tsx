@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
+import eduraLogo from "@/assets/edura-logo.png";
 
 // Validation schemas
 const loginSchema = z.object({
@@ -220,10 +221,7 @@ export default function AuthForm() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
-            <div className="bg-primary p-2 rounded-lg">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold text-foreground">Edura</span>
+            <img src={eduraLogo} alt="Edura" className="h-10 w-auto" />
           </Link>
         </div>
 
