@@ -1,4 +1,5 @@
 {
+  "id": "com.edura.app",
   "background_color": "#ffffff",
   "description": "Edura - Nigeria's premier Computer-Based Test (CBT) platform for JAMB, WAEC, NECO, and Post-UTME preparation. Practice with authentic past questions, get instant results, and track your progress.",
   "dir": "ltr",
