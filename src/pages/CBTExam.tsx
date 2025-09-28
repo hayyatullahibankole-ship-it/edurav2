@@ -385,8 +385,10 @@ const CBTExam = () => {
   }
 
   const examType = (examData?.proctoring_data as any)?.exam_type?.toLowerCase();
+  console.log('Detected exam type:', examType, 'from proctoring_data:', examData?.proctoring_data);
   const isJambExam = examType === 'jamb';
   const isSubjectBasedExam = ['waec', 'neco', 'post-utme', 'custom'].includes(examType);
+  console.log('isJambExam:', isJambExam, 'isSubjectBasedExam:', isSubjectBasedExam);
 
   return (
     <>
@@ -397,24 +399,34 @@ const CBTExam = () => {
           onOptimize={() => setShowOptimizer(false)}
         />
       ) : isJambExam ? (
-        <JambCBTInterface
-          examTitle={(examData?.proctoring_data as any)?.title || "JAMB CBT Practice Test"}
-          examDescription={(examData?.proctoring_data as any)?.description || "Joint Admissions and Matriculation Board Computer Based Test"}
-          questions={questions}
-          duration={examData?.time_remaining_seconds ? Math.ceil(examData.time_remaining_seconds / 60) : ((examData?.proctoring_data as any)?.duration_minutes || 90)}
-          onSubmit={handleExamSubmit}
-        />
+        <div>
+          <div className="bg-green-500 text-white p-2 text-center font-bold mb-4">
+            🎯 JAMB CBT INTERFACE LOADED ✅
+          </div>
+          <JambCBTInterface
+            examTitle={(examData?.proctoring_data as any)?.title || "JAMB CBT Practice Test"}
+            examDescription={(examData?.proctoring_data as any)?.description || "Joint Admissions and Matriculation Board Computer Based Test"}
+            questions={questions}
+            duration={examData?.time_remaining_seconds ? Math.ceil(examData.time_remaining_seconds / 60) : ((examData?.proctoring_data as any)?.duration_minutes || 90)}
+            onSubmit={handleExamSubmit}
+          />
+        </div>
       ) : (
-        <SubjectBasedExamInterface
-          examTitle={(examData?.proctoring_data as any)?.title || "Practice Test"}
-          examDescription={(examData?.proctoring_data as any)?.description || "Practice Examination"}
-          questions={questions}
-          duration={examData?.time_remaining_seconds ? Math.ceil(examData.time_remaining_seconds / 60) : ((examData?.proctoring_data as any)?.duration_minutes || 90)}
-          onSubmit={handleExamSubmit}
-          allowReview={true}
-          showExplanations={false}
-          antiCheatEnabled={true}
-        />
+        <div>
+          <div className="bg-blue-500 text-white p-2 text-center font-bold mb-4">
+            📚 SUBJECT-BASED INTERFACE LOADED (Default)
+          </div>
+          <SubjectBasedExamInterface
+            examTitle={(examData?.proctoring_data as any)?.title || "Practice Test"}
+            examDescription={(examData?.proctoring_data as any)?.description || "Practice Examination"}
+            questions={questions}
+            duration={examData?.time_remaining_seconds ? Math.ceil(examData.time_remaining_seconds / 60) : ((examData?.proctoring_data as any)?.duration_minutes || 90)}
+            onSubmit={handleExamSubmit}
+            allowReview={true}
+            showExplanations={false}
+            antiCheatEnabled={true}
+          />
+        </div>
       )}
     </>
   );

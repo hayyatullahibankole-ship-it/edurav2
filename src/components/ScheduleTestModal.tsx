@@ -177,6 +177,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
       }
 
       // Create attempt with practice config in proctoring_data
+      console.log('Creating attempt with exam type:', testConfig.examType);
       const attemptData = {
         user_id: userProfile.id,
         selected_subjects: testConfig.subjects,
@@ -190,6 +191,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
           duration_minutes: testConfig.duration
         }
       };
+      console.log('Attempt data being saved:', attemptData);
 
       const { data: attempt, error: attemptError } = await supabase
         .from('attempts')
@@ -244,7 +246,10 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
             className={`cursor-pointer transition-all hover:shadow-md ${
               testConfig.examType === type.value ? 'border-primary bg-primary/5' : ''
             }`}
-            onClick={() => setTestConfig(prev => ({ ...prev, examType: type.value }))}
+            onClick={() => {
+              console.log('Setting exam type to:', type.value);
+              setTestConfig(prev => ({ ...prev, examType: type.value }));
+            }}
           >
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -261,7 +266,10 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
       
       <div className="flex justify-end">
         <Button 
-          onClick={() => setStep(2)}
+          onClick={() => {
+            console.log('Moving to step 2 with exam type:', testConfig.examType);
+            setStep(2);
+          }}
           disabled={!testConfig.examType}
         >
           Next: Configure Test
