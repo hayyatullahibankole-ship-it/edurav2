@@ -119,44 +119,63 @@ export default function QuestionManagement() {
         return;
       }
 
-      // Fetch questions with better error handling
-      console.log('Fetching questions...');
-      const { data: questionsData, error: questionsError } = await supabase
-        .from('questions')
-        .select(`
-          id,
-          question_text,
-          type,
-          options,
-          correct_answer,
-          explanation,
-          difficulty_level,
-          tags,
-          subject_id,
-          is_active,
-          points,
-          created_at
-        `)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1000);
+      // For admin users, always try the edge function first since the regular query has RLS issues
+      console.log('Admin user detected - using admin edge function...');
+      try {
+        const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-get-questions', {
+          body: { activeOnly: true, limit: 1000 }
+        });
 
-      if (questionsError) {
-        console.error('Questions error:', questionsError);
+        console.log('Edge function response:', { fnData, fnError });
 
-        // Fallback: use admin edge function (bypasses RLS with admin check)
-        try {
-          const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-get-questions', {
-            body: { activeOnly: true, limit: 1000 }
+        if (fnError) {
+          console.error('Edge function error:', fnError);
+          throw new Error(fnError.message || 'Admin fetch failed');
+        }
+
+        const loaded = (fnData as any)?.questions || [];
+        console.log('Loaded questions from edge function:', loaded.length);
+        setQuestions(loaded);
+
+        if (loaded.length === 0) {
+          toast({
+            title: "Info",
+            description: "No questions found. Start by creating some questions.",
           });
+        } else {
+          toast({
+            title: "Success",
+            description: `Loaded ${loaded.length} questions successfully`,
+          });
+        }
+        return; // Success - exit early
+      } catch (fnCatch) {
+        console.error('Edge function failed, trying direct query:', fnCatch);
+        
+        // Fallback to direct query if edge function fails
+        console.log('Trying direct query as fallback...');
+        const { data: questionsData, error: questionsError } = await supabase
+          .from('questions')
+          .select(`
+            id,
+            question_text,
+            type,
+            options,
+            correct_answer,
+            explanation,
+            difficulty_level,
+            tags,
+            subject_id,
+            is_active,
+            points,
+            created_at
+          `)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1000);
 
-          if (fnError) {
-            throw new Error(fnError.message || 'Admin fetch failed');
-          }
-
-          const loaded = (fnData as any)?.questions || [];
-          setQuestions(loaded);
-        } catch (fnCatch) {
+        if (questionsError) {
+          console.error('Direct query also failed:', questionsError);
           const msg = fnCatch instanceof Error ? fnCatch.message : 'Unknown error occurred';
           toast({
             title: 'Error Loading Data',
@@ -164,27 +183,17 @@ export default function QuestionManagement() {
             variant: 'destructive'
           });
           setQuestions([]);
+        } else {
+          console.log('Direct query successful:', questionsData?.length || 0);
+          setQuestions(questionsData || []);
+          
+          if (!questionsData || questionsData.length === 0) {
+            toast({
+              title: "Info",
+              description: "No questions found. Start by creating some questions.",
+            });
+          }
         }
-      } else {
-        console.log('Questions loaded:', questionsData?.length || 0);
-        setQuestions(questionsData || []);
-        
-        if (!questionsData || questionsData.length === 0) {
-          toast({
-            title: "Info",
-            description: "No questions found. Start by creating some questions.",
-          });
-        }
-      }
-
-      console.log('Questions loaded:', questionsData?.length || 0);
-      setQuestions(questionsData || []);
-      
-      if (!questionsData || questionsData.length === 0) {
-        toast({
-          title: "Info",
-          description: "No questions found. Start by creating some questions.",
-        });
       }
       
     } catch (error) {
