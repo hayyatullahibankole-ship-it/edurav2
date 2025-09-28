@@ -67,23 +67,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (isMounted && profileData) {
           setUserProfile(profileData);
           
-          // Check for role in users table first (legacy support)
-          let userRole = profileData.role;
-          
-          // If no role in users table, check user_roles table
-          if (!userRole) {
-            const { data: roleData, error: roleError } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', profileData.id)
-              .single();
-              
-            if (!roleError && roleData) {
-              userRole = roleData.role;
-            }
+          // Get user role from user_roles table
+          const { data: roleData, error: roleError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', profileData.id)
+            .single();
+            
+          if (!roleError && roleData) {
+            setUserRole(roleData.role);
+          } else {
+            console.error('Role fetch error:', roleError);
+            setUserRole('student'); // Default to student if no role found
           }
-          
-          setUserRole(userRole || 'student'); // Default to student if no role found
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
