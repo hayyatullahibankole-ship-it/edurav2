@@ -49,8 +49,11 @@ const Dashboard = () => {
   useEffect(() => {
     if (userProfile?.id) {
       fetchDashboardData();
+    } else if (userProfile !== undefined) {
+      // If userProfile is loaded but has no id, stop loading
+      setLoading(false);
     }
-  }, [userProfile?.id]);
+  }, [userProfile]);
 
   const fetchDashboardData = async () => {
     if (!userProfile?.id) return;
