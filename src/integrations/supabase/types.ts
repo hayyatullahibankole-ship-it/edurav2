@@ -522,6 +522,33 @@ export type Database = {
           },
         ]
       }
+      rate_limits: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          id: string
+          request_count: number | null
+          user_id: string | null
+          window_start: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          request_count?: number | null
+          user_id?: string | null
+          window_start?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          request_count?: number | null
+          user_id?: string | null
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       resources: {
         Row: {
           access_level: string | null
@@ -1035,6 +1062,21 @@ export type Database = {
           type: Database["public"]["Enums"]["question_type"]
         }[]
       }
+      get_exam_questions_secure: {
+        Args: { exam_question_ids: string[] }
+        Returns: {
+          difficulty_level: number
+          id: string
+          media_urls: Json
+          options: Json
+          points: number
+          question_text: string
+          subject_id: string
+          tags: Json
+          time_limit_seconds: number
+          type: Database["public"]["Enums"]["question_type"]
+        }[]
+      }
       get_question_explanation: {
         Args: { question_id: string; user_id: string }
         Returns: string
@@ -1057,8 +1099,16 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      log_admin_action: {
+        Args: { action_type: string; admin_id: string; target_id?: string }
+        Returns: boolean
+      }
       validate_question_answer: {
         Args: { question_id: string; submitted_answer: Json }
+        Returns: boolean
+      }
+      validate_user_input: {
+        Args: { input_data: Json; validation_rules: Json }
         Returns: boolean
       }
     }
