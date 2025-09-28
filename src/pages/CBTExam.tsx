@@ -83,41 +83,38 @@ const CBTExam = () => {
           ? 60 
           : (proctoringData.question_count_per_subject || 40);
 
+        // SECURITY FIX: Use secure function to fetch questions without exposing answers
         const { data: subjectQuestions, error } = await supabase
-          .from('questions')
-          .select('*')
-          .eq('subject_id', subjectId)
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(perSubject);
+          .rpc('get_student_exam_questions', { attempt_id_param: attemptId });
 
-          if (error) {
-            console.error(`Error fetching questions for subject ${subjectId}:`, error);
-            continue;
-          }
+        if (error) {
+          console.error(`Error fetching questions securely:`, error);
+          continue;
+        }
 
-          console.log(`Found ${subjectQuestions?.length || 0} questions for ${subjectNameMap[subjectId]}`);
+        console.log(`Found ${subjectQuestions?.length || 0} questions from secure function`);
 
-          if (subjectQuestions && subjectQuestions.length > 0) {
-            // Transform questions to match the expected format
-            const transformedQuestions = subjectQuestions.map((q, index) => ({
+        if (subjectQuestions && subjectQuestions.length > 0) {
+          // Transform questions to match the expected format (no correct answers exposed)
+          const transformedQuestions = subjectQuestions
+            .filter(q => q.subject_id === subjectId) // Filter for current subject
+            .slice(0, perSubject) // Limit per subject
+            .map((q, index) => ({
               id: allQuestions.length + index + 1,
               subject: subjectNameMap[subjectId] || 'Unknown',
               question: q.question_text,
               options: Array.isArray(q.options) ? 
                 (q.options as string[]).map((opt: string, i: number) => `${String.fromCharCode(65 + i)}) ${opt}`) : 
                 [],
-              correct: Array.isArray(q.options) ? 
-                String.fromCharCode(65 + (typeof q.correct_answer === 'number' ? q.correct_answer : 0)) : 
-                'A',
-              explanation: q.explanation || '',
+              // Note: No 'correct' field - this prevents answer exposure
+              explanation: '', // Will be loaded securely after submission
               difficulty: q.difficulty_level === 1 ? 'easy' as const : 
                          q.difficulty_level === 2 ? 'medium' as const : 'hard' as const,
               originalId: q.id
             }));
 
-            allQuestions.push(...transformedQuestions);
-          } else {
+          allQuestions.push(...transformedQuestions);
+        } else {
             console.warn(`No questions found for subject: ${subjectNameMap[subjectId] || subjectId}`);
           }
         }
@@ -191,32 +188,58 @@ const CBTExam = () => {
       
       // We'll update attempt status AFTER saving answers to satisfy RLS
 
-      // Calculate score and prepare answers - Fix the indexing issue
+      // SECURITY FIX: Use secure validation instead of client-side answer checking
       let correctCount = 0;
       const subjectStats: Record<string, { total: number; correct: number }> = {};
       
-      const answerRecords = questions.map((question, questionIndex) => {
-        // Use the question's ID minus 1 to match the answer key
+      const answerRecords = [];
+      
+      // Process each question with secure validation
+      for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
+        const question = questions[questionIndex];
         const answerKey = question.id - 1;
         const userAnswer = answers[answerKey];
-        const isCorrect = userAnswer === question.correct;
         const subject = question.subject || 'General';
         
+        // Initialize subject stats
         subjectStats[subject] = subjectStats[subject] || { total: 0, correct: 0 };
         subjectStats[subject].total += 1;
+        
+        // Use secure validation function (doesn't expose correct answer)
+        let isCorrect = false;
+        if (userAnswer && question.originalId) {
+          try {
+            const { data: validationResult, error: validationError } = await supabase
+              .rpc('validate_student_answer', {
+                question_id_param: question.originalId,
+                submitted_answer: userAnswer
+              });
+            
+            if (validationError) {
+              console.error('Error validating answer:', validationError);
+              isCorrect = false;
+            } else {
+              isCorrect = validationResult === true;
+            }
+          } catch (error) {
+            console.error('Error in secure validation:', error);
+            isCorrect = false;
+          }
+        }
+        
         if (isCorrect) {
           correctCount++;
           subjectStats[subject].correct += 1;
         }
         
-        return {
+        answerRecords.push({
           attempt_id: attemptId,
           question_id: question.originalId,
           answer: userAnswer || null,
           is_correct: isCorrect,
           time_spent_seconds: Math.floor(timeTaken / questions.length)
-        };
-      });
+        });
+      }
 
       console.log('Inserting answer records...', { recordCount: answerRecords.length });
       

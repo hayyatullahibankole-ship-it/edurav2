@@ -404,9 +404,12 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
                 <div className="space-y-3">
                   {questions[currentQuestion].options.map((option, index) => {
                     const optionLetter = option.split(')')[0];
+                    // SECURITY FIX: Remove direct access to correct answers
+                    // Only show explanations AFTER submission through secure methods
                     const isSelected = answers[currentQuestion] === optionLetter;
-                    const isCorrect = showExplanations && optionLetter === questions[currentQuestion].correct;
-                    const isWrong = showExplanations && isSelected && optionLetter !== questions[currentQuestion].correct;
+                    const showCorrect = false; // Explanations will be loaded securely after submission
+                    const isCorrect = false; // Never expose during exam
+                    const isWrong = false; // Never expose during exam
                     
                     return (
                       <div

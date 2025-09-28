@@ -257,12 +257,10 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
     const subjectData = subjectQuestions.find(s => s.subject === subject);
     if (!subjectData) return 0;
     
-    const correctCount = subjectData.questions.filter(q => {
-      const answer = answers[q.id - 1];
-      return answer === q.correct;
-    }).length;
-    
-    return Math.round((correctCount / subjectData.questions.length) * 100);
+    // SECURITY FIX: Remove client-side score calculation
+    // All scoring will be done securely on the server during submission
+    // This prevents exposure of correct answers to determine scores
+    return 0; // Placeholder - real scores calculated securely
   };
 
   const answeredCount = Object.keys(answers).length;
@@ -413,9 +411,10 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
                     // Handle both pre-lettered options (A) text) and plain text options
                     const optionLetter = option.includes(')') ? option.split(')')[0] : String.fromCharCode(65 + index);
                     const optionText = option.includes(')') ? option : `${optionLetter}) ${option}`;
+                    // SECURITY FIX: Remove direct access to correct answers during exam
                     const isSelected = answers[globalQuestionIndex] === optionLetter;
-                    const isCorrect = showExplanations && optionLetter === currentQuestion.correct;
-                    const isWrong = showExplanations && isSelected && optionLetter !== currentQuestion.correct;
+                    const isCorrect = false; // Never expose correct answers during active exam
+                    const isWrong = false; // Never expose incorrect indicators during active exam
                     
                     return (
                       <div

@@ -1126,6 +1126,13 @@ export type Database = {
         Args: { question_id: string; user_id: string }
         Returns: string
       }
+      get_question_explanation_secure: {
+        Args: { question_id_param: string }
+        Returns: {
+          correct_answer: Json
+          explanation: string
+        }[]
+      }
       get_secure_user_data: {
         Args: { target_user_id: string }
         Returns: {
@@ -1158,6 +1165,21 @@ export type Database = {
           submitted_at: string
           time_remaining_seconds: number
           user_id: string
+        }[]
+      }
+      get_student_exam_questions: {
+        Args: { attempt_id_param: string }
+        Returns: {
+          difficulty_level: number
+          id: string
+          media_urls: Json
+          options: Json
+          points: number
+          question_text: string
+          subject_id: string
+          tags: Json
+          time_limit_seconds: number
+          type: Database["public"]["Enums"]["question_type"]
         }[]
       }
       get_subject_question_counts: {
@@ -1237,6 +1259,10 @@ export type Database = {
       }
       validate_question_answer: {
         Args: { question_id: string; submitted_answer: Json }
+        Returns: boolean
+      }
+      validate_student_answer: {
+        Args: { question_id_param: string; submitted_answer: Json }
         Returns: boolean
       }
       validate_user_input: {

@@ -149,6 +149,8 @@ const TestResults = () => {
 
             const questionIds = (answers || []).map((a: any) => a.question_id).filter(Boolean);
             if (questionIds.length > 0) {
+              // Note: For basic subject mapping, we can still get minimal question info
+              // Sensitive data like answers/explanations will use secure functions
               const { data: questions } = await supabase
                 .from('questions')
                 .select('id, subject_id')
