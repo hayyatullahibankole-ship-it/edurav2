@@ -92,26 +92,52 @@ const TestResults = () => {
         const examTitle = proctoringData.title || 'Practice Test';
         const examDuration = proctoringData.duration_minutes || 120;
         
-        // Transform the data to match expected format
-        const transformedResults: any = {
-          score: Math.round(resultData.percentage || 0),
-          scaledScore: resultData.scaled_score, // For JAMB (out of 400)
-          rawScore: resultData.raw_score || resultData.correct_answers,
-          totalQuestions: resultData.total_questions,
-          correctAnswers: resultData.correct_answers,
-          wrongAnswers: resultData.wrong_answers,
-          unanswered: resultData.unanswered,
-          timeTaken: resultData.time_taken_minutes,
-          timeAllotted: examDuration,
-          examType: proctoringData.examType || 'CUSTOM',
-          subjects: resultData.subject_breakdown ? Object.entries(resultData.subject_breakdown as any).map(([name, data]: [string, any]) => ({
-            name,
-            score: Math.round((data?.percentage ?? ((data?.correct ?? 0) / Math.max(1, data?.total ?? 0)) * 100) || 0),
-            total: data?.total || 0,
-            correct: data?.correct || 0,
-            grade: data?.grade || null // WAEC grades (A1-F9)
-          })) : []
-        };
+          // Transform the data to match expected format
+          const examType = (proctoringData.examType || proctoringData.exam_type || 'CUSTOM').toUpperCase();
+          
+          const transformedResults: any = {
+            score: Math.round(resultData.percentage || 0),
+            scaledScore: resultData.scaled_score, // For JAMB (out of 400)
+            rawScore: resultData.raw_score || resultData.correct_answers,
+            totalQuestions: resultData.total_questions,
+            correctAnswers: resultData.correct_answers,
+            wrongAnswers: resultData.wrong_answers,
+            unanswered: resultData.unanswered,
+            timeTaken: resultData.time_taken_minutes,
+            timeAllotted: examDuration,
+            examType: examType,
+            // For JAMB, show JAMB-specific performance metrics
+            jambPerformance: examType === 'JAMB' ? {
+              scaledScore: resultData.scaled_score || 0,
+              rawScore: (resultData.correct_answers * 4) - (resultData.wrong_answers * 1),
+              maxPossible: resultData.total_questions * 4,
+              efficiency: Math.round(((resultData.scaled_score || 0) / 400) * 100),
+              rank: resultData.scaled_score >= 300 ? 'Excellent' : 
+                    resultData.scaled_score >= 250 ? 'Very Good' :
+                    resultData.scaled_score >= 200 ? 'Good' :
+                    resultData.scaled_score >= 150 ? 'Fair' : 'Needs Improvement'
+            } : null,
+            subjects: resultData.subject_breakdown ? Object.entries(resultData.subject_breakdown as any).map(([name, data]: [string, any]) => {
+              const subjectScore = Math.round((data?.percentage ?? ((data?.correct ?? 0) / Math.max(1, data?.total ?? 0)) * 100) || 0);
+              const result: any = {
+                name,
+                score: subjectScore,
+                total: data?.total || 0,
+                correct: data?.correct || 0,
+                grade: data?.grade || null // WAEC grades (A1-F9)
+              };
+              
+              // Add JAMB-specific subject metrics
+              if (examType === 'JAMB') {
+                const subjectWrong = (data?.total || 0) - (data?.correct || 0);
+                result.jambScore = Math.max(0, (data?.correct || 0) * 4 - subjectWrong * 1);
+                result.maxJambScore = (data?.total || 0) * 4;
+                result.jambEfficiency = result.maxJambScore > 0 ? Math.round((result.jambScore / result.maxJambScore) * 100) : 0;
+              }
+              
+              return result;
+            }) : []
+          };
 
         // Fallback: build subject breakdown from attempt_answers if missing
         if (!transformedResults.subjects || transformedResults.subjects.length === 0) {
@@ -262,14 +288,28 @@ const TestResults = () => {
           <CardContent className="pt-8">
             <div className="text-center mb-8">
               {/* Display score based on exam type */}
-              {results.examType === 'JAMB' && results.scaledScore ? (
+              {results.examType === 'JAMB' && results.scaledScore !== undefined ? (
                 <div>
-                  <div className={`text-7xl font-bold mb-2 ${getScoreColor(results.score)}`}>
-                    {results.scaledScore}/400
+                  <div className={`text-7xl font-bold mb-2 ${getScoreColor(Math.round((results.scaledScore/400)*100))}`}>
+                    {results.scaledScore}<span className="text-3xl">/400</span>
                   </div>
-                  <div className="text-xl text-muted-foreground mb-4">
-                    JAMB Score: {results.score}% ({results.rawScore}/{results.totalQuestions})
+                  <div className="text-xl text-muted-foreground mb-2">
+                    JAMB Score • {results.score}% Accuracy
                   </div>
+                  <div className="text-sm text-muted-foreground mb-4">
+                    Raw Score: {results.jambPerformance?.rawScore || results.rawScore} 
+                    ({results.correctAnswers} correct × 4 - {results.wrongAnswers} wrong × 1)
+                  </div>
+                  {results.jambPerformance?.rank && (
+                    <Badge className={
+                      results.jambPerformance.rank === 'Excellent' ? 'bg-green-100 text-green-800' :
+                      results.jambPerformance.rank === 'Very Good' ? 'bg-blue-100 text-blue-800' :
+                      results.jambPerformance.rank === 'Good' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }>
+                      {results.jambPerformance.rank} Performance
+                    </Badge>
+                  )}
                 </div>
               ) : (
                 <div className={`text-7xl font-bold mb-4 ${getScoreColor(results.score)}`}>
@@ -280,8 +320,17 @@ const TestResults = () => {
                 {results.examType === 'WAEC' ? `Grade: ${scoreBadge.label}` : scoreBadge.label}
               </Badge>
               <p className="text-muted-foreground mt-2">
-                You scored {results.correctAnswers} out of {results.totalQuestions} questions correctly
-                {results.examType === 'JAMB' && ` (${results.rawScore} raw score scaled to ${results.scaledScore}/400)`}
+                {results.examType === 'JAMB' ? (
+                  <>
+                    You answered {results.correctAnswers} correctly, {results.wrongAnswers} incorrectly, and left {results.unanswered} unanswered
+                    <br />
+                    <span className="text-xs">
+                      JAMB Formula: (Correct × 4) - (Wrong × 1) = {results.jambPerformance?.rawScore || results.rawScore} raw points, scaled to {results.scaledScore}/400
+                    </span>
+                  </>
+                ) : (
+                  `You scored ${results.correctAnswers} out of ${results.totalQuestions} questions correctly`
+                )}
               </p>
             </div>
 
@@ -418,9 +467,20 @@ const TestResults = () => {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">{subject.name}</CardTitle>
                       <div className="flex gap-2">
-                        <Badge className={getScoreColor(subject.score)}>
-                          {subject.score}%
-                        </Badge>
+                        {results.examType === 'JAMB' && subject.jambScore !== undefined ? (
+                          <>
+                            <Badge className={getScoreColor(subject.jambEfficiency || 0)}>
+                              {subject.jambScore}/{subject.maxJambScore}
+                            </Badge>
+                            <Badge variant="outline">
+                              {subject.jambEfficiency}%
+                            </Badge>
+                          </>
+                        ) : (
+                          <Badge className={getScoreColor(subject.score)}>
+                            {subject.score}%
+                          </Badge>
+                        )}
                         {subject.grade && results.examType === 'WAEC' && (
                           <Badge variant="outline" className="font-bold">
                             {subject.grade}
@@ -430,34 +490,49 @@ const TestResults = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-sm mb-2">
-                          <span>Progress</span>
-                          <span>{subject.correct}/{subject.total}</span>
-                        </div>
-                        <Progress value={subject.score} className="h-2" />
+                     <div className="space-y-4">
+                       <div>
+                         <div className="flex justify-between text-sm mb-2">
+                           <span>
+                             {results.examType === 'JAMB' ? 'JAMB Score' : 'Progress'}
+                           </span>
+                           <span>
+                             {results.examType === 'JAMB' && subject.jambScore !== undefined 
+                               ? `${subject.jambScore}/${subject.maxJambScore}`
+                               : `${subject.correct}/${subject.total}`
+                             }
+                           </span>
+                         </div>
+                         <Progress 
+                           value={results.examType === 'JAMB' ? subject.jambEfficiency : subject.score} 
+                           className="h-2" 
+                         />
+                       </div>
+                       <div className="grid grid-cols-2 gap-4 text-sm">
+                         <div>
+                           <div className="text-muted-foreground">Correct</div>
+                           <div className="font-semibold text-green-600">{subject.correct}</div>
+                         </div>
+                         <div>
+                           <div className="text-muted-foreground">
+                             {results.examType === 'JAMB' ? 'Wrong' : 'Total'}
+                           </div>
+                           <div className="font-semibold">
+                             {results.examType === 'JAMB' ? subject.total - subject.correct : subject.total}
+                           </div>
+                         </div>
+                       </div>
+                       {results.examType === 'JAMB' && (
+                         <div className="text-xs text-muted-foreground border-t pt-2">
+                           Formula: ({subject.correct} × 4) - ({subject.total - subject.correct} × 1) = {subject.jambScore} points
+                         </div>
+                       )}
                       </div>
-                      <div className="grid grid-cols-3 gap-4 text-center text-sm">
-                        <div>
-                          <div className="font-bold text-green-600">{subject.correct}</div>
-                          <div className="text-muted-foreground">Correct</div>
-                        </div>
-                        <div>
-                          <div className="font-bold text-red-600">{subject.total - subject.correct}</div>
-                          <div className="text-muted-foreground">Wrong</div>
-                        </div>
-                        <div>
-                          <div className="font-bold text-muted-foreground">{subject.total}</div>
-                          <div className="text-muted-foreground">Total</div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
 
           <TabsContent value="analysis">
             <div className="grid md:grid-cols-2 gap-6">
