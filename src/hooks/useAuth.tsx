@@ -47,24 +47,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    const fetchUserData = async (userId: string) => {
-      try {
-        // Get user profile
-        const { data: profileData, error: profileError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('auth_user_id', userId)
-          .single();
+  const fetchUserData = async (userId: string) => {
+    try {
+      // Get user profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('auth_user_id', userId)
+        .maybeSingle();
 
-        if (profileError) {
-          console.error('Profile fetch error:', profileError);
-          if (isMounted) {
-            setLoading(false);
-          }
-          return;
+      if (profileError) {
+        console.error('Profile fetch error:', profileError);
+        if (isMounted) {
+          setUserProfile(null);
+          setUserRole('student');
+          setLoading(false);
         }
+        return;
+      }
 
-        if (isMounted && profileData) {
+      if (isMounted) {
+        if (profileData) {
           setUserProfile(profileData);
           
           // Get user role from user_roles table
@@ -72,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .from('user_roles')
             .select('role')
             .eq('user_id', profileData.id)
-            .single();
+            .maybeSingle();
             
           if (!roleError && roleData) {
             setUserRole(roleData.role);
@@ -80,19 +83,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.error('Role fetch error:', roleError);
             setUserRole('student'); // Default to student if no role found
           }
+        } else {
+          // No profile data found
+          setUserProfile(null);
+          setUserRole('student');
         }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      if (isMounted) {
+        setUserProfile(null);
+        setUserRole('student');
+        setLoading(false);
+      }
+    }
+  };
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (!isMounted) return;
 
         console.log('Auth state changed:', event, session?.user?.email);
@@ -102,7 +112,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (session?.user) {
           setLoading(true);
-          await fetchUserData(session.user.id);
+          // Use setTimeout to avoid blocking the auth state change
+          setTimeout(() => {
+            fetchUserData(session.user.id);
+          }, 0);
         } else {
           setUserProfile(null);
           setUserRole(null);
@@ -116,7 +129,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       isMounted = false;
-      subscription.unsubscribe();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
   }, []);
 
