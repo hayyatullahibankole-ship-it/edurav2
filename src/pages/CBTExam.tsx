@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import SubjectBasedExamInterface from "@/components/SubjectBasedExamInterface";
+import JambCBTInterface from "@/components/JambCBTInterface";
 import CBTOptimizer from "@/components/CBTOptimizer";
 
 const CBTExam = () => {
@@ -383,16 +384,34 @@ const CBTExam = () => {
   }
 
   return (
-    <SubjectBasedExamInterface
-      examTitle={(examData?.proctoring_data as any)?.title || "Practice Test"}
-      examDescription={(examData?.proctoring_data as any)?.description || "Practice Examination"}
-      questions={questions}
-      duration={examData?.time_remaining_seconds ? Math.ceil(examData.time_remaining_seconds / 60) : ((examData?.proctoring_data as any)?.duration_minutes || 90)}
-      onSubmit={handleExamSubmit}
-      allowReview={true}
-      showExplanations={false}
-      antiCheatEnabled={true}
-    />
+    <>
+      {showOptimizer ? (
+        <CBTOptimizer
+          examData={examData}
+          questions={questions}
+          onOptimize={() => setShowOptimizer(false)}
+        />
+      ) : examData?.proctoring_data?.exam_type === 'jamb' ? (
+        <JambCBTInterface
+          examTitle={(examData?.proctoring_data as any)?.title || "JAMB CBT Practice Test"}
+          examDescription={(examData?.proctoring_data as any)?.description || "Joint Admissions and Matriculation Board Computer Based Test"}
+          questions={questions}
+          duration={examData?.time_remaining_seconds ? Math.ceil(examData.time_remaining_seconds / 60) : ((examData?.proctoring_data as any)?.duration_minutes || 90)}
+          onSubmit={handleExamSubmit}
+        />
+      ) : (
+        <SubjectBasedExamInterface
+          examTitle={(examData?.proctoring_data as any)?.title || "Practice Test"}
+          examDescription={(examData?.proctoring_data as any)?.description || "Practice Examination"}
+          questions={questions}
+          duration={examData?.time_remaining_seconds ? Math.ceil(examData.time_remaining_seconds / 60) : ((examData?.proctoring_data as any)?.duration_minutes || 90)}
+          onSubmit={handleExamSubmit}
+          allowReview={true}
+          showExplanations={false}
+          antiCheatEnabled={true}
+        />
+      )}
+    </>
   );
 };
 

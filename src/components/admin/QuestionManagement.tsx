@@ -135,8 +135,7 @@ export default function QuestionManagement() {
           subject_id,
           is_active,
           points,
-          created_at,
-          subjects!inner(name, code)
+          created_at
         `)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
