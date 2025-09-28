@@ -5,19 +5,37 @@ enabled = true
 port = 54321
 schemas = ["public", "graphql_public"]
 extra_search_path = ["public", "extensions"]
-max_rows = 50000
+max_rows = 1000
 
-[functions.create-admin]
-verify_jwt = false
+[db]
+port = 54322
+major_version = 15
 
-[functions.get-rank]
-verify_jwt = false
+[studio]
+enabled = true
+port = 54323
 
-[functions.verify-payment]
-verify_jwt = false
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+port = 54325
+
+[auth]
+enabled = true
+port = 54326
+
+[edge_functions]
+enabled = true
+port = 54327
 
 [functions.exam-api]
 verify_jwt = true
 
-[functions.generate-questions]
-verify_jwt = true
+[functions.create-admin]
+verify_jwt = false
+
+[functions.verify-payment]
+verify_jwt = false

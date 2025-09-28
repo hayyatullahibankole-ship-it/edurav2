@@ -1,200 +1,175 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { reference, userId } = await req.json()
+    const { reference } = await req.json();
+    
+    console.log('Payment verification request for:', reference);
 
     if (!reference) {
       return new Response(
         JSON.stringify({ error: 'Payment reference is required' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
 
-    // Verify payment with Paystack
-    const paystackSecretKey = Deno.env.get('PAYSTACK_SECRET_KEY')
+    // Get Paystack secret key from environment
+    const paystackSecretKey = Deno.env.get('PAYSTACK_SECRET_KEY');
     if (!paystackSecretKey) {
-      throw new Error('Paystack secret key not configured')
+      console.error('Paystack secret key not configured');
+      return new Response(
+        JSON.stringify({ error: 'Payment system not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const verificationResponse = await fetch(
+    // Verify payment with Paystack
+    const paystackResponse = await fetch(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
         headers: {
-          Authorization: `Bearer ${paystackSecretKey}`,
-          'Content-Type': 'application/json',
-        },
+          'Authorization': `Bearer ${paystackSecretKey}`,
+          'Content-Type': 'application/json'
+        }
       }
-    )
+    );
 
-    const verificationData = await verificationResponse.json()
+    const paymentData = await paystackResponse.json();
 
-    if (!verificationData.status || verificationData.data.status !== 'success') {
+    if (!paystackResponse.ok || !paymentData.status) {
+      console.error('Payment verification failed:', paymentData);
       return new Response(
         JSON.stringify({ error: 'Payment verification failed' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const paymentData = verificationData.data
-    const amount = paymentData.amount / 100 // Convert from kobo to naira
-    const planType = paymentData.metadata?.plan_type || 'premium'
+    const transaction = paymentData.data;
 
-    // Find the user in our database
-    const { data: user, error: userError } = await supabaseClient
+    // Check if payment was successful
+    if (transaction.status !== 'success') {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Payment not successful',
+          status: transaction.status 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get user by email from transaction
+    const { data: users, error: userError } = await supabaseClient
       .from('users')
       .select('id')
-      .eq('auth_user_id', userId)
-      .single()
+      .eq('email', transaction.customer.email)
+      .single();
 
-    if (userError || !user) {
-      console.error('User not found:', userError)
+    if (userError || !users) {
+      console.error('User not found:', transaction.customer.email);
       return new Response(
         JSON.stringify({ error: 'User not found' }),
-        { 
-          status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Find the appropriate subscription plan
-    const { data: plan, error: planError } = await supabaseClient
-      .from('subscription_plans')
-      .select('*')
-      .eq('name', planType === 'premium' ? 'Premium Plan' : 'Basic Plan')
-      .eq('is_active', true)
-      .single()
-
-    if (planError || !plan) {
-      console.error('Plan not found:', planError)
-      return new Response(
-        JSON.stringify({ error: 'Subscription plan not found' }),
-        { 
-          status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
-
-    // Create transaction record
+    // Record transaction
     const { error: transactionError } = await supabaseClient
       .from('transactions')
       .insert({
-        user_id: user.id,
-        amount: amount,
-        currency: 'NGN',
-        status: 'SUCCESS',
+        user_id: users.id,
+        amount: transaction.amount / 100, // Convert from kobo to naira
+        currency: transaction.currency,
         gateway: 'paystack',
         gateway_reference: reference,
-        payment_method: paymentData.channel,
+        status: 'SUCCESS',
+        payment_method: transaction.channel,
         metadata: {
-          plan_type: planType,
-          customer_email: paymentData.customer.email,
-          fees: paymentData.fees,
+          paystack_data: transaction,
+          customer_code: transaction.customer.customer_code
         }
-      })
+      });
 
     if (transactionError) {
-      console.error('Failed to create transaction:', transactionError)
-    }
-
-    // Deactivate existing active subscriptions
-    const { error: deactivateError } = await supabaseClient
-      .from('subscriptions')
-      .update({ status: 'EXPIRED' })
-      .eq('user_id', user.id)
-      .eq('status', 'ACTIVE')
-
-    if (deactivateError) {
-      console.error('Failed to deactivate existing subscriptions:', deactivateError)
-    }
-
-    // Create new subscription
-    const startDate = new Date()
-    const endDate = new Date(startDate.getTime() + (plan.duration_days * 24 * 60 * 60 * 1000))
-
-    const { error: subscriptionError } = await supabaseClient
-      .from('subscriptions')
-      .insert({
-        user_id: user.id,
-        plan_id: plan.id,
-        status: 'ACTIVE',
-        start_date: startDate.toISOString(),
-        end_date: endDate.toISOString(),
-        payment_reference: reference,
-        auto_renew: false
-      })
-
-    if (subscriptionError) {
-      console.error('Failed to create subscription:', subscriptionError)
+      console.error('Error recording transaction:', transactionError);
       return new Response(
-        JSON.stringify({ error: 'Failed to activate subscription' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
+        JSON.stringify({ error: 'Failed to record transaction' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Create success notification
-    await supabaseClient
-      .from('notifications')
-      .insert({
-        user_id: user.id,
-        title: 'Payment Successful',
-        message: `Your ${plan.name} subscription has been activated successfully!`,
-        type: 'success',
-        metadata: {
-          payment_reference: reference,
-          amount: amount,
-          plan_name: plan.name
+    // If this is a subscription payment, activate the subscription
+    if (transaction.metadata && transaction.metadata.subscription) {
+      const planType = transaction.metadata.plan_type;
+      
+      // Get the subscription plan
+      const { data: plan, error: planError } = await supabaseClient
+        .from('subscription_plans')
+        .select('id, duration_days')
+        .eq('name', planType)
+        .single();
+
+      if (planError || !plan) {
+        console.error('Subscription plan not found:', planType);
+      } else {
+        // Create or update subscription
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + plan.duration_days);
+
+        const { error: subscriptionError } = await supabaseClient
+          .from('subscriptions')
+          .insert({
+            user_id: users.id,
+            plan_id: plan.id,
+            status: 'ACTIVE',
+            start_date: new Date().toISOString(),
+            end_date: endDate.toISOString(),
+            payment_reference: reference,
+            auto_renew: false
+          });
+
+        if (subscriptionError) {
+          console.error('Error creating subscription:', subscriptionError);
         }
-      })
+      }
+    }
 
     return new Response(
-      JSON.stringify({
+      JSON.stringify({ 
         success: true,
-        amount: amount,
-        plan_name: plan.name,
-        reference: reference,
-        subscription_end_date: endDate.toISOString()
+        message: 'Payment verified successfully',
+        amount: transaction.amount / 100,
+        currency: transaction.currency
       }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
 
   } catch (error) {
-    console.error('Payment verification error:', error)
+    console.error('Payment verification error:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
-})
+});
