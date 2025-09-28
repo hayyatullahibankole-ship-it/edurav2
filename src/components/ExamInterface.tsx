@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MathRenderer } from "@/components/ui/math-renderer";
-import { MathJax, MathJaxContext } from "better-react-mathjax";
 import { 
   Clock, 
   ChevronLeft, 
