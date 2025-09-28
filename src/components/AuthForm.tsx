@@ -104,7 +104,7 @@ export default function AuthForm() {
           password: formData.password
         });
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: loginData.email,
           password: loginData.password
         });
@@ -116,12 +116,17 @@ export default function AuthForm() {
           throw error;
         }
 
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully signed in.",
-        });
+        if (data.user) {
+          toast({
+            title: "Welcome back!",
+            description: "You have successfully signed in.",
+          });
 
-        navigate('/dashboard');
+          // Wait for auth state to update before navigation
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 100);
+        }
       } else {
         // Validate signup form
         const signupData = signupSchema.parse(formData);

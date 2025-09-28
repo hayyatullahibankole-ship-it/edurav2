@@ -51,6 +51,16 @@ const Resources = () => {
         supabase.from('subjects').select('*').eq('is_active', true)
       ]);
 
+      if (resourcesResp.error) {
+        console.error('Resources fetch error:', resourcesResp.error);
+        throw new Error('Failed to fetch resources');
+      }
+
+      if (subjectsResp.error) {
+        console.error('Subjects fetch error:', subjectsResp.error);
+        throw new Error('Failed to fetch subjects');
+      }
+
       setResources(resourcesResp.data || []);
       setSubjects(subjectsResp.data || []);
       
@@ -58,7 +68,7 @@ const Resources = () => {
       console.error('Error fetching resources:', error);
       toast({
         title: "Error",
-        description: "Failed to load resources",
+        description: error instanceof Error ? error.message : "Failed to load resources",
         variant: "destructive"
       });
     } finally {
@@ -551,11 +561,19 @@ const Resources = () => {
                     Upgrade to Premium
                   </Button>
                 </Link>
-                <Link to="/auth">
-                  <Button size="lg" variant="outline">
-                    Start Free Trial
-                  </Button>
-                </Link>
+                 {!user ? (
+                   <Link to="/auth">
+                     <Button size="lg" variant="outline">
+                       Login to Subscribe
+                     </Button>
+                   </Link>
+                 ) : (
+                   <Link to="/auth">
+                     <Button size="lg" variant="outline">
+                       Start Free Trial
+                     </Button>
+                   </Link>
+                 )}
               </div>
             </CardContent>
           </Card>

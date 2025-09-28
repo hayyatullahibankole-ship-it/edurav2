@@ -22,45 +22,83 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        // Get initial session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (isMounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            await fetchUserData(session.user.id);
+          } else {
+            setLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    const fetchUserData = async (userId: string) => {
+      try {
+        // Get user profile
+        const { data: profileData, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('auth_user_id', userId)
+          .single();
+
+        if (profileError) {
+          console.error('Profile fetch error:', profileError);
+          return;
+        }
+
+        if (isMounted && profileData) {
+          setUserProfile(profileData);
+          
+          // Get user role
+          const { data: roleData, error: roleError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', profileData.id)
+            .single();
+            
+          if (roleError) {
+            console.error('Role fetch error:', roleError);
+          } else if (roleData) {
+            setUserRole(roleData.role);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        if (!isMounted) return;
+
+        console.log('Auth state changed:', event, session?.user?.email);
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile and role using setTimeout to avoid blocking
-          setTimeout(async () => {
-            try {
-              setLoading(true);
-              
-              // First get the user profile
-              const profileResponse = await supabase
-                .from('users')
-                .select('*')
-                .eq('auth_user_id', session.user.id)
-                .single();
-
-              if (profileResponse.data) {
-                setUserProfile(profileResponse.data);
-                
-                // Then get the user role using the profile ID
-                const roleResponse = await supabase
-                  .from('user_roles')
-                  .select('role')
-                  .eq('user_id', profileResponse.data.id)
-                  .single();
-                  
-                if (roleResponse.data) {
-                  setUserRole(roleResponse.data.role);
-                }
-              }
-            } catch (error) {
-              console.error('Error fetching user data:', error);
-            } finally {
-              setLoading(false);
-            }
-          }, 0);
+          setLoading(true);
+          await fetchUserData(session.user.id);
         } else {
           setUserProfile(null);
           setUserRole(null);
@@ -69,16 +107,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (!session) {
-        setLoading(false);
-      }
-    });
+    // Initialize auth
+    initializeAuth();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
