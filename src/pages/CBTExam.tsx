@@ -384,8 +384,10 @@ const CBTExam = () => {
     );
   }
 
-  const examType = (examData?.proctoring_data as any)?.exam_type?.toLowerCase();
-  console.log('Detected exam type:', examType, 'from proctoring_data:', examData?.proctoring_data);
+  const urlExamType = searchParams.get('examType')?.toLowerCase();
+  const proctorExamType = (examData?.proctoring_data as any)?.exam_type as string | undefined;
+  const examType = (proctorExamType || urlExamType || '').toLowerCase();
+  console.log('Detected exam type:', examType, 'urlExamType:', urlExamType, 'from proctoring_data:', examData?.proctoring_data);
   const isJambExam = examType === 'jamb';
   const isSubjectBasedExam = ['waec', 'neco', 'post-utme', 'custom'].includes(examType);
   console.log('isJambExam:', isJambExam, 'isSubjectBasedExam:', isSubjectBasedExam);

@@ -230,8 +230,8 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
         showResults: true
       });
 
-      // Navigate to exam page with attempt ID
-      navigate(`/practice?attempt=${attempt.id}`);
+      // Navigate to exam page with attempt ID and exam type as fallback
+      navigate(`/practice?attempt=${attempt.id}&examType=${testConfig.examType}`);
       
     } catch (error) {
       console.error('Error starting test:', error);
