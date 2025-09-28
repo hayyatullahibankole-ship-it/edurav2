@@ -1074,7 +1074,7 @@ export type Database = {
         Returns: undefined
       }
       find_incomplete_questions: {
-        Args: Record<PropertyKey, never>
+        Args: Record<PropertyKey, never> | { target_subject?: string }
         Returns: {
           id: string
           reason: string
