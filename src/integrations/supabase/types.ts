@@ -1266,6 +1266,14 @@ export type Database = {
         Args: { action_type: string; admin_id: string; target_id?: string }
         Returns: boolean
       }
+      log_admin_pii_access: {
+        Args: {
+          access_type: string
+          accessed_fields?: string[]
+          target_user_id: string
+        }
+        Returns: undefined
+      }
       log_pii_access: {
         Args: { access_type: string; accessed_user_id: string }
         Returns: undefined
