@@ -46,10 +46,11 @@ const CBTExam = () => {
       }
 
       console.log('Loaded attempt data:', attempt);
+      const proctoringData = attempt.proctoring_data as any;
+      console.log('Proctoring data exam_type:', proctoringData?.exam_type);
       setExamData(attempt);
 
       // Check if this is a practice attempt (has proctoring_data) or exam-based attempt
-      const proctoringData = attempt.proctoring_data as any;
       let allQuestions: any[] = [];
 
       if (proctoringData && attempt.selected_subjects) {
@@ -383,6 +384,10 @@ const CBTExam = () => {
     );
   }
 
+  const examType = (examData?.proctoring_data as any)?.exam_type?.toLowerCase();
+  const isJambExam = examType === 'jamb';
+  const isSubjectBasedExam = ['waec', 'neco', 'post-utme', 'custom'].includes(examType);
+
   return (
     <>
       {showOptimizer ? (
@@ -391,7 +396,7 @@ const CBTExam = () => {
           questions={questions}
           onOptimize={() => setShowOptimizer(false)}
         />
-      ) : examData?.proctoring_data?.exam_type === 'jamb' ? (
+      ) : isJambExam ? (
         <JambCBTInterface
           examTitle={(examData?.proctoring_data as any)?.title || "JAMB CBT Practice Test"}
           examDescription={(examData?.proctoring_data as any)?.description || "Joint Admissions and Matriculation Board Computer Based Test"}
