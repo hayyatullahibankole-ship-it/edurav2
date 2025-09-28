@@ -182,7 +182,7 @@ export default function AdminDashboard() {
         description: "Exam deleted successfully"
       });
       
-      fetchData();
+      fetchAdminData();
     } catch (error) {
       console.error('Error deleting exam:', error);
       toast({
@@ -196,7 +196,7 @@ export default function AdminDashboard() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate('/');
+      navigate('/admin/login');
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
@@ -204,13 +204,6 @@ export default function AdminDashboard() {
         description: "Failed to sign out",
         variant: "destructive"
       });
-    }
-  };
-    try {
-      await signOut();
-      navigate('/admin/login');
-    } catch (error) {
-      console.error('Error signing out:', error);
     }
   };
 
