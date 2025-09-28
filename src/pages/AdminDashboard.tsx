@@ -38,6 +38,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import SecurityConfig from '@/components/admin/SecurityConfig';
 import SecurityAlertsBanner from '@/components/admin/SecurityAlertsBanner';
+import QuestionManagement from '@/components/admin/QuestionManagement';
 
 export default function AdminDashboard() {
   const { user, isAdmin, signOut } = useAuth();
@@ -141,7 +142,70 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleExportData = () => {
+    // TODO: Implement data export functionality
+    toast({
+      title: "Export Data",
+      description: "Export functionality will be available soon",
+    });
+  };
+
+  const handleEditExam = (examId: string) => {
+    // TODO: Implement exam editing
+    toast({
+      title: "Edit Exam",
+      description: "Exam editing functionality will be available soon",
+    });
+  };
+
+  const handleViewExam = (examId: string) => {
+    // TODO: Implement exam viewing
+    toast({
+      title: "View Exam", 
+      description: "Exam viewing functionality will be available soon",
+    });
+  };
+
+  const handleDeleteExam = async (examId: string) => {
+    if (!confirm('Are you sure you want to delete this exam?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('exams')
+        .delete()
+        .eq('id', examId);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Exam deleted successfully"
+      });
+      
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting exam:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete exam",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive"
+      });
+    }
+  };
     try {
       await signOut();
       navigate('/admin/login');
@@ -331,11 +395,11 @@ export default function AdminDashboard() {
             </TabsList>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExportData}>
                 <Filter className="w-4 h-4 mr-2" />
                 Filter
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExportData}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
@@ -496,13 +560,13 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleEditExam(exam.id)}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleViewExam(exam.id)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleDeleteExam(exam.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -514,31 +578,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="questions" className="space-y-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Question Bank</CardTitle>
-                  <CardDescription>Manage exam questions and bulk import</CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Bulk Import
-                  </Button>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Question
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Question management interface will be displayed here</p>
-                  <p className="text-sm">Upload questions via CSV/Excel or create individually</p>
-                </div>
-              </CardContent>
-            </Card>
+            <QuestionManagement />
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">

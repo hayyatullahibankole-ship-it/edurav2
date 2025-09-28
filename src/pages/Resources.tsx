@@ -15,14 +15,19 @@ import {
   Play,
   Lock,
   Eye,
-  Globe
+  Globe,
+  CheckCircle
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useAuth } from "@/hooks/useAuth";
 
 const Resources = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
   const [resources, setResources] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,58 +88,141 @@ const Resources = () => {
 
   const handleResourceAccess = async (resource: any) => {
     try {
-      if (resource.access_level === 'premium') {
-        // Redirect to payment page
-        window.location.href = '/payment';
+      // Check if user is logged in
+      if (!user) {
+        toast({
+          title: "Login Required",
+          description: "Please log in to access resources",
+          variant: "destructive"
+        });
+        window.location.href = '/auth';
         return;
       }
+
+      // Check premium access for premium resources
+      if (resource.access_level === 'premium') {
+        if (subscriptionLoading) {
+          toast({
+            title: "Loading",
+            description: "Checking subscription status...",
+          });
+          return;
+        }
+        
+        if (!hasPremiumAccess && !isPremium) {
+          toast({
+            title: "Premium Required",
+            description: "This resource requires a premium subscription",
+            variant: "destructive"
+          });
+          window.location.href = '/payment?plan=premium';
+          return;
+        }
+      }
+
+      console.log('Accessing resource:', resource.title, 'URL:', resource.file_url);
 
       // Generate proper storage URL for the file
       let fileUrl = resource.file_url;
       
-      // If the file_url is a relative path, construct the full Supabase storage URL
-      if (!fileUrl.startsWith('http')) {
-        // Extract bucket and file path
-        const pathParts = fileUrl.split('/');
-        const bucketName = pathParts[0] || 'resources';
-        const filePath = pathParts.slice(1).join('/');
-        
-        // Get public URL from Supabase storage
-        const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
-        fileUrl = data.publicUrl;
+      try {
+        // If the file_url is a storage path, construct the full Supabase storage URL
+        if (!fileUrl.startsWith('http')) {
+          // Handle storage paths like "resources/file.pdf" or just "file.pdf"
+          const pathParts = fileUrl.split('/');
+          
+          // If no bucket specified, default to 'resources'
+          let bucketName = 'resources';
+          let filePath = fileUrl;
+          
+          // If path includes bucket name
+          if (pathParts.length > 1) {
+            bucketName = pathParts[0];
+            filePath = pathParts.slice(1).join('/');
+          }
+          
+          // Get public URL from Supabase storage
+          const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+          fileUrl = data.publicUrl;
+          console.log('Generated storage URL:', fileUrl);
+        }
+
+        // Test if file exists
+        const response = await fetch(fileUrl, { method: 'HEAD' });
+        if (!response.ok) {
+          throw new Error(`File not found (${response.status})`);
+        }
+
+        // Increment download count
+        await supabase
+          .from('resources')
+          .update({ 
+            download_count: (resource.download_count || 0) + 1,
+            view_count: (resource.view_count || 0) + 1
+          })
+          .eq('id', resource.id);
+
+        // Handle different file types
+        if (resource.file_type?.startsWith('video') || fileUrl.includes('youtube')) {
+          window.open(fileUrl, '_blank');
+          toast({
+            title: "Opening Video",
+            description: "Video is opening in a new tab"
+          });
+        } else {
+          // For documents, try to download with proper filename
+          try {
+            const response = await fetch(fileUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            
+            // Get proper filename with extension
+            let filename = resource.title;
+            if (!filename.includes('.')) {
+              const urlPath = new URL(fileUrl).pathname;
+              const extension = urlPath.split('.').pop();
+              if (extension) {
+                filename += `.${extension}`;
+              }
+            }
+            
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up blob URL
+            setTimeout(() => window.URL.revokeObjectURL(url), 100);
+            
+            toast({
+              title: "Download Started",
+              description: `Downloading ${filename}`
+            });
+          } catch (downloadError) {
+            // Fallback: open in new tab
+            console.warn('Download failed, opening in new tab:', downloadError);
+            window.open(fileUrl, '_blank');
+            toast({
+              title: "Opening File",
+              description: "File is opening in a new tab"
+            });
+          }
+        }
+
+      } catch (urlError) {
+        console.error('Error processing file URL:', urlError);
+        throw new Error("File not found or inaccessible");
       }
-
-      // Increment download count
-      await supabase
-        .from('resources')
-        .update({ 
-          download_count: (resource.download_count || 0) + 1 
-        })
-        .eq('id', resource.id);
-
-      // Open the file
-      if (resource.file_type?.startsWith('video')) {
-        window.open(fileUrl, '_blank');
-      } else {
-        // For documents, trigger download
-        const link = document.createElement('a');
-        link.href = fileUrl;
-        link.download = resource.title;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-
-      toast({
-        title: "Success",
-        description: resource.file_type?.startsWith('video') ? "Opening video..." : "Download started"
-      });
 
     } catch (error) {
       console.error('Error accessing resource:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to access resource";
       toast({
-        title: "Error",
-        description: "Failed to access resource. Please try again.",
+        title: "Access Error",
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -296,9 +384,13 @@ const Resources = () => {
                         {getFileIcon(resource.file_type)}
                       </div>
                       {resource.access_level === 'premium' && (
-                        <Badge className="bg-accent/10 text-accent border-accent/20">
-                          <Lock className="h-3 w-3 mr-1" />
-                          Premium
+                        <Badge className={`${hasPremiumAccess || isPremium ? 'bg-green-100 text-green-700 border-green-300' : 'bg-accent/10 text-accent border-accent/20'}`}>
+                          {hasPremiumAccess || isPremium ? (
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                          ) : (
+                            <Lock className="h-3 w-3 mr-1" />
+                          )}
+                          {hasPremiumAccess || isPremium ? 'Premium' : 'Premium'}
                         </Badge>
                       )}
                     </div>
@@ -335,18 +427,27 @@ const Resources = () => {
                     
                     <Button 
                       className="w-full" 
-                      variant={resource.access_level === 'premium' ? "default" : "outline"}
+                      variant={resource.access_level === 'premium' && !(hasPremiumAccess || isPremium) ? "default" : "outline"}
                       onClick={() => handleResourceAccess(resource)}
+                      disabled={subscriptionLoading}
                     >
-                      {resource.file_type?.startsWith('video') ? (
+                      {subscriptionLoading ? (
+                        <span>Checking...</span>
+                      ) : resource.file_type?.startsWith('video') ? (
                         <>
                           <Play className="h-4 w-4 mr-2" />
-                          {resource.access_level === 'premium' ? 'Premium Required' : 'Watch Video'}
+                          {resource.access_level === 'premium' && !(hasPremiumAccess || isPremium) 
+                            ? 'Get Premium' 
+                            : 'Watch Video'
+                          }
                         </>
                       ) : (
                         <>
                           <Download className="h-4 w-4 mr-2" />
-                          {resource.access_level === 'premium' ? 'Premium Required' : 'Download'}
+                          {resource.access_level === 'premium' && !(hasPremiumAccess || isPremium) 
+                            ? 'Get Premium' 
+                            : 'Download'
+                          }
                         </>
                       )}
                     </Button>

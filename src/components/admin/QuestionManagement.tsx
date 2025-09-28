@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MathRenderer } from '@/components/ui/math-renderer';
+import { processQuestionText, processQuestionOptions } from '@/utils/latexProcessor';
 import { 
   BookOpen, 
   Plus, 
@@ -30,6 +31,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import SimpleBulkUpload from './SimpleBulkUpload';
+import LatexAutoFixer from '@/components/LatexAutoFixer';
 
 interface Question {
   id: string;
@@ -83,51 +85,86 @@ export default function QuestionManagement() {
     try {
       setLoading(true);
       
-      // Fetch subjects
+      // Fetch subjects first
+      console.log('Fetching subjects...');
       const { data: subjectsData, error: subjectsError } = await supabase
         .from('subjects')
         .select('*')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .order('name', { ascending: true });
 
-      if (subjectsError) throw subjectsError;
-
-      // Fetch all questions in pages of 1000 to bypass PostgREST max-rows
-      const pageSize = 1000;
-      let from = 0;
-      let to = pageSize - 1;
-      let allQuestions: any[] = [];
-
-      // Loop until fewer than pageSize returned
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const { data: batch, error: batchError } = await supabase
-          .from('questions')
-          .select(`
-            *,
-            subjects(name, code)
-          `)
-          .order('created_at', { ascending: false })
-          .range(from, to);
-
-        if (batchError) throw batchError;
-        if (!batch || batch.length === 0) break;
-
-        allQuestions = allQuestions.concat(batch);
-        if (batch.length < pageSize) break;
-        from += pageSize;
-        to += pageSize;
+      if (subjectsError) {
+        console.error('Subjects error:', subjectsError);
+        throw subjectsError;
       }
 
-      setQuestions(allQuestions);
+      console.log('Subjects loaded:', subjectsData?.length || 0);
       setSubjects(subjectsData || []);
+
+      if (!subjectsData || subjectsData.length === 0) {
+        console.warn('No subjects found');
+        toast({
+          title: "Warning",
+          description: "No subjects found. Please create subjects first.",
+          variant: "destructive"
+        });
+        setQuestions([]);
+        return;
+      }
+
+      // Fetch questions with better error handling
+      console.log('Fetching questions...');
+      const { data: questionsData, error: questionsError } = await supabase
+        .from('questions')
+        .select(`
+          id,
+          question_text,
+          type,
+          options,
+          correct_answer,
+          explanation,
+          difficulty_level,
+          tags,
+          subject_id,
+          is_active,
+          points,
+          created_at,
+          subjects!inner(name, code)
+        `)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1000);
+
+      if (questionsError) {
+        console.error('Questions error:', questionsError);
+        // Don't throw error if it's just no questions found
+        if (questionsError.code !== 'PGRST116') {
+          throw questionsError;
+        }
+      }
+
+      console.log('Questions loaded:', questionsData?.length || 0);
+      setQuestions(questionsData || []);
+      
+      if (!questionsData || questionsData.length === 0) {
+        toast({
+          title: "Info",
+          description: "No questions found. Start by creating some questions.",
+        });
+      }
       
     } catch (error) {
       console.error('Error fetching data:', error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       toast({
-        title: "Error",
-        description: "Failed to load questions data",
+        title: "Error Loading Data", 
+        description: `Failed to load questions: ${errorMessage}`,
         variant: "destructive"
       });
+      
+      // Set empty arrays to prevent undefined errors
+      setQuestions([]);
+      setSubjects([]);
     } finally {
       setLoading(false);
     }
@@ -137,31 +174,53 @@ export default function QuestionManagement() {
     try {
       setLoading(true);
       
+      // Validate required fields
+      if (!newQuestion.question_text.trim()) {
+        throw new Error("Question text is required");
+      }
+      
+      if (!newQuestion.subject_id) {
+        throw new Error("Please select a subject");
+      }
+      
+      if (newQuestion.type === 'MCQ_SINGLE') {
+        const validOptions = newQuestion.options.filter(opt => opt.trim() !== '');
+        if (validOptions.length < 2) {
+          throw new Error("Please provide at least 2 valid options");
+        }
+      }
+      
       const questionData = {
-        question_text: newQuestion.question_text,
+        question_text: processQuestionText(newQuestion.question_text.trim()),
         type: newQuestion.type,
         options: newQuestion.type === 'MCQ_SINGLE' 
-          ? newQuestion.options.filter(opt => opt.trim() !== '')
+          ? processQuestionOptions(newQuestion.options.filter(opt => opt.trim() !== ''))
           : newQuestion.type === 'TRUE_FALSE' 
           ? ['True', 'False']
           : null,
         correct_answer: newQuestion.type === 'MCQ_SINGLE'
           ? newQuestion.correct_answer
           : newQuestion.type === 'TRUE_FALSE'
-          ? newQuestion.correct_answer
+          ? (newQuestion.correct_answer === 0 ? 'True' : 'False')
           : newQuestion.options[0],
-        explanation: newQuestion.explanation,
+        explanation: processQuestionText(newQuestion.explanation.trim()),
         difficulty_level: newQuestion.difficulty_level,
-        tags: newQuestion.tags,
+        tags: Array.isArray(newQuestion.tags) ? newQuestion.tags : [],
         subject_id: newQuestion.subject_id,
         points: newQuestion.points,
         is_active: true
       };
 
-      const { error } = await supabase.from('questions').insert(questionData);
+      console.log('Creating question with data:', questionData);
+      const { data, error } = await supabase.from('questions').insert(questionData).select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(error.message || "Failed to save question");
+      }
 
+      console.log('Question created successfully:', data);
+      
       toast({
         title: "Success",
         description: "Question created successfully"
@@ -173,9 +232,10 @@ export default function QuestionManagement() {
       
     } catch (error) {
       console.error('Error creating question:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to create question";
       toast({
         title: "Error",
-        description: "Failed to create question",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -195,6 +255,94 @@ export default function QuestionManagement() {
       subject_id: '',
       points: 1
     });
+  };
+
+  const handleViewQuestion = (question: Question) => {
+    // TODO: Implement view question modal
+    toast({
+      title: "View Question",
+      description: `Viewing question: ${question.question_text.slice(0, 50)}...`,
+    });
+  };
+
+  const handleEditQuestion = (question: Question) => {
+    // TODO: Implement edit question functionality
+    toast({
+      title: "Edit Question", 
+      description: "Edit functionality will be implemented soon",
+    });
+  };
+
+  const handleDuplicateQuestion = async (question: Question) => {
+    try {
+      const duplicatedQuestion = {
+        question_text: `${question.question_text} (Copy)`,
+        type: question.type,
+        options: question.options,
+        correct_answer: question.correct_answer,
+        explanation: question.explanation,
+        difficulty_level: question.difficulty_level,
+        tags: question.tags,
+        subject_id: question.subject_id,
+        points: question.points,
+        is_active: true
+      };
+
+      const { error } = await supabase.from('questions').insert(duplicatedQuestion);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Question duplicated successfully"
+      });
+
+      fetchData();
+    } catch (error) {
+      console.error('Error duplicating question:', error);
+      toast({
+        title: "Error",
+        description: "Failed to duplicate question",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleViewAnalytics = (question: Question) => {
+    // TODO: Implement analytics view
+    toast({
+      title: "Analytics",
+      description: "Analytics functionality will be implemented soon",
+    });
+  };
+
+  const handleDeleteQuestion = async (questionId: string) => {
+    if (!confirm('Are you sure you want to delete this question? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('questions')
+        .update({ is_active: false })
+        .eq('id', questionId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Question deleted successfully"
+      });
+
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting question:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete question",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredQuestions = questions.filter(question => {
@@ -251,7 +399,7 @@ export default function QuestionManagement() {
                   </div>
                   <MathRenderer 
                     content={question.question_text}
-                    className="font-medium mb-2 line-clamp-2"
+                    className="font-medium mb-2 line-clamp-3"
                   />
                   <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                     <span>{question.points} point{question.points !== 1 ? 's' : ''}</span>
@@ -263,19 +411,19 @@ export default function QuestionManagement() {
                 </div>
                 
                 <div className="flex items-center space-x-2 ml-4">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => handleViewQuestion(question)}>
                     <Eye className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => handleEditQuestion(question)}>
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => handleDuplicateQuestion(question)}>
                     <Copy className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => handleViewAnalytics(question)}>
                     <BarChart3 className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => handleDeleteQuestion(question.id)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -297,6 +445,8 @@ export default function QuestionManagement() {
           </div>
           
           <div className="flex items-center gap-4 flex-wrap">
+            <LatexAutoFixer />
+            
             <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -341,11 +491,17 @@ export default function QuestionManagement() {
                             <SelectValue placeholder="Select subject" />
                           </SelectTrigger>
                           <SelectContent>
-                            {subjects.map(subject => (
-                              <SelectItem key={subject.id} value={subject.id}>
-                                {subject.name}
+                            {subjects.length > 0 ? (
+                              subjects.map(subject => (
+                                <SelectItem key={subject.id} value={subject.id}>
+                                  {subject.name} ({subject.code})
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="" disabled>
+                                No subjects available - Please create subjects first
                               </SelectItem>
-                            ))}
+                            )}
                           </SelectContent>
                         </Select>
                       </div>

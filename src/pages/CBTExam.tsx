@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import SubjectBasedExamInterface from "@/components/SubjectBasedExamInterface";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import SubjectBasedExamInterface from "@/components/SubjectBasedExamInterface";
+import CBTOptimizer from "@/components/CBTOptimizer";
 
 const CBTExam = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const CBTExam = () => {
   const [questions, setQuestions] = useState<any[]>([]);
   const [examData, setExamData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showOptimizer, setShowOptimizer] = useState(false);
   const attemptId = searchParams.get('attempt');
 
   useEffect(() => {
@@ -136,6 +138,7 @@ const CBTExam = () => {
 
       if (allQuestions.length === 0) {
         console.error('No questions loaded for attempt:', attemptId);
+        setShowOptimizer(true);
         throw new Error('No questions available for this test. Please contact support.');
       }
 
@@ -309,22 +312,71 @@ const CBTExam = () => {
   }
 
   if (!examData || questions.length === 0) {
+    if (showOptimizer && examData) {
+      return (
+        <div className="min-h-screen bg-background p-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold mb-2">CBT Exam Optimization</h1>
+              <p className="text-muted-foreground">
+                Analyzing and optimizing your exam configuration...
+              </p>
+            </div>
+            
+            <CBTOptimizer 
+              examData={examData}
+              questions={questions}
+              onOptimize={() => {
+                setShowOptimizer(false);
+                navigate('/dashboard');
+              }}
+            />
+            
+            <div className="mt-6 text-center">
+              <button 
+                onClick={() => navigate('/dashboard')}
+                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ← Back to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-md">
           <p className="text-lg font-medium mb-2">Unable to Load Test</p>
           <p className="text-muted-foreground mb-4">
             {!examData ? "Test session not found or has expired." : "No questions available for the selected subjects."}
           </p>
-          <p className="text-sm text-muted-foreground mb-4">
-            This may happen if: the test was already completed, the session expired, or there are insufficient questions for your selected subjects.
-          </p>
-          <button 
-            onClick={() => navigate('/dashboard')}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            Back to Dashboard
-          </button>
+          <div className="text-sm text-muted-foreground mb-6 space-y-1">
+            <p>This may happen if:</p>
+            <ul className="list-disc list-inside text-left space-y-1">
+              <li>The test was already completed</li>
+              <li>The session has expired</li>
+              <li>There are insufficient questions for your selected subjects</li>
+              <li>The exam configuration needs optimization</li>
+            </ul>
+          </div>
+          <div className="space-y-3">
+            {examData && (
+              <button 
+                onClick={() => setShowOptimizer(true)}
+                className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Optimize & Retry
+              </button>
+            )}
+            <button 
+              onClick={() => navigate('/dashboard')}
+              className="w-full px-4 py-2 bg-muted text-muted-foreground rounded-md hover:bg-muted/80 transition-colors"
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
