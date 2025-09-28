@@ -304,22 +304,36 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <ScheduleTestModal>
+                      <ScheduleTestModal defaultExamType="jamb">
                         <Button className="w-full h-20 flex-col gap-2">
                           <Play className="h-6 w-6" />
-                          Start Test
+                          JAMB Practice
                         </Button>
                       </ScheduleTestModal>
+                      <ScheduleTestModal defaultExamType="waec">
+                        <Button variant="outline" className="w-full h-20 flex-col gap-2">
+                          <Play className="h-6 w-6" />
+                          WAEC Practice
+                        </Button>
+                      </ScheduleTestModal>
+                      <ScheduleTestModal defaultExamType="neco">
+                        <Button variant="outline" className="w-full h-20 flex-col gap-2">
+                          <Play className="h-6 w-6" />
+                          NECO Practice
+                        </Button>
+                      </ScheduleTestModal>
+                      <ScheduleTestModal defaultExamType="post-utme">
+                        <Button variant="outline" className="w-full h-20 flex-col gap-2">
+                          <Play className="h-6 w-6" />
+                          Post-UTME Practice
+                        </Button>
+                      </ScheduleTestModal>
+                    </div>
+                    <div className="mt-4 grid md:grid-cols-2 gap-4">
                       <Link to="/resources">
                         <Button variant="outline" className="w-full h-20 flex-col gap-2">
                           <FileText className="h-6 w-6" />
                           Browse Resources
-                        </Button>
-                      </Link>
-                      <Link to="/resources">
-                        <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                          <Video className="h-6 w-6" />
-                          Watch Tutorials
                         </Button>
                       </Link>
                       <Link to="/consultation">
