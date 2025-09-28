@@ -28,7 +28,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Verify user is authenticated admin
+    // Verify user is authenticated
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
     if (authError || !user) {
       return new Response('Unauthorized', { 
@@ -37,11 +37,12 @@ serve(async (req) => {
       })
     }
 
-    // Check admin status
-    const { data: isAdminData, error: adminError } = await supabaseServiceClient
+    // Check admin status using the authenticated client
+    const { data: isAdminData, error: adminError } = await supabaseClient
       .rpc('is_admin', { _user_id: user.id })
     
     if (adminError || !isAdminData) {
+      console.error('Admin check failed:', adminError)
       return new Response('Forbidden', { 
         status: 403, 
         headers: corsHeaders 
@@ -51,13 +52,16 @@ serve(async (req) => {
     const { action, target_subject } = await req.json()
 
     if (action === 'scan') {
-      // Find incomplete questions
-      const { data, error } = await supabaseServiceClient
+      // Find incomplete questions using authenticated client
+      const { data, error } = await supabaseClient
         .rpc('find_incomplete_questions', { target_subject })
       
-      if (error) throw error
+      if (error) {
+        console.error('Scan error:', error)
+        throw error
+      }
 
-      // Get question details for display
+      // Get question details for display using service client for better performance
       if (data && data.length > 0) {
         const questionIds = data.map((q: any) => q.id)
         const { data: questionDetails, error: detailsError } = await supabaseServiceClient
@@ -93,11 +97,14 @@ serve(async (req) => {
     }
 
     if (action === 'fix_latex') {
-      // Fix LaTeX formatting in questions
-      const { data, error } = await supabaseServiceClient
+      // Fix LaTeX formatting in questions using authenticated client
+      const { data, error } = await supabaseClient
         .rpc('fix_latex_questions', { target_subject })
       
-      if (error) throw error
+      if (error) {
+        console.error('Fix LaTeX error:', error)
+        throw error
+      }
 
       const fixedCount = data?.[0]?.updated_count || 0
       return new Response(
@@ -107,11 +114,14 @@ serve(async (req) => {
     }
 
     if (action === 'delete_incomplete') {
-      // Delete incomplete questions
-      const { data, error } = await supabaseServiceClient
+      // Delete incomplete questions using authenticated client
+      const { data, error } = await supabaseClient
         .rpc('delete_incomplete_questions', { target_subject })
       
-      if (error) throw error
+      if (error) {
+        console.error('Delete incomplete error:', error)
+        throw error
+      }
 
       const deletedCount = data?.[0]?.deleted || 0
       return new Response(
