@@ -1194,6 +1194,14 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: boolean
       }
+      check_rate_limit: {
+        Args: {
+          endpoint_name: string
+          max_requests?: number
+          window_minutes?: number
+        }
+        Returns: boolean
+      }
       delete_user_completely: {
         Args: { user_uuid: string }
         Returns: boolean
@@ -1260,6 +1268,15 @@ export type Database = {
       }
       log_pii_access: {
         Args: { access_type: string; accessed_user_id: string }
+        Returns: undefined
+      }
+      log_security_event: {
+        Args: {
+          details?: Json
+          event_type: string
+          target_id?: string
+          target_table: string
+        }
         Returns: undefined
       }
       mask_email: {
