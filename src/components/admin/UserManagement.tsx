@@ -34,6 +34,7 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   
   const [newUser, setNewUser] = useState({
@@ -417,7 +418,10 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
                     </Badge>
                   )}
                   
-                  <Button variant="ghost" size="sm" onClick={() => {/* View user details */}}>
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    setSelectedUser(user);
+                    setIsViewModalOpen(true);
+                  }}>
                     <Eye className="w-4 h-4" />
                   </Button>
                   
@@ -516,6 +520,75 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
                 </Button>
                 <Button variant="outline" onClick={() => setIsEditModalOpen(false)} disabled={loading}>
                   Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* View User Modal */}
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-slate-600 rounded-full flex items-center justify-center">
+                  {selectedUser.profile_image_url ? (
+                    <img src={selectedUser.profile_image_url} alt="Profile" className="w-16 h-16 rounded-full" />
+                  ) : (
+                    <Users className="w-8 h-8 text-slate-300" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold">{selectedUser.first_name} {selectedUser.last_name}</h3>
+                  <p className="text-muted-foreground">{selectedUser.email}</p>
+                  <div className="flex items-center space-x-2 mt-2">
+                    {selectedUser.is_verified && (
+                      <Badge className="bg-green-600">Verified</Badge>
+                    )}
+                    {selectedUser.is_suspended && (
+                      <Badge className="bg-red-600">Suspended</Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-medium mb-3">Personal Information</h4>
+                  <div className="space-y-2 text-sm">
+                    <div><span className="text-muted-foreground">Phone:</span> {selectedUser.phone || 'Not provided'}</div>
+                    <div><span className="text-muted-foreground">Date of Birth:</span> {selectedUser.date_of_birth ? new Date(selectedUser.date_of_birth).toLocaleDateString() : 'Not provided'}</div>
+                    <div><span className="text-muted-foreground">Country:</span> {selectedUser.country || 'Not provided'}</div>
+                    <div><span className="text-muted-foreground">State:</span> {selectedUser.state || 'Not provided'}</div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium mb-3">Account Information</h4>
+                  <div className="space-y-2 text-sm">
+                    <div><span className="text-muted-foreground">Created:</span> {new Date(selectedUser.created_at).toLocaleDateString()}</div>
+                    <div><span className="text-muted-foreground">Last Login:</span> {selectedUser.last_login_at ? new Date(selectedUser.last_login_at).toLocaleDateString() : 'Never'}</div>
+                    <div><span className="text-muted-foreground">2FA Enabled:</span> {selectedUser.two_fa_enabled ? 'Yes' : 'No'}</div>
+                    <div><span className="text-muted-foreground">Account Status:</span> {selectedUser.is_suspended ? 'Suspended' : 'Active'}</div>
+                  </div>
+                </div>
+              </div>
+
+              {selectedUser.address && (
+                <div>
+                  <h4 className="font-medium mb-2">Address</h4>
+                  <p className="text-sm text-muted-foreground">{selectedUser.address}</p>
+                </div>
+              )}
+
+              <div className="flex justify-end pt-4">
+                <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>
+                  Close
                 </Button>
               </div>
             </div>
