@@ -51,19 +51,20 @@ serve(async (req) => {
     const isPost = req.method === "POST";
     const body = isPost ? await req.json().catch(() => ({})) : {};
     const activeOnly = body.activeOnly !== false; // default true
-    const limit = typeof body.limit === "number" ? Math.min(body.limit, 15000) : 5000; // Increased for large datasets
+    const requestedLimit = typeof body.limit === "number" ? body.limit : 1000;
+    const limit = Math.min(requestedLimit, 1000); // PostgREST per-request cap
+    const offset = typeof body.offset === "number" ? Math.max(0, body.offset) : 0;
 
-    const query = adminClient
+    const baseSelect = `id, question_text, type, options, correct_answer, explanation, difficulty_level, tags, subject_id, is_active, points, created_at`;
+
+    let query = adminClient
       .from("questions")
-      .select(
-        `id, question_text, type, options, correct_answer, explanation, difficulty_level, tags, subject_id, is_active, points, created_at`
-      )
-      .order("created_at", { ascending: false })
-      .limit(limit);
+      .select(baseSelect, { count: "exact" })
+      .order("created_at", { ascending: false });
 
-    if (activeOnly) query.eq("is_active", true);
+    if (activeOnly) query = query.eq("is_active", true);
 
-    const { data, error } = await query;
+    const { data, error, count } = await query.range(offset, offset + limit - 1);
 
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), {
@@ -72,7 +73,7 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ questions: data || [] }), {
+    return new Response(JSON.stringify({ questions: data || [], count: count ?? 0, offset, limit }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

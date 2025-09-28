@@ -120,24 +120,50 @@ export default function QuestionManagement() {
       }
 
       // For admin users, always try the edge function first since the regular query has RLS issues
-      console.log('Admin user detected - using admin edge function...');
+      console.log('Admin user detected - using admin edge function with pagination...');
       try {
-        const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-get-questions', {
-          body: { activeOnly: true, limit: 5000 }
-        });
+        const pageSize = 1000; // Supabase PostgREST per-request cap
+        let offset = 0;
+        let all: any[] = [];
 
-        console.log('Edge function response:', { fnData, fnError });
+        // First page
+        const first = await supabase.functions.invoke('admin-get-questions', {
+          body: { activeOnly: true, limit: pageSize, offset }
+        });
+        const fnError = first.error as any;
+        const fnData: any = first.data;
+
+        console.log('Edge function first page:', { count: fnData?.count, received: fnData?.questions?.length, fnError });
 
         if (fnError) {
           console.error('Edge function error:', fnError);
           throw new Error(fnError.message || 'Admin fetch failed');
         }
 
-        const loaded = (fnData as any)?.questions || [];
-        console.log('Loaded questions from edge function:', loaded.length);
-        setQuestions(loaded);
+        const total: number = fnData?.count ?? (fnData?.questions?.length || 0);
+        all = (fnData?.questions as any[]) || [];
+        offset += all.length;
 
-        if (loaded.length === 0) {
+        // Fetch remaining pages in batches of 1000
+        while (offset < total) {
+          const next = await supabase.functions.invoke('admin-get-questions', {
+            body: { activeOnly: true, limit: pageSize, offset }
+          });
+          if (next.error) {
+            console.error('Pagination fetch error:', next.error);
+            break;
+          }
+          const nextBatch = ((next.data as any)?.questions || []) as any[];
+          if (nextBatch.length === 0) break;
+          all = all.concat(nextBatch);
+          offset += nextBatch.length;
+          console.log(`Loaded ${all.length}/${total}...`);
+        }
+
+        console.log('Loaded questions from edge function:', all.length);
+        setQuestions(all);
+
+        if (all.length === 0) {
           toast({
             title: "Info",
             description: "No questions found. Start by creating some questions.",
@@ -145,7 +171,7 @@ export default function QuestionManagement() {
         } else {
           toast({
             title: "Success",
-            description: `Loaded ${loaded.length} questions successfully`,
+            description: `Loaded ${all.length} questions successfully`,
           });
         }
         return; // Success - exit early
