@@ -1,15 +1,25 @@
 /**
  * JAMB Scoring Algorithm
- * Scales raw score (0-180) to final score (0-400)
- * Formula: finalScore = round((rawCorrect / 180) * 400)
+ * - Correct answer: +4 points
+ * - Wrong answer: -1 point  
+ * - No answer: 0 points
+ * Final score capped at 400 (maximum possible)
  */
-export function calculateJAMBScore(rawCorrect: number, totalQuestions: number = 180): number {
-  if (rawCorrect < 0 || rawCorrect > totalQuestions) {
-    throw new Error('Invalid raw score');
+export function calculateJAMBScore(
+  correctAnswers: number, 
+  wrongAnswers: number, 
+  totalQuestions: number = 180
+): number {
+  if (correctAnswers < 0 || wrongAnswers < 0 || correctAnswers + wrongAnswers > totalQuestions) {
+    throw new Error('Invalid answer counts');
   }
   
-  const scaled = Math.round((rawCorrect / totalQuestions) * 400);
-  return Math.max(0, Math.min(400, scaled));
+  const rawScore = (correctAnswers * 4) - (wrongAnswers * 1);
+  const maxPossibleScore = totalQuestions * 4; // 180 * 4 = 720 for full JAMB
+  
+  // Scale to 400 max and ensure not negative
+  const scaledScore = Math.round((rawScore / maxPossibleScore) * 400);
+  return Math.max(0, Math.min(400, scaledScore));
 }
 
 /**
@@ -74,7 +84,7 @@ export function calculateExamResult(
   if (examType === 'JAMB') {
     return {
       ...result,
-      scaledScore: calculateJAMBScore(correctAnswers, totalQuestions),
+      scaledScore: calculateJAMBScore(correctAnswers, wrongAnswers, totalQuestions),
       examType: 'JAMB'
     };
   } else if (examType === 'WAEC') {

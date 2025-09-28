@@ -87,7 +87,7 @@ export default function Calculator({ isOpen, onClose }: CalculatorProps) {
   };
 
   const buttonClass = "h-12 text-lg font-medium transition-colors";
-  const numberButtonClass = `${buttonClass} bg-muted hover:bg-muted/80`;
+  const numberButtonClass = `${buttonClass} bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border`;
   const operatorButtonClass = `${buttonClass} bg-primary text-primary-foreground hover:bg-primary/90`;
   const clearButtonClass = `${buttonClass} bg-destructive text-destructive-foreground hover:bg-destructive/90`;
 

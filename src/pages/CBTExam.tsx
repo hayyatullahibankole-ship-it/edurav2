@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import SubjectBasedExamInterface from "@/components/SubjectBasedExamInterface";
 import JambCBTInterface from "@/components/JambCBTInterface";
 import CBTOptimizer from "@/components/CBTOptimizer";
+import { calculateJAMBScore } from "@/utils/examScoring";
 
 const CBTExam = () => {
   const navigate = useNavigate();
@@ -246,6 +247,15 @@ const CBTExam = () => {
       const wrongCount = questions.length - correctCount;
       const unansweredCount = questions.length - Object.keys(answers).length;
 
+      // Determine exam type from proctoring data
+      const examType = ((examData?.proctoring_data as any)?.exam_type || 'CUSTOM').toUpperCase();
+      
+      // Calculate scaled score for JAMB
+      let scaledScore = null;
+      if (examType === 'JAMB') {
+        scaledScore = calculateJAMBScore(correctCount, wrongCount, questions.length);
+      }
+
       // Build subject breakdown for analytics
       const subject_breakdown: Record<string, { total: number; correct: number; percentage: number }> = {};
       Object.entries(subjectStats).forEach(([subject, stats]) => {
@@ -256,21 +266,36 @@ const CBTExam = () => {
         };
       });
 
-      console.log('Inserting results...', { correctCount, totalQuestions: questions.length, percentage });
+      console.log('Inserting results...', { 
+        correctCount, 
+        wrongCount, 
+        unansweredCount,
+        totalQuestions: questions.length, 
+        percentage, 
+        scaledScore,
+        examType 
+      });
+
+      const resultData: any = {
+        attempt_id: attemptId,
+        raw_score: correctCount,
+        total_questions: questions.length,
+        correct_answers: correctCount,
+        wrong_answers: wrongCount,
+        unanswered: unansweredCount,
+        percentage: percentage,
+        time_taken_minutes: Math.floor(timeTaken / 60),
+        subject_breakdown
+      };
+
+      // Add scaled score for JAMB exams
+      if (scaledScore !== null) {
+        resultData.scaled_score = scaledScore;
+      }
 
       const { error: resultError } = await supabase
         .from('results')
-        .insert({
-          attempt_id: attemptId,
-          raw_score: correctCount,
-          total_questions: questions.length,
-          correct_answers: correctCount,
-          wrong_answers: wrongCount,
-          unanswered: unansweredCount,
-          percentage: percentage,
-          time_taken_minutes: Math.floor(timeTaken / 60),
-          subject_breakdown
-        });
+        .insert(resultData);
 
       if (resultError) {
         console.error('Error inserting results:', resultError);
@@ -281,7 +306,9 @@ const CBTExam = () => {
       
       toast({
         title: "Exam Submitted!",
-        description: `You scored ${correctCount}/${questions.length} (${percentage.toFixed(1)}%)`,
+        description: scaledScore 
+          ? `JAMB Score: ${scaledScore}/400 (${percentage.toFixed(1)}% - ${correctCount}/${questions.length})`
+          : `You scored ${correctCount}/${questions.length} (${percentage.toFixed(1)}%)`,
       });
 
       navigate(`/results?attempt=${attemptId}`);
