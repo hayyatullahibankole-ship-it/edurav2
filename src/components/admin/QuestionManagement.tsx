@@ -95,7 +95,14 @@ export default function QuestionManagement() {
 
       if (subjectsError) {
         console.error('Subjects error:', subjectsError);
-        throw subjectsError;
+        toast({
+          title: "Error",
+          description: "Failed to load subjects: " + subjectsError.message,
+          variant: "destructive"
+        });
+        setSubjects([]);
+        setQuestions([]);
+        return;
       }
 
       console.log('Subjects loaded:', subjectsData?.length || 0);
@@ -137,10 +144,13 @@ export default function QuestionManagement() {
 
       if (questionsError) {
         console.error('Questions error:', questionsError);
-        // Don't throw error if it's just no questions found
-        if (questionsError.code !== 'PGRST116') {
-          throw questionsError;
-        }
+        toast({
+          title: "Error",
+          description: "Failed to load questions: " + questionsError.message,
+          variant: "destructive"
+        });
+        setQuestions([]);
+        return;
       }
 
       console.log('Questions loaded:', questionsData?.length || 0);

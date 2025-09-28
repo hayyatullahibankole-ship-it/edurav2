@@ -128,29 +128,38 @@ const Resources = () => {
       try {
         // If the file_url is a storage path, construct the full Supabase storage URL
         if (!fileUrl.startsWith('http')) {
-          // Handle storage paths like "resources/file.pdf" or just "file.pdf"
-          const pathParts = fileUrl.split('/');
-          
-          // If no bucket specified, default to 'resources'
-          let bucketName = 'resources';
-          let filePath = fileUrl;
-          
-          // If path includes bucket name
-          if (pathParts.length > 1) {
-            bucketName = pathParts[0];
-            filePath = pathParts.slice(1).join('/');
+          // For paths starting with "uploads/", use the uploads bucket
+          if (fileUrl.startsWith('uploads/')) {
+            const filePath = fileUrl.replace('uploads/', '');
+            const { data } = supabase.storage.from('uploads').getPublicUrl(filePath);
+            fileUrl = data.publicUrl;
+            console.log('Generated uploads storage URL:', fileUrl);
+          } else {
+            // Handle other storage paths like "resources/file.pdf"
+            const pathParts = fileUrl.split('/');
+            
+            // If no bucket specified, default to 'resources'
+            let bucketName = 'resources';
+            let filePath = fileUrl;
+            
+            // If path includes bucket name
+            if (pathParts.length > 1) {
+              bucketName = pathParts[0];
+              filePath = pathParts.slice(1).join('/');
+            }
+            
+            // Get public URL from Supabase storage
+            const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+            fileUrl = data.publicUrl;
+            console.log('Generated storage URL:', fileUrl);
           }
-          
-          // Get public URL from Supabase storage
-          const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
-          fileUrl = data.publicUrl;
-          console.log('Generated storage URL:', fileUrl);
         }
 
-        // Test if file exists
+        // Test if file exists by attempting to fetch it
         const response = await fetch(fileUrl, { method: 'HEAD' });
         if (!response.ok) {
-          throw new Error(`File not found (${response.status})`);
+          console.warn('File not accessible via HEAD request, trying direct access');
+          // Try direct download without HEAD check
         }
 
         // Increment download count
