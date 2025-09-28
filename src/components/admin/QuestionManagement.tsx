@@ -32,7 +32,6 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import SimpleBulkUpload from './SimpleBulkUpload';
-import LatexAutoFixer from '@/components/LatexAutoFixer';
 import LatexConverter from '@/components/admin/LatexConverter';
 import QuestionCleanup from '@/components/admin/QuestionCleanup';
 
@@ -525,8 +524,6 @@ export default function QuestionManagement() {
           </div>
           
           <div className="flex items-center gap-4 flex-wrap">
-            <LatexAutoFixer />
-            
             <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -852,7 +849,6 @@ export default function QuestionManagement() {
 
           <TabsContent value="latex">
             <div className="space-y-6">
-              <LatexAutoFixer />
               <LatexConverter />
             </div>
           </TabsContent>
