@@ -851,10 +851,7 @@ export default function QuestionManagement() {
           </TabsContent>
 
           <TabsContent value="latex">
-            <div className="space-y-6">
-              <LatexAutoFixer />
-              <LatexConverter />
-            </div>
+            <LatexConverter />
           </TabsContent>
 
           <TabsContent value="cleanup">
