@@ -26,7 +26,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Resources = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
   const [resources, setResources] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
@@ -109,7 +109,7 @@ const Resources = () => {
           return;
         }
         
-        if (!hasPremiumAccess && !isPremium) {
+        if (!hasPremiumAccess && !isPremium && !isAdmin) {
           toast({
             title: "Premium Required",
             description: "This resource requires a premium subscription",
@@ -180,6 +180,16 @@ const Resources = () => {
           });
         } else {
           // For documents, try to download with proper filename
+          // Get proper filename with extension
+          let filename = resource.title;
+          if (!filename.includes('.')) {
+            const urlPath = new URL(fileUrl).pathname;
+            const extension = urlPath.split('.').pop();
+            if (extension) {
+              filename += `.${extension}`;
+            }
+          }
+          
           try {
             const response = await fetch(fileUrl);
             const blob = await response.blob();
@@ -187,17 +197,6 @@ const Resources = () => {
             
             const link = document.createElement('a');
             link.href = url;
-            
-            // Get proper filename with extension
-            let filename = resource.title;
-            if (!filename.includes('.')) {
-              const urlPath = new URL(fileUrl).pathname;
-              const extension = urlPath.split('.').pop();
-              if (extension) {
-                filename += `.${extension}`;
-              }
-            }
-            
             link.download = filename;
             document.body.appendChild(link);
             link.click();
@@ -211,8 +210,45 @@ const Resources = () => {
               description: `Downloading ${filename}`
             });
           } catch (downloadError) {
-            // Fallback: open in new tab
-            console.warn('Download failed, opening in new tab:', downloadError);
+            // Fallback: try direct URL access
+            console.warn('Download failed, trying direct access:', downloadError);
+            
+            // For Supabase storage files, try to access directly via storage API
+            if (fileUrl.includes('supabase')) {
+              try {
+                // Extract bucket and file path from URL
+                const urlParts = fileUrl.split('/storage/v1/object/public/');
+                if (urlParts.length === 2) {
+                  const [bucketAndPath] = urlParts[1].split('/');
+                  const filePath = urlParts[1].substring(bucketAndPath.length + 1);
+                  
+                  const { data, error } = await supabase.storage
+                    .from(bucketAndPath)
+                    .download(filePath);
+                    
+                  if (data) {
+                    const url = window.URL.createObjectURL(data);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                    
+                    toast({
+                      title: "Download Started",
+                      description: `Downloading ${filename}`
+                    });
+                    return;
+                  }
+                }
+              } catch (storageError) {
+                console.warn('Storage download failed:', storageError);
+              }
+            }
+            
+            // Final fallback: open in new tab
             window.open(fileUrl, '_blank');
             toast({
               title: "Opening File",
