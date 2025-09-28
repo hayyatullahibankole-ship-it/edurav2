@@ -89,11 +89,26 @@ export default function AuthForm() {
     setErrors({});
 
     try {
-      // Check rate limiting for authentication attempts
-      const { data: rateLimitResult, error: rateLimitError } = await supabase.rpc('check_auth_rate_limit');
-      
-      if (rateLimitError || !rateLimitResult) {
+      // Optional rate limit check (non-blocking if unavailable)
+      let rateLimited = false;
+      try {
+        const { data: rateLimitResult } = await supabase.rpc('check_auth_rate_limit');
+        const allowed = typeof rateLimitResult === 'boolean' 
+          ? rateLimitResult 
+          : (rateLimitResult as any)?.allowed;
+        if (allowed === false) {
+          rateLimited = true;
+        }
+      } catch (e) {
+        // If the RPC is missing or errors out, do not block login
+      }
+      if (rateLimited) {
         setErrors({ general: 'Too many authentication attempts. Please try again in 15 minutes.' });
+        toast({
+          title: 'Rate limit hit',
+          description: 'Please wait 15 minutes before trying again.',
+          variant: 'destructive',
+        });
         return;
       }
 
