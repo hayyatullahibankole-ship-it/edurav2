@@ -59,36 +59,19 @@ export default function QuestionCleanup() {
       const targetSubject = selectedSubject === 'all' ? null : selectedSubject;
 
       // Get incomplete questions with details
-      const { data: incomplete, error } = await supabase.rpc('find_incomplete_questions', {
-        target_subject: targetSubject
+      const { data, error } = await supabase.functions.invoke('question-cleanup', {
+        body: { 
+          action: 'scan',
+          target_subject: targetSubject 
+        }
       });
       
       if (error) throw error;
 
+      const incomplete = data?.questions || [];
+
       if (incomplete && incomplete.length > 0) {
-        // Get question details for display
-        const questionIds = incomplete.map((q: any) => q.id);
-        const { data: questionDetails, error: detailsError } = await supabase
-          .from('questions')
-          .select(`
-            id,
-            question_text,
-            subjects!inner(name)
-          `)
-          .in('id', questionIds);
-
-        if (detailsError) throw detailsError;
-
-        const enrichedQuestions = incomplete.map((inc: any) => {
-          const details = questionDetails?.find(q => q.id === inc.id);
-          return {
-            ...inc,
-            question_text: details?.question_text || 'No text',
-            subject_name: details?.subjects?.name || 'Unknown'
-          };
-        });
-
-        setIncompleteQuestions(enrichedQuestions);
+        setIncompleteQuestions(incomplete);
         toast({
           title: "Scan Complete",
           description: `Found ${incomplete.length} incomplete questions`,
@@ -118,13 +101,16 @@ export default function QuestionCleanup() {
       setFixing(true);
       const targetSubject = selectedSubject === 'all' ? null : selectedSubject;
 
-      const { data, error } = await supabase.rpc('fix_latex_questions', {
-        target_subject: targetSubject
+      const { data, error } = await supabase.functions.invoke('question-cleanup', {
+        body: { 
+          action: 'fix_latex',
+          target_subject: targetSubject 
+        }
       });
 
       if (error) throw error;
 
-      const fixedCount = data?.[0]?.updated_count || 0;
+      const fixedCount = data?.fixed_count || 0;
       toast({
         title: "LaTeX Fix Complete",
         description: `Fixed ${fixedCount} questions with LaTeX formatting`,
@@ -155,13 +141,16 @@ export default function QuestionCleanup() {
       setLoading(true);
       const targetSubject = selectedSubject === 'all' ? null : selectedSubject;
       
-      const { data, error } = await supabase.rpc('delete_incomplete_questions', {
-        target_subject: targetSubject
+      const { data, error } = await supabase.functions.invoke('question-cleanup', {
+        body: { 
+          action: 'delete_incomplete',
+          target_subject: targetSubject 
+        }
       });
 
       if (error) throw error;
 
-      const deletedCount = data?.[0]?.deleted || 0;
+      const deletedCount = data?.deleted_count || 0;
       setCleanupResult({ deleted: deletedCount });
       setIncompleteQuestions([]);
       

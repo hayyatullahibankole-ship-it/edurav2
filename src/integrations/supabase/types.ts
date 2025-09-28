@@ -1061,6 +1061,12 @@ export type Database = {
           updated_count: number
         }[]
       }
+      delete_incomplete_questions: {
+        Args: { target_subject?: string }
+        Returns: {
+          deleted: number
+        }[]
+      }
       delete_question_safely: {
         Args: { qid: string }
         Returns: boolean
@@ -1078,6 +1084,12 @@ export type Database = {
         Returns: {
           id: string
           reason: string
+        }[]
+      }
+      fix_latex_questions: {
+        Args: { target_subject?: string }
+        Returns: {
+          updated_count: number
         }[]
       }
       get_exam_questions: {
