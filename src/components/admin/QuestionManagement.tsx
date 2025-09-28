@@ -34,6 +34,7 @@ import { useToast } from '@/hooks/use-toast';
 import SimpleBulkUpload from './SimpleBulkUpload';
 import LatexAutoFixer from '@/components/LatexAutoFixer';
 import LatexConverter from '@/components/admin/LatexConverter';
+import QuestionCleanup from '@/components/admin/QuestionCleanup';
 
 interface Question {
   id: string;
@@ -397,21 +398,18 @@ export default function QuestionManagement() {
   };
 
   const handleDeleteQuestion = async (questionId: string) => {
-    if (!confirm('Are you sure you want to delete this question? This action cannot be undone.')) {
+    if (!confirm('Are you sure you want to permanently delete this question? This action cannot be undone and will remove all related data.')) {
       return;
     }
 
     try {
-      const { error } = await supabase
-        .from('questions')
-        .update({ is_active: false })
-        .eq('id', questionId);
+      const { data, error } = await supabase.rpc('delete_question_safely', { qid: questionId });
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Question deleted successfully"
+        description: "Question permanently deleted successfully"
       });
 
       fetchData();
@@ -805,6 +803,15 @@ export default function QuestionManagement() {
             <TabsTrigger value="inactive">
               Inactive Questions ({inactiveQuestions.length})
             </TabsTrigger>
+            <TabsTrigger value="upload">
+              Bulk Upload
+            </TabsTrigger>
+            <TabsTrigger value="latex">
+              LaTeX Tools
+            </TabsTrigger>
+            <TabsTrigger value="cleanup">
+              Question Cleanup
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="active">
@@ -837,6 +844,21 @@ export default function QuestionManagement() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="upload">
+            <SimpleBulkUpload subjects={subjects} onUploadComplete={fetchData} />
+          </TabsContent>
+
+          <TabsContent value="latex">
+            <div className="space-y-6">
+              <LatexAutoFixer />
+              <LatexConverter />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="cleanup">
+            <QuestionCleanup />
           </TabsContent>
         </Tabs>
 

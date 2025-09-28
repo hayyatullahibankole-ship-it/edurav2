@@ -1061,6 +1061,10 @@ export type Database = {
           updated_count: number
         }[]
       }
+      delete_question_safely: {
+        Args: { qid: string }
+        Returns: boolean
+      }
       delete_user_completely: {
         Args: { user_uuid: string }
         Returns: boolean
@@ -1068,6 +1072,13 @@ export type Database = {
       expire_subscriptions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      find_incomplete_questions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          reason: string
+        }[]
       }
       get_exam_questions: {
         Args: { exam_question_ids: string[] }
