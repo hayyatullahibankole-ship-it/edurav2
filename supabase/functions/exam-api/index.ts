@@ -203,7 +203,7 @@ async function handleStartExam(req: Request, supabaseClient: any, userId: string
   // Get secure question data without answers using our secure function
   const questionIds = selectedQuestions.map(q => q.id);
   const { data: secureQuestions, error: secureError } = await supabaseClient
-    .rpc('get_exam_questions', { exam_question_ids: questionIds });
+    .rpc('get_exam_questions_secure', { exam_question_ids: questionIds });
 
   if (secureError || !secureQuestions) {
     console.error('Error getting secure questions:', secureError);

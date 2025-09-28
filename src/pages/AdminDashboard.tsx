@@ -36,6 +36,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import SecurityConfig from '@/components/admin/SecurityConfig';
 
 export default function AdminDashboard() {
   const { user, isAdmin, signOut } = useAuth();
@@ -532,46 +533,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-orange-500" />
-                  Security Dashboard
-                </CardTitle>
-                <CardDescription>Monitor suspicious activities and security events</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {dashboardStats.suspiciousActivities.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No suspicious activities detected</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {dashboardStats.suspiciousActivities.map((activity: any) => (
-                      <div key={activity.id} className="p-4 border border-orange-200 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="font-medium">
-                            {activity.users?.first_name} {activity.users?.last_name}
-                          </p>
-                          <Badge variant="destructive">
-                            {activity.suspicious_activity_count} violations
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {activity.exams?.title} • {new Date(activity.created_at).toLocaleString()}
-                        </p>
-                        <div className="mt-2">
-                          <Button variant="outline" size="sm">
-                            Review Details
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <SecurityConfig />
           </TabsContent>
 
           {/* Add other tab contents as needed */}

@@ -20,22 +20,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
+import { emailSchema, passwordSchema, nameSchema, phoneSchema } from "@/utils/inputValidation";
 import eduraLogo from "@/assets/edura-logo.png";
 
-// Validation schemas
+// Enhanced validation schemas for security
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters")
+  email: emailSchema,
+  password: z.string().min(1, "Password is required") // Don't validate length on login
 });
 
 const signupSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().regex(/^\+234\d{10}$/, "Phone must be in format +234xxxxxxxxxx"),
+  firstName: nameSchema,
+  lastName: nameSchema,
+  email: emailSchema,
+  phone: phoneSchema,
   examType: z.string().min(1, "Please select an exam type"),
   currentClass: z.string().min(1, "Please select your current class"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: passwordSchema,
   confirmPassword: z.string(),
   agreedToTerms: z.boolean().refine(val => val === true, "You must agree to the terms")
 }).refine((data) => data.password === data.confirmPassword, {

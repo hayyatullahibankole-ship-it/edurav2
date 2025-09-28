@@ -26,7 +26,7 @@ export const initializePaystackPayment = (payment: PaystackPayment) => {
     }
     
     const handler = window.PaystackPop.setup({
-      key: 'pk_live_4be1a72db9986251078a2107f2963f95ee2576f1', // Replace with your actual Paystack public key (pk_test_... or pk_live_...)
+      key: 'pk_test_c4dcaa71b1a2dc1eef447b5b8d16144c334e7d02', // TODO: Move to system settings for security
       email: validatedData.email,
       amount: validatedData.amount * 100, // Convert to kobo
       currency: validatedData.currency,

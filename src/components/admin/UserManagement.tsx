@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { emailSchema, passwordSchema, nameSchema, adminUserSchema } from '@/utils/inputValidation';
 
 interface UserManagementProps {
   users: any[];
