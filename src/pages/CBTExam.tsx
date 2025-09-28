@@ -72,19 +72,23 @@ const CBTExam = () => {
         const subjectNameMap: Record<string, string> = {};
         (subjectRows || []).forEach((s: any) => subjectNameMap[s.id] = s.name);
 
-        const perSubject = proctoringData.question_count_per_subject || 40;
+      const isJamb = (proctoringData?.exam_type || '').toLowerCase() === 'jamb';
 
-        // Fetch questions for each subject
-        for (const subjectId of selectedSubjects) {
-          console.log(`Fetching questions for subject: ${subjectId} (${subjectNameMap[subjectId]})`);
-          
-          const { data: subjectQuestions, error } = await supabase
-            .from('questions')
-            .select('*')
-            .eq('subject_id', subjectId)
-            .eq('is_active', true)
-            .order('created_at', { ascending: false })
-            .limit(perSubject);
+      // Fetch questions for each subject
+      for (const subjectId of selectedSubjects) {
+        console.log(`Fetching questions for subject: ${subjectId} (${subjectNameMap[subjectId]})`);
+        const subjectName = subjectNameMap[subjectId] || 'Unknown';
+        const perSubject = isJamb && subjectName.toLowerCase().includes('english') 
+          ? 60 
+          : (proctoringData.question_count_per_subject || 40);
+
+        const { data: subjectQuestions, error } = await supabase
+          .from('questions')
+          .select('*')
+          .eq('subject_id', subjectId)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(perSubject);
 
           if (error) {
             console.error(`Error fetching questions for subject ${subjectId}:`, error);
@@ -184,19 +188,7 @@ const CBTExam = () => {
     try {
       console.log('Starting exam submission...', { attemptId, answersCount: Object.keys(answers).length });
       
-      // Update attempt status and save answers
-      const { error: attemptError } = await supabase
-        .from('attempts')
-        .update({ 
-          status: 'SUBMITTED' as 'SUBMITTED',
-          submitted_at: new Date().toISOString()
-        })
-        .eq('id', attemptId);
-
-      if (attemptError) {
-        console.error('Error updating attempt:', attemptError);
-        throw attemptError;
-      }
+      // We'll update attempt status AFTER saving answers to satisfy RLS
 
       // Calculate score and prepare answers - Fix the indexing issue
       let correctCount = 0;
@@ -234,6 +226,20 @@ const CBTExam = () => {
       if (answersError) {
         console.error('Error inserting answers:', answersError);
         throw answersError;
+      }
+
+      // Now mark attempt as SUBMITTED (after answers are stored)
+      const { error: attemptError } = await supabase
+        .from('attempts')
+        .update({ 
+          status: 'SUBMITTED' as 'SUBMITTED',
+          submitted_at: new Date().toISOString()
+        })
+        .eq('id', attemptId);
+
+      if (attemptError) {
+        console.error('Error updating attempt:', attemptError);
+        throw attemptError;
       }
 
       const percentage = (correctCount / questions.length) * 100;

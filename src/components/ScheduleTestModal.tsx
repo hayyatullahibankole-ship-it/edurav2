@@ -154,7 +154,11 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
     // Check if selected subjects have enough questions
     const insufficientSubjects = testConfig.subjects.filter(subjectId => {
       const availableCount = availableQuestions[subjectId] || 0;
-      return availableCount < testConfig.questionCount;
+      const subjectName = subjects.find(s => s.id === subjectId)?.name || '';
+      const requiredCount = testConfig.examType === 'jamb'
+        ? (subjectName.toLowerCase().includes('english') ? 60 : 40)
+        : testConfig.questionCount;
+      return availableCount < requiredCount;
     });
 
     if (insufficientSubjects.length > 0) {
@@ -164,7 +168,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
       
       toast({
         title: "Insufficient Questions",
-        description: `Not enough questions available for: ${subjectNames}. Please reduce questions per subject or select different subjects.`,
+        description: `Not enough questions available for: ${subjectNames}.`,
         variant: "destructive"
       });
       return;
@@ -353,7 +357,10 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
           <div className="grid md:grid-cols-2 gap-3">
             {subjects.map((subject) => {
               const questionCount = availableQuestions[subject.id] || 0;
-              const hasEnoughQuestions = questionCount >= testConfig.questionCount;
+              const requiredCount = testConfig.examType === 'jamb'
+                ? (subject.name?.toLowerCase().includes('english') ? 60 : 40)
+                : testConfig.questionCount;
+              const hasEnoughQuestions = questionCount >= requiredCount;
               
               return (
                 <div
@@ -378,7 +385,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
                   </div>
                   {!hasEnoughQuestions && (
                     <p className="text-xs text-destructive mt-1">
-                      Need {testConfig.questionCount} questions minimum
+                      Need {requiredCount} questions minimum
                     </p>
                   )}
                 </div>
@@ -413,22 +420,31 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="questionCount">Questions per Subject</Label>
-          <Select value={testConfig.questionCount.toString()} onValueChange={(value) => 
-            setTestConfig(prev => ({ ...prev, questionCount: parseInt(value) }))
-          }>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10">10 Questions</SelectItem>
-              <SelectItem value="20">20 Questions</SelectItem>
-              <SelectItem value="40">40 Questions</SelectItem>
-              <SelectItem value="50">50 Questions</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {testConfig.examType === 'jamb' ? (
+          <div className="space-y-1">
+            <Label>Questions per Subject</Label>
+            <p className="text-sm text-muted-foreground">
+              JAMB format: English Language 60 questions; other subjects 40 each.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Label htmlFor="questionCount">Questions per Subject</Label>
+            <Select value={testConfig.questionCount.toString()} onValueChange={(value) => 
+              setTestConfig(prev => ({ ...prev, questionCount: parseInt(value) }))
+            }>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10 Questions</SelectItem>
+                <SelectItem value="20">20 Questions</SelectItem>
+                <SelectItem value="40">40 Questions</SelectItem>
+                <SelectItem value="50">50 Questions</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-4">
