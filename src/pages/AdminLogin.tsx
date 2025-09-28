@@ -56,6 +56,14 @@ export default function AdminLogin() {
     e.preventDefault();
     
     try {
+      // Check rate limiting for authentication attempts
+      const { data: rateLimitResult, error: rateLimitError } = await supabase.rpc('check_auth_rate_limit');
+      
+      if (rateLimitError || !rateLimitResult) {
+        setErrors({ general: 'Too many authentication attempts. Please try again in 15 minutes.' });
+        return;
+      }
+
       // Validate form data
       const validatedData = adminLoginSchema.parse(formData);
       setErrors({});

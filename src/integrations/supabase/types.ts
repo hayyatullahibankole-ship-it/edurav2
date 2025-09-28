@@ -1043,6 +1043,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: boolean
       }
+      check_auth_rate_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       check_rate_limit: {
         Args: {
           endpoint_name: string
@@ -1092,6 +1096,40 @@ export type Database = {
       get_question_explanation: {
         Args: { question_id: string; user_id: string }
         Returns: string
+      }
+      get_secure_user_data: {
+        Args: { target_user_id: string }
+        Returns: {
+          auth_user_id: string
+          country: string
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          is_suspended: boolean
+          is_verified: boolean
+          last_login_at: string
+          last_name: string
+          phone: string
+          state: string
+          updated_at: string
+        }[]
+      }
+      get_student_attempt_data: {
+        Args: { target_attempt_id: string }
+        Returns: {
+          created_at: string
+          device_info: string
+          exam_id: string
+          id: string
+          security_score: number
+          selected_subjects: Json
+          started_at: string
+          status: Database["public"]["Enums"]["attempt_status"]
+          submitted_at: string
+          time_remaining_seconds: number
+          user_id: string
+        }[]
       }
       get_subject_question_counts: {
         Args: Record<PropertyKey, never>
@@ -1163,6 +1201,10 @@ export type Database = {
       mask_phone: {
         Args: { phone: string }
         Returns: string
+      }
+      validate_admin_action: {
+        Args: { action_type: string; target_data?: Json }
+        Returns: boolean
       }
       validate_question_answer: {
         Args: { question_id: string; submitted_answer: Json }

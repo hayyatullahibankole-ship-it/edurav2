@@ -89,6 +89,14 @@ export default function AuthForm() {
     setErrors({});
 
     try {
+      // Check rate limiting for authentication attempts
+      const { data: rateLimitResult, error: rateLimitError } = await supabase.rpc('check_auth_rate_limit');
+      
+      if (rateLimitError || !rateLimitResult) {
+        setErrors({ general: 'Too many authentication attempts. Please try again in 15 minutes.' });
+        return;
+      }
+
       if (isLogin) {
         // Validate login form
         const loginData = loginSchema.parse({

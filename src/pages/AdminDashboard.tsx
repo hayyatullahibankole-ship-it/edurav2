@@ -37,6 +37,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import SecurityConfig from '@/components/admin/SecurityConfig';
+import SecurityMonitor from '@/components/admin/SecurityMonitor';
 import SecurityAlertsBanner from '@/components/admin/SecurityAlertsBanner';
 import QuestionManagement from '@/components/admin/QuestionManagement';
 
@@ -377,7 +378,7 @@ export default function AdminDashboard() {
         {/* Enhanced Admin Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <TabsList className="grid grid-cols-4 lg:grid-cols-7 w-full lg:w-auto bg-card border">
+            <TabsList className="grid grid-cols-4 lg:grid-cols-8 w-full lg:w-auto bg-card border">
               <TabsTrigger value="overview" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Overview</TabsTrigger>
               <TabsTrigger value="users" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Users</TabsTrigger>
               <TabsTrigger value="exams" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Exams</TabsTrigger>
@@ -385,6 +386,7 @@ export default function AdminDashboard() {
               <TabsTrigger value="resources" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Resources</TabsTrigger>
               <TabsTrigger value="analytics" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Analytics</TabsTrigger>
               <TabsTrigger value="security" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Security</TabsTrigger>
+              <TabsTrigger value="monitor" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Monitor</TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-2">
@@ -576,6 +578,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="security" className="space-y-6">
             <SecurityConfig />
+          </TabsContent>
+
+          <TabsContent value="monitor" className="space-y-6">
+            <SecurityMonitor />
           </TabsContent>
 
           {/* Add other tab contents as needed */}
