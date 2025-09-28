@@ -123,7 +123,7 @@ export default function QuestionManagement() {
       console.log('Admin user detected - using admin edge function...');
       try {
         const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-get-questions', {
-          body: { activeOnly: true, limit: 1000 }
+          body: { activeOnly: true, limit: 5000 }
         });
 
         console.log('Edge function response:', { fnData, fnError });
@@ -172,7 +172,7 @@ export default function QuestionManagement() {
           `)
           .eq('is_active', true)
           .order('created_at', { ascending: false })
-          .limit(1000);
+          .limit(5000);
 
         if (questionsError) {
           console.error('Direct query also failed:', questionsError);

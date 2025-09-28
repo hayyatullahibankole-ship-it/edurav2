@@ -51,7 +51,7 @@ serve(async (req) => {
     const isPost = req.method === "POST";
     const body = isPost ? await req.json().catch(() => ({})) : {};
     const activeOnly = body.activeOnly !== false; // default true
-    const limit = typeof body.limit === "number" ? Math.min(body.limit, 2000) : 1000;
+    const limit = typeof body.limit === "number" ? Math.min(body.limit, 15000) : 5000; // Increased for large datasets
 
     const query = adminClient
       .from("questions")
