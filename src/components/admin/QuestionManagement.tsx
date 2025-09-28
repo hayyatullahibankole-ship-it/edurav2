@@ -143,13 +143,38 @@ export default function QuestionManagement() {
 
       if (questionsError) {
         console.error('Questions error:', questionsError);
-        toast({
-          title: "Error",
-          description: "Failed to load questions: " + questionsError.message,
-          variant: "destructive"
-        });
-        setQuestions([]);
-        return;
+
+        // Fallback: use admin edge function (bypasses RLS with admin check)
+        try {
+          const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-get-questions', {
+            body: { activeOnly: true, limit: 1000 }
+          });
+
+          if (fnError) {
+            throw new Error(fnError.message || 'Admin fetch failed');
+          }
+
+          const loaded = (fnData as any)?.questions || [];
+          setQuestions(loaded);
+        } catch (fnCatch) {
+          const msg = fnCatch instanceof Error ? fnCatch.message : 'Unknown error occurred';
+          toast({
+            title: 'Error Loading Data',
+            description: `Failed to load questions: ${msg}`,
+            variant: 'destructive'
+          });
+          setQuestions([]);
+        }
+      } else {
+        console.log('Questions loaded:', questionsData?.length || 0);
+        setQuestions(questionsData || []);
+        
+        if (!questionsData || questionsData.length === 0) {
+          toast({
+            title: "Info",
+            description: "No questions found. Start by creating some questions.",
+          });
+        }
       }
 
       console.log('Questions loaded:', questionsData?.length || 0);
@@ -355,10 +380,12 @@ export default function QuestionManagement() {
   };
 
   const filteredQuestions = questions.filter(question => {
-    const matchesSearch = question.question_text.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         question.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const tags = Array.isArray(question.tags) ? question.tags : [];
+    const qText = (question.question_text || '').toString();
+    const matchesSearch = qText.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         tags.some((tag: any) => String(tag).toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesSubject = selectedSubject === 'all' || question.subject_id === selectedSubject;
-    const matchesDifficulty = selectedDifficulty === 'all' || question.difficulty_level.toString() === selectedDifficulty;
+    const matchesDifficulty = selectedDifficulty === 'all' || String(question.difficulty_level) === selectedDifficulty;
     
     return matchesSearch && matchesSubject && matchesDifficulty;
   });
