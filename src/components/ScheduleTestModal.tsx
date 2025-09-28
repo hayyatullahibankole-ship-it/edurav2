@@ -62,9 +62,17 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
   useEffect(() => {
     if (open) {
       fetchSubjectsAndQuestions();
-      // Set default exam type if provided
+      // Set default exam type if provided and jump to next step for better UX
       if (defaultExamType && defaultExamType !== testConfig.examType) {
-        setTestConfig(prev => ({ ...prev, examType: defaultExamType }));
+        const defaultLabel = examTypes.find(t => t.value === defaultExamType)?.label || 'Practice';
+        setTestConfig(prev => ({ 
+          ...prev, 
+          examType: defaultExamType, 
+          title: prev.title || `${defaultLabel} Test`
+        }));
+        // Skip the exam type step when coming from Quick Actions
+        setStep(2);
+        console.log('Auto-selected exam type from Quick Action:', defaultExamType);
       }
     }
   }, [open, defaultExamType]);
