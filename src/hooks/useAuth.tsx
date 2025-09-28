@@ -24,49 +24,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-      if (session?.user) {
-        setLoading(true);
-        // Fetch user profile and role
-        setTimeout(async () => {
-          try {
-            // First get the user profile
-            const profileResponse = await supabase
-              .from('users')
-              .select('*')
-              .eq('auth_user_id', session.user.id)
-              .single();
-
-            if (profileResponse.data) {
-              setUserProfile(profileResponse.data);
+        if (session?.user) {
+          // Fetch user profile and role using setTimeout to avoid blocking
+          setTimeout(async () => {
+            try {
+              setLoading(true);
               
-              // Then get the user role using the profile ID
-              const roleResponse = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', profileResponse.data.id)
+              // First get the user profile
+              const profileResponse = await supabase
+                .from('users')
+                .select('*')
+                .eq('auth_user_id', session.user.id)
                 .single();
+
+              if (profileResponse.data) {
+                setUserProfile(profileResponse.data);
                 
-              if (roleResponse.data) {
-                setUserRole(roleResponse.data.role);
+                // Then get the user role using the profile ID
+                const roleResponse = await supabase
+                  .from('user_roles')
+                  .select('role')
+                  .eq('user_id', profileResponse.data.id)
+                  .single();
+                  
+                if (roleResponse.data) {
+                  setUserRole(roleResponse.data.role);
+                }
               }
+            } catch (error) {
+              console.error('Error fetching user data:', error);
+            } finally {
+              setLoading(false);
             }
-          } catch (error) {
-            console.error('Error fetching user data:', error);
-          } finally {
-            setLoading(false);
-          }
           }, 0);
-      } else {
-        setUserProfile(null);
-        setUserRole(null);
-        setLoading(false);
-      }
-        
-      // setLoading(false) handled after fetching user data or when no session
+        } else {
+          setUserProfile(null);
+          setUserRole(null);
+          setLoading(false);
+        }
       }
     );
 

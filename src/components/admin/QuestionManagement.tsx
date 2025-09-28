@@ -26,12 +26,14 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
+  Clock,
   Download
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import SimpleBulkUpload from './SimpleBulkUpload';
 import LatexAutoFixer from '@/components/LatexAutoFixer';
+import LatexConverter from '@/components/admin/LatexConverter';
 
 interface Question {
   id: string;
@@ -64,6 +66,13 @@ export default function QuestionManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
+  
+  // Modal states
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
   const [newQuestion, setNewQuestion] = useState({
     question_text: '',
@@ -327,19 +336,24 @@ export default function QuestionManagement() {
   };
 
   const handleViewQuestion = (question: Question) => {
-    // TODO: Implement view question modal
-    toast({
-      title: "View Question",
-      description: `Viewing question: ${question.question_text.slice(0, 50)}...`,
-    });
+    setSelectedQuestion(question);
+    setIsViewModalOpen(true);
   };
 
   const handleEditQuestion = (question: Question) => {
-    // TODO: Implement edit question functionality
-    toast({
-      title: "Edit Question", 
-      description: "Edit functionality will be implemented soon",
+    setEditingQuestion(question);
+    setNewQuestion({
+      question_text: question.question_text,
+      type: question.type,
+      options: question.options || {},
+      correct_answer: question.correct_answer,
+      explanation: question.explanation || '',
+      difficulty_level: question.difficulty_level,
+      tags: question.tags || [],
+      subject_id: question.subject_id,
+      points: question.points
     });
+    setIsEditModalOpen(true);
   };
 
   const handleDuplicateQuestion = async (question: Question) => {
@@ -378,11 +392,8 @@ export default function QuestionManagement() {
   };
 
   const handleViewAnalytics = (question: Question) => {
-    // TODO: Implement analytics view
-    toast({
-      title: "Analytics",
-      description: "Analytics functionality will be implemented soon",
-    });
+    setSelectedQuestion(question);
+    setIsAnalyticsModalOpen(true);
   };
 
   const handleDeleteQuestion = async (questionId: string) => {
@@ -828,6 +839,130 @@ export default function QuestionManagement() {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* View Question Modal */}
+        <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>View Question</DialogTitle>
+            </DialogHeader>
+            {selectedQuestion && (
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">Question Text</Label>
+                  <div className="mt-1 p-3 border rounded-md bg-muted">
+                    <MathRenderer content={selectedQuestion.question_text} />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Type</Label>
+                    <p className="mt-1 text-sm">{selectedQuestion.type}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Difficulty</Label>
+                    <p className="mt-1 text-sm">{selectedQuestion.difficulty_level}/5</p>
+                  </div>
+                </div>
+
+                {selectedQuestion.options && typeof selectedQuestion.options === 'object' && (
+                  <div>
+                    <Label className="text-sm font-medium">Options</Label>
+                    <div className="mt-1 space-y-2">
+                      {Object.entries(selectedQuestion.options).map(([key, value]) => (
+                        <div key={key} className="flex items-center gap-2">
+                          <Badge variant={selectedQuestion.correct_answer === key ? "default" : "outline"}>
+                            {key.toUpperCase()}
+                          </Badge>
+                          <span className="text-sm">{String(value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedQuestion.explanation && (
+                  <div>
+                    <Label className="text-sm font-medium">Explanation</Label>
+                    <div className="mt-1 p-3 border rounded-md bg-muted">
+                      <MathRenderer content={selectedQuestion.explanation} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Modal */}
+        <Dialog open={isAnalyticsModalOpen} onOpenChange={setIsAnalyticsModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>Question Analytics</DialogTitle>
+            </DialogHeader>
+            {selectedQuestion && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-4 gap-4">
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Total Attempts</p>
+                          <p className="text-2xl font-bold">-</p>
+                        </div>
+                        <Eye className="h-8 w-8 text-blue-500" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Correct Rate</p>
+                          <p className="text-2xl font-bold">-</p>
+                        </div>
+                        <CheckCircle className="h-8 w-8 text-green-500" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Avg Time</p>
+                          <p className="text-2xl font-bold">-</p>
+                        </div>
+                        <Clock className="h-8 w-8 text-orange-500" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Difficulty</p>
+                          <p className="text-2xl font-bold">{selectedQuestion.difficulty_level}/5</p>
+                        </div>
+                        <BarChart3 className="h-8 w-8 text-purple-500" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <Alert>
+                  <BarChart3 className="h-4 w-4" />
+                  <AlertDescription>
+                    Detailed analytics will be available once students start attempting this question.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </ScrollArea>
   );

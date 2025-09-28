@@ -6,12 +6,13 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MathRenderer } from '@/components/ui/math-renderer';
+import Calculator from '@/components/Calculator';
 import { 
   Clock, 
   Flag, 
   ChevronLeft, 
   ChevronRight, 
-  Calculator,
+  Calculator as CalculatorIcon,
   Users,
   AlertTriangle,
   Check,
@@ -61,6 +62,7 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
 
   // Group questions by subject on mount
   useEffect(() => {
@@ -344,7 +346,15 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Calculator className="h-4 w-4 text-muted-foreground" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsCalculatorOpen(true)}
+                      className="flex items-center gap-1"
+                    >
+                      <CalculatorIcon className="h-4 w-4" />
+                      Calculator
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -484,6 +494,12 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
           </Card>
         </div>
       )}
+
+      {/* Calculator Component */}
+      <Calculator 
+        isOpen={isCalculatorOpen} 
+        onClose={() => setIsCalculatorOpen(false)} 
+      />
     </div>
   );
 };

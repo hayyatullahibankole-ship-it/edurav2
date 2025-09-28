@@ -1055,6 +1055,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      convert_latex_mathbf_to_markdown: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          updated_count: number
+        }[]
+      }
       delete_user_completely: {
         Args: { user_uuid: string }
         Returns: boolean
