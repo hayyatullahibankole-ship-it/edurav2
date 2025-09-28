@@ -41,7 +41,27 @@ export default function SecurityCenter({ suspiciousActivities }: SecurityCenterP
     try {
       setLoading(true);
       
-      // Fetch recent attempts with suspicious activities
+      // Fetch security alerts from audit logs for enhanced monitoring
+      const { data: auditData, error: auditError } = await supabase
+        .from('audit_logs')
+        .select(`
+          id,
+          action_type,
+          actor_user_id,
+          target_id,
+          details,
+          created_at,
+          ip_address
+        `)
+        .in('action_type', ['PII_ACCESS', 'USER_SUSPENDED', 'UPDATE_SETTING', 'INSERT_SETTING'])
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (auditError) {
+        console.error('Error fetching audit data:', auditError);
+      }
+
+      // Fetch traditional suspicious activity attempts
       const { data: attempts, error } = await supabase
         .from('attempts')
         .select(`
@@ -51,11 +71,39 @@ export default function SecurityCenter({ suspiciousActivities }: SecurityCenterP
         `)
         .gt('suspicious_activity_count', 0)
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(10);
 
-      if (error) throw error;
-      
-      setSecurityAlerts(attempts || []);
+      if (error) {
+        console.error('Error fetching attempts data:', error);
+        return;
+      }
+
+      // Combine audit logs and suspicious attempts
+      const combinedAlerts = [
+        ...(auditData?.map(log => ({
+          id: log.id,
+          type: 'audit',
+          action_type: log.action_type,
+          suspicious_activity_count: log.action_type === 'PII_ACCESS' ? 3 : 1,
+          created_at: log.created_at,
+          details: log.details,
+          ip_address: log.ip_address,
+          users: { 
+            first_name: 'System', 
+            last_name: 'Event', 
+            email: `${log.action_type.toLowerCase()}@system` 
+          },
+          exams: { title: 'System Operation' }
+        })) || []),
+        ...(attempts?.map(attempt => ({
+          ...attempt,
+          type: 'suspicious_activity'
+        })) || [])
+      ];
+
+      setSecurityAlerts(combinedAlerts.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ));
       
     } catch (error) {
       console.error('Error fetching security data:', error);
@@ -79,6 +127,7 @@ export default function SecurityCenter({ suspiciousActivities }: SecurityCenterP
 
   const handleBlockUser = async (userId: string) => {
     try {
+      // Use enhanced security with audit logging
       const { error } = await supabase
         .from('users')
         .update({ is_suspended: true })
@@ -86,9 +135,16 @@ export default function SecurityCenter({ suspiciousActivities }: SecurityCenterP
 
       if (error) throw error;
 
+      // Log the admin action using the security function
+      await supabase.rpc('log_admin_action', {
+        action_type: 'USER_SUSPENDED',
+        admin_id: null, // Function will use auth.uid()
+        target_id: userId
+      });
+
       toast({
         title: "User Blocked",
-        description: "User has been suspended for security violations"
+        description: "User has been suspended and action logged for audit trail"
       });
 
       fetchSecurityData();
@@ -229,7 +285,10 @@ export default function SecurityCenter({ suspiciousActivities }: SecurityCenterP
                         <div>
                           <div className="flex items-center space-x-2">
                             <h3 className="font-medium text-white">
-                              Suspicious Activity Detected
+                              {alert.type === 'audit' ? 
+                                `Security Event: ${alert.action_type.replace('_', ' ')}` :
+                                'Suspicious Activity Detected'
+                              }
                             </h3>
                             <Badge className={`${threat.bg} ${threat.color} border-0`}>
                               {threat.level} Risk
@@ -237,13 +296,32 @@ export default function SecurityCenter({ suspiciousActivities }: SecurityCenterP
                           </div>
                           <div className="text-sm text-slate-400 mt-1">
                             <span>User: {alert.users?.first_name} {alert.users?.last_name}</span>
-                            <span className="mx-2">•</span>
-                            <span>Exam: {alert.exams?.title}</span>
-                            <span className="mx-2">•</span>
-                            <span>{alert.suspicious_activity_count} violations</span>
+                            {alert.exams?.title && (
+                              <>
+                                <span className="mx-2">•</span>
+                                <span>Exam: {alert.exams?.title}</span>
+                              </>
+                            )}
+                            {alert.type === 'suspicious_activity' && (
+                              <>
+                                <span className="mx-2">•</span>
+                                <span>{alert.suspicious_activity_count} violations</span>
+                              </>
+                            )}
+                            {alert.ip_address && (
+                              <>
+                                <span className="mx-2">•</span>
+                                <span>IP: {alert.ip_address}</span>
+                              </>
+                            )}
                           </div>
                           <div className="text-xs text-slate-500 mt-1">
                             {new Date(alert.created_at).toLocaleString()}
+                            {alert.type === 'audit' && (
+                              <span className="ml-2 px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">
+                                AUDIT LOG
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>

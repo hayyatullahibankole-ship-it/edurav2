@@ -126,6 +126,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       audit_logs: {
@@ -168,6 +175,13 @@ export type Database = {
             columns: ["actor_user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_actor_user_id_fkey"
+            columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -294,10 +308,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "bookings_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "bookings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -407,6 +435,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "exams_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       notifications: {
@@ -446,6 +481,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -511,6 +553,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
             referencedColumns: ["id"]
           },
           {
@@ -613,6 +662,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "resources_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       results: {
@@ -685,6 +741,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "results_graded_by_fkey"
+            columns: ["graded_by"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       roles: {
@@ -736,6 +799,13 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -864,6 +934,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       transactions: {
@@ -924,6 +1001,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -957,10 +1041,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "user_roles_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_roles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -1036,9 +1134,66 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      users_safe: {
+        Row: {
+          address: string | null
+          auth_user_id: string | null
+          country: string | null
+          created_at: string | null
+          date_of_birth: string | null
+          email: string | null
+          first_name: string | null
+          id: string | null
+          is_suspended: boolean | null
+          is_verified: boolean | null
+          last_name: string | null
+          phone: string | null
+          profile_image_url: string | null
+          state: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: never
+          auth_user_id?: string | null
+          country?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: never
+          first_name?: string | null
+          id?: string | null
+          is_suspended?: boolean | null
+          is_verified?: boolean | null
+          last_name?: string | null
+          phone?: never
+          profile_image_url?: string | null
+          state?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: never
+          auth_user_id?: string | null
+          country?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: never
+          first_name?: string | null
+          id?: string | null
+          is_suspended?: boolean | null
+          is_verified?: boolean | null
+          last_name?: string | null
+          phone?: never
+          profile_image_url?: string | null
+          state?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      can_view_full_pii: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
       delete_user_completely: {
         Args: { user_uuid: string }
         Returns: boolean
@@ -1102,6 +1257,18 @@ export type Database = {
       log_admin_action: {
         Args: { action_type: string; admin_id: string; target_id?: string }
         Returns: boolean
+      }
+      log_pii_access: {
+        Args: { access_type: string; accessed_user_id: string }
+        Returns: undefined
+      }
+      mask_email: {
+        Args: { email: string }
+        Returns: string
+      }
+      mask_phone: {
+        Args: { phone: string }
+        Returns: string
       }
       validate_question_answer: {
         Args: { question_id: string; submitted_answer: Json }

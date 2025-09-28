@@ -37,6 +37,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import SecurityConfig from '@/components/admin/SecurityConfig';
+import SecurityAlertsBanner from '@/components/admin/SecurityAlertsBanner';
 
 export default function AdminDashboard() {
   const { user, isAdmin, signOut } = useAuth();
@@ -219,6 +220,14 @@ export default function AdminDashboard() {
       </div>
 
       <div className="container mx-auto py-8 px-4">
+
+        {/* Security Status Banner */}
+        <div className="mb-6">
+          <SecurityAlertsBanner criticalIssues={[
+            "Enable Leaked Password Protection in Supabase Authentication settings",
+            "Verify Site URL and Redirect URLs in Supabase Authentication configuration"
+          ]} />
+        </div>
 
         {/* Security Alert */}
         {dashboardStats.suspiciousActivities.length > 0 && (
@@ -537,6 +546,9 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Add other tab contents as needed */}
+          <TabsContent value="sec-config">
+            <SecurityConfig />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
