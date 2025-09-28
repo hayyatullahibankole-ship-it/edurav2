@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import DOMPurify from 'dompurify';
 
 interface BlogPost {
   id: string;
@@ -218,7 +219,7 @@ const Blog = () => {
               </p>
               
               {currentPost.content ? (
-                <div dangerouslySetInnerHTML={{ __html: currentPost.content }} />
+                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentPost.content) }} />
               ) : (
                 <div className="space-y-6 text-lg leading-relaxed">
                   <p>This is a comprehensive article about {currentPost.title.toLowerCase()}. The content covers important aspects and provides valuable insights for students and professionals.</p>
