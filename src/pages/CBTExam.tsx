@@ -374,6 +374,16 @@ const CBTExam = () => {
       }
 
       console.log('Exam submitted successfully!');
+
+      // Fire-and-forget: trigger instant SMS via edge function (also handled by DB trigger)
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        await supabase.functions.invoke('notify-result', {
+          body: { attemptId, userId: user?.id }
+        });
+      } catch (e) {
+        console.warn('notify-result invoke failed (non-blocking):', e);
+      }
       
       toast({
         title: "Exam Submitted!",
