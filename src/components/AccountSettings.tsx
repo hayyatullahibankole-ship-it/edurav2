@@ -368,17 +368,6 @@ export default function AccountSettings() {
                 <Badge variant={userProfile?.is_verified ? "default" : "secondary"}>
                   {userProfile?.is_verified ? "Verified" : "Unverified"}
                 </Badge>
-                {!userProfile?.is_verified && (
-                  <Button 
-                    variant="link" 
-                    size="sm" 
-                    className="h-auto p-0"
-                    onClick={handleSendVerificationEmail}
-                    disabled={verificationLoading}
-                  >
-                    {verificationLoading ? "Sending..." : "Verify Now"}
-                  </Button>
-                )}
               </div>
             </div>
             <div className="space-y-2">
