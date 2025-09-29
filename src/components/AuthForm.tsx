@@ -582,31 +582,61 @@ export default function AuthForm() {
             )}
 
             {/* Toggle Auth Mode */}
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                {isLogin ? "Don't have an account? " : "Already have an account? "}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsLogin(!isLogin);
-                    setErrors({});
-                    setFormData({
-                      firstName: '',
-                      lastName: '',
-                      email: formData.email, // Keep email when switching
-                      phone: '+234',
-                      examType: '',
-                      currentClass: '',
-                      password: '',
-                      confirmPassword: '',
-                      agreedToTerms: false
-                    });
-                  }}
-                  className="text-primary hover:underline font-medium"
-                >
-                  {isLogin ? "Sign up here" : "Sign in instead"}
-                </button>
-              </p>
+            <div className="text-center space-y-3">
+              {isLogin ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Don't have an account?
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIsLogin(false);
+                      setErrors({});
+                      setFormData({
+                        firstName: '',
+                        lastName: '',
+                        email: formData.email, // Keep email when switching
+                        phone: '+234',
+                        examType: '',
+                        currentClass: '',
+                        password: '',
+                        confirmPassword: '',
+                        agreedToTerms: false
+                      });
+                    }}
+                    className="w-full"
+                  >
+                    Create Account
+                  </Button>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Already have an account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsLogin(true);
+                      setErrors({});
+                      setFormData({
+                        firstName: '',
+                        lastName: '',
+                        email: formData.email, // Keep email when switching
+                        phone: '+234',
+                        examType: '',
+                        currentClass: '',
+                        password: '',
+                        confirmPassword: '',
+                        agreedToTerms: false
+                      });
+                    }}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Sign in instead
+                  </button>
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
