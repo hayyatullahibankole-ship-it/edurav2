@@ -56,18 +56,12 @@ export default function AdminLogin() {
     e.preventDefault();
     
     try {
-      // Check rate limiting for authentication attempts
-      const { data: rateLimitResult, error: rateLimitError } = await supabase.rpc('check_auth_rate_limit');
-      
-      if (rateLimitError || !rateLimitResult) {
-        setErrors({ general: 'Too many authentication attempts. Please try again in 15 minutes.' });
-        return;
-      }
-
-      // Validate form data
+      // Validate form data first
       const validatedData = adminLoginSchema.parse(formData);
       setErrors({});
       setLoading(true);
+
+      console.log('Attempting admin login...');
 
       // Attempt login
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -75,7 +69,10 @@ export default function AdminLogin() {
         password: validatedData.password,
       });
 
+      console.log('Login result:', { data: !!data, error: error?.message });
+
       if (error) {
+        console.error('Authentication error:', error);
         toast({
           title: "Login Failed",
           description: error.message === 'Invalid login credentials' 
@@ -87,22 +84,27 @@ export default function AdminLogin() {
       }
 
       if (data.user) {
-        // Verify admin privileges via secure RPC (avoids FK join issues)
+        console.log('User authenticated, checking admin privileges...');
+        
+        // Verify admin privileges via secure RPC
         const { data: isAdminFlag, error: adminCheckError } = await supabase
           .rpc('is_admin', { _user_id: data.user.id });
+
+        console.log('Admin check result:', { isAdmin: isAdminFlag, error: adminCheckError?.message });
 
         if (adminCheckError) {
           console.error('Error verifying admin privileges:', adminCheckError);
           await supabase.auth.signOut();
           toast({
             title: "Access Denied",
-            description: "Error verifying admin privileges",
+            description: "Error verifying admin privileges. Please try again.",
             variant: "destructive",
           });
           return;
         }
 
         if (!isAdminFlag) {
+          console.warn('User is not an admin');
           await supabase.auth.signOut();
           toast({
             title: "Access Denied",
@@ -112,18 +114,19 @@ export default function AdminLogin() {
           return;
         }
 
+        console.log('Admin login successful, navigating to dashboard...');
+        
         toast({
           title: "Welcome Admin",
           description: "Successfully logged into admin dashboard",
         });
 
-        // Use a slight delay to ensure admin role is loaded
-        setTimeout(() => {
-          navigate('/admin', { replace: true });
-        }, 100);
-
+        // Navigate immediately since auth state will handle the rest
+        navigate('/admin', { replace: true });
       }
     } catch (error) {
+      console.error('Login process error:', error);
+      
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
         error.errors.forEach((err) => {
