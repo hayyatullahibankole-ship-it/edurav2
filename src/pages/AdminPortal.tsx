@@ -77,7 +77,7 @@ export default function AdminPortal() {
       setLoading(true);
       
       const [usersResp, examsResp, attemptsResp] = await Promise.all([
-        supabase.from('users').select('*').limit(10),
+        supabase.from('users').select('*').order('created_at', { ascending: false }),
         supabase.from('exams').select('*'),
         supabase.from('attempts').select(`
           *,
