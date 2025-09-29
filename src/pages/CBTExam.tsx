@@ -209,10 +209,23 @@ const CBTExam = () => {
         let isCorrect = false;
         if (userAnswer && question.originalId) {
           try {
+            // Convert letter-based answer to numeric format for validation
+            let normalizedAnswer: string | number = userAnswer;
+            if (typeof userAnswer === 'string' && userAnswer.match(/^[A-D]\)/)) {
+              const letter = userAnswer.charAt(0);
+              normalizedAnswer = letter.charCodeAt(0) - 65; // A=0, B=1, C=2, D=3
+            }
+
+            console.log('Validating answer:', {
+              questionId: question.originalId,
+              originalAnswer: userAnswer,
+              normalizedAnswer
+            });
+
             const { data: validationResult, error: validationError } = await supabase
               .rpc('validate_student_answer', {
                 question_id_param: question.originalId,
-                submitted_answer: userAnswer
+                submitted_answer: JSON.stringify(normalizedAnswer)
               });
             
             if (validationError) {
@@ -220,6 +233,7 @@ const CBTExam = () => {
               isCorrect = false;
             } else {
               isCorrect = validationResult === true;
+              console.log('Validation result:', { isCorrect, validationResult });
             }
           } catch (error) {
             console.error('Error in secure validation:', error);
