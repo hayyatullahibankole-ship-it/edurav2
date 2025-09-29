@@ -27,7 +27,7 @@ import { useAuth } from "@/hooks/useAuth";
 const Resources = () => {
   const { toast } = useToast();
   const { user, isAdmin } = useAuth();
-  const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
+  const { hasPremiumAccess, isPremium, isEnterprise, canAccessPremium, loading: subscriptionLoading } = useSubscription();
   const [resources, setResources] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,10 +119,10 @@ const Resources = () => {
           return;
         }
         
-        if (!hasPremiumAccess && !isPremium && !isAdmin) {
+        if (!canAccessPremium && !isAdmin) {
           toast({
             title: "Premium Required",
-            description: "This resource requires a premium subscription",
+            description: "This resource requires a premium or enterprise subscription",
             variant: "destructive"
           });
           window.location.href = '/payment?plan=premium';
@@ -434,13 +434,13 @@ const Resources = () => {
                         {getFileIcon(resource.file_type)}
                       </div>
                       {resource.access_level === 'premium' && (
-                        <Badge className={`${hasPremiumAccess || isPremium ? 'bg-green-100 text-green-700 border-green-300' : 'bg-accent/10 text-accent border-accent/20'}`}>
-                          {hasPremiumAccess || isPremium ? (
+                        <Badge className={`${canAccessPremium ? 'bg-green-100 text-green-700 border-green-300' : 'bg-accent/10 text-accent border-accent/20'}`}>
+                          {canAccessPremium ? (
                             <CheckCircle className="h-3 w-3 mr-1" />
                           ) : (
                             <Lock className="h-3 w-3 mr-1" />
                           )}
-                          {hasPremiumAccess || isPremium ? 'Premium' : 'Premium'}
+                          {canAccessPremium ? (isEnterprise ? 'Enterprise' : 'Premium') : 'Premium'}
                         </Badge>
                       )}
                     </div>

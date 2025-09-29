@@ -42,11 +42,23 @@ import SecurityAlertsBanner from '@/components/admin/SecurityAlertsBanner';
 import QuestionManagement from '@/components/admin/QuestionManagement';
 
 export default function AdminDashboard() {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, signOut, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
+  }
   
   const [dashboardStats, setDashboardStats] = useState({
     totalUsers: 0,
@@ -63,12 +75,20 @@ export default function AdminDashboard() {
   const [questions, setQuestions] = useState([]);
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking admin status
+    if (authLoading) {
+      return;
+    }
+    
     if (!isAdmin) {
+      console.log('Not admin, redirecting to login');
       navigate('/admin/login');
       return;
     }
+    
+    console.log('Admin verified, loading dashboard data');
     fetchAdminData();
-  }, [isAdmin, navigate]);
+  }, [isAdmin, authLoading, navigate]);
 
   const fetchAdminData = async () => {
     try {

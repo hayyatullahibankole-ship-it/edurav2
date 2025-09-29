@@ -72,8 +72,14 @@ export function useSubscription() {
   // User has any active (non-expired) subscription
   const hasPremiumAccess = Boolean(!loading && active && notExpired);
   
-  // User is premium if access level is premium
+  // User is premium if access level is premium or enterprise
   const isPremium = Boolean(hasPremiumAccess && (accessLevel === 'premium' || (subscription?.subscription_plans?.name || '').toLowerCase().includes('premium')));
+  
+  // User is enterprise if access level is enterprise
+  const isEnterprise = Boolean(hasPremiumAccess && (accessLevel === 'enterprise' || (subscription?.subscription_plans?.name || '').toLowerCase().includes('enterprise')));
+  
+  // User can access premium content (premium or enterprise)
+  const canAccessPremium = Boolean(isPremium || isEnterprise);
   
   // User is on free/basic plan
   const isFree = Boolean(hasPremiumAccess && accessLevel === 'basic');
@@ -95,6 +101,8 @@ export function useSubscription() {
     loading,
     hasPremiumAccess: !!hasPremiumAccess,
     isPremium: !!isPremium,
+    isEnterprise: !!isEnterprise,
+    canAccessPremium: !!canAccessPremium,
     isFree: !!isFree,
   };
 }
