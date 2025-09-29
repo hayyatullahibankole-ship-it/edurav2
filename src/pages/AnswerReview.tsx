@@ -54,20 +54,25 @@ const AnswerReview = () => {
   const fetchAnswerReview = async () => {
     try {
       setLoading(true);
+      console.log('Starting fetchAnswerReview for attempt:', attemptId);
 
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        console.log('No user found, redirecting to auth');
         navigate('/auth');
         return;
       }
+      console.log('Current user:', user.id);
 
       // First, get the user's internal ID
-      const { data: userData } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from('users')
         .select('id')
         .eq('auth_user_id', user.id)
         .maybeSingle();
+
+      console.log('User data fetch:', { userData, userError });
 
       if (!userData) {
         toast({
@@ -80,12 +85,14 @@ const AnswerReview = () => {
       }
 
       // Fetch attempt details to verify ownership
-      const { data: attempt } = await supabase
+      const { data: attempt, error: attemptError } = await supabase
         .from('attempts')
         .select('*')
         .eq('id', attemptId)
         .eq('user_id', userData.id)
         .maybeSingle();
+
+      console.log('Attempt fetch:', { attempt, attemptError });
 
       if (!attempt) {
         toast({
@@ -122,6 +129,8 @@ const AnswerReview = () => {
         `)
         .eq('attempt_id', attemptId);
 
+      console.log('Answers fetch:', { answersCount: answersData?.length, answersError });
+
       if (answersError || !answersData) {
         console.error('Error fetching answers:', answersError);
         toast({
@@ -132,25 +141,38 @@ const AnswerReview = () => {
         return;
       }
 
-      // Fetch question details separately
+      // Get question IDs and fetch secure question data via RPC
       const questionIds = answersData.map(a => a.question_id);
-      const { data: questionsData } = await supabase
-        .from('questions')
-        .select(`
-          id,
-          question_text,
-          type,
-          options,
-          difficulty_level,
-          subject_id,
-          subjects(name)
-        `)
-        .in('id', questionIds);
+      const { data: questionsData, error: questionsError } = await supabase
+        .rpc('get_exam_questions_secure', { 
+          exam_question_ids: questionIds 
+        });
+
+      console.log('Questions fetch via RPC:', { questionsCount: questionsData?.length, questionsError });
+
+      if (!questionsData) {
+        toast({
+          title: "Error", 
+          description: "Failed to load question details",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Get subjects for the questions
+      const subjectIds = [...new Set(questionsData.map(q => q.subject_id))];
+      const { data: subjectsData } = await supabase
+        .from('subjects')
+        .select('id, name')
+        .in('id', subjectIds);
 
       // Combine the data
       const questionDetails: QuestionReview[] = await Promise.all(answersData.map(async (answer) => {
         const question = questionsData?.find(q => q.id === answer.question_id);
+        const subject = subjectsData?.find(s => s.id === question?.subject_id);
+        
         if (!question) {
+          console.log('Question not found for answer:', answer.question_id);
           return null;
         }
 
@@ -173,7 +195,7 @@ const AnswerReview = () => {
             correct_answer: explanation?.correct_answer || null,
             is_correct: answer.is_correct,
             explanation: explanation?.explanation || 'No explanation available',
-            subject: question.subjects?.name || 'Unknown Subject',
+            subject: subject?.name || 'Unknown Subject',
             difficulty_level: question.difficulty_level || 1,
             time_spent_seconds: answer.time_spent_seconds || 0
           };
@@ -188,7 +210,7 @@ const AnswerReview = () => {
             correct_answer: null,
             is_correct: answer.is_correct,
             explanation: 'Explanation not available',
-            subject: question.subjects?.name || 'Unknown Subject',
+            subject: subject?.name || 'Unknown Subject',
             difficulty_level: question.difficulty_level || 1,
             time_spent_seconds: answer.time_spent_seconds || 0
           };
