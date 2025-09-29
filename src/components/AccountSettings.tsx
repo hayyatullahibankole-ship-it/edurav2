@@ -14,7 +14,7 @@ import {
   Shield, 
   Globe, 
   Eye, 
-  Download, 
+  Download,
   Trash2,
   AlertTriangle,
   Check,
@@ -270,6 +270,44 @@ export default function AccountSettings() {
         description: error.message,
         variant: "destructive",
       });
+    }
+  };
+
+  const handleClearStorage = async () => {
+    if (!user) return;
+    
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      "Are you sure you want to clear your storage? This will delete all uploaded files except your profile picture. This action cannot be undone."
+    );
+    
+    if (!confirmed) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('clear-user-storage', {
+        body: { preserveProfile: true }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Storage cleared successfully",
+        description: `${data.clearedFiles} files deleted. ${data.freedSpace.toFixed(3)} GB freed.`,
+      });
+
+      // Refresh storage calculation
+      await calculateStorage();
+      
+    } catch (error: any) {
+      console.error('Error clearing storage:', error);
+      toast({
+        title: "Failed to clear storage",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -708,6 +746,20 @@ export default function AccountSettings() {
               Refresh Storage
             </Button>
           </div>
+
+          {storageUsage.used > storageUsage.total * 0.8 && (
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button 
+                variant="destructive" 
+                onClick={handleClearStorage} 
+                className="flex-1"
+                disabled={loading}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {loading ? "Clearing..." : "Clear Storage"}
+              </Button>
+            </div>
+          )}
 
           <Alert>
             <Info className="h-4 w-4" />
