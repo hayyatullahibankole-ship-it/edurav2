@@ -165,12 +165,11 @@ export function processQuestionText(text: string): string {
   const hasDollar = /\$/.test(processed);
   const looksLikeSentence = /[A-Za-z]{3,}\s+[A-Za-z]{3,}/.test(processed);
   if (hasMathToken && !hasDollar) {
-    // Use block for matrices/determinants when the whole content is math-like and short
-    const complex = /(pmatrix|bmatrix|vmatrix|\\begin\{.*?matrix\})/.test(processed);
-    if (!looksLikeSentence || complex) {
+    // Only auto-wrap when the whole string is math-like (not a natural sentence)
+    if (!looksLikeSentence) {
+      const complex = /(pmatrix|bmatrix|vmatrix|\\begin\{.*?matrix\})/.test(processed);
       processed = complex ? `$$${processed}$$` : `$${processed}$`;
     }
-    // If it looks like a sentence, do not wrap here - MathRenderer will render inline tokens safely
   }
 
   // Finally, wrap known chemistry pieces with $ if not already inside math
