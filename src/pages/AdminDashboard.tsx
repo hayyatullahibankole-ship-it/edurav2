@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Users, 
   BookOpen, 
@@ -40,6 +41,10 @@ import SecurityConfig from '@/components/admin/SecurityConfig';
 import SecurityMonitor from '@/components/admin/SecurityMonitor';
 import SecurityAlertsBanner from '@/components/admin/SecurityAlertsBanner';
 import QuestionManagement from '@/components/admin/QuestionManagement';
+import ResourceManagement from '@/components/admin/ResourceManagement';
+import AnalyticsHub from '@/components/admin/AnalyticsHub';
+import UserManagement from '@/components/admin/UserManagement';
+import ExamControl from '@/components/admin/ExamControl';
 
 export default function AdminDashboard() {
   const { user, isAdmin, signOut, loading: authLoading } = useAuth();
@@ -73,6 +78,25 @@ export default function AdminDashboard() {
   const [exams, setExams] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [questions, setQuestions] = useState([]);
+  
+  // Modal states
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isExamModalOpen, setIsExamModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedExam, setSelectedExam] = useState<any>(null);
+  const [isCreateExamModalOpen, setIsCreateExamModalOpen] = useState(false);
+  
+  // Form states
+  const [newExam, setNewExam] = useState({
+    title: '',
+    description: '',
+    type: 'JAMB' as 'JAMB' | 'WAEC' | 'CUSTOM',
+    duration_minutes: 120,
+    total_questions: 180,
+    passing_score: 50,
+    instructions: '',
+    is_published: false
+  });
 
   useEffect(() => {
     // Wait for auth to finish loading before checking admin status
@@ -142,7 +166,10 @@ export default function AdminDashboard() {
   const handleUserAction = async (userId: string, action: 'suspend' | 'activate' | 'delete') => {
     try {
       if (action === 'delete') {
-        const { error } = await supabase.from('users').delete().eq('id', userId);
+        if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+          return;
+        }
+        const { error } = await supabase.rpc('delete_user_completely', { user_uuid: userId });
         if (error) throw error;
         toast({ title: "User deleted successfully" });
       } else {
@@ -155,6 +182,7 @@ export default function AdminDashboard() {
       }
       fetchAdminData();
     } catch (error) {
+      console.error(`Error ${action}ing user:`, error);
       toast({
         title: "Error",
         description: `Failed to ${action} user`,
@@ -164,27 +192,151 @@ export default function AdminDashboard() {
   };
 
   const handleExportData = () => {
-    // TODO: Implement data export functionality
-    toast({
-      title: "Export Data",
-      description: "Export functionality will be available soon",
-    });
+    try {
+      // Export all data as CSV
+      const exportData = {
+        users: users.slice(0, 100), // Limit for performance
+        exams: exams,
+        dashboardStats
+      };
+      
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
+        type: 'application/json;charset=utf-8;' 
+      });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `admin_export_${new Date().toISOString().split('T')[0]}.json`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Export Complete",
+        description: "Admin data exported successfully"
+      });
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export data",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleEditExam = (examId: string) => {
-    // TODO: Implement exam editing
-    toast({
-      title: "Edit Exam",
-      description: "Exam editing functionality will be available soon",
-    });
+  const handleViewUser = (user: any) => {
+    setSelectedUser(user);
+    setIsUserModalOpen(true);
   };
 
-  const handleViewExam = (examId: string) => {
-    // TODO: Implement exam viewing
-    toast({
-      title: "View Exam", 
-      description: "Exam viewing functionality will be available soon",
+  const handleCreateExam = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('exams')
+        .insert([newExam])
+        .select();
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Exam created successfully"
+      });
+
+      setIsCreateExamModalOpen(false);
+      setNewExam({
+        title: '',
+        description: '',
+        type: 'JAMB' as 'JAMB' | 'WAEC' | 'CUSTOM',
+        duration_minutes: 120,
+        total_questions: 180,
+        passing_score: 50,
+        instructions: '',
+        is_published: false
+      });
+      fetchAdminData();
+    } catch (error) {
+      console.error('Error creating exam:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create exam",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEditExam = (exam: any) => {
+    setSelectedExam(exam);
+    setNewExam({
+      title: exam.title,
+      description: exam.description || '',
+      type: exam.type,
+      duration_minutes: exam.duration_minutes,
+      total_questions: exam.total_questions || 180,
+      passing_score: exam.passing_score || 50,
+      instructions: exam.instructions || '',
+      is_published: exam.is_published
     });
+    setIsExamModalOpen(true);
+  };
+
+  const handleUpdateExam = async () => {
+    try {
+      const { error } = await supabase
+        .from('exams')
+        .update(newExam)
+        .eq('id', selectedExam.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Exam updated successfully"
+      });
+
+      setIsExamModalOpen(false);
+      setSelectedExam(null);
+      fetchAdminData();
+    } catch (error) {
+      console.error('Error updating exam:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update exam",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleViewExam = (exam: any) => {
+    setSelectedExam(exam);
+    setIsExamModalOpen(true);
+  };
+
+  const handleToggleExamPublished = async (examId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('exams')
+        .update({ is_published: !currentStatus })
+        .eq('id', examId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Exam ${!currentStatus ? 'published' : 'unpublished'} successfully`
+      });
+
+      fetchAdminData();
+    } catch (error) {
+      console.error('Error toggling exam status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update exam status",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleDeleteExam = async (examId: string) => {
@@ -477,123 +629,23 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>User Management</CardTitle>
-                  <CardDescription>Manage registered users and their permissions</CardDescription>
-                </div>
-                <Button onClick={() => {
-                  // Export users functionality
-                  try {
-                    const headers = ['Email', 'First Name', 'Last Name', 'Created At'];
-                    const csvContent = [
-                      headers.join(','),
-                      ...users.map(user => [
-                        user.email || '',
-                        user.first_name || '',
-                        user.last_name || '',
-                        new Date(user.created_at).toLocaleDateString()
-                      ].map(field => `"${field}"`).join(','))
-                    ].join('\n');
-
-                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                    const link = document.createElement('a');
-                    const url = URL.createObjectURL(blob);
-                    link.setAttribute('href', url);
-                    link.setAttribute('download', `users_export_${new Date().toISOString().split('T')[0]}.csv`);
-                    link.style.visibility = 'hidden';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  } catch (error) {
-                    console.error('Export failed:', error);
-                  }
-                }}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Export Users
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {users.slice(0, 10).map((user: any) => (
-                    <div key={user.id} className="flex items-center justify-between p-4 border rounded">
-                      <div>
-                        <p className="font-medium">{user.email}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Joined: {new Date(user.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {user.is_suspended && (
-                          <Badge variant="destructive">Suspended</Badge>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleUserAction(user.id, user.is_suspended ? 'activate' : 'suspend')}
-                        >
-                          {user.is_suspended ? 'Activate' : 'Suspend'}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <UserManagement users={users} onRefresh={fetchAdminData} />
           </TabsContent>
 
           <TabsContent value="exams" className="space-y-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Exam Management</CardTitle>
-                  <CardDescription>Create and manage exam templates</CardDescription>
-                </div>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Exam
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {exams.map((exam: any) => (
-                    <div key={exam.id} className="flex items-center justify-between p-4 border rounded">
-                      <div>
-                        <p className="font-medium">{exam.title}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline">{exam.type}</Badge>
-                          <Badge variant={exam.is_published ? 'default' : 'secondary'}>
-                            {exam.is_published ? 'Published' : 'Draft'}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEditExam(exam.id)}>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleViewExam(exam.id)}>
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDeleteExam(exam.id)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <ExamControl />
           </TabsContent>
 
           <TabsContent value="questions" className="space-y-6">
             <QuestionManagement />
+          </TabsContent>
+
+          <TabsContent value="resources" className="space-y-6">
+            <ResourceManagement />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <AnalyticsHub />
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
@@ -602,11 +654,6 @@ export default function AdminDashboard() {
 
           <TabsContent value="monitor" className="space-y-6">
             <SecurityMonitor />
-          </TabsContent>
-
-          {/* Add other tab contents as needed */}
-          <TabsContent value="sec-config">
-            <SecurityConfig />
           </TabsContent>
         </Tabs>
       </div>

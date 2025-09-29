@@ -78,7 +78,7 @@ export default function QuestionManagement() {
     question_text: '',
     type: 'MCQ_SINGLE' as 'MCQ_SINGLE' | 'MCQ_MULTI' | 'TRUE_FALSE' | 'FILL_IN' | 'MATCHING' | 'ESSAY',
     options: ['', '', '', '', ''],
-    correct_answer: 0,
+    correct_answer: '' as any,
     explanation: '',
     difficulty_level: 1,
     tags: [] as string[],
@@ -341,7 +341,7 @@ export default function QuestionManagement() {
       question_text: '',
       type: 'MCQ_SINGLE' as 'MCQ_SINGLE' | 'MCQ_MULTI' | 'TRUE_FALSE' | 'FILL_IN' | 'MATCHING' | 'ESSAY',
       options: ['', '', '', '', ''],
-      correct_answer: 0,
+      correct_answer: '' as any,
       explanation: '',
       difficulty_level: 1,
       tags: [],
@@ -369,6 +369,64 @@ export default function QuestionManagement() {
       points: question.points
     });
     setIsEditModalOpen(true);
+  };
+
+  const handleUpdateQuestion = async () => {
+    if (!editingQuestion) return;
+    
+    try {
+      setLoading(true);
+
+      // Validate required fields
+      if (!newQuestion.question_text.trim()) {
+        throw new Error("Question text is required");
+      }
+      
+      if (!newQuestion.subject_id) {
+        throw new Error("Subject is required");
+      }
+
+      // Prepare question data
+      const questionData = {
+        question_text: newQuestion.question_text.trim(),
+        type: newQuestion.type,
+        options: newQuestion.options,
+        correct_answer: newQuestion.correct_answer,
+        explanation: newQuestion.explanation?.trim() || null,
+        difficulty_level: newQuestion.difficulty_level,
+        tags: Array.isArray(newQuestion.tags) ? newQuestion.tags : [],
+        subject_id: newQuestion.subject_id,
+        points: newQuestion.points
+      };
+
+      const { error } = await supabase
+        .from('questions')
+        .update(questionData)
+        .eq('id', editingQuestion.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Question updated successfully"
+      });
+
+      setIsEditModalOpen(false);
+      setEditingQuestion(null);
+      resetNewQuestion();
+      fetchData();
+      
+    } catch (error) {
+      console.error('Error updating question:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to update question";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDuplicateQuestion = async (question: Question) => {
@@ -925,6 +983,160 @@ export default function QuestionManagement() {
                 )}
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Modal */}
+        <Dialog open={isEditModalOpen} onOpenChange={(open) => {
+          setIsEditModalOpen(open);
+          if (!open) {
+            setEditingQuestion(null);
+            resetNewQuestion();
+          }
+        }}>
+          <DialogContent className="sm:max-w-[700px]">
+            <DialogHeader>
+              <DialogTitle>Edit Question</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[70vh]">
+              <div className="space-y-4 p-1">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="subject">Subject</Label>
+                    <Select value={newQuestion.subject_id} onValueChange={(value) => setNewQuestion({...newQuestion, subject_id: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select subject" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subjects.length > 0 ? (
+                          subjects.map(subject => (
+                            <SelectItem key={subject.id} value={subject.id}>
+                              {subject.name} ({subject.code})
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="" disabled>
+                            No subjects available
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="type">Question Type</Label>
+                    <Select value={newQuestion.type} onValueChange={(value: any) => setNewQuestion({...newQuestion, type: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="MCQ_SINGLE">Multiple Choice (Single)</SelectItem>
+                        <SelectItem value="MCQ_MULTI">Multiple Choice (Multi)</SelectItem>
+                        <SelectItem value="TRUE_FALSE">True/False</SelectItem>
+                        <SelectItem value="FILL_IN">Fill in the Blank</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="question">Question Text</Label>
+                  <Textarea
+                    id="question"
+                    value={newQuestion.question_text}
+                    onChange={(e) => setNewQuestion({...newQuestion, question_text: e.target.value})}
+                    placeholder="Enter your question here..."
+                    rows={4}
+                  />
+                </div>
+
+                {(newQuestion.type === 'MCQ_SINGLE' || newQuestion.type === 'MCQ_MULTI') && (
+                  <div>
+                    <Label>Options</Label>
+                    <div className="space-y-2">
+                      {['A', 'B', 'C', 'D', 'E'].map((letter, index) => (
+                        <div key={letter} className="flex items-center space-x-2">
+                          <Badge variant="outline" className="w-8 h-8 flex items-center justify-center">
+                            {letter}
+                          </Badge>
+                          <Input
+                            value={newQuestion.options[letter] || ''}
+                            onChange={(e) => setNewQuestion({
+                              ...newQuestion, 
+                              options: {...newQuestion.options, [letter]: e.target.value}
+                            })}
+                            placeholder={`Option ${letter}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2">
+                      <Label>Correct Answer</Label>
+                      <Select 
+                        value={String(newQuestion.correct_answer)} 
+                        onValueChange={(value) => setNewQuestion({...newQuestion, correct_answer: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select correct answer" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {['A', 'B', 'C', 'D', 'E'].map(letter => (
+                            <SelectItem key={letter} value={letter}>
+                              Option {letter}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <Label htmlFor="explanation">Explanation</Label>
+                  <Textarea
+                    id="explanation"
+                    value={newQuestion.explanation}
+                    onChange={(e) => setNewQuestion({...newQuestion, explanation: e.target.value})}
+                    placeholder="Explain why this answer is correct..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="difficulty">Difficulty Level</Label>
+                    <Select value={newQuestion.difficulty_level.toString()} onValueChange={(value) => setNewQuestion({...newQuestion, difficulty_level: parseInt(value)})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Easy</SelectItem>  
+                        <SelectItem value="2">Medium</SelectItem>
+                        <SelectItem value="3">Hard</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="points">Points</Label>
+                    <Input
+                      id="points"
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={newQuestion.points}
+                      onChange={(e) => setNewQuestion({...newQuestion, points: parseInt(e.target.value) || 1})}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleUpdateQuestion} disabled={loading}>
+                    {loading ? 'Updating...' : 'Update Question'}
+                  </Button>
+                </div>
+              </div>
+            </ScrollArea>
           </DialogContent>
         </Dialog>
 
