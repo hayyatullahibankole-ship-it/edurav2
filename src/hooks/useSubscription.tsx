@@ -121,25 +121,37 @@ export function useSubscription() {
     fetchSubscription();
   }, [user, userProfile]);
 
-  // Normalize subscription state
+  // Normalize subscription state - fix the premium detection logic
   const active = subscription?.status === 'ACTIVE';
   const notExpired = subscription?.end_date ? new Date(subscription.end_date) > new Date() : true;
   const accessLevel = subscription?.subscription_plans?.resource_access_level?.toLowerCase();
+  const planName = (subscription?.subscription_plans?.name || '').toLowerCase();
 
   // User has any active (non-expired) subscription
   const hasPremiumAccess = Boolean(!loading && active && notExpired);
   
-  // User is premium if access level is premium or enterprise
-  const isPremium = Boolean(hasPremiumAccess && (accessLevel === 'premium' || (subscription?.subscription_plans?.name || '').toLowerCase().includes('premium')));
+  // User is premium if access level is premium OR plan name contains premium
+  const isPremium = Boolean(
+    hasPremiumAccess && (
+      accessLevel === 'premium' || 
+      planName.includes('premium') ||
+      (subscription?.subscription_plans?.price && subscription.subscription_plans.price > 0)
+    )
+  );
   
-  // User is enterprise if access level is enterprise
-  const isEnterprise = Boolean(hasPremiumAccess && (accessLevel === 'enterprise' || (subscription?.subscription_plans?.name || '').toLowerCase().includes('enterprise')));
+  // User is enterprise if access level is enterprise OR plan name contains enterprise
+  const isEnterprise = Boolean(
+    hasPremiumAccess && (
+      accessLevel === 'enterprise' || 
+      planName.includes('enterprise')
+    )
+  );
   
   // User can access premium content (premium or enterprise)
   const canAccessPremium = Boolean(isPremium || isEnterprise);
   
-  // User is on free/basic plan
-  const isFree = Boolean(hasPremiumAccess && accessLevel === 'basic');
+  // User is on free/basic plan (has access but not premium/enterprise)
+  const isFree = Boolean(hasPremiumAccess && accessLevel === 'basic' && !isPremium && !isEnterprise);
   
   if (typeof window !== 'undefined') {
     console.debug('useSubscription', {
