@@ -36,7 +36,11 @@ const MathRenderer: React.FC<MathRendererProps> = ({ content, className = "" }) 
                     "\\vec": "\\overrightarrow{#1}",
                     "\\pmatrix": "\\begin{pmatrix}#1\\end{pmatrix}",
                     "\\bmatrix": "\\begin{bmatrix}#1\\end{bmatrix}",
-                    "\\vmatrix": "\\begin{vmatrix}#1\\end{vmatrix}"
+                    "\\vmatrix": "\\begin{vmatrix}#1\\end{vmatrix}",
+                    "\\,": "\\,", // thin space
+                    "\\;": "\\;", // medium space
+                    "\\quad": "\\quad", // large space
+                    "\\qquad": "\\qquad" // very large space
                   }
                 })
               }}
@@ -67,7 +71,11 @@ const MathRenderer: React.FC<MathRendererProps> = ({ content, className = "" }) 
                     "\\vec": "\\overrightarrow{#1}",
                     "\\pmatrix": "\\begin{pmatrix}#1\\end{pmatrix}",
                     "\\bmatrix": "\\begin{bmatrix}#1\\end{bmatrix}",
-                    "\\vmatrix": "\\begin{vmatrix}#1\\end{vmatrix}"
+                    "\\vmatrix": "\\begin{vmatrix}#1\\end{vmatrix}",
+                    "\\,": "\\,", // thin space
+                    "\\;": "\\;", // medium space
+                    "\\quad": "\\quad", // large space
+                    "\\qquad": "\\qquad" // very large space
                   }
                 })
               }}

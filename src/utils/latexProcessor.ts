@@ -47,12 +47,14 @@ export function processQuestionText(text: string): string {
     .replace(/√\s*([A-Za-z0-9]+)/g, '\\sqrt{$1}')
     .replace(/\bsqrt\s+(\d+)/gi, '\\sqrt{$1}')
     .replace(/\bsqrt\s+([A-Za-z])/gi, '\\sqrt{$1}')
-    .replace(/≤/g, '\\leq')
-    .replace(/≥/g, '\\geq')
-    .replace(/≠/g, '\\neq')
-    .replace(/±/g, '\\pm')
-    .replace(/×/g, '\\times')
-    .replace(/÷/g, '\\div')
+    
+    // 6) Mathematical symbols with proper spacing
+    .replace(/≤/g, ' \\leq ')
+    .replace(/≥/g, ' \\geq ')
+    .replace(/≠/g, ' \\neq ')
+    .replace(/±/g, ' \\pm ')
+    .replace(/×/g, ' \\times ')
+    .replace(/÷/g, ' \\div ')
     .replace(/π/g, '\\pi')
     .replace(/∞/g, '\\infty')
     .replace(/∑/g, '\\sum')
@@ -70,10 +72,10 @@ export function processQuestionText(text: string): string {
     .replace(/σ/g, '\\sigma')
     .replace(/Ω/g, '\\Omega')
 
-    // 6) Scientific notation patterns
+    // 7) Scientific notation patterns with spacing
     .replace(/(\d+(?:\.\d+)?)\s*[xX×]\s*10\^\{?([+-]?\d+)\}?/g, '$1 \\times 10^{$2}')
 
-    // 7) Chemistry (simple)
+    // 8) Chemistry with proper spacing
     .replace(/\bH2O\b/g, 'H_2O')
     .replace(/\bCO2\b/g, 'CO_2')
     .replace(/\bH2SO4\b/g, 'H_2SO_4')
@@ -83,28 +85,41 @@ export function processQuestionText(text: string): string {
     .replace(/\bNH3\b/g, 'NH_3')
     .replace(/\bCH4\b/g, 'CH_4')
 
-    // 8) Common physics units
+    // 9) Common physics units with spacing
     .replace(/m\/s2/g, 'm/s^2')
     .replace(/kg\.m\/s2/g, 'kg \\cdot m/s^2')
     .replace(/kg\/m³/g, 'kg/m^3')
 
-    // 9) Matrix and determinant patterns (enhanced)
+    // 10) Matrix and determinant patterns (enhanced)
     .replace(/\|\s*([^|]+)\s*\|/g, '\\begin{vmatrix}$1\\end{vmatrix}')
     .replace(/det\s*\(\s*([^)]+)\s*\)/gi, '\\det($1)')
     .replace(/matrix\s*\(\s*([^)]+)\s*\)/gi, '\\begin{pmatrix}$1\\end{pmatrix}')
     
-    // 10) Vector notation
+    // 11) Vector notation with spacing
     .replace(/vec\s*\(\s*([A-Za-z])\s*\)/gi, '\\vec{$1}')
     .replace(/\b([A-Za-z])-vector/gi, '\\vec{$1}')
     
-    // 11) Logarithm improvements
+    // 12) Logarithm improvements with spacing
     .replace(/log\s*_\s*(\d+)\s*\(\s*([^)]+)\s*\)/gi, '\\log_{$1}($2)')
     .replace(/log\s*_\s*(\d+)\s+([A-Za-z0-9]+)/gi, '\\log_{$1} $2')
     
-    // 12) Trigonometric with angles
+    // 13) Trigonometric with angles and spacing
     .replace(/cos\s*(\d+)\s*°/gi, '\\cos $1^{\\circ}')
     .replace(/sin\s*(\d+)\s*°/gi, '\\sin $1^{\\circ}')
-    .replace(/tan\s*(\d+)\s*°/gi, '\\tan $1^{\\circ}');
+    .replace(/tan\s*(\d+)\s*°/gi, '\\tan $1^{\\circ}')
+    
+    // 14) Add spacing around mathematical operators
+    .replace(/([A-Za-z0-9\)])(\+)([A-Za-z0-9\(])/g, '$1 + $3')
+    .replace(/([A-Za-z0-9\)])(-)([A-Za-z0-9\(])/g, '$1 - $3')
+    .replace(/([A-Za-z0-9\)])(=)([A-Za-z0-9\(])/g, '$1 = $3')
+    
+    // 15) Add spacing between numbers and variables
+    .replace(/(\d)([A-Za-z])/g, '$1 $2')
+    .replace(/([A-Za-z])(\d)/g, '$1 $2')
+    
+    // 16) Clean up excessive spaces
+    .replace(/\s+/g, ' ')
+    .replace(/\s*\\\s*/g, '\\');
 
   // Clean redundancy of dollar signs created elsewhere
   processed = processed.replace(/\$\$+/g, '$');
