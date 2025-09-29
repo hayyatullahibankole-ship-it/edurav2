@@ -144,13 +144,13 @@ export function processQuestionText(text: string): string {
           for (let i = 0; i < parts.length; i += cols) {
             rows.push(parts.slice(i, i + cols).join(' & '));
           }
-          const body = rows.join(' \\ ');
+          const body = rows.join(' \\\\ ');
           return `\\begin{pmatrix} ${body} \\end{pmatrix}`;
         }
       }
       // If semicolons used as row separators
       if (content.includes(';')) {
-        const rows = content.split(';').map(r => r.trim()).filter(Boolean).join(' \\ ');
+        const rows = content.split(';').map(r => r.trim()).filter(Boolean).join(' \\\\ ');
         return `\\begin{pmatrix} ${rows} \\end{pmatrix}`;
       }
       // Fallback: wrap as pmatrix
