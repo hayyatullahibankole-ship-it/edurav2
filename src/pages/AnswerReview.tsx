@@ -108,24 +108,22 @@ const AnswerReview = () => {
         return;
       }
 
-      // Fetch answers with question details (without sensitive data)
-      const { data: answers } = await supabase
+      // Fetch answers with question details using a simpler query
+      const { data: answersData, error: answersError } = await supabase
         .from('attempt_answers')
         .select(`
-          *,
-          questions!inner(
-            id,
-            question_text,
-            type,
-            options,
-            difficulty_level,
-            subject_id,
-            subjects(name)
-          )
+          id,
+          question_id,
+          answer,
+          is_correct,
+          is_flagged,
+          time_spent_seconds,
+          answered_at
         `)
         .eq('attempt_id', attemptId);
 
-      if (!answers) {
+      if (answersError || !answersData) {
+        console.error('Error fetching answers:', answersError);
         toast({
           title: "Error",
           description: "Failed to load answers",
@@ -134,50 +132,73 @@ const AnswerReview = () => {
         return;
       }
 
-      // Get explanations and correct answers securely for each question
-      const questionDetails: QuestionReview[] = await Promise.all(answers.map(async (answer) => {
+      // Fetch question details separately
+      const questionIds = answersData.map(a => a.question_id);
+      const { data: questionsData } = await supabase
+        .from('questions')
+        .select(`
+          id,
+          question_text,
+          type,
+          options,
+          difficulty_level,
+          subject_id,
+          subjects(name)
+        `)
+        .in('id', questionIds);
+
+      // Combine the data
+      const questionDetails: QuestionReview[] = await Promise.all(answersData.map(async (answer) => {
+        const question = questionsData?.find(q => q.id === answer.question_id);
+        if (!question) {
+          return null;
+        }
+
         try {
           // Use the secure function to get explanation and correct answer
           const { data: explanationData } = await supabase
             .rpc('get_question_explanation_secure', { 
-              question_id_param: answer.questions.id 
+              question_id_param: question.id 
             });
 
           // The RPC returns a table, so we need to access the first row
           const explanation = explanationData && explanationData.length > 0 ? explanationData[0] : null;
 
           return {
-            id: answer.questions.id,
-            question_text: answer.questions.question_text,
-            type: answer.questions.type,
-            options: Array.isArray(answer.questions.options) ? answer.questions.options : [],
+            id: question.id,
+            question_text: question.question_text,
+            type: question.type,
+            options: Array.isArray(question.options) ? question.options : [],
             user_answer: answer.answer,
             correct_answer: explanation?.correct_answer || null,
             is_correct: answer.is_correct,
             explanation: explanation?.explanation || 'No explanation available',
-            subject: answer.questions.subjects?.name || 'Unknown Subject',
-            difficulty_level: answer.questions.difficulty_level || 1,
+            subject: question.subjects?.name || 'Unknown Subject',
+            difficulty_level: question.difficulty_level || 1,
             time_spent_seconds: answer.time_spent_seconds || 0
           };
         } catch (error) {
-          console.error(`Error getting explanation for question ${answer.questions.id}:`, error);
+          console.error(`Error getting explanation for question ${question.id}:`, error);
           return {
-            id: answer.questions.id,
-            question_text: answer.questions.question_text,
-            type: answer.questions.type,
-            options: Array.isArray(answer.questions.options) ? answer.questions.options : [],
+            id: question.id,
+            question_text: question.question_text,
+            type: question.type,
+            options: Array.isArray(question.options) ? question.options : [],
             user_answer: answer.answer,
             correct_answer: null,
             is_correct: answer.is_correct,
             explanation: 'Explanation not available',
-            subject: answer.questions.subjects?.name || 'Unknown Subject',
-            difficulty_level: answer.questions.difficulty_level || 1,
+            subject: question.subjects?.name || 'Unknown Subject',
+            difficulty_level: question.difficulty_level || 1,
             time_spent_seconds: answer.time_spent_seconds || 0
           };
         }
       }));
 
-      setQuestions(questionDetails);
+      // Filter out null results
+      const validQuestions = questionDetails.filter(q => q !== null) as QuestionReview[];
+
+      setQuestions(validQuestions);
     } catch (error) {
       console.error('Error fetching answer review:', error);
       toast({
