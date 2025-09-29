@@ -195,11 +195,24 @@ const CBTExam = () => {
       const answerRecords = [];
       
       // Process each question with secure validation
+      console.log('Processing answers for submission:', {
+        totalQuestions: questions.length,
+        answersReceived: Object.keys(answers).length,
+        answersSample: Object.entries(answers).slice(0, 3)
+      });
+
       for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
         const question = questions[questionIndex];
-        const answerKey = question.id - 1;
-        const userAnswer = answers[answerKey];
+        
+        // FIX: Use question.id as the key (matches how answers are stored in interface)
+        const userAnswer = answers[question.id];
         const subject = question.subject || 'General';
+        
+        console.log(`Processing question ${questionIndex}:`, {
+          questionId: question.originalId,
+          userAnswer,
+          subject
+        });
         
         // Initialize subject stats
         subjectStats[subject] = subjectStats[subject] || { total: 0, correct: 0 };
@@ -211,9 +224,20 @@ const CBTExam = () => {
           try {
             // Convert letter-based answer to numeric format for validation
             let normalizedAnswer: string | number = userAnswer;
-            if (typeof userAnswer === 'string' && userAnswer.match(/^[A-D]\)/)) {
-              const letter = userAnswer.charAt(0);
-              normalizedAnswer = letter.charCodeAt(0) - 65; // A=0, B=1, C=2, D=3
+            
+            // Handle different answer formats
+            if (typeof userAnswer === 'string') {
+              if (userAnswer.match(/^[A-D]\)/)) {
+                // Format: "A) option text"
+                const letter = userAnswer.charAt(0);
+                normalizedAnswer = letter.charCodeAt(0) - 65; // A=0, B=1, C=2, D=3
+              } else if (userAnswer.match(/^[A-D]$/)) {
+                // Format: "A"
+                normalizedAnswer = userAnswer.charCodeAt(0) - 65;
+              } else if (userAnswer.match(/^[0-3]$/)) {
+                // Format: "0", "1", "2", "3"
+                normalizedAnswer = parseInt(userAnswer);
+              }
             }
 
             console.log('Validating answer:', {
@@ -282,7 +306,17 @@ const CBTExam = () => {
 
       const percentage = (correctCount / questions.length) * 100;
       const wrongCount = questions.length - correctCount;
-      const unansweredCount = questions.length - Object.keys(answers).length;
+      // Fix unanswered count - count questions that actually have non-null answers
+      const answeredCount = answerRecords.filter(record => record.answer !== null && record.answer !== undefined).length;
+      const unansweredCount = questions.length - answeredCount;
+
+      console.log('Calculated exam results:', {
+        totalQuestions: questions.length,
+        correctCount,
+        answeredCount,
+        unansweredCount,
+        percentage
+      });
 
       // Determine exam type from proctoring data
       const examType = ((examData?.proctoring_data as any)?.exam_type || 'CUSTOM').toUpperCase();
@@ -361,6 +395,13 @@ const CBTExam = () => {
           errorMessage = "This exam has already been submitted.";
         } else if (error.message.includes('permission')) {
           errorMessage = "Permission denied. Please log in again.";
+        } else if (error.message.includes('violates row-level security')) {
+          errorMessage = "Access denied. Please refresh and try again.";
+        } else if (error.message.includes('attempt_answers')) {
+          errorMessage = "Error saving your answers. Please try again.";
+        } else {
+          // Include the actual error message for debugging
+          errorMessage = `Submission failed: ${error.message}`;
         }
       }
       
