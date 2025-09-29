@@ -280,7 +280,10 @@ const Resources = () => {
                          resource.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSubject = selectedSubject === 'all' || resource.subject_id === selectedSubject;
     
-    return matchesSearch && matchesSubject;
+    // Hide broken resources for regular users, but show them for admins
+    const isWorking = resource.file_url.startsWith('http') || !resource.file_url.includes('uploads/');
+    
+    return matchesSearch && matchesSubject && (isWorking || isAdmin);
   });
 
   const resourceCategories = [

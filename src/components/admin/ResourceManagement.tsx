@@ -79,10 +79,18 @@ export default function ResourceManagement() {
   });
 
   const [bulkFiles, setBulkFiles] = useState<FileList | null>(null);
+  const [brokenResources, setBrokenResources] = useState<Resource[]>([]);
+  const [isFixingResources, setIsFixingResources] = useState(false);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (resources.length > 0) {
+      checkBrokenResources();
+    }
+  }, [resources]);
 
   const fetchData = async () => {
     try {
@@ -310,6 +318,134 @@ export default function ResourceManagement() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const checkBrokenResources = async () => {
+    try {
+      const broken: Resource[] = [];
+      
+      for (const resource of resources) {
+        if (!resource.file_url.startsWith('http')) {
+          // Check if file exists in storage
+          let bucketName = 'uploads';
+          let filePath = resource.file_url;
+
+          if (resource.file_url.startsWith('uploads/')) {
+            bucketName = 'uploads';
+            filePath = resource.file_url.replace('uploads/', '');
+          } else if (resource.file_url.includes('/')) {
+            const pathParts = resource.file_url.split('/');
+            bucketName = pathParts[0];
+            filePath = pathParts.slice(1).join('/');
+          } else {
+            bucketName = 'resources';
+            filePath = resource.file_url;
+          }
+
+          try {
+            const { error } = await supabase.storage
+              .from(bucketName)
+              .download(filePath);
+
+            if (error) {
+              broken.push(resource);
+            }
+          } catch {
+            broken.push(resource);
+          }
+        }
+      }
+      
+      setBrokenResources(broken);
+    } catch (error) {
+      console.error('Error checking broken resources:', error);
+    }
+  };
+
+  const fixBrokenResource = async (resource: Resource, file: File) => {
+    try {
+      const fileName = `fixed-resources/${Date.now()}-${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('resources')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('resources')
+        .getPublicUrl(fileName);
+
+      // Update resource with new URL
+      const { error: updateError } = await supabase
+        .from('resources')
+        .update({
+          file_url: urlData.publicUrl,
+          file_type: file.type,
+          file_size_bytes: file.size
+        })
+        .eq('id', resource.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success",
+        description: `Fixed resource: ${resource.title}`,
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error fixing resource:', error);
+      toast({
+        title: "Error",
+        description: `Failed to fix resource: ${resource.title}`,
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
+  const handleBulkFixResources = async () => {
+    if (!bulkFiles || bulkFiles.length === 0) return;
+
+    try {
+      setIsFixingResources(true);
+      let fixed = 0;
+      
+      const fileArray = Array.from(bulkFiles);
+      
+      for (const file of fileArray) {
+        // Try to match file with broken resource by name
+        const matchingResource = brokenResources.find(resource => {
+          const resourceName = resource.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const fileName = file.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+          return fileName.includes(resourceName) || resourceName.includes(fileName);
+        });
+
+        if (matchingResource) {
+          const success = await fixBrokenResource(matchingResource, file);
+          if (success) fixed++;
+        }
+      }
+
+      toast({
+        title: "Bulk Fix Complete",
+        description: `Fixed ${fixed} out of ${fileArray.length} resources`,
+      });
+
+      fetchData();
+      checkBrokenResources();
+      setBulkFiles(null);
+    } catch (error) {
+      console.error('Error in bulk fix:', error);
+      toast({
+        title: "Error",
+        description: "Bulk fix operation failed",
+        variant: "destructive",
+      });
+    } finally {
+      setIsFixingResources(false);
+    }
+  };
+
   const filteredResources = resources.filter(resource => {
     const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -320,6 +456,10 @@ export default function ResourceManagement() {
     return matchesSearch && matchesSubject && matchesType;
   });
 
+  const workingResources = filteredResources.filter(resource => 
+    !brokenResources.some(broken => broken.id === resource.id)
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -329,6 +469,64 @@ export default function ResourceManagement() {
         </div>
         
         <div className="flex space-x-3">
+          {brokenResources.length > 0 && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="destructive" className="relative">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  Fix Broken Resources ({brokenResources.length})
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Fix Broken Resources</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-800">
+                      {brokenResources.length} resources have broken file links. Upload the correct files to fix them.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <Label>Broken Resources:</Label>
+                    <div className="max-h-32 overflow-auto space-y-1 border rounded p-2 bg-gray-50">
+                      {brokenResources.map((resource) => (
+                        <div key={resource.id} className="text-sm p-1 bg-white rounded border">
+                          {resource.title}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="fixFiles">Select Files to Fix Broken Resources</Label>
+                    <Input
+                      id="fixFiles"
+                      type="file"
+                      multiple
+                      onChange={(e) => setBulkFiles(e.target.files)}
+                      className="mt-1"
+                    />
+                    <p className="text-sm text-slate-500 mt-1">
+                      Select files that match the broken resource names. The system will try to match them automatically.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <Button 
+                      onClick={handleBulkFixResources} 
+                      disabled={isFixingResources || !bulkFiles || bulkFiles.length === 0}
+                      className="flex-1"
+                    >
+                      {isFixingResources ? 'Fixing...' : `Fix Resources`}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+
           <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="border-slate-600">
