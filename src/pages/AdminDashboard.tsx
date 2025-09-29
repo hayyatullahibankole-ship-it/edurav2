@@ -40,6 +40,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import SecurityConfig from '@/components/admin/SecurityConfig';
+import SecurityManager from '@/components/admin/SecurityManager';
 import SecurityMonitor from '@/components/admin/SecurityMonitor';
 import SecurityAlertsBanner from '@/components/admin/SecurityAlertsBanner';
 import QuestionManagement from '@/components/admin/QuestionManagement';
@@ -714,7 +715,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
-            <SecurityConfig />
+            <SecurityManager />
           </TabsContent>
 
           <TabsContent value="monitor" className="space-y-6">

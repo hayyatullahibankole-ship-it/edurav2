@@ -1073,6 +1073,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: boolean
       }
+      check_admin_rate_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       check_auth_rate_limit: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1283,12 +1287,28 @@ export type Database = {
         Args: { phone: string }
         Returns: string
       }
+      monitor_security_events: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          event_count: number
+          event_type: string
+          last_occurrence: string
+          severity: string
+        }[]
+      }
       validate_admin_action: {
         Args: { action_type: string; target_data?: Json }
         Returns: boolean
       }
       validate_question_answer: {
         Args: { question_id: string; submitted_answer: Json }
+        Returns: boolean
+      }
+      validate_role_assignment: {
+        Args: {
+          role_to_assign: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+        }
         Returns: boolean
       }
       validate_student_answer: {
