@@ -64,7 +64,7 @@ const Payment = () => {
   };
 
   const handlePaystackPayment = async (planName: string, amount: number) => {
-    if (!user || !userProfile?.email) {
+    if (!user?.email) {
       toast({
         title: "Authentication Required", 
         description: "Please login first to subscribe",
@@ -74,7 +74,7 @@ const Payment = () => {
     }
     
     try {
-      await createSubscriptionPayment(planName, userProfile.email, amount);
+      await createSubscriptionPayment(planName, user.email, amount);
     } catch (error) {
       toast({
         title: "Payment Error",
