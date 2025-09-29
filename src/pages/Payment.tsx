@@ -63,7 +63,7 @@ const Payment = () => {
     }
   };
 
-  const handlePaystackPayment = (planName: string, amount: number) => {
+  const handlePaystackPayment = async (planName: string, amount: number) => {
     if (!user || !userProfile?.email) {
       toast({
         title: "Authentication Required", 
@@ -73,7 +73,15 @@ const Payment = () => {
       return;
     }
     
-    createSubscriptionPayment(planName, userProfile.email, amount);
+    try {
+      await createSubscriptionPayment(planName, userProfile.email, amount);
+    } catch (error) {
+      toast({
+        title: "Payment Error",
+        description: "Failed to initialize payment. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const yearlyDiscount = {
