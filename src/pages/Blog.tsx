@@ -169,11 +169,14 @@ const Blog = () => {
 
           <article className="max-w-4xl mx-auto">
             {currentPost.featured_image_url && (
-              <div className="aspect-video mb-8 overflow-hidden rounded-lg">
+              <div className="aspect-video mb-8 overflow-hidden rounded-lg shadow-lg">
                 <img 
                   src={currentPost.featured_image_url} 
                   alt={currentPost.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               </div>
             )}
@@ -319,11 +322,14 @@ const Blog = () => {
               {paginatedPosts.map((post) => (
                 <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer">
                   {post.featured_image_url && (
-                    <div className="aspect-video overflow-hidden">
+                    <div className="aspect-video overflow-hidden bg-muted">
                       <img 
                         src={post.featured_image_url} 
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.parentElement!.style.display = 'none';
+                        }}
                       />
                     </div>
                   )}

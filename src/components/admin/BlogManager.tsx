@@ -58,6 +58,9 @@ const BlogManager = () => {
     tags: ''
   });
 
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+
   const categories = [
     { value: 'general', label: 'General' },
     { value: 'admissions', label: 'Admissions' },
@@ -101,6 +104,47 @@ const BlogManager = () => {
       .replace(/(^-|-$)/g, '');
   };
 
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => setImagePreview(e.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage = async (): Promise<string | null> => {
+    if (!selectedImage) return null;
+
+    try {
+      const fileName = `blog-images/${Date.now()}-${selectedImage.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('resources')
+        .upload(fileName, selectedImage);
+
+      if (uploadError) {
+        console.error('Image upload error:', uploadError);
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
+
+      // Get public URL for the uploaded image
+      const { data: urlData } = supabase.storage
+        .from('resources')
+        .getPublicUrl(fileName);
+
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Upload Error",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -108,12 +152,21 @@ const BlogManager = () => {
       const slug = generateSlug(formData.title);
       const tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
       
+      // Upload image if one is selected
+      let imageUrl = formData.featured_image_url;
+      if (selectedImage) {
+        const uploadedUrl = await uploadImage();
+        if (uploadedUrl) {
+          imageUrl = uploadedUrl;
+        }
+      }
+      
       const postData = {
         title: formData.title,
         slug: editingPost ? editingPost.slug : slug,
         content: formData.content,
         excerpt: formData.excerpt,
-        featured_image_url: formData.featured_image_url || null,
+        featured_image_url: imageUrl || null,
         is_published: formData.is_published,
         is_featured: formData.is_featured,
         category: formData.category,
@@ -170,6 +223,8 @@ const BlogManager = () => {
       category: post.category,
       tags: Array.isArray(post.tags) ? post.tags.join(', ') : ''
     });
+    setSelectedImage(null);
+    setImagePreview(post.featured_image_url || '');
     setIsCreateModalOpen(true);
   };
 
@@ -242,6 +297,8 @@ const BlogManager = () => {
       category: 'general',
       tags: ''
     });
+    setSelectedImage(null);
+    setImagePreview('');
   };
 
   const formatDate = (dateString: string) => {
@@ -348,15 +405,54 @@ const BlogManager = () => {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="featured_image" className="text-white">Featured Image URL (Optional)</Label>
-                <Input
-                  id="featured_image"
-                  value={formData.featured_image_url}
-                  onChange={(e) => setFormData({...formData, featured_image_url: e.target.value})}
-                  placeholder="https://edura.com/images/blog-image.jpg"
-                  className="bg-slate-700 border-slate-600 text-white"
-                />
+              <div className="space-y-4">
+                <Label className="text-white">Featured Image</Label>
+                
+                {/* Image Upload */}
+                <div>
+                  <Label htmlFor="image_upload" className="text-sm text-slate-300">Upload Image</Label>
+                  <Input
+                    id="image_upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">
+                    Recommended size: 1200x630px (16:9 aspect ratio)
+                  </p>
+                </div>
+
+                {/* Image Preview */}
+                {(imagePreview || formData.featured_image_url) && (
+                  <div className="mt-2">
+                    <Label className="text-sm text-slate-300">Preview</Label>
+                    <div className="mt-1 aspect-video w-full max-w-sm overflow-hidden rounded-lg border border-slate-600">
+                      <img 
+                        src={imagePreview || formData.featured_image_url} 
+                        alt="Image preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Or Image URL */}
+                <div>
+                  <Label htmlFor="featured_image_url" className="text-sm text-slate-300">Or Enter Image URL</Label>
+                  <Input
+                    id="featured_image_url"
+                    value={formData.featured_image_url}
+                    onChange={(e) => {
+                      setFormData({...formData, featured_image_url: e.target.value});
+                      if (e.target.value && !selectedImage) {
+                        setImagePreview(e.target.value);
+                      }
+                    }}
+                    placeholder="https://example.com/image.jpg"
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
               </div>
 
               <div className="flex items-center space-x-6">
