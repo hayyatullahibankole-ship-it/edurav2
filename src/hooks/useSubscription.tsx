@@ -143,9 +143,9 @@ export function useSubscription() {
   // User has any active (non-expired) subscription
   const hasPremiumAccess = Boolean(!loading && active && notExpired);
   
-  // User is premium if access level is premium OR plan name contains premium
+  // User is premium if access level is premium OR plan name contains premium OR has paid subscription
   const isPremium = Boolean(
-    hasPremiumAccess && (
+    !loading && active && notExpired && (
       accessLevel === 'premium' || 
       planName.includes('premium') ||
       (subscription?.subscription_plans?.price && subscription.subscription_plans.price > 0)
