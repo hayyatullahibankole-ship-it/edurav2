@@ -143,15 +143,18 @@ const AnswerReview = () => {
               question_id_param: answer.questions.id 
             });
 
+          // The RPC returns a table, so we need to access the first row
+          const explanation = explanationData && explanationData.length > 0 ? explanationData[0] : null;
+
           return {
             id: answer.questions.id,
             question_text: answer.questions.question_text,
             type: answer.questions.type,
             options: Array.isArray(answer.questions.options) ? answer.questions.options : [],
             user_answer: answer.answer,
-            correct_answer: explanationData?.[0]?.correct_answer || null,
+            correct_answer: explanation?.correct_answer || null,
             is_correct: answer.is_correct,
-            explanation: explanationData?.[0]?.explanation || 'No explanation available',
+            explanation: explanation?.explanation || 'No explanation available',
             subject: answer.questions.subjects?.name || 'Unknown Subject',
             difficulty_level: answer.questions.difficulty_level || 1,
             time_spent_seconds: answer.time_spent_seconds || 0
