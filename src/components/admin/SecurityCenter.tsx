@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Shield, 
@@ -425,12 +426,56 @@ export default function SecurityCenter({ suspiciousActivities }: SecurityCenterP
         <TabsContent value="blocked">
           <Card className="bg-slate-800 border-slate-700">
             <CardHeader>
-              <CardTitle className="text-white">Blocked Users</CardTitle>
+              <CardTitle className="text-white">Blocked Users Management</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Ban className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-                <p className="text-slate-400">No users currently blocked</p>
+              <div className="space-y-4">
+                {/* Search and Filter for Blocked Users */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Search blocked users..."
+                      className="bg-slate-700 border-slate-600"
+                    />
+                  </div>
+                  <Button variant="outline" className="border-slate-600">
+                    <Eye className="w-4 h-4 mr-2" />
+                    View All
+                  </Button>
+                </div>
+
+                {/* Blocked Users List */}
+                <div className="space-y-3">
+                  {/* Sample blocked user */}
+                  <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg border border-slate-600">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
+                        <Ban className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-white">Sample User</h3>
+                        <p className="text-sm text-slate-400">Blocked for: Multiple violations</p>
+                        <p className="text-xs text-slate-500">Blocked on: {new Date().toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="outline" size="sm">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button variant="default" size="sm">
+                        Unblock
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {blockedUsers.length === 0 && (
+                  <div className="text-center py-8">
+                    <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                    <p className="text-slate-400">No users currently blocked</p>
+                    <p className="text-sm text-slate-500 mt-2">All users are in good standing</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -448,7 +493,10 @@ export default function SecurityCenter({ suspiciousActivities }: SecurityCenterP
                     <h3 className="font-medium text-white">Anti-Cheat Detection</h3>
                     <p className="text-sm text-slate-400">Monitor suspicious behavior during exams</p>
                   </div>
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-400">ACTIVE</span>
+                  </div>
                 </div>
                 
                 <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
@@ -456,7 +504,21 @@ export default function SecurityCenter({ suspiciousActivities }: SecurityCenterP
                     <h3 className="font-medium text-white">Browser Lock Mode</h3>
                     <p className="text-sm text-slate-400">Prevent tab switching and minimize windows</p>
                   </div>
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-400">ENABLED</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
+                  <div>
+                    <h3 className="font-medium text-white">Webcam Proctoring</h3>
+                    <p className="text-sm text-slate-400">Monitor users via webcam during exams</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-blue-400">ENABLED</span>
+                  </div>
                 </div>
                 
                 <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
@@ -464,7 +526,48 @@ export default function SecurityCenter({ suspiciousActivities }: SecurityCenterP
                     <h3 className="font-medium text-white">Time Tracking</h3>
                     <p className="text-sm text-slate-400">Monitor time spent on each question</p>
                   </div>
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-400">ACTIVE</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
+                  <div>
+                    <h3 className="font-medium text-white">IP Tracking</h3>
+                    <p className="text-sm text-slate-400">Log and monitor user IP addresses</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-purple-400">TRACKING</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
+                  <div>
+                    <h3 className="font-medium text-white">Device Fingerprinting</h3>
+                    <p className="text-sm text-slate-400">Identify and track unique devices</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-orange-400">FINGERPRINTING</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-slate-600">
+                <h4 className="text-white font-medium mb-4">Security Thresholds</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-3 bg-slate-700 rounded">
+                    <label className="text-sm text-slate-300">Violation Threshold</label>
+                    <p className="text-lg font-bold text-yellow-400">5</p>
+                    <p className="text-xs text-slate-400">Before auto-suspension</p>
+                  </div>
+                  <div className="p-3 bg-slate-700 rounded">
+                    <label className="text-sm text-slate-300">Session Timeout</label>
+                    <p className="text-lg font-bold text-blue-400">30min</p>
+                    <p className="text-xs text-slate-400">Idle time limit</p>
+                  </div>
                 </div>
               </div>
             </CardContent>

@@ -993,26 +993,160 @@ export default function ResourceManagement() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="free">
+        <TabsContent value="free" className="space-y-4">
           <Card className="bg-slate-800 border-slate-700">
             <CardContent className="p-6">
-              <p className="text-slate-400">Free resources will be shown here</p>
+              <div className="space-y-4">
+                {resources.filter(r => r.access_level === 'free').map((resource) => (
+                  <div key={resource.id} className="flex items-start justify-between p-4 bg-slate-700 rounded-lg border border-slate-600">
+                    <div className="flex items-start space-x-4 flex-1">
+                      <div className="p-2 bg-green-600 rounded">
+                        {getFileIcon(resource.file_type)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <h3 className="font-medium text-white">{resource.title}</h3>
+                          <Badge className="bg-green-600">FREE</Badge>
+                        </div>
+                        <p className="text-slate-300 text-sm mb-2">{resource.description}</p>
+                        <div className="flex items-center space-x-4 text-sm text-slate-400">
+                          <span>{resource.download_count} downloads</span>
+                          <span>{resource.view_count} views</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="outline" size="sm">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                
+                {resources.filter(r => r.access_level === 'free').length === 0 && (
+                  <div className="text-center py-8">
+                    <Globe className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+                    <p className="text-slate-400">No free resources</p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="premium">
+        <TabsContent value="premium" className="space-y-4">
           <Card className="bg-slate-800 border-slate-700">
             <CardContent className="p-6">
-              <p className="text-slate-400">Premium resources will be shown here</p>
+              <div className="space-y-4">
+                {resources.filter(r => r.access_level === 'premium').map((resource) => (
+                  <div key={resource.id} className="flex items-start justify-between p-4 bg-slate-700 rounded-lg border border-slate-600">
+                    <div className="flex items-start space-x-4 flex-1">
+                      <div className="p-2 bg-yellow-600 rounded">
+                        {getFileIcon(resource.file_type)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <h3 className="font-medium text-white">{resource.title}</h3>
+                          <Badge className="bg-yellow-600">PREMIUM</Badge>
+                        </div>
+                        <p className="text-slate-300 text-sm mb-2">{resource.description}</p>
+                        <div className="flex items-center space-x-4 text-sm text-slate-400">
+                          <span>{resource.download_count} downloads</span>
+                          <span>{resource.view_count} views</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="outline" size="sm">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                
+                {resources.filter(r => r.access_level === 'premium').length === 0 && (
+                  <div className="text-center py-8">
+                    <Video className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+                    <p className="text-slate-400">No premium resources</p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="analytics">
+        <TabsContent value="analytics" className="space-y-4">
           <Card className="bg-slate-800 border-slate-700">
-            <CardContent className="p-6">
-              <p className="text-slate-400">Resource analytics will be shown here</p>
+            <CardHeader>
+              <CardTitle className="text-white">Resource Analytics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                <div className="p-4 bg-slate-700 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white">Most Downloaded</span>
+                    <Download className="w-4 h-4 text-green-400" />
+                  </div>
+                  <p className="text-lg font-bold text-green-400">
+                    {resources.sort((a, b) => b.download_count - a.download_count)[0]?.title || 'N/A'}
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {resources.sort((a, b) => b.download_count - a.download_count)[0]?.download_count || 0} downloads
+                  </p>
+                </div>
+                
+                <div className="p-4 bg-slate-700 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white">Most Viewed</span>
+                    <Eye className="w-4 h-4 text-blue-400" />
+                  </div>
+                  <p className="text-lg font-bold text-blue-400">
+                    {resources.sort((a, b) => b.view_count - a.view_count)[0]?.title || 'N/A'}
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {resources.sort((a, b) => b.view_count - a.view_count)[0]?.view_count || 0} views
+                  </p>
+                </div>
+                
+                <div className="p-4 bg-slate-700 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white">Popular Format</span>
+                    <FileText className="w-4 h-4 text-purple-400" />
+                  </div>
+                  <p className="text-lg font-bold text-purple-400">PDF</p>
+                  <p className="text-xs text-slate-400">Most common type</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h4 className="text-white font-medium">Top Performing Resources</h4>
+                {resources
+                  .sort((a, b) => (b.download_count + b.view_count) - (a.download_count + a.view_count))
+                  .slice(0, 5)
+                  .map((resource, index) => (
+                    <div key={resource.id} className="flex items-center justify-between p-3 bg-slate-700 rounded border border-slate-600">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                          #{index + 1}
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">{resource.title}</p>
+                          <p className="text-xs text-slate-400">{resource.access_level}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-blue-400 font-bold">{resource.download_count + resource.view_count}</p>
+                        <p className="text-xs text-slate-400">total engagements</p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

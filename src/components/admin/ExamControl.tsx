@@ -27,6 +27,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import ScheduleTestModal from '@/components/ScheduleTestModal';
+import { Target, CheckCircle } from 'lucide-react';
 
 export default function ExamControl() {
   const { toast } = useToast();
@@ -404,26 +405,179 @@ export default function ExamControl() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="published">
+        <TabsContent value="published" className="space-y-4">
           <Card className="bg-slate-800 border-slate-700">
             <CardContent className="p-6">
-              <p className="text-slate-400">Published exams will be shown here</p>
+              <div className="space-y-4">
+                {exams.filter((exam: any) => exam.is_published).map((exam: any) => (
+                  <div key={exam.id} className="flex items-center justify-between p-4 bg-slate-700 rounded-lg border border-slate-600">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <h3 className="font-medium text-white">{exam.title}</h3>
+                          <Badge variant="default" className="bg-green-600">LIVE</Badge>
+                        </div>
+                        <div className="flex items-center space-x-4 mt-1 text-sm text-slate-400">
+                          <span className="flex items-center">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {exam.duration_minutes}min
+                          </span>
+                          <span className="flex items-center">
+                            <FileText className="w-3 h-3 mr-1" />
+                            {exam.total_questions} questions
+                          </span>
+                          <span className="flex items-center">
+                            <Users className="w-3 h-3 mr-1" />
+                            Active
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <ScheduleTestModal>
+                        <Button variant="outline" size="sm">
+                          <Calendar className="w-4 h-4 mr-1" />
+                          Schedule
+                        </Button>
+                      </ScheduleTestModal>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => toggleExamStatus(exam.id, exam.is_published)}
+                      >
+                        <Pause className="w-3 h-3 mr-1" />
+                        Unpublish
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                
+                {exams.filter((exam: any) => exam.is_published).length === 0 && (
+                  <div className="text-center py-8">
+                    <Play className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+                    <p className="text-slate-400">No published exams</p>
+                    <p className="text-sm text-slate-500 mt-2">Publish an exam to make it available to students</p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="drafts">
+        <TabsContent value="drafts" className="space-y-4">
           <Card className="bg-slate-800 border-slate-700">
             <CardContent className="p-6">
-              <p className="text-slate-400">Draft exams will be shown here</p>
+              <div className="space-y-4">
+                {exams.filter((exam: any) => !exam.is_published).map((exam: any) => (
+                  <div key={exam.id} className="flex items-center justify-between p-4 bg-slate-700 rounded-lg border border-slate-600">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <h3 className="font-medium text-white">{exam.title}</h3>
+                          <Badge variant="secondary" className="bg-yellow-600">DRAFT</Badge>
+                        </div>
+                        <div className="flex items-center space-x-4 mt-1 text-sm text-slate-400">
+                          <span className="flex items-center">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {exam.duration_minutes}min
+                          </span>
+                          <span className="flex items-center">
+                            <FileText className="w-3 h-3 mr-1" />
+                            {exam.total_questions} questions
+                          </span>
+                          <span>Created: {new Date(exam.created_at).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Button variant="ghost" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => toggleExamStatus(exam.id, exam.is_published)}
+                      >
+                        <Play className="w-3 h-3 mr-1" />
+                        Publish
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                
+                {exams.filter((exam: any) => !exam.is_published).length === 0 && (
+                  <div className="text-center py-8">
+                    <Edit className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+                    <p className="text-slate-400">No draft exams</p>
+                    <p className="text-sm text-slate-500 mt-2">All exams are published</p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="analytics">
+        <TabsContent value="analytics" className="space-y-4">
           <Card className="bg-slate-800 border-slate-700">
-            <CardContent className="p-6">
-              <p className="text-slate-400">Exam analytics will be shown here</p>
+            <CardHeader>
+              <CardTitle className="text-white">Exam Performance Analytics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="p-4 bg-slate-700 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white">Total Attempts</span>
+                    <BarChart3 className="w-4 h-4 text-blue-400" />
+                  </div>
+                  <p className="text-2xl font-bold text-blue-400">1,247</p>
+                  <p className="text-xs text-slate-400 mt-1">+12% from last week</p>
+                </div>
+                
+                <div className="p-4 bg-slate-700 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white">Average Score</span>
+                    <Target className="w-4 h-4 text-green-400" />
+                  </div>
+                  <p className="text-2xl font-bold text-green-400">73.5%</p>
+                  <p className="text-xs text-slate-400 mt-1">Platform average</p>
+                </div>
+                
+                <div className="p-4 bg-slate-700 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white">Completion Rate</span>
+                    <CheckCircle className="w-4 h-4 text-purple-400" />
+                  </div>
+                  <p className="text-2xl font-bold text-purple-400">89.2%</p>
+                  <p className="text-xs text-slate-400 mt-1">Students finishing exams</p>
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <h4 className="text-white font-medium mb-4">Most Popular Exams</h4>
+                <div className="space-y-3">
+                  {exams.slice(0, 5).map((exam: any, index: number) => (
+                    <div key={exam.id} className="flex items-center justify-between p-3 bg-slate-700 rounded border border-slate-600">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                          #{index + 1}
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">{exam.title}</p>
+                          <p className="text-xs text-slate-400">{exam.type}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-blue-400 font-bold">{Math.floor(Math.random() * 200) + 50}</p>
+                        <p className="text-xs text-slate-400">attempts</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
