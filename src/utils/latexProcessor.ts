@@ -117,9 +117,8 @@ export function processQuestionText(text: string): string {
     .replace(/(\d)([A-Za-z])/g, '$1 $2')
     .replace(/([A-Za-z])(\d)/g, '$1 $2')
     
-    // 16) Clean up excessive spaces
-    .replace(/\s+/g, ' ')
-    .replace(/\s*\\\s*/g, '\\');
+    // 16) Clean up excessive spaces (but keep spaces around LaTeX commands)
+    .replace(/\s{2,}/g, ' ');
 
   // Clean redundancy of dollar signs created elsewhere
   processed = processed.replace(/\$\$+/g, '$');

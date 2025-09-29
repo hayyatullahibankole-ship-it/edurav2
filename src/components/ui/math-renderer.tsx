@@ -11,6 +11,12 @@ interface MathRendererProps {
 const MathRenderer: React.FC<MathRendererProps> = ({ content, className = "" }) => {
   // Process the content to convert mathematical notation to LaTeX
   const processedContent = processQuestionText(content || '');
+  
+  const isSentenceLike = (s: string) => {
+    const wordCount = (s.match(/[A-Za-z]{2,}/g) || []).length;
+    const hasEnv = /\\begin\{|\\end\{|matrix|align|equation\*/.test(s);
+    return wordCount >= 6 && !hasEnv;
+  };
 
   const hasDollar = /\$/.test(processedContent);
   const hasMathToken = /(\\(frac|sqrt|begin|end|cos|sin|tan|log|ln|vec|sum|int|leq|geq|neq|times|div|alpha|beta|gamma|delta|theta|lambda|mu|sigma|Omega|pi|infty|partial|nabla)|\^|_|√|×|÷)/.test(processedContent);
@@ -85,6 +91,13 @@ const MathRenderer: React.FC<MathRendererProps> = ({ content, className = "" }) 
       if (part.startsWith('$$') && part.endsWith('$$')) {
         // Block math (display mode)
         const mathContent = part.slice(2, -2);
+        if (isSentenceLike(mathContent)) {
+          return (
+            <div key={index} className="my-4 text-base leading-relaxed whitespace-pre-wrap">
+              {renderHybridContent(mathContent)}
+            </div>
+          );
+        }
         try {
           return (
             <div
@@ -121,6 +134,13 @@ const MathRenderer: React.FC<MathRendererProps> = ({ content, className = "" }) 
       } else if (part.startsWith('$') && part.endsWith('$') && part.length > 2) {
         // Inline math
         const mathContent = part.slice(1, -1);
+        if (isSentenceLike(mathContent)) {
+          return (
+            <span key={index} className="whitespace-pre-wrap">
+              {renderHybridContent(mathContent)}
+            </span>
+          );
+        }
         try {
           return (
             <span
