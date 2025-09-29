@@ -108,7 +108,7 @@ const AnswerReview = () => {
         return;
       }
 
-      // Fetch answers with question details
+      // Fetch answers with question details (without sensitive data)
       const { data: answers } = await supabase
         .from('attempt_answers')
         .select(`
@@ -118,8 +118,6 @@ const AnswerReview = () => {
             question_text,
             type,
             options,
-            correct_answer,
-            explanation,
             difficulty_level,
             subject_id,
             subjects(name)
@@ -136,19 +134,44 @@ const AnswerReview = () => {
         return;
       }
 
-      // Transform the data
-      const questionDetails: QuestionReview[] = answers.map(answer => ({
-        id: answer.questions.id,
-        question_text: answer.questions.question_text,
-        type: answer.questions.type,
-        options: Array.isArray(answer.questions.options) ? answer.questions.options : [],
-        user_answer: answer.answer,
-        correct_answer: answer.questions.correct_answer,
-        is_correct: answer.is_correct,
-        explanation: answer.questions.explanation || 'No explanation available',
-        subject: answer.questions.subjects?.name || 'Unknown Subject',
-        difficulty_level: answer.questions.difficulty_level || 1,
-        time_spent_seconds: answer.time_spent_seconds || 0
+      // Get explanations and correct answers securely for each question
+      const questionDetails: QuestionReview[] = await Promise.all(answers.map(async (answer) => {
+        try {
+          // Use the secure function to get explanation and correct answer
+          const { data: explanationData } = await supabase
+            .rpc('get_question_explanation_secure', { 
+              question_id_param: answer.questions.id 
+            });
+
+          return {
+            id: answer.questions.id,
+            question_text: answer.questions.question_text,
+            type: answer.questions.type,
+            options: Array.isArray(answer.questions.options) ? answer.questions.options : [],
+            user_answer: answer.answer,
+            correct_answer: explanationData?.[0]?.correct_answer || null,
+            is_correct: answer.is_correct,
+            explanation: explanationData?.[0]?.explanation || 'No explanation available',
+            subject: answer.questions.subjects?.name || 'Unknown Subject',
+            difficulty_level: answer.questions.difficulty_level || 1,
+            time_spent_seconds: answer.time_spent_seconds || 0
+          };
+        } catch (error) {
+          console.error(`Error getting explanation for question ${answer.questions.id}:`, error);
+          return {
+            id: answer.questions.id,
+            question_text: answer.questions.question_text,
+            type: answer.questions.type,
+            options: Array.isArray(answer.questions.options) ? answer.questions.options : [],
+            user_answer: answer.answer,
+            correct_answer: null,
+            is_correct: answer.is_correct,
+            explanation: 'Explanation not available',
+            subject: answer.questions.subjects?.name || 'Unknown Subject',
+            difficulty_level: answer.questions.difficulty_level || 1,
+            time_spent_seconds: answer.time_spent_seconds || 0
+          };
+        }
       }));
 
       setQuestions(questionDetails);
@@ -318,8 +341,17 @@ const AnswerReview = () => {
                       <h4 className="font-medium mb-2">Options:</h4>
                       <div className="space-y-2">
                         {question.options.map((option: string, optIndex: number) => {
-                          const isUserAnswer = question.user_answer === optIndex;
-                          const isCorrectAnswer = question.correct_answer === optIndex;
+                          // Handle both letter-based and numeric answers
+                          const isUserAnswer = (
+                            question.user_answer === optIndex || 
+                            question.user_answer === String.fromCharCode(65 + optIndex) ||
+                            String(question.user_answer).toLowerCase() === String.fromCharCode(97 + optIndex)
+                          );
+                          const isCorrectAnswer = (
+                            question.correct_answer === optIndex ||
+                            question.correct_answer === String.fromCharCode(65 + optIndex) ||
+                            String(question.correct_answer).toLowerCase() === String.fromCharCode(97 + optIndex)
+                          );
                           
                           let bgColor = 'bg-muted';
                           let borderColor = 'border-muted';
