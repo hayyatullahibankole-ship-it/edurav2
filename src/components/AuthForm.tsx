@@ -503,9 +503,9 @@ export default function AuthForm() {
                     />
                     <Label htmlFor="terms" className="text-sm text-muted-foreground leading-tight">
                       I agree to the{' '}
-                      <a href="/terms" className="text-primary hover:underline">Terms of Service</a>
+                      <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
                       {' '}and{' '}
-                      <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
+                      <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
                     </Label>
                   </div>
                 )}

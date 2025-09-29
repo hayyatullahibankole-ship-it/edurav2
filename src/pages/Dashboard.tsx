@@ -24,6 +24,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ProfileSettings from "@/components/ProfileSettings";
+import AccountSettings from "@/components/AccountSettings";
 import ScheduleTestModal from "@/components/ScheduleTestModal";
 import SubjectProgressCard from "@/components/SubjectProgressCard";
 
@@ -489,20 +490,7 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="settings" className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
-                <CardDescription>
-                  Manage your account preferences and notifications
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Settings panel will be implemented here with notification preferences,
-                  privacy settings, and account management options.
-                </p>
-              </CardContent>
-            </Card>
+            <AccountSettings />
           </TabsContent>
         </Tabs>
       </div>
