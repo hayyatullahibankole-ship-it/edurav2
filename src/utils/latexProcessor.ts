@@ -122,6 +122,43 @@ export function processQuestionText(text: string): string {
 
   // Clean redundancy of dollar signs created elsewhere
   processed = processed.replace(/\$\$+/g, '$');
+
+  // Fix malformed matrix begin/end without environment and missing row separators
+  processed = processed.replace(/\\begin\s+([\s\S]*?)\\s*\\end/g, (match: string, inner: string) => {
+    try {
+      let content = (inner || '').trim();
+      if (!content) return match;
+      // Normalize delimiters
+      content = content.replace(/\s*;\s*/g, ';');
+      // If already has an environment, keep it
+      if (/^\{[a-zA-Z*]+\}/.test(content)) {
+        return `\\begin${content}\\end${content}`;
+      }
+      // If content contains '&' but no row breaks, try to infer rows
+      if (content.includes('&') && !/\\\\/.test(content)) {
+        const parts = content.split('&').map(s => s.trim()).filter(Boolean);
+        if (parts.length >= 4) {
+          const n = Math.round(Math.sqrt(parts.length));
+          const cols = n > 1 && n * n === parts.length ? n : (parts.length % 2 === 0 ? 2 : 3);
+          const rows: string[] = [];
+          for (let i = 0; i < parts.length; i += cols) {
+            rows.push(parts.slice(i, i + cols).join(' & '));
+          }
+          const body = rows.join(' \\ ');
+          return `\\begin{pmatrix} ${body} \\end{pmatrix}`;
+        }
+      }
+      // If semicolons used as row separators
+      if (content.includes(';')) {
+        const rows = content.split(';').map(r => r.trim()).filter(Boolean).join(' \\ ');
+        return `\\begin{pmatrix} ${rows} \\end{pmatrix}`;
+      }
+      // Fallback: wrap as pmatrix
+      return `\\begin{pmatrix} ${content} \\end{pmatrix}`;
+    } catch {
+      return match;
+    }
+  });
   
   // If expressions like log_2(…), cos(…), sqrt(…), ^, _ appear but no $ present, conditionally wrap
   const hasMathToken = /(\\(frac|sqrt|begin|end|cos|sin|tan|log|ln|vec|sum|int|leq|geq|neq|times|div|alpha|beta|gamma|delta|theta|lambda|mu|sigma|Omega|pi|infty|partial|nabla)|\^|_|√|×|÷)/.test(processed);

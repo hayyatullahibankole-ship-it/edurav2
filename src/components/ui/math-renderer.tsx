@@ -20,7 +20,8 @@ const MathRenderer: React.FC<MathRendererProps> = ({ content, className = "" }) 
 
   const hasDollar = /\$/.test(processedContent);
   const hasMathToken = /(\\(frac|sqrt|begin|end|cos|sin|tan|log|ln|vec|sum|int|leq|geq|neq|times|div|alpha|beta|gamma|delta|theta|lambda|mu|sigma|Omega|pi|infty|partial|nabla)|\^|_|√|×|÷)/.test(processedContent);
-  
+  const hasEnvBlock = /\\begin\{[a-zA-Z*]+\}/.test(processedContent);
+
   const renderHybridContent = (text: string) => {
     const segments = text.split(/(\s+)/);
     return segments.map((seg, i) => {
@@ -81,6 +82,45 @@ const MathRenderer: React.FC<MathRendererProps> = ({ content, className = "" }) 
 
       return <span key={`t-${i}`}>{seg}</span>;
     });
+  };
+
+  const renderWithEnvironments = (text: string) => {
+    const envRegex = /\\begin\{([a-zA-Z*]+)\}([\s\S]*?)\\end\{\1\}/g;
+    const nodes: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = envRegex.exec(text)) !== null) {
+      const before = text.slice(lastIndex, match.index);
+      if (before) {
+        nodes.push(...(hasDollar ? renderMathContent(before) : renderHybridContent(before)));
+      }
+      const envContent = match[0];
+      try {
+        const html = katex.renderToString(envContent, {
+          displayMode: true,
+          throwOnError: false,
+          strict: false,
+          trust: true,
+        });
+        nodes.push(
+          <div key={`env-${match.index}`} className="my-4 text-center" dangerouslySetInnerHTML={{ __html: html }} />
+        );
+      } catch {
+        nodes.push(
+          <div key={`enverr-${match.index}`} className="text-red-600 bg-red-50 p-2 rounded border my-2 text-sm">
+            {envContent}
+          </div>
+        );
+      }
+      lastIndex = envRegex.lastIndex;
+    }
+
+    const rest = text.slice(lastIndex);
+    if (rest) {
+      nodes.push(...(hasDollar ? renderMathContent(rest) : renderHybridContent(rest)));
+    }
+    return nodes;
   };
 
   const renderMathContent = (text: string) => {
@@ -187,7 +227,11 @@ const MathRenderer: React.FC<MathRendererProps> = ({ content, className = "" }) 
 
   return (
     <div className={className}>
-      {hasDollar ? renderMathContent(processedContent) : (hasMathToken ? renderHybridContent(processedContent) : processedContent)}
+      {hasEnvBlock
+        ? renderWithEnvironments(processedContent)
+        : hasDollar
+          ? renderMathContent(processedContent)
+          : (hasMathToken ? renderHybridContent(processedContent) : processedContent)}
     </div>
   );
 };
