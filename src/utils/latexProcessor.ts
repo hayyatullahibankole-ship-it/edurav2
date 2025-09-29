@@ -107,53 +107,93 @@ export function processQuestionText(text: string): string {
     .replace(/cos\s*(\d+)\s*°/gi, '\\cos $1^{\\circ}')
     .replace(/sin\s*(\d+)\s*°/gi, '\\sin $1^{\\circ}')
     .replace(/tan\s*(\d+)\s*°/gi, '\\tan $1^{\\circ}')
-    
+
     // 14) Add spacing around mathematical operators
     .replace(/([A-Za-z0-9\)])(\+)([A-Za-z0-9\(])/g, '$1 + $3')
     .replace(/([A-Za-z0-9\)])(-)([A-Za-z0-9\(])/g, '$1 - $3')
     .replace(/([A-Za-z0-9\)])(=)([A-Za-z0-9\(])/g, '$1 = $3')
-    
+
     // 15) Add spacing between numbers and variables
     .replace(/(\d)([A-Za-z])/g, '$1 $2')
     .replace(/([A-Za-z])(\d)/g, '$1 $2')
-    
-    // 16) Clean up excessive spaces (but keep spaces around LaTeX commands)
+
+    // 16) Common typo/notation fixes
+    .replace(/\\last\b/gi, '\\ast ')
+    .replace(/\\vec\b(?!\s*\{)/g, '\\vec{v}')
+    .replace(/\\times/g, '\\times')
+
+    // 17) Clean up excessive spaces (but keep spaces around LaTeX commands)
     .replace(/\s{2,}/g, ' ');
 
   // Clean redundancy of dollar signs created elsewhere
   processed = processed.replace(/\$\$+/g, '$');
+
+  // Wrap explicit set braces \{ ... \} with math if not already inside
+  processed = processed.replace(/\\\{[\s\S]*?\\\}/g, (m) => /\$/.test(m) ? m : `$${m}$`);
+
 
   // Fix malformed matrix begin/end without environment and missing row separators
   processed = processed.replace(/\\begin\s+([\s\S]*?)\\s*\\end/g, (match: string, inner: string) => {
     try {
       let content = (inner || '').trim();
       if (!content) return match;
-      // Normalize delimiters
-      content = content.replace(/\s*;\s*/g, ';');
-      // If already has an environment, keep it
+
+      // If already has an explicit environment, keep it intact
       if (/^\{[a-zA-Z*]+\}/.test(content)) {
         return `\\begin${content}\\end${content}`;
       }
-      // If content contains '&' but no row breaks, try to infer rows
-      if (content.includes('&') && !/\\\\/.test(content)) {
-        const parts = content.split('&').map(s => s.trim()).filter(Boolean);
-        if (parts.length >= 4) {
-          const n = Math.round(Math.sqrt(parts.length));
-          const cols = n > 1 && n * n === parts.length ? n : (parts.length % 2 === 0 ? 2 : 3);
+
+      // Tokenize by row separators or whitespace
+      const hasAmp = content.includes('&');
+      const hasRowBreak = /\\\\/.test(content);
+      const hasSemicolon = content.includes(';');
+      const hasNewline = /\r?\n/.test(content);
+
+      // Normalize semicolons as row separators
+      if (hasSemicolon && !hasRowBreak) {
+        const rows = content.split(';').map(r => r.trim()).filter(Boolean);
+        return `\\begin{pmatrix} ${rows.join(' \\\\ ')} \\end{pmatrix}`;
+      }
+
+      // Split by explicit row breaks if present
+      if (hasRowBreak) {
+        return `\\begin{pmatrix} ${content} \\end{pmatrix}`;
+      }
+
+      // Handle ampersand-separated cells without row breaks: infer rows
+      if (hasAmp && !hasRowBreak) {
+        const cells = content.split('&').map(s => s.trim()).filter(Boolean);
+        if (cells.length >= 2) {
+          // Heuristic: prefer square-ish matrices, else 2 columns
+          const n = Math.round(Math.sqrt(cells.length));
+          const cols = n > 1 && n * n === cells.length ? n : (cells.length % 2 === 0 ? 2 : 3);
           const rows: string[] = [];
-          for (let i = 0; i < parts.length; i += cols) {
-            rows.push(parts.slice(i, i + cols).join(' & '));
+          for (let i = 0; i < cells.length; i += cols) {
+            rows.push(cells.slice(i, i + cols).join(' & '));
           }
-          const body = rows.join(' \\\\ ');
-          return `\\begin{pmatrix} ${body} \\end{pmatrix}`;
+          return `\\begin{pmatrix} ${rows.join(' \\\\ ')} \\end{pmatrix}`;
         }
       }
-      // If semicolons used as row separators
-      if (content.includes(';')) {
-        const rows = content.split(';').map(r => r.trim()).filter(Boolean).join(' \\\\ ');
-        return `\\begin{pmatrix} ${rows} \\end{pmatrix}`;
+
+      // Handle plain whitespace/newline separated numbers like "-3 4" or "-3\n4"
+      if (!hasAmp) {
+        const cells = content.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
+        if (cells.length === 2) {
+          // Column vector
+          return `\\begin{pmatrix} ${cells[0]} \\\\ ${cells[1]} \\end{pmatrix}`;
+        }
+        if (cells.length > 2) {
+          const n = Math.round(Math.sqrt(cells.length));
+          const cols = n > 1 && n * n === cells.length ? n : (cells.length % 2 === 0 ? 2 : 3);
+          const rows: string[] = [];
+          for (let i = 0; i < cells.length; i += cols) {
+            rows.push(cells.slice(i, i + cols).join(' & '));
+          }
+          return `\\begin{pmatrix} ${rows.join(' \\\\ ')} \\end{pmatrix}`;
+        }
       }
-      // Fallback: wrap as pmatrix
+
+      // Fallback: wrap content in pmatrix
       return `\\begin{pmatrix} ${content} \\end{pmatrix}`;
     } catch {
       return match;
