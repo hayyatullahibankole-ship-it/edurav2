@@ -138,9 +138,23 @@ export default function ResourceManagement() {
       let fileType = newResource.file_type;
 
       if (newResource.resource_type === 'file' && newResource.file) {
-        // For now, we'll store the file name. In a real implementation,
-        // you'd upload to Supabase Storage or another service
-        fileUrl = `uploads/${newResource.file.name}`;
+        // Upload file to Supabase Storage
+        const fileName = `${Date.now()}-${newResource.file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('resources')
+          .upload(fileName, newResource.file);
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw new Error(`Upload failed: ${uploadError.message}`);
+        }
+
+        // Get public URL for the uploaded file
+        const { data: urlData } = supabase.storage
+          .from('resources')
+          .getPublicUrl(fileName);
+
+        fileUrl = urlData.publicUrl;
         fileSize = newResource.file.size;
         fileType = newResource.file.type;
       } else if (newResource.resource_type === 'video') {
@@ -211,21 +225,45 @@ export default function ResourceManagement() {
       setLoading(true);
       const resourcesToInsert: any[] = [];
 
-      Array.from(bulkFiles).forEach(file => {
-        resourcesToInsert.push({
-          title: file.name.split('.')[0],
-          description: `Bulk uploaded file: ${file.name}`,
-          file_url: `uploads/${file.name}`,
-          file_type: file.type,
-          file_size_bytes: file.size,
-          subject_id: subjects[0]?.id || '', // Default to first subject
-          access_level: 'free',
-          tags: [],
-          is_active: true,
-          download_count: 0,
-          view_count: 0
-        });
-      });
+      // Upload each file to Supabase Storage
+      for (const file of Array.from(bulkFiles)) {
+        try {
+          const fileName = `${Date.now()}-${file.name}`;
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('resources')
+            .upload(fileName, file);
+
+          if (uploadError) {
+            console.warn(`Failed to upload ${file.name}:`, uploadError);
+            continue; // Skip this file but continue with others
+          }
+
+          // Get public URL for the uploaded file
+          const { data: urlData } = supabase.storage
+            .from('resources')
+            .getPublicUrl(fileName);
+
+          resourcesToInsert.push({
+            title: file.name.split('.')[0],
+            description: `Bulk uploaded file: ${file.name}`,
+            file_url: urlData.publicUrl,
+            file_type: file.type,
+            file_size_bytes: file.size,
+            subject_id: subjects[0]?.id || '', // Default to first subject
+            access_level: 'free',
+            tags: [],
+            is_active: true,
+            download_count: 0,
+            view_count: 0
+          });
+        } catch (fileError) {
+          console.warn(`Error processing ${file.name}:`, fileError);
+        }
+      }
+
+      if (resourcesToInsert.length === 0) {
+        throw new Error('No files were successfully uploaded');
+      }
 
       const { error } = await supabase.from('resources').insert(resourcesToInsert);
 

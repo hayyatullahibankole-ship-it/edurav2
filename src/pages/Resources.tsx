@@ -132,144 +132,107 @@ const Resources = () => {
 
       console.log('Accessing resource:', resource.title, 'URL:', resource.file_url);
 
-      // Generate proper storage URL for the file
       let fileUrl = resource.file_url;
       
-      try {
-        // If the file_url is a storage path, construct the full Supabase storage URL
-        if (!fileUrl.startsWith('http')) {
-          // For paths starting with "uploads/", use the uploads bucket
+      // Handle different URL types
+      if (fileUrl.startsWith('http')) {
+        // Already a full URL (new uploads or external links)
+        // Just use it directly
+      } else {
+        // Legacy or relative path - try to construct Supabase Storage URL
+        try {
           if (fileUrl.startsWith('uploads/')) {
             const filePath = fileUrl.replace('uploads/', '');
             const { data } = supabase.storage.from('uploads').getPublicUrl(filePath);
             fileUrl = data.publicUrl;
-            console.log('Generated uploads storage URL:', fileUrl);
-          } else {
-            // Handle other storage paths like "resources/file.pdf"
+          } else if (fileUrl.includes('/')) {
+            // Path like "resources/filename.pdf"
             const pathParts = fileUrl.split('/');
-            
-            // If no bucket specified, default to 'resources'
-            let bucketName = 'resources';
-            let filePath = fileUrl;
-            
-            // If path includes bucket name
-            if (pathParts.length > 1) {
-              bucketName = pathParts[0];
-              filePath = pathParts.slice(1).join('/');
-            }
-            
-            // Get public URL from Supabase storage
+            const bucketName = pathParts[0];
+            const filePath = pathParts.slice(1).join('/');
             const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
             fileUrl = data.publicUrl;
-            console.log('Generated storage URL:', fileUrl);
+          } else {
+            // Just filename - assume it's in resources bucket
+            const { data } = supabase.storage.from('resources').getPublicUrl(fileUrl);
+            fileUrl = data.publicUrl;
           }
+        } catch (urlError) {
+          console.warn('Error constructing URL:', urlError);
+          throw new Error("Invalid file URL");
         }
+      }
 
-        // Test if file exists by attempting to fetch it
-        const response = await fetch(fileUrl, { method: 'HEAD' });
-        if (!response.ok) {
-          console.warn('File not accessible via HEAD request, trying direct access');
-          // Try direct download without HEAD check
-        }
+      // Increment view/download count
+      await supabase
+        .from('resources')
+        .update({ 
+          download_count: (resource.download_count || 0) + 1,
+          view_count: (resource.view_count || 0) + 1
+        })
+        .eq('id', resource.id);
 
-        // Increment download count
-        await supabase
-          .from('resources')
-          .update({ 
-            download_count: (resource.download_count || 0) + 1,
-            view_count: (resource.view_count || 0) + 1
-          })
-          .eq('id', resource.id);
-
-        // Handle different file types
-        if (resource.file_type?.startsWith('video') || fileUrl.includes('youtube')) {
-          window.open(fileUrl, '_blank');
-          toast({
-            title: "Opening Video",
-            description: "Video is opening in a new tab"
-          });
-        } else {
-          // For documents, try to download with proper filename
-          // Get proper filename with extension
-          let filename = resource.title;
-          if (!filename.includes('.')) {
-            const urlPath = new URL(fileUrl).pathname;
-            const extension = urlPath.split('.').pop();
-            if (extension) {
-              filename += `.${extension}`;
-            }
-          }
-          
-          try {
-            const response = await fetch(fileUrl);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Clean up blob URL
-            setTimeout(() => window.URL.revokeObjectURL(url), 100);
-            
-            toast({
-              title: "Download Started",
-              description: `Downloading ${filename}`
-            });
-          } catch (downloadError) {
-            // Fallback: try direct URL access
-            console.warn('Download failed, trying direct access:', downloadError);
-            
-            // For Supabase storage files, try to access directly via storage API
-            if (fileUrl.includes('supabase')) {
-              try {
-                // Extract bucket and file path from URL
-                const urlParts = fileUrl.split('/storage/v1/object/public/');
-                if (urlParts.length === 2) {
-                  const [bucketAndPath] = urlParts[1].split('/');
-                  const filePath = urlParts[1].substring(bucketAndPath.length + 1);
-                  
-                  const { data, error } = await supabase.storage
-                    .from(bucketAndPath)
-                    .download(filePath);
-                    
-                  if (data) {
-                    const url = window.URL.createObjectURL(data);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    window.URL.revokeObjectURL(url);
-                    
-                    toast({
-                      title: "Download Started",
-                      description: `Downloading ${filename}`
-                    });
-                    return;
-                  }
-                }
-              } catch (storageError) {
-                console.warn('Storage download failed:', storageError);
-              }
-            }
-            
-            // Final fallback: open in new tab
+      // Handle different file types
+      if (resource.file_type?.startsWith('video') || fileUrl.includes('youtube') || fileUrl.includes('vimeo')) {
+        window.open(fileUrl, '_blank');
+        toast({
+          title: "Opening Video",
+          description: "Video is opening in a new tab"
+        });
+      } else {
+        // For documents, try to download
+        try {
+          const response = await fetch(fileUrl, { method: 'HEAD' });
+          if (!response.ok) {
+            // If HEAD fails, fallback to opening in new tab
             window.open(fileUrl, '_blank');
             toast({
               title: "Opening File",
               description: "File is opening in a new tab"
             });
+            return;
           }
-        }
 
-      } catch (urlError) {
-        console.error('Error processing file URL:', urlError);
-        throw new Error("File not found or inaccessible");
+          // Try to download with proper filename
+          let filename = resource.title;
+          if (!filename.includes('.')) {
+            try {
+              const urlPath = new URL(fileUrl).pathname;
+              const extension = urlPath.split('.').pop();
+              if (extension && extension.length <= 4) {
+                filename += `.${extension}`;
+              }
+            } catch {
+              // If URL parsing fails, just use title as is
+            }
+          }
+          
+          const downloadResponse = await fetch(fileUrl);
+          const blob = await downloadResponse.blob();
+          const url = window.URL.createObjectURL(blob);
+          
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          setTimeout(() => window.URL.revokeObjectURL(url), 100);
+          
+          toast({
+            title: "Download Started",
+            description: `Downloading ${filename}`
+          });
+
+        } catch (downloadError) {
+          console.warn('Download failed, opening in new tab:', downloadError);
+          window.open(fileUrl, '_blank');
+          toast({
+            title: "Opening File",
+            description: "File is opening in a new tab"
+          });
+        }
       }
 
     } catch (error) {
