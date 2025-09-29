@@ -670,6 +670,18 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="questions" className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div>
+                  <CardTitle>Question Tools</CardTitle>
+                  <CardDescription>Fix rendering of matrices, roots, exponents, subscripts and other math.</CardDescription>
+                </div>
+                <Button variant="outline" size="sm" onClick={handleFixMathNotation} disabled={loading}>
+                  <Calculator className="w-4 h-4 mr-2" />
+                  Fix Math Notation
+                </Button>
+              </CardHeader>
+            </Card>
             <QuestionManagement />
           </TabsContent>
 
