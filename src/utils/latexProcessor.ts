@@ -5,29 +5,67 @@ export function processQuestionText(text: string): string {
   
   // Convert common math expressions to LaTeX format
   let processed = text
+    // Fix broken LaTeX first - common issues from the database
+    .replace(/\\begin\s+([^\\]+)\s+\\end/g, '\\begin{$1} \\end{$1}')
+    .replace(/\\begin\{([^}]+)\}([^\\]*?)\\end\{[^}]*\}/g, '\\begin{$1}$2\\end{$1}')
+    .replace(/\$([^$]*[{}][^$]*)\$(?!\$)/g, (match, content) => {
+      // Fix unmatched braces in LaTeX
+      const openBraces = (content.match(/\{/g) || []).length;
+      const closeBraces = (content.match(/\}/g) || []).length;
+      if (openBraces > closeBraces) {
+        content += '}'.repeat(openBraces - closeBraces);
+      }
+      return `$${content}$`;
+    })
+    
+    // Handle matrices and vectors properly
+    .replace(/\\begin\s*\{\s*pmatrix\s*\}\s*([^\\]+)\s*\\end\s*\{\s*pmatrix\s*\}/g, '$\\begin{pmatrix}$1\\end{pmatrix}$')
+    .replace(/\\begin\s*\{\s*bmatrix\s*\}\s*([^\\]+)\s*\\end\s*\{\s*bmatrix\s*\}/g, '$\\begin{bmatrix}$1\\end{bmatrix}$')
+    .replace(/\\begin\s*\{\s*vmatrix\s*\}\s*([^\\]+)\s*\\end\s*\{\s*vmatrix\s*\}/g, '$\\begin{vmatrix}$1\\end{vmatrix}$')
+    
+    // Convert matrix notation without proper LaTeX tags
+    .replace(/\[\s*([0-9\s\-+.,&\\]+)\s*\]/g, (match, content) => {
+      if (content.includes('&') || content.includes('\\\\')) {
+        return `$\\begin{bmatrix}${content}\\end{bmatrix}$`;
+      }
+      return match;
+    })
+    
+    // Handle determinant notation
+    .replace(/\|\s*([0-9\s\-+.,&\\]+)\s*\|/g, (match, content) => {
+      if (content.includes('&') || content.includes('\\\\')) {
+        return `$\\begin{vmatrix}${content}\\end{vmatrix}$`;
+      }
+      return match;
+    })
+    
+    // Convert vectors
+    .replace(/\\vec\s*\{\s*([^}]+)\s*\}/g, '$\\vec{$1}$')
+    .replace(/\\vec\s+([a-zA-Z])/g, '$\\vec{$1}$')
+    
     // Convert superscript numbers (like x² to x^2)
-    .replace(/([a-zA-Z0-9)])(²)/g, '$1^2')
-    .replace(/([a-zA-Z0-9)])(³)/g, '$1^3')
-    .replace(/([a-zA-Z0-9)])(⁴)/g, '$1^4')
-    .replace(/([a-zA-Z0-9)])(⁵)/g, '$1^5')
-    .replace(/([a-zA-Z0-9)])(⁶)/g, '$1^6')
-    .replace(/([a-zA-Z0-9)])(⁷)/g, '$1^7')
-    .replace(/([a-zA-Z0-9)])(⁸)/g, '$1^8')
-    .replace(/([a-zA-Z0-9)])(⁹)/g, '$1^9')
-    .replace(/([a-zA-Z0-9)])(⁰)/g, '$1^0')
-    .replace(/([a-zA-Z0-9)])(¹)/g, '$1^1')
+    .replace(/([a-zA-Z0-9)])(²)/g, '$$1^2$')
+    .replace(/([a-zA-Z0-9)])(³)/g, '$$1^3$')
+    .replace(/([a-zA-Z0-9)])(⁴)/g, '$$1^4$')
+    .replace(/([a-zA-Z0-9)])(⁵)/g, '$$1^5$')
+    .replace(/([a-zA-Z0-9)])(⁶)/g, '$$1^6$')
+    .replace(/([a-zA-Z0-9)])(⁷)/g, '$$1^7$')
+    .replace(/([a-zA-Z0-9)])(⁸)/g, '$$1^8$')
+    .replace(/([a-zA-Z0-9)])(⁹)/g, '$$1^9$')
+    .replace(/([a-zA-Z0-9)])(⁰)/g, '$$1^0$')
+    .replace(/([a-zA-Z0-9)])(¹)/g, '$$1^1$')
     
     // Convert subscript numbers (like H₂O to H_2O)
-    .replace(/([a-zA-Z])(₀)/g, '$1_0')
-    .replace(/([a-zA-Z])(₁)/g, '$1_1')
-    .replace(/([a-zA-Z])(₂)/g, '$1_2')
-    .replace(/([a-zA-Z])(₃)/g, '$1_3')
-    .replace(/([a-zA-Z])(₄)/g, '$1_4')
-    .replace(/([a-zA-Z])(₅)/g, '$1_5')
-    .replace(/([a-zA-Z])(₆)/g, '$1_6')
-    .replace(/([a-zA-Z])(₇)/g, '$1_7')
-    .replace(/([a-zA-Z])(₈)/g, '$1_8')
-    .replace(/([a-zA-Z])(₉)/g, '$1_9')
+    .replace(/([a-zA-Z])(₀)/g, '$$1_0$')
+    .replace(/([a-zA-Z])(₁)/g, '$$1_1$')
+    .replace(/([a-zA-Z])(₂)/g, '$$1_2$')
+    .replace(/([a-zA-Z])(₃)/g, '$$1_3$')
+    .replace(/([a-zA-Z])(₄)/g, '$$1_4$')
+    .replace(/([a-zA-Z])(₅)/g, '$$1_5$')
+    .replace(/([a-zA-Z])(₆)/g, '$$1_6$')
+    .replace(/([a-zA-Z])(₇)/g, '$$1_7$')
+    .replace(/([a-zA-Z])(₈)/g, '$$1_8$')
+    .replace(/([a-zA-Z])(₉)/g, '$$1_9$')
     
     // Convert fractions like 2/3 to \frac{2}{3} if they're standalone
     .replace(/\b(\d+)\/(\d+)\b/g, '$\\frac{$1}{$2}$')
@@ -38,27 +76,35 @@ export function processQuestionText(text: string): string {
     .replace(/√(\d+)/g, '$\\sqrt{$1}$')
     .replace(/√([a-zA-Z]+)/g, '$\\sqrt{$1}$')
     
-    // Convert powers like x^2 to proper LaTeX (fixed the triple dollar issue)
-    .replace(/\b([a-zA-Z]+)\^([0-9]+)/g, '$$1^{$2}$')
+    // Convert powers like x^2 to proper LaTeX
+    .replace(/\b([a-zA-Z]+)\^([0-9]+)\b/g, '$$1^{$2}$')
     .replace(/\b([a-zA-Z]+)\^{([^}]+)}/g, '$$1^{$2}$')
-    .replace(/\b(\d+)\^([0-9]+)/g, '$$1^{$2}$')
+    .replace(/\b(\d+)\^([0-9]+)\b/g, '$$1^{$2}$')
     .replace(/\b(\d+)\^{([^}]+)}/g, '$$1^{$2}$')
     
     // Convert expressions inside parentheses with powers
     .replace(/\(([^)]+)\)\^([0-9]+)/g, '$($1)^{$2}$')
     .replace(/\(([^)]+)\)\^{([^}]+)}/g, '$($1)^{$2}$')
     
+    // Convert degree symbol
+    .replace(/°C/g, '$°C$')
+    .replace(/°F/g, '$°F$')
+    .replace(/°/g, '$°$')
+    
     // Convert common symbols
+    .replace(/×/g, '$\\times$')
+    .replace(/÷/g, '$\\div$')
+    .replace(/π/g, '$\\pi$')
     .replace(/≤/g, '$\\leq$')
     .replace(/≥/g, '$\\geq$')
     .replace(/≠/g, '$\\neq$')
     .replace(/±/g, '$\\pm$')
-    .replace(/×/g, '$\\times$')
-    .replace(/÷/g, '$\\div$')
-    .replace(/π/g, '$\\pi$')
     .replace(/∞/g, '$\\infty$')
     .replace(/∑/g, '$\\sum$')
     .replace(/∫/g, '$\\int$')
+    .replace(/∂/g, '$\\partial$')
+    .replace(/Δ/g, '$\\Delta$')
+    .replace(/∇/g, '$\\nabla$')
     .replace(/α/g, '$\\alpha$')
     .replace(/β/g, '$\\beta$')
     .replace(/γ/g, '$\\gamma$')
@@ -67,15 +113,13 @@ export function processQuestionText(text: string): string {
     .replace(/λ/g, '$\\lambda$')
     .replace(/μ/g, '$\\mu$')
     .replace(/σ/g, '$\\sigma$')
-    .replace(/Δ/g, '$\\Delta$')
     .replace(/Ω/g, '$\\Omega$')
     
-    // Convert degree symbol
-    .replace(/°C/g, '$°C$')
-    .replace(/°F/g, '$°F$')
-    .replace(/°/g, '$°$')
+    // Scientific notation fixes
+    .replace(/(\d+(?:\.\d+)?)\s*[xX]\s*10\^{?([+-]?\d+)}?/g, '$$1 \\times 10^{$2}$')
+    .replace(/(\d+(?:\.\d+)?)\s*[×]\s*10\^{?([+-]?\d+)}?/g, '$$1 \\times 10^{$2}$')
     
-    // Chemical formulas (simple ones)
+    // Fix common chemistry formulas
     .replace(/\bH2O\b/g, '$H_2O$')
     .replace(/\bCO2\b/g, '$CO_2$')
     .replace(/\bNaCl\b/g, '$NaCl$')
@@ -86,19 +130,19 @@ export function processQuestionText(text: string): string {
     .replace(/\bNH3\b/g, '$NH_3$')
     .replace(/\bCH4\b/g, '$CH_4$')
     
-    // Physics units and constants  
+    // Physics units
     .replace(/m\/s2/g, '$m/s^2$')
     .replace(/kg\.m\/s2/g, '$kg \\cdot m/s^2$')
     .replace(/J\/mol/g, '$J/mol$')
     .replace(/m\/s/g, '$m/s$')
-    .replace(/kg\/m³/g, '$kg/m^3$')
-    
-    // Scientific notation
-    .replace(/(\d+(?:\.\d+)?)\s*[xX]\s*10\^([+-]?\d+)/g, '$$1 \\times 10^{$2}$')
-    .replace(/(\d+(?:\.\d+)?)\s*[×]\s*10\^([+-]?\d+)/g, '$$1 \\times 10^{$2}$');
+    .replace(/kg\/m³/g, '$kg/m^3$');
 
-  // Clean up any triple or double dollars that might have been created
-  processed = processed.replace(/\$\$\$/g, '$$').replace(/\$\$\$/g, '$$');
+  // Clean up multiple dollar signs and fix spacing
+  processed = processed
+    .replace(/\$\$+/g, '$')
+    .replace(/\$\s+/g, '$')
+    .replace(/\s+\$/g, '$')
+    .replace(/\$([^$]*)\$\$([^$]*)\$/g, '$$$1 $2$$');
   
   return processed;
 }
