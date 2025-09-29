@@ -273,6 +273,43 @@ export default function AccountSettings() {
     }
   };
 
+  const handleVerifyEmail = async () => {
+    if (!userProfile?.email) {
+      toast({
+        title: "Error",
+        description: "Email not found. Please update your profile.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: userProfile.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Verification email sent",
+        description: "Please check your email and click the verification link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error sending verification",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSendVerificationEmail = async () => {
     if (!user?.email) return;
     
