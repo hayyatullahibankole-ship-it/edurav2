@@ -41,10 +41,12 @@ export function processQuestionText(text: string): string {
     .replace(/\^(?!\{)([A-Za-z0-9])/g, '^{$1}')
     .replace(/_(?!\{)([A-Za-z0-9])/g, '_{$1}')
 
-    // 5) sqrt and common symbols
-    .replace(/sqrt\(([^)]+)\)/gi, '\\sqrt{$1}')
-    .replace(/√\(([^)]+)\)/g, '\\sqrt{$1}')
-    .replace(/√([A-Za-z0-9]+)/g, '\\sqrt{$1}')
+    // 5) sqrt and common symbols - enhanced
+    .replace(/sqrt\s*\(([^)]+)\)/gi, '\\sqrt{$1}')
+    .replace(/√\s*\(([^)]+)\)/g, '\\sqrt{$1}')
+    .replace(/√\s*([A-Za-z0-9]+)/g, '\\sqrt{$1}')
+    .replace(/\bsqrt\s+(\d+)/gi, '\\sqrt{$1}')
+    .replace(/\bsqrt\s+([A-Za-z])/gi, '\\sqrt{$1}')
     .replace(/≤/g, '\\leq')
     .replace(/≥/g, '\\geq')
     .replace(/≠/g, '\\neq')
@@ -84,7 +86,25 @@ export function processQuestionText(text: string): string {
     // 8) Common physics units
     .replace(/m\/s2/g, 'm/s^2')
     .replace(/kg\.m\/s2/g, 'kg \\cdot m/s^2')
-    .replace(/kg\/m³/g, 'kg/m^3');
+    .replace(/kg\/m³/g, 'kg/m^3')
+
+    // 9) Matrix and determinant patterns (enhanced)
+    .replace(/\|\s*([^|]+)\s*\|/g, '\\begin{vmatrix}$1\\end{vmatrix}')
+    .replace(/det\s*\(\s*([^)]+)\s*\)/gi, '\\det($1)')
+    .replace(/matrix\s*\(\s*([^)]+)\s*\)/gi, '\\begin{pmatrix}$1\\end{pmatrix}')
+    
+    // 10) Vector notation
+    .replace(/vec\s*\(\s*([A-Za-z])\s*\)/gi, '\\vec{$1}')
+    .replace(/\b([A-Za-z])-vector/gi, '\\vec{$1}')
+    
+    // 11) Logarithm improvements
+    .replace(/log\s*_\s*(\d+)\s*\(\s*([^)]+)\s*\)/gi, '\\log_{$1}($2)')
+    .replace(/log\s*_\s*(\d+)\s+([A-Za-z0-9]+)/gi, '\\log_{$1} $2')
+    
+    // 12) Trigonometric with angles
+    .replace(/cos\s*(\d+)\s*°/gi, '\\cos $1^{\\circ}')
+    .replace(/sin\s*(\d+)\s*°/gi, '\\sin $1^{\\circ}')
+    .replace(/tan\s*(\d+)\s*°/gi, '\\tan $1^{\\circ}');
 
   // Clean redundancy of dollar signs created elsewhere
   processed = processed.replace(/\$\$+/g, '$');

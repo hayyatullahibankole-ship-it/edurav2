@@ -384,10 +384,12 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
                         </Badge>
                       )}
                     </div>
-                    <MathRenderer 
-                      content={questions[currentQuestion].question}
-                      className="text-xl leading-relaxed font-semibold"
-                    />
+                    <div className="py-4">
+                      <MathRenderer 
+                        content={questions[currentQuestion].question}
+                        className="text-xl leading-relaxed font-semibold"
+                      />
+                    </div>
                   </div>
                   <Button
                     variant="outline"
@@ -400,8 +402,8 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
                 </div>
               </CardHeader>
               
-              <CardContent>
-                <div className="space-y-3">
+              <CardContent className="pt-6">
+                <div className="space-y-4">
                   {questions[currentQuestion].options.map((option, index) => {
                     const optionLetter = option.split(')')[0];
                     // SECURITY FIX: Remove direct access to correct answers
@@ -414,15 +416,15 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
                     return (
                       <div
                         key={index}
-                        className={`p-4 border rounded-lg cursor-pointer transition-all hover:bg-muted/50 ${
+                        className={`p-5 border rounded-lg cursor-pointer transition-all hover:bg-muted/50 ${
                           isSelected ? "border-primary bg-primary/10" : 
                           isCorrect ? "border-green-500 bg-green-50" :
                           isWrong ? "border-red-500 bg-red-50" : "border-border"
                         }`}
                         onClick={() => !showExplanations && handleAnswerSelect(currentQuestion, optionLetter)}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        <div className="flex items-start gap-4">
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-1 ${
                             isSelected ? "border-primary bg-primary" : 
                             isCorrect ? "border-green-500 bg-green-500" :
                             isWrong ? "border-red-500 bg-red-500" : "border-muted-foreground"
@@ -431,10 +433,12 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
                               <div className="w-2 h-2 rounded-full bg-white" />
                             )}
                           </div>
-                          <MathRenderer 
-                            content={option} 
-                            className="flex-1"
-                          />
+                          <div className="flex-1 py-1">
+                            <MathRenderer 
+                              content={option} 
+                              className="text-base leading-relaxed"
+                            />
+                          </div>
                         </div>
                       </div>
                     );

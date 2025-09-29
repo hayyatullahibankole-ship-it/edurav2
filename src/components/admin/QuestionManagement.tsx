@@ -531,11 +531,11 @@ export default function QuestionManagement() {
     <Card>
       <CardContent className="p-6">
         <ScrollArea className="h-[600px]">
-          <div className="space-y-4 pr-4">
+          <div className="space-y-6 pr-4">
             {list.map((question) => (
-              <div key={question.id} className="flex items-start justify-between p-4 bg-muted/50 rounded-lg border">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
+              <div key={question.id} className="flex items-start justify-between p-6 bg-card rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center space-x-2">
                     <Badge className={`${getDifficultyColor(question.difficulty_level)} text-white`}>
                       {getDifficultyLabel(question.difficulty_level)}
                     </Badge>
@@ -549,11 +549,13 @@ export default function QuestionManagement() {
                       <Badge variant="destructive">Inactive</Badge>
                     )}
                   </div>
-                  <MathRenderer 
-                    content={question.question_text}
-                    className="font-medium mb-2 line-clamp-3"
-                  />
-                  <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                  <div className="py-2">
+                    <MathRenderer 
+                      content={question.question_text}
+                      className="font-medium text-lg leading-relaxed"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-4 text-sm text-muted-foreground pt-2 border-t">
                     <span>{question.points} point{question.points !== 1 ? 's' : ''}</span>
                     <span>{new Date(question.created_at).toLocaleDateString()}</span>
                     {question.tags && Array.isArray(question.tags) && question.tags.length > 0 && (
