@@ -177,14 +177,16 @@ const AnswerReview = () => {
         }
 
         try {
-          // Use the secure function to get explanation and correct answer
-          const { data: explanationData } = await supabase
-            .rpc('get_question_explanation_secure', { 
-              question_id_param: question.id 
-            });
+          // Since this is for answer review of a completed attempt, fetch the actual question data directly
+          const { data: fullQuestionData, error: questionError } = await supabase
+            .from('questions')
+            .select('correct_answer, explanation')
+            .eq('id', question.id)
+            .maybeSingle();
 
-          // The RPC returns a table, so we need to access the first row
-          const explanation = explanationData && explanationData.length > 0 ? explanationData[0] : null;
+          if (questionError) {
+            console.error(`Error fetching question details for ${question.id}:`, questionError);
+          }
 
           return {
             id: question.id,
@@ -192,15 +194,15 @@ const AnswerReview = () => {
             type: question.type,
             options: Array.isArray(question.options) ? question.options : [],
             user_answer: answer.answer,
-            correct_answer: explanation?.correct_answer || null,
+            correct_answer: fullQuestionData?.correct_answer || null,
             is_correct: answer.is_correct,
-            explanation: explanation?.explanation || 'No explanation available',
+            explanation: fullQuestionData?.explanation || 'No explanation available',
             subject: subject?.name || 'Unknown Subject',
             difficulty_level: question.difficulty_level || 1,
             time_spent_seconds: answer.time_spent_seconds || 0
           };
         } catch (error) {
-          console.error(`Error getting explanation for question ${question.id}:`, error);
+          console.error(`Error getting question details for ${question.id}:`, error);
           return {
             id: question.id,
             question_text: question.question_text,
@@ -386,18 +388,49 @@ const AnswerReview = () => {
                     <div>
                       <h4 className="font-medium mb-2">Options:</h4>
                       <div className="space-y-2">
-                        {question.options.map((option: string, optIndex: number) => {
-                          // Handle both letter-based and numeric answers
-                          const isUserAnswer = (
-                            question.user_answer === optIndex || 
-                            question.user_answer === String.fromCharCode(65 + optIndex) ||
-                            String(question.user_answer).toLowerCase() === String.fromCharCode(97 + optIndex)
-                          );
-                          const isCorrectAnswer = (
-                            question.correct_answer === optIndex ||
-                            question.correct_answer === String.fromCharCode(65 + optIndex) ||
-                            String(question.correct_answer).toLowerCase() === String.fromCharCode(97 + optIndex)
-                          );
+                         {question.options.map((option: string, optIndex: number) => {
+                          // Parse user answer to handle different formats
+                          let userAnswerIndex = -1;
+                          if (typeof question.user_answer === 'number') {
+                            userAnswerIndex = question.user_answer;
+                          } else if (typeof question.user_answer === 'string') {
+                            const userStr = question.user_answer.trim();
+                            // Handle letter format (A, B, C, etc.)
+                            if (userStr.length === 1 && /[A-Za-z]/.test(userStr)) {
+                              userAnswerIndex = userStr.toUpperCase().charCodeAt(0) - 65;
+                            }
+                            // Handle "A)" format
+                            else if (userStr.match(/^[A-Za-z]\)/)) {
+                              userAnswerIndex = userStr.charAt(0).toUpperCase().charCodeAt(0) - 65;
+                            }
+                            // Handle numeric string
+                            else if (!isNaN(parseInt(userStr))) {
+                              userAnswerIndex = parseInt(userStr);
+                            }
+                          }
+
+                          // Parse correct answer to handle different formats
+                          let correctAnswerIndex = -1;
+                          if (typeof question.correct_answer === 'number') {
+                            correctAnswerIndex = question.correct_answer;
+                          } else if (typeof question.correct_answer === 'string') {
+                            const correctStr = question.correct_answer.trim();
+                            // Handle letter format (A, B, C, etc.)
+                            if (correctStr.length === 1 && /[A-Za-z]/.test(correctStr)) {
+                              correctAnswerIndex = correctStr.toUpperCase().charCodeAt(0) - 65;
+                            }
+                            // Handle "A)" format
+                            else if (correctStr.match(/^[A-Za-z]\)/)) {
+                              correctAnswerIndex = correctStr.charAt(0).toUpperCase().charCodeAt(0) - 65;
+                            }
+                            // Handle numeric string
+                            else if (!isNaN(parseInt(correctStr))) {
+                              correctAnswerIndex = parseInt(correctStr);
+                            }
+                          }
+
+                          const isUserAnswer = userAnswerIndex === optIndex;
+                          const isCorrectAnswer = correctAnswerIndex === optIndex;
                           
                           let bgColor = 'bg-muted';
                           let borderColor = 'border-muted';
