@@ -1,7 +1,7 @@
 /**
- * JAMB Scoring Algorithm
+ * JAMB Scoring Algorithm (Current 2024/2025 Format)
  * - Correct answer: +4 points
- * - Wrong answer: -1 point  
+ * - Wrong answer: 0 points (NO negative marking)
  * - No answer: 0 points
  * Final score capped at 400 (maximum possible)
  */
@@ -14,12 +14,11 @@ export function calculateJAMBScore(
     throw new Error('Invalid answer counts');
   }
   
-  const rawScore = (correctAnswers * 4) - (wrongAnswers * 1);
-  const maxPossibleScore = totalQuestions * 4; // 180 * 4 = 720 for full JAMB
+  // JAMB uses NO negative marking - only correct answers count
+  const rawScore = correctAnswers * 4;
   
-  // Scale to 400 max and ensure not negative
-  const scaledScore = Math.round((rawScore / maxPossibleScore) * 400);
-  return Math.max(0, Math.min(400, scaledScore));
+  // Direct scoring - no scaling needed since max is already 400 for 100 questions
+  return Math.max(0, Math.min(400, rawScore));
 }
 
 /**

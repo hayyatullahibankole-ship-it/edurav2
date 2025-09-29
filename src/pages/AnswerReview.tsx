@@ -67,7 +67,7 @@ const AnswerReview = () => {
         .from('users')
         .select('id')
         .eq('auth_user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (!userData) {
         toast({
@@ -85,7 +85,7 @@ const AnswerReview = () => {
         .select('*')
         .eq('id', attemptId)
         .eq('user_id', userData.id)
-        .single();
+        .maybeSingle();
 
       if (!attempt) {
         toast({
