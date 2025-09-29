@@ -59,7 +59,7 @@ export function useSubscription() {
       try {
         setLoading(true);
         
-        // Get the user's active subscription (including free accounts)
+        // Get all active subscriptions (may include multiple entries)
         const { data, error } = await supabase
           .from('subscriptions')
           .select(`
@@ -74,11 +74,9 @@ export function useSubscription() {
           .eq('user_id', userProfile.id)
           .eq('status', 'ACTIVE')
           .gte('end_date', new Date().toISOString())
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+          .order('end_date', { ascending: false });
 
-        if (error && error.code !== 'PGRST116') {
+        if (error) {
           console.error('Error fetching subscription:', error);
           // Set a basic subscription as fallback
           setSubscription({
@@ -95,7 +93,22 @@ export function useSubscription() {
             }
           });
         } else {
-          setSubscription(data);
+          // Choose the best subscription (highest level or highest price)
+          const subs = (data || []) as SubscriptionData[];
+          const rank: Record<string, number> = { basic: 1, premium: 2, enterprise: 3 };
+          const best = subs
+            .sort((a, b) => {
+              const aLevel = rank[(a.subscription_plans?.resource_access_level || 'basic').toLowerCase()] || 0;
+              const bLevel = rank[(b.subscription_plans?.resource_access_level || 'basic').toLowerCase()] || 0;
+              if (aLevel !== bLevel) return bLevel - aLevel;
+              const aPrice = a.subscription_plans?.price || 0;
+              const bPrice = b.subscription_plans?.price || 0;
+              if (aPrice !== bPrice) return bPrice - aPrice;
+              const aEnd = a.end_date ? new Date(a.end_date).getTime() : 0;
+              const bEnd = b.end_date ? new Date(b.end_date).getTime() : 0;
+              return bEnd - aEnd;
+            })[0] || null;
+          setSubscription(best);
         }
       } catch (error) {
         console.error('Error fetching subscription:', error);
