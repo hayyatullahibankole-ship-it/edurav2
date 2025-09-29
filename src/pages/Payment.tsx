@@ -74,11 +74,14 @@ const Payment = () => {
     }
     
     try {
+      console.log('Initiating payment for:', { planName, amount, email: user.email });
       await createSubscriptionPayment(planName, user.email, amount);
     } catch (error) {
+      console.error('Payment error details:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: "Payment Error",
-        description: "Failed to initialize payment. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     }

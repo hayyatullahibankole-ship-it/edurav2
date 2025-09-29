@@ -49,7 +49,7 @@ export const initializePaystackPayment = async (payment: PaystackPayment) => {
     const handler = window.PaystackPop.setup({
       key: publicKey,
       email: validatedData.email,
-      amount: validatedData.amount * 100, // Convert to kobo
+      amount: validatedData.amount, // Amount should already be in kobo
       currency: validatedData.currency,
       ref: validatedData.reference,
       metadata: validatedData.metadata,
@@ -66,8 +66,9 @@ export const initializePaystackPayment = async (payment: PaystackPayment) => {
     
     handler.openIframe();
   } catch (error) {
-    console.error('Invalid payment data:', error);
-    throw new Error('Failed to initialize payment');
+    console.error('Payment initialization error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    throw new Error(`Payment initialization failed: ${errorMessage}`);
   }
 };
 
@@ -79,7 +80,7 @@ export const createSubscriptionPayment = async (planType: string, userEmail: str
   
   try {
     await initializePaystackPayment({
-      amount,
+      amount: amount * 100, // Convert naira to kobo
       email: userEmail,
       reference,
       currency: "NGN",
