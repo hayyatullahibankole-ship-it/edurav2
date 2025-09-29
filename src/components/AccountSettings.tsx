@@ -56,10 +56,11 @@ interface PreferenceSettings {
 }
 
 export default function AccountSettings() {
-  const { userProfile } = useAuth();
+  const { user, userProfile } = useAuth();
   const { subscription, isPremium, canAccessPremium } = useSubscription();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [verificationLoading, setVerificationLoading] = useState(false);
 
   // State for settings
   const [notifications, setNotifications] = useState<NotificationSettings>({
@@ -272,6 +273,36 @@ export default function AccountSettings() {
     }
   };
 
+  const handleSendVerificationEmail = async () => {
+    if (!user?.email) return;
+    
+    setVerificationLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: user.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Verification email sent",
+        description: "Please check your email and click the verification link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error sending verification",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Account Overview */}
@@ -294,8 +325,14 @@ export default function AccountSettings() {
                   {userProfile?.is_verified ? "Verified" : "Unverified"}
                 </Badge>
                 {!userProfile?.is_verified && (
-                  <Button variant="link" size="sm" className="h-auto p-0">
-                    Verify Now
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    className="h-auto p-0"
+                    onClick={handleSendVerificationEmail}
+                    disabled={verificationLoading}
+                  >
+                    {verificationLoading ? "Sending..." : "Verify Now"}
                   </Button>
                 )}
               </div>
