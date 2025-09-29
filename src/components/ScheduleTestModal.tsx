@@ -370,24 +370,24 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
                   } ${!hasEnoughQuestions ? 'opacity-50' : ''}`}
                   onClick={() => hasEnoughQuestions && handleSubjectToggle(subject.id)}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        checked={testConfig.subjects.includes(subject.id)}
-                        disabled={!hasEnoughQuestions}
-                        onChange={() => {}}
-                      />
-                      <span className="text-sm font-medium">{subject.name}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          checked={testConfig.subjects.includes(subject.id)}
+                          disabled={!hasEnoughQuestions}
+                          onChange={() => {}}
+                        />
+                        <span className="text-sm font-medium">{subject.name}</span>
+                      </div>
+                      <Badge variant={hasEnoughQuestions ? "secondary" : "destructive"} className="text-xs">
+                        {hasEnoughQuestions ? "Available" : "Unavailable"}
+                      </Badge>
                     </div>
-                    <Badge variant={hasEnoughQuestions ? "secondary" : "destructive"} className="text-xs">
-                      {questionCount} questions
-                    </Badge>
-                  </div>
-                  {!hasEnoughQuestions && (
-                    <p className="text-xs text-destructive mt-1">
-                      Need {requiredCount} questions minimum
-                    </p>
-                  )}
+                    {!hasEnoughQuestions && (
+                      <p className="text-xs text-destructive mt-1">
+                        Insufficient questions for this subject
+                      </p>
+                    )}
                 </div>
               );
             })}
