@@ -90,6 +90,9 @@ export default function ProfileSettings() {
 
       if (updateError) throw updateError;
 
+      // Force a page refresh to update the auth context with new profile image
+      setTimeout(() => window.location.reload(), 1000);
+
       toast({
         title: "Profile image updated",
         description: "Your profile picture has been updated successfully.",
