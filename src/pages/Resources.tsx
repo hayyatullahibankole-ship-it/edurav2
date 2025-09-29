@@ -137,33 +137,69 @@ const Resources = () => {
       // Handle different URL types
       if (fileUrl.startsWith('http')) {
         // Already a full URL (new uploads or external links)
-        // Just use it directly
-      } else {
-        // Legacy or relative path - try to construct Supabase Storage URL
+        // Verify the file exists before proceeding
         try {
-          if (fileUrl.startsWith('uploads/')) {
-            const filePath = fileUrl.replace('uploads/', '');
-            const { data } = supabase.storage.from('uploads').getPublicUrl(filePath);
-            fileUrl = data.publicUrl;
-          } else if (fileUrl.includes('/')) {
-            // Path like "resources/filename.pdf"
-            const pathParts = fileUrl.split('/');
-            const bucketName = pathParts[0];
-            const filePath = pathParts.slice(1).join('/');
-            const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
-            fileUrl = data.publicUrl;
-          } else {
-            // Just filename - assume it's in resources bucket
-            const { data } = supabase.storage.from('resources').getPublicUrl(fileUrl);
-            fileUrl = data.publicUrl;
+          const response = await fetch(fileUrl, { method: 'HEAD' });
+          if (!response.ok) {
+            throw new Error('File not found at the specified URL');
           }
-        } catch (urlError) {
-          console.warn('Error constructing URL:', urlError);
-          throw new Error("Invalid file URL");
+        } catch (fetchError) {
+          console.error('File verification failed:', fetchError);
+          toast({
+            title: "File Not Available",
+            description: "This resource file is currently not available. Please contact support.",
+            variant: "destructive"
+          });
+          return;
+        }
+      } else {
+        // Legacy or relative path - check if file exists in storage first
+        let bucketName = 'uploads';
+        let filePath = fileUrl;
+
+        if (fileUrl.startsWith('uploads/')) {
+          bucketName = 'uploads';
+          filePath = fileUrl.replace('uploads/', '');
+        } else if (fileUrl.includes('/')) {
+          const pathParts = fileUrl.split('/');
+          bucketName = pathParts[0];
+          filePath = pathParts.slice(1).join('/');
+        } else {
+          bucketName = 'resources';
+          filePath = fileUrl;
+        }
+
+        // Check if file exists in storage
+        try {
+          const { data, error } = await supabase.storage
+            .from(bucketName)
+            .download(filePath);
+
+          if (error || !data) {
+            console.error('File not found in storage:', error);
+            toast({
+              title: "File Not Available",
+              description: "This resource file is currently not available. It may need to be re-uploaded.",
+              variant: "destructive"
+            });
+            return;
+          }
+
+          // File exists, create download URL
+          const { data: urlData } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+          fileUrl = urlData.publicUrl;
+        } catch (storageError) {
+          console.error('Storage access error:', storageError);
+          toast({
+            title: "Storage Error",
+            description: "Unable to access the file storage. Please try again later.",
+            variant: "destructive"
+          });
+          return;
         }
       }
 
-      // Increment view/download count
+      // Increment view/download count only if file access will succeed
       await supabase
         .from('resources')
         .update({ 
@@ -182,18 +218,6 @@ const Resources = () => {
       } else {
         // For documents, try to download
         try {
-          const response = await fetch(fileUrl, { method: 'HEAD' });
-          if (!response.ok) {
-            // If HEAD fails, fallback to opening in new tab
-            window.open(fileUrl, '_blank');
-            toast({
-              title: "Opening File",
-              description: "File is opening in a new tab"
-            });
-            return;
-          }
-
-          // Try to download with proper filename
           let filename = resource.title;
           if (!filename.includes('.')) {
             try {
@@ -203,11 +227,16 @@ const Resources = () => {
                 filename += `.${extension}`;
               }
             } catch {
-              // If URL parsing fails, just use title as is
+              // If URL parsing fails, add pdf extension as default
+              filename += '.pdf';
             }
           }
           
           const downloadResponse = await fetch(fileUrl);
+          if (!downloadResponse.ok) {
+            throw new Error(`Failed to download: ${downloadResponse.status}`);
+          }
+          
           const blob = await downloadResponse.blob();
           const url = window.URL.createObjectURL(blob);
           
@@ -226,11 +255,11 @@ const Resources = () => {
           });
 
         } catch (downloadError) {
-          console.warn('Download failed, opening in new tab:', downloadError);
-          window.open(fileUrl, '_blank');
+          console.error('Download failed:', downloadError);
           toast({
-            title: "Opening File",
-            description: "File is opening in a new tab"
+            title: "Download Failed",
+            description: "Unable to download the file. The file may not be available.",
+            variant: "destructive"
           });
         }
       }
