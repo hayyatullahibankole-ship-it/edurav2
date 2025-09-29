@@ -23,7 +23,6 @@ const getPaystackPublicKey = async (): Promise<string> => {
     .single();
     
   if (error || !data) {
-    console.error('Failed to fetch Paystack public key:', error);
     throw new Error('Payment system configuration error. Please contact support.');
   }
   
@@ -54,13 +53,10 @@ export const initializePaystackPayment = async (payment: PaystackPayment) => {
       ref: validatedData.reference,
       metadata: validatedData.metadata,
       callback: function(response: any) {
-        console.log('Payment successful:', response);
-        // Handle successful payment
         window.location.href = `/payment-success?reference=${response.reference}`;
       },
       onClose: function() {
-        console.log('Payment dialog closed');
-        // Handle payment cancellation
+        // User closed payment dialog
       }
     });
     

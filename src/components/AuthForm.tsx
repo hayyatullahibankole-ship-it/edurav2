@@ -164,19 +164,20 @@ export default function AuthForm() {
           if (error.message.includes('User already registered')) {
             throw new Error('This email is already registered. Please sign in instead.');
           }
-          console.error('Signup error details:', error);
+          if (error.message.includes('Email not confirmed')) {
+            throw new Error('Please check your email and confirm your account before signing in.');
+          }
           throw new Error(`Account creation failed: ${error.message}`);
         }
 
         toast({
           title: "Account created successfully!",
-          description: "Please check your email to verify your account.",
+          description: "Please check your email and click the verification link to activate your account.",
         });
 
         setIsLogin(true);
       }
     } catch (error: any) {
-      console.error('Auth error:', error);
       if (error.issues) {
         // Zod validation errors
         const newErrors: Record<string, string> = {};

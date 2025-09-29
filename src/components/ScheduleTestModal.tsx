@@ -72,7 +72,6 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
         }));
         // Skip the exam type step when coming from Quick Actions
         setStep(2);
-        console.log('Auto-selected exam type from Quick Action:', defaultExamType);
       }
     }
   }, [open, defaultExamType]);
@@ -100,7 +99,6 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
         setAvailableQuestions(questionCounts);
       }
     } catch (error) {
-      console.error('Error fetching subjects and questions:', error);
       toast({
         title: "Error",
         description: "Failed to load available subjects",
@@ -189,7 +187,6 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
       }
 
       // Create attempt with practice config in proctoring_data
-      console.log('Creating attempt with exam type:', testConfig.examType);
       const attemptData = {
         user_id: userProfile.id,
         selected_subjects: testConfig.subjects,
@@ -203,7 +200,6 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
           duration_minutes: testConfig.duration
         }
       };
-      console.log('Attempt data being saved:', attemptData);
 
       const { data: attempt, error: attemptError } = await supabase
         .from('attempts')
@@ -238,7 +234,6 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
       navigate(`/practice?attempt=${attempt.id}&examType=${testConfig.examType}`);
       
     } catch (error) {
-      console.error('Error starting test:', error);
       toast({
         title: "Error",
         description: "Failed to start test. Please try again.",
@@ -259,7 +254,6 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
               testConfig.examType === type.value ? 'border-primary bg-primary/5' : ''
             }`}
             onClick={() => {
-              console.log('Setting exam type to:', type.value);
               setTestConfig(prev => ({ ...prev, examType: type.value }));
             }}
           >
@@ -279,7 +273,6 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
       <div className="flex justify-end">
         <Button 
           onClick={() => {
-            console.log('Moving to step 2 with exam type:', testConfig.examType);
             setStep(2);
           }}
           disabled={!testConfig.examType}
