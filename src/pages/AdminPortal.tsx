@@ -35,7 +35,6 @@ import {
 import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
 import QuestionManagement from '@/components/admin/QuestionManagement';
-import { QuestionCleanupScript } from '@/components/admin/QuestionCleanupScript';
 import ResourceManagement from '@/components/admin/ResourceManagement';
 import SecurityCenter from '@/components/admin/SecurityCenter';
 import AnalyticsHub from '@/components/admin/AnalyticsHub';
@@ -406,12 +405,7 @@ export default function AdminPortal() {
           
           {activeSection === 'exams' && <ExamControl />}
           
-          {activeSection === 'questions' && (
-            <div className="space-y-6">
-              <QuestionCleanupScript />
-              <QuestionManagement />
-            </div>
-          )}
+          {activeSection === 'questions' && <QuestionManagement />}
           
           {activeSection === 'resources' && <ResourceManagement />}
           
