@@ -285,24 +285,31 @@ export default function AccountSettings() {
 
     setLoading(true);
     try {
+      // Use the correct redirect URL for the current environment
+      const redirectUrl = window.location.origin + '/dashboard';
+      
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: userProfile.email,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`
+          emailRedirectTo: redirectUrl
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Verification email error:', error);
+        throw error;
+      }
 
       toast({
         title: "Verification email sent",
-        description: "Please check your email and click the verification link.",
+        description: `Please check your email (${userProfile.email}) and spam folder for the verification link.`,
       });
     } catch (error: any) {
+      console.error('Verification error:', error);
       toast({
         title: "Error sending verification",
-        description: error.message,
+        description: `Failed to send verification email: ${error.message}. Please check your email address or contact support.`,
         variant: "destructive",
       });
     } finally {
