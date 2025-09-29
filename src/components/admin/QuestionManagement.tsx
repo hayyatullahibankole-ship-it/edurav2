@@ -142,34 +142,49 @@ export default function QuestionManagement() {
         const fnError = first.error as any;
         const fnData: any = first.data;
 
-        console.log('Edge function first page:', { count: fnData?.count, received: fnData?.questions?.length, fnError });
+        console.log('Edge function first page:', { count: fnData?.count, received: fnData?.questions?.length, fnError, offset });
 
         if (fnError) {
           console.error('Edge function error:', fnError);
           throw new Error(fnError.message || 'Admin fetch failed');
         }
 
-        const total: number = fnData?.count ?? (fnData?.questions?.length || 0);
+        const total: number = fnData?.count ?? 0;
         all = (fnData?.questions as any[]) || [];
-        offset += all.length;
-
-        // Fetch remaining pages in batches of 1000
-        while (offset < total) {
-          const next = await supabase.functions.invoke('admin-get-questions', {
-            body: { activeOnly: true, limit: pageSize, offset }
-          });
-          if (next.error) {
-            console.error('Pagination fetch error:', next.error);
-            break;
+        
+        console.log(`Initial batch loaded: ${all.length}/${total} questions`);
+        
+        // If there are more questions to fetch, continue pagination
+        if (total > pageSize) {
+          offset = pageSize; // Start from the next page
+          
+          while (offset < total && all.length < total) {
+            console.log(`Fetching next batch, offset: ${offset}, total needed: ${total}`);
+            
+            const next = await supabase.functions.invoke('admin-get-questions', {
+              body: { activeOnly: true, limit: pageSize, offset }
+            });
+            
+            if (next.error) {
+              console.error('Pagination fetch error:', next.error);
+              break;
+            }
+            
+            const nextBatch = ((next.data as any)?.questions || []) as any[];
+            console.log(`Received batch: ${nextBatch.length} questions`);
+            
+            if (nextBatch.length === 0) {
+              console.log('No more questions in batch, stopping pagination');
+              break;
+            }
+            
+            all = all.concat(nextBatch);
+            offset += nextBatch.length;
+            console.log(`Progress: ${all.length}/${total} questions loaded`);
           }
-          const nextBatch = ((next.data as any)?.questions || []) as any[];
-          if (nextBatch.length === 0) break;
-          all = all.concat(nextBatch);
-          offset += nextBatch.length;
-          console.log(`Loaded ${all.length}/${total}...`);
         }
 
-        console.log('Loaded questions from edge function:', all.length);
+        console.log(`Final count: Loaded ${all.length} questions from edge function (expected: ${total})`);
         setQuestions(all);
 
         if (all.length === 0) {
