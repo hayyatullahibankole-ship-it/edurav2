@@ -49,47 +49,68 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserData = async (userId: string) => {
     try {
-      // Get user profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('auth_user_id', userId)
-        .maybeSingle();
-
-      if (profileError) {
-        console.error('Profile fetch error:', profileError);
+      // Set a timeout to prevent indefinite loading
+      const timeoutId = setTimeout(() => {
         if (isMounted) {
+          console.warn('User data fetch timed out, setting defaults');
           setUserProfile(null);
           setUserRole('student');
           setLoading(false);
         }
-        return;
-      }
+      }, 5000); // 5 second timeout
 
-      if (isMounted) {
-        if (profileData) {
-          setUserProfile(profileData);
-          
-          // Get user role from user_roles table
-          const { data: roleData, error: roleError } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', profileData.id)
-            .maybeSingle();
-            
-          if (!roleError && roleData) {
-            setUserRole(roleData.role);
-          } else {
-            console.error('Role fetch error:', roleError);
-            setUserRole('student'); // Default to student if no role found
+      // Get user profile with retry logic
+      let profileData = null;
+      let attempts = 0;
+      const maxAttempts = 3;
+
+      while (attempts < maxAttempts && !profileData && isMounted) {
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('auth_user_id', userId)
+          .maybeSingle();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Profile fetch error:', error);
+          attempts++;
+          if (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
           }
         } else {
-          // No profile data found
-          setUserProfile(null);
+          profileData = data;
+          break;
+        }
+      }
+
+      clearTimeout(timeoutId);
+
+      if (!isMounted) return;
+
+      if (profileData) {
+        setUserProfile(profileData);
+        
+        // Get user role from user_roles table
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', profileData.id)
+          .maybeSingle();
+          
+        if (!roleError && roleData) {
+          setUserRole(roleData.role);
+        } else {
+          console.warn('Role fetch error, defaulting to student:', roleError);
           setUserRole('student');
         }
-        setLoading(false);
+      } else {
+        // No profile found - this should be rare after our migration
+        console.warn('No user profile found for authenticated user:', userId);
+        setUserProfile(null);
+        setUserRole('student');
       }
+      
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching user data:', error);
       if (isMounted) {

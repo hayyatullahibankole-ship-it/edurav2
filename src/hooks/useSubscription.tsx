@@ -22,37 +22,42 @@ export function useSubscription() {
   const { user, userProfile } = useAuth();
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
     const fetchSubscription = async () => {
       if (!user) {
-        // No user authenticated, stop loading
+        // No user authenticated, clear subscription and stop loading
         setSubscription(null);
         setLoading(false);
         return;
       }
 
       if (!userProfile) {
-        // Wait until auth and profile are ready, but with timeout
+        // Wait until profile is loaded, but add timeout
         setLoading(true);
         
-        // Set a timeout to prevent infinite loading
-        timeoutId = setTimeout(() => {
-          console.warn('Subscription loading timeout - proceeding with basic access');
-          setSubscription(null);
+        // Set a fallback timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+          console.warn('Subscription loading timed out, user may not have profile');
+          setSubscription({
+            id: 'fallback',
+            status: 'ACTIVE',
+            plan_id: 'basic',
+            start_date: new Date().toISOString(),
+            end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+            subscription_plans: {
+              name: 'Basic Access',
+              price: 0,
+              resource_access_level: 'basic',
+              features: ['Basic practice tests']
+            }
+          });
           setLoading(false);
-        }, 10000); // 10 second timeout
+        }, 8000); // 8 second timeout
         
-        return;
-      }
-
-      // Clear any existing timeout
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+        return () => clearTimeout(timeoutId);
       }
 
       try {
-        console.log('Fetching subscription for user profile:', userProfile.id);
+        setLoading(true);
         
         // Get the user's active subscription (including free accounts)
         const { data, error } = await supabase
@@ -75,29 +80,45 @@ export function useSubscription() {
 
         if (error && error.code !== 'PGRST116') {
           console.error('Error fetching subscription:', error);
-          // If error, assume basic access to prevent blocking
-          setSubscription(null);
+          // Set a basic subscription as fallback
+          setSubscription({
+            id: 'fallback',
+            status: 'ACTIVE',
+            plan_id: 'basic',
+            start_date: new Date().toISOString(),
+            end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+            subscription_plans: {
+              name: 'Basic Access',
+              price: 0,
+              resource_access_level: 'basic',
+              features: ['Basic practice tests']
+            }
+          });
         } else {
-          console.log('Subscription data fetched:', data);
           setSubscription(data);
         }
       } catch (error) {
         console.error('Error fetching subscription:', error);
-        // On error, assume basic access
-        setSubscription(null);
+        // Set fallback subscription on error
+        setSubscription({
+          id: 'fallback',
+          status: 'ACTIVE', 
+          plan_id: 'basic',
+          start_date: new Date().toISOString(),
+          end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          subscription_plans: {
+            name: 'Basic Access',
+            price: 0,
+            resource_access_level: 'basic',
+            features: ['Basic practice tests']
+          }
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchSubscription();
-
-    // Cleanup timeout on unmount
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
   }, [user, userProfile]);
 
   // Normalize subscription state
@@ -105,26 +126,21 @@ export function useSubscription() {
   const notExpired = subscription?.end_date ? new Date(subscription.end_date) > new Date() : true;
   const accessLevel = subscription?.subscription_plans?.resource_access_level?.toLowerCase();
 
-  // User has any active (non-expired) subscription OR no subscription (default basic access)
-  const hasActiveSubscription = Boolean(!loading && active && notExpired);
-  
-  // User is on basic/free plan (either explicitly or as default)
-  const isFree = Boolean(!loading && (hasActiveSubscription && accessLevel === 'basic'));
-  
-  // User has basic access (either via free subscription or as default when not loading)
-  const hasBasicAccess = Boolean(!loading && (hasActiveSubscription || !subscription));
+  // User has any active (non-expired) subscription
+  const hasPremiumAccess = Boolean(!loading && active && notExpired);
   
   // User is premium if access level is premium or enterprise
-  const isPremium = Boolean(hasActiveSubscription && (accessLevel === 'premium' || (subscription?.subscription_plans?.name || '').toLowerCase().includes('premium')));
+  const isPremium = Boolean(hasPremiumAccess && (accessLevel === 'premium' || (subscription?.subscription_plans?.name || '').toLowerCase().includes('premium')));
   
   // User is enterprise if access level is enterprise
-  const isEnterprise = Boolean(hasActiveSubscription && (accessLevel === 'enterprise' || (subscription?.subscription_plans?.name || '').toLowerCase().includes('enterprise')));
+  const isEnterprise = Boolean(hasPremiumAccess && (accessLevel === 'enterprise' || (subscription?.subscription_plans?.name || '').toLowerCase().includes('enterprise')));
   
   // User can access premium content (premium or enterprise)
   const canAccessPremium = Boolean(isPremium || isEnterprise);
   
-  // User has premium access (premium or enterprise subscriptions)
-  const hasPremiumAccess = Boolean(isPremium || isEnterprise);
+  // User is on free/basic plan
+  const isFree = Boolean(hasPremiumAccess && accessLevel === 'basic');
+  
   if (typeof window !== 'undefined') {
     console.debug('useSubscription', {
       userId: user?.id,
@@ -141,7 +157,6 @@ export function useSubscription() {
   return {
     subscription,
     loading,
-    hasBasicAccess: !!hasBasicAccess,
     hasPremiumAccess: !!hasPremiumAccess,
     isPremium: !!isPremium,
     isEnterprise: !!isEnterprise,
