@@ -11,7 +11,72 @@ interface MathRendererProps {
 const MathRenderer: React.FC<MathRendererProps> = ({ content, className = "" }) => {
   // Process the content to convert mathematical notation to LaTeX
   const processedContent = processQuestionText(content || '');
+
+  const hasDollar = /\$/.test(processedContent);
+  const hasMathToken = /(\\(frac|sqrt|begin|end|cos|sin|tan|log|ln|vec|sum|int|leq|geq|neq|times|div|alpha|beta|gamma|delta|theta|lambda|mu|sigma|Omega|pi|infty|partial|nabla)|\^|_|√|×|÷)/.test(processedContent);
   
+  const renderHybridContent = (text: string) => {
+    const segments = text.split(/(\s+)/);
+    return segments.map((seg, i) => {
+      if (seg.trim() === '') {
+        return <span key={`sp-${i}`}>{seg}</span>;
+      }
+
+      // Handle trailing punctuation
+      const match = seg.match(/^(.*?)([.,;:!?])$/);
+      const core = match ? match[1] : seg;
+      const punct = match ? match[2] : '';
+
+      // If a backslash appears attached to a prior word, split to preserve spacing (e.g., "text\\cos x")
+      const bs = core.indexOf('\\');
+      if (bs > 0 && /[A-Za-z0-9)]$/.test(core.slice(0, bs))) {
+        const before = core.slice(0, bs);
+        const after = core.slice(bs);
+        try {
+          const html = katex.renderToString(after, {
+            displayMode: false,
+            throwOnError: false,
+            strict: false,
+            trust: true,
+          });
+          return (
+            <React.Fragment key={`split-${i}`}>
+              <span>{before}</span>
+              <span> </span>
+              <span dangerouslySetInnerHTML={{ __html: html }} />
+              {punct && <span>{punct}</span>}
+            </React.Fragment>
+          );
+        } catch {
+          return <span key={`t-${i}`}>{seg}</span>;
+        }
+      }
+
+      const looksMath = /(\\(frac|sqrt|cos|sin|tan|log|ln|vec|sum|int|leq|geq|neq|times|div|alpha|beta|gamma|delta|theta|lambda|mu|sigma|Omega|pi|infty|partial|nabla)|\^|_|√|×|÷)/.test(core);
+      if (looksMath) {
+        try {
+          const html = katex.renderToString(core, {
+            displayMode: false,
+            throwOnError: false,
+            strict: false,
+            trust: true,
+          });
+          return (
+            <React.Fragment key={`m-${i}`}>
+              <span dangerouslySetInnerHTML={{ __html: html }} />
+              {punct && <span>{punct}</span>}
+            </React.Fragment>
+          );
+        } catch (e) {
+          // Fall back to plain text if KaTeX fails
+          return <span key={`t-${i}`}>{seg}</span>;
+        }
+      }
+
+      return <span key={`t-${i}`}>{seg}</span>;
+    });
+  };
+
   const renderMathContent = (text: string) => {
     // Enhanced math delimiter detection and error handling
     const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/);
@@ -102,7 +167,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({ content, className = "" }) 
 
   return (
     <div className={className}>
-      {renderMathContent(processedContent)}
+      {hasDollar ? renderMathContent(processedContent) : (hasMathToken ? renderHybridContent(processedContent) : processedContent)}
     </div>
   );
 };

@@ -124,13 +124,17 @@ export function processQuestionText(text: string): string {
   // Clean redundancy of dollar signs created elsewhere
   processed = processed.replace(/\$\$+/g, '$');
   
-  // If expressions like log_2(…), cos(…), sqrt(…), ^, _ appear but no $ present, auto-wrap
-  const hasMathToken = /(\\(frac|sqrt|begin|end|cos|sin|tan|log|ln|vec|sum|int|leq|geq|neq|times|div)|\^|_|√|×|÷)/.test(processed);
+  // If expressions like log_2(…), cos(…), sqrt(…), ^, _ appear but no $ present, conditionally wrap
+  const hasMathToken = /(\\(frac|sqrt|begin|end|cos|sin|tan|log|ln|vec|sum|int|leq|geq|neq|times|div|alpha|beta|gamma|delta|theta|lambda|mu|sigma|Omega|pi|infty|partial|nabla)|\^|_|√|×|÷)/.test(processed);
   const hasDollar = /\$/.test(processed);
+  const looksLikeSentence = /[A-Za-z]{3,}\s+[A-Za-z]{3,}/.test(processed);
   if (hasMathToken && !hasDollar) {
-    // Use block for matrices/determinants
+    // Use block for matrices/determinants when the whole content is math-like and short
     const complex = /(pmatrix|bmatrix|vmatrix|\\begin\{.*?matrix\})/.test(processed);
-    processed = complex ? `$$${processed}$$` : `$${processed}$`;
+    if (!looksLikeSentence || complex) {
+      processed = complex ? `$$${processed}$$` : `$${processed}$`;
+    }
+    // If it looks like a sentence, do not wrap here - MathRenderer will render inline tokens safely
   }
 
   // Finally, wrap known chemistry pieces with $ if not already inside math
