@@ -164,7 +164,8 @@ export default function AuthForm() {
           if (error.message.includes('User already registered')) {
             throw new Error('This email is already registered. Please sign in instead.');
           }
-          throw error;
+          console.error('Signup error details:', error);
+          throw new Error(`Account creation failed: ${error.message}`);
         }
 
         toast({
@@ -175,6 +176,7 @@ export default function AuthForm() {
         setIsLogin(true);
       }
     } catch (error: any) {
+      console.error('Auth error:', error);
       if (error.issues) {
         // Zod validation errors
         const newErrors: Record<string, string> = {};
@@ -193,7 +195,6 @@ export default function AuthForm() {
       setLoading(false);
     }
   };
-
 
   const handleForgotPassword = async () => {
     if (!formData.email) {
@@ -504,7 +505,6 @@ export default function AuthForm() {
                 {loading ? "Please wait..." : (isLogin ? "Sign In" : "Create Account")}
               </Button>
             </form>
-
 
             {/* Toggle Auth Mode */}
             <div className="text-center space-y-3">

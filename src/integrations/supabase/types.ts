@@ -525,6 +525,7 @@ export type Database = {
       rate_limits: {
         Row: {
           created_at: string | null
+          details: Json | null
           endpoint: string
           id: string
           request_count: number | null
@@ -533,6 +534,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          details?: Json | null
           endpoint: string
           id?: string
           request_count?: number | null
@@ -541,6 +543,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          details?: Json | null
           endpoint?: string
           id?: string
           request_count?: number | null
