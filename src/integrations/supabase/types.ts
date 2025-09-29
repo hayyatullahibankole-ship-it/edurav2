@@ -126,13 +126,6 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "attempts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
-            referencedColumns: ["id"]
-          },
         ]
       }
       audit_logs: {
@@ -175,13 +168,6 @@ export type Database = {
             columns: ["actor_user_id"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "audit_logs_actor_user_id_fkey"
-            columns: ["actor_user_id"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
             referencedColumns: ["id"]
           },
         ]
@@ -308,24 +294,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "bookings_tutor_id_fkey"
-            columns: ["tutor_id"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "bookings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
             referencedColumns: ["id"]
           },
         ]
@@ -435,13 +407,6 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "exams_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
-            referencedColumns: ["id"]
-          },
         ]
       }
       notifications: {
@@ -481,13 +446,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
             referencedColumns: ["id"]
           },
         ]
@@ -553,13 +511,6 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "questions_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
             referencedColumns: ["id"]
           },
           {
@@ -662,13 +613,6 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "resources_uploaded_by_fkey"
-            columns: ["uploaded_by"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
-            referencedColumns: ["id"]
-          },
         ]
       }
       results: {
@@ -741,13 +685,6 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "results_graded_by_fkey"
-            columns: ["graded_by"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
-            referencedColumns: ["id"]
-          },
         ]
       }
       roles: {
@@ -799,13 +736,6 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "settings_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
             referencedColumns: ["id"]
           },
         ]
@@ -934,13 +864,6 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "subscriptions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
-            referencedColumns: ["id"]
-          },
         ]
       }
       system_settings: {
@@ -1031,13 +954,6 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "transactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
-            referencedColumns: ["id"]
-          },
         ]
       }
       user_roles: {
@@ -1071,24 +987,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "user_roles_assigned_by_fkey"
-            columns: ["assigned_by"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "user_roles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users_masked"
             referencedColumns: ["id"]
           },
         ]
@@ -1164,69 +1066,7 @@ export type Database = {
       }
     }
     Views: {
-      users_masked: {
-        Row: {
-          address: string | null
-          auth_user_id: string | null
-          country: string | null
-          created_at: string | null
-          date_of_birth: string | null
-          device_fingerprint_masked: string | null
-          email: string | null
-          first_name: string | null
-          id: string | null
-          is_suspended: boolean | null
-          is_verified: boolean | null
-          last_login_at: string | null
-          last_login_ip_masked: string | null
-          last_name: string | null
-          phone: string | null
-          profile_image_url: string | null
-          state: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          address?: never
-          auth_user_id?: string | null
-          country?: string | null
-          created_at?: string | null
-          date_of_birth?: never
-          device_fingerprint_masked?: never
-          email?: never
-          first_name?: string | null
-          id?: string | null
-          is_suspended?: boolean | null
-          is_verified?: boolean | null
-          last_login_at?: never
-          last_login_ip_masked?: never
-          last_name?: string | null
-          phone?: never
-          profile_image_url?: string | null
-          state?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          address?: never
-          auth_user_id?: string | null
-          country?: string | null
-          created_at?: string | null
-          date_of_birth?: never
-          device_fingerprint_masked?: never
-          email?: never
-          first_name?: string | null
-          id?: string | null
-          is_suspended?: boolean | null
-          is_verified?: boolean | null
-          last_login_at?: never
-          last_login_ip_masked?: never
-          last_name?: string | null
-          phone?: never
-          profile_image_url?: string | null
-          state?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       can_view_full_pii: {
@@ -1416,6 +1256,29 @@ export type Database = {
           id: string
           is_suspended: boolean
           is_verified: boolean
+          last_name: string
+          phone: string
+          profile_image_url: string
+          state: string
+          updated_at: string
+        }[]
+      }
+      get_users_masked: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address: string
+          auth_user_id: string
+          country: string
+          created_at: string
+          date_of_birth: string
+          device_fingerprint_masked: string
+          email: string
+          first_name: string
+          id: string
+          is_suspended: boolean
+          is_verified: boolean
+          last_login_at: string
+          last_login_ip_masked: string
           last_name: string
           phone: string
           profile_image_url: string
