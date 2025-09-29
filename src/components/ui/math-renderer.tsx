@@ -1,6 +1,7 @@
 import React from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import { processQuestionText } from '@/utils/latexProcessor';
 
 interface MathRendererProps {
   content: string;
@@ -8,6 +9,9 @@ interface MathRendererProps {
 }
 
 const MathRenderer: React.FC<MathRendererProps> = ({ content, className = "" }) => {
+  // Process the content to convert mathematical notation to LaTeX
+  const processedContent = processQuestionText(content || '');
+  
   const renderMathContent = (text: string) => {
     // Split text by math delimiters while preserving the delimiters
     const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/);
@@ -76,7 +80,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({ content, className = "" }) 
 
   return (
     <div className={className}>
-      {renderMathContent(content)}
+      {renderMathContent(processedContent)}
     </div>
   );
 };

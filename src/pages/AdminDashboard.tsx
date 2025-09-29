@@ -31,7 +31,8 @@ import {
   Search,
   Filter,
   MoreHorizontal,
-  Activity
+  Activity,
+  Calculator
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -380,6 +381,34 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleFixMathNotation = async () => {
+    try {
+      setLoading(true);
+      toast({
+        title: "Processing",
+        description: "Fixing mathematical notation in all questions...",
+      });
+
+      const { data, error } = await supabase.functions.invoke('fix-math-notation');
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Mathematical Notation Fixed",
+        description: data.message || "Successfully processed all questions with mathematical notation fixes.",
+      });
+    } catch (error) {
+      console.error('Math notation fix error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fix mathematical notation",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isAdmin) {
     return null;
   }
@@ -569,6 +598,10 @@ export default function AdminDashboard() {
               <Button variant="outline" size="sm" onClick={handleExportData}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleFixMathNotation} disabled={loading}>
+                <Calculator className="w-4 h-4 mr-2" />
+                Fix Math
               </Button>
             </div>
           </div>
