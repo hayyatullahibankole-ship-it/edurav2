@@ -1419,6 +1419,10 @@ export type Database = {
           severity: string
         }[]
       }
+      send_immediate_result_notification: {
+        Args: { attempt_uuid: string }
+        Returns: boolean
+      }
       validate_admin_action: {
         Args: { action_type: string; target_data?: Json }
         Returns: boolean

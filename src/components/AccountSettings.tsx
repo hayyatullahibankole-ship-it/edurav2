@@ -311,6 +311,45 @@ export default function AccountSettings() {
     }
   };
 
+  const handleTestSMS = async () => {
+    if (!user || !isPremium) {
+      toast({
+        title: "Premium required",
+        description: "SMS notifications are only available for premium subscribers.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-sms', {
+        body: {
+          type: 'custom',
+          userId: user.id,
+          message: 'This is a test SMS from Edura! Your SMS notifications are working perfectly. 🎉'
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Test SMS sent!",
+        description: "Check your phone for the test message.",
+      });
+      
+    } catch (error: any) {
+      console.error('Error sending test SMS:', error);
+      toast({
+        title: "Failed to send test SMS",
+        description: error.message || "Please check your phone number and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleVerifyEmail = async () => {
     if (!userProfile?.email) {
       toast({
@@ -490,7 +529,7 @@ export default function AccountSettings() {
                   />
                 </div>
               ))}
-              {!isPremium && (
+              {!isPremium ? (
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertDescription>
@@ -500,6 +539,20 @@ export default function AccountSettings() {
                     </Link>
                   </AlertDescription>
                 </Alert>
+              ) : (
+                <div className="mt-4 flex gap-2">
+                  <Button 
+                    onClick={handleTestSMS} 
+                    variant="outline" 
+                    size="sm"
+                    disabled={loading}
+                  >
+                    {loading ? "Sending..." : "Test SMS"}
+                  </Button>
+                  <span className="text-xs text-muted-foreground self-center">
+                    Send a test message to verify SMS notifications
+                  </span>
+                </div>
               )}
             </div>
           </div>
