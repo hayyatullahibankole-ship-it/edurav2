@@ -131,7 +131,7 @@ export default function AdminDashboard() {
       
       // Fetch dashboard statistics
       const [usersResp, subscriptionsResp, examsResp, attemptsResp] = await Promise.all([
-        supabase.from('users').select('*').order('created_at', { ascending: false }),
+        supabase.rpc('get_users_masked'),
         supabase.from('subscriptions').select('id, status', { count: 'exact' }),
         supabase.from('exams').select('id, title, type, is_published'),
         supabase.from('attempts').select(`
