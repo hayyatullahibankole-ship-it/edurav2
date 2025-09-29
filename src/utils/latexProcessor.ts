@@ -3,147 +3,104 @@
 export function processQuestionText(text: string): string {
   if (!text) return '';
   
-  // Convert common math expressions to LaTeX format
+  // Convert common math expressions to LaTeX format (SAFE transforms only)
   let processed = text
-    // Fix broken LaTeX first - common issues from the database
-    .replace(/\\begin\s+([^\\]+)\s+\\end/g, '\\begin{$1} \\end{$1}')
-    .replace(/\\begin\{([^}]+)\}([^\\]*?)\\end\{[^}]*\}/g, '\\begin{$1}$2\\end{$1}')
-    .replace(/\$([^$]*[{}][^$]*)\$(?!\$)/g, (match, content) => {
-      // Fix unmatched braces in LaTeX
-      const openBraces = (content.match(/\{/g) || []).length;
-      const closeBraces = (content.match(/\}/g) || []).length;
-      if (openBraces > closeBraces) {
-        content += '}'.repeat(openBraces - closeBraces);
-      }
-      return `$${content}$`;
-    })
-    
-    // Handle matrices and vectors properly
-    .replace(/\\begin\s*\{\s*pmatrix\s*\}\s*([^\\]+)\s*\\end\s*\{\s*pmatrix\s*\}/g, '$\\begin{pmatrix}$1\\end{pmatrix}$')
-    .replace(/\\begin\s*\{\s*bmatrix\s*\}\s*([^\\]+)\s*\\end\s*\{\s*bmatrix\s*\}/g, '$\\begin{bmatrix}$1\\end{bmatrix}$')
-    .replace(/\\begin\s*\{\s*vmatrix\s*\}\s*([^\\]+)\s*\\end\s*\{\s*vmatrix\s*\}/g, '$\\begin{vmatrix}$1\\end{vmatrix}$')
-    
-    // Convert matrix notation without proper LaTeX tags
-    .replace(/\[\s*([0-9\s\-+.,&\\]+)\s*\]/g, (match, content) => {
-      if (content.includes('&') || content.includes('\\\\')) {
-        return `$\\begin{bmatrix}${content}\\end{bmatrix}$`;
-      }
-      return match;
-    })
-    
-    // Handle determinant notation
-    .replace(/\|\s*([0-9\s\-+.,&\\]+)\s*\|/g, (match, content) => {
-      if (content.includes('&') || content.includes('\\\\')) {
-        return `$\\begin{vmatrix}${content}\\end{vmatrix}$`;
-      }
-      return match;
-    })
-    
-    // Convert vectors
-    .replace(/\\vec\s*\{\s*([^}]+)\s*\}/g, '$\\vec{$1}$')
-    .replace(/\\vec\s+([a-zA-Z])/g, '$\\vec{$1}$')
-    
-    // Convert superscript numbers (like x² to x^2)
-    .replace(/([a-zA-Z0-9)])(²)/g, '$$1^2$')
-    .replace(/([a-zA-Z0-9)])(³)/g, '$$1^3$')
-    .replace(/([a-zA-Z0-9)])(⁴)/g, '$$1^4$')
-    .replace(/([a-zA-Z0-9)])(⁵)/g, '$$1^5$')
-    .replace(/([a-zA-Z0-9)])(⁶)/g, '$$1^6$')
-    .replace(/([a-zA-Z0-9)])(⁷)/g, '$$1^7$')
-    .replace(/([a-zA-Z0-9)])(⁸)/g, '$$1^8$')
-    .replace(/([a-zA-Z0-9)])(⁹)/g, '$$1^9$')
-    .replace(/([a-zA-Z0-9)])(⁰)/g, '$$1^0$')
-    .replace(/([a-zA-Z0-9)])(¹)/g, '$$1^1$')
-    
-    // Convert subscript numbers (like H₂O to H_2O)
-    .replace(/([a-zA-Z])(₀)/g, '$$1_0$')
-    .replace(/([a-zA-Z])(₁)/g, '$$1_1$')
-    .replace(/([a-zA-Z])(₂)/g, '$$1_2$')
-    .replace(/([a-zA-Z])(₃)/g, '$$1_3$')
-    .replace(/([a-zA-Z])(₄)/g, '$$1_4$')
-    .replace(/([a-zA-Z])(₅)/g, '$$1_5$')
-    .replace(/([a-zA-Z])(₆)/g, '$$1_6$')
-    .replace(/([a-zA-Z])(₇)/g, '$$1_7$')
-    .replace(/([a-zA-Z])(₈)/g, '$$1_8$')
-    .replace(/([a-zA-Z])(₉)/g, '$$1_9$')
-    
-    // Convert fractions like 2/3 to \frac{2}{3} if they're standalone
-    .replace(/\b(\d+)\/(\d+)\b/g, '$\\frac{$1}{$2}$')
-    
-    // Convert square roots
-    .replace(/sqrt\(([^)]+)\)/g, '$\\sqrt{$1}$')
-    .replace(/√\(([^)]+)\)/g, '$\\sqrt{$1}$')
-    .replace(/√(\d+)/g, '$\\sqrt{$1}$')
-    .replace(/√([a-zA-Z]+)/g, '$\\sqrt{$1}$')
-    
-    // Convert powers like x^2 to proper LaTeX
-    .replace(/\b([a-zA-Z]+)\^([0-9]+)\b/g, '$$1^{$2}$')
-    .replace(/\b([a-zA-Z]+)\^{([^}]+)}/g, '$$1^{$2}$')
-    .replace(/\b(\d+)\^([0-9]+)\b/g, '$$1^{$2}$')
-    .replace(/\b(\d+)\^{([^}]+)}/g, '$$1^{$2}$')
-    
-    // Convert expressions inside parentheses with powers
-    .replace(/\(([^)]+)\)\^([0-9]+)/g, '$($1)^{$2}$')
-    .replace(/\(([^)]+)\)\^{([^}]+)}/g, '$($1)^{$2}$')
-    
-    // Convert degree symbol
-    .replace(/°C/g, '$°C$')
-    .replace(/°F/g, '$°F$')
-    .replace(/°/g, '$°$')
-    
-    // Convert common symbols
-    .replace(/×/g, '$\\times$')
-    .replace(/÷/g, '$\\div$')
-    .replace(/π/g, '$\\pi$')
-    .replace(/≤/g, '$\\leq$')
-    .replace(/≥/g, '$\\geq$')
-    .replace(/≠/g, '$\\neq$')
-    .replace(/±/g, '$\\pm$')
-    .replace(/∞/g, '$\\infty$')
-    .replace(/∑/g, '$\\sum$')
-    .replace(/∫/g, '$\\int$')
-    .replace(/∂/g, '$\\partial$')
-    .replace(/Δ/g, '$\\Delta$')
-    .replace(/∇/g, '$\\nabla$')
-    .replace(/α/g, '$\\alpha$')
-    .replace(/β/g, '$\\beta$')
-    .replace(/γ/g, '$\\gamma$')
-    .replace(/δ/g, '$\\delta$')
-    .replace(/θ/g, '$\\theta$')
-    .replace(/λ/g, '$\\lambda$')
-    .replace(/μ/g, '$\\mu$')
-    .replace(/σ/g, '$\\sigma$')
-    .replace(/Ω/g, '$\\Omega$')
-    
-    // Scientific notation fixes
-    .replace(/(\d+(?:\.\d+)?)\s*[xX]\s*10\^{?([+-]?\d+)}?/g, '$$1 \\times 10^{$2}$')
-    .replace(/(\d+(?:\.\d+)?)\s*[×]\s*10\^{?([+-]?\d+)}?/g, '$$1 \\times 10^{$2}$')
-    
-    // Fix common chemistry formulas
-    .replace(/\bH2O\b/g, '$H_2O$')
-    .replace(/\bCO2\b/g, '$CO_2$')
-    .replace(/\bNaCl\b/g, '$NaCl$')
-    .replace(/\bH2SO4\b/g, '$H_2SO_4$')
-    .replace(/\bCaCO3\b/g, '$CaCO_3$')
-    .replace(/\bO2\b/g, '$O_2$')
-    .replace(/\bN2\b/g, '$N_2$')
-    .replace(/\bNH3\b/g, '$NH_3$')
-    .replace(/\bCH4\b/g, '$CH_4$')
-    
-    // Physics units
-    .replace(/m\/s2/g, '$m/s^2$')
-    .replace(/kg\.m\/s2/g, '$kg \\cdot m/s^2$')
-    .replace(/J\/mol/g, '$J/mol$')
-    .replace(/m\/s/g, '$m/s$')
-    .replace(/kg\/m³/g, '$kg/m^3$');
+    // 1) Function names without backslash
+    .replace(/\bcos(?=\s|\()/gi, '\\cos')
+    .replace(/\bsin(?=\s|\()/gi, '\\sin')
+    .replace(/\btan(?=\s|\()/gi, '\\tan')
+    .replace(/\blog(?=\s*[_\(])/gi, '\\log')
+    .replace(/\bln(?=\s|\()/gi, '\\ln')
 
-  // Clean up multiple dollar signs and fix spacing
-  processed = processed
-    .replace(/\$\$+/g, '$')
-    .replace(/\$\s+/g, '$')
-    .replace(/\s+\$/g, '$')
-    .replace(/\$([^$]*)\$\$([^$]*)\$/g, '$$$1 $2$$');
+    // 2) Degree notations
+    .replace(/\^\\?circ/gi, '^{\\circ}')
+    .replace(/\b(\d+)\s*deg\b/gi, '$1^{\\circ}')
+
+    // 3) Superscript/subscript unicode to ASCII caret/underscore
+    .replace(/([A-Za-z0-9\)])(²)/g, '$1^2')
+    .replace(/([A-Za-z0-9\)])(³)/g, '$1^3')
+    .replace(/([A-Za-z0-9\)])(⁴)/g, '$1^4')
+    .replace(/([A-Za-z0-9\)])(⁵)/g, '$1^5')
+    .replace(/([A-Za-z0-9\)])(⁶)/g, '$1^6')
+    .replace(/([A-Za-z0-9\)])(⁷)/g, '$1^7')
+    .replace(/([A-Za-z0-9\)])(⁸)/g, '$1^8')
+    .replace(/([A-Za-z0-9\)])(⁹)/g, '$1^9')
+    .replace(/([A-Za-z0-9\)])(⁰)/g, '$1^0')
+    .replace(/([A-Za-z])(₀)/g, '$1_0')
+    .replace(/([A-Za-z])(₁)/g, '$1_1')
+    .replace(/([A-Za-z])(₂)/g, '$1_2')
+    .replace(/([A-Za-z])(₃)/g, '$1_3')
+    .replace(/([A-Za-z])(₄)/g, '$1_4')
+    .replace(/([A-Za-z])(₅)/g, '$1_5')
+    .replace(/([A-Za-z])(₆)/g, '$1_6')
+    .replace(/([A-Za-z])(₇)/g, '$1_7')
+    .replace(/([A-Za-z])(₈)/g, '$1_8')
+    .replace(/([A-Za-z])(₉)/g, '$1_9')
+
+    // 4) Ensure braces for ^ and _ when followed by a single char
+    .replace(/\^(?!\{)([A-Za-z0-9])/g, '^{$1}')
+    .replace(/_(?!\{)([A-Za-z0-9])/g, '_{$1}')
+
+    // 5) sqrt and common symbols
+    .replace(/sqrt\(([^)]+)\)/gi, '\\sqrt{$1}')
+    .replace(/√\(([^)]+)\)/g, '\\sqrt{$1}')
+    .replace(/√([A-Za-z0-9]+)/g, '\\sqrt{$1}')
+    .replace(/≤/g, '\\leq')
+    .replace(/≥/g, '\\geq')
+    .replace(/≠/g, '\\neq')
+    .replace(/±/g, '\\pm')
+    .replace(/×/g, '\\times')
+    .replace(/÷/g, '\\div')
+    .replace(/π/g, '\\pi')
+    .replace(/∞/g, '\\infty')
+    .replace(/∑/g, '\\sum')
+    .replace(/∫/g, '\\int')
+    .replace(/∂/g, '\\partial')
+    .replace(/Δ/g, '\\Delta')
+    .replace(/∇/g, '\\nabla')
+    .replace(/α/g, '\\alpha')
+    .replace(/β/g, '\\beta')
+    .replace(/γ/g, '\\gamma')
+    .replace(/δ/g, '\\delta')
+    .replace(/θ/g, '\\theta')
+    .replace(/λ/g, '\\lambda')
+    .replace(/μ/g, '\\mu')
+    .replace(/σ/g, '\\sigma')
+    .replace(/Ω/g, '\\Omega')
+
+    // 6) Scientific notation patterns
+    .replace(/(\d+(?:\.\d+)?)\s*[xX×]\s*10\^\{?([+-]?\d+)\}?/g, '$1 \\times 10^{$2}')
+
+    // 7) Chemistry (simple)
+    .replace(/\bH2O\b/g, 'H_2O')
+    .replace(/\bCO2\b/g, 'CO_2')
+    .replace(/\bH2SO4\b/g, 'H_2SO_4')
+    .replace(/\bCaCO3\b/g, 'CaCO_3')
+    .replace(/\bO2\b/g, 'O_2')
+    .replace(/\bN2\b/g, 'N_2')
+    .replace(/\bNH3\b/g, 'NH_3')
+    .replace(/\bCH4\b/g, 'CH_4')
+
+    // 8) Common physics units
+    .replace(/m\/s2/g, 'm/s^2')
+    .replace(/kg\.m\/s2/g, 'kg \\cdot m/s^2')
+    .replace(/kg\/m³/g, 'kg/m^3');
+
+  // Clean redundancy of dollar signs created elsewhere
+  processed = processed.replace(/\$\$+/g, '$');
   
+  // If expressions like log_2(…), cos(…), sqrt(…), ^, _ appear but no $ present, auto-wrap
+  const hasMathToken = /(\\(frac|sqrt|begin|end|cos|sin|tan|log|ln|vec|sum|int|leq|geq|neq|times|div)|\^|_|√|×|÷)/.test(processed);
+  const hasDollar = /\$/.test(processed);
+  if (hasMathToken && !hasDollar) {
+    // Use block for matrices/determinants
+    const complex = /(pmatrix|bmatrix|vmatrix|\\begin\{.*?matrix\})/.test(processed);
+    processed = complex ? `$$${processed}$$` : `$${processed}$`;
+  }
+
+  // Finally, wrap known chemistry pieces with $ if not already inside math
+  processed = processed.replace(/\b([A-Z][a-z]?_\{?\d+\}?)+\b/g, (m) => /\$/.test(m) ? m : `$${m}$`);
+
   return processed;
 }
 
