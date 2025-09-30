@@ -177,14 +177,34 @@ const PricingManager = () => {
     try {
       const { data, error } = await supabase
         .from('transactions')
-        .select(`
-          *,
-          users (first_name, last_name, email)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTransactions(data || []);
+      
+      // Fetch user details separately for each transaction
+      const transactionsWithUsers = await Promise.all(
+        (data || []).map(async (transaction) => {
+          if (transaction.user_id) {
+            const { data: userData } = await supabase
+              .from('users')
+              .select('first_name, last_name, email')
+              .eq('auth_user_id', transaction.user_id)
+              .single();
+            
+            return {
+              ...transaction,
+              users: userData || null
+            };
+          }
+          return {
+            ...transaction,
+            users: null
+          };
+        })
+      );
+      
+      setTransactions(transactionsWithUsers);
     } catch (error) {
       console.error('Error fetching transactions:', error);
     }
@@ -902,7 +922,12 @@ const PricingManager = () => {
                       <div>
                         <div className="flex items-center space-x-2">
                           <p className="font-medium text-white">
-                            {transaction.users?.first_name} {transaction.users?.last_name}
+                            {transaction.users?.first_name && transaction.users?.last_name
+                              ? `${transaction.users.first_name} ${transaction.users.last_name}`
+                              : transaction.metadata?.paystack_data?.customer?.email || 
+                                transaction.metadata?.customer_email ||
+                                'Unknown User'
+                            }
                           </p>
                           <Badge className={
                             transaction.status === 'SUCCESS' ? 'bg-green-600' :
@@ -912,7 +937,12 @@ const PricingManager = () => {
                             {transaction.status}
                           </Badge>
                         </div>
-                        <p className="text-sm text-slate-400">{transaction.users?.email}</p>
+                        <p className="text-sm text-slate-400">
+                          {transaction.users?.email || 
+                           transaction.metadata?.paystack_data?.customer?.email ||
+                           transaction.metadata?.customer_email ||
+                           'No email available'}
+                        </p>
                         <div className="flex items-center space-x-4 mt-1 text-xs text-slate-500">
                           <span>Amount: {formatCurrency(transaction.amount, transaction.currency)}</span>
                           <span>Gateway: {transaction.gateway || 'Paystack'}</span>
