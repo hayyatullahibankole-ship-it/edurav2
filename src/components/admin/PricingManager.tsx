@@ -181,35 +181,11 @@ const PricingManager = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      // Fetch user details separately for each transaction
-      const transactionsWithUsers = await Promise.all(
-        (data || []).map(async (transaction) => {
-          if (transaction.user_id) {
-            const { data: userData } = await supabase
-              .from('users')
-              .select('first_name, last_name, email')
-              .eq('auth_user_id', transaction.user_id)
-              .single();
-            
-            return {
-              ...transaction,
-              users: userData || null
-            };
-          }
-          return {
-            ...transaction,
-            users: null
-          };
-        })
-      );
-      
-      setTransactions(transactionsWithUsers);
+      setTransactions(data || []);
     } catch (error) {
       console.error('Error fetching transactions:', error);
     }
   };
-
   const calculateAnalytics = () => {
     try {
       console.log('Calculating analytics with', transactions.length, 'transactions');
