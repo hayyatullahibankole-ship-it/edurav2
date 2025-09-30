@@ -13,9 +13,9 @@ serve(async (req) => {
   }
 
   try {
-    const { reference } = await req.json();
+    const { reference, userId } = await req.json();
     
-    console.log('Payment verification request for:', reference);
+    console.log('Payment verification request for:', reference, 'userId:', userId);
 
     if (!reference) {
       return new Response(
@@ -79,26 +79,53 @@ serve(async (req) => {
       );
     }
 
-    // Get user by email from transaction
-    const { data: users, error: userError } = await supabaseClient
-      .from('users')
-      .select('id')
-      .eq('email', transaction.customer.email)
-      .single();
+    // Resolve user: prefer explicit userId (auth uid), fallback to Paystack email
+    let userRecord: { id: string } | null = null;
 
-    if (userError || !users) {
-      console.error('User not found:', transaction.customer.email);
+    if (userId) {
+      const { data: byAuth } = await supabaseClient
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', userId)
+        .maybeSingle();
+      if (byAuth) userRecord = byAuth as { id: string };
+    }
+
+    if (!userRecord) {
+      const { data: byEmail } = await supabaseClient
+        .from('users')
+        .select('id')
+        .eq('email', transaction.customer.email)
+        .maybeSingle();
+      if (byEmail) userRecord = byEmail as { id: string };
+    }
+
+    // Idempotency: if we already recorded this reference, ensure SUCCESS and return
+    const { data: existingTx } = await supabaseClient
+      .from('transactions')
+      .select('id, status')
+      .eq('gateway_reference', reference)
+      .maybeSingle();
+
+    if (existingTx) {
+      if (existingTx.status !== 'SUCCESS') {
+        await supabaseClient
+          .from('transactions')
+          .update({ status: 'SUCCESS', updated_at: new Date().toISOString() })
+          .eq('id', existingTx.id);
+      }
       return new Response(
-        JSON.stringify({ error: 'User not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: true, message: 'Payment already verified' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
 
     // Record transaction
     const { error: transactionError } = await supabaseClient
       .from('transactions')
       .insert({
-        user_id: users.id,
+        user_id: userRecord ? userRecord.id : null,
         amount: transaction.amount / 100, // Convert from kobo to naira
         currency: transaction.currency,
         gateway: 'paystack',
@@ -107,7 +134,9 @@ serve(async (req) => {
         payment_method: transaction.channel,
         metadata: {
           paystack_data: transaction,
-          customer_code: transaction.customer.customer_code
+          customer_code: transaction.customer?.customer_code,
+          customer_email: transaction.customer?.email,
+          plan_type: transaction.metadata?.plan_type || null
         }
       });
 
@@ -140,7 +169,7 @@ serve(async (req) => {
         const { error: subscriptionError } = await supabaseClient
           .from('subscriptions')
           .insert({
-            user_id: users.id,
+            user_id: userRecord ? userRecord.id : null,
             plan_id: plan.id,
             status: 'ACTIVE',
             start_date: new Date().toISOString(),
