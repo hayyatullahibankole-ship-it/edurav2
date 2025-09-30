@@ -134,23 +134,30 @@ const Resources = () => {
 
       let fileUrl = resource.file_url;
       
+      // Check if it's an external video link (YouTube, Vimeo, etc.)
+      const isExternalVideo = fileUrl.includes('youtube.com') || 
+                              fileUrl.includes('youtu.be') || 
+                              fileUrl.includes('vimeo.com');
+      
       // Handle different URL types
       if (fileUrl.startsWith('http')) {
-        // Already a full URL (new uploads or external links)
-        // Verify the file exists before proceeding
-        try {
-          const response = await fetch(fileUrl, { method: 'HEAD' });
-          if (!response.ok) {
-            throw new Error('File not found at the specified URL');
+        // Skip verification for external video links (YouTube, Vimeo) due to CORS
+        if (!isExternalVideo) {
+          // Verify the file exists for non-video external links
+          try {
+            const response = await fetch(fileUrl, { method: 'HEAD' });
+            if (!response.ok) {
+              throw new Error('File not found at the specified URL');
+            }
+          } catch (fetchError) {
+            console.error('File verification failed:', fetchError);
+            toast({
+              title: "File Not Available",
+              description: "This resource file is currently not available. Please contact support.",
+              variant: "destructive"
+            });
+            return;
           }
-        } catch (fetchError) {
-          console.error('File verification failed:', fetchError);
-          toast({
-            title: "File Not Available",
-            description: "This resource file is currently not available. Please contact support.",
-            variant: "destructive"
-          });
-          return;
         }
       } else {
         // Legacy or relative path - check if file exists in storage first
