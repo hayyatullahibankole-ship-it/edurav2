@@ -216,8 +216,35 @@ const Resources = () => {
         .eq('id', resource.id);
 
       // Handle different file types
-      if (resource.file_type?.startsWith('video') || fileUrl.includes('youtube') || fileUrl.includes('vimeo')) {
-        window.open(fileUrl, '_blank');
+      if (resource.file_type?.startsWith('video') || fileUrl.includes('youtube') || fileUrl.includes('youtu.be') || fileUrl.includes('vimeo')) {
+        // Normalize YouTube short links to full watch URLs
+        const normalizeVideoUrl = (url: string) => {
+          try {
+            if (url.includes('youtu.be/')) {
+              const id = new URL(url).pathname.replace('/', '').split('?')[0];
+              return `https://www.youtube.com/watch?v=${id}`;
+            }
+            if (url.includes('youtube.com/shorts/')) {
+              const id = new URL(url).pathname.split('/').pop();
+              return `https://www.youtube.com/watch?v=${id}`;
+            }
+            return url;
+          } catch {
+            return url;
+          }
+        };
+
+        const openUrl = normalizeVideoUrl(fileUrl);
+
+        // Open in a true new tab to avoid iframe blocking (ERR_BLOCKED_BY_RESPONSE)
+        const a = document.createElement('a');
+        a.href = openUrl;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
         toast({
           title: "Opening Video",
           description: "Video is opening in a new tab"
