@@ -116,14 +116,14 @@ const PricingManager = () => {
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      await Promise.allSettled([
-        fetchPlans(),
-        fetchSubscriptions(),
-        fetchTransactions()
-      ]);
-      // calculateAnalytics runs via useEffect when data updates
+      const { data, error } = await supabase.functions.invoke('admin-get-billing', { body: {} });
+      if (error) throw error;
+      setPlans((data as any)?.plans || []);
+      setSubscriptions(((data as any)?.subscriptions || []) as any);
+      setTransactions(((data as any)?.transactions || []) as any);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching billing data:', error);
+      toast({ title: 'Error', description: 'Failed to load billing data', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
