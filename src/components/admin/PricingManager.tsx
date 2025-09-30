@@ -116,14 +116,12 @@ const PricingManager = () => {
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      // Fetch data first
-      await Promise.all([
+      await Promise.allSettled([
         fetchPlans(),
         fetchSubscriptions(),
         fetchTransactions()
       ]);
-      // Then calculate analytics after data is loaded
-      // Note: calculateAnalytics will be called via useEffect when dependencies update
+      // calculateAnalytics runs via useEffect when data updates
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -156,13 +154,14 @@ const PricingManager = () => {
         .from('subscriptions')
         .select(`
           *,
-          users (first_name, last_name, email),
           subscription_plans (name, price, currency)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSubscriptions(data || []);
+      // Ensure type compatibility when user relation isn't selected
+      const normalized = (data || []).map((s: any) => ({ ...s, users: null }));
+      setSubscriptions(normalized as any);
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
       toast({
@@ -841,13 +840,15 @@ const PricingManager = () => {
                       <div>
                         <div className="flex items-center space-x-2">
                           <p className="font-medium text-white">
-                            {subscription.users?.first_name} {subscription.users?.last_name}
+                            {subscription.users?.first_name && subscription.users?.last_name
+                              ? `${subscription.users.first_name} ${subscription.users.last_name}`
+                              : 'Subscriber'}
                           </p>
                           <Badge className={getStatusColor(subscription.status)}>
                             {subscription.status}
                           </Badge>
                         </div>
-                        <p className="text-sm text-slate-400">{subscription.users?.email}</p>
+                        <p className="text-sm text-slate-400">{subscription.users?.email || 'N/A'}</p>
                         <div className="flex items-center space-x-4 mt-1 text-xs text-slate-500">
                           <span>Plan: {subscription.subscription_plans?.name}</span>
                           <span>Amount: {formatCurrency(subscription.subscription_plans?.price || 0, subscription.subscription_plans?.currency || 'NGN')}</span>
