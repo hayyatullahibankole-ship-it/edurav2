@@ -325,13 +325,14 @@ const Resources = () => {
 
   const filteredResources = resources.filter(resource => {
     const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         resource.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         resource.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSubject = selectedSubject === 'all' || resource.subject_id === selectedSubject;
     
-    // Hide broken resources for regular users, but show them for admins
-    const isWorking = resource.file_url.startsWith('http') || !resource.file_url.includes('uploads/');
+    // Allow all valid URLs (including YouTube, external links)
+    const isValidUrl = resource.file_url && resource.file_url.startsWith('http');
     
-    return matchesSearch && matchesSubject && (isWorking || isAdmin);
+    // Show all valid resources, regardless of source
+    return matchesSearch && matchesSubject && isValidUrl;
   });
 
   const resourceCategories = [
@@ -450,7 +451,7 @@ const Resources = () => {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {loading ? (
               Array.from({ length: 8 }, (_, index) => (
                 <Card key={index} className="animate-pulse">

@@ -106,15 +106,24 @@ const PricingManager = () => {
     };
   }, []);
 
+  // Calculate analytics whenever data changes
+  useEffect(() => {
+    if (transactions.length > 0 || subscriptions.length > 0 || plans.length > 0) {
+      calculateAnalytics();
+    }
+  }, [transactions, subscriptions, plans]);
+
   const fetchAllData = async () => {
     try {
       setLoading(true);
+      // Fetch data first
       await Promise.all([
         fetchPlans(),
         fetchSubscriptions(),
-        fetchTransactions(),
-        calculateAnalytics()
+        fetchTransactions()
       ]);
+      // Then calculate analytics after data is loaded
+      // Note: calculateAnalytics will be called via useEffect when dependencies update
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -181,8 +190,9 @@ const PricingManager = () => {
     }
   };
 
-  const calculateAnalytics = async () => {
+  const calculateAnalytics = () => {
     try {
+      console.log('Calculating analytics with', transactions.length, 'transactions');
       const totalRevenue = transactions
         .filter(t => t.status === 'SUCCESS')
         .reduce((sum, t) => sum + Number(t.amount), 0);
