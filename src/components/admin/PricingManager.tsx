@@ -152,10 +152,7 @@ const PricingManager = () => {
     try {
       const { data, error } = await supabase
         .from('subscriptions')
-        .select(`
-          *,
-          subscription_plans (name, price, currency)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -850,8 +847,12 @@ const PricingManager = () => {
                         </div>
                         <p className="text-sm text-slate-400">{subscription.users?.email || 'N/A'}</p>
                         <div className="flex items-center space-x-4 mt-1 text-xs text-slate-500">
-                          <span>Plan: {subscription.subscription_plans?.name}</span>
-                          <span>Amount: {formatCurrency(subscription.subscription_plans?.price || 0, subscription.subscription_plans?.currency || 'NGN')}</span>
+                          {(() => { const p = plans.find(pl => pl.id === subscription.plan_id); return (
+                            <>
+                              <span>Plan: {p?.name || '—'}</span>
+                              <span>Amount: {formatCurrency(p?.price || 0, p?.currency || 'NGN')}</span>
+                            </>
+                          ); })()}
                           <span>Started: {new Date(subscription.start_date).toLocaleDateString()}</span>
                           <span>Expires: {new Date(subscription.end_date).toLocaleDateString()}</span>
                         </div>
