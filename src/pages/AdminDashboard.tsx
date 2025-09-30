@@ -123,16 +123,37 @@ export default function AdminDashboard() {
     
     console.log('Admin verified, loading dashboard data');
     fetchAdminData();
+
+    // Set up real-time updates for subscriptions and transactions
+    const channel = supabase
+      .channel('admin-dashboard-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'subscriptions' }, () => {
+        console.log('Subscription changed, refreshing dashboard');
+        fetchAdminData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
+        console.log('Transaction changed, refreshing dashboard');
+        fetchAdminData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => {
+        console.log('User changed, refreshing dashboard');
+        fetchAdminData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [isAdmin, authLoading, navigate]);
 
   const fetchAdminData = async () => {
     try {
       setLoading(true);
       
-      // Fetch dashboard statistics
-      const [usersResp, subscriptionsResp, examsResp, attemptsResp] = await Promise.all([
+      // Fetch dashboard statistics with transactions for revenue
+      const [usersResp, subscriptionsResp, examsResp, attemptsResp, transactionsResp] = await Promise.all([
         supabase.rpc('get_users_masked'),
-        supabase.from('subscriptions').select('id, status', { count: 'exact' }),
+        supabase.from('subscriptions').select('id, status, start_date, end_date', { count: 'exact' }),
         supabase.from('exams').select('id, title, type, is_published'),
         supabase.from('attempts').select(`
           id, 
@@ -140,12 +161,17 @@ export default function AdminDashboard() {
           created_at,
           users(first_name, last_name, email),
           exams(title)
-        `).order('created_at', { ascending: false }).limit(10)
+        `).order('created_at', { ascending: false }).limit(10),
+        supabase.from('transactions').select('amount, status, created_at').eq('status', 'SUCCESS')
       ]);
 
       const totalUsers = usersResp.data?.length || 0;
       const activeSubscriptions = subscriptionsResp.data?.filter(s => s.status === 'ACTIVE').length || 0;
       const totalExams = examsResp.data?.length || 0;
+      
+      // Calculate total revenue from successful transactions
+      const totalRevenue = transactionsResp.data?.reduce((sum, transaction) => 
+        sum + parseFloat(String(transaction.amount) || '0'), 0) || 0;
       
       // Get suspicious activities
       const suspiciousActivities = attemptsResp.data?.filter(a => a.suspicious_activity_count > 0) || [];
@@ -153,7 +179,7 @@ export default function AdminDashboard() {
       setDashboardStats({
         totalUsers,
         activeSubscriptions,
-        totalRevenue: 0, // Calculate from transactions
+        totalRevenue,
         totalExams,
         recentActivities: attemptsResp.data?.slice(0, 5) || [],
         suspiciousActivities
@@ -534,9 +560,11 @@ export default function AdminDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-700 dark:text-green-300">Active Subscriptions</p>
-                  <p className="text-3xl font-bold text-green-900 dark:text-green-100">{dashboardStats.activeSubscriptions}</p>
-                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">+8% from last month</p>
+                  <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Revenue</p>
+                  <p className="text-3xl font-bold text-green-900 dark:text-green-100">
+                    ₦{dashboardStats.totalRevenue.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">{dashboardStats.activeSubscriptions} active subs</p>
                 </div>
                 <div className="relative">
                   <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">

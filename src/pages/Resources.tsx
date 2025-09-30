@@ -37,6 +37,19 @@ const Resources = () => {
 
   useEffect(() => {
     fetchResourcesData();
+
+    // Set up real-time updates for resources
+    const channel = supabase
+      .channel('resources-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'resources' }, (payload) => {
+        console.log('Resource changed:', payload);
+        fetchResourcesData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchResourcesData = async () => {
@@ -61,6 +74,7 @@ const Resources = () => {
         throw new Error('Failed to fetch subjects');
       }
 
+      console.log('Fetched resources:', resourcesResp.data?.length, 'resources');
       setResources(resourcesResp.data || []);
       setSubjects(subjectsResp.data || []);
       
