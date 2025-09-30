@@ -448,10 +448,10 @@ export default function ResourceManagement() {
 
   const filteredResources = resources.filter(resource => {
     const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+                         resource.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (Array.isArray(resource.tags) && resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
     const matchesSubject = selectedSubject === 'all' || resource.subject_id === selectedSubject;
-    const matchesType = selectedType === 'all' || resource.file_type.startsWith(selectedType);
+    const matchesType = selectedType === 'all' || resource.file_type?.startsWith(selectedType);
     
     return matchesSearch && matchesSubject && matchesType;
   });
