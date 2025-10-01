@@ -133,26 +133,15 @@ export default function ResourceManagement() {
     try {
       setLoading(true);
       
-      // Fetch resources and subjects separately to avoid join issues
       const [resourcesResp, subjectsResp] = await Promise.all([
-        supabase.from('resources').select('*').order('created_at', { ascending: false }),
+        supabase.from('resources').select(`
+          *,
+          subjects(name, code)
+        `).order('created_at', { ascending: false }),
         supabase.from('subjects').select('*').eq('is_active', true)
       ]);
 
-      if (resourcesResp.error) throw resourcesResp.error;
-      if (subjectsResp.error) throw subjectsResp.error;
-
-      // Map subject data to resources
-      const subjectsMap = new Map(
-        (subjectsResp.data || []).map(s => [s.id, { name: s.name, code: s.code }])
-      );
-
-      const resourcesWithSubjects = (resourcesResp.data || []).map(resource => ({
-        ...resource,
-        subjects: resource.subject_id ? subjectsMap.get(resource.subject_id) : null
-      }));
-
-      setResources(resourcesWithSubjects);
+      setResources(resourcesResp.data || []);
       setSubjects(subjectsResp.data || []);
       
     } catch (error) {
