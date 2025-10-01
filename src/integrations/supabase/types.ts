@@ -1192,6 +1192,10 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
+      delete_user_completely_by_app_id: {
+        Args: { user_app_id: string }
+        Returns: boolean
+      }
       expire_subscriptions: {
         Args: Record<PropertyKey, never>
         Returns: undefined

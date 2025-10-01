@@ -183,28 +183,39 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
       setLoading(true);
       console.log('Starting delete for user:', userId);
       
-      // Get the user's auth_user_id first
+      // Get the user's identifiers
       const { data: userData } = await supabase
         .from('users')
-        .select('auth_user_id')
+        .select('id, auth_user_id')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
-      if (!userData?.auth_user_id) {
-        throw new Error('User auth ID not found');
+      if (!userData) {
+        throw new Error('User not found');
       }
 
-      // Use the database function to delete user completely
-      const { data, error } = await supabase.rpc('delete_user_completely', {
-        user_uuid: userData.auth_user_id
-      });
+      // Use appropriate RPC depending on whether auth_user_id exists
+      let rpcResult: any = null; 
+      let rpcError: any = null;
 
-      if (error) {
-        console.error('Error from delete function:', error);
-        throw error;
+      if (userData.auth_user_id) {
+        const { data, error } = await supabase.rpc('delete_user_completely', {
+          user_uuid: userData.auth_user_id
+        });
+        rpcResult = data; rpcError = error;
+      } else {
+        const { data, error } = await supabase.rpc('delete_user_completely_by_app_id', {
+          user_app_id: userData.id
+        });
+        rpcResult = data; rpcError = error;
       }
 
-      if (!data) {
+      if (rpcError) {
+        console.error('Error from delete function:', rpcError);
+        throw rpcError;
+      }
+
+      if (!rpcResult) {
         throw new Error('User deletion failed - user may not exist');
       }
 
