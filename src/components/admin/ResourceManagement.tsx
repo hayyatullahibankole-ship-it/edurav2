@@ -133,30 +133,28 @@ export default function ResourceManagement() {
     try {
       setLoading(true);
       
-      // Fetch resources and subjects separately to avoid join issues
-      const [resourcesResp, subjectsResp] = await Promise.all([
-        supabase.from('resources').select('*').order('created_at', { ascending: false }),
-        supabase.from('subjects').select('*').eq('is_active', true)
-      ]);
+      // Use secure Edge Function to fetch without RLS side-effects
+      const { data, error } = await supabase.functions.invoke('admin-get-resources');
+      if (error) throw error;
 
-      if (resourcesResp.error) throw resourcesResp.error;
-      if (subjectsResp.error) throw subjectsResp.error;
+      const resourcesData = data?.resources || [];
+      const subjectsData = data?.subjects || [];
 
-      console.log('[ResourceManagement] resources count:', (resourcesResp.data || []).length);
-      console.log('[ResourceManagement] subjects count:', (subjectsResp.data || []).length);
+      console.log('[ResourceManagement] resources count:', resourcesData.length);
+      console.log('[ResourceManagement] subjects count:', subjectsData.length);
 
       // Map subject data to resources
       const subjectsMap = new Map(
-        (subjectsResp.data || []).map(s => [s.id, { name: s.name, code: s.code }])
+        (subjectsData).map((s: any) => [s.id, { name: s.name, code: s.code }])
       );
 
-      const resourcesWithSubjects = (resourcesResp.data || []).map(resource => ({
+      const resourcesWithSubjects = (resourcesData).map((resource: any) => ({
         ...resource,
         subjects: resource.subject_id ? subjectsMap.get(resource.subject_id) : null
       }));
 
       setResources(resourcesWithSubjects);
-      setSubjects(subjectsResp.data || []);
+      setSubjects(subjectsData);
       
     } catch (error: any) {
       console.error('Error fetching data:', error);
