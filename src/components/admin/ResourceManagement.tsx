@@ -142,6 +142,9 @@ export default function ResourceManagement() {
       if (resourcesResp.error) throw resourcesResp.error;
       if (subjectsResp.error) throw subjectsResp.error;
 
+      console.log('[ResourceManagement] resources count:', (resourcesResp.data || []).length);
+      console.log('[ResourceManagement] subjects count:', (subjectsResp.data || []).length);
+
       // Map subject data to resources
       const subjectsMap = new Map(
         (subjectsResp.data || []).map(s => [s.id, { name: s.name, code: s.code }])
@@ -155,11 +158,11 @@ export default function ResourceManagement() {
       setResources(resourcesWithSubjects);
       setSubjects(subjectsResp.data || []);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
         title: "Error",
-        description: "Failed to load resources data",
+        description: `Failed to load resources data${error?.message ? `: ${error.message}` : ''}`,
         variant: "destructive"
       });
     } finally {
@@ -495,9 +498,10 @@ export default function ResourceManagement() {
   };
 
   const filteredResources = resources.filter(resource => {
+    const tagsArr = Array.isArray(resource.tags) ? resource.tags : [];
     const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          resource.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (Array.isArray(resource.tags) && resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
+                         tagsArr.some(tag => String(tag).toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesSubject = selectedSubject === 'all' || resource.subject_id === selectedSubject;
     const matchesType = selectedType === 'all' || resource.file_type?.startsWith(selectedType);
     
