@@ -372,21 +372,28 @@ export default function ResourceManagement() {
       const broken: Resource[] = [];
       
       for (const resource of resources) {
-        if (!resource.file_url.startsWith('http')) {
+        const url = (resource as any)?.file_url;
+        if (!url || typeof url !== 'string') {
+          // Missing or invalid URL counts as broken
+          broken.push(resource);
+          continue;
+        }
+
+        if (!url.startsWith('http')) {
           // Check if file exists in storage
           let bucketName = 'uploads';
-          let filePath = resource.file_url;
+          let filePath = url;
 
-          if (resource.file_url.startsWith('uploads/')) {
+          if (url.startsWith('uploads/')) {
             bucketName = 'uploads';
-            filePath = resource.file_url.replace('uploads/', '');
-          } else if (resource.file_url.includes('/')) {
-            const pathParts = resource.file_url.split('/');
+            filePath = url.replace('uploads/', '');
+          } else if (url.includes('/')) {
+            const pathParts = url.split('/');
             bucketName = pathParts[0];
             filePath = pathParts.slice(1).join('/');
           } else {
             bucketName = 'resources';
-            filePath = resource.file_url;
+            filePath = url;
           }
 
           try {
