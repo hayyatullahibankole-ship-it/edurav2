@@ -133,34 +133,33 @@ export default function ResourceManagement() {
     try {
       setLoading(true);
       
-      // Use secure Edge Function to fetch without RLS side-effects
-      const { data, error } = await supabase.functions.invoke('admin-get-resources');
-      if (error) throw error;
+      // Fetch resources and subjects separately to avoid join issues
+      const [resourcesResp, subjectsResp] = await Promise.all([
+        supabase.from('resources').select('*').order('created_at', { ascending: false }),
+        supabase.from('subjects').select('*').eq('is_active', true)
+      ]);
 
-      const resourcesData = data?.resources || [];
-      const subjectsData = data?.subjects || [];
-
-      console.log('[ResourceManagement] resources count:', resourcesData.length);
-      console.log('[ResourceManagement] subjects count:', subjectsData.length);
+      if (resourcesResp.error) throw resourcesResp.error;
+      if (subjectsResp.error) throw subjectsResp.error;
 
       // Map subject data to resources
       const subjectsMap = new Map(
-        (subjectsData).map((s: any) => [s.id, { name: s.name, code: s.code }])
+        (subjectsResp.data || []).map(s => [s.id, { name: s.name, code: s.code }])
       );
 
-      const resourcesWithSubjects = (resourcesData).map((resource: any) => ({
+      const resourcesWithSubjects = (resourcesResp.data || []).map(resource => ({
         ...resource,
         subjects: resource.subject_id ? subjectsMap.get(resource.subject_id) : null
       }));
 
       setResources(resourcesWithSubjects);
-      setSubjects(subjectsData);
+      setSubjects(subjectsResp.data || []);
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching data:', error);
       toast({
         title: "Error",
-        description: `Failed to load resources data${error?.message ? `: ${error.message}` : ''}`,
+        description: "Failed to load resources data",
         variant: "destructive"
       });
     } finally {
@@ -372,28 +371,21 @@ export default function ResourceManagement() {
       const broken: Resource[] = [];
       
       for (const resource of resources) {
-        const url = (resource as any)?.file_url;
-        if (!url || typeof url !== 'string') {
-          // Missing or invalid URL counts as broken
-          broken.push(resource);
-          continue;
-        }
-
-        if (!url.startsWith('http')) {
+        if (!resource.file_url.startsWith('http')) {
           // Check if file exists in storage
           let bucketName = 'uploads';
-          let filePath = url;
+          let filePath = resource.file_url;
 
-          if (url.startsWith('uploads/')) {
+          if (resource.file_url.startsWith('uploads/')) {
             bucketName = 'uploads';
-            filePath = url.replace('uploads/', '');
-          } else if (url.includes('/')) {
-            const pathParts = url.split('/');
+            filePath = resource.file_url.replace('uploads/', '');
+          } else if (resource.file_url.includes('/')) {
+            const pathParts = resource.file_url.split('/');
             bucketName = pathParts[0];
             filePath = pathParts.slice(1).join('/');
           } else {
             bucketName = 'resources';
-            filePath = url;
+            filePath = resource.file_url;
           }
 
           try {
@@ -503,10 +495,9 @@ export default function ResourceManagement() {
   };
 
   const filteredResources = resources.filter(resource => {
-    const tagsArr = Array.isArray(resource.tags) ? resource.tags : [];
     const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          resource.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tagsArr.some(tag => String(tag).toLowerCase().includes(searchTerm.toLowerCase()));
+                         (Array.isArray(resource.tags) && resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
     const matchesSubject = selectedSubject === 'all' || resource.subject_id === selectedSubject;
     const matchesType = selectedType === 'all' || resource.file_type?.startsWith(selectedType);
     
