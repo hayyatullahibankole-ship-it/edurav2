@@ -84,6 +84,43 @@ export default function ResourceManagement() {
 
   useEffect(() => {
     fetchData();
+
+    // Set up real-time subscription for resources
+    const resourcesChannel = supabase
+      .channel('resources-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'resources'
+        },
+        () => {
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    // Set up real-time subscription for subjects
+    const subjectsChannel = supabase
+      .channel('subjects-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'subjects'
+        },
+        () => {
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(resourcesChannel);
+      supabase.removeChannel(subjectsChannel);
+    };
   }, []);
 
   useEffect(() => {
