@@ -347,28 +347,28 @@ const Resources = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
+      <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-primary/5 to-accent/5">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-4 bg-accent/10 text-accent border-accent/20">
+            <Badge className="mb-3 sm:mb-4 bg-accent/10 text-accent border-accent/20 text-xs sm:text-sm">
               📚 Resource Library
             </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 px-2">
               Study Resources & Materials
             </h1>
-            <p className="text-xl mb-8 text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 text-muted-foreground max-w-2xl mx-auto px-4">
               Access thousands of study materials, past questions, video tutorials, and expert guides 
               to boost your WAEC and JAMB preparation.
             </p>
             <div className="relative max-w-2xl mx-auto">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
               <Input 
                 placeholder="Search for resources, subjects, or topics..." 
-                className="pl-12 pr-4 py-6 text-lg"
+                className="pl-10 sm:pl-12 pr-20 sm:pr-24 py-4 sm:py-6 text-sm sm:text-lg"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <Button className="absolute right-2 top-1/2 transform -translate-y-1/2">
+              <Button className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 text-xs sm:text-sm px-3 sm:px-4 h-8 sm:h-auto">
                 Search
               </Button>
             </div>
@@ -377,26 +377,26 @@ const Resources = () => {
       </section>
 
       {/* Filters & Categories */}
-      <section className="py-12 border-b">
+      <section className="py-8 sm:py-12 border-b">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
             {/* Categories */}
             <div className="lg:w-1/4">
-              <h3 className="font-semibold mb-4 flex items-center">
-                <Filter className="h-5 w-5 mr-2" />
+              <h3 className="font-semibold mb-4 flex items-center text-sm sm:text-base">
+                <Filter className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Categories
               </h3>
               <div className="space-y-2">
                 {resourceCategories.map((category, index) => (
                   <button 
                     key={index}
-                    className={`w-full text-left p-3 rounded-lg hover:bg-muted/50 transition-colors flex justify-between items-center ${
+                    className={`w-full text-left p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors flex justify-between items-center text-sm ${
                       selectedCategory === category.name.toLowerCase().replace(' ', '-') ? 'bg-primary/10 text-primary' : ''
                     }`}
                     onClick={() => setSelectedCategory(category.name.toLowerCase().replace(' ', '-'))}
                   >
-                    <span>{category.name}</span>
-                    <Badge variant="secondary" className="text-xs">
+                    <span className="truncate">{category.name}</span>
+                    <Badge variant="secondary" className="text-xs flex-shrink-0 ml-2">
                       {category.count}
                     </Badge>
                   </button>
@@ -406,11 +406,11 @@ const Resources = () => {
 
             {/* Subjects Filter */}
             <div className="lg:w-3/4">
-              <h3 className="font-semibold mb-4">Filter by Subject</h3>
+              <h3 className="font-semibold mb-4 text-sm sm:text-base">Filter by Subject</h3>
               <div className="flex flex-wrap gap-2">
                 <Badge 
                   variant={selectedSubject === 'all' ? 'default' : 'outline'}
-                  className="px-3 py-2 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                  className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
                   onClick={() => setSelectedSubject('all')}
                 >
                   All Subjects
@@ -419,7 +419,7 @@ const Resources = () => {
                   <Badge 
                     key={subject.id}
                     variant={selectedSubject === subject.id ? 'default' : 'outline'}
-                    className="px-3 py-2 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
                     onClick={() => setSelectedSubject(subject.id)}
                   >
                     {subject.name}
@@ -432,21 +432,21 @@ const Resources = () => {
       </section>
 
       {/* Featured Resources */}
-      <section className="py-20">
+      <section className="py-12 sm:py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-12">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 sm:mb-12 gap-4">
             <div>
-              <h2 className="text-3xl font-bold mb-2">Featured Resources</h2>
-              <p className="text-muted-foreground">Most popular and highly-rated study materials</p>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2">Featured Resources</h2>
+              <p className="text-sm sm:text-base text-muted-foreground">Most popular and highly-rated study materials</p>
             </div>
-            <div className="flex gap-4">
-              <Button variant="outline">
-                <BookOpen className="h-4 w-4 mr-2" />
-                All PDFs
+            <div className="flex gap-2 sm:gap-4 overflow-x-auto">
+              <Button variant="outline" size="sm" className="flex-shrink-0">
+                <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="text-xs sm:text-sm">All PDFs</span>
               </Button>
-              <Button variant="outline">
-                <Video className="h-4 w-4 mr-2" />
-                All Videos
+              <Button variant="outline" size="sm" className="flex-shrink-0">
+                <Video className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="text-xs sm:text-sm">All Videos</span>
               </Button>
             </div>
           </div>
@@ -460,7 +460,7 @@ const Resources = () => {
                       <div className="p-2 bg-gray-200 rounded-lg w-10 h-10"></div>
                       <div className="w-16 h-6 bg-gray-200 rounded"></div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <div className="w-16 h-5 bg-gray-200 rounded"></div>
                       <div className="w-12 h-5 bg-gray-200 rounded"></div>
                     </div>
@@ -474,16 +474,16 @@ const Resources = () => {
               ))
             ) : filteredResources.length > 0 ? (
               filteredResources.map((resource) => (
-                <Card key={resource.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className={`p-2 rounded-lg ${
+                <Card key={resource.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
+                  <CardHeader className="pb-3 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className={`p-2 rounded-lg flex-shrink-0 ${
                         resource.file_type?.startsWith('video') ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
                       }`}>
                         {getFileIcon(resource.file_type)}
                       </div>
                       {resource.access_level === 'premium' && (
-                        <Badge className={`${canAccessPremium ? 'bg-green-100 text-green-700 border-green-300' : 'bg-accent/10 text-accent border-accent/20'}`}>
+                        <Badge className={`flex-shrink-0 ${canAccessPremium ? 'bg-green-100 text-green-700 border-green-300' : 'bg-accent/10 text-accent border-accent/20'}`}>
                           {canAccessPremium ? (
                             <CheckCircle className="h-3 w-3 mr-1" />
                           ) : (
@@ -493,7 +493,7 @@ const Resources = () => {
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="secondary" className="text-xs">
                         {resource.subjects?.name || 'General'}
                       </Badge>
@@ -503,29 +503,29 @@ const Resources = () => {
                     </div>
                   </CardHeader>
                   
-                  <CardContent className="space-y-4">
-                    <div>
-                      <CardTitle className="text-lg leading-tight mb-2">
-                        {resource.title}
+                  <CardContent className="space-y-4 flex-1 flex flex-col">
+                    <div className="flex-1">
+                      <CardTitle className="text-base sm:text-lg leading-tight mb-2 line-clamp-2 break-words">
+                        {resource.title || 'Untitled Resource'}
                       </CardTitle>
-                      <CardDescription className="text-sm">
-                        {resource.description}
+                      <CardDescription className="text-xs sm:text-sm line-clamp-3 break-words">
+                        {resource.description || 'No description available'}
                       </CardDescription>
                     </div>
                     
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground pt-2 border-t">
                       <div className="flex items-center gap-1">
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                         <span>{resource.view_count || 0}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Download className="h-4 w-4" />
+                        <Download className="h-3 w-3 sm:h-4 sm:w-4" />
                         <span>{resource.download_count || 0}</span>
                       </div>
                     </div>
                     
                     <Button 
-                      className="w-full" 
+                      className="w-full text-sm" 
                       variant={resource.access_level === 'premium' && !(hasPremiumAccess || isPremium) ? "default" : "outline"}
                       onClick={() => handleResourceAccess(resource)}
                       disabled={subscriptionLoading}
@@ -534,7 +534,7 @@ const Resources = () => {
                         <span>Checking...</span>
                       ) : resource.file_type?.startsWith('video') ? (
                         <>
-                          <Play className="h-4 w-4 mr-2" />
+                          <Play className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                           {resource.access_level === 'premium' && !(hasPremiumAccess || isPremium) 
                             ? 'Get Premium' 
                             : 'Watch Video'
@@ -542,7 +542,7 @@ const Resources = () => {
                         </>
                       ) : (
                         <>
-                          <Download className="h-4 w-4 mr-2" />
+                          <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                           {resource.access_level === 'premium' && !(hasPremiumAccess || isPremium) 
                             ? 'Get Premium' 
                             : 'Download'
@@ -555,9 +555,9 @@ const Resources = () => {
               ))
             ) : (
               <div className="col-span-full text-center py-12">
-                <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-muted-foreground mb-2">No resources found</h3>
-                <p className="text-sm text-muted-foreground">
+                <FileText className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-base sm:text-lg font-medium text-muted-foreground mb-2">No resources found</h3>
+                <p className="text-sm text-muted-foreground px-4">
                   {searchTerm || selectedSubject !== 'all' 
                     ? 'Try adjusting your search or filters'
                     : 'No resources have been uploaded yet'
@@ -570,50 +570,50 @@ const Resources = () => {
       </section>
 
       {/* Premium CTA */}
-      <section className="py-20 bg-gradient-to-r from-accent/10 to-primary/10">
+      <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-r from-accent/10 to-primary/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="max-w-4xl mx-auto text-center p-8">
-            <CardHeader>
-              <div className="mx-auto bg-accent/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                <Lock className="h-8 w-8 text-accent" />
+          <Card className="max-w-4xl mx-auto text-center p-6 sm:p-8">
+            <CardHeader className="space-y-3 sm:space-y-4">
+              <div className="mx-auto bg-accent/10 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-2 sm:mb-4">
+                <Lock className="h-6 w-6 sm:h-8 sm:w-8 text-accent" />
               </div>
-              <CardTitle className="text-3xl mb-4">
+              <CardTitle className="text-2xl sm:text-3xl mb-2 sm:mb-4 px-2">
                 Unlock Premium Resources
               </CardTitle>
-              <CardDescription className="text-lg">
+              <CardDescription className="text-base sm:text-lg px-4">
                 Get access to exclusive video tutorials, detailed study guides, and premium past questions
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-3 gap-4 text-sm">
+            <CardContent className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
                 <div className="flex items-center justify-center gap-2">
-                  <Video className="h-5 w-5 text-accent" />
+                  <Video className="h-4 w-4 sm:h-5 sm:w-5 text-accent flex-shrink-0" />
                   <span>150+ Video Tutorials</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <FileText className="h-5 w-5 text-accent" />
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-accent flex-shrink-0" />
                   <span>500+ Premium PDFs</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <Download className="h-5 w-5 text-accent" />
+                  <Download className="h-4 w-4 sm:h-5 sm:w-5 text-accent flex-shrink-0" />
                   <span>Unlimited Downloads</span>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/payment?plan=premium">
-                  <Button size="lg" className="bg-accent hover:bg-accent/90">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                <Link to="/payment?plan=premium" className="w-full sm:w-auto">
+                  <Button size="lg" className="bg-accent hover:bg-accent/90 w-full sm:w-auto">
                     Upgrade to Premium
                   </Button>
                 </Link>
                  {!user ? (
-                   <Link to="/auth">
-                     <Button size="lg" variant="outline">
+                   <Link to="/auth" className="w-full sm:w-auto">
+                     <Button size="lg" variant="outline" className="w-full sm:w-auto">
                        Login to Subscribe
                      </Button>
                    </Link>
                  ) : (
-                   <Link to="/auth">
-                     <Button size="lg" variant="outline">
+                   <Link to="/auth" className="w-full sm:w-auto">
+                     <Button size="lg" variant="outline" className="w-full sm:w-auto">
                        Start Free Trial
                      </Button>
                    </Link>
