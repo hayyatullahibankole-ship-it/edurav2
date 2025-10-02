@@ -136,10 +136,8 @@ export default function AuthForm() {
             description: "You have successfully signed in.",
           });
 
-          // Wait for auth state to update before navigation
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 100);
+          // Let the Auth page handle redirect based on role
+
         }
       } else {
         // Validate signup form

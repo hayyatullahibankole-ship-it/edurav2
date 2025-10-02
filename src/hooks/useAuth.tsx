@@ -90,17 +90,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (profileData) {
         setUserProfile(profileData);
         
-        // Get user role from user_roles table
-        const { data: roleData, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', profileData.id)
-          .maybeSingle();
-          
-        if (!roleError && roleData) {
-          setUserRole(roleData.role);
+        // Determine role via secure RPC to avoid RLS issues
+        const { data: isAdminFlag, error: roleError } = await supabase
+          .rpc('is_admin', { _user_id: userId });
+
+        if (!roleError && typeof isAdminFlag === 'boolean') {
+          setUserRole(isAdminFlag ? 'admin' : 'student');
         } else {
-          console.warn('Role fetch error, defaulting to student:', roleError);
+          console.warn('Role fetch error (RPC), defaulting to student:', roleError);
           setUserRole('student');
         }
       } else {
