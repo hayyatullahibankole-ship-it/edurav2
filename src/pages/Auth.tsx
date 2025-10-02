@@ -4,14 +4,19 @@ import { useAuth } from '@/hooks/useAuth';
 import AuthForm from '@/components/AuthForm';
 
 export default function Auth() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin, userRole } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user && !loading) {
-      navigate('/dashboard', { replace: true });
+    if (user && !loading && userRole !== null) {
+      // Redirect based on role
+      if (isAdmin) {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, userRole, isAdmin, navigate]);
 
   if (loading) {
     return (
@@ -24,8 +29,8 @@ export default function Auth() {
     );
   }
 
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
+  if (user && userRole !== null) {
+    return <Navigate to={isAdmin ? "/admin" : "/dashboard"} replace />;
   }
 
   return <AuthForm />;
