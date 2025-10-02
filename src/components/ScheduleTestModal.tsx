@@ -39,7 +39,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
   const [step, setStep] = useState(1);
   const { isPremium, loading: subscriptionLoading } = useSubscription();
   const { user } = useAuth();
-  const allowPremium = !subscriptionLoading && (isPremium || user?.email === 'akeemsulekz@gmail.com');
+  const allowPremium = !subscriptionLoading && (isPremium || user?.email === 'eduracbt@gmail.com');
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState<any[]>([]);
   const [availableQuestions, setAvailableQuestions] = useState<{ [key: string]: number }>({});

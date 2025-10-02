@@ -81,7 +81,7 @@ export const sendConsultationBooking = (tutorName: string, sessionType: string) 
   const message = `Hello! I would like to book a ${sessionType} session with ${tutorName}. Please let me know about available dates and times. Thank you!`;
   
   // Edura support WhatsApp number
-  const supportPhone = '+2348101466977';
+  const supportPhone = '+2347050757085';
   
   sendWhatsAppMessage(supportPhone, message);
 };
@@ -91,7 +91,7 @@ export const sendConsultationBooking = (tutorName: string, sessionType: string) 
  */
 export const contactSupport = (subject: string, message: string) => {
   const fullMessage = `Subject: ${subject}\n\n${message}\n\nSent from Edura Platform`;
-  const supportPhone = '+2348101466977';
+  const supportPhone = '+2347050757085';
   
   sendWhatsAppMessage(supportPhone, fullMessage);
 };
