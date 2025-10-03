@@ -242,8 +242,10 @@ const CBTExam = () => {
 
             console.log('Validating answer:', {
               questionId: question.originalId,
+              questionText: question.question_text?.substring(0, 50),
               originalAnswer: userAnswer,
-              normalizedAnswer
+              normalizedAnswer,
+              options: question.options?.slice(0, 4)
             });
 
             const { data: validationResult, error: validationError } = await supabase
@@ -253,11 +255,22 @@ const CBTExam = () => {
               });
             
             if (validationError) {
-              console.error('Error validating answer:', validationError);
+              console.error('❌ Error validating answer:', {
+                questionId: question.originalId,
+                error: validationError,
+                userAnswer,
+                normalizedAnswer
+              });
               isCorrect = false;
             } else {
               isCorrect = validationResult === true;
-              console.log('Validation result:', { isCorrect, validationResult });
+              console.log(isCorrect ? '✅ Correct answer' : '❌ Wrong answer', {
+                questionId: question.originalId,
+                questionText: question.question_text?.substring(0, 50),
+                userAnswer,
+                normalizedAnswer,
+                result: isCorrect
+              });
             }
           } catch (error) {
             console.error('Error in secure validation:', error);
