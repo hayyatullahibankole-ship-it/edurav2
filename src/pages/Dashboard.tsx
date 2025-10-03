@@ -61,9 +61,9 @@ const Dashboard = () => {
     
     setLoading(true);
     try {
-      // Fetch user's attempts and results
+      // Fetch user's attempts and results using secure view
       const { data: attempts, error: attemptsError } = await supabase
-        .from('attempts')
+        .from('student_exam_progress')
         .select(`
           *,
           results(*)

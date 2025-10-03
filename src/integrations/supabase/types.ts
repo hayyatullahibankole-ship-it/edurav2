@@ -50,7 +50,21 @@ export type Database = {
             foreignKeyName: "attempt_answers_attempt_id_fkey"
             columns: ["attempt_id"]
             isOneToOne: false
+            referencedRelation: "admin_proctoring_data"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attempt_answers_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
             referencedRelation: "attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attempt_answers_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "student_exam_progress"
             referencedColumns: ["id"]
           },
           {
@@ -678,7 +692,21 @@ export type Database = {
             foreignKeyName: "results_attempt_id_fkey"
             columns: ["attempt_id"]
             isOneToOne: false
+            referencedRelation: "admin_proctoring_data"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "results_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
             referencedRelation: "attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "results_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "student_exam_progress"
             referencedColumns: ["id"]
           },
           {
@@ -1149,7 +1177,173 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_proctoring_data: {
+        Row: {
+          device_fingerprint: string | null
+          email: string | null
+          exam_id: string | null
+          first_name: string | null
+          id: string | null
+          ip_address: unknown | null
+          last_name: string | null
+          proctoring_data: Json | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["attempt_status"] | null
+          submitted_at: string | null
+          suspicious_activity_count: number | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attempts_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_bookings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string | null
+          is_paid: boolean | null
+          meeting_link: string | null
+          notes: string | null
+          payment_status: string | null
+          price: number | null
+          start_time: string | null
+          status: Database["public"]["Enums"]["booking_status"] | null
+          subject_id: string | null
+          title: string | null
+          tutor_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string | null
+          is_paid?: boolean | null
+          meeting_link?: string | null
+          notes?: string | null
+          payment_status?: never
+          price?: number | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          subject_id?: string | null
+          title?: string | null
+          tutor_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string | null
+          is_paid?: boolean | null
+          meeting_link?: string | null
+          notes?: string | null
+          payment_status?: never
+          price?: number | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          subject_id?: string | null
+          title?: string | null
+          tutor_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_exam_progress: {
+        Row: {
+          created_at: string | null
+          exam_id: string | null
+          id: string | null
+          proctoring_data: Json | null
+          security_score: number | null
+          selected_subjects: Json | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["attempt_status"] | null
+          submitted_at: string | null
+          time_remaining_seconds: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          exam_id?: string | null
+          id?: string | null
+          proctoring_data?: Json | null
+          security_score?: never
+          selected_subjects?: Json | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["attempt_status"] | null
+          submitted_at?: string | null
+          time_remaining_seconds?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          exam_id?: string | null
+          id?: string | null
+          proctoring_data?: Json | null
+          security_score?: never
+          selected_subjects?: Json | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["attempt_status"] | null
+          submitted_at?: string | null
+          time_remaining_seconds?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attempts_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       can_view_full_pii: {
@@ -1170,6 +1364,10 @@ export type Database = {
           max_requests?: number
           window_minutes?: number
         }
+        Returns: boolean
+      }
+      check_user_lookup_rate_limit: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       convert_latex_mathbf_to_markdown: {

@@ -195,9 +195,15 @@ serve(async (req) => {
     );
 
   } catch (error) {
+    // Log detailed error server-side but return generic message
     console.error('Payment verification error:', error);
+    
+    // Return generic error without exposing internal details
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ 
+        error: 'Payment verification failed. Please contact support if this persists.',
+        errorId: crypto.randomUUID() // For support tracking
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

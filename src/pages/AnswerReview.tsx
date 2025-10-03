@@ -84,9 +84,9 @@ const AnswerReview = () => {
         return;
       }
 
-      // Fetch attempt details to verify ownership
+      // Fetch attempt details to verify ownership using secure view
       const { data: attempt, error: attemptError } = await supabase
-        .from('attempts')
+        .from('student_exam_progress')
         .select('*')
         .eq('id', attemptId)
         .eq('user_id', userData.id)

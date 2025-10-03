@@ -33,9 +33,9 @@ const CBTExam = () => {
     try {
       setLoading(true);
 
-      // Fetch attempt data
+      // Fetch attempt data using secure view
       const { data: attempt, error: attemptError } = await supabase
-        .from('attempts')
+        .from('student_exam_progress')
         .select('*')
         .eq('id', attemptId)
         .single();
