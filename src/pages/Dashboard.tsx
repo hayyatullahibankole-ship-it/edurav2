@@ -61,16 +61,25 @@ const Dashboard = () => {
     
     setLoading(true);
     try {
-      // Fetch user's attempts and results using secure view
-      const { data: attempts, error: attemptsError } = await supabase
-        .from('student_exam_progress')
-        .select(`
-          *,
-          results(*)
-        `)
-        .eq('user_id', userProfile.id)
-        .eq('status', 'SUBMITTED')
-        .order('submitted_at', { ascending: false });
+      // Fetch user's attempts using secure RPC function
+      const { data: allAttempts, error: attemptsError } = await supabase
+        .rpc('get_student_exam_progress');
+      
+      const attempts = allAttempts?.filter(a => 
+        a.user_id === userProfile.id && a.status === 'SUBMITTED'
+      ).sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime());
+      
+      // Fetch results for each attempt
+      const attemptsWithResults = await Promise.all(
+        (attempts || []).map(async (attempt) => {
+          const { data: results } = await supabase
+            .from("results")
+            .select("*")
+            .eq("attempt_id", attempt.id)
+            .single();
+          return { ...attempt, results: results ? [results] : [] };
+        })
+      );
 
       if (attemptsError) {
         console.error('Error fetching attempts:', attemptsError);
@@ -78,8 +87,8 @@ const Dashboard = () => {
       }
 
       // Calculate statistics
-      const testsTaken = attempts?.length || 0;
-      const resultsWithScores = attempts?.filter(a => a.results && Array.isArray(a.results) && a.results.length > 0) || [];
+      const testsTaken = attemptsWithResults?.length || 0;
+      const resultsWithScores = attemptsWithResults?.filter(a => a.results && Array.isArray(a.results) && a.results.length > 0) || [];
       const averageScore = resultsWithScores.length > 0 
         ? Math.round(resultsWithScores.reduce((sum, a) => {
             const result = Array.isArray(a.results) ? a.results[0] : a.results;
