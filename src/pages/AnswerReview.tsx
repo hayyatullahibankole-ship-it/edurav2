@@ -389,42 +389,32 @@ const AnswerReview = () => {
                       <h4 className="font-medium mb-2">Options:</h4>
                       <div className="space-y-2">
                          {question.options.map((option: string, optIndex: number) => {
-                          // Parse user answer to handle different formats
+                          // Parse user answer to get index
                           let userAnswerIndex = -1;
                           if (typeof question.user_answer === 'number') {
                             userAnswerIndex = question.user_answer;
                           } else if (typeof question.user_answer === 'string') {
                             const userStr = question.user_answer.trim();
-                            // Handle letter format (A, B, C, etc.)
                             if (userStr.length === 1 && /[A-Za-z]/.test(userStr)) {
                               userAnswerIndex = userStr.toUpperCase().charCodeAt(0) - 65;
-                            }
-                            // Handle "A)" format
-                            else if (userStr.match(/^[A-Za-z]\)/)) {
+                            } else if (userStr.match(/^[A-Za-z]\)/)) {
                               userAnswerIndex = userStr.charAt(0).toUpperCase().charCodeAt(0) - 65;
-                            }
-                            // Handle numeric string
-                            else if (!isNaN(parseInt(userStr))) {
+                            } else if (!isNaN(parseInt(userStr))) {
                               userAnswerIndex = parseInt(userStr);
                             }
                           }
 
-                          // Parse correct answer to handle different formats
+                          // Parse correct answer to get index
                           let correctAnswerIndex = -1;
                           if (typeof question.correct_answer === 'number') {
                             correctAnswerIndex = question.correct_answer;
                           } else if (typeof question.correct_answer === 'string') {
                             const correctStr = question.correct_answer.trim();
-                            // Handle letter format (A, B, C, etc.)
                             if (correctStr.length === 1 && /[A-Za-z]/.test(correctStr)) {
                               correctAnswerIndex = correctStr.toUpperCase().charCodeAt(0) - 65;
-                            }
-                            // Handle "A)" format
-                            else if (correctStr.match(/^[A-Za-z]\)/)) {
+                            } else if (correctStr.match(/^[A-Za-z]\)/)) {
                               correctAnswerIndex = correctStr.charAt(0).toUpperCase().charCodeAt(0) - 65;
-                            }
-                            // Handle numeric string
-                            else if (!isNaN(parseInt(correctStr))) {
+                            } else if (!isNaN(parseInt(correctStr))) {
                               correctAnswerIndex = parseInt(correctStr);
                             }
                           }
@@ -432,22 +422,28 @@ const AnswerReview = () => {
                           const isUserAnswer = userAnswerIndex === optIndex;
                           const isCorrectAnswer = correctAnswerIndex === optIndex;
                           
+                          // Use the validated is_correct field from database
+                          // If user selected this option and it's correct according to validation
+                          const isValidatedCorrect = isUserAnswer && question.is_correct;
+                          // If user selected this option and it's wrong according to validation
+                          const isValidatedWrong = isUserAnswer && !question.is_correct;
+                          
                           let bgColor = 'bg-muted';
                           let borderColor = 'border-muted';
                           let textColor = '';
                           
-                          if (isCorrectAnswer && isUserAnswer) {
-                            // User got it right
+                          if (isValidatedCorrect) {
+                            // User got it right (validated by server)
                             bgColor = 'bg-green-50';
                             borderColor = 'border-green-200';
                             textColor = 'text-green-800';
                           } else if (isCorrectAnswer) {
-                            // Correct answer (user didn't choose this)
+                            // Show correct answer (not selected by user)
                             bgColor = 'bg-green-50';
                             borderColor = 'border-green-200';
                             textColor = 'text-green-700';
-                          } else if (isUserAnswer) {
-                            // User's wrong answer
+                          } else if (isValidatedWrong) {
+                            // User's wrong answer (validated by server)
                             bgColor = 'bg-red-50';
                             borderColor = 'border-red-200';
                             textColor = 'text-red-800';
