@@ -23,6 +23,35 @@ export const AnswerOption = ({
 
   // Parse user answer to get index
   const getUserAnswerIndex = (): number => {
+    if (typeof userAnswer === 'object' && userAnswer !== null) {
+      const obj: any = userAnswer;
+      const numCandidates = [obj.index, obj.idx, obj.answerIndex, obj.selectedIndex, obj.value];
+      for (const c of numCandidates) {
+        if (typeof c === 'number' || (typeof c === 'string' && /^\d+$/.test(c))) {
+          const n = typeof c === 'string' ? parseInt(c) : c;
+          if (n >= 0 && n < totalOptions) return n;
+          if (n >= 1 && n <= totalOptions) return n - 1;
+        }
+      }
+      const textCandidates = [obj.letter, obj.choice, obj.value, obj.text, obj.label, obj.option];
+      const normalize = (s: string) => s.replace(/^[A-Za-z][\)\.:-]?\s*/, '').trim().toLowerCase();
+      for (const t of textCandidates) {
+        if (typeof t === 'string') {
+          const s = t.trim();
+          if (s.length === 1 && /[A-Za-z]/.test(s)) {
+            return s.toUpperCase().charCodeAt(0) - 65;
+          } else if (/^[A-Za-z][\)\.:-]?/.test(s)) {
+            return s.charAt(0).toUpperCase().charCodeAt(0) - 65;
+          } else if (/^\d+$/.test(s)) {
+            const n = parseInt(s);
+            if (n >= 0 && n < totalOptions) return n;
+            if (n >= 1 && n <= totalOptions) return n - 1;
+          } else if (normalize(s) === normalize(String(option))) {
+            return optIndex;
+          }
+        }
+      }
+    }
     if (typeof userAnswer === 'number') {
       if (userAnswer >= 0 && userAnswer < totalOptions) return userAnswer;
       if (userAnswer >= 1 && userAnswer <= totalOptions) return userAnswer - 1;
@@ -31,7 +60,7 @@ export const AnswerOption = ({
       const userStr = userAnswer.trim();
       if (userStr.length === 1 && /[A-Za-z]/.test(userStr)) {
         return userStr.toUpperCase().charCodeAt(0) - 65;
-      } else if (userStr.match(/^[A-Za-z]\)/)) {
+      } else if (/^[A-Za-z][\)\.:-]?/.test(userStr)) {
         return userStr.charAt(0).toUpperCase().charCodeAt(0) - 65;
       } else if (!isNaN(parseInt(userStr))) {
         const num = parseInt(userStr);
@@ -52,6 +81,35 @@ export const AnswerOption = ({
 
   // Parse correct answer to get index
   const getCorrectAnswerIndex = (): number => {
+    if (typeof correctAnswer === 'object' && correctAnswer !== null) {
+      const obj: any = correctAnswer;
+      const numCandidates = [obj.index, obj.idx, obj.answerIndex, obj.selectedIndex, obj.value];
+      for (const c of numCandidates) {
+        if (typeof c === 'number' || (typeof c === 'string' && /^\d+$/.test(c))) {
+          const n = typeof c === 'string' ? parseInt(c) : c;
+          if (n >= 0 && n < totalOptions) return n;
+          if (n >= 1 && n <= totalOptions) return n - 1;
+        }
+      }
+      const textCandidates = [obj.letter, obj.choice, obj.value, obj.text, obj.label, obj.option];
+      const normalize = (s: string) => s.replace(/^[A-Za-z][\)\.:-]?\s*/, '').trim().toLowerCase();
+      for (const t of textCandidates) {
+        if (typeof t === 'string') {
+          const s = t.trim();
+          if (s.length === 1 && /[A-Za-z]/.test(s)) {
+            return s.toUpperCase().charCodeAt(0) - 65;
+          } else if (/^[A-Za-z][\)\.:-]?/.test(s)) {
+            return s.charAt(0).toUpperCase().charCodeAt(0) - 65;
+          } else if (/^\d+$/.test(s)) {
+            const n = parseInt(s);
+            if (n >= 0 && n < totalOptions) return n;
+            if (n >= 1 && n <= totalOptions) return n - 1;
+          } else if (normalize(s) === normalize(String(option))) {
+            return optIndex;
+          }
+        }
+      }
+    }
     if (typeof correctAnswer === 'number') {
       if (correctAnswer >= 0 && correctAnswer < totalOptions) return correctAnswer;
       if (correctAnswer >= 1 && correctAnswer <= totalOptions) return correctAnswer - 1;
@@ -60,7 +118,7 @@ export const AnswerOption = ({
       const correctStr = correctAnswer.trim();
       if (correctStr.length === 1 && /[A-Za-z]/.test(correctStr)) {
         return correctStr.toUpperCase().charCodeAt(0) - 65;
-      } else if (correctStr.match(/^[A-Za-z]\)/)) {
+      } else if (/^[A-Za-z][\)\.:-]?/.test(correctStr)) {
         return correctStr.charAt(0).toUpperCase().charCodeAt(0) - 65;
       } else if (!isNaN(parseInt(correctStr))) {
         const num = parseInt(correctStr);
@@ -68,7 +126,7 @@ export const AnswerOption = ({
         if (num >= 1 && num <= totalOptions) return num - 1;
       } else {
         // Fallback: match by option text
-        const normalize = (s: string) => s.replace(/^[A-Za-z]\)\s*/, '').trim().toLowerCase();
+        const normalize = (s: string) => s.replace(/^[A-Za-z][\)\.:-]?\s*/, '').trim().toLowerCase();
         const ca = normalize(correctStr);
         const optNorm = normalize(String(option));
         if (ca === optNorm || ca === String(option).trim().toLowerCase()) {
@@ -78,7 +136,6 @@ export const AnswerOption = ({
     }
     return -1;
   };
-
   const userAnswerIndex = getUserAnswerIndex();
   const correctAnswerIndex = getCorrectAnswerIndex();
 
