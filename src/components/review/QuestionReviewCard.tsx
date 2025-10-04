@@ -19,6 +19,19 @@ export const QuestionReviewCard = ({ question, index }: QuestionReviewCardProps)
     }
   };
 
+  const getOptionText = (opt: any): string => {
+    if (opt == null) return '';
+    if (typeof opt === 'string') return opt;
+    if (typeof opt === 'object') {
+      // Common shapes: { text }, { label }, { option }, { value }
+      const candidate = (opt as any).text ?? (opt as any).label ?? (opt as any).option ?? (opt as any).value;
+      if (typeof candidate === 'string') return candidate;
+      if (candidate != null) return String(candidate);
+      try { return JSON.stringify(opt); } catch { return String(opt); }
+    }
+    return String(opt);
+  };
+
   return (
     <Card 
       className="border-l-4" 
@@ -57,14 +70,15 @@ export const QuestionReviewCard = ({ question, index }: QuestionReviewCardProps)
           <div>
             <h4 className="font-medium mb-2">Options:</h4>
             <div className="space-y-2">
-              {question.options.map((option: string, optIndex: number) => (
+              {question.options.map((option: any, optIndex: number) => (
                 <AnswerOption
                   key={optIndex}
-                  option={option}
+                  option={getOptionText(option)}
                   optIndex={optIndex}
                   userAnswer={question.user_answer}
                   correctAnswer={question.correct_answer}
                   isCorrect={question.is_correct}
+                  totalOptions={question.options.length}
                 />
               ))}
             </div>

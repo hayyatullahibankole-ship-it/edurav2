@@ -6,6 +6,7 @@ interface AnswerOptionProps {
   userAnswer: any;
   correctAnswer: any;
   isCorrect: boolean;
+  totalOptions: number;
 }
 
 export const AnswerOption = ({ 
@@ -13,7 +14,8 @@ export const AnswerOption = ({
   optIndex, 
   userAnswer, 
   correctAnswer, 
-  isCorrect 
+  isCorrect,
+  totalOptions
 }: AnswerOptionProps) => {
   const formatOption = (opt: string, index: number) => {
     return `${String.fromCharCode(65 + index)}. ${opt}`;
@@ -22,7 +24,9 @@ export const AnswerOption = ({
   // Parse user answer to get index
   const getUserAnswerIndex = (): number => {
     if (typeof userAnswer === 'number') {
-      return userAnswer;
+      if (userAnswer >= 0 && userAnswer < totalOptions) return userAnswer;
+      if (userAnswer >= 1 && userAnswer <= totalOptions) return userAnswer - 1;
+      return -1;
     } else if (typeof userAnswer === 'string') {
       const userStr = userAnswer.trim();
       if (userStr.length === 1 && /[A-Za-z]/.test(userStr)) {
@@ -30,7 +34,9 @@ export const AnswerOption = ({
       } else if (userStr.match(/^[A-Za-z]\)/)) {
         return userStr.charAt(0).toUpperCase().charCodeAt(0) - 65;
       } else if (!isNaN(parseInt(userStr))) {
-        return parseInt(userStr);
+        const num = parseInt(userStr);
+        if (num >= 0 && num < totalOptions) return num;
+        if (num >= 1 && num <= totalOptions) return num - 1;
       } else {
         // Fallback: match by option text
         const normalize = (s: string) => s.replace(/^[A-Za-z]\)\s*/, '').trim().toLowerCase();
@@ -47,7 +53,9 @@ export const AnswerOption = ({
   // Parse correct answer to get index
   const getCorrectAnswerIndex = (): number => {
     if (typeof correctAnswer === 'number') {
-      return correctAnswer;
+      if (correctAnswer >= 0 && correctAnswer < totalOptions) return correctAnswer;
+      if (correctAnswer >= 1 && correctAnswer <= totalOptions) return correctAnswer - 1;
+      return -1;
     } else if (typeof correctAnswer === 'string') {
       const correctStr = correctAnswer.trim();
       if (correctStr.length === 1 && /[A-Za-z]/.test(correctStr)) {
@@ -55,7 +63,9 @@ export const AnswerOption = ({
       } else if (correctStr.match(/^[A-Za-z]\)/)) {
         return correctStr.charAt(0).toUpperCase().charCodeAt(0) - 65;
       } else if (!isNaN(parseInt(correctStr))) {
-        return parseInt(correctStr);
+        const num = parseInt(correctStr);
+        if (num >= 0 && num < totalOptions) return num;
+        if (num >= 1 && num <= totalOptions) return num - 1;
       } else {
         // Fallback: match by option text
         const normalize = (s: string) => s.replace(/^[A-Za-z]\)\s*/, '').trim().toLowerCase();
