@@ -401,6 +401,14 @@ const AnswerReview = () => {
                               userAnswerIndex = userStr.charAt(0).toUpperCase().charCodeAt(0) - 65;
                             } else if (!isNaN(parseInt(userStr))) {
                               userAnswerIndex = parseInt(userStr);
+                            } else {
+                              // Fallback: match by option text (strip leading "A) ")
+                              const normalize = (s: string) => s.replace(/^[A-Za-z]\)\s*/, '').trim().toLowerCase();
+                              const ua = normalize(userStr);
+                              const optNorm = normalize(String(option));
+                              if (ua === optNorm || ua === String(option).trim().toLowerCase()) {
+                                userAnswerIndex = optIndex;
+                              }
                             }
                           }
 
@@ -416,6 +424,14 @@ const AnswerReview = () => {
                               correctAnswerIndex = correctStr.charAt(0).toUpperCase().charCodeAt(0) - 65;
                             } else if (!isNaN(parseInt(correctStr))) {
                               correctAnswerIndex = parseInt(correctStr);
+                            } else {
+                              // Fallback: match by option text
+                              const normalize = (s: string) => s.replace(/^[A-Za-z]\)\s*/, '').trim().toLowerCase();
+                              const ca = normalize(correctStr);
+                              const optNorm = normalize(String(option));
+                              if (ca === optNorm || ca === String(option).trim().toLowerCase()) {
+                                correctAnswerIndex = optIndex;
+                              }
                             }
                           }
 
