@@ -1,39 +1,33 @@
-import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { BookOpen, Loader2 } from 'lucide-react';
-import { useAnswerReview } from '@/hooks/useAnswerReview';
-import { ReviewHeader } from '@/components/review/ReviewHeader';
-import { ReviewFilters } from '@/components/review/ReviewFilters';
-import { QuestionReviewCard } from '@/components/review/QuestionReviewCard';
+import { useState } from 'react';
+import { useCleanAnswerReview } from '@/hooks/useCleanAnswerReview';
+import { CleanAnswerReviewCard } from '@/components/CleanAnswerReviewCard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, BookOpen, CheckCircle, XCircle } from 'lucide-react';
 
-const AnswerReview = () => {
+export default function AnswerReview() {
   const [searchParams] = useSearchParams();
   const attemptId = searchParams.get('attempt');
-  const { questions, loading } = useAnswerReview(attemptId);
-  const [activeTab, setActiveTab] = useState('all');
-
-  const correctAnswers = questions.filter(q => q.is_correct);
-  const incorrectAnswers = questions.filter(q => !q.is_correct);
+  const { questions, loading } = useCleanAnswerReview(attemptId);
+  const [activeTab, setActiveTab] = useState<'all' | 'correct' | 'incorrect'>('all');
 
   const getFilteredQuestions = () => {
-    switch (activeTab) {
-      case 'correct':
-        return correctAnswers;
-      case 'incorrect':
-        return incorrectAnswers;
-      default:
-        return questions;
-    }
+    if (activeTab === 'all') return questions;
+    if (activeTab === 'correct') return questions.filter(q => q.isCorrect);
+    if (activeTab === 'incorrect') return questions.filter(q => !q.isCorrect);
+    return questions;
   };
+
+  const correctCount = questions.filter(q => q.isCorrect).length;
+  const incorrectCount = questions.filter(q => !q.isCorrect).length;
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading answer review...</p>
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-lg">Loading answer review...</p>
         </div>
       </div>
     );
@@ -41,45 +35,97 @@ const AnswerReview = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <ReviewHeader attemptId={attemptId!} questions={questions} />
+      {/* Header */}
+      <div className="bg-primary text-primary-foreground p-6 shadow-lg">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-3xl font-bold mb-2">Answer Review</h1>
+          <p className="text-primary-foreground/80">
+            Review your answers and learn from explanations
+          </p>
+        </div>
+      </div>
 
-        {/* Answer Review Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <ReviewFilters 
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            correctCount={correctAnswers.length}
-            incorrectCount={incorrectAnswers.length}
-          />
+      {/* Content */}
+      <div className="max-w-5xl mx-auto p-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Questions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-blue-500" />
+                <span className="text-3xl font-bold">{questions.length}</span>
+              </div>
+            </CardContent>
+          </Card>
 
-          <TabsContent value={activeTab} className="space-y-6 mt-6">
-            {getFilteredQuestions().map((question, index) => (
-              <QuestionReviewCard 
-                key={question.id} 
-                question={question} 
-                index={index}
-              />
-            ))}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Correct Answers
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span className="text-3xl font-bold text-green-600">{correctCount}</span>
+              </div>
+            </CardContent>
+          </Card>
 
-            {getFilteredQuestions().length === 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Incorrect Answers
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <XCircle className="h-5 w-5 text-red-500" />
+                <span className="text-3xl font-bold text-red-600">{incorrectCount}</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="mb-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="all">
+              All ({questions.length})
+            </TabsTrigger>
+            <TabsTrigger value="correct">
+              Correct ({correctCount})
+            </TabsTrigger>
+            <TabsTrigger value="incorrect">
+              Incorrect ({incorrectCount})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab} className="mt-6 space-y-6">
+            {getFilteredQuestions().length === 0 ? (
               <Card>
-                <CardContent className="text-center py-12">
-                  <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No questions found</h3>
-                  <p className="text-muted-foreground">
-                    {activeTab === 'correct' && 'No correct answers to show'}
-                    {activeTab === 'incorrect' && 'Great! No incorrect answers'}
-                    {activeTab === 'all' && 'No questions available for review'}
-                  </p>
+                <CardContent className="py-12 text-center">
+                  <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No questions found in this category</p>
                 </CardContent>
               </Card>
+            ) : (
+              getFilteredQuestions().map((question, index) => (
+                <CleanAnswerReviewCard
+                  key={question.id}
+                  question={question}
+                  index={index}
+                />
+              ))
             )}
           </TabsContent>
         </Tabs>
       </div>
     </div>
   );
-};
-
-export default AnswerReview;
+}

@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 
 import AdminPortal from "./pages/AdminPortal";
 import AdminLogin from "./pages/AdminLogin";
+import AdminNormalize from "./pages/AdminNormalize";
 import CBTExam from "./pages/CBTExam";
 import TestResults from "./pages/TestResults";
 import Demo from "./pages/Demo";
@@ -46,6 +47,11 @@ const App = () => (
             <Route path="/admin" element={
               <ProtectedRoute requireAdmin>
                 <AdminPortal />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin-normalize" element={
+              <ProtectedRoute requireAdmin>
+                <AdminNormalize />
               </ProtectedRoute>
             } />
             <Route path="/practice" element={
