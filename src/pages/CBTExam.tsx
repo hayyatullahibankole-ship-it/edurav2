@@ -220,10 +220,11 @@ const CBTExam = () => {
         
         // Use secure validation function (doesn't expose correct answer)
         let isCorrect = false;
+        let normalizedAnswer: string | number = userAnswer;
+        
         if (userAnswer && question.originalId) {
           try {
             // Convert letter-based answer to numeric format for validation
-            let normalizedAnswer: string | number = userAnswer;
             
             // Handle different answer formats
             if (typeof userAnswer === 'string') {
@@ -283,10 +284,11 @@ const CBTExam = () => {
           subjectStats[subject].correct += 1;
         }
         
+        // Store the normalized answer (as index) for consistency
         answerRecords.push({
           attempt_id: attemptId,
           question_id: question.originalId,
-          answer: userAnswer || null,
+          answer: userAnswer ? normalizedAnswer : null,
           is_correct: isCorrect,
           time_spent_seconds: Math.floor(timeTaken / questions.length)
         });
