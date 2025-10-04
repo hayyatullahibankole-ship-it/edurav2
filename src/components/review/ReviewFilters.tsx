@@ -1,4 +1,4 @@
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface ReviewFiltersProps {
   activeTab: string;
@@ -14,16 +14,14 @@ export const ReviewFilters = ({
   incorrectCount 
 }: ReviewFiltersProps) => {
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="all">All Questions</TabsTrigger>
-        <TabsTrigger value="correct" className="text-green-600">
-          Correct ({correctCount})
-        </TabsTrigger>
-        <TabsTrigger value="incorrect" className="text-red-600">
-          Incorrect ({incorrectCount})
-        </TabsTrigger>
-      </TabsList>
-    </Tabs>
+    <TabsList className="grid w-full grid-cols-3">
+      <TabsTrigger value="all">All Questions</TabsTrigger>
+      <TabsTrigger value="correct" className="text-green-600">
+        Correct ({correctCount})
+      </TabsTrigger>
+      <TabsTrigger value="incorrect" className="text-red-600">
+        Incorrect ({incorrectCount})
+      </TabsTrigger>
+    </TabsList>
   );
 };

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
-import { TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { BookOpen, Loader2 } from 'lucide-react';
 import { useAnswerReview } from '@/hooks/useAnswerReview';
 import { ReviewHeader } from '@/components/review/ReviewHeader';
@@ -45,36 +45,38 @@ const AnswerReview = () => {
         <ReviewHeader attemptId={attemptId!} questions={questions} />
 
         {/* Answer Review Tabs */}
-        <ReviewFilters 
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          correctCount={correctAnswers.length}
-          incorrectCount={incorrectAnswers.length}
-        />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <ReviewFilters 
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            correctCount={correctAnswers.length}
+            incorrectCount={incorrectAnswers.length}
+          />
 
-        <TabsContent value={activeTab} className="space-y-6 mt-6">
-          {getFilteredQuestions().map((question, index) => (
-            <QuestionReviewCard 
-              key={question.id} 
-              question={question} 
-              index={index}
-            />
-          ))}
+          <TabsContent value={activeTab} className="space-y-6 mt-6">
+            {getFilteredQuestions().map((question, index) => (
+              <QuestionReviewCard 
+                key={question.id} 
+                question={question} 
+                index={index}
+              />
+            ))}
 
-          {getFilteredQuestions().length === 0 && (
-            <Card>
-              <CardContent className="text-center py-12">
-                <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No questions found</h3>
-                <p className="text-muted-foreground">
-                  {activeTab === 'correct' && 'No correct answers to show'}
-                  {activeTab === 'incorrect' && 'Great! No incorrect answers'}
-                  {activeTab === 'all' && 'No questions available for review'}
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+            {getFilteredQuestions().length === 0 && (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No questions found</h3>
+                  <p className="text-muted-foreground">
+                    {activeTab === 'correct' && 'No correct answers to show'}
+                    {activeTab === 'incorrect' && 'Great! No incorrect answers'}
+                    {activeTab === 'all' && 'No questions available for review'}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
