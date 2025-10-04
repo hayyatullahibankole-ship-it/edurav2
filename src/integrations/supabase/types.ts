@@ -1152,6 +1152,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_answer_normalization: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          failed_count: number
+          updated_count: number
+        }[]
+      }
       can_view_full_pii: {
         Args: { target_user_id: string }
         Returns: boolean
@@ -1485,12 +1492,25 @@ export type Database = {
           severity: string
         }[]
       }
+      normalize_question_answers: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          new_format: number
+          old_format: string
+          question_id: string
+          status: string
+        }[]
+      }
       send_immediate_result_notification: {
         Args: { attempt_uuid: string }
         Returns: boolean
       }
       validate_admin_action: {
         Args: { action_type: string; target_data?: Json }
+        Returns: boolean
+      }
+      validate_answer_simple: {
+        Args: { question_id_param: string; submitted_index: number }
         Returns: boolean
       }
       validate_question_answer: {
