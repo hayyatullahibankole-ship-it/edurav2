@@ -145,6 +145,8 @@ export const AnswerOption = ({
   // Use the validated is_correct field from database
   const isValidatedCorrect = isUserAnswer && isCorrect;
   const isValidatedWrong = isUserAnswer && !isCorrect;
+
+  const hasReliableCorrect = typeof correctAnswer === 'string' || (typeof correctAnswer === 'object' && correctAnswer !== null);
   
   let bgColor = 'bg-muted';
   let borderColor = 'border-muted';
@@ -154,7 +156,7 @@ export const AnswerOption = ({
     bgColor = 'bg-green-50';
     borderColor = 'border-green-200';
     textColor = 'text-green-800';
-  } else if (isCorrectAnswer) {
+  } else if (hasReliableCorrect && isCorrectAnswer) {
     bgColor = 'bg-green-50';
     borderColor = 'border-green-200';
     textColor = 'text-green-700';
@@ -171,7 +173,7 @@ export const AnswerOption = ({
       <div className="flex items-center justify-between">
         <span>{formatOption(option, optIndex)}</span>
         <div className="flex gap-2">
-          {isCorrectAnswer && (
+          {hasReliableCorrect && isCorrectAnswer && (
             <Badge variant="default" className="bg-green-600 hover:bg-green-700">
               ✓ Correct Answer
             </Badge>

@@ -100,9 +100,13 @@ export const QuestionReviewCard = ({ question, index }: QuestionReviewCardProps)
             </div>
             <div>
               <h4 className="font-medium mb-2">Correct Answer:</h4>
-              <div className="p-3 rounded border bg-green-50 border-green-200 text-green-700">
-                {question.correct_answer || 'Not available'}
-              </div>
+              {(typeof question.correct_answer === 'string' || (question.correct_answer && typeof question.correct_answer === 'object')) && (
+                <div className="p-3 rounded border bg-green-50 border-green-200 text-green-700">
+                  {typeof question.correct_answer === 'string' 
+                    ? question.correct_answer 
+                    : JSON.stringify(question.correct_answer)}
+                </div>
+              )}
             </div>
           </div>
         )}
