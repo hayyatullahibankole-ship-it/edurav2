@@ -203,12 +203,13 @@ const CBTExam = () => {
       for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
         const question = questions[questionIndex];
         
-        // FIX: Use question.id as the key (matches how answers are stored in interface)
-        const userAnswer = answers[question.id];
+        // Robust answer lookup: support id-based, index-based, and id-1 keys
+        const userAnswer = (answers as any)[question.id] ?? (answers as any)[questionIndex] ?? (answers as any)[question.id - 1];
         const subject = question.subject || 'General';
         
         console.log(`Processing question ${questionIndex}:`, {
           questionId: question.originalId,
+          usedKey: (answers as any)[question.id] !== undefined ? 'id' : (answers as any)[questionIndex] !== undefined ? 'index' : 'id-1',
           userAnswer,
           subject
         });
