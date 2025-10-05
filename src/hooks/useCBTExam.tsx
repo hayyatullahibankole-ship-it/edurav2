@@ -118,10 +118,11 @@ export const useCBTExam = (attemptId: string | null) => {
           
           console.log('Calling RPC with subject_ids:', subjectIds);
           
+          // Use 40 questions per subject for JAMB standard format
           const { data: practiceQs, error: practiceError } = await supabase
             .rpc('get_random_questions_for_subjects', { 
               subject_ids: subjectIds,
-              per_subject_count: 10
+              per_subject_count: 40
             });
           
           if (practiceError) {
