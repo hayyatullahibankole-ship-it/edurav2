@@ -111,18 +111,24 @@ export const useCleanAnswerReview = (attemptId: string | null) => {
         }
 
         // Use secure review RPC that returns everything we need
+        console.log('Fetching review for attempt:', attemptId);
+        
         const { data: reviewData, error: reviewError } = await supabase
           .rpc('get_review_questions_for_attempt', { 
             attempt_uuid: attemptId 
           });
 
         if (reviewError) {
-          throw reviewError;
+          console.error('Review RPC error:', reviewError);
+          throw new Error(`Failed to load review: ${reviewError.message}`);
         }
 
         if (!reviewData || reviewData.length === 0) {
-          throw new Error('No review data available');
+          console.warn('No review data returned');
+          throw new Error('No review data available for this attempt');
         }
+        
+        console.log('Review data fetched:', reviewData.length, 'questions');
 
         // Apply same deterministic shuffle as during exam
         const attemptSeed = strHash(attemptId);

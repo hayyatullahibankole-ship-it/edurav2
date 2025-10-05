@@ -90,23 +90,46 @@ export const useCBTExam = (attemptId: string | null) => {
               target_exam_id: attemptData.exam_id 
             });
           
-          if (examError) throw examError;
+          if (examError) {
+            console.error('Exam RPC error:', examError);
+            throw new Error(`Failed to load exam questions: ${examError.message}`);
+          }
           questionsData = examQs || [];
         } else {
           // Practice mode - use selected subjects
           const subjects = attemptData.selected_subjects as any;
-          if (!subjects || subjects.length === 0) {
+          console.log('Selected subjects raw:', subjects);
+          
+          if (!subjects || (Array.isArray(subjects) && subjects.length === 0)) {
             throw new Error('No subjects selected for practice');
           }
           
+          // Handle different formats: array of UUIDs or array of objects with id
+          let subjectIds: string[];
+          if (typeof subjects[0] === 'string') {
+            // Already an array of UUIDs
+            subjectIds = subjects;
+          } else if (subjects[0]?.id) {
+            // Array of objects with id property
+            subjectIds = subjects.map((s: any) => s.id);
+          } else {
+            throw new Error('Invalid subjects format');
+          }
+          
+          console.log('Calling RPC with subject_ids:', subjectIds);
+          
           const { data: practiceQs, error: practiceError } = await supabase
             .rpc('get_random_questions_for_subjects', { 
-              subject_ids: subjects.map((s: any) => s.id),
+              subject_ids: subjectIds,
               per_subject_count: 10
             });
           
-          if (practiceError) throw practiceError;
+          if (practiceError) {
+            console.error('Practice RPC error:', practiceError);
+            throw new Error(`Failed to load practice questions: ${practiceError.message}`);
+          }
           questionsData = practiceQs || [];
+          console.log('Questions fetched:', questionsData.length);
         }
 
         if (!questionsData || questionsData.length === 0) {
