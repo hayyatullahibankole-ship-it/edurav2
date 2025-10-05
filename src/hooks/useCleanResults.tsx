@@ -141,6 +141,21 @@ export const useCleanResults = (attemptId: string | null) => {
           }
         }
 
+        // Detect mismatch between saved results and answer review; auto-recompute once
+        if (resultsData) {
+          const { data: reviewCheck } = await supabase.rpc('get_review_questions_for_attempt', { attempt_uuid: attemptId });
+          if (Array.isArray(reviewCheck)) {
+            const total = reviewCheck.length;
+            const correct = reviewCheck.filter((q: any) => q.is_correct).length;
+            if (total > 0 && correct > 0 && (resultsData.correct_answers === 0 || resultsData.percentage === 0)) {
+              await supabase.rpc('recompute_results_for_attempt', { attempt_uuid: attemptId });
+              // quick re-poll after recompute
+              const recomputed = await pollResults(5, 500);
+              if (recomputed) resultsData = recomputed;
+            }
+          }
+        }
+
         if (!resultsData) {
           toast({
             title: 'Results not ready',

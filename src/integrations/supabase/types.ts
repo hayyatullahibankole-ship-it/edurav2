@@ -1550,6 +1550,18 @@ export type Database = {
           status: string
         }[]
       }
+      recompute_results_for_attempt: {
+        Args: { attempt_uuid: string }
+        Returns: {
+          correct: number
+          percentage: number
+          scaled_score: number
+          total: number
+          unanswered: number
+          updated: boolean
+          wrong: number
+        }[]
+      }
       send_immediate_result_notification: {
         Args: { attempt_uuid: string }
         Returns: boolean
