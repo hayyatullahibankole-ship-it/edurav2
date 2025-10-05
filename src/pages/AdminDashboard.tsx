@@ -50,7 +50,7 @@ import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
 import { PaymentSettings } from '@/components/admin/PaymentSettings';
 import PricingManager from '@/components/admin/PricingManager';
-import CorrectAnswerFixer from '@/components/admin/CorrectAnswerFixer';
+
 
 export default function AdminDashboard() {
   const { user, isAdmin, signOut, loading: authLoading } = useAuth();
@@ -712,7 +712,6 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="questions" className="space-y-6">
-            <CorrectAnswerFixer />
             <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-blue-200 dark:border-blue-800">
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <div>

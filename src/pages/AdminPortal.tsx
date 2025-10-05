@@ -45,11 +45,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import CorrectAnswerFixer from '@/components/admin/CorrectAnswerFixer';
-import QuestionDiagnostics from '@/components/admin/QuestionDiagnostics';
-import BulkAnswerUpdater from '@/components/admin/BulkAnswerUpdater';
-import AnswerCSVManager from '@/components/admin/AnswerCSVManager';
-import AutoAnswerDetector from '@/components/admin/AutoAnswerDetector';
 
 export default function AdminPortal() {
   const { user, isAdmin, signOut } = useAuth();
@@ -410,16 +405,7 @@ export default function AdminPortal() {
           
           {activeSection === 'exams' && <ExamControl />}
           
-          {activeSection === 'questions' && (
-            <div className="space-y-6">
-              <QuestionDiagnostics />
-              <AutoAnswerDetector />
-              <BulkAnswerUpdater />
-              <AnswerCSVManager />
-              <CorrectAnswerFixer />
-              <QuestionManagement />
-            </div>
-          )}
+          {activeSection === 'questions' && <QuestionManagement />}
           
           {activeSection === 'resources' && <ResourceManagement />}
           
