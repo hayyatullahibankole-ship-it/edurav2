@@ -72,8 +72,9 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
     
     let currentQuestion = null;
     
+    // Note: Asterisks (*text* or **text**) are preserved as markdown bold formatting
     for (let line of lines) {
-      line = line.trim();
+      line = line.trim(); // Preserve asterisks - they represent bold markdown formatting
       
       // Check if this line starts a new question (contains a question mark or starts with a number)
       if (line.match(/^\d+[.)]\s*/) || line.includes('?') || (!currentQuestion && line.length > 10)) {
