@@ -1284,6 +1284,51 @@ export type Database = {
           explanation: string
         }[]
       }
+      get_random_questions_for_exam: {
+        Args: { target_exam_id: string }
+        Returns: {
+          difficulty_level: number
+          id: string
+          media_urls: Json
+          options: Json
+          points: number
+          question_text: string
+          subject_id: string
+          tags: Json
+          time_limit_seconds: number
+          type: Database["public"]["Enums"]["question_type"]
+        }[]
+      }
+      get_random_questions_for_subjects: {
+        Args: { per_subject_count?: number; subject_ids: string[] }
+        Returns: {
+          difficulty_level: number
+          id: string
+          media_urls: Json
+          options: Json
+          points: number
+          question_text: string
+          subject_id: string
+          tags: Json
+          time_limit_seconds: number
+          type: Database["public"]["Enums"]["question_type"]
+        }[]
+      }
+      get_review_questions_for_attempt: {
+        Args: { attempt_uuid: string }
+        Returns: {
+          correct_answer_index: number
+          explanation: string
+          id: string
+          is_correct: boolean
+          options: Json
+          question_text: string
+          subject_id: string
+          subject_name: string
+          time_spent_seconds: number
+          user_answer_index: number
+        }[]
+      }
       get_secure_user_data: {
         Args: { target_user_id: string }
         Returns: {
