@@ -98,7 +98,9 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
         }
       } else if (line.toLowerCase().includes('answer:') || line.toLowerCase().includes('correct:')) {
         if (currentQuestion) {
-          const answerPart = line.split(/(?:answer:|correct:)\s*/i)[1]?.trim();
+          // Remove asterisks first - handles **Answer:** B format
+          const cleanLine = line.replace(/\*\*/g, '');
+          const answerPart = cleanLine.split(/(?:answer:|correct:)\s*/i)[1]?.trim();
           if (answerPart) {
             const match = answerPart.match(/^(?:option\s+)?([A-E])[\s.)\]:]?/i) || answerPart.match(/^([A-E])[\s.)\]:]?/i);
             if (match && match[1]) {
@@ -107,6 +109,8 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
             } else {
               console.warn(`Could not extract answer from: "${line}"`);
             }
+          } else {
+            console.warn(`No answer part found in: "${line}"`);
           }
         }
       } else if (line.toLowerCase().includes('explanation:')) {
