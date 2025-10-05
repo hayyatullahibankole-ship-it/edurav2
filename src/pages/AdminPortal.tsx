@@ -122,12 +122,13 @@ export default function AdminPortal() {
   const handleDeleteAllQuestions = async () => {
     try {
       setLoading(true);
-      const { error } = await supabase
-        .from('questions')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+      const { data, error } = await supabase.rpc('admin_delete_all_questions');
       if (error) throw error;
-      toast({ title: 'Deleted', description: 'All questions removed.' });
+      const result = data as { questions_deleted: number; attempt_answers_deleted: number };
+      toast({ 
+        title: 'Success', 
+        description: `Deleted ${result.questions_deleted} questions and ${result.attempt_answers_deleted} related answers.` 
+      });
     } catch (e: any) {
       console.error(e);
       toast({ title: 'Delete failed', description: e.message || 'Unable to delete', variant: 'destructive' });

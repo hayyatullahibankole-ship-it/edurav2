@@ -1152,6 +1152,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_all_questions: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       apply_answer_normalization: {
         Args: Record<PropertyKey, never>
         Returns: {

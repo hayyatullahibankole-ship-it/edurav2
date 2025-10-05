@@ -356,16 +356,14 @@ export default function QuestionManagement() {
     try {
       setLoading(true);
       
-      const { error } = await supabase
-        .from('questions')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all by using impossible condition
+      const { data, error } = await supabase.rpc('admin_delete_all_questions');
       
       if (error) throw error;
 
+      const result = data as { questions_deleted: number; attempt_answers_deleted: number };
       toast({
         title: "Success",
-        description: "All questions have been deleted"
+        description: `Deleted ${result.questions_deleted} questions and ${result.attempt_answers_deleted} related answers`
       });
 
       fetchData();
