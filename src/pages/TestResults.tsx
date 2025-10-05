@@ -1,4 +1,5 @@
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useCleanResults } from '@/hooks/useCleanResults';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,14 +11,83 @@ import {
   CheckCircle, 
   XCircle, 
   Clock, 
-  FileText
+  FileText,
+  Download
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { generateExamReportPDF } from '@/utils/pdfGenerator';
 
 export default function TestResults() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const attemptId = searchParams.get('attempt');
   const { results, loading } = useCleanResults(attemptId);
+  const [downloading, setDownloading] = useState(false);
+  const { toast } = useToast();
+
+  const handleDownloadPDF = async () => {
+    if (!results || !attemptId) return;
+
+    try {
+      setDownloading(true);
+
+      // Fetch additional data needed for PDF
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const [userProfileResp, attemptResp] = await Promise.all([
+        supabase.from('users').select('first_name, last_name, email').eq('auth_user_id', user.id).single(),
+        supabase.from('attempts').select('proctoring_data, started_at').eq('id', attemptId).single()
+      ]);
+
+      const userProfile = userProfileResp.data;
+      const attemptData = attemptResp.data;
+
+      if (!userProfile || !attemptData) {
+        throw new Error('Failed to fetch required data');
+      }
+
+      const proctorData = attemptData.proctoring_data as any;
+      const examTitle = proctorData?.title || 'Practice Test';
+      const durationMinutes = proctorData?.duration_minutes || 180;
+
+      // Prepare data for PDF generator
+      const pdfData = {
+        examTitle,
+        studentName: `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'Student',
+        studentEmail: userProfile.email || user.email || '',
+        examDate: new Date(attemptData.started_at || results.createdAt).toLocaleDateString(),
+        totalQuestions: results.totalQuestions,
+        correctAnswers: results.correctAnswers,
+        wrongAnswers: results.wrongAnswers,
+        unanswered: results.unanswered,
+        score: results.rawScore,
+        percentage: results.percentage,
+        timeTaken: results.timeTakenMinutes,
+        timeAllotted: durationMinutes,
+        subjectBreakdown: results.subjectBreakdown,
+        attemptId: results.attemptId
+      };
+
+      await generateExamReportPDF(pdfData);
+
+      toast({
+        title: 'Success',
+        description: 'Results PDF downloaded successfully'
+      });
+
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to generate PDF. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -170,6 +240,26 @@ export default function TestResults() {
           >
             <FileText className="h-5 w-5 mr-2" />
             Review Answers
+          </Button>
+          
+          <Button
+            onClick={handleDownloadPDF}
+            disabled={downloading}
+            variant="secondary"
+            size="lg"
+            className="flex-1"
+          >
+            {downloading ? (
+              <>
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Download className="h-5 w-5 mr-2" />
+                Download Results
+              </>
+            )}
           </Button>
           
           <Button
