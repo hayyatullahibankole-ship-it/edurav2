@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import eduraLogo from '@/assets/edura-logo.png';
 
 export interface ExamResult {
   examTitle: string;
@@ -36,270 +37,236 @@ export const generateExamReportPDF = async (result: ExamResult): Promise<void> =
 
   // Helper function to get grade and color
   const getGradeInfo = (percentage: number) => {
-    if (percentage >= 70) return { grade: 'A', color: successColor, description: 'Excellent Performance' };
-    if (percentage >= 60) return { grade: 'B', color: eduraAccent, description: 'Good Performance' };
-    if (percentage >= 50) return { grade: 'C', color: warningColor, description: 'Average Performance' };
-    if (percentage >= 40) return { grade: 'D', color: [255, 140, 0], description: 'Below Average' };
-    return { grade: 'F', color: dangerColor, description: 'Needs Improvement' };
+    if (percentage >= 70) return { grade: 'A', color: successColor, description: 'Excellent' };
+    if (percentage >= 60) return { grade: 'B', color: eduraAccent, description: 'Good' };
+    if (percentage >= 50) return { grade: 'C', color: warningColor, description: 'Average' };
+    if (percentage >= 40) return { grade: 'D', color: [255, 140, 0], description: 'Fair' };
+    return { grade: 'F', color: dangerColor, description: 'Poor' };
   };
 
   const gradeInfo = getGradeInfo(result.percentage);
 
-  // Page 1: Modern Header
+  // ONE PAGE LAYOUT - Compact Design
   let yPosition = 0;
 
-  // Gradient-style header background
+  // Compact header background
   pdf.setFillColor(eduraDark[0], eduraDark[1], eduraDark[2]);
-  pdf.rect(0, 0, pageWidth, 50, 'F');
+  pdf.rect(0, 0, pageWidth, 35, 'F');
   
   // Accent bar at top
   pdf.setFillColor(eduraAccent[0], eduraAccent[1], eduraAccent[2]);
-  pdf.rect(0, 0, pageWidth, 4, 'F');
+  pdf.rect(0, 0, pageWidth, 3, 'F');
   
-  // EDURA Logo/Brand
+  // Add Edura Logo
+  pdf.addImage(eduraLogo, 'PNG', 15, 8, 20, 20);
+  
+  // EDURA Brand Text
   pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(32);
+  pdf.setFontSize(18);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('EDURA', 20, 25);
+  pdf.text('EDURA', 38, 17);
   
-  pdf.setFontSize(10);
+  pdf.setFontSize(8);
   pdf.setFont('helvetica', 'normal');
-  pdf.text('Computer Based Testing', 20, 32);
+  pdf.text('Computer Based Testing', 38, 22);
   
   // Report title on right
-  pdf.setFontSize(20);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('EXAM REPORT', pageWidth - 20, 25, { align: 'right' });
-  
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(eduraAccent[0], eduraAccent[1], eduraAccent[2]);
-  pdf.text(`Report ID: ${result.attemptId.substring(0, 8).toUpperCase()}`, pageWidth - 20, 32, { align: 'right' });
-
-  yPosition = 60;
-
-  // Modern Info Card
-  pdf.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
-  pdf.roundedRect(20, yPosition, pageWidth - 40, 50, 3, 3, 'F');
-  
-  pdf.setTextColor(textGray[0], textGray[1], textGray[2]);
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('STUDENT INFORMATION', 25, yPosition + 8);
-  
-  yPosition += 16;
-  pdf.setFontSize(11);
-  pdf.setFont('helvetica', 'normal');
-  
-  const studentInfo = [
-    ['Student Name:', result.studentName],
-    ['Email Address:', result.studentEmail],
-    ['Examination:', result.examTitle],
-    ['Test Date:', result.examDate]
-  ];
-
-  studentInfo.forEach(([label, value]) => {
-    pdf.setFont('helvetica', 'bold');
-    pdf.setTextColor(textGray[0], textGray[1], textGray[2]);
-    pdf.text(label, 25, yPosition);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(eduraDark[0], eduraDark[1], eduraDark[2]);
-    pdf.text(value, 75, yPosition);
-    yPosition += 8;
-  });
-
-  yPosition += 10;
-
-  // Performance Summary with Modern Card
-  pdf.setTextColor(eduraDark[0], eduraDark[1], eduraDark[2]);
   pdf.setFontSize(16);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('PERFORMANCE OVERVIEW', 20, yPosition);
+  pdf.text('EXAM REPORT', pageWidth - 15, 17, { align: 'right' });
   
-  // Decorative line
-  pdf.setDrawColor(eduraAccent[0], eduraAccent[1], eduraAccent[2]);
-  pdf.setLineWidth(2);
-  pdf.line(20, yPosition + 3, 80, yPosition + 3);
-  
-  yPosition += 15;
+  pdf.setFontSize(8);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(eduraAccent[0], eduraAccent[1], eduraAccent[2]);
+  pdf.text(`ID: ${result.attemptId.substring(0, 8).toUpperCase()}`, pageWidth - 15, 22, { align: 'right' });
 
-  // Modern score showcase
+  yPosition = 40;
+
+  // Compact Info Section - Two columns
+  const leftCol = 15;
+  const rightCol = 110;
+  
+  pdf.setTextColor(textGray[0], textGray[1], textGray[2]);
+  pdf.setFontSize(8);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('STUDENT INFORMATION', leftCol, yPosition);
+  
+  yPosition += 5;
+  pdf.setFontSize(8);
+  
+  const studentInfoLeft = [
+    ['Student:', result.studentName],
+    ['Exam:', result.examTitle]
+  ];
+  
+  const studentInfoRight = [
+    ['Email:', result.studentEmail],
+    ['Date:', result.examDate]
+  ];
+
+  studentInfoLeft.forEach(([label, value]) => {
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(textGray[0], textGray[1], textGray[2]);
+    pdf.text(label, leftCol, yPosition);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(eduraDark[0], eduraDark[1], eduraDark[2]);
+    const truncatedValue = value.length > 30 ? value.substring(0, 27) + '...' : value;
+    pdf.text(truncatedValue, leftCol + 20, yPosition);
+    yPosition += 5;
+  });
+  
+  let yPosRight = yPosition - 10;
+  studentInfoRight.forEach(([label, value]) => {
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(textGray[0], textGray[1], textGray[2]);
+    pdf.text(label, rightCol, yPosRight);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(eduraDark[0], eduraDark[1], eduraDark[2]);
+    const truncatedValue = value.length > 30 ? value.substring(0, 27) + '...' : value;
+    pdf.text(truncatedValue, rightCol + 15, yPosRight);
+    yPosRight += 5;
+  });
+
+  yPosition += 3;
+
+  // Compact Performance Section - Side by side layout
   const centerX = pageWidth / 2;
-  const scoreBoxWidth = 140;
-  const scoreBoxHeight = 70;
-  const scoreBoxX = centerX - scoreBoxWidth / 2;
+  const scoreBoxWidth = 50;
+  const scoreBoxHeight = 40;
+  const scoreBoxX = 15;
   
-  // Score card with shadow effect
-  pdf.setFillColor(245, 245, 245);
-  pdf.roundedRect(scoreBoxX + 2, yPosition + 2, scoreBoxWidth, scoreBoxHeight, 5, 5, 'F');
-  
-  // Main score card
+  // Score card
   pdf.setFillColor(255, 255, 255);
-  pdf.roundedRect(scoreBoxX, yPosition, scoreBoxWidth, scoreBoxHeight, 5, 5, 'F');
+  pdf.roundedRect(scoreBoxX, yPosition, scoreBoxWidth, scoreBoxHeight, 3, 3, 'F');
   
   // Border with grade color
   pdf.setDrawColor(gradeInfo.color[0], gradeInfo.color[1], gradeInfo.color[2]);
-  pdf.setLineWidth(3);
-  pdf.roundedRect(scoreBoxX, yPosition, scoreBoxWidth, scoreBoxHeight, 5, 5, 'S');
+  pdf.setLineWidth(2);
+  pdf.roundedRect(scoreBoxX, yPosition, scoreBoxWidth, scoreBoxHeight, 3, 3, 'S');
   
   // Large percentage score
   pdf.setTextColor(gradeInfo.color[0], gradeInfo.color[1], gradeInfo.color[2]);
-  pdf.setFontSize(42);
+  pdf.setFontSize(24);
   pdf.setFont('helvetica', 'bold');
-  pdf.text(`${result.percentage.toFixed(0)}%`, centerX, yPosition + 30, { align: 'center' });
+  pdf.text(`${result.percentage.toFixed(0)}%`, scoreBoxX + scoreBoxWidth / 2, yPosition + 18, { align: 'center' });
   
   // Grade badge
-  pdf.setFontSize(18);
-  pdf.text(`Grade ${gradeInfo.grade}`, centerX, yPosition + 48, { align: 'center' });
+  pdf.setFontSize(12);
+  pdf.text(`Grade ${gradeInfo.grade}`, scoreBoxX + scoreBoxWidth / 2, yPosition + 28, { align: 'center' });
   
   // Description
-  pdf.setFontSize(11);
+  pdf.setFontSize(8);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(textGray[0], textGray[1], textGray[2]);
-  pdf.text(gradeInfo.description, centerX, yPosition + 60, { align: 'center' });
+  pdf.text(gradeInfo.description, scoreBoxX + scoreBoxWidth / 2, yPosition + 35, { align: 'center' });
 
-  yPosition += scoreBoxHeight + 20;
-
-  // Modern Statistics Grid
+  // Compact Statistics Grid - Next to score
   const stats = [
-    { label: 'Total', value: result.totalQuestions, color: textGray, icon: '📝' },
-    { label: 'Correct', value: result.correctAnswers, color: successColor, icon: '✓' },
-    { label: 'Wrong', value: result.wrongAnswers, color: dangerColor, icon: '✗' },
-    { label: 'Skipped', value: result.unanswered, color: warningColor, icon: '○' }
+    { label: 'Total', value: result.totalQuestions, color: textGray },
+    { label: 'Correct', value: result.correctAnswers, color: successColor },
+    { label: 'Wrong', value: result.wrongAnswers, color: dangerColor },
+    { label: 'Skipped', value: result.unanswered, color: warningColor }
   ];
 
-  const boxWidth = (pageWidth - 50) / 4;
-  const boxHeight = 35;
+  const boxWidth = 30;
+  const boxHeight = 20;
+  const startX = scoreBoxX + scoreBoxWidth + 5;
 
   stats.forEach((stat, index) => {
-    const xPos = 20 + index * (boxWidth + 3);
+    const xPos = startX + (index % 2) * (boxWidth + 2);
+    const yPos = yPosition + Math.floor(index / 2) * (boxHeight + 2);
     
     // Card background
     pdf.setFillColor(255, 255, 255);
-    pdf.roundedRect(xPos, yPosition, boxWidth, boxHeight, 3, 3, 'F');
+    pdf.roundedRect(xPos, yPos, boxWidth, boxHeight, 2, 2, 'F');
     
     // Colored top border
     pdf.setFillColor(stat.color[0], stat.color[1], stat.color[2]);
-    pdf.roundedRect(xPos, yPosition, boxWidth, 4, 1, 1, 'F');
+    pdf.roundedRect(xPos, yPos, boxWidth, 2, 1, 1, 'F');
     
     // Value
     pdf.setTextColor(stat.color[0], stat.color[1], stat.color[2]);
-    pdf.setFontSize(22);
+    pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(stat.value.toString(), xPos + boxWidth / 2, yPosition + 19, { align: 'center' });
+    pdf.text(stat.value.toString(), xPos + boxWidth / 2, yPos + 11, { align: 'center' });
     
     // Label
-    pdf.setFontSize(9);
+    pdf.setFontSize(7);
     pdf.setFont('helvetica', 'normal');
     pdf.setTextColor(textGray[0], textGray[1], textGray[2]);
-    pdf.text(stat.label, xPos + boxWidth / 2, yPosition + 29, { align: 'center' });
+    pdf.text(stat.label, xPos + boxWidth / 2, yPos + 17, { align: 'center' });
   });
 
-  yPosition += boxHeight + 20;
-
-  // Time Statistics Card
-  pdf.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
-  pdf.roundedRect(20, yPosition, pageWidth - 40, 42, 3, 3, 'F');
-  
+  // Time info next to stats
+  const timeX = startX + 2 * (boxWidth + 2) + 5;
+  pdf.setFontSize(7);
+  pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(textGray[0], textGray[1], textGray[2]);
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('⏱️ TIME ANALYSIS', 25, yPosition + 8);
+  pdf.text('TIME ANALYSIS', timeX, yPosition + 3);
   
-  yPosition += 16;
+  pdf.setFontSize(7);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(`Duration: ${result.timeAllotted}min`, timeX, yPosition + 8);
+  pdf.text(`Used: ${result.timeTaken}min`, timeX, yPosition + 13);
+  pdf.text(`Avg: ${(result.timeTaken / result.totalQuestions).toFixed(1)}min/q`, timeX, yPosition + 18);
 
-  const timeStats = [
-    ['Duration Allowed:', `${result.timeAllotted} min`],
-    ['Time Utilized:', `${result.timeTaken} min`],
-    ['Avg. per Question:', `${(result.timeTaken / result.totalQuestions).toFixed(1)} min`]
-  ];
+  yPosition += Math.max(scoreBoxHeight, boxHeight * 2 + 2) + 8;
 
-  pdf.setFontSize(10);
-  const timeColWidth = (pageWidth - 50) / 3;
-  timeStats.forEach(([label, value], idx) => {
-    const xPos = 25 + idx * timeColWidth;
-    pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(textGray[0], textGray[1], textGray[2]);
-    pdf.text(label, xPos, yPosition);
-    pdf.setFont('helvetica', 'bold');
-    pdf.setTextColor(eduraDark[0], eduraDark[1], eduraDark[2]);
-    pdf.text(value, xPos, yPosition + 8);
-  });
-
-  yPosition += 22;
-
-  // Subject Breakdown (if fits on page, otherwise on next page)
-  if (yPosition + 70 > pageHeight - 25) {
-    pdf.addPage();
-    yPosition = 20;
-    
-    // Re-add header on new page
-    pdf.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
-    pdf.rect(0, 0, pageWidth, 15, 'F');
-    pdf.setTextColor(eduraDark[0], eduraDark[1], eduraDark[2]);
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('EDURA - Exam Report (Continued)', 20, 10);
-    yPosition = 25;
-  } else {
-    yPosition += 15;
-  }
-
+  // Subject Breakdown - Compact table
   pdf.setTextColor(eduraDark[0], eduraDark[1], eduraDark[2]);
-  pdf.setFontSize(16);
+  pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('📊 SUBJECT PERFORMANCE', 20, yPosition);
+  pdf.text('SUBJECT PERFORMANCE', 15, yPosition);
   
   // Decorative line
   pdf.setDrawColor(eduraAccent[0], eduraAccent[1], eduraAccent[2]);
-  pdf.setLineWidth(2);
-  pdf.line(20, yPosition + 3, 95, yPosition + 3);
+  pdf.setLineWidth(1);
+  pdf.line(15, yPosition + 2, 70, yPosition + 2);
   
-  yPosition += 15;
+  yPosition += 8;
 
-  // Modern table header
-  const colWidths = [70, 25, 30, 25, 40];
-  const colPositions = [20, 90, 115, 145, 170];
+  // Compact table header
+  const colPositions = [15, 95, 120, 145, 170];
   
   pdf.setFillColor(eduraDark[0], eduraDark[1], eduraDark[2]);
-  pdf.roundedRect(20, yPosition, pageWidth - 40, 12, 2, 2, 'F');
+  pdf.roundedRect(15, yPosition, pageWidth - 30, 7, 1, 1, 'F');
   
   pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(10);
+  pdf.setFontSize(8);
   pdf.setFont('helvetica', 'bold');
   
-  const headers = ['Subject Name', 'Total', 'Correct', 'Wrong', 'Score'];
+  const headers = ['Subject', 'Total', 'Correct', 'Wrong', 'Score'];
   headers.forEach((header, index) => {
-    pdf.text(header, colPositions[index] + 3, yPosition + 8);
+    pdf.text(header, colPositions[index] + 2, yPosition + 5);
   });
   
-  yPosition += 12;
+  yPosition += 7;
 
-  // Subject rows with modern styling
+  // Compact subject rows
   pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(10);
+  pdf.setFontSize(7);
   
   Object.entries(result.subjectBreakdown).forEach((entry, index) => {
     const [subject, stats] = entry;
-    const rowHeight = 11;
+    const rowHeight = 6;
     
     // Alternating row colors
     if (index % 2 === 0) {
       pdf.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
-      pdf.roundedRect(20, yPosition, pageWidth - 40, rowHeight, 1, 1, 'F');
+      pdf.roundedRect(15, yPosition, pageWidth - 30, rowHeight, 0.5, 0.5, 'F');
     }
     
     pdf.setTextColor(eduraDark[0], eduraDark[1], eduraDark[2]);
     
     // Subject name
-    const truncatedSubject = subject.length > 25 ? subject.substring(0, 22) + '...' : subject;
+    const truncatedSubject = subject.length > 30 ? subject.substring(0, 27) + '...' : subject;
     pdf.setFont('helvetica', 'bold');
-    pdf.text(truncatedSubject, colPositions[0] + 3, yPosition + 7);
+    pdf.text(truncatedSubject, colPositions[0] + 2, yPosition + 4);
     
     pdf.setFont('helvetica', 'normal');
-    pdf.text(stats.total.toString(), colPositions[1] + 3, yPosition + 7);
-    pdf.text(stats.correct.toString(), colPositions[2] + 3, yPosition + 7);
-    pdf.text((stats.total - stats.correct).toString(), colPositions[3] + 3, yPosition + 7);
+    pdf.text(stats.total.toString(), colPositions[1] + 2, yPosition + 4);
+    pdf.text(stats.correct.toString(), colPositions[2] + 2, yPosition + 4);
+    pdf.text((stats.total - stats.correct).toString(), colPositions[3] + 2, yPosition + 4);
     
     // Percentage with color badge
     const percentage = stats.percentage;
@@ -309,34 +276,34 @@ export const generateExamReportPDF = async (result: ExamResult): Promise<void> =
     else badgeColor = dangerColor;
     
     pdf.setFillColor(badgeColor[0], badgeColor[1], badgeColor[2]);
-    pdf.roundedRect(colPositions[4] + 2, yPosition + 2, 30, 7, 2, 2, 'F');
+    pdf.roundedRect(colPositions[4] + 2, yPosition + 1, 22, 4.5, 1, 1, 'F');
     
     pdf.setTextColor(255, 255, 255);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(`${percentage.toFixed(0)}%`, colPositions[4] + 17, yPosition + 7, { align: 'center' });
+    pdf.text(`${percentage.toFixed(0)}%`, colPositions[4] + 13, yPosition + 4, { align: 'center' });
     
     yPosition += rowHeight;
   });
 
-  // Modern Footer
-  const footerY = pageHeight - 15;
+  // Compact Footer
+  const footerY = pageHeight - 10;
   
   // Footer background
   pdf.setFillColor(eduraDark[0], eduraDark[1], eduraDark[2]);
-  pdf.rect(0, footerY - 5, pageWidth, 20, 'F');
+  pdf.rect(0, footerY - 3, pageWidth, 13, 'F');
   
   // Accent line
   pdf.setFillColor(eduraAccent[0], eduraAccent[1], eduraAccent[2]);
-  pdf.rect(0, footerY - 5, pageWidth, 2, 'F');
+  pdf.rect(0, footerY - 3, pageWidth, 1.5, 'F');
   
-  pdf.setFontSize(9);
+  pdf.setFontSize(7);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(255, 255, 255);
-  pdf.text('© EDURA - Computer Based Testing Platform', 20, footerY + 3);
+  pdf.text('© EDURA - Computer Based Testing Platform', 15, footerY + 3);
   
   pdf.setFont('helvetica', 'italic');
   pdf.setTextColor(200, 200, 200);
-  pdf.text(`Generated: ${new Date().toLocaleString()}`, pageWidth - 20, footerY + 3, { align: 'right' });
+  pdf.text(`Generated: ${new Date().toLocaleString()}`, pageWidth - 15, footerY + 3, { align: 'right' });
 
   // Save the PDF with branded name
   const fileName = `EDURA-Exam-Report-${new Date().toISOString().split('T')[0]}-${result.attemptId.substring(0, 8).toUpperCase()}.pdf`;
