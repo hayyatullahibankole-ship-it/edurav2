@@ -68,11 +68,17 @@ const Resources = () => {
       }
 
       // Fetch resources - RLS will filter based on user's access level
-      const resourcesResp = await supabase
+      let resourcesQuery = supabase
         .from('resources')
         .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .eq('is_active', true);
+      
+      // Avoid RLS subquery issues by fetching only FREE resources for non-premium users
+      if (!canAccessPremium && !isAdmin) {
+        resourcesQuery = resourcesQuery.eq('access_level', 'free');
+      }
+
+      const resourcesResp = await resourcesQuery.order('created_at', { ascending: false });
 
       if (resourcesResp.error) {
         console.error('Resources fetch error:', resourcesResp.error);
