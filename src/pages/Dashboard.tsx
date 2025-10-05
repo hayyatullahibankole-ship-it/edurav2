@@ -69,15 +69,32 @@ const Dashboard = () => {
         a.user_id === userProfile.id && a.status === 'SUBMITTED'
       ).sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime());
       
-      // Fetch results for each attempt
+      // Fetch results for each attempt with auto-recompute if missing/zero
       const attemptsWithResults = await Promise.all(
         (attempts || []).map(async (attempt) => {
-          const { data: results } = await supabase
+          // Try fetch existing result
+          let { data: result } = await supabase
             .from("results")
             .select("*")
             .eq("attempt_id", attempt.id)
-            .single();
-          return { ...attempt, results: results ? [results] : [] };
+            .maybeSingle();
+
+          // If missing or suspiciously zero, recompute server-side once
+          if (!result || result.percentage === 0) {
+            try {
+              await supabase.rpc('recompute_results_for_attempt', { attempt_uuid: attempt.id });
+              const { data: recomputed } = await supabase
+                .from("results")
+                .select("*")
+                .eq("attempt_id", attempt.id)
+                .maybeSingle();
+              if (recomputed) result = recomputed;
+            } catch (e) {
+              console.warn('Recompute failed for attempt', attempt.id, e);
+            }
+          }
+
+          return { ...attempt, results: result ? [result] : [] };
         })
       );
 
