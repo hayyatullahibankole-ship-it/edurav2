@@ -46,6 +46,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import CorrectAnswerFixer from '@/components/admin/CorrectAnswerFixer';
+import QuestionDiagnostics from '@/components/admin/QuestionDiagnostics';
 
 export default function AdminPortal() {
   const { user, isAdmin, signOut } = useAuth();
@@ -408,6 +409,7 @@ export default function AdminPortal() {
           
           {activeSection === 'questions' && (
             <div className="space-y-6">
+              <QuestionDiagnostics />
               <CorrectAnswerFixer />
               <QuestionManagement />
             </div>
