@@ -58,14 +58,76 @@ export default function CorrectAnswerFixer() {
     setResult(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('auto-fix-correct-answers');
+      // Fetch all questions with correct_answer = 0
+      const { data: questions, error: fetchError } = await supabase
+        .from('questions')
+        .select('id, question_text, explanation, options')
+        .eq('correct_answer', 0)
+        .eq('is_active', true);
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
 
-      setResult(data);
+      let fixedCount = 0;
+      let notFoundCount = 0;
+
+      for (const question of questions || []) {
+        const text = `${question.question_text} ${question.explanation || ''}`.toLowerCase();
+        
+        // Look for answer patterns
+        let detectedAnswer: number | null = null;
+        
+        // Pattern 1: "answer: B" or "answer:B"
+        const answerMatch = text.match(/answer\s*:\s*([a-e])/i);
+        if (answerMatch) {
+          detectedAnswer = answerMatch[1].toUpperCase().charCodeAt(0) - 65;
+        }
+        
+        // Pattern 2: "correct: C" or "correct answer: C"
+        if (detectedAnswer === null) {
+          const correctMatch = text.match(/correct\s*(?:answer)?\s*:\s*([a-e])/i);
+          if (correctMatch) {
+            detectedAnswer = correctMatch[1].toUpperCase().charCodeAt(0) - 65;
+          }
+        }
+        
+        // Pattern 3: "option B is correct"
+        if (detectedAnswer === null) {
+          const optionMatch = text.match(/option\s+([a-e])\s+is\s+correct/i);
+          if (optionMatch) {
+            detectedAnswer = optionMatch[1].toUpperCase().charCodeAt(0) - 65;
+          }
+        }
+        
+        // Validate against available options
+        const optionsCount = Array.isArray(question.options) ? question.options.length : 4;
+        if (detectedAnswer !== null && detectedAnswer >= 0 && detectedAnswer < optionsCount) {
+          // Update this question
+          const { error: updateError } = await supabase
+            .from('questions')
+            .update({ correct_answer: detectedAnswer })
+            .eq('id', question.id);
+
+          if (updateError) {
+            console.error(`Failed to update question ${question.id}:`, updateError);
+            notFoundCount++;
+          } else {
+            fixedCount++;
+          }
+        } else {
+          notFoundCount++;
+        }
+      }
+
+      setResult({
+        total: questions?.length || 0,
+        fixed: fixedCount,
+        notFound: notFoundCount,
+        message: `Fixed ${fixedCount} questions. ${notFoundCount} questions could not be auto-detected and need manual review.`
+      });
+
       toast({
         title: 'Auto-Fix Complete',
-        description: data.message,
+        description: `Fixed ${fixedCount} out of ${questions?.length || 0} questions`,
       });
 
       // Refresh count
