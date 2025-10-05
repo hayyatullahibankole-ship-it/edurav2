@@ -82,12 +82,12 @@ export const useCleanResults = (attemptId: string | null) => {
           return;
         }
 
-        // Fetch results
+        // Fetch results (use maybeSingle to avoid 406 when not ready)
         const { data: resultsData, error: resultsError } = await supabase
           .from('results')
           .select('*')
           .eq('attempt_id', attemptId)
-          .single();
+          .maybeSingle();
 
         if (resultsError || !resultsData) {
           throw new Error('Results not found');

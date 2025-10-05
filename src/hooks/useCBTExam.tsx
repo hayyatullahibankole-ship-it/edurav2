@@ -280,10 +280,10 @@ export const useCBTExam = (attemptId: string | null) => {
         });
       }
 
-      // Insert all answers
+      // Insert or update all answers atomically (handle duplicates by unique key)
       const { error: answersError } = await supabase
         .from('attempt_answers')
-        .upsert(validatedAnswers);
+        .upsert(validatedAnswers, { onConflict: 'attempt_id,question_id' });
 
       if (answersError) throw answersError;
 
