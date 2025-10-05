@@ -74,23 +74,40 @@ export const useCleanResults = (attemptId: string | null) => {
 
         if (attemptData.status !== 'SUBMITTED') {
           toast({
-            title: 'Error',
-            description: 'Results are only available for submitted exams',
-            variant: 'destructive'
+            title: 'Processing',
+            description: 'Results will be available after you submit the exam',
           });
-          navigate('/dashboard');
+          setLoading(false);
           return;
         }
 
-        // Fetch results (use maybeSingle to avoid 406 when not ready)
-        const { data: resultsData, error: resultsError } = await supabase
-          .from('results')
-          .select('*')
-          .eq('attempt_id', attemptId)
-          .maybeSingle();
+        // Fetch results with short polling window to avoid 406/empty races
+        const pollResults = async (retries = 8, delayMs = 1000) => {
+          for (let i = 0; i < retries; i++) {
+            const { data, error } = await supabase
+              .from('results')
+              .select('*')
+              .eq('attempt_id', attemptId)
+              .maybeSingle();
+            if (error) {
+              console.warn('Results fetch attempt error:', error);
+            }
+            if (data) return data;
+            await new Promise((r) => setTimeout(r, delayMs));
+          }
+          return null;
+        };
 
-        if (resultsError || !resultsData) {
-          throw new Error('Results not found');
+        const resultsData = await pollResults();
+
+        if (!resultsData) {
+          toast({
+            title: 'Results not ready',
+            description: 'We are still processing your results. Please try again in a moment.',
+          });
+          setResults(null);
+          setLoading(false);
+          return;
         }
 
         // Transform to clean format
