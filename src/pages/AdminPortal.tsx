@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription as AlertDialogDesc, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { 
   Shield, 
   Users, 
@@ -115,6 +116,23 @@ export default function AdminPortal() {
       navigate('/admin/login');
     } catch (error) {
       console.error('Error signing out:', error);
+    }
+  };
+
+  const handleDeleteAllQuestions = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from('questions')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) throw error;
+      toast({ title: 'Deleted', description: 'All questions removed.' });
+    } catch (e: any) {
+      console.error(e);
+      toast({ title: 'Delete failed', description: e.message || 'Unable to delete', variant: 'destructive' });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -405,7 +423,41 @@ export default function AdminPortal() {
           
           {activeSection === 'exams' && <ExamControl />}
           
-          {activeSection === 'questions' && <QuestionManagement />}
+          {activeSection === 'questions' && (
+            <div className="space-y-6">
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Danger Zone</CardTitle>
+                </CardHeader>
+                <CardContent className="flex items-center justify-between">
+                  <p className="text-sm text-slate-300">Permanently delete all questions from the database.</p>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive">
+                        <Database className="w-4 h-4 mr-2" />
+                        Delete All Questions
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm delete all</AlertDialogTitle>
+                        <AlertDialogDesc>
+                          This action cannot be undone. All questions will be permanently deleted.
+                        </AlertDialogDesc>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteAllQuestions} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          Delete All
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </CardContent>
+              </Card>
+              <QuestionManagement />
+            </div>
+          )}
           
           {activeSection === 'resources' && <ResourceManagement />}
           
