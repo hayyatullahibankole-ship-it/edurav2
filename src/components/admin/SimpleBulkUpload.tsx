@@ -96,11 +96,16 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
           currentQuestion.options.push(optionText);
         }
       } else if (line.toLowerCase().includes('answer:') || line.toLowerCase().includes('correct:')) {
-        // This is the correct answer
         if (currentQuestion) {
-          const match = line.match(/[A-E]/i);
-          if (match) {
-            currentQuestion.correct_answer = match[0].toUpperCase();
+          const answerPart = line.split(/(?:answer:|correct:)\s*/i)[1]?.trim();
+          if (answerPart) {
+            const match = answerPart.match(/^(?:option\s+)?([A-E])[\s.)\]:]?/i) || answerPart.match(/^([A-E])[\s.)\]:]?/i);
+            if (match && match[1]) {
+              currentQuestion.correct_answer = match[1].toUpperCase();
+              console.log(`Extracted answer: ${currentQuestion.correct_answer} from line: "${line}"`);
+            } else {
+              console.warn(`Could not extract answer from: "${line}"`);
+            }
           }
         }
       } else if (line.toLowerCase().includes('explanation:')) {
