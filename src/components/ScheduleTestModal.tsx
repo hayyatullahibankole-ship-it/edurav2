@@ -131,12 +131,24 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
   ];
 
   const handleSubjectToggle = (subjectId: string) => {
-    setTestConfig(prev => ({
-      ...prev,
-      subjects: prev.subjects.includes(subjectId)
+    setTestConfig(prev => {
+      const isSelected = prev.subjects.includes(subjectId);
+      let newSubjects = isSelected
         ? prev.subjects.filter(s => s !== subjectId)
-        : [...prev.subjects, subjectId]
-    }));
+        : [...prev.subjects, subjectId];
+      
+      // JAMB validation: max 4 subjects
+      if (prev.examType === 'jamb' && newSubjects.length > 4) {
+        toast({
+          title: "Subject Limit",
+          description: "JAMB allows maximum 4 subjects",
+          variant: "destructive"
+        });
+        return prev;
+      }
+      
+      return { ...prev, subjects: newSubjects };
+    });
   };
 
   const handleScheduleTest = async () => {
@@ -147,6 +159,31 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
         variant: "destructive"
       });
       return;
+    }
+
+    // JAMB-specific validation
+    if (testConfig.examType === 'jamb') {
+      const englishSubject = subjects.find(s => 
+        s.name?.toLowerCase().includes('english') && testConfig.subjects.includes(s.id)
+      );
+      
+      if (!englishSubject) {
+        toast({
+          title: "English Required",
+          description: "English Language is compulsory for JAMB",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (testConfig.subjects.length > 4) {
+        toast({
+          title: "Too Many Subjects",
+          description: "JAMB allows maximum 4 subjects",
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
     // Check if selected subjects have enough questions
@@ -354,13 +391,15 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
                 ? (subject.name?.toLowerCase().includes('english') ? 60 : 40)
                 : testConfig.questionCount;
               const hasEnoughQuestions = questionCount >= requiredCount;
+              const isEnglish = subject.name?.toLowerCase().includes('english');
+              const isJambMode = testConfig.examType === 'jamb';
               
               return (
                 <div
                   key={subject.id}
                   className={`p-3 border rounded-lg cursor-pointer transition-all hover:bg-muted/50 ${
                     testConfig.subjects.includes(subject.id) ? 'border-primary bg-primary/5' : 'border-border'
-                  } ${!hasEnoughQuestions ? 'opacity-50' : ''}`}
+                  } ${!hasEnoughQuestions ? 'opacity-50' : ''} ${isJambMode && isEnglish ? 'ring-2 ring-primary' : ''}`}
                   onClick={() => hasEnoughQuestions && handleSubjectToggle(subject.id)}
                 >
                     <div className="flex items-center justify-between">
@@ -370,10 +409,17 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
                           disabled={!hasEnoughQuestions}
                           onChange={() => {}}
                         />
-                        <span className="text-sm font-medium">{subject.name}</span>
+                        <span className="text-sm font-medium">
+                          {subject.name}
+                          {isJambMode && isEnglish && (
+                            <Badge variant="default" className="ml-2 text-xs">Compulsory</Badge>
+                          )}
+                        </span>
                       </div>
                       <Badge variant={hasEnoughQuestions ? "secondary" : "destructive"} className="text-xs">
-                        {hasEnoughQuestions ? "Available" : "Unavailable"}
+                        {hasEnoughQuestions ? 
+                          (isJambMode && isEnglish ? "60 Qs" : isJambMode ? "40 Qs" : "Available") 
+                          : "Unavailable"}
                       </Badge>
                     </div>
                     {!hasEnoughQuestions && (
@@ -388,6 +434,11 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
         )}
         <p className="text-sm text-muted-foreground mt-2">
           Selected: {testConfig.subjects.length} subjects
+          {testConfig.examType === 'jamb' && (
+            <span className="ml-2 text-primary">
+              (Max 4 subjects, English compulsory)
+            </span>
+          )}
         </p>
       </div>
 

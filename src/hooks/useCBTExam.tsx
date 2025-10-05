@@ -98,7 +98,9 @@ export const useCBTExam = (attemptId: string | null) => {
         } else {
           // Practice mode - use selected subjects
           const subjects = attemptData.selected_subjects as any;
-          console.log('Selected subjects raw:', subjects);
+          const proctorData = attemptData.proctoring_data as any;
+          const examType = proctorData?.exam_type;
+          console.log('Selected subjects raw:', subjects, 'exam type:', examType);
           
           if (!subjects || (Array.isArray(subjects) && subjects.length === 0)) {
             throw new Error('No subjects selected for practice');
@@ -107,10 +109,8 @@ export const useCBTExam = (attemptId: string | null) => {
           // Handle different formats: array of UUIDs or array of objects with id
           let subjectIds: string[];
           if (typeof subjects[0] === 'string') {
-            // Already an array of UUIDs
             subjectIds = subjects;
           } else if (subjects[0]?.id) {
-            // Array of objects with id property
             subjectIds = subjects.map((s: any) => s.id);
           } else {
             throw new Error('Invalid subjects format');
@@ -118,18 +118,52 @@ export const useCBTExam = (attemptId: string | null) => {
           
           console.log('Calling RPC with subject_ids:', subjectIds);
           
-          // Use 40 questions per subject for JAMB standard format
-          const { data: practiceQs, error: practiceError } = await supabase
-            .rpc('get_random_questions_for_subjects', { 
-              subject_ids: subjectIds,
-              per_subject_count: 40
-            });
-          
-          if (practiceError) {
-            console.error('Practice RPC error:', practiceError);
-            throw new Error(`Failed to load practice questions: ${practiceError.message}`);
+          // For JAMB: fetch questions per subject based on subject type
+          if (examType === 'jamb') {
+            // Get subject names to identify English
+            const { data: subjectsData } = await supabase
+              .from('subjects')
+              .select('id, name')
+              .in('id', subjectIds);
+            
+            // Fetch questions for each subject with appropriate count
+            const allQuestions = [];
+            for (const subjectId of subjectIds) {
+              const subjectName = subjectsData?.find(s => s.id === subjectId)?.name || '';
+              const questionCount = subjectName.toLowerCase().includes('english') ? 60 : 40;
+              
+              const { data: subjectQs, error: subjectError } = await supabase
+                .rpc('get_random_questions_for_subjects', { 
+                  subject_ids: [subjectId],
+                  per_subject_count: questionCount
+                });
+              
+              if (subjectError) {
+                console.error('Subject RPC error:', subjectError);
+                throw new Error(`Failed to load questions for ${subjectName}`);
+              }
+              
+              if (subjectQs) {
+                allQuestions.push(...subjectQs);
+              }
+            }
+            questionsData = allQuestions;
+          } else {
+            // Non-JAMB: use configured question count or default 40
+            const questionCount = proctorData?.question_count_per_subject || 40;
+            const { data: practiceQs, error: practiceError } = await supabase
+              .rpc('get_random_questions_for_subjects', { 
+                subject_ids: subjectIds,
+                per_subject_count: questionCount
+              });
+            
+            if (practiceError) {
+              console.error('Practice RPC error:', practiceError);
+              throw new Error(`Failed to load practice questions: ${practiceError.message}`);
+            }
+            questionsData = practiceQs || [];
           }
-          questionsData = practiceQs || [];
+          
           console.log('Questions fetched:', questionsData.length);
         }
 
