@@ -55,8 +55,8 @@ const Resources = () => {
   const fetchResourcesData = async () => {
     try {
       setLoading(true);
-      
-      // Fetch resources and subjects separately to avoid RLS issues
+
+      // 1) Load subjects first (simple SELECT avoids RLS joins)
       const subjectsResp = await supabase
         .from('subjects')
         .select('*')
@@ -67,57 +67,53 @@ const Resources = () => {
         throw new Error('Failed to fetch subjects');
       }
 
-      // Fetch resources - RLS will filter based on user's access level
-      let resourcesQuery = supabase
-        .from('resources')
-        .select('*')
-        .eq('is_active', true);
-      
-      // Avoid RLS subquery issues by fetching only FREE resources for non-premium users
-      if (!canAccessPremium && !isAdmin) {
-        resourcesQuery = resourcesQuery.eq('access_level', 'free');
-      }
+      // 2) Paginate resources to avoid row limits/timeouts (fetch in batches of 40)
+      const pageSize = 40;
+      let allResources: any[] = [];
+      let from = 0;
+      let to = pageSize - 1;
 
-      const resourcesResp = await resourcesQuery.order('created_at', { ascending: false });
+      for (let i = 0; i < 10; i++) { // hard cap 10 pages = 400 items
+        let query = supabase
+          .from('resources')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .range(from, to);
 
-      if (resourcesResp.error) {
-        console.error('Resources fetch error:', resourcesResp.error);
-        // If error is RLS-related and user is not logged in, show a helpful message
-        if (resourcesResp.error.message.includes('row-level security') || 
-            resourcesResp.error.code === 'PGRST301') {
-          toast({
-            title: "Login Required",
-            description: "Please log in to view resources",
-            variant: "destructive"
-          });
-          setResources([]);
-          setSubjects(subjectsResp.data || []);
-          setLoading(false);
-          return;
+        // Restrict to free resources when user lacks premium access to avoid RLS denials
+        if (!canAccessPremium && !isAdmin) {
+          query = query.eq('access_level', 'free');
         }
-        throw resourcesResp.error;
+
+        const { data, error } = await query;
+        if (error) {
+          console.error('Resources page fetch error:', error);
+          throw error;
+        }
+        if (!data || data.length === 0) break;
+        allResources = allResources.concat(data);
+        if (data.length < pageSize) break; // last page reached
+        from += pageSize;
+        to += pageSize;
       }
 
-      // Manually join subjects data to resources
-      const resourcesWithSubjects = (resourcesResp.data || []).map(resource => {
-        const subject = subjectsResp.data?.find(s => s.id === resource.subject_id);
+      // 3) Attach subject info manually
+      const resourcesWithSubjects = allResources.map((resource) => {
+        const subject = subjectsResp.data?.find((s: any) => s.id === resource.subject_id);
         return {
           ...resource,
-          subjects: subject ? { name: subject.name, code: subject.code } : null
+          subjects: subject ? { name: subject.name, code: subject.code } : null,
         };
       });
 
-      console.log('Fetched resources:', resourcesWithSubjects.length, 'resources');
+      console.log('Fetched resources (total):', resourcesWithSubjects.length);
       setResources(resourcesWithSubjects);
       setSubjects(subjectsResp.data || []);
-      
     } catch (error) {
       console.error('Error fetching resources:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to load resources",
-        variant: "destructive"
-      });
+      const msg = error instanceof Error ? error.message : 'Failed to load resources';
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
       // Set empty arrays so the page still renders
       setResources([]);
       setSubjects([]);
