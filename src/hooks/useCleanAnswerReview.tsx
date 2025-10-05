@@ -100,13 +100,28 @@ export const useCleanAnswerReview = (attemptId: string | null) => {
           return;
         }
 
-        if (attemptData.status !== 'SUBMITTED') {
+        // Wait for attempt to be SUBMITTED (short polling to avoid race conditions)
+        let status = attemptData.status;
+        let tries = 0;
+        while (status !== 'SUBMITTED' && tries < 20) {
+          await new Promise((res) => setTimeout(res, 1000));
+          const { data: latestAttempt, error: latestErr } = await supabase
+            .from('attempts')
+            .select('status')
+            .eq('id', attemptId)
+            .single();
+          if (latestErr) break;
+          status = latestAttempt?.status;
+          tries++;
+        }
+
+        if (status !== 'SUBMITTED') {
           toast({
-            title: 'Error',
-            description: 'Answer review is only available for submitted exams',
-            variant: 'destructive'
+            title: 'Preparing review…',
+            description: 'Your results are being finalized. Please try again shortly.',
+            variant: 'default'
           });
-          navigate('/dashboard');
+          setLoading(false);
           return;
         }
 
@@ -174,7 +189,7 @@ export const useCleanAnswerReview = (attemptId: string | null) => {
           description: 'Failed to load answer review',
           variant: 'destructive'
         });
-        navigate('/dashboard');
+        // stay on page to allow retry or polling
       } finally {
         setLoading(false);
       }
