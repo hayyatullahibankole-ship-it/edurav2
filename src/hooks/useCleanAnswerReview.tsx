@@ -149,31 +149,60 @@ export const useCleanAnswerReview = (attemptId: string | null) => {
         const attemptSeed = strHash(attemptId);
         
         const reviewQuestions: CleanQuestionReview[] = reviewData.map(item => {
-          const originalOptions = Array.isArray(item.options) 
-            ? item.options.map((opt: any) => String(opt))
-            : [];
+          // Normalize options from array/object to a simple string[]
+          const normalizeOptions = (opts: any): string[] => {
+            try {
+              if (Array.isArray(opts)) {
+                return opts.map((o: any) => {
+                  if (typeof o === 'string') return o;
+                  if (o == null) return '';
+                  if (typeof o === 'number' || typeof o === 'boolean') return String(o);
+                  if (typeof o === 'object') {
+                    // Try common shapes
+                    const cand = (o.text ?? o.label ?? o.value ?? Object.values(o)[0]);
+                    return cand != null ? String(cand) : '';
+                  }
+                  return String(o);
+                });
+              }
+              if (opts && typeof opts === 'object') {
+                // Sort A..Z if letter keys, else by key name
+                const keys = Object.keys(opts).sort((a, b) => a.localeCompare(b));
+                return keys.map(k => String((opts as any)[k] ?? ''));
+              }
+              return [];
+            } catch {
+              return [];
+            }
+          };
+
+          const originalOptions = normalizeOptions(item.options);
           
           // Generate same shuffle as during exam
           const questionSeed = attemptSeed ^ strHash(item.id);
           const shuffleMap = shuffledIndices(originalOptions.length, questionSeed);
           
           // Shuffle options
-          const shuffledOptions = shuffleMap.map(origIdx => originalOptions[origIdx]);
+          const shuffledOptions = originalOptions.length > 0
+            ? shuffleMap.map(origIdx => originalOptions[origIdx])
+            : [];
           
           // Map indices: stored original indices -> display indices
-          const userDisplayIndex = item.user_answer_index !== null
+          const userDisplayIndex = (item.user_answer_index !== null && originalOptions.length > 0)
             ? shuffleMap.indexOf(item.user_answer_index)
             : null;
           
-          const correctDisplayIndex = shuffleMap.indexOf(item.correct_answer_index);
+          const correctDisplayIndexRaw = (originalOptions.length > 0)
+            ? shuffleMap.indexOf(item.correct_answer_index)
+            : -1;
 
           return {
             id: item.id,
             questionText: item.question_text,
             options: shuffledOptions,
             userAnswerIndex: userDisplayIndex,
-            correctAnswerIndex: correctDisplayIndex !== -1 ? correctDisplayIndex : 0,
-            isCorrect: item.is_correct,
+            correctAnswerIndex: correctDisplayIndexRaw !== -1 ? correctDisplayIndexRaw : 0,
+            isCorrect: !!item.is_correct,
             explanation: item.explanation || 'No explanation available',
             subject: item.subject_name || 'Unknown',
             timeSpentSeconds: item.time_spent_seconds || 0
