@@ -56,26 +56,53 @@ const Resources = () => {
     try {
       setLoading(true);
       
-      const [resourcesResp, subjectsResp] = await Promise.all([
-        supabase.from('resources').select(`
-          *,
-          subjects(name, code)
-        `).eq('is_active', true).order('created_at', { ascending: false }),
-        supabase.from('subjects').select('*').eq('is_active', true)
-      ]);
-
-      if (resourcesResp.error) {
-        console.error('Resources fetch error:', resourcesResp.error);
-        throw new Error('Failed to fetch resources');
-      }
+      // Fetch resources and subjects separately to avoid RLS issues
+      const subjectsResp = await supabase
+        .from('subjects')
+        .select('*')
+        .eq('is_active', true);
 
       if (subjectsResp.error) {
         console.error('Subjects fetch error:', subjectsResp.error);
         throw new Error('Failed to fetch subjects');
       }
 
-      console.log('Fetched resources:', resourcesResp.data?.length, 'resources');
-      setResources(resourcesResp.data || []);
+      // Fetch resources - RLS will filter based on user's access level
+      const resourcesResp = await supabase
+        .from('resources')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (resourcesResp.error) {
+        console.error('Resources fetch error:', resourcesResp.error);
+        // If error is RLS-related and user is not logged in, show a helpful message
+        if (resourcesResp.error.message.includes('row-level security') || 
+            resourcesResp.error.code === 'PGRST301') {
+          toast({
+            title: "Login Required",
+            description: "Please log in to view resources",
+            variant: "destructive"
+          });
+          setResources([]);
+          setSubjects(subjectsResp.data || []);
+          setLoading(false);
+          return;
+        }
+        throw resourcesResp.error;
+      }
+
+      // Manually join subjects data to resources
+      const resourcesWithSubjects = (resourcesResp.data || []).map(resource => {
+        const subject = subjectsResp.data?.find(s => s.id === resource.subject_id);
+        return {
+          ...resource,
+          subjects: subject ? { name: subject.name, code: subject.code } : null
+        };
+      });
+
+      console.log('Fetched resources:', resourcesWithSubjects.length, 'resources');
+      setResources(resourcesWithSubjects);
       setSubjects(subjectsResp.data || []);
       
     } catch (error) {
@@ -85,6 +112,9 @@ const Resources = () => {
         description: error instanceof Error ? error.message : "Failed to load resources",
         variant: "destructive"
       });
+      // Set empty arrays so the page still renders
+      setResources([]);
+      setSubjects([]);
     } finally {
       setLoading(false);
     }
