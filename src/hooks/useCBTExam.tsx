@@ -256,14 +256,18 @@ export const useCBTExam = (attemptId: string | null) => {
           // Map display index back to original DB index
           originalIndex = question.originalIndexMap[displayIndex];
           
-          // Call simple validation function with original index
-          const { data: validationResult } = await supabase
-            .rpc('validate_answer_simple', {
-              question_id_param: question.id,
-              submitted_index: originalIndex
-            });
-
-          isCorrect = validationResult === true;
+          // Validate using robust validator (handles letters/numbers/options)
+          if (originalIndex !== null && originalIndex !== undefined) {
+            const { data: validationResult, error: valErr } = await supabase
+              .rpc('validate_student_answer', {
+                question_id_param: question.id,
+                submitted_answer: originalIndex as any
+              });
+            if (valErr) {
+              console.warn('Validation RPC error', valErr);
+            }
+            isCorrect = validationResult === true;
+          }
           if (isCorrect) {
             correctCount++;
             subjectBreakdown[subject].correct += 1;
