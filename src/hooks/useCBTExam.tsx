@@ -34,7 +34,8 @@ const shuffledIndices = (length: number, seed: number) => {
 export interface CBTQuestion {
   id: string;
   questionText: string;
-  options: string[];
+  options: string[]; // Already shuffled for display
+  originalIndexMap: number[]; // Maps displayed index to original DB index
   subject: string;
   displayIndex: number;
 }
@@ -79,52 +80,37 @@ export const useCBTExam = (attemptId: string | null) => {
           throw new Error('Attempt not found');
         }
 
-        // Fetch questions based on exam type
-        let questionIds: string[] = [];
+        // Fetch questions using secure RPCs
+        let questionsData: any[] = [];
 
         if (attemptData.exam_id) {
-          // Standard exam
-          const { data: examQuestions } = await supabase
-            .from('exam_subjects')
-            .select('subject_id, question_count')
-            .eq('exam_id', attemptData.exam_id);
-
-          // Get random questions for each subject
-          // (Simplified - you may want to use an RPC for this)
-          const allQuestionIds: string[] = [];
-          for (const es of examQuestions || []) {
-            const { data: subjectQs } = await supabase
-              .from('questions')
-              .select('id')
-              .eq('subject_id', es.subject_id)
-              .eq('is_active', true)
-              .limit(es.question_count);
-            
-            allQuestionIds.push(...(subjectQs?.map(q => q.id) || []));
-          }
-          questionIds = allQuestionIds;
+          // Standard exam - use exam blueprint
+          const { data: examQs, error: examError } = await supabase
+            .rpc('get_random_questions_for_exam', { 
+              target_exam_id: attemptData.exam_id 
+            });
+          
+          if (examError) throw examError;
+          questionsData = examQs || [];
         } else {
           // Practice mode - use selected subjects
           const subjects = attemptData.selected_subjects as any;
-          // Fetch questions for practice
-          const { data: practiceQs } = await supabase
-            .from('questions')
-            .select('id')
-            .in('subject_id', subjects.map((s: any) => s.id))
-            .eq('is_active', true)
-            .limit(40);
+          if (!subjects || subjects.length === 0) {
+            throw new Error('No subjects selected for practice');
+          }
           
-          questionIds = practiceQs?.map(q => q.id) || [];
+          const { data: practiceQs, error: practiceError } = await supabase
+            .rpc('get_random_questions_for_subjects', { 
+              subject_ids: subjects.map((s: any) => s.id),
+              per_subject_count: 10
+            });
+          
+          if (practiceError) throw practiceError;
+          questionsData = practiceQs || [];
         }
 
-        // Fetch full question details (without correct answers)
-        const { data: questionsData } = await supabase
-          .rpc('get_exam_questions_secure', { 
-            exam_question_ids: questionIds 
-          });
-
-        if (!questionsData) {
-          throw new Error('Failed to load questions');
+        if (!questionsData || questionsData.length === 0) {
+          throw new Error('No questions available for this exam');
         }
 
         // Get subject names
@@ -134,18 +120,33 @@ export const useCBTExam = (attemptId: string | null) => {
           .select('id, name')
           .in('id', subjectIds);
 
-        // Transform to clean format
-        const transformedQuestions: CBTQuestion[] = questionsData.map((q, idx) => ({
-          id: q.id,
-          questionText: q.question_text,
-          options: Array.isArray(q.options) ? q.options.map(opt => String(opt)) : [],
-          subject: subjectsData?.find(s => s.id === q.subject_id)?.name || 'Unknown',
-          displayIndex: idx
-        }));
+        // Transform to clean format with stable shuffled options
+        const attemptSeed = strHash(attemptId);
+        const transformedQuestions: CBTQuestion[] = questionsData.map((q, idx) => {
+          const originalOptions = Array.isArray(q.options) 
+            ? q.options.map((opt: any) => String(opt)) 
+            : [];
+          
+          // Generate deterministic shuffle for this question in this attempt
+          const questionSeed = attemptSeed ^ strHash(q.id);
+          const shuffleMap = shuffledIndices(originalOptions.length, questionSeed);
+          
+          // Shuffle options using the map
+          const shuffledOptions = shuffleMap.map(origIdx => originalOptions[origIdx]);
+          
+          return {
+            id: q.id,
+            questionText: q.question_text,
+            options: shuffledOptions,
+            originalIndexMap: shuffleMap, // Store mapping: displayIdx -> originalIdx
+            subject: subjectsData?.find(s => s.id === q.subject_id)?.name || 'Unknown',
+            displayIndex: idx
+          };
+        });
 
         setQuestions(transformedQuestions);
 
-        // Load any existing answers
+        // Load any existing answers and map to display indices
         const { data: existingAnswers } = await supabase
           .from('attempt_answers')
           .select('question_id, answer')
@@ -153,12 +154,20 @@ export const useCBTExam = (attemptId: string | null) => {
 
         const loadedAnswers: CBTAnswers = {};
         existingAnswers?.forEach(a => {
-          // Parse answer as integer
-          const answerValue = typeof a.answer === 'number' 
+          const question = transformedQuestions.find(q => q.id === a.question_id);
+          if (!question) return;
+          
+          // Parse stored answer (original index from DB)
+          const originalIndex = typeof a.answer === 'number' 
             ? a.answer 
             : parseInt(String(a.answer));
-          if (!isNaN(answerValue)) {
-            loadedAnswers[a.question_id] = answerValue;
+          
+          if (isNaN(originalIndex)) return;
+          
+          // Map original index to display index using reverse lookup
+          const displayIndex = question.originalIndexMap.indexOf(originalIndex);
+          if (displayIndex !== -1) {
+            loadedAnswers[a.question_id] = displayIndex;
           }
         });
         setAnswers(loadedAnswers);
@@ -179,9 +188,9 @@ export const useCBTExam = (attemptId: string | null) => {
     fetchQuestions();
   }, [attemptId, navigate, toast]);
 
-  // Select answer (stores as integer)
-  const selectAnswer = useCallback((questionId: string, optionIndex: number) => {
-    setAnswers(prev => ({ ...prev, [questionId]: optionIndex }));
+  // Select answer (stores display index, will be mapped to original on submit)
+  const selectAnswer = useCallback((questionId: string, displayIndex: number) => {
+    setAnswers(prev => ({ ...prev, [questionId]: displayIndex }));
   }, []);
 
   // Submit exam
@@ -208,7 +217,7 @@ export const useCBTExam = (attemptId: string | null) => {
       const subjectBreakdown: Record<string, { total: number; correct: number }> = {};
 
       for (const question of questions) {
-        const userAnswerIndex = answers[question.id];
+        const displayIndex = answers[question.id];
         const subject = question.subject;
 
         // Initialize subject stats
@@ -218,13 +227,17 @@ export const useCBTExam = (attemptId: string | null) => {
         subjectBreakdown[subject].total += 1;
 
         let isCorrect = false;
+        let originalIndex: number | null = null;
 
-        if (userAnswerIndex !== undefined) {
-          // Call simple validation function
+        if (displayIndex !== undefined) {
+          // Map display index back to original DB index
+          originalIndex = question.originalIndexMap[displayIndex];
+          
+          // Call simple validation function with original index
           const { data: validationResult } = await supabase
             .rpc('validate_answer_simple', {
               question_id_param: question.id,
-              submitted_index: userAnswerIndex
+              submitted_index: originalIndex
             });
 
           isCorrect = validationResult === true;
@@ -237,7 +250,7 @@ export const useCBTExam = (attemptId: string | null) => {
         validatedAnswers.push({
           attempt_id: attemptId,
           question_id: question.id,
-          answer: userAnswerIndex ?? null,
+          answer: originalIndex, // Store original index in DB
           is_correct: isCorrect,
           time_spent_seconds: Math.floor(timeSpentSeconds / questions.length),
           answered_at: new Date().toISOString()

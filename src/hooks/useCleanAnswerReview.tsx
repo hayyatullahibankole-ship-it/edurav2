@@ -3,12 +3,41 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+// Same shuffle utilities as in useCBTExam for consistency
+const strHash = (s: string) => {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+};
+
+const mulberry32 = (a: number) => {
+  return function () {
+    let t = (a += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+const shuffledIndices = (length: number, seed: number) => {
+  const indices = Array.from({ length }, (_, i) => i);
+  const rand = mulberry32(seed);
+  for (let i = length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  return indices;
+};
+
 export interface CleanQuestionReview {
   id: string;
   questionText: string;
-  options: string[];
-  userAnswerIndex: number | null;
-  correctAnswerIndex: number;
+  options: string[]; // Shuffled same as during exam
+  userAnswerIndex: number | null; // Display index
+  correctAnswerIndex: number; // Display index
   isCorrect: boolean;
   explanation: string;
   subject: string;
@@ -81,65 +110,54 @@ export const useCleanAnswerReview = (attemptId: string | null) => {
           return;
         }
 
-        // Fetch answers with stored correctness
-        const { data: answersData } = await supabase
-          .from('attempt_answers')
-          .select('question_id, answer, is_correct, time_spent_seconds')
-          .eq('attempt_id', attemptId);
+        // Use secure review RPC that returns everything we need
+        const { data: reviewData, error: reviewError } = await supabase
+          .rpc('get_review_questions_for_attempt', { 
+            attempt_uuid: attemptId 
+          });
 
-        if (!answersData) {
-          throw new Error('Failed to load answers');
+        if (reviewError) {
+          throw reviewError;
         }
 
-        // Get question IDs and fetch details
-        const questionIds = answersData.map(a => a.question_id);
+        if (!reviewData || reviewData.length === 0) {
+          throw new Error('No review data available');
+        }
+
+        // Apply same deterministic shuffle as during exam
+        const attemptSeed = strHash(attemptId);
         
-        // Fetch questions with correct answers (admin access needed)
-        const { data: questionsData } = await supabase
-          .from('questions')
-          .select('id, question_text, options, correct_answer, explanation, subject_id')
-          .in('id', questionIds);
-
-        if (!questionsData) {
-          throw new Error('Failed to load question details');
-        }
-
-        // Get subject names
-        const subjectIds = [...new Set(questionsData.map(q => q.subject_id))];
-        const { data: subjectsData } = await supabase
-          .from('subjects')
-          .select('id, name')
-          .in('id', subjectIds);
-
-        // Combine data into clean format
-        const reviewQuestions: CleanQuestionReview[] = answersData.map(answer => {
-          const question = questionsData.find(q => q.id === answer.question_id);
-          const subject = subjectsData?.find(s => s.id === question?.subject_id);
-
-          if (!question) return null;
-
-          // Parse correct answer as integer
-          const correctAnswerIndex = typeof question.correct_answer === 'number'
-            ? question.correct_answer
-            : parseInt(String(question.correct_answer));
-
-          // Parse user answer as integer
-          const userAnswerIndex = answer.answer !== null && answer.answer !== undefined
-            ? (typeof answer.answer === 'number' ? answer.answer : parseInt(String(answer.answer)))
+        const reviewQuestions: CleanQuestionReview[] = reviewData.map(item => {
+          const originalOptions = Array.isArray(item.options) 
+            ? item.options.map((opt: any) => String(opt))
+            : [];
+          
+          // Generate same shuffle as during exam
+          const questionSeed = attemptSeed ^ strHash(item.id);
+          const shuffleMap = shuffledIndices(originalOptions.length, questionSeed);
+          
+          // Shuffle options
+          const shuffledOptions = shuffleMap.map(origIdx => originalOptions[origIdx]);
+          
+          // Map indices: stored original indices -> display indices
+          const userDisplayIndex = item.user_answer_index !== null
+            ? shuffleMap.indexOf(item.user_answer_index)
             : null;
+          
+          const correctDisplayIndex = shuffleMap.indexOf(item.correct_answer_index);
 
           return {
-            id: question.id,
-            questionText: question.question_text,
-            options: Array.isArray(question.options) ? question.options : [],
-            userAnswerIndex,
-            correctAnswerIndex: isNaN(correctAnswerIndex) ? 0 : correctAnswerIndex,
-            isCorrect: answer.is_correct, // Use stored value, don't recompute
-            explanation: question.explanation || 'No explanation available',
-            subject: subject?.name || 'Unknown',
-            timeSpentSeconds: answer.time_spent_seconds || 0
+            id: item.id,
+            questionText: item.question_text,
+            options: shuffledOptions,
+            userAnswerIndex: userDisplayIndex,
+            correctAnswerIndex: correctDisplayIndex !== -1 ? correctDisplayIndex : 0,
+            isCorrect: item.is_correct,
+            explanation: item.explanation || 'No explanation available',
+            subject: item.subject_name || 'Unknown',
+            timeSpentSeconds: item.time_spent_seconds || 0
           };
-        }).filter(q => q !== null) as CleanQuestionReview[];
+        });
 
         setQuestions(reviewQuestions);
 
