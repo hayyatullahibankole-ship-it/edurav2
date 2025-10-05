@@ -1,10 +1,11 @@
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useCleanAnswerReview } from '@/hooks/useCleanAnswerReview';
 import { CleanAnswerReviewCard } from '@/components/CleanAnswerReviewCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, BookOpen, CheckCircle, XCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, BookOpen, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 
 export default function AnswerReview() {
   const [searchParams] = useSearchParams();
@@ -37,11 +38,17 @@ export default function AnswerReview() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-primary text-primary-foreground p-6 shadow-lg">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2">Answer Review</h1>
-          <p className="text-primary-foreground/80">
-            Review your answers and learn from explanations
-          </p>
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Answer Review</h1>
+            <p className="text-primary-foreground/80">Review your answers and learn from explanations</p>
+          </div>
+          <Button asChild variant="secondary">
+            <Link to={`/results?attempt=${attemptId}`} aria-label="Back to results">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Results
+            </Link>
+          </Button>
         </div>
       </div>
 
