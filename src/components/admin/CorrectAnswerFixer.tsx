@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AlertTriangle, Save, Loader2, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Loader2, CheckCircle, Wand2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -20,61 +17,31 @@ interface Question {
 
 export default function CorrectAnswerFixer() {
   const { toast } = useToast();
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questionCount, setQuestionCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [updates, setUpdates] = useState<Record<string, number>>({});
-  const [filterSubject, setFilterSubject] = useState<string>('all');
-  const [subjects, setSubjects] = useState<Array<{ id: string; name: string }>>([]);
+  const [autoFixing, setAutoFixing] = useState(false);
+  const [result, setResult] = useState<any>(null);
 
   useEffect(() => {
-    fetchData();
+    checkQuestionCount();
   }, []);
 
-  const fetchData = async () => {
+  const checkQuestionCount = async () => {
     setLoading(true);
     try {
-      // Fetch subjects
-      const { data: subjectsData } = await supabase
-        .from('subjects')
-        .select('id, name')
-        .eq('is_active', true)
-        .order('name');
-      
-      setSubjects(subjectsData || []);
-
-      // Fetch questions with correct_answer = 0
-      const { data, error } = await supabase
+      const { count, error } = await supabase
         .from('questions')
-        .select(`
-          id,
-          question_text,
-          options,
-          correct_answer,
-          subject_id,
-          subjects!inner(name)
-        `)
-        .eq('is_active', true)
+        .select('*', { count: 'exact', head: true })
         .eq('correct_answer', 0)
-        .order('created_at', { ascending: false })
-        .limit(200);
+        .eq('is_active', true);
 
       if (error) throw error;
-
-      const formatted = (data || []).map((q: any) => ({
-        id: q.id,
-        question_text: q.question_text,
-        options: Array.isArray(q.options) ? q.options : [],
-        correct_answer: q.correct_answer,
-        subject_name: q.subjects?.name || 'Unknown'
-      }));
-
-      setQuestions(formatted);
+      setQuestionCount(count || 0);
     } catch (error) {
-      console.error('Error fetching questions:', error);
+      console.error('Error checking questions:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load questions',
+        description: 'Failed to check questions',
         variant: 'destructive'
       });
     } finally {
@@ -82,182 +49,117 @@ export default function CorrectAnswerFixer() {
     }
   };
 
-  const handleUpdateAnswer = (questionId: string, newIndex: number) => {
-    setUpdates(prev => ({ ...prev, [questionId]: newIndex }));
-  };
-
-  const handleSaveAll = async () => {
-    if (Object.keys(updates).length === 0) {
-      toast({
-        title: 'No Changes',
-        description: 'Please update at least one answer before saving',
-        variant: 'destructive'
-      });
+  const handleAutoFix = async () => {
+    if (!confirm(`This will automatically scan ${questionCount} questions and fix correct answers based on patterns like "Answer: B" found in the text. Continue?`)) {
       return;
     }
 
-    setSaving(true);
+    setAutoFixing(true);
+    setResult(null);
+
     try {
-      let successCount = 0;
-      let errorCount = 0;
+      const { data, error } = await supabase.functions.invoke('auto-fix-correct-answers');
 
-      for (const [questionId, correctIndex] of Object.entries(updates)) {
-        const { error } = await supabase
-          .from('questions')
-          .update({ correct_answer: correctIndex })
-          .eq('id', questionId);
+      if (error) throw error;
 
-        if (error) {
-          console.error(`Error updating question ${questionId}:`, error);
-          errorCount++;
-        } else {
-          successCount++;
-        }
-      }
-
+      setResult(data);
       toast({
-        title: 'Update Complete',
-        description: `Updated ${successCount} questions successfully${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
+        title: 'Auto-Fix Complete',
+        description: data.message,
       });
 
-      if (successCount > 0) {
-        setUpdates({});
-        fetchData();
-      }
+      // Refresh count
+      checkQuestionCount();
     } catch (error) {
-      console.error('Error saving updates:', error);
+      console.error('Error auto-fixing:', error);
       toast({
         title: 'Error',
-        description: 'Failed to save updates',
+        description: error.message || 'Failed to auto-fix questions',
         variant: 'destructive'
       });
     } finally {
-      setSaving(false);
+      setAutoFixing(false);
     }
   };
 
-  const filteredQuestions = filterSubject === 'all' 
-    ? questions 
-    : questions.filter(q => q.subject_name === filterSubject);
-
-  const allSubjects = ['all', ...new Set(questions.map(q => q.subject_name))];
-
-  if (loading) {
-    return (
-      <Card>
-        <CardContent className="py-12 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <div className="space-y-4">
-      <Alert className="border-yellow-500 bg-yellow-50">
-        <AlertTriangle className="h-4 w-4 text-yellow-600" />
-        <AlertDescription className="text-yellow-800">
-          <strong>Issue Detected:</strong> Found {questions.length} questions with correct answer set to option A (index 0).
-          Review and update the correct answers below.
-        </AlertDescription>
-      </Alert>
+    <Card>
+      <CardHeader>
+        <CardTitle>Correct Answer Auto-Fix Tool</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {loading ? (
+          <div className="py-8 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : questionCount === 0 ? (
+          <Alert className="border-green-500 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <strong>All Good!</strong> No questions found with correct answer issues. All questions have valid answers set.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <>
+            <Alert className="border-yellow-500 bg-yellow-50">
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-yellow-800">
+                <strong>Issue Detected:</strong> Found {questionCount} questions with correct answer set to 0 (option A).
+                This tool will automatically scan question text and explanations for answer patterns like "Answer: B" or "Correct: C" and fix them.
+              </AlertDescription>
+            </Alert>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Fix Correct Answers</CardTitle>
-            <div className="flex items-center gap-3">
-              <Select value={filterSubject} onValueChange={setFilterSubject}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Filter by subject" />
-                </SelectTrigger>
-                <SelectContent>
-                  {allSubjects.map(subject => (
-                    <SelectItem key={subject} value={subject}>
-                      {subject === 'all' ? 'All Subjects' : subject}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <p className="font-medium">Questions to Fix: {questionCount}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  The tool will scan for patterns: "Answer: X", "Correct: X", "Option X is correct"
+                </p>
+              </div>
               <Button 
-                onClick={handleSaveAll}
-                disabled={saving || Object.keys(updates).length === 0}
+                onClick={handleAutoFix}
+                disabled={autoFixing}
+                size="lg"
+                className="ml-4"
               >
-                {saving ? (
+                {autoFixing ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
+                    Auto-Fixing...
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Save {Object.keys(updates).length} Changes
+                    <Wand2 className="h-4 w-4 mr-2" />
+                    Auto-Fix All Questions
                   </>
                 )}
               </Button>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[600px]">
-            <div className="space-y-4">
-              {filteredQuestions.length === 0 ? (
-                <div className="text-center py-12">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    {filterSubject === 'all' 
-                      ? 'No questions found with incorrect answer data!' 
-                      : 'No questions found for this subject'}
-                  </p>
-                </div>
-              ) : (
-                filteredQuestions.map((question, idx) => (
-                  <Card key={question.id} className="border-l-4 border-l-yellow-500">
-                    <CardContent className="pt-6">
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <Badge variant="outline" className="mb-2">
-                              {question.subject_name}
-                            </Badge>
-                            <p className="font-medium text-sm mb-3">
-                              {idx + 1}. {question.question_text.substring(0, 200)}
-                              {question.question_text.length > 200 && '...'}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="grid gap-2">
-                          {question.options.map((option, optIdx) => (
-                            <div
-                              key={optIdx}
-                              className={`p-3 rounded border cursor-pointer transition-colors ${
-                                (updates[question.id] ?? question.correct_answer) === optIdx
-                                  ? 'bg-green-50 border-green-500'
-                                  : 'bg-background hover:bg-muted'
-                              }`}
-                              onClick={() => handleUpdateAnswer(question.id, optIdx)}
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm">
-                                  <strong>{String.fromCharCode(65 + optIdx)}.</strong> {option}
-                                </span>
-                                {(updates[question.id] ?? question.correct_answer) === optIdx && (
-                                  <Badge className="bg-green-600">Correct Answer</Badge>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </ScrollArea>
-        </CardContent>
-      </Card>
-    </div>
+
+            {result && (
+              <Alert className="border-blue-500 bg-blue-50">
+                <CheckCircle className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-800">
+                  <div className="space-y-2">
+                    <p><strong>Auto-Fix Results:</strong></p>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      <li>Total Scanned: {result.total}</li>
+                      <li>Successfully Fixed: {result.fixed}</li>
+                      <li>Could Not Auto-Detect: {result.notFound}</li>
+                    </ul>
+                    {result.notFound > 0 && (
+                      <p className="mt-2 text-sm">
+                        Questions that couldn't be auto-fixed don't have clear answer indicators in their text.
+                        You may need to review those manually or re-upload with proper answer formatting.
+                      </p>
+                    )}
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }
