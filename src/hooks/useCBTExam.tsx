@@ -298,28 +298,43 @@ export const useCBTExam = (attemptId: string | null) => {
 
       if (attemptError) throw attemptError;
 
-      // Calculate and insert results
+      // Calculate and persist results
       const totalQuestions = questions.length;
-      const wrongAnswers = Object.keys(answers).length - correctCount;
-      const unanswered = totalQuestions - Object.keys(answers).length;
-      const percentage = (correctCount / totalQuestions) * 100;
+      const answeredCount = Object.keys(answers).length;
+      const wrongAnswers = Math.max(answeredCount - correctCount, 0);
+      const unanswered = Math.max(totalQuestions - answeredCount, 0);
+      const percentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
 
-      const { error: resultsError } = await supabase
-        .from('results')
-        .insert({
-          attempt_id: attemptId,
-          raw_score: correctCount,
-          scaled_score: Math.round((correctCount / totalQuestions) * 400), // JAMB scale
-          correct_answers: correctCount,
-          wrong_answers: wrongAnswers,
-          unanswered: unanswered,
-          total_questions: totalQuestions,
-          percentage: percentage,
-          subject_breakdown: subjectBreakdown,
-          time_taken_minutes: Math.floor(timeSpentSeconds / 60)
-        });
+      // Enrich subject breakdown with percentages
+      const subjectBreakdownWithPct = Object.fromEntries(
+        Object.entries(subjectBreakdown).map(([subj, stats]) => {
+          const pct = stats.total > 0 ? (stats.correct / stats.total) * 100 : 0;
+          return [subj, { ...stats, percentage: pct }];
+        })
+      );
 
-      if (resultsError) throw resultsError;
+      const resultPayload = {
+        attempt_id: attemptId,
+        raw_score: correctCount,
+        scaled_score: totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 400) : 0,
+        correct_answers: correctCount,
+        wrong_answers: wrongAnswers,
+        unanswered: unanswered,
+        total_questions: totalQuestions,
+        percentage: percentage,
+        subject_breakdown: subjectBreakdownWithPct,
+        time_taken_minutes: Math.floor(timeSpentSeconds / 60)
+      };
+
+      try {
+        // Upsert to avoid duplicates and races
+        const { error: resultsError } = await supabase
+          .from('results')
+          .upsert(resultPayload, { onConflict: 'attempt_id' });
+        if (resultsError) throw resultsError;
+      } catch (e) {
+        console.warn('Results upsert failed (will still navigate):', e);
+      }
 
       toast({
         title: 'Exam Submitted',
