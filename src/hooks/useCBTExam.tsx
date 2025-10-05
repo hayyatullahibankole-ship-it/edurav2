@@ -327,11 +327,16 @@ export const useCBTExam = (attemptId: string | null) => {
       };
 
       try {
-        // Upsert to avoid duplicates and races
-        const { error: resultsError } = await supabase
+        // Upsert to avoid duplicates and races and get back the row
+        const { data: upserted, error: resultsError } = await supabase
           .from('results')
-          .upsert(resultPayload, { onConflict: 'attempt_id' });
+          .upsert(resultPayload, { onConflict: 'attempt_id' })
+          .select()
+          .maybeSingle();
         if (resultsError) throw resultsError;
+        if (!upserted) {
+          console.warn('Results upsert returned no row (will rely on polling).');
+        }
       } catch (e) {
         console.warn('Results upsert failed (will still navigate):', e);
       }

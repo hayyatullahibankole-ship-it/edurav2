@@ -81,8 +81,8 @@ export const useCleanResults = (attemptId: string | null) => {
           return;
         }
 
-        // Fetch results with short polling window to avoid 406/empty races
-        const pollResults = async (retries = 8, delayMs = 1000) => {
+        // Fetch results with extended polling to avoid race conditions
+        const pollResults = async (retries = 20, delayMs = 1000) => {
           for (let i = 0; i < retries; i++) {
             const { data, error } = await supabase
               .from('results')
@@ -98,7 +98,48 @@ export const useCleanResults = (attemptId: string | null) => {
           return null;
         };
 
-        const resultsData = await pollResults();
+        let resultsData = await pollResults();
+
+        // Fallback: compute results from secure review RPC if still missing
+        if (!resultsData) {
+          const { data: reviewData, error: reviewError } = await supabase
+            .rpc('get_review_questions_for_attempt', { attempt_uuid: attemptId });
+          if (!reviewError && Array.isArray(reviewData) && reviewData.length > 0) {
+            const total = reviewData.length;
+            const correct = reviewData.filter((q: any) => q.is_correct).length;
+            const answered = reviewData.filter((q: any) => q.user_answer_index !== null).length;
+            const wrong = Math.max(answered - correct, 0);
+            const unanswered = Math.max(total - answered, 0);
+            const percentage = total > 0 ? (correct / total) * 100 : 0;
+
+            const subjectBreakdown: any = {};
+            reviewData.forEach((q: any) => {
+              const subj = q.subject_name || 'Unknown';
+              subjectBreakdown[subj] = subjectBreakdown[subj] || { total: 0, correct: 0, percentage: 0 };
+              subjectBreakdown[subj].total += 1;
+              if (q.is_correct) subjectBreakdown[subj].correct += 1;
+            });
+            Object.keys(subjectBreakdown).forEach((k) => {
+              const s = subjectBreakdown[k];
+              s.percentage = s.total > 0 ? (s.correct / s.total) * 100 : 0;
+            });
+
+            resultsData = {
+              id: 'fallback',
+              attempt_id: attemptId,
+              raw_score: correct,
+              scaled_score: total > 0 ? Math.round((correct / total) * 400) : 0,
+              correct_answers: correct,
+              wrong_answers: wrong,
+              unanswered,
+              total_questions: total,
+              percentage,
+              subject_breakdown: subjectBreakdown,
+              time_taken_minutes: 0,
+              created_at: new Date().toISOString(),
+            } as any;
+          }
+        }
 
         if (!resultsData) {
           toast({
