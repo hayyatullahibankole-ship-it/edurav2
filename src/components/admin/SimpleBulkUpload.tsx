@@ -285,7 +285,7 @@ export default function SimpleBulkUpload({ subjects, onUploadComplete }: SimpleB
                 question_text: questionData.question_text,
                 type: 'MCQ_SINGLE',
                 options: questionData.options,
-                correct_answer: correctIndex,
+                correct_answer: correctIndex.toString(),
                 explanation: questionData.explanation,
                 subject_id: selectedSubject,
                 difficulty_level: 1,
