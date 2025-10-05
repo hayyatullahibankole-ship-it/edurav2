@@ -452,7 +452,7 @@ export type Database = {
       }
       questions: {
         Row: {
-          correct_answer: Json
+          correct_answer: string
           created_at: string | null
           created_by: string | null
           difficulty_level: number | null
@@ -470,7 +470,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          correct_answer: Json
+          correct_answer: string
           created_at?: string | null
           created_by?: string | null
           difficulty_level?: number | null
@@ -488,7 +488,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          correct_answer?: Json
+          correct_answer?: string
           created_at?: string | null
           created_by?: string | null
           difficulty_level?: number | null
