@@ -30,6 +30,7 @@ import {
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import DOMPurify from 'dompurify';
+import { Helmet } from 'react-helmet';
 
 interface BlogPost {
   id: string;
@@ -266,8 +267,26 @@ const Blog = () => {
 
   // Single post view
   if (slug && currentPost) {
+    const currentUrl = window.location.href;
+    const ogImage = currentPost.featured_image_url || "https://zqapbmllkywsuywpfava.supabase.co/storage/v1/object/public/blog-images/edura-logo.png";
+    const ogTitle = currentPost.title;
+    const ogDescription = currentPost.excerpt;
+
     return (
       <div className="min-h-screen bg-background">
+        <Helmet>
+          <title>{ogTitle} - Edura Blog</title>
+          <meta name="description" content={ogDescription} />
+          <meta property="og:title" content={ogTitle} />
+          <meta property="og:description" content={ogDescription} />
+          <meta property="og:image" content={ogImage} />
+          <meta property="og:url" content={currentUrl} />
+          <meta property="og:type" content="article" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={ogTitle} />
+          <meta name="twitter:description" content={ogDescription} />
+          <meta name="twitter:image" content={ogImage} />
+        </Helmet>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Button 
             variant="ghost" 
