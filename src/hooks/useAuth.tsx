@@ -1,5 +1,6 @@
 import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   validateSessionToken, 
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   // Validate current session token
@@ -37,6 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const localToken = getSessionToken();
     if (!localToken) {
       console.warn('No local session token found');
+      await signOut();
+      navigate('/auth', { replace: true });
       return false;
     }
 
@@ -50,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive",
       });
       await signOut();
+      navigate('/auth', { replace: true });
       return false;
     }
 

@@ -20,6 +20,10 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
       if (user) {
         const isValid = await validateCurrentSession();
         setSessionValid(isValid);
+        if (!isValid) {
+          // Navigation is handled in validateCurrentSession
+          return;
+        }
       }
     };
 
@@ -29,6 +33,9 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
       
       // Then check every 30 seconds
       intervalId = setInterval(checkSession, 30000);
+    } else if (!user && !loading) {
+      // If no user and not loading, mark session as invalid
+      setSessionValid(false);
     }
 
     return () => {
