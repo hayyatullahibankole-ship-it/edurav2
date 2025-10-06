@@ -147,7 +147,7 @@ const BlogSection = () => {
                   <CardDescription className="text-base mb-4 leading-relaxed">
                     {featuredPost.excerpt}
                   </CardDescription>
-                   <Link to={`/blog/${featuredPost.slug}`}>
+                  <Link to={`/blog/${featuredPost.slug || featuredPost.id}`}>
                      <Button className="group">
                        Read Full Article
                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -185,15 +185,15 @@ const BlogSection = () => {
                     {post.excerpt}
                   </CardDescription>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground flex items-center">
-                      <TrendingUp className="w-3 h-3 mr-1" />
-                      {post.view_count} views
-                    </span>
-                     <Link to={`/blog/${post.slug}`}>
-                       <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
-                         Read more →
-                       </Button>
-                     </Link>
+                     <span className="text-sm text-muted-foreground flex items-center">
+                       <TrendingUp className="w-3 h-3 mr-1" />
+                       {post.view_count} views
+                     </span>
+                      <Link to={`/blog/${post.slug || post.id}`}>
+                        <Button variant="ghost" size="sm" className="text-primary p-0 h-auto">
+                          Read more →
+                        </Button>
+                      </Link>
                   </div>
                 </CardContent>
               </Card>

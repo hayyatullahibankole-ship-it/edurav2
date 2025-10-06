@@ -98,10 +98,24 @@ const BlogManager = () => {
   };
 
   const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
+    // Normalize unicode (e.g., fancy bold letters) and remove diacritics
+    const normalized = title
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '') // remove combining marks
+      .toLowerCase();
+
+    // Replace anything not alphanum with hyphens, collapse repeats
+    let slug = normalized
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+      .replace(/^-+|-+$/g, '-')
+      .replace(/-+/g, '-');
+
+    // Fallback if empty
+    if (!slug || slug === '-') {
+      slug = `post-${Date.now()}`;
+    }
+
+    return slug;
   };
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {

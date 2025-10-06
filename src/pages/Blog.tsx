@@ -82,13 +82,18 @@ const Blog = () => {
 
   const fetchSinglePost = async () => {
     try {
-      // First try to fetch published post
-      const { data, error } = await supabase
+      const slugParam = String(slug);
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugParam);
+
+      // Build query by slug or by id (fallback when slug is missing)
+      let query = supabase
         .from('blog_posts')
         .select('*')
-        .eq('slug', slug)
-        .eq('is_published', true)
-        .maybeSingle();
+        .eq('is_published', true);
+
+      query = isUUID ? query.eq('id', slugParam) : query.eq('slug', slugParam);
+
+      const { data, error } = await query.maybeSingle();
 
       if (error) {
         console.error('Database error fetching blog post:', error);
@@ -104,14 +109,14 @@ const Blog = () => {
           .eq('id', data.id);
       } else {
         // Post not found or not published
-        console.error('Blog post not found with slug:', slug);
-        console.log('Possible reasons: Post not published, incorrect slug, or post does not exist');
+        console.error('Blog post not found with param:', slug);
+        console.log('Possible reasons: Post not published, incorrect slug, empty slug, or post does not exist');
         
         // Check if post exists but is not published
         const { data: unpublishedPost } = await supabase
           .from('blog_posts')
           .select('id, title, is_published')
-          .eq('slug', slug)
+          .eq(isUUID ? 'id' : 'slug', slugParam)
           .maybeSingle();
         
         if (unpublishedPost && !unpublishedPost.is_published) {
@@ -384,7 +389,7 @@ const Blog = () => {
                     <CardDescription className="text-base mb-4 leading-relaxed line-clamp-3">
                       {post.excerpt}
                     </CardDescription>
-                    <Link to={`/blog/${post.slug}`}>
+                    <Link to={`/blog/${post.slug || post.id}`}>
                       <Button variant="ghost" className="text-primary p-0 h-auto group-hover:translate-x-1 transition-transform">
                         Read Full Article →
                       </Button>
