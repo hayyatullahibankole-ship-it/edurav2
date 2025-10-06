@@ -21,6 +21,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
 import { emailSchema, passwordSchema, nameSchema, phoneSchema } from "@/utils/inputValidation";
 import eduraLogo from "@/assets/edura-logo.png";
+import { generateSessionToken, storeSessionToken, setSessionToken } from "@/utils/sessionManager";
 
 // Enhanced validation schemas for security
 const loginSchema = z.object({
@@ -131,6 +132,17 @@ export default function AuthForm() {
         }
 
         if (data.user) {
+          // Generate and store new session token (invalidates other sessions)
+          const newSessionToken = generateSessionToken();
+          storeSessionToken(newSessionToken);
+          
+          // Update session token in database
+          const tokenSet = await setSessionToken(data.user.id, newSessionToken);
+          
+          if (!tokenSet) {
+            console.error('Failed to set session token');
+          }
+
           toast({
             title: "Welcome back!",
             description: "You have successfully signed in.",
@@ -143,7 +155,7 @@ export default function AuthForm() {
         // Validate signup form
         const signupData = signupSchema.parse(formData);
 
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email: signupData.email,
           password: signupData.password,
           options: {
@@ -166,6 +178,15 @@ export default function AuthForm() {
             throw new Error('Please check your email and confirm your account before signing in.');
           }
           throw new Error(`Account creation failed: ${error.message}`);
+        }
+
+        // Generate and store session token for new user
+        if (signUpData.user) {
+          const newSessionToken = generateSessionToken();
+          storeSessionToken(newSessionToken);
+          
+          // Update session token in database
+          await setSessionToken(signUpData.user.id, newSessionToken);
         }
 
         toast({

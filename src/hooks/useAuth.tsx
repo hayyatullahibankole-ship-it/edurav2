@@ -1,6 +1,13 @@
 import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { 
+  validateSessionToken, 
+  getSessionToken, 
+  clearSessionToken, 
+  clearSessionTokenInDB 
+} from '@/utils/sessionManager';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -10,6 +17,7 @@ interface AuthContextType {
   userRole: string | null;
   isAdmin: boolean;
   userProfile: any;
+  validateCurrentSession: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +28,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const { toast } = useToast();
+
+  // Validate current session token
+  const validateCurrentSession = async (): Promise<boolean> => {
+    if (!user) return false;
+    
+    const localToken = getSessionToken();
+    if (!localToken) {
+      console.warn('No local session token found');
+      return false;
+    }
+
+    const isValid = await validateSessionToken(user.id, localToken);
+    
+    if (!isValid) {
+      console.warn('Session token invalid - logging out');
+      toast({
+        title: "Session Expired",
+        description: "You've been logged out because your account was accessed from another device.",
+        variant: "destructive",
+      });
+      await signOut();
+      return false;
+    }
+
+    return true;
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -155,6 +190,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
+      const currentUser = user;
+      
+      // Clear session token from database
+      if (currentUser) {
+        await clearSessionTokenInDB(currentUser.id);
+      }
+      
+      // Clear local session token
+      clearSessionToken();
+      
       // Clear all local state first
       setUser(null);
       setSession(null);
@@ -169,6 +214,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error during signOut:', error);
       // Even if there's an error, clear local state
+      clearSessionToken();
       setUser(null);
       setSession(null);
       setUserProfile(null);
@@ -185,7 +231,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
     userRole,
     isAdmin,
-    userProfile
+    userProfile,
+    validateCurrentSession
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

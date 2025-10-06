@@ -1080,6 +1080,7 @@ export type Database = {
       }
       users: {
         Row: {
+          active_session_token: string | null
           address: string | null
           auth_user_id: string | null
           country: string | null
@@ -1102,6 +1103,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          active_session_token?: string | null
           address?: string | null
           auth_user_id?: string | null
           country?: string | null
@@ -1124,6 +1126,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          active_session_token?: string | null
           address?: string | null
           auth_user_id?: string | null
           country?: string | null
@@ -1185,6 +1188,10 @@ export type Database = {
       }
       check_user_lookup_rate_limit: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      clear_session_token: {
+        Args: { user_auth_id: string }
         Returns: boolean
       }
       convert_latex_mathbf_to_markdown: {
@@ -1499,6 +1506,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      is_session_valid: {
+        Args: { token_to_check: string; user_auth_id: string }
+        Returns: boolean
+      }
       log_admin_action: {
         Args: { action_type: string; admin_id: string; target_id?: string }
         Returns: boolean
@@ -1568,6 +1579,10 @@ export type Database = {
       }
       validate_admin_action: {
         Args: { action_type: string; target_data?: Json }
+        Returns: boolean
+      }
+      validate_and_set_session_token: {
+        Args: { new_token: string; user_auth_id: string }
         Returns: boolean
       }
       validate_answer_simple: {
