@@ -268,7 +268,7 @@ const Blog = () => {
   // Single post view
   if (slug && currentPost) {
     const currentUrl = window.location.href;
-    const ogImage = currentPost.featured_image_url || "https://zqapbmllkywsuywpfava.supabase.co/storage/v1/object/public/blog-images/edura-logo.png";
+    const ogImage = currentPost.featured_image_url || `${window.location.origin}/og-default.png`;
     const ogTitle = currentPost.title;
     const ogDescription = currentPost.excerpt;
 
