@@ -43,7 +43,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     };
   }, [user, loading, validateCurrentSession]);
 
-  if (loading || sessionValid === null) {
+  if (loading || (user && sessionValid === null)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
