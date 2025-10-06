@@ -4,6 +4,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from '@/hooks/use-toast';
 import { 
   Calendar, 
   Clock, 
@@ -13,7 +20,12 @@ import {
   BookOpen,
   Filter,
   ArrowLeft,
-  Share2
+  Share2,
+  Facebook,
+  MessageCircle,
+  Instagram,
+  Copy,
+  Check
 } from 'lucide-react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,12 +49,14 @@ interface BlogPost {
 const Blog = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [currentPost, setCurrentPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [copied, setCopied] = useState(false);
   const postsPerPage = 9;
 
   const categories = [
@@ -154,6 +168,55 @@ const Blog = () => {
     return colors[category] || colors['general'];
   };
 
+  const handleShare = async (platform: 'whatsapp' | 'facebook' | 'instagram' | 'copy') => {
+    if (!currentPost) return;
+
+    const url = window.location.href;
+    const text = `${currentPost.title} - ${currentPost.excerpt}`;
+
+    switch (platform) {
+      case 'whatsapp':
+        window.open(`https://wa.me/?text=${encodeURIComponent(text + '\n\n' + url)}`, '_blank');
+        break;
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        break;
+      case 'instagram':
+        // Instagram doesn't support direct web sharing, so copy to clipboard with a message
+        try {
+          await navigator.clipboard.writeText(url);
+          toast({
+            title: "Link copied!",
+            description: "Open Instagram and paste the link in your story or post.",
+          });
+        } catch (err) {
+          toast({
+            title: "Error",
+            description: "Failed to copy link",
+            variant: "destructive",
+          });
+        }
+        break;
+      case 'copy':
+        try {
+          await navigator.clipboard.writeText(url);
+          setCopied(true);
+          toast({
+            title: "Link copied!",
+            description: "You can now share it anywhere.",
+          });
+          setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+          toast({
+            title: "Error",
+            description: "Failed to copy link",
+            variant: "destructive",
+          });
+        }
+        break;
+    }
+  };
+
   // Filter posts based on search and category
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -235,10 +298,41 @@ const Blog = () => {
                     {currentPost.view_count + 1} views
                   </span>
                 </div>
-                <Button variant="outline" size="sm">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Share
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => handleShare('whatsapp')}>
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      WhatsApp
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleShare('facebook')}>
+                      <Facebook className="w-4 h-4 mr-2" />
+                      Facebook
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleShare('instagram')}>
+                      <Instagram className="w-4 h-4 mr-2" />
+                      Instagram
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleShare('copy')}>
+                      {copied ? (
+                        <>
+                          <Check className="w-4 h-4 mr-2" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4 mr-2" />
+                          Copy Link
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
 
