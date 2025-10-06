@@ -172,7 +172,8 @@ const Blog = () => {
   const handleShare = async (platform: 'whatsapp' | 'facebook' | 'instagram' | 'copy') => {
     if (!currentPost) return;
 
-    const url = window.location.href;
+    const blogUrl = window.location.href;
+    const url = `https://zqapbmllkywsuywpfava.functions.supabase.co/blog-share?slug=${encodeURIComponent(currentPost.slug || currentPost.id)}&target=${encodeURIComponent(blogUrl)}`;
     const text = `${currentPost.title} - ${currentPost.excerpt}`;
 
     switch (platform) {
