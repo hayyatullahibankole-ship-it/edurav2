@@ -82,14 +82,18 @@ const Blog = () => {
 
   const fetchSinglePost = async () => {
     try {
+      // First try to fetch published post
       const { data, error } = await supabase
         .from('blog_posts')
         .select('*')
         .eq('slug', slug)
         .eq('is_published', true)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error fetching blog post:', error);
+        throw error;
+      }
       
       if (data) {
         setCurrentPost(data);
@@ -98,6 +102,23 @@ const Blog = () => {
           .from('blog_posts')
           .update({ view_count: data.view_count + 1 })
           .eq('id', data.id);
+      } else {
+        // Post not found or not published
+        console.error('Blog post not found with slug:', slug);
+        console.log('Possible reasons: Post not published, incorrect slug, or post does not exist');
+        
+        // Check if post exists but is not published
+        const { data: unpublishedPost } = await supabase
+          .from('blog_posts')
+          .select('id, title, is_published')
+          .eq('slug', slug)
+          .maybeSingle();
+        
+        if (unpublishedPost && !unpublishedPost.is_published) {
+          console.error('Post exists but is not published:', unpublishedPost.title);
+        }
+        
+        navigate('/blog');
       }
     } catch (error) {
       console.error('Error fetching blog post:', error);
