@@ -217,6 +217,28 @@ const Blog = () => {
     }
   };
 
+  // Format content to preserve line breaks and structure
+  const formatContent = (content: string) => {
+    if (!content) return '';
+    
+    // Split by double line breaks to create paragraphs
+    const paragraphs = content.split('\n\n');
+    
+    return paragraphs
+      .map(para => {
+        // Replace single line breaks with <br> tags
+        const formatted = para
+          .split('\n')
+          .filter(line => line.trim())
+          .join('<br/>');
+        
+        // Wrap in paragraph tags if not empty
+        return formatted ? `<p>${formatted}</p>` : '';
+      })
+      .filter(p => p)
+      .join('');
+  };
+
   // Filter posts based on search and category
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -342,7 +364,12 @@ const Blog = () => {
               </p>
               
               {currentPost.content ? (
-                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentPost.content) }} />
+                <div 
+                  className="whitespace-pre-wrap" 
+                  dangerouslySetInnerHTML={{ 
+                    __html: DOMPurify.sanitize(formatContent(currentPost.content)) 
+                  }} 
+                />
               ) : (
                 <div className="space-y-6 text-lg leading-relaxed">
                   <p>This is a comprehensive article about {currentPost.title.toLowerCase()}. The content covers important aspects and provides valuable insights for students and professionals.</p>
