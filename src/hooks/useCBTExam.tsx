@@ -260,7 +260,7 @@ export const useCBTExam = (attemptId: string | null) => {
     setAnswers(prev => ({ ...prev, [questionId]: displayIndex }));
   }, []);
 
-  // Submit exam
+  // Submit exam - optimized for speed
   const submitExam = useCallback(async (timeSpentSeconds: number) => {
     if (!attemptId) return;
 
@@ -269,69 +269,29 @@ export const useCBTExam = (attemptId: string | null) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Get user internal ID
-      const { data: userData } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_user_id', user.id)
-        .single();
-
-      if (!userData) throw new Error('User not found');
-
-      // Validate each answer using simple integer comparison
-      const validatedAnswers = [];
-      let correctCount = 0;
-      const subjectBreakdown: Record<string, { total: number; correct: number }> = {};
-
-      for (const question of questions) {
+      // Prepare answers for bulk submission (without validation first)
+      const answersToSubmit = questions.map(question => {
         const displayIndex = answers[question.id];
-        const subject = question.subject;
-
-        // Initialize subject stats
-        if (!subjectBreakdown[subject]) {
-          subjectBreakdown[subject] = { total: 0, correct: 0 };
-        }
-        subjectBreakdown[subject].total += 1;
-
-        let isCorrect = false;
         let originalIndex: number | null = null;
-
+        
         if (displayIndex !== undefined) {
-          // Map display index back to original DB index
           originalIndex = question.originalIndexMap[displayIndex];
-          
-          // Validate using robust validator (handles letters/numbers/options)
-          if (originalIndex !== null && originalIndex !== undefined) {
-            const { data: validationResult, error: valErr } = await supabase
-              .rpc('validate_student_answer', {
-                question_id_param: question.id,
-                submitted_answer: originalIndex as any
-              });
-            if (valErr) {
-              console.warn('Validation RPC error', valErr);
-            }
-            isCorrect = validationResult === true;
-          }
-          if (isCorrect) {
-            correctCount++;
-            subjectBreakdown[subject].correct += 1;
-          }
         }
 
-        validatedAnswers.push({
+        return {
           attempt_id: attemptId,
           question_id: question.id,
-          answer: originalIndex, // Store original index in DB
-          is_correct: isCorrect,
+          answer: originalIndex,
+          is_correct: null, // Will be validated server-side
           time_spent_seconds: Math.floor(timeSpentSeconds / questions.length),
           answered_at: new Date().toISOString()
-        });
-      }
+        };
+      });
 
-      // Insert or update all answers atomically (handle duplicates by unique key)
+      // Submit all answers immediately
       const { error: answersError } = await supabase
         .from('attempt_answers')
-        .upsert(validatedAnswers, { onConflict: 'attempt_id,question_id' });
+        .upsert(answersToSubmit, { onConflict: 'attempt_id,question_id' });
 
       if (answersError) throw answersError;
 
@@ -346,54 +306,13 @@ export const useCBTExam = (attemptId: string | null) => {
 
       if (attemptError) throw attemptError;
 
-      // Calculate and persist results
-      const totalQuestions = questions.length;
-      const answeredCount = Object.keys(answers).length;
-      const wrongAnswers = Math.max(answeredCount - correctCount, 0);
-      const unanswered = Math.max(totalQuestions - answeredCount, 0);
-      const percentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
-
-      // Enrich subject breakdown with percentages
-      const subjectBreakdownWithPct = Object.fromEntries(
-        Object.entries(subjectBreakdown).map(([subj, stats]) => {
-          const pct = stats.total > 0 ? (stats.correct / stats.total) * 100 : 0;
-          return [subj, { ...stats, percentage: pct }];
-        })
-      );
-
-      const resultPayload = {
-        attempt_id: attemptId,
-        raw_score: correctCount,
-        scaled_score: totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 400) : 0,
-        correct_answers: correctCount,
-        wrong_answers: wrongAnswers,
-        unanswered: unanswered,
-        total_questions: totalQuestions,
-        percentage: percentage,
-        subject_breakdown: subjectBreakdownWithPct,
-        time_taken_minutes: Math.floor(timeSpentSeconds / 60)
-      };
-
-      try {
-        // Upsert to avoid duplicates and races and get back the row
-        const { data: upserted, error: resultsError } = await supabase
-          .from('results')
-          .upsert(resultPayload, { onConflict: 'attempt_id' })
-          .select()
-          .maybeSingle();
-        if (resultsError) throw resultsError;
-        if (!upserted) {
-          console.warn('Results upsert returned no row (will rely on polling).');
-        }
-      } catch (e) {
-        console.warn('Results upsert failed (will still navigate):', e);
-      }
-
+      // Show immediate feedback
       toast({
         title: 'Exam Submitted',
-        description: 'Your answers have been submitted successfully'
+        description: 'Processing your results...'
       });
 
+      // Navigate immediately - results page will handle validation and scoring
       navigate(`/results?attempt=${attemptId}`);
 
     } catch (error) {
