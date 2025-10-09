@@ -154,9 +154,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-    // Set up auth state listener
+  // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         if (!isMounted) return;
 
         console.log('Auth state changed:', event, session?.user?.email);
@@ -165,6 +165,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          // Initialize session token on sign in or token refresh
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            const { generateSessionToken, storeSessionToken, setSessionToken } = await import('@/utils/sessionManager');
+            const newToken = generateSessionToken();
+            storeSessionToken(newToken);
+            await setSessionToken(session.user.id, newToken);
+          }
+          
           setLoading(true);
           // Use setTimeout to avoid blocking the auth state change
           setTimeout(() => {

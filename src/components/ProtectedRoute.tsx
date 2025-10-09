@@ -31,8 +31,8 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
       // Check session immediately
       checkSession();
       
-      // Then check every 30 seconds
-      intervalId = setInterval(checkSession, 30000);
+      // Then check every 5 minutes (less aggressive)
+      intervalId = setInterval(checkSession, 5 * 60 * 1000);
     } else if (!user && !loading) {
       // If no user and not loading, mark session as invalid
       setSessionValid(false);

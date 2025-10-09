@@ -14,7 +14,8 @@ const CBTExam = () => {
     loading,
     submitting,
     selectAnswer,
-    submitExam
+    submitExam,
+    examDuration
   } = useCBTExam(attemptId);
 
   if (!attemptId) {
@@ -58,7 +59,7 @@ const CBTExam = () => {
       answers={answers}
       onAnswerSelect={selectAnswer}
       onSubmit={submitExam}
-      duration={180} // 3 hours default
+      duration={examDuration}
       examTitle="CBT Practice Exam"
     />
   );

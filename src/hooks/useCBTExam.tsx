@@ -49,6 +49,7 @@ export const useCBTExam = (attemptId: string | null) => {
   const [answers, setAnswers] = useState<CBTAnswers>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [examDuration, setExamDuration] = useState<number>(180); // Default 3 hours
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -78,6 +79,14 @@ export const useCBTExam = (attemptId: string | null) => {
 
         if (!attemptData) {
           throw new Error('Attempt not found');
+        }
+
+        // Set exam duration from exam data or use proctoring data or default
+        if (attemptData.exams && attemptData.exams.duration_minutes) {
+          setExamDuration(attemptData.exams.duration_minutes);
+        } else if (attemptData.proctoring_data) {
+          const proctorData = attemptData.proctoring_data as any;
+          setExamDuration(proctorData.duration_minutes || 180);
         }
 
         // Fetch questions using secure RPCs
@@ -405,6 +414,7 @@ export const useCBTExam = (attemptId: string | null) => {
     loading,
     submitting,
     selectAnswer,
-    submitExam
+    submitExam,
+    examDuration
   };
 };
