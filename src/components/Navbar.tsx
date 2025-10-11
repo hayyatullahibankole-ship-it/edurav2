@@ -47,9 +47,6 @@ const Navbar = () => {
           ) : (
             <div className="hidden md:flex items-center space-x-4">
               <Link to="/auth">
-                <Button variant="ghost">Login</Button>
-              </Link>
-              <Link to="/auth">
                 <Button>Get Started</Button>
               </Link>
             </div>
@@ -115,9 +112,6 @@ const Navbar = () => {
                   </>
                 ) : (
                   <>
-                    <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full">Login</Button>
-                    </Link>
                     <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
                       <Button className="w-full">Get Started</Button>
                     </Link>
