@@ -31,7 +31,8 @@ import {
   Zap,
   FileText,
   DollarSign,
-  Newspaper
+  Newspaper,
+  MessageCircle
 } from 'lucide-react';
 import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
@@ -42,6 +43,7 @@ import AnalyticsHub from '@/components/admin/AnalyticsHub';
 import SystemConfig from '@/components/admin/SystemConfig';
 import PricingManager from '@/components/admin/PricingManager';
 import BlogManager from '@/components/admin/BlogManager';
+import CustomerCommunications from '@/components/admin/CustomerCommunications';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -269,6 +271,15 @@ export default function AdminPortal() {
                 <span className="sm:hidden">Blog</span>
               </Button>
               <Button
+                variant={activeSection === 'communications' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm"
+                onClick={() => setActiveSection('communications')}
+              >
+                <MessageCircle className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Communications</span>
+                <span className="sm:hidden">Messages</span>
+              </Button>
+              <Button
                 variant={activeSection === 'settings' ? 'secondary' : 'ghost'}
                 className="w-full justify-start text-left text-xs sm:text-sm col-span-2 lg:col-span-1"
                 onClick={() => setActiveSection('settings')}
@@ -470,10 +481,12 @@ export default function AdminPortal() {
           
           {activeSection === 'blog' && <BlogManager />}
           
+          {activeSection === 'communications' && <CustomerCommunications users={users} />}
+          
           {activeSection === 'settings' && <SystemConfig />}
 
           {/* Other sections can be implemented similarly */}
-          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'blog', 'settings'].includes(activeSection) && (
+          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'blog', 'communications', 'settings'].includes(activeSection) && (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
