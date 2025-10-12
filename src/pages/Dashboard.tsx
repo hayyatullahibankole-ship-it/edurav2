@@ -16,7 +16,10 @@ import {
   Trophy,
   User,
   Settings,
-  LogOut
+  LogOut,
+  MessageSquare,
+  Sword,
+  GraduationCap
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -370,6 +373,45 @@ const Dashboard = () => {
                         <Button variant="outline" className="w-full h-20 flex-col gap-2">
                           <Calendar className="h-6 w-6" />
                           Book Session
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Learning Hub */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Learning Hub</CardTitle>
+                    <CardDescription>Explore study materials and connect with others</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <Link to="/study-hub">
+                        <Button variant="outline" className="w-full h-24 flex-col gap-2 hover:border-primary">
+                          <GraduationCap className="h-8 w-8 text-primary" />
+                          <div className="text-center">
+                            <div className="font-semibold">Study Hub</div>
+                            <div className="text-xs text-muted-foreground">Lessons & Resources</div>
+                          </div>
+                        </Button>
+                      </Link>
+                      <Link to="/forum">
+                        <Button variant="outline" className="w-full h-24 flex-col gap-2 hover:border-primary">
+                          <MessageSquare className="h-8 w-8 text-primary" />
+                          <div className="text-center">
+                            <div className="font-semibold">Ask Tutor</div>
+                            <div className="text-xs text-muted-foreground">Discussion Forum</div>
+                          </div>
+                        </Button>
+                      </Link>
+                      <Link to="/challenge-arena">
+                        <Button variant="outline" className="w-full h-24 flex-col gap-2 hover:border-primary">
+                          <Sword className="h-8 w-8 text-primary" />
+                          <div className="text-center">
+                            <div className="font-semibold">Challenge Arena</div>
+                            <div className="text-xs text-muted-foreground">Compete & Win</div>
+                          </div>
                         </Button>
                       </Link>
                     </div>

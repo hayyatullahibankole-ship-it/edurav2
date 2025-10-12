@@ -23,15 +23,6 @@ const Navbar = () => {
             <Link to="/demo" className="text-foreground hover:text-primary transition-colors">
               Practice Tests
             </Link>
-            <Link to="/study-hub" className="text-foreground hover:text-primary transition-colors">
-              Study Hub
-            </Link>
-            <Link to="/forum" className="text-foreground hover:text-primary transition-colors">
-              Forum
-            </Link>
-            <Link to="/challenge-arena" className="text-foreground hover:text-primary transition-colors">
-              Challenges
-            </Link>
             <Link to="/resources" className="text-foreground hover:text-primary transition-colors">
               Resources
             </Link>
@@ -83,27 +74,6 @@ const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Practice Tests
-              </Link>
-              <Link
-                to="/study-hub"
-                className="block px-3 py-2 text-foreground hover:bg-muted rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Study Hub
-              </Link>
-              <Link
-                to="/forum"
-                className="block px-3 py-2 text-foreground hover:bg-muted rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Forum
-              </Link>
-              <Link
-                to="/challenge-arena"
-                className="block px-3 py-2 text-foreground hover:bg-muted rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Challenges
               </Link>
               <Link
                 to="/resources"
