@@ -116,91 +116,91 @@ export default function ChallengeArena() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">🏆 Challenge Arena</h1>
-          <p className="text-muted-foreground">Compete, improve, and climb the leaderboard</p>
+      <div className="container mx-auto px-4 py-4 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">🏆 Challenge Arena</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Compete, improve, and climb the leaderboard</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <Card>
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mb-6 sm:mb-8">
+          <Card className="animate-fade-in">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Your Rank</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">Your Rank</CardTitle>
               <Trophy className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">#--</div>
+              <div className="text-xl sm:text-2xl font-bold">#--</div>
               <p className="text-xs text-muted-foreground">Complete challenges to rank</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="animate-fade-in">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Points</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">Total Points</CardTitle>
               <Zap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-xl sm:text-2xl font-bold">0</div>
               <p className="text-xs text-muted-foreground">Earn points by competing</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="animate-fade-in sm:col-span-2 md:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Achievements</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">Achievements</CardTitle>
               <Award className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-xl sm:text-2xl font-bold">0</div>
               <p className="text-xs text-muted-foreground">Unlock badges</p>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-8">
-          <TabsList>
-            <TabsTrigger value="daily">Daily</TabsTrigger>
-            <TabsTrigger value="weekly">Weekly</TabsTrigger>
-            <TabsTrigger value="special">Special</TabsTrigger>
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-6 sm:mb-8">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="daily" className="text-xs sm:text-sm">Daily</TabsTrigger>
+            <TabsTrigger value="weekly" className="text-xs sm:text-sm">Weekly</TabsTrigger>
+            <TabsTrigger value="special" className="text-xs sm:text-sm">Special</TabsTrigger>
           </TabsList>
 
-          <TabsContent value={selectedTab} className="mt-6">
-            <div className="grid gap-6 md:grid-cols-2">
+          <TabsContent value={selectedTab} className="mt-4 sm:mt-6">
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
               <div className="space-y-4">
-                <h2 className="text-2xl font-semibold">Active Challenges</h2>
+                <h2 className="text-xl sm:text-2xl font-semibold">Active Challenges</h2>
                 
                 {challenges.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <Target className="h-16 w-16 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground">No active {selectedTab} challenges</p>
+                  <Card className="animate-fade-in">
+                    <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12 px-4">
+                      <Target className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4" />
+                      <p className="text-sm sm:text-base text-muted-foreground text-center">No active {selectedTab} challenges</p>
                     </CardContent>
                   </Card>
                 ) : (
                   challenges.map((challenge) => (
-                    <Card key={challenge.id}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
+                    <Card key={challenge.id} className="animate-fade-in">
+                      <CardHeader className="pb-3">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                           <div className="flex-1">
-                            <CardTitle>{challenge.title}</CardTitle>
-                            <CardDescription className="mt-2">
+                            <CardTitle className="text-base sm:text-lg">{challenge.title}</CardTitle>
+                            <CardDescription className="mt-2 text-xs sm:text-sm">
                               {challenge.description}
                             </CardDescription>
                           </div>
-                          <Badge variant="secondary">
+                          <Badge variant="secondary" className="text-xs self-start">
                             {challenge.points_reward} pts
                           </Badge>
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground mb-4">
                           <div className="flex items-center gap-1">
-                            <Target className="h-4 w-4" />
-                            {challenge.question_count} questions
+                            <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span>{challenge.question_count} questions</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {challenge.duration_minutes} min
+                            <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span>{challenge.duration_minutes} min</span>
                           </div>
                           <span>Difficulty: {challenge.difficulty_level}/5</span>
                         </div>
@@ -217,23 +217,23 @@ export default function ChallengeArena() {
               </div>
 
               <div>
-                <h2 className="text-2xl font-semibold mb-4">🏆 Leaderboard</h2>
-                <Card>
-                  <CardContent className="pt-6">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">🏆 Leaderboard</h2>
+                <Card className="animate-fade-in">
+                  <CardContent className="pt-4 sm:pt-6">
                     {leaderboard.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <TrendingUp className="h-12 w-12 mx-auto mb-2" />
-                        <p>No rankings yet</p>
+                      <div className="text-center py-6 sm:py-8 text-muted-foreground">
+                        <TrendingUp className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2" />
+                        <p className="text-sm sm:text-base">No rankings yet</p>
                       </div>
                     ) : (
-                      <div className="space-y-4">
+                      <div className="space-y-3 sm:space-y-4">
                         {leaderboard.map((entry, index) => (
                           <div 
                             key={entry.user_id}
-                            className="flex items-center justify-between p-3 rounded-lg bg-accent/50"
+                            className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-accent/50 animate-fade-in"
                           >
-                            <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0 ${
                                 index === 0 ? 'bg-yellow-500 text-white' :
                                 index === 1 ? 'bg-gray-400 text-white' :
                                 index === 2 ? 'bg-orange-600 text-white' :
@@ -241,17 +241,17 @@ export default function ChallengeArena() {
                               }`}>
                                 {index + 1}
                               </div>
-                              <div>
-                                <p className="font-medium">
+                              <div className="min-w-0 flex-1">
+                                <p className="font-medium text-sm sm:text-base truncate">
                                   {entry.users?.first_name} {entry.users?.last_name}
                                 </p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs text-muted-foreground truncate">
                                   {formatDistanceToNow(new Date(entry.completed_at), { addSuffix: true })}
                                 </p>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <p className="font-bold">{entry.score} pts</p>
+                            <div className="text-right flex-shrink-0 ml-2">
+                              <p className="font-bold text-sm sm:text-base">{entry.score} pts</p>
                               <p className="text-xs text-muted-foreground">
                                 {Math.floor(entry.time_taken_seconds / 60)}:{(entry.time_taken_seconds % 60).toString().padStart(2, '0')}
                               </p>
