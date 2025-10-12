@@ -137,26 +137,23 @@ export const useCBTExam = (attemptId: string | null) => {
             
             // Fetch questions for each subject with appropriate count
             const allQuestions = [];
-            for (const subjectId of subjectIds) {
-              const subjectName = subjectsData?.find(s => s.id === subjectId)?.name || '';
-              const questionCount = subjectName.toLowerCase().includes('english') ? 60 : 40;
-              
-              const { data: subjectQs, error: subjectError } = await supabase
-                .rpc('get_random_questions_for_subjects', { 
-                  subject_ids: [subjectId],
-                  per_subject_count: questionCount
-                });
-              
-              if (subjectError) {
-                console.error('Subject RPC error:', subjectError);
-                throw new Error(`Failed to load questions for ${subjectName}`);
-              }
-              
-              if (subjectQs) {
-                allQuestions.push(...subjectQs);
-              }
-            }
-            questionsData = allQuestions;
+            const allQuestionsArrays = await Promise.all(
+              subjectIds.map(async (subjectId) => {
+                const subjectName = subjectsData?.find(s => s.id === subjectId)?.name || '';
+                const questionCount = subjectName.toLowerCase().includes('english') ? 60 : 40;
+                const { data: subjectQs, error: subjectError } = await supabase
+                  .rpc('get_random_questions_for_subjects', { 
+                    subject_ids: [subjectId],
+                    per_subject_count: questionCount
+                  });
+                if (subjectError) {
+                  console.error('Subject RPC error:', subjectError);
+                  throw new Error(`Failed to load questions for ${subjectName}`);
+                }
+                return subjectQs || [];
+              })
+            );
+            questionsData = allQuestionsArrays.flat();
           } else {
             // Non-JAMB: use configured question count or default 40
             const questionCount = proctorData?.question_count_per_subject || 40;

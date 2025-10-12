@@ -82,11 +82,11 @@ export const useCleanResults = (attemptId: string | null) => {
         }
 
         // Fetch results with extended polling to avoid race conditions
-        const pollResults = async (retries = 20, delayMs = 1000) => {
+        const pollResults = async (retries = 8, delayMs = 750) => {
           for (let i = 0; i < retries; i++) {
             const { data, error } = await supabase
               .from('results')
-              .select('*')
+              .select('id,attempt_id,raw_score,scaled_score,correct_answers,wrong_answers,unanswered,total_questions,percentage,subject_breakdown,time_taken_minutes,created_at')
               .eq('attempt_id', attemptId)
               .maybeSingle();
             if (error) {

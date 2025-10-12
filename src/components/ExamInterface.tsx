@@ -22,7 +22,8 @@ import {
   RotateCcw,
   Save
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from "@/hooks/use-toast";
 
 interface Question {
@@ -66,6 +67,8 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
 
   // Anti-cheat monitoring
   useEffect(() => {
@@ -164,15 +167,24 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
   }, [flagged, currentQuestion]);
 
   const handleAutoSubmit = useCallback(() => {
+    if (!subscriptionLoading && !hasPremiumAccess && !isPremium) {
+      setShowUpgradeDialog(true);
+      return;
+    }
     const timeTaken = (duration * 60) - timeLeft;
     onSubmit(answers, Math.floor(timeTaken / 60));
-  }, [answers, duration, timeLeft, onSubmit]);
+  }, [answers, duration, timeLeft, onSubmit, hasPremiumAccess, isPremium, subscriptionLoading]);
 
   const handleManualSubmit = () => {
     setShowSubmitDialog(true);
   };
 
   const confirmSubmit = () => {
+    if (!subscriptionLoading && !hasPremiumAccess && !isPremium) {
+      setShowSubmitDialog(false);
+      setShowUpgradeDialog(true);
+      return;
+    }
     const timeTaken = (duration * 60) - timeLeft;
     onSubmit(answers, Math.floor(timeTaken / 60));
   };
@@ -582,6 +594,26 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
                 Submit Now
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upgrade Required Dialog */}
+      <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upgrade to Submit</DialogTitle>
+            <DialogDescription>
+              Subscribe to submit your exam and unlock full results and explanations.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setShowUpgradeDialog(false)} className="flex-1">
+              Continue Exam
+            </Button>
+            <Link to="/payment" className="flex-1">
+              <Button className="w-full">Upgrade Now</Button>
+            </Link>
           </div>
         </DialogContent>
       </Dialog>

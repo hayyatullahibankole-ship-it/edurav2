@@ -19,6 +19,8 @@ import {
   X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSubscription } from '@/hooks/useSubscription';
+import { Link } from 'react-router-dom';
 
 interface Question {
   id: number;
@@ -63,6 +65,8 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
   const [isPaused, setIsPaused] = useState(false);
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
 
   // Group questions by subject on mount
   useEffect(() => {
@@ -163,10 +167,15 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
   };
 
   const handleManualSubmit = useCallback(() => {
+    if (!subscriptionLoading && !hasPremiumAccess && !isPremium) {
+      setShowSubmitDialog(false);
+      setShowUpgradeDialog(true);
+      return;
+    }
     setIsSubmitting(true);
     const timeSpent = (duration * 60) - timeLeft;
     onSubmit(answers, timeSpent);
-  }, [answers, duration, timeLeft, onSubmit]);
+  }, [answers, duration, timeLeft, onSubmit, hasPremiumAccess, isPremium, subscriptionLoading]);
 
   const togglePause = () => {
     setIsPaused(!isPaused);
@@ -500,6 +509,26 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
         isOpen={isCalculatorOpen} 
         onClose={() => setIsCalculatorOpen(false)} 
       />
+
+      {/* Upgrade Required Dialog */}
+      <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upgrade to Submit</DialogTitle>
+            <DialogDescription>
+              Subscribe to submit your test and unlock full results and explanations.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setShowUpgradeDialog(false)} className="flex-1">
+              Continue Test
+            </Button>
+            <Link to="/payment" className="flex-1">
+              <Button className="w-full">Upgrade Now</Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
