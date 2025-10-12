@@ -67,7 +67,7 @@ serve(async (req) => {
     }
 
     const userScore = Number(result.percentage) || 0;
-    const examType = attemptData.exams.type;
+    const examType = (attemptData.exams as any).type;
 
     // Get unique students who took this exam type (based on most recent attempt per user)
     const { data: recentAttempts, error: studentsError } = await supabase
