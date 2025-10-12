@@ -268,17 +268,20 @@ const Dashboard = () => {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="dashboard">
+        <Tabs value={activeTab} onValueChange={(value) => {
+          console.log('Tab changed to:', value);
+          setActiveTab(value);
+        }}>
+          <TabsList className="grid w-full grid-cols-3 relative z-50">
+            <TabsTrigger value="dashboard" className="pointer-events-auto cursor-pointer">
               <Target className="h-4 w-4 mr-2" />
               Dashboard
             </TabsTrigger>
-            <TabsTrigger value="profile">
+            <TabsTrigger value="profile" className="pointer-events-auto cursor-pointer">
               <User className="h-4 w-4 mr-2" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="settings">
+            <TabsTrigger value="settings" className="pointer-events-auto cursor-pointer">
               <Settings className="h-4 w-4 mr-2" />
               Account
             </TabsTrigger>
