@@ -26,25 +26,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get the user's result and exam type for this attempt
-    const { data: attemptData, error: attemptError } = await supabase
-      .from('attempts')
-      .select(`
-        id,
-        exam_id,
-        exams!inner(type)
-      `)
-      .eq('id', attemptId)
-      .maybeSingle();
-
-    if (attemptError || !attemptData) {
-      console.error('Error fetching attempt:', attemptError);
-      return new Response(
-        JSON.stringify({ error: 'Attempt not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
+    // Get the user's percentage for this attempt
     const { data: result, error: resultError } = await supabase
       .from('results')
       .select('percentage')
@@ -67,65 +49,39 @@ serve(async (req) => {
     }
 
     const userScore = Number(result.percentage) || 0;
-    const examType = (attemptData.exams as any).type;
 
-    // Get unique students who took this exam type (based on most recent attempt per user)
-    const { data: recentAttempts, error: studentsError } = await supabase
-      .from('attempts')
-      .select(`
-        user_id,
-        id,
-        exam_id,
-        submitted_at,
-        exams!inner(type)
-      `)
-      .eq('exams.type', examType)
-      .eq('status', 'SUBMITTED')
-      .order('submitted_at', { ascending: false });
-
-    if (studentsError) {
-      console.error('Error fetching students:', studentsError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to compute rank' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Get most recent attempt per user for this exam type
-    const userLatestAttempts = new Map();
-    recentAttempts?.forEach(attempt => {
-      if (!userLatestAttempts.has(attempt.user_id)) {
-        userLatestAttempts.set(attempt.user_id, attempt.id);
-      }
-    });
-
-    const latestAttemptIds = Array.from(userLatestAttempts.values());
-
-    // Get results for these latest attempts
-    const { data: allResults, error: resultsError } = await supabase
+    // Total number of results
+    const { count: totalCount, error: totalError } = await supabase
       .from('results')
-      .select('attempt_id, percentage')
-      .in('attempt_id', latestAttemptIds);
+      .select('id', { count: 'exact', head: true });
 
-    if (resultsError) {
-      console.error('Error fetching results:', resultsError);
+    if (totalError) {
+      console.error('Error counting total results:', totalError);
       return new Response(
         JSON.stringify({ error: 'Failed to compute rank' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Count unique students
-    const totalStudents = allResults?.length || 0;
-    
-    // Count how many have a higher score
-    const higherCount = allResults?.filter(r => Number(r.percentage) > userScore).length || 0;
-    
+    // Count how many results have a higher score
+    const { count: higherCount, error: higherError } = await supabase
+      .from('results')
+      .select('id', { count: 'exact', head: true })
+      .gt('percentage', userScore);
+
+    if (higherError) {
+      console.error('Error counting higher scores:', higherError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to compute rank' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Rank is number of people ahead + 1
-    const rank = higherCount + 1;
+    const rank = (higherCount ?? 0) + 1;
 
     return new Response(
-      JSON.stringify({ rank, total: totalStudents }),
+      JSON.stringify({ rank, total: totalCount ?? 0 }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err) {
