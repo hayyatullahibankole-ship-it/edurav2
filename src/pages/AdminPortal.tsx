@@ -194,7 +194,7 @@ export default function AdminPortal() {
             <nav className="grid grid-cols-2 lg:grid-cols-1 gap-2 lg:space-y-2 lg:grid-cols-none">
               <Button
                 variant={activeSection === 'dashboard' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('dashboard')}
               >
                 <Monitor className="w-4 h-4 mr-2 lg:mr-3" />
@@ -203,7 +203,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'users' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('users')}
               >
                 <Users className="w-4 h-4 mr-2 lg:mr-3" />
@@ -212,7 +212,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'exams' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('exams')}
               >
                 <BookOpen className="w-4 h-4 mr-2 lg:mr-3" />
@@ -221,7 +221,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'questions' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('questions')}
               >
                 <FileText className="w-4 h-4 mr-2 lg:mr-3" />
@@ -230,7 +230,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'resources' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('resources')}
               >
                 <Upload className="w-4 h-4 mr-2 lg:mr-3" />
@@ -239,7 +239,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'security' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('security')}
               >
                 <Lock className="w-4 h-4 mr-2 lg:mr-3" />
@@ -248,7 +248,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'analytics' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('analytics')}
               >
                 <BarChart3 className="w-4 h-4 mr-2 lg:mr-3" />
@@ -257,7 +257,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'pricing' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('pricing')}
               >
                 <DollarSign className="w-4 h-4 mr-2 lg:mr-3" />
@@ -266,7 +266,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'blog' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('blog')}
               >
                 <Newspaper className="w-4 h-4 mr-2 lg:mr-3" />
@@ -275,7 +275,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'communications' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('communications')}
               >
                 <MessageCircle className="w-4 h-4 mr-2 lg:mr-3" />
@@ -284,7 +284,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'study-hub' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('study-hub')}
               >
                 <GraduationCap className="w-4 h-4 mr-2 lg:mr-3" />
@@ -293,7 +293,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'forum' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('forum')}
               >
                 <MessageCircle className="w-4 h-4 mr-2 lg:mr-3" />
@@ -302,7 +302,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'challenges' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('challenges')}
               >
                 <Sword className="w-4 h-4 mr-2 lg:mr-3" />
@@ -311,7 +311,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'settings' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm col-span-2 lg:col-span-1"
+                className="w-full justify-start text-left text-xs sm:text-sm col-span-2 lg:col-span-1 text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('settings')}
               >
                 <Settings className="w-4 h-4 mr-2 lg:mr-3" />
