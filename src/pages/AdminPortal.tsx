@@ -32,7 +32,9 @@ import {
   FileText,
   DollarSign,
   Newspaper,
-  MessageCircle
+  MessageCircle,
+  GraduationCap,
+  Sword
 } from 'lucide-react';
 import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
@@ -44,6 +46,9 @@ import SystemConfig from '@/components/admin/SystemConfig';
 import PricingManager from '@/components/admin/PricingManager';
 import BlogManager from '@/components/admin/BlogManager';
 import CustomerCommunications from '@/components/admin/CustomerCommunications';
+import StudyHubManager from '@/components/admin/StudyHubManager';
+import ForumManager from '@/components/admin/ForumManager';
+import ChallengeManager from '@/components/admin/ChallengeManager';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -278,6 +283,33 @@ export default function AdminPortal() {
                 <span className="sm:hidden">Messages</span>
               </Button>
               <Button
+                variant={activeSection === 'study-hub' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm"
+                onClick={() => setActiveSection('study-hub')}
+              >
+                <GraduationCap className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Study Hub</span>
+                <span className="sm:hidden">Study</span>
+              </Button>
+              <Button
+                variant={activeSection === 'forum' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm"
+                onClick={() => setActiveSection('forum')}
+              >
+                <MessageCircle className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Forum</span>
+                <span className="sm:hidden">Forum</span>
+              </Button>
+              <Button
+                variant={activeSection === 'challenges' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm"
+                onClick={() => setActiveSection('challenges')}
+              >
+                <Sword className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Challenges</span>
+                <span className="sm:hidden">Arena</span>
+              </Button>
+              <Button
                 variant={activeSection === 'settings' ? 'secondary' : 'ghost'}
                 className="w-full justify-start text-left text-xs sm:text-sm col-span-2 lg:col-span-1"
                 onClick={() => setActiveSection('settings')}
@@ -481,10 +513,16 @@ export default function AdminPortal() {
           
           {activeSection === 'communications' && <CustomerCommunications users={users} />}
           
+          {activeSection === 'study-hub' && <StudyHubManager />}
+          
+          {activeSection === 'forum' && <ForumManager />}
+          
+          {activeSection === 'challenges' && <ChallengeManager />}
+          
           {activeSection === 'settings' && <SystemConfig />}
 
           {/* Other sections can be implemented similarly */}
-          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'blog', 'communications', 'settings'].includes(activeSection) && (
+          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings'].includes(activeSection) && (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
