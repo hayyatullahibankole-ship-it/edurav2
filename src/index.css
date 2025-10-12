@@ -20,14 +20,14 @@ All colors MUST be HSL for consistency across light/dark modes.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* Primary - Vibrant purple for engagement */
-    --primary: 262 83% 58%;
+    /* Primary - Bright blue for engagement */
+    --primary: 205 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 262 83% 52%;
-    --primary-glow: 262 83% 68%;
+    --primary-hover: 205 100% 45%;
+    --primary-glow: 195 100% 60%;
 
-    /* Secondary - Electric blue */
-    --secondary: 217 91% 60%;
+    /* Secondary - Teal/cyan */
+    --secondary: 180 100% 40%;
     --secondary-foreground: 0 0% 100%;
 
     /* Muted elements */
@@ -58,22 +58,22 @@ All colors MUST be HSL for consistency across light/dark modes.
     /* Borders and inputs */
     --border: 220 13% 91%;
     --input: 220 13% 95%;
-    --ring: 262 83% 58%;
+    --ring: 205 100% 50%;
 
     --radius: 1rem;
 
     /* Vibrant gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(217 91% 60%));
+    --gradient-primary: linear-gradient(135deg, hsl(205 100% 50%), hsl(180 100% 40%));
     --gradient-success: linear-gradient(135deg, hsl(142 76% 45%), hsl(160 84% 39%));
     --gradient-warning: linear-gradient(135deg, hsl(38 92% 50%), hsl(24 100% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(217 91% 60%) 50%, hsl(142 76% 45%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(205 100% 50%) 0%, hsl(180 100% 40%) 50%, hsl(142 76% 45%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(220 20% 98%));
-    --gradient-feature: linear-gradient(145deg, hsl(262 83% 58% / 0.1), hsl(217 91% 60% / 0.1));
+    --gradient-feature: linear-gradient(145deg, hsl(205 100% 50% / 0.1), hsl(180 100% 40% / 0.1));
 
     /* Enhanced shadows with color */
     --shadow-card: 0 4px 6px -1px hsl(220 20% 70% / 0.1), 0 2px 4px -1px hsl(220 20% 70% / 0.06);
-    --shadow-hover: 0 20px 25px -5px hsl(262 83% 58% / 0.3), 0 10px 10px -5px hsl(262 83% 58% / 0.1);
-    --shadow-glow: 0 0 40px hsl(262 83% 68% / 0.4);
+    --shadow-hover: 0 20px 25px -5px hsl(205 100% 50% / 0.3), 0 10px 10px -5px hsl(205 100% 50% / 0.1);
+    --shadow-glow: 0 0 40px hsl(195 100% 60% / 0.4);
     --shadow-success: 0 10px 20px -5px hsl(142 76% 45% / 0.3);
 
     /* Animation durations */
@@ -101,12 +101,12 @@ All colors MUST be HSL for consistency across light/dark modes.
     --popover: 222 47% 13%;
     --popover-foreground: 214 50% 95%;
 
-    --primary: 262 83% 62%;
+    --primary: 205 100% 55%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 262 83% 56%;
-    --primary-glow: 262 83% 72%;
+    --primary-hover: 205 100% 50%;
+    --primary-glow: 195 100% 65%;
 
-    --secondary: 217 91% 65%;
+    --secondary: 180 100% 45%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 222 47% 16%;
@@ -130,7 +130,7 @@ All colors MUST be HSL for consistency across light/dark modes.
 
     --border: 222 47% 20%;
     --input: 222 47% 16%;
-    --ring: 262 83% 62%;
+    --ring: 205 100% 55%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;

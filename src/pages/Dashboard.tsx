@@ -284,17 +284,6 @@ const Dashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-          <div className="mt-4 flex justify-end">
-            <Button 
-              variant="outline" 
-              onClick={handleLogout}
-              className="flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
-          </div>
-
           <TabsContent value="dashboard" className="mt-8 space-y-8">
             {/* Quick Stats */}
             <div className="grid md:grid-cols-4 gap-6 animate-scale-in">
