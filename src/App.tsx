@@ -28,6 +28,8 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import StudyHub from "./pages/StudyHub";
 import StudyTopic from "./pages/StudyTopic";
 import Forum from "./pages/Forum";
+import ForumNewPost from "./pages/ForumNewPost";
+import ForumPost from "./pages/ForumPost";
 import ChallengeArena from "./pages/ChallengeArena";
 
 const queryClient = new QueryClient();
@@ -92,6 +94,16 @@ const App = () => (
             <Route path="/forum" element={
               <ProtectedRoute>
                 <Forum />
+              </ProtectedRoute>
+            } />
+            <Route path="/forum/new" element={
+              <ProtectedRoute>
+                <ForumNewPost />
+              </ProtectedRoute>
+            } />
+            <Route path="/forum/post/:postId" element={
+              <ProtectedRoute>
+                <ForumPost />
               </ProtectedRoute>
             } />
             <Route path="/challenge-arena" element={

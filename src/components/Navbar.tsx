@@ -27,6 +27,16 @@ const Navbar = () => {
             <Link to="/resources" className="text-foreground hover:text-primary transition-colors">
               Resources
             </Link>
+            {user && (
+              <>
+                <Link to="/study-hub" className="text-foreground hover:text-primary transition-colors">
+                  Study Hub
+                </Link>
+                <Link to="/forum" className="text-foreground hover:text-primary transition-colors">
+                  Forum
+                </Link>
+              </>
+            )}
             <Link to="/blog" className="text-foreground hover:text-primary transition-colors">
               Blog
             </Link>
@@ -84,6 +94,24 @@ const Navbar = () => {
               >
                 Resources
               </Link>
+              {user && (
+                <>
+                  <Link
+                    to="/study-hub"
+                    className="block px-3 py-2 text-foreground hover:bg-muted rounded-md"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Study Hub
+                  </Link>
+                  <Link
+                    to="/forum"
+                    className="block px-3 py-2 text-foreground hover:bg-muted rounded-md"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Forum
+                  </Link>
+                </>
+              )}
               <Link
                 to="/blog"
                 className="block px-3 py-2 text-foreground hover:bg-muted rounded-md"

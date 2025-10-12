@@ -150,14 +150,19 @@ export default function StudyHubManager() {
       const { error } = await supabase.from('study_topics').delete().eq('id', topicId);
       if (error) throw error;
 
+      // Immediately update local state
+      setTopics(prev => prev.filter(t => t.id !== topicId));
+      
       toast({ title: 'Success', description: 'Topic deleted successfully' });
-      fetchData();
     } catch (error: any) {
+      console.error('Delete error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to delete topic',
         variant: 'destructive'
       });
+      // Refetch on error to ensure consistency
+      fetchData();
     }
   };
 
@@ -208,14 +213,19 @@ export default function StudyHubManager() {
       const { error } = await supabase.from('study_lessons').delete().eq('id', lessonId);
       if (error) throw error;
 
+      // Immediately update local state
+      setLessons(prev => prev.filter(l => l.id !== lessonId));
+      
       toast({ title: 'Success', description: 'Lesson deleted successfully' });
-      fetchData();
     } catch (error: any) {
+      console.error('Delete error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to delete lesson',
         variant: 'destructive'
       });
+      // Refetch on error to ensure consistency
+      fetchData();
     }
   };
 
