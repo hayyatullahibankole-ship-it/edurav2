@@ -68,6 +68,8 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const { canAccessPremium, loading: subscriptionLoading } = useSubscription();
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
 
   // Anti-cheat monitoring
@@ -167,20 +169,20 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
   }, [flagged, currentQuestion]);
 
   const handleAutoSubmit = useCallback(() => {
-    if (!subscriptionLoading && !hasPremiumAccess && !isPremium) {
+    if (!subscriptionLoading && !canAccessPremium) {
       setShowUpgradeDialog(true);
       return;
     }
     const timeTaken = (duration * 60) - timeLeft;
     onSubmit(answers, Math.floor(timeTaken / 60));
-  }, [answers, duration, timeLeft, onSubmit, hasPremiumAccess, isPremium, subscriptionLoading]);
+  }, [answers, duration, timeLeft, onSubmit, canAccessPremium, subscriptionLoading]);
 
   const handleManualSubmit = () => {
     setShowSubmitDialog(true);
   };
 
   const confirmSubmit = () => {
-    if (!subscriptionLoading && !hasPremiumAccess && !isPremium) {
+    if (!subscriptionLoading && !canAccessPremium) {
       setShowSubmitDialog(false);
       setShowUpgradeDialog(true);
       return;

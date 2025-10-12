@@ -31,7 +31,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
   const [timeLeft, setTimeLeft] = useState(duration * 60);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
+  const { canAccessPremium, loading: subscriptionLoading } = useSubscription();
 
   const currentQuestion = questions[currentIndex];
 
@@ -57,14 +57,12 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
   };
 
   const handleSubmitClick = () => {
-    // Check subscription before allowing submission
-    if (!subscriptionLoading && !hasPremiumAccess && !isPremium) {
+    // Block submission for free/basic users
+    if (!subscriptionLoading && !canAccessPremium) {
       setShowSubmitDialog(false);
       setShowUpgradeDialog(true);
       return;
     }
-    
-    // Allow submission for premium users
     const timeSpent = (duration * 60) - timeLeft;
     onSubmit(timeSpent);
   };
@@ -119,6 +117,8 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
 
       {/* Question Card */}
       <div className="max-w-5xl mx-auto p-6">
+        <div className="grid lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -196,9 +196,10 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
             </div>
           </CardContent>
         </Card>
+          </div>
 
-        {/* Quick navigation */}
-        <Card className="mt-4">
+          {/* Sidebar - Quick navigation */}
+        <Card>
           <CardHeader>
             <CardTitle className="text-sm">Quick Navigation</CardTitle>
           </CardHeader>
@@ -226,6 +227,9 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
             </div>
           </CardContent>
         </Card>
+        </div>
+      </div>
+        </div>
       </div>
 
       {/* Submit Confirmation Dialog */}

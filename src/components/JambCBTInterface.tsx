@@ -66,7 +66,7 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
+  const { canAccessPremium, loading: subscriptionLoading } = useSubscription();
 
   // Group questions by subject on mount
   useEffect(() => {
@@ -167,7 +167,7 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
   };
 
   const handleManualSubmit = useCallback(() => {
-    if (!subscriptionLoading && !hasPremiumAccess && !isPremium) {
+    if (!subscriptionLoading && !canAccessPremium) {
       setShowSubmitDialog(false);
       setShowUpgradeDialog(true);
       return;

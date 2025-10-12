@@ -76,6 +76,8 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const { canAccessPremium, loading: subscriptionLoading } = useSubscription();
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
 
   // Subject-based state
@@ -112,14 +114,14 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
   const globalQuestionIndex = currentQuestion ? currentQuestion.id - 1 : 0;
 
   const handleAutoSubmit = useCallback(() => {
-    if (!subscriptionLoading && !hasPremiumAccess && !isPremium) {
+    if (!subscriptionLoading && !canAccessPremium) {
       setShowUpgradeDialog(true);
       return;
     }
     const totalTime = duration * 60;
     const timeTaken = totalTime - timeLeft;
     onSubmit(answers, timeTaken);
-  }, [answers, duration, timeLeft, onSubmit, hasPremiumAccess, isPremium, subscriptionLoading]);
+  }, [answers, duration, timeLeft, onSubmit, canAccessPremium, subscriptionLoading]);
 
   // Timer effect with auto-submit on time expiry
   useEffect(() => {
@@ -217,7 +219,7 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
   };
 
   const confirmSubmit = () => {
-    if (!subscriptionLoading && !hasPremiumAccess && !isPremium) {
+    if (!subscriptionLoading && !canAccessPremium) {
       setShowSubmitDialog(false);
       setShowUpgradeDialog(true);
       return;
@@ -345,42 +347,45 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
       )}
 
       <div className="container mx-auto px-4 py-6">
+        {subjectQuestions.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {subjectQuestions.map((sd) => (
+              <Button
+                key={sd.subject}
+                variant={currentSubject === sd.subject ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => switchToSubject(sd.subject)}
+              >
+                {sd.subject}
+              </Button>
+            ))}
+          </div>
+        )}
         <div className="grid lg:grid-cols-4 gap-6">
           {/* Subject Navigation Sidebar */}
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5" />
-                  Subjects
-                </CardTitle>
+                <CardTitle className="text-sm">Question Navigator</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {subjectQuestions.map((subjectData) => {
-                  const progress = getSubjectProgress(subjectData.subject);
-                  const isActive = currentSubject === subjectData.subject;
-                  
-                  return (
-                    <div
-                      key={subjectData.subject}
-                      className={`p-3 border rounded-lg cursor-pointer transition-all hover:bg-muted/50 ${
-                        isActive ? 'border-primary bg-primary/10' : 'border-border'
-                      }`}
-                      onClick={() => switchToSubject(subjectData.subject)}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-sm">{subjectData.subject}</span>
-                        <Badge variant={progress === 100 ? "default" : "secondary"} className="text-xs">
-                          {progress}%
-                        </Badge>
-                      </div>
-                      <Progress value={progress} className="h-1" />
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {subjectData.questions.filter(q => answers.hasOwnProperty(q.id - 1)).length}/{subjectData.questions.length} answered
-                      </div>
-                    </div>
-                  );
-                })}
+              <CardContent>
+                <div className="grid grid-cols-5 gap-2">
+                  {currentSubjectData?.questions.map((q, idx) => {
+                    const isAnswered = answers.hasOwnProperty(q.id - 1);
+                    const isCurrent = idx === currentQuestionInSubject;
+                    return (
+                      <Button
+                        key={q.id}
+                        variant={isCurrent ? 'default' : 'outline'}
+                        size="sm"
+                        className={`${isAnswered ? 'border-green-500 bg-green-50 hover:bg-green-100' : ''} aspect-square p-0 text-xs`}
+                        onClick={() => setCurrentQuestionInSubject(idx)}
+                      >
+                        {idx + 1}
+                      </Button>
+                    );
+                  })}
+                </div>
               </CardContent>
             </Card>
           </div>
