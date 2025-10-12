@@ -1,5 +1,5 @@
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCleanResults } from '@/hooks/useCleanResults';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,10 +24,45 @@ export default function TestResults() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const attemptId = searchParams.get('attempt');
-  const { results, loading } = useCleanResults(attemptId);
-  const [downloading, setDownloading] = useState(false);
   const { toast } = useToast();
   const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
+  
+  // Fetch basic stats for paywall (always fetch, use conditionally)
+  const [basicStats, setBasicStats] = useState<{ percentage: number; total: number; correct: number } | null>(null);
+  const [fetchingBasicStats, setFetchingBasicStats] = useState(false);
+  
+  useEffect(() => {
+    const fetchBasicStats = async () => {
+      if (!attemptId || hasPremiumAccess || isPremium || subscriptionLoading) return;
+      
+      setFetchingBasicStats(true);
+      try {
+        // Fetch attempt answers to calculate basic percentage for paywall
+        const { data: answers } = await supabase
+          .from('attempt_answers')
+          .select('is_correct')
+          .eq('attempt_id', attemptId);
+        
+        if (answers) {
+          const total = answers.length;
+          const correct = answers.filter(a => a.is_correct === true).length;
+          const percentage = total > 0 ? (correct / total) * 100 : 0;
+          setBasicStats({ percentage, total, correct });
+        }
+      } catch (error) {
+        console.error('Error fetching basic stats:', error);
+      } finally {
+        setFetchingBasicStats(false);
+      }
+    };
+    
+    fetchBasicStats();
+  }, [attemptId, hasPremiumAccess, isPremium, subscriptionLoading]);
+  
+  // Only load full results if user has premium access
+  const shouldLoadResults = !subscriptionLoading && (hasPremiumAccess || isPremium);
+  const { results, loading } = useCleanResults(shouldLoadResults ? attemptId : null);
+  const [downloading, setDownloading] = useState(false);
 
   const handleDownloadPDF = async () => {
     if (!results || !attemptId) return;
@@ -92,17 +127,53 @@ export default function TestResults() {
     }
   };
 
-  if (loading || subscriptionLoading) {
+  // Show loading only while checking subscription
+  if (subscriptionLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-lg">Loading results...</p>
+          <p className="text-lg">Checking subscription...</p>
         </div>
       </div>
     );
   }
 
+  // Show paywall IMMEDIATELY if no premium access (before loading full results)
+  if (!hasPremiumAccess && !isPremium) {
+    if (fetchingBasicStats || !basicStats) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-lg">Processing your submission...</p>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <ResultsPaywall
+        percentage={basicStats.percentage}
+        totalQuestions={basicStats.total}
+        correctAnswers={basicStats.correct}
+      />
+    );
+  }
+
+  // Loading full results (only for premium users)
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-lg">Loading your results...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Results not found (for premium users only)
   if (!results) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
@@ -115,17 +186,6 @@ export default function TestResults() {
           </CardContent>
         </Card>
       </div>
-    );
-  }
-
-  // Show paywall for users without premium access
-  if (!hasPremiumAccess && !isPremium) {
-    return (
-      <ResultsPaywall
-        percentage={results.percentage}
-        totalQuestions={results.totalQuestions}
-        correctAnswers={results.correctAnswers}
-      />
     );
   }
 

@@ -295,7 +295,7 @@ export const useCBTExam = (attemptId: string | null) => {
 
       if (answersError) throw answersError;
 
-      // Update attempt status
+      // Update attempt status to SUBMITTED
       const { error: attemptError } = await supabase
         .from('attempts')
         .update({
@@ -308,11 +308,11 @@ export const useCBTExam = (attemptId: string | null) => {
 
       // Show immediate feedback
       toast({
-        title: 'Exam Submitted',
-        description: 'Processing your results...'
+        title: 'Exam Submitted Successfully',
+        description: 'Redirecting to results...'
       });
 
-      // Navigate immediately - results page will handle validation and scoring
+      // Navigate to results - paywall check happens there before loading results
       navigate(`/results?attempt=${attemptId}`);
 
     } catch (error) {
