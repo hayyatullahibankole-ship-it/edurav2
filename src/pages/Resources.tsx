@@ -155,26 +155,7 @@ const Resources = () => {
         return;
       }
 
-      // Check premium access for premium resources
-      if (resource.access_level === 'premium') {
-        if (subscriptionLoading) {
-          toast({
-            title: "Loading",
-            description: "Checking subscription status...",
-          });
-          return;
-        }
-        
-        if (!canAccessPremium && !isAdmin) {
-          toast({
-            title: "Premium Required",
-            description: "This resource requires a premium or enterprise subscription",
-            variant: "destructive"
-          });
-          window.location.href = '/payment?plan=premium';
-          return;
-        }
-      }
+      // Allow all users to access resources (monetize through results paywall instead)
 
       console.log('Accessing resource:', resource.title, 'URL:', resource.file_url);
 

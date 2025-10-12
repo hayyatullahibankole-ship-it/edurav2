@@ -17,6 +17,8 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { generateExamReportPDF } from '@/utils/pdfGenerator';
+import { useSubscription } from '@/hooks/useSubscription';
+import { ResultsPaywall } from '@/components/ResultsPaywall';
 
 export default function TestResults() {
   const [searchParams] = useSearchParams();
@@ -25,6 +27,7 @@ export default function TestResults() {
   const { results, loading } = useCleanResults(attemptId);
   const [downloading, setDownloading] = useState(false);
   const { toast } = useToast();
+  const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
 
   const handleDownloadPDF = async () => {
     if (!results || !attemptId) return;
@@ -89,7 +92,7 @@ export default function TestResults() {
     }
   };
 
-  if (loading) {
+  if (loading || subscriptionLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -112,6 +115,17 @@ export default function TestResults() {
           </CardContent>
         </Card>
       </div>
+    );
+  }
+
+  // Show paywall for users without premium access
+  if (!hasPremiumAccess && !isPremium) {
+    return (
+      <ResultsPaywall
+        percentage={results.percentage}
+        totalQuestions={results.totalQuestions}
+        correctAnswers={results.correctAnswers}
+      />
     );
   }
 
