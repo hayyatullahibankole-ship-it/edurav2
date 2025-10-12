@@ -16,7 +16,7 @@ export const StatCard = ({
   value, 
   subtext,
   gradient = "from-primary to-secondary",
-  iconColor = "text-primary"
+  iconColor = "text-white"
 }: StatCardProps) => {
   return (
     <Card className="hover-lift overflow-hidden relative group">
