@@ -27,6 +27,7 @@ import AnswerReview from "./pages/AnswerReview";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import StudyHub from "./pages/StudyHub";
 import StudyTopic from "./pages/StudyTopic";
+import LessonView from "./pages/LessonView";
 import Forum from "./pages/Forum";
 import ForumNewPost from "./pages/ForumNewPost";
 import ForumPost from "./pages/ForumPost";
@@ -89,6 +90,11 @@ const App = () => (
             <Route path="/study-hub/topic/:topicId" element={
               <ProtectedRoute>
                 <StudyTopic />
+              </ProtectedRoute>
+            } />
+            <Route path="/study-hub/lesson/:lessonId" element={
+              <ProtectedRoute>
+                <LessonView />
               </ProtectedRoute>
             } />
             <Route path="/forum" element={
