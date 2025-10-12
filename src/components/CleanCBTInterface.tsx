@@ -229,8 +229,6 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
         </Card>
         </div>
       </div>
-        </div>
-      </div>
 
       {/* Submit Confirmation Dialog */}
       {showSubmitDialog && (

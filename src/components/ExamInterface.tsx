@@ -69,8 +69,6 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
   const [showWarning, setShowWarning] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const { canAccessPremium, loading: subscriptionLoading } = useSubscription();
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
 
   // Anti-cheat monitoring
   useEffect(() => {

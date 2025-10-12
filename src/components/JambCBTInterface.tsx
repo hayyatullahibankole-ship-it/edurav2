@@ -175,7 +175,7 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
     setIsSubmitting(true);
     const timeSpent = (duration * 60) - timeLeft;
     onSubmit(answers, timeSpent);
-  }, [answers, duration, timeLeft, onSubmit, hasPremiumAccess, isPremium, subscriptionLoading]);
+  }, [answers, duration, timeLeft, onSubmit, canAccessPremium, subscriptionLoading]);
 
   const togglePause = () => {
     setIsPaused(!isPaused);
