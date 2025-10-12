@@ -42,7 +42,7 @@ export default function ChallengeManager() {
   const [achievementForm, setAchievementForm] = useState({
     name: '',
     description: '',
-    category: 'performance',
+    category: 'milestone',
     badge_icon: '🏆',
     badge_color: 'gold',
     points_value: 50,
@@ -231,7 +231,7 @@ export default function ChallengeManager() {
     setAchievementForm({
       name: '',
       description: '',
-      category: 'performance',
+      category: 'milestone',
       badge_icon: '🏆',
       badge_color: 'gold',
       points_value: 50,
@@ -481,6 +481,24 @@ export default function ChallengeManager() {
                       onChange={(e) => setAchievementForm({ ...achievementForm, description: e.target.value })}
                       placeholder="Achievement description"
                     />
+                  </div>
+                  <div>
+                    <Label>Category</Label>
+                    <Select
+                      value={achievementForm.category}
+                      onValueChange={(value) => setAchievementForm({ ...achievementForm, category: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="speed">Speed</SelectItem>
+                        <SelectItem value="accuracy">Accuracy</SelectItem>
+                        <SelectItem value="consistency">Consistency</SelectItem>
+                        <SelectItem value="subject">Subject Mastery</SelectItem>
+                        <SelectItem value="milestone">Milestone</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
