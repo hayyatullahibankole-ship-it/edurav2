@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import eduraLogo from "@/assets/edura-logo.png";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,7 +40,8 @@ const Navbar = () => {
 
           {/* Desktop Auth Buttons */}
           {user ? (
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-2">
+              <NotificationBell />
               <Link to="/dashboard">
                 <Button variant="ghost">Dashboard</Button>
               </Link>
