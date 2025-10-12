@@ -5,7 +5,10 @@ import {
   validateSessionToken, 
   getSessionToken, 
   clearSessionToken, 
-  clearSessionTokenInDB 
+  clearSessionTokenInDB,
+  setSessionToken,
+  generateSessionToken,
+  storeSessionToken
 } from '@/utils/sessionManager';
 import { useToast } from '@/hooks/use-toast';
 
@@ -70,6 +73,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(session?.user ?? null);
           
           if (session?.user) {
+            // Ensure a session token exists on hard refreshes
+            const existing = getSessionToken();
+            if (!existing) {
+              const newToken = generateSessionToken();
+              storeSessionToken(newToken);
+              await setSessionToken(session.user.id, newToken);
+            }
             await fetchUserData(session.user.id);
           } else {
             setLoading(false);
@@ -165,12 +175,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Initialize session token on sign in or token refresh
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            const { generateSessionToken, storeSessionToken, setSessionToken } = await import('@/utils/sessionManager');
-            const newToken = generateSessionToken();
-            storeSessionToken(newToken);
-            await setSessionToken(session.user.id, newToken);
+          // Initialize session token on sign in, token refresh, or initial session (on hard refresh)
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+            const existing = getSessionToken();
+            if (!existing) {
+              const { generateSessionToken, storeSessionToken, setSessionToken } = await import('@/utils/sessionManager');
+              const newToken = generateSessionToken();
+              storeSessionToken(newToken);
+              await setSessionToken(session.user.id, newToken);
+            }
           }
           
           setLoading(true);
