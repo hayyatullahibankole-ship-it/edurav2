@@ -19,7 +19,11 @@ import {
   LogOut,
   MessageSquare,
   Sword,
-  GraduationCap
+  GraduationCap,
+  Zap,
+  Award,
+  Rocket,
+  Sparkles
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,6 +34,9 @@ import ProfileSettings from "@/components/ProfileSettings";
 import AccountSettings from "@/components/AccountSettings";
 import ScheduleTestModal from "@/components/ScheduleTestModal";
 import SubjectProgressCard from "@/components/SubjectProgressCard";
+import { StatCard } from "@/components/dashboard/StatCard";
+import { FeatureCard } from "@/components/dashboard/FeatureCard";
+import { QuickActionButton } from "@/components/dashboard/QuickActionButton";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -231,21 +238,31 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b border-border">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                Welcome back, {userProfile?.first_name || user?.email?.split('@')[0]}!
+      {/* Hero Header with Gradient */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="text-center md:text-left animate-fade-in-up">
+              <div className="flex items-center gap-2 mb-2 justify-center md:justify-start">
+                <Sparkles className="h-6 w-6 text-white animate-pulse" />
+                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                  {subscriptionLoading ? 'Loading...' : (isPremium ? '✨ Premium Member' : 'Free Member')}
+                </Badge>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">
+                Welcome back, {userProfile?.first_name || user?.email?.split('@')[0]}! 👋
               </h1>
-              <p className="text-muted-foreground">Continue your exam preparation journey</p>
+              <p className="text-white/90 text-lg">Ready to ace your exams? Let's continue your journey to success!</p>
             </div>
-            <div className="flex items-center gap-4">
-              <Badge className="bg-accent text-accent-foreground">
-                {subscriptionLoading ? 'Loading...' : (isPremium ? 'Premium Member' : 'Free Member')}
-              </Badge>
-            </div>
+            <Button 
+              variant="secondary" 
+              onClick={handleLogout}
+              className="flex items-center gap-2 shadow-lg"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
           </div>
         </div>
       </div>
@@ -278,52 +295,41 @@ const Dashboard = () => {
             </Button>
           </div>
 
-          <TabsContent value="dashboard" className="mt-8">
+          <TabsContent value="dashboard" className="mt-8 space-y-8">
             {/* Quick Stats */}
-            <div className="grid md:grid-cols-4 gap-6 mb-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Tests Taken</CardTitle>
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{loading ? "..." : stats.testsTaken}</div>
-                  <p className="text-xs text-muted-foreground">Total attempts</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Average Score</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{loading ? "..." : `${stats.averageScore}%`}</div>
-                  <p className="text-xs text-muted-foreground">Across all tests</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Study Hours</CardTitle>
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{loading ? "..." : `${stats.studyHours}h`}</div>
-                  <p className="text-xs text-muted-foreground">Time spent on tests</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Rank</CardTitle>
-                  <Trophy className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}</div>
-                  <p className="text-xs text-muted-foreground">Out of {stats.totalStudents} students</p>
-                </CardContent>
-              </Card>
+            <div className="grid md:grid-cols-4 gap-6 animate-scale-in">
+              <StatCard 
+                icon={Target}
+                label="Tests Taken"
+                value={loading ? "..." : stats.testsTaken}
+                subtext="Total attempts"
+                gradient="from-primary to-primary-glow"
+                iconColor="text-primary"
+              />
+              <StatCard 
+                icon={TrendingUp}
+                label="Average Score"
+                value={loading ? "..." : `${stats.averageScore}%`}
+                subtext="Across all tests"
+                gradient="from-success to-success-glow"
+                iconColor="text-success"
+              />
+              <StatCard 
+                icon={Clock}
+                label="Study Hours"
+                value={loading ? "..." : `${stats.studyHours}h`}
+                subtext="Time invested"
+                gradient="from-info to-secondary"
+                iconColor="text-info"
+              />
+              <StatCard 
+                icon={Trophy}
+                label="Rank"
+                value={loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}
+                subtext={`Out of ${stats.totalStudents} students`}
+                gradient="from-warning to-warning"
+                iconColor="text-warning"
+              />
             </div>
 
             <div className="grid lg:grid-cols-3 gap-8">
@@ -379,44 +385,42 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                {/* Learning Hub */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Learning Hub</CardTitle>
-                    <CardDescription>Explore study materials and connect with others</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <Link to="/study-hub">
-                        <Button variant="outline" className="w-full h-24 flex-col gap-2 hover:border-primary">
-                          <GraduationCap className="h-8 w-8 text-primary" />
-                          <div className="text-center">
-                            <div className="font-semibold">Study Hub</div>
-                            <div className="text-xs text-muted-foreground">Lessons & Resources</div>
-                          </div>
-                        </Button>
-                      </Link>
-                      <Link to="/forum">
-                        <Button variant="outline" className="w-full h-24 flex-col gap-2 hover:border-primary">
-                          <MessageSquare className="h-8 w-8 text-primary" />
-                          <div className="text-center">
-                            <div className="font-semibold">Ask Tutor</div>
-                            <div className="text-xs text-muted-foreground">Discussion Forum</div>
-                          </div>
-                        </Button>
-                      </Link>
-                      <Link to="/challenge-arena">
-                        <Button variant="outline" className="w-full h-24 flex-col gap-2 hover:border-primary">
-                          <Sword className="h-8 w-8 text-primary" />
-                          <div className="text-center">
-                            <div className="font-semibold">Challenge Arena</div>
-                            <div className="text-xs text-muted-foreground">Compete & Win</div>
-                          </div>
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
+                {/* Learning Hub - Mad Features! */}
+                <div>
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold flex items-center gap-2 mb-2">
+                      <Rocket className="h-6 w-6 text-primary animate-bounce-slow" />
+                      Unlock Your Potential
+                    </h2>
+                    <p className="text-muted-foreground">Explore our amazing features designed to help you succeed</p>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <FeatureCard 
+                      icon={GraduationCap}
+                      title="Study Hub"
+                      description="Access comprehensive lessons, video tutorials, and study materials curated by experts"
+                      href="/study-hub"
+                      gradient="from-primary to-secondary"
+                      badge="Popular"
+                    />
+                    <FeatureCard 
+                      icon={MessageSquare}
+                      title="Ask Tutor"
+                      description="Get instant help from tutors and peers. Ask questions, share knowledge, and learn together"
+                      href="/forum"
+                      gradient="from-success to-accent"
+                      badge="24/7"
+                    />
+                    <FeatureCard 
+                      icon={Sword}
+                      title="Challenge Arena"
+                      description="Compete with students nationwide! Earn points, climb leaderboards, and win amazing prizes"
+                      href="/challenge-arena"
+                      gradient="from-warning to-destructive"
+                      badge="New"
+                    />
+                  </div>
+                </div>
 
                 {/* Recent Test Results */}
                 <Card>
