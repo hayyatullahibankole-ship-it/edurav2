@@ -18,14 +18,11 @@ import {
   Target, 
   Settings, 
   Plus,
-  CheckCircle2,
-  Lock,
-  Users
+  CheckCircle2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { useSubscription } from "@/hooks/useSubscription";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -37,9 +34,7 @@ interface ScheduleTestModalProps {
 const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, defaultExamType }) => {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
-  const { isPremium, loading: subscriptionLoading } = useSubscription();
   const { user } = useAuth();
-  const allowPremium = !subscriptionLoading && (isPremium || user?.email === 'eduracbt@gmail.com');
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState<any[]>([]);
   const [availableQuestions, setAvailableQuestions] = useState<{ [key: string]: number }>({});
@@ -587,62 +582,6 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
     3: "Select Subjects & Difficulty",
     4: "Start & Confirm"
   };
-
-  // Show premium upgrade if user is not premium (with email override)
-  if (!allowPremium) {
-    return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          {children}
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5 text-primary" />
-              Premium Feature
-            </DialogTitle>
-            <DialogDescription>
-              Starting tests requires a premium subscription
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-6">
-            <Card className="border-primary/20 bg-primary/5">
-              <CardHeader className="text-center">
-                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                  <Target className="h-8 w-8 text-primary" />
-                </div>
-                <CardTitle>Upgrade to Premium</CardTitle>
-                <CardDescription>
-                  Unlock unlimited practice tests and advanced features
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-center space-y-4">
-                <div className="grid gap-2 text-sm">
-                  <div className="flex items-center gap-2 justify-center">
-                    <BookOpen className="h-4 w-4 text-primary" />
-                    Unlimited practice tests
-                  </div>
-                  <div className="flex items-center gap-2 justify-center">
-                    <Target className="h-4 w-4 text-primary" />
-                    Detailed performance analytics
-                  </div>
-                  <div className="flex items-center gap-2 justify-center">
-                    <Users className="h-4 w-4 text-primary" />
-                    Priority support
-                  </div>
-                </div>
-                <Link to="/payment?plan=premium">
-                  <Button className="w-full">
-                    Upgrade Now
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
