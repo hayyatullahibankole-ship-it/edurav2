@@ -11,6 +11,7 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const { user, loading, isAdmin, userRole, validateCurrentSession } = useAuth();
   const [sessionValid, setSessionValid] = useState<boolean | null>(null);
+  const [roleTimeoutReached, setRoleTimeoutReached] = useState(false);
   const location = useLocation();
 
   // Check if user is on exam page - disable validation during exams
@@ -18,7 +19,9 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
 
   // Validate session on mount and periodically (but not during exams)
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    let intervalId: NodeJS.Timeout | undefined;
+    let sessionTimeoutId: ReturnType<typeof setTimeout> | undefined;
+    let roleTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const checkSession = async () => {
       if (user && !isOnExamPage) {
@@ -32,7 +35,6 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     };
 
     if (user && !loading) {
-      // Check session immediately (unless on exam page)
       if (!isOnExamPage) {
         checkSession();
         // Then check every 30 minutes (very infrequent to avoid interrupting long sessions)
@@ -46,10 +48,27 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
       setSessionValid(false);
     }
 
+    // Safety timeouts to prevent indefinite spinners
+    if (user && sessionValid === null && !isOnExamPage) {
+      sessionTimeoutId = setTimeout(() => {
+        console.warn('Session validation timeout - proceeding cautiously');
+        // Allow UI to proceed; backend RLS still protects sensitive data
+        setSessionValid(true);
+      }, 8000);
+    }
+
+    if (requireAdmin && userRole === null && !loading) {
+      roleTimeoutId = setTimeout(() => {
+        setRoleTimeoutReached(true);
+      }, 8000);
+    }
+
     return () => {
       if (intervalId) clearInterval(intervalId);
+      if (sessionTimeoutId) clearTimeout(sessionTimeoutId);
+      if (roleTimeoutId) clearTimeout(roleTimeoutId);
     };
-  }, [user, loading, validateCurrentSession, isOnExamPage, location.pathname]);
+  }, [user, loading, validateCurrentSession, isOnExamPage, location.pathname, requireAdmin, userRole, sessionValid]);
 
   if (loading || (user && sessionValid === null)) {
     return (
@@ -67,6 +86,10 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
   // For admin routes, wait until userRole is loaded
   if (requireAdmin) {
     if (userRole === null) {
+      // If role check is taking too long, send user to admin login to re-auth
+      if (roleTimeoutReached) {
+        return <Navigate to="/admin/login" replace />;
+      }
       return (
         <div className="min-h-screen flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin" />

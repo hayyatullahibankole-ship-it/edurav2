@@ -68,12 +68,10 @@ export default function AdminPortal() {
   const [recentActivities, setRecentActivities] = useState([]);
 
   useEffect(() => {
-    if (!isAdmin) {
-      navigate('/admin/login');
-      return;
+    if (isAdmin) {
+      fetchAdminData();
     }
-    fetchAdminData();
-  }, [isAdmin, navigate]);
+  }, [isAdmin]);
 
   const fetchAdminData = async () => {
     try {
