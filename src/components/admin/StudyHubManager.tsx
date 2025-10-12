@@ -51,24 +51,40 @@ export default function StudyHubManager() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      console.log('Fetching study hub data...');
+      
       const [topicsRes, lessonsRes, subjectsRes] = await Promise.all([
         supabase.from('study_topics').select('*, subjects(name)').order('display_order'),
         supabase.from('study_lessons').select('*, study_topics(title)').order('display_order'),
         supabase.from('subjects').select('*').eq('is_active', true)
       ]);
 
-      if (topicsRes.error) throw topicsRes.error;
-      if (lessonsRes.error) throw lessonsRes.error;
-      if (subjectsRes.error) throw subjectsRes.error;
+      console.log('Topics response:', topicsRes);
+      console.log('Lessons response:', lessonsRes);
+      console.log('Subjects response:', subjectsRes);
 
+      if (topicsRes.error) {
+        console.error('Topics fetch error:', topicsRes.error);
+        throw topicsRes.error;
+      }
+      if (lessonsRes.error) {
+        console.error('Lessons fetch error:', lessonsRes.error);
+        throw lessonsRes.error;
+      }
+      if (subjectsRes.error) {
+        console.error('Subjects fetch error:', subjectsRes.error);
+        throw subjectsRes.error;
+      }
+
+      console.log(`Loaded ${topicsRes.data?.length || 0} topics, ${lessonsRes.data?.length || 0} lessons`);
       setTopics(topicsRes.data || []);
       setLessons(lessonsRes.data || []);
       setSubjects(subjectsRes.data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load study hub data',
+        description: error.message || 'Failed to load study hub data',
         variant: 'destructive'
       });
     } finally {
@@ -78,17 +94,28 @@ export default function StudyHubManager() {
 
   const handleCreateTopic = async () => {
     try {
-      const { error } = await supabase.from('study_topics').insert([topicForm]);
-      if (error) throw error;
+      console.log('Creating topic with data:', topicForm);
+      
+      const { data, error } = await supabase
+        .from('study_topics')
+        .insert([topicForm])
+        .select();
+      
+      if (error) {
+        console.error('Insert error:', error);
+        throw error;
+      }
 
+      console.log('Topic created successfully:', data);
       toast({ title: 'Success', description: 'Topic created successfully' });
       setIsTopicDialogOpen(false);
       resetTopicForm();
       fetchData();
     } catch (error: any) {
+      console.error('Full error object:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to create topic',
+        description: error.message || error.toString() || 'Failed to create topic',
         variant: 'destructive'
       });
     }
