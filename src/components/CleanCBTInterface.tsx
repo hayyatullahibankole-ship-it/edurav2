@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { MathRenderer } from '@/components/ui/math-renderer';
-import { Clock, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, Check, Lock, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CBTQuestion, CBTAnswers } from '@/hooks/useCBTExam';
+import { useSubscription } from '@/hooks/useSubscription';
+import { Link } from 'react-router-dom';
 
 interface CleanCBTInterfaceProps {
   questions: CBTQuestion[];
@@ -28,13 +30,15 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(duration * 60);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
 
   const currentQuestion = questions[currentIndex];
 
   // Timer
   useEffect(() => {
     if (timeLeft <= 0) {
-      handleSubmit();
+      handleSubmitClick();
       return;
     }
 
@@ -52,7 +56,15 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleSubmit = () => {
+  const handleSubmitClick = () => {
+    // Check subscription before allowing submission
+    if (!subscriptionLoading && !hasPremiumAccess && !isPremium) {
+      setShowSubmitDialog(false);
+      setShowUpgradeDialog(true);
+      return;
+    }
+    
+    // Allow submission for premium users
     const timeSpent = (duration * 60) - timeLeft;
     onSubmit(timeSpent);
   };
@@ -216,7 +228,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
         </Card>
       </div>
 
-      {/* Submit Dialog */}
+      {/* Submit Confirmation Dialog */}
       {showSubmitDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="w-full max-w-md mx-4">
@@ -254,11 +266,84 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
                   Continue
                 </Button>
                 <Button 
-                  onClick={handleSubmit}
+                  onClick={handleSubmitClick}
                   className="flex-1"
                 >
                   Submit
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Upgrade Required Dialog */}
+      {showUpgradeDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-lg">
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                <Lock className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Upgrade to Submit Test</CardTitle>
+              <p className="text-muted-foreground mt-2">
+                Subscribe now to submit your test and unlock detailed results, analytics, and more!
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Features */}
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                  <Crown className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold">Submit Tests & View Results</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Access detailed exam results with breakdowns
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                  <Crown className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold">Answer Review & Explanations</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Review all questions with detailed explanations
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                  <Crown className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold">Performance Analytics</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Track progress and identify areas for improvement
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowUpgradeDialog(false)}
+                  className="flex-1"
+                >
+                  Continue Practicing
+                </Button>
+                <Link to="/payment" className="flex-1">
+                  <Button className="w-full gap-2">
+                    <Crown className="h-5 w-5" />
+                    Upgrade Now
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Trust Badge */}
+              <div className="text-center pt-4 border-t text-sm text-muted-foreground">
+                ✓ Cancel anytime · ✓ Instant access · ✓ All exams included
               </div>
             </CardContent>
           </Card>

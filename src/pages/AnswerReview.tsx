@@ -6,15 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, BookOpen, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
-import { useSubscription } from '@/hooks/useSubscription';
-import { ResultsPaywall } from '@/components/ResultsPaywall';
 
 export default function AnswerReview() {
   const [searchParams] = useSearchParams();
   const attemptId = searchParams.get('attempt');
   const { questions, loading } = useCleanAnswerReview(attemptId);
   const [activeTab, setActiveTab] = useState<'all' | 'correct' | 'incorrect'>('all');
-  const { hasPremiumAccess, isPremium, loading: subscriptionLoading } = useSubscription();
 
   const getFilteredQuestions = () => {
     if (activeTab === 'all') return questions;
@@ -26,7 +23,7 @@ export default function AnswerReview() {
   const correctCount = questions.filter(q => q.isCorrect).length;
   const incorrectCount = questions.filter(q => !q.isCorrect).length;
 
-  if (loading || subscriptionLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -34,19 +31,6 @@ export default function AnswerReview() {
           <p className="text-lg">Loading answer review...</p>
         </div>
       </div>
-    );
-  }
-
-  // Paywall: require subscription to access detailed review
-  if (!hasPremiumAccess && !isPremium) {
-    const total = questions.length || 0;
-    const percentage = total ? (correctCount / total) * 100 : 0;
-    return (
-      <ResultsPaywall
-        percentage={percentage}
-        totalQuestions={total}
-        correctAnswers={correctCount}
-      />
     );
   }
 
