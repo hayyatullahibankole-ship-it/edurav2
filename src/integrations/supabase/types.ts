@@ -2182,6 +2182,24 @@ export type Database = {
           status: string
         }[]
       }
+      notify_all_users: {
+        Args: {
+          notification_message: string
+          notification_metadata?: Json
+          notification_title: string
+          notification_type?: string
+        }
+        Returns: undefined
+      }
+      notify_premium_users: {
+        Args: {
+          notification_message: string
+          notification_metadata?: Json
+          notification_title: string
+          notification_type?: string
+        }
+        Returns: undefined
+      }
       recompute_results_for_attempt: {
         Args: { attempt_uuid: string }
         Returns: {
