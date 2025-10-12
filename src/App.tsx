@@ -20,11 +20,15 @@ import Resources from "./pages/Resources";
 import Consultation from "./pages/Consultation";
 import Blog from "./pages/Blog";
 import Payment from "./pages/Payment";
+import NotFound from "./pages/NotFound";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import AnswerReview from "./pages/AnswerReview";
 import PaymentSuccess from "./pages/PaymentSuccess";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import NotFound from "./pages/NotFound";
+import StudyHub from "./pages/StudyHub";
+import StudyTopic from "./pages/StudyTopic";
+import Forum from "./pages/Forum";
+import ChallengeArena from "./pages/ChallengeArena";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +79,26 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/payment-success" element={<Layout showNavbar={false}><PaymentSuccess /></Layout>} />
+            <Route path="/study-hub" element={
+              <ProtectedRoute>
+                <StudyHub />
+              </ProtectedRoute>
+            } />
+            <Route path="/study-hub/topic/:topicId" element={
+              <ProtectedRoute>
+                <StudyTopic />
+              </ProtectedRoute>
+            } />
+            <Route path="/forum" element={
+              <ProtectedRoute>
+                <Forum />
+              </ProtectedRoute>
+            } />
+            <Route path="/challenge-arena" element={
+              <ProtectedRoute>
+                <ChallengeArena />
+              </ProtectedRoute>
+            } />
             <Route path="/blog" element={<Layout><Blog /></Layout>} />
             <Route path="/blog/:slug" element={<Layout><Blog /></Layout>} />
             <Route path="/terms" element={<Layout><Terms /></Layout>} />
