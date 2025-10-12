@@ -288,56 +288,71 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
       </div>
 
       <div className="max-w-7xl mx-auto p-4">
+        {/* Subject Navigation at Top */}
+        <div className="mb-4 flex flex-wrap gap-2">
+          {Object.keys(subjectQuestions).map((subject) => (
+            <Button
+              key={subject}
+              variant={currentSubject === subject ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => switchToSubject(subject)}
+              className="flex items-center gap-2"
+            >
+              {subject}
+              <Badge variant="secondary" className="text-xs">
+                {subjectQuestions[subject].questions.filter(q => answers.hasOwnProperty(q.id)).length}/
+                {subjectQuestions[subject].questions.length}
+              </Badge>
+            </Button>
+          ))}
+        </div>
+
+        {/* Anti-cheat warning */}
+        {tabSwitchCount > 0 && (
+          <Alert className="mb-4 border-warning">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Tab switches detected: {tabSwitchCount}
+              {tabSwitchCount >= 2 && " (Warning issued)"}
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid lg:grid-cols-4 gap-6">
-          {/* Subject Navigation Sidebar */}
+          {/* Question Navigator Sidebar */}
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <Users className="h-5 w-5 mr-2" />
-                  Subjects
-                </CardTitle>
+                <CardTitle className="text-sm">Question Navigator</CardTitle>
               </CardHeader>
-              <CardContent className="p-0">
-                <div className="space-y-1">
-                  {Object.keys(subjectQuestions).map((subject) => (
-                    <button
-                      key={subject}
-                      onClick={() => switchToSubject(subject)}
-                      className={cn(
-                        "w-full text-left p-3 hover:bg-muted/50 transition-colors border-l-4",
-                        currentSubject === subject 
-                          ? "border-primary bg-primary/5 font-medium" 
-                          : "border-transparent"
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">{subject}</span>
-                        <Badge variant={getSubjectProgress(subject) === 100 ? "default" : "outline"} className="text-xs">
-                          {subjectQuestions[subject].questions.filter(q => answers.hasOwnProperty(q.id)).length}/
-                          {subjectQuestions[subject].questions.length}
-                        </Badge>
-                      </div>
-                      <Progress 
-                        value={getSubjectProgress(subject)} 
-                        className="h-1 mt-1" 
-                      />
-                    </button>
-                  ))}
+              <CardContent>
+                <div className="grid grid-cols-5 gap-2">
+                  {subjectQuestions[currentSubject]?.questions.map((q, idx) => {
+                    const isAnswered = answers.hasOwnProperty(q.id);
+                    const isCurrent = idx === currentQuestionIndex;
+                    const isFlagged = flaggedQuestions.has(q.id);
+                    
+                    return (
+                      <Button
+                        key={q.id}
+                        variant={isCurrent ? 'default' : 'outline'}
+                        size="sm"
+                        className={cn(
+                          "aspect-square p-0 text-xs relative",
+                          isAnswered && !isCurrent && "border-green-500 bg-green-50 hover:bg-green-100"
+                        )}
+                        onClick={() => setCurrentQuestionIndex(idx)}
+                      >
+                        {isFlagged && (
+                          <Flag className="h-2 w-2 absolute -top-1 -right-1 fill-warning text-warning" />
+                        )}
+                        {idx + 1}
+                      </Button>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
-
-            {/* Anti-cheat warning */}
-            {tabSwitchCount > 0 && (
-              <Alert className="mt-4 border-warning">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  Tab switches detected: {tabSwitchCount}
-                  {tabSwitchCount >= 2 && " (Warning issued)"}
-                </AlertDescription>
-              </Alert>
-            )}
           </div>
 
           {/* Main Question Area */}
