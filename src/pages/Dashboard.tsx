@@ -38,6 +38,7 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { FeatureCard } from "@/components/dashboard/FeatureCard";
 import { QuickActionButton } from "@/components/dashboard/QuickActionButton";
 import { NotificationBell } from "@/components/NotificationBell";
+import OnboardingTour from "@/components/OnboardingTour";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -57,15 +58,38 @@ const Dashboard = () => {
   const [recentTests, setRecentTests] = useState([]);
   const [subjectProgress, setSubjectProgress] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     if (userProfile?.id) {
       fetchDashboardData();
+      checkOnboardingStatus();
     } else if (userProfile !== undefined) {
       // If userProfile is loaded but has no id, stop loading
       setLoading(false);
     }
   }, [userProfile]);
+
+  const checkOnboardingStatus = async () => {
+    if (!userProfile?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .select('onboarding_completed')
+        .eq('user_id', userProfile.id)
+        .single();
+
+      if (error) throw error;
+
+      // Show onboarding for new users who haven't completed it
+      if (!data?.onboarding_completed) {
+        setShowOnboarding(true);
+      }
+    } catch (error) {
+      console.error('Error checking onboarding status:', error);
+    }
+  };
 
   const fetchDashboardData = async () => {
     if (!userProfile?.id) return;
@@ -239,6 +263,10 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <OnboardingTour 
+        isOpen={showOnboarding} 
+        onComplete={() => setShowOnboarding(false)} 
+      />
       {/* Hero Header with Gradient */}
       <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />

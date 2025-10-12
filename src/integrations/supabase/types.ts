@@ -1545,6 +1545,8 @@ export type Database = {
           email_test_reminders: boolean
           id: string
           language: string
+          onboarding_completed: boolean
+          onboarding_completed_at: string | null
           profile_visibility: string
           push_notifications: boolean
           show_study_progress: boolean
@@ -1568,6 +1570,8 @@ export type Database = {
           email_test_reminders?: boolean
           id?: string
           language?: string
+          onboarding_completed?: boolean
+          onboarding_completed_at?: string | null
           profile_visibility?: string
           push_notifications?: boolean
           show_study_progress?: boolean
@@ -1591,6 +1595,8 @@ export type Database = {
           email_test_reminders?: boolean
           id?: string
           language?: string
+          onboarding_completed?: boolean
+          onboarding_completed_at?: string | null
           profile_visibility?: string
           push_notifications?: boolean
           show_study_progress?: boolean
