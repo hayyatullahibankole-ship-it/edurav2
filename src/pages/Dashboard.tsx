@@ -37,6 +37,7 @@ import SubjectProgressCard from "@/components/SubjectProgressCard";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { FeatureCard } from "@/components/dashboard/FeatureCard";
 import { QuickActionButton } from "@/components/dashboard/QuickActionButton";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -255,14 +256,17 @@ const Dashboard = () => {
               </h1>
               <p className="text-white/90 text-lg">Ready to ace your exams? Let's continue your journey to success!</p>
             </div>
-            <Button 
-              variant="secondary" 
-              onClick={handleLogout}
-              className="flex items-center gap-2 shadow-lg"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <Button 
+                variant="secondary" 
+                onClick={handleLogout}
+                className="flex items-center gap-2 shadow-lg"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
