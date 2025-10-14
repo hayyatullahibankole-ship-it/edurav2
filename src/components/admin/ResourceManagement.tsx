@@ -486,7 +486,7 @@ export default function ResourceManagement() {
   const filteredResources = resources.filter(resource => {
     const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          resource.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (Array.isArray(resource.tags) && resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
+                         (Array.isArray(resource.tags) && resource.tags.length > 0 && resource.tags.some(tag => tag?.toLowerCase().includes(searchTerm.toLowerCase())));
     const matchesSubject = selectedSubject === 'all' || resource.subject_id === selectedSubject;
     const matchesType = selectedType === 'all' || resource.file_type?.startsWith(selectedType);
     
@@ -754,7 +754,7 @@ data-testid="resource-management-container">
                   <Label htmlFor="tags">Tags (comma-separated)</Label>
                   <Input
                     id="tags"
-                    value={newResource.tags.join(', ')}
+                    value={Array.isArray(newResource.tags) ? newResource.tags.join(', ') : ''}
                     onChange={(e) => setNewResource({...newResource, tags: e.target.value.split(',').map(t => t.trim()).filter(t => t)})}
                     placeholder="study guide, revision, past questions"
                   />
@@ -932,7 +932,7 @@ data-testid="resource-management-container">
                           <span>{resource.download_count} downloads</span>
                           <span>{resource.view_count} views</span>
                           <span>{new Date(resource.created_at).toLocaleDateString()}</span>
-                          {resource.tags.length > 0 && (
+                          {resource.tags && Array.isArray(resource.tags) && resource.tags.length > 0 && (
                             <span>Tags: {resource.tags.slice(0, 3).join(', ')}</span>
                           )}
                         </div>
