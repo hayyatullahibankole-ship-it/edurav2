@@ -142,14 +142,20 @@ const handler = async (req: Request): Promise<Response> => {
             ctaUrl
           );
 
+          const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'Edura <onboarding@resend.dev>';
+          
           const emailResponse = await resend.emails.send({
-            from: "Edura <onboarding@resend.dev>",
+            from: fromEmail,
             to: [user.email],
             subject: subject,
             html: emailHtml,
           });
 
-          console.log(`Email sent to ${user.email}:`, emailResponse);
+          if (emailResponse.error) {
+            throw emailResponse.error;
+          }
+
+          console.log(`✅ Email sent successfully to ${user.email}`);
           results.sent++;
         } catch (emailError: any) {
           console.error(`Email failed for ${user.email}:`, emailError);
