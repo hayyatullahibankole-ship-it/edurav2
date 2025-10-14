@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface Notification {
   id: string;
@@ -20,11 +21,18 @@ interface Notification {
   type: string;
   is_read: boolean;
   created_at: string;
+  metadata?: {
+    post_id?: string;
+    subject_id?: string;
+    subject_name?: string;
+    exam_type?: string;
+  };
 }
 
 export function NotificationBell() {
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -72,8 +80,13 @@ export function NotificationBell() {
       return;
     }
 
-    setNotifications(data || []);
-    setUnreadCount(data?.filter(n => !n.is_read).length || 0);
+    const typedData = (data || []).map(n => ({
+      ...n,
+      metadata: n.metadata as Notification['metadata']
+    }));
+
+    setNotifications(typedData);
+    setUnreadCount(typedData.filter(n => !n.is_read).length);
   };
 
   const markAsRead = async (notificationId: string) => {
@@ -91,6 +104,18 @@ export function NotificationBell() {
       prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
     );
     setUnreadCount(prev => Math.max(0, prev - 1));
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.is_read) {
+      await markAsRead(notification.id);
+    }
+    
+    // Navigate to forum post if metadata contains post_id
+    if (notification.metadata?.post_id) {
+      setOpen(false);
+      navigate(`/forum/${notification.metadata.post_id}`);
+    }
   };
 
   const markAllAsRead = async () => {
@@ -174,7 +199,7 @@ export function NotificationBell() {
                   className={`p-4 hover:bg-muted/50 cursor-pointer transition-colors ${
                     !notification.is_read ? 'bg-primary/5' : ''
                   }`}
-                  onClick={() => !notification.is_read && markAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex gap-3">
                     <div className="text-2xl flex-shrink-0">
