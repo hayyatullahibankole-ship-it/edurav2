@@ -17,7 +17,10 @@ interface WelcomeEmailRequest {
   lastName?: string;
 }
 
-const createWelcomeEmailHtml = (firstName: string, dashboardUrl: string) => {
+const createWelcomeEmailHtml = (firstName: string, dashboardUrl: string, unsubscribeToken?: string) => {
+  const unsubscribeUrl = unsubscribeToken 
+    ? `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com')}/unsubscribe?token=${unsubscribeToken}`
+    : null;
   return `
     <!DOCTYPE html>
     <html>
@@ -111,6 +114,7 @@ const createWelcomeEmailHtml = (firstName: string, dashboardUrl: string) => {
           <div class="footer">
             <p>© ${new Date().getFullYear()} Edura. All rights reserved.</p>
             <p style="margin-top: 10px;">Need help? Contact us at support@edura.space</p>
+            ${unsubscribeUrl ? `<p style="margin-top: 15px;"><a href="${unsubscribeUrl}" style="color: #9ca3af; font-size: 11px; text-decoration: underline;">Unsubscribe from these emails</a></p>` : ''}
           </div>
         </div>
       </body>
@@ -125,13 +129,57 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { userId, email, firstName, lastName }: WelcomeEmailRequest = await req.json();
+    
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log(`Sending welcome email to ${email} (User ID: ${userId})`);
+    console.log(`📧 Sending welcome email to ${email} (User ID: ${userId})`);
+
+    // Check email rate limit
+    const { data: rateLimitOk } = await supabase.rpc('check_email_rate_limit', {
+      recipient_email: email
+    });
+    
+    if (!rateLimitOk) {
+      console.warn(`⚠️ Email rate limit exceeded for ${email}`);
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Rate limit exceeded'
+      }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Check if user wants welcome emails
+    const { data: canSend } = await supabase.rpc('can_send_email', {
+      target_user_id: userId,
+      email_type: 'welcome'
+    });
+    
+    if (canSend === false) {
+      console.log(`📭 User ${email} has unsubscribed from welcome emails`);
+      return new Response(JSON.stringify({ 
+        success: true,
+        message: 'User has unsubscribed'
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Get unsubscribe token
+    const { data: prefs } = await supabase
+      .from('email_preferences')
+      .select('unsubscribe_token')
+      .eq('user_id', userId)
+      .single();
 
     const displayName = firstName || 'there';
-    const dashboardUrl = `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com')}/dashboard` || 'https://edura.space/dashboard';
+    const dashboardUrl = `${supabaseUrl.replace('.supabase.co', '.lovableproject.com')}/dashboard` || 'https://edura.space/dashboard';
 
-    const emailHtml = createWelcomeEmailHtml(displayName, dashboardUrl);
+    const emailHtml = createWelcomeEmailHtml(displayName, dashboardUrl, prefs?.unsubscribe_token);
 
     const emailResponse = await resend.emails.send({
       from: fromEmail,
@@ -143,6 +191,25 @@ const handler = async (req: Request): Promise<Response> => {
     if (emailResponse.error) {
       throw emailResponse.error;
     }
+
+    // Log email delivery
+    await supabase.from('email_delivery_log').insert({
+      user_id: userId,
+      recipient_email: email,
+      email_type: 'welcome',
+      subject: "🎉 Welcome to Edura - Start Your Learning Journey!",
+      status: 'sent',
+      provider_message_id: emailResponse.data?.id,
+      sent_at: new Date().toISOString()
+    });
+
+    // Log for rate limiting
+    await supabase.rpc('log_security_event', {
+      action_type: 'EMAIL_SENT',
+      target_type: 'email',
+      target_id: userId,
+      details: { recipient: email, type: 'welcome' }
+    });
 
     console.log(`✅ Welcome email sent successfully to ${email}`);
 
@@ -158,6 +225,26 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("❌ Error in send-welcome-email function:", error);
+    
+    // Log failed delivery
+    try {
+      const { userId, email } = await req.json();
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      );
+      
+      await supabase.from('email_delivery_log').insert({
+        user_id: userId,
+        recipient_email: email,
+        email_type: 'welcome',
+        status: 'failed',
+        error_message: error.message
+      });
+    } catch (logError) {
+      console.error("Failed to log error:", logError);
+    }
+    
     return new Response(
       JSON.stringify({ 
         success: false,

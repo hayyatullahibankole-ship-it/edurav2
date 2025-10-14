@@ -89,6 +89,23 @@ export default function AuthForm() {
     setErrors({});
 
     try {
+      // Check if account is locked
+      const { data: isLocked } = await supabase.rpc('is_account_locked', {
+        user_email: formData.email
+      });
+
+      if (isLocked) {
+        setErrors({ 
+          general: 'Account temporarily locked due to multiple failed login attempts. Please try again in 15 minutes or reset your password.' 
+        });
+        toast({
+          title: 'Account Locked',
+          description: 'Too many failed login attempts. Please try again later.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       // Optional rate limit check (non-blocking if unavailable)
       let rateLimited = false;
       try {
@@ -123,6 +140,16 @@ export default function AuthForm() {
           email: loginData.email,
           password: loginData.password
         });
+
+        // Record login attempt (non-blocking)
+        try {
+          await supabase.rpc('record_login_attempt', {
+            user_email: loginData.email,
+            attempt_success: !error
+          });
+        } catch (recordError) {
+          console.warn('Failed to record login attempt:', recordError);
+        }
 
         if (error) {
           if (error.message.includes('Invalid login credentials')) {

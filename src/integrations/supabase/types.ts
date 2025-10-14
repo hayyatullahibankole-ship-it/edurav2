@@ -451,6 +451,97 @@ export type Database = {
           },
         ]
       }
+      email_delivery_log: {
+        Row: {
+          created_at: string
+          email_type: string
+          error_message: string | null
+          id: string
+          provider_message_id: string | null
+          recipient_email: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_type: string
+          error_message?: string | null
+          id?: string
+          provider_message_id?: string | null
+          recipient_email: string
+          sent_at?: string | null
+          status: string
+          subject?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          provider_message_id?: string | null
+          recipient_email?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_delivery_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          marketing_emails: boolean
+          product_updates: boolean
+          subscription_reminders: boolean
+          unsubscribe_token: string
+          updated_at: string
+          user_id: string
+          welcome_emails: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          marketing_emails?: boolean
+          product_updates?: boolean
+          subscription_reminders?: boolean
+          unsubscribe_token?: string
+          updated_at?: string
+          user_id: string
+          welcome_emails?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          marketing_emails?: boolean
+          product_updates?: boolean
+          subscription_reminders?: boolean
+          unsubscribe_token?: string
+          updated_at?: string
+          user_id?: string
+          welcome_emails?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exam_subjects: {
         Row: {
           display_order: number | null
@@ -765,6 +856,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      login_attempts: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          ip_address: unknown | null
+          success: boolean
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          ip_address?: unknown | null
+          success?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          ip_address?: unknown | null
+          success?: boolean
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -1796,6 +1911,10 @@ export type Database = {
           updated_count: number
         }[]
       }
+      can_send_email: {
+        Args: { email_type: string; target_user_id: string }
+        Returns: boolean
+      }
       can_view_full_pii: {
         Args: { target_user_id: string }
         Returns: boolean
@@ -1806,6 +1925,10 @@ export type Database = {
       }
       check_auth_rate_limit: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      check_email_rate_limit: {
+        Args: { recipient_email: string }
         Returns: boolean
       }
       check_rate_limit: {
@@ -2132,6 +2255,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_account_locked: {
+        Args: { user_email: string }
+        Returns: boolean
+      }
       is_admin: {
         Args: { _user_id: string }
         Returns: boolean
@@ -2220,6 +2347,14 @@ export type Database = {
           updated: boolean
           wrong: number
         }[]
+      }
+      record_login_attempt: {
+        Args: {
+          attempt_success: boolean
+          user_email: string
+          user_ip?: unknown
+        }
+        Returns: undefined
       }
       send_immediate_result_notification: {
         Args: { attempt_uuid: string }

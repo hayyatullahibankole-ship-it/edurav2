@@ -213,10 +213,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       const currentUser = user;
+      const currentSession = session;
       
-      // Clear session token from database
+      // Clear session token from database first
       if (currentUser) {
-        await clearSessionTokenInDB(currentUser.id);
+        try {
+          await clearSessionTokenInDB(currentUser.id);
+        } catch (dbError) {
+          console.error('Error clearing session token from DB:', dbError);
+          // Continue with logout even if DB clear fails
+        }
       }
       
       // Clear local session token
@@ -228,14 +234,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserProfile(null);
       setUserRole(null);
       
-      // Then sign out from Supabase
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error);
+      // Only attempt Supabase signout if we actually have a session
+      if (currentSession) {
+        const { error } = await supabase.auth.signOut();
+        
+        // Ignore "Auth session missing" error as it's expected during logout
+        if (error && error.message !== 'Auth session missing!') {
+          console.error('Error signing out:', error);
+        }
       }
     } catch (error) {
       console.error('Error during signOut:', error);
-      // Even if there's an error, clear local state
+      // Even if there's an error, ensure local state is cleared
       clearSessionToken();
       setUser(null);
       setSession(null);

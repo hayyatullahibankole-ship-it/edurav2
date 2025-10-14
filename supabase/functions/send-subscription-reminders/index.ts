@@ -10,7 +10,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const createReminderEmailHtml = (firstName: string, planName: string, endDate: string, renewalPrice: string, manageUrl: string) => {
+const createReminderEmailHtml = (firstName: string, planName: string, endDate: string, renewalPrice: string, manageUrl: string, unsubscribeToken?: string) => {
+  const unsubscribeUrl = unsubscribeToken 
+    ? `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com')}/unsubscribe?token=${unsubscribeToken}`
+    : null;
   return `
     <!DOCTYPE html>
     <html>
@@ -98,6 +101,7 @@ const createReminderEmailHtml = (firstName: string, planName: string, endDate: s
           <div class="footer">
             <p>© ${new Date().getFullYear()} Edura. All rights reserved.</p>
             <p style="margin-top: 10px;">Need help? Contact us at support@edura.space</p>
+            ${unsubscribeUrl ? `<p style="margin-top: 15px;"><a href="${unsubscribeUrl}" style="color: #9ca3af; font-size: 11px; text-decoration: underline;">Unsubscribe from these emails</a></p>` : ''}
           </div>
         </div>
       </body>
@@ -181,6 +185,36 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       try {
+        // Check email rate limit
+        const { data: rateLimitOk } = await supabase.rpc('check_email_rate_limit', {
+          recipient_email: user.email
+        });
+        
+        if (!rateLimitOk) {
+          console.warn(`⚠️ Rate limit exceeded for ${user.email}`);
+          results.failed++;
+          results.errors.push(`${user.email}: Rate limit exceeded`);
+          continue;
+        }
+
+        // Check if user wants subscription reminders
+        const { data: canSend } = await supabase.rpc('can_send_email', {
+          target_user_id: subscription.user_id,
+          email_type: 'subscription_reminder'
+        });
+        
+        if (canSend === false) {
+          console.log(`📭 User ${user.email} has unsubscribed from reminders`);
+          continue;
+        }
+
+        // Get unsubscribe token
+        const { data: prefs } = await supabase
+          .from('email_preferences')
+          .select('unsubscribe_token')
+          .eq('user_id', subscription.user_id)
+          .single();
+
         const firstName = user.first_name || 'there';
         const endDate = new Date(subscription.end_date).toLocaleDateString('en-US', { 
           year: 'numeric', 
@@ -195,7 +229,8 @@ const handler = async (req: Request): Promise<Response> => {
           plan.name,
           endDate,
           renewalPrice,
-          manageUrl
+          manageUrl,
+          prefs?.unsubscribe_token
         );
 
         const emailResponse = await resend.emails.send({
@@ -209,12 +244,44 @@ const handler = async (req: Request): Promise<Response> => {
           throw emailResponse.error;
         }
 
+        // Log successful delivery
+        await supabase.from('email_delivery_log').insert({
+          user_id: subscription.user_id,
+          recipient_email: user.email,
+          email_type: 'subscription_reminder',
+          subject: `📅 Your ${plan.name} Subscription Renewal Reminder`,
+          status: 'sent',
+          provider_message_id: emailResponse.data?.id,
+          sent_at: new Date().toISOString()
+        });
+
+        // Log for rate limiting
+        await supabase.rpc('log_security_event', {
+          action_type: 'EMAIL_SENT',
+          target_type: 'email',
+          target_id: subscription.user_id,
+          details: { recipient: user.email, type: 'subscription_reminder' }
+        });
+
         console.log(`✅ Reminder sent to ${user.email}`);
         results.sent++;
       } catch (emailError: any) {
         console.error(`❌ Failed to send to ${user.email}:`, emailError);
         results.failed++;
         results.errors.push(`${user.email}: ${emailError.message}`);
+        
+        // Log failed delivery
+        try {
+          await supabase.from('email_delivery_log').insert({
+            user_id: subscription.user_id,
+            recipient_email: user.email,
+            email_type: 'subscription_reminder',
+            status: 'failed',
+            error_message: emailError.message
+          });
+        } catch (logError) {
+          console.error("Failed to log error:", logError);
+        }
       }
     }
 
