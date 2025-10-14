@@ -1183,6 +1183,233 @@ export type Database = {
         }
         Relationships: []
       }
+      school_staff: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          permissions: Json | null
+          role: string | null
+          school_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          permissions?: Json | null
+          role?: string | null
+          school_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          permissions?: Json | null
+          role?: string | null
+          school_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_staff_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_staff_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_students: {
+        Row: {
+          class_level: string | null
+          created_at: string | null
+          enrollment_date: string | null
+          id: string
+          is_active: boolean | null
+          school_id: string
+          student_id: string | null
+          user_id: string
+        }
+        Insert: {
+          class_level?: string | null
+          created_at?: string | null
+          enrollment_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          school_id: string
+          student_id?: string | null
+          user_id: string
+        }
+        Update: {
+          class_level?: string | null
+          created_at?: string | null
+          enrollment_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          school_id?: string
+          student_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_students_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_students_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_subscriptions: {
+        Row: {
+          auto_renew: boolean | null
+          created_at: string | null
+          end_date: string | null
+          features: Json | null
+          id: string
+          payment_reference: string | null
+          plan_id: string
+          school_id: string
+          start_date: string | null
+          status: Database["public"]["Enums"]["subscription_status"] | null
+          student_seats: number | null
+          updated_at: string | null
+          used_seats: number | null
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          created_at?: string | null
+          end_date?: string | null
+          features?: Json | null
+          id?: string
+          payment_reference?: string | null
+          plan_id: string
+          school_id: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          student_seats?: number | null
+          updated_at?: string | null
+          used_seats?: number | null
+        }
+        Update: {
+          auto_renew?: boolean | null
+          created_at?: string | null
+          end_date?: string | null
+          features?: Json | null
+          id?: string
+          payment_reference?: string | null
+          plan_id?: string
+          school_id?: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          student_seats?: number | null
+          updated_at?: string | null
+          used_seats?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_subscriptions_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schools: {
+        Row: {
+          address: string | null
+          admin_user_id: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          description: string | null
+          email: string
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          max_students: number | null
+          name: string
+          phone: string | null
+          registration_number: string | null
+          slug: string
+          state: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          admin_user_id?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          email: string
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          max_students?: number | null
+          name: string
+          phone?: string | null
+          registration_number?: string | null
+          slug: string
+          state?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          admin_user_id?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          max_students?: number | null
+          name?: string
+          phone?: string | null
+          registration_number?: string | null
+          slug?: string
+          state?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schools_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       settings: {
         Row: {
           description: string | null
@@ -1900,6 +2127,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_student_to_school: {
+        Args: {
+          p_class_level?: string
+          p_school_id: string
+          p_student_id?: string
+          p_user_email: string
+        }
+        Returns: string
+      }
       admin_delete_all_questions: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -2093,6 +2329,16 @@ export type Database = {
           user_answer_index: number
         }[]
       }
+      get_school_subscription_status: {
+        Args: { target_school_id: string }
+        Returns: {
+          end_date: string
+          is_active: boolean
+          plan_name: string
+          student_seats: number
+          used_seats: number
+        }[]
+      }
       get_secure_user_data: {
         Args: { target_user_id: string }
         Returns: {
@@ -2261,6 +2507,10 @@ export type Database = {
       }
       is_admin: {
         Args: { _user_id: string }
+        Returns: boolean
+      }
+      is_school_admin: {
+        Args: { target_school_id: string; user_auth_id: string }
         Returns: boolean
       }
       is_session_valid: {
