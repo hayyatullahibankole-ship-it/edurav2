@@ -1109,6 +1109,7 @@ export type Database = {
           estimated_minutes: number | null
           id: string
           is_active: boolean | null
+          media_urls: Json | null
           summary: string | null
           title: string
           topic_id: string
@@ -1122,6 +1123,7 @@ export type Database = {
           estimated_minutes?: number | null
           id?: string
           is_active?: boolean | null
+          media_urls?: Json | null
           summary?: string | null
           title: string
           topic_id: string
@@ -1135,6 +1137,7 @@ export type Database = {
           estimated_minutes?: number | null
           id?: string
           is_active?: boolean | null
+          media_urls?: Json | null
           summary?: string | null
           title?: string
           topic_id?: string

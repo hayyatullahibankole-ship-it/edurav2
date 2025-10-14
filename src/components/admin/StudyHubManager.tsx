@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { GraduationCap, Plus, Edit, Trash2, BookOpen, FileText, Video } from 'lucide-react';
+import { GraduationCap, Plus, Edit, Trash2, BookOpen, FileText, Video, Image, Upload, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -41,8 +41,11 @@ export default function StudyHubManager() {
     summary: '',
     estimated_minutes: 15,
     display_order: 0,
-    is_active: true
+    is_active: true,
+    media_urls: [] as Array<{ url: string; type: 'image' | 'video'; caption?: string }>
   });
+
+  const [uploadingMedia, setUploadingMedia] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -249,8 +252,77 @@ export default function StudyHubManager() {
       summary: '',
       estimated_minutes: 15,
       display_order: 0,
-      is_active: true
+      is_active: true,
+      media_urls: []
     });
+  };
+
+  const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const validVideoTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+    
+    if (type === 'image' && !validImageTypes.includes(file.type)) {
+      toast({ title: 'Error', description: 'Please upload a valid image file (JPEG, PNG, GIF, WEBP)', variant: 'destructive' });
+      return;
+    }
+    
+    if (type === 'video' && !validVideoTypes.includes(file.type)) {
+      toast({ title: 'Error', description: 'Please upload a valid video file (MP4, WEBM, OGG)', variant: 'destructive' });
+      return;
+    }
+
+    // Validate file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      toast({ title: 'Error', description: 'File size must be less than 50MB', variant: 'destructive' });
+      return;
+    }
+
+    try {
+      setUploadingMedia(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const filePath = `lesson-media/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('resources')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('resources')
+        .getPublicUrl(filePath);
+
+      setLessonForm({
+        ...lessonForm,
+        media_urls: [...lessonForm.media_urls, { url: publicUrl, type, caption: '' }]
+      });
+
+      toast({ title: 'Success', description: `${type === 'image' ? 'Image' : 'Video'} uploaded successfully` });
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to upload file', variant: 'destructive' });
+    } finally {
+      setUploadingMedia(false);
+      event.target.value = '';
+    }
+  };
+
+  const removeMedia = (index: number) => {
+    setLessonForm({
+      ...lessonForm,
+      media_urls: lessonForm.media_urls.filter((_, i) => i !== index)
+    });
+  };
+
+  const updateMediaCaption = (index: number, caption: string) => {
+    const updatedMedia = [...lessonForm.media_urls];
+    updatedMedia[index] = { ...updatedMedia[index], caption };
+    setLessonForm({ ...lessonForm, media_urls: updatedMedia });
   };
 
   const editTopic = (topic: any) => {
@@ -276,7 +348,8 @@ export default function StudyHubManager() {
       summary: lesson.summary || '',
       estimated_minutes: lesson.estimated_minutes,
       display_order: lesson.display_order,
-      is_active: lesson.is_active
+      is_active: lesson.is_active,
+      media_urls: lesson.media_urls || []
     });
     setIsLessonDialogOpen(true);
   };
@@ -484,6 +557,98 @@ export default function StudyHubManager() {
                       rows={10}
                     />
                   </div>
+                  
+                  {/* Media Upload Section */}
+                  <div className="space-y-3">
+                    <Label>Images & Videos</Label>
+                    <div className="flex gap-2">
+                      <div>
+                        <Input
+                          id="image-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleMediaUpload(e, 'image')}
+                          disabled={uploadingMedia}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById('image-upload')?.click()}
+                          disabled={uploadingMedia}
+                        >
+                          <Image className="w-4 h-4 mr-2" />
+                          Upload Image
+                        </Button>
+                      </div>
+                      <div>
+                        <Input
+                          id="video-upload"
+                          type="file"
+                          accept="video/*"
+                          onChange={(e) => handleMediaUpload(e, 'video')}
+                          disabled={uploadingMedia}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById('video-upload')?.click()}
+                          disabled={uploadingMedia}
+                        >
+                          <Video className="w-4 h-4 mr-2" />
+                          Upload Video
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Display uploaded media */}
+                    {lessonForm.media_urls.length > 0 && (
+                      <div className="space-y-2 mt-3">
+                        {lessonForm.media_urls.map((media, index) => (
+                          <div key={index} className="flex items-start gap-2 p-3 border rounded-lg">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                {media.type === 'image' ? (
+                                  <Image className="w-4 h-4" />
+                                ) : (
+                                  <Video className="w-4 h-4" />
+                                )}
+                                <span className="text-sm font-medium">
+                                  {media.type === 'image' ? 'Image' : 'Video'} {index + 1}
+                                </span>
+                              </div>
+                              <Input
+                                placeholder="Add caption (optional)"
+                                value={media.caption || ''}
+                                onChange={(e) => updateMediaCaption(index, e.target.value)}
+                                className="text-sm"
+                              />
+                              <a
+                                href={media.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-muted-foreground hover:underline mt-1 inline-block"
+                              >
+                                View file
+                              </a>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeMedia(index)}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label>Estimated Minutes</Label>
