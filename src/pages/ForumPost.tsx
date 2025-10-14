@@ -45,6 +45,11 @@ interface ForumReply {
   };
 }
 
+interface UserVote {
+  post_id?: string;
+  reply_id?: string;
+}
+
 export default function ForumPost() {
   const { postId } = useParams();
   const navigate = useNavigate();
@@ -54,6 +59,7 @@ export default function ForumPost() {
   const [loading, setLoading] = useState(true);
   const [replyContent, setReplyContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [userVotes, setUserVotes] = useState<UserVote[]>([]);
 
   useEffect(() => {
     if (!user) {
@@ -68,7 +74,7 @@ export default function ForumPost() {
   const fetchPostData = async () => {
     try {
       setLoading(true);
-      const [postResp, repliesResp] = await Promise.all([
+      const [postResp, repliesResp, votesResp] = await Promise.all([
         supabase
           .from('forum_posts')
           .select('*, users(first_name, last_name), subjects(name)')
@@ -79,7 +85,12 @@ export default function ForumPost() {
           .select('*, users(first_name, last_name)')
           .eq('post_id', postId!)
           .order('is_answer', { ascending: false })
-          .order('created_at', { ascending: true })
+          .order('created_at', { ascending: true }),
+        supabase
+          .from('forum_votes')
+          .select('post_id, reply_id')
+          .eq('user_id', userProfile?.id!)
+          .or(`post_id.eq.${postId},reply_id.in.(select id from forum_replies where post_id=${postId})`)
       ]);
 
       if (postResp.error) throw postResp.error;
@@ -87,6 +98,7 @@ export default function ForumPost() {
 
       setPost(postResp.data);
       setReplies(repliesResp.data || []);
+      setUserVotes(votesResp.data || []);
     } catch (error) {
       console.error('Error fetching post:', error);
       toast.error('Failed to load post');
@@ -164,55 +176,100 @@ export default function ForumPost() {
   const handleUpvote = async (replyId?: string) => {
     if (!userProfile?.id) return;
 
+    const hasVoted = replyId
+      ? userVotes.some(v => v.reply_id === replyId)
+      : userVotes.some(v => v.post_id === postId);
+
     try {
-      if (replyId) {
-        await supabase.from('forum_votes').insert([{
-          user_id: userProfile.id,
-          reply_id: replyId,
-          vote_type: 'upvote'
-        }]);
-        
-        const { data: currentReply } = await supabase
-          .from('forum_replies')
-          .select('upvotes')
-          .eq('id', replyId)
-          .single();
-        
-        if (currentReply) {
-          await supabase
+      if (hasVoted) {
+        // Remove vote
+        const { error } = await supabase
+          .from('forum_votes')
+          .delete()
+          .eq('user_id', userProfile.id)
+          .eq(replyId ? 'reply_id' : 'post_id', replyId || postId!);
+
+        if (error) throw error;
+
+        // Update count
+        if (replyId) {
+          const { data: currentReply } = await supabase
             .from('forum_replies')
-            .update({ upvotes: (currentReply.upvotes || 0) + 1 })
-            .eq('id', replyId);
-        }
-      } else {
-        await supabase.from('forum_votes').insert([{
-          user_id: userProfile.id,
-          post_id: postId!,
-          vote_type: 'upvote'
-        }]);
-        
-        const { data: currentPost } = await supabase
-          .from('forum_posts')
-          .select('upvotes')
-          .eq('id', postId!)
-          .single();
-        
-        if (currentPost) {
-          await supabase
+            .select('upvotes')
+            .eq('id', replyId)
+            .single();
+          
+          if (currentReply) {
+            await supabase
+              .from('forum_replies')
+              .update({ upvotes: Math.max(0, (currentReply.upvotes || 0) - 1) })
+              .eq('id', replyId);
+          }
+        } else {
+          const { data: currentPost } = await supabase
             .from('forum_posts')
-            .update({ upvotes: (currentPost.upvotes || 0) + 1 })
-            .eq('id', postId!);
+            .select('upvotes')
+            .eq('id', postId!)
+            .single();
+          
+          if (currentPost) {
+            await supabase
+              .from('forum_posts')
+              .update({ upvotes: Math.max(0, (currentPost.upvotes || 0) - 1) })
+              .eq('id', postId!);
+          }
         }
+
+        toast.success('Vote removed');
+      } else {
+        // Add vote
+        if (replyId) {
+          await supabase.from('forum_votes').insert([{
+            user_id: userProfile.id,
+            reply_id: replyId,
+            vote_type: 'upvote'
+          }]);
+          
+          const { data: currentReply } = await supabase
+            .from('forum_replies')
+            .select('upvotes')
+            .eq('id', replyId)
+            .single();
+          
+          if (currentReply) {
+            await supabase
+              .from('forum_replies')
+              .update({ upvotes: (currentReply.upvotes || 0) + 1 })
+              .eq('id', replyId);
+          }
+        } else {
+          await supabase.from('forum_votes').insert([{
+            user_id: userProfile.id,
+            post_id: postId!,
+            vote_type: 'upvote'
+          }]);
+          
+          const { data: currentPost } = await supabase
+            .from('forum_posts')
+            .select('upvotes')
+            .eq('id', postId!)
+            .single();
+          
+          if (currentPost) {
+            await supabase
+              .from('forum_posts')
+              .update({ upvotes: (currentPost.upvotes || 0) + 1 })
+              .eq('id', postId!);
+          }
+        }
+
+        toast.success('Upvoted!');
       }
 
-      toast.success('Upvoted!');
       fetchPostData();
     } catch (error: any) {
-      if (error.code === '23505') {
-        toast.error('You already upvoted this');
-      } else {
-        toast.error('Failed to upvote');
-      }
+      console.error('Vote error:', error);
+      toast.error('Failed to vote');
     }
   };
 
@@ -297,9 +354,15 @@ export default function ForumPost() {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleUpvote()}
-                  className="gap-1"
+                  className={`gap-1 ${
+                    userVotes.some(v => v.post_id === postId) 
+                      ? 'text-primary bg-primary/10' 
+                      : ''
+                  }`}
                 >
-                  <ThumbsUp className="h-4 w-4" />
+                  <ThumbsUp className={`h-4 w-4 ${
+                    userVotes.some(v => v.post_id === postId) ? 'fill-current' : ''
+                  }`} />
                   {post.upvotes}
                 </Button>
                 <div className="flex items-center gap-1 text-muted-foreground text-sm">
@@ -349,9 +412,15 @@ export default function ForumPost() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleUpvote(reply.id)}
-                      className="gap-1 h-8"
+                      className={`gap-1 h-8 ${
+                        userVotes.some(v => v.reply_id === reply.id)
+                          ? 'text-primary bg-primary/10'
+                          : ''
+                      }`}
                     >
-                      <ThumbsUp className="h-3 w-3" />
+                      <ThumbsUp className={`h-3 w-3 ${
+                        userVotes.some(v => v.reply_id === reply.id) ? 'fill-current' : ''
+                      }`} />
                       {reply.upvotes}
                     </Button>
                   </div>
