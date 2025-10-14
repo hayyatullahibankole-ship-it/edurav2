@@ -11,14 +11,80 @@ const corsHeaders = {
 };
 
 interface MessageRequest {
-  userId: string;
+  userIds: string[];
   subject: string;
   message: string;
   type: 'email' | 'whatsapp' | 'both';
+  imageUrl?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  isBulk?: boolean;
 }
 
+const createEmailHtml = (
+  firstName: string, 
+  message: string, 
+  imageUrl?: string,
+  ctaText?: string,
+  ctaUrl?: string
+) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+          .container { max-width: 600px; margin: 0 auto; }
+          .header { background: linear-gradient(135deg, #1e40af 0%, #059669 100%); padding: 40px 30px; text-align: center; }
+          .header h1 { color: white; margin: 0; font-size: 32px; }
+          .content { padding: 40px 30px; background-color: #f9fafb; }
+          .content h2 { color: #111827; margin: 0 0 20px 0; font-size: 24px; }
+          .message-box { background: white; padding: 24px; border-radius: 12px; margin-bottom: 20px; line-height: 1.6; color: #374151; }
+          .image-container { text-align: center; margin: 20px 0; }
+          .image-container img { max-width: 100%; height: auto; border-radius: 8px; }
+          .cta-button { display: inline-block; background: linear-gradient(135deg, #1e40af 0%, #059669 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .cta-button:hover { opacity: 0.9; }
+          .footer-note { color: #6b7280; font-size: 14px; margin-top: 20px; }
+          .footer { background-color: #111827; padding: 24px 30px; text-align: center; }
+          .footer p { color: #9ca3af; font-size: 12px; margin: 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Edura</h1>
+          </div>
+          <div class="content">
+            <h2>Hello ${firstName},</h2>
+            <div class="message-box">
+              ${message.replace(/\n/g, '<br>')}
+            </div>
+            ${imageUrl ? `
+              <div class="image-container">
+                <img src="${imageUrl}" alt="Message attachment" />
+              </div>
+            ` : ''}
+            ${ctaText && ctaUrl ? `
+              <div style="text-align: center;">
+                <a href="${ctaUrl}" class="cta-button">${ctaText}</a>
+              </div>
+            ` : ''}
+            <p class="footer-note">
+              This is an official communication from the Edura team.
+            </p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} Edura. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+};
+
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -28,80 +94,74 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { userId, subject, message, type }: MessageRequest = await req.json();
+    const { 
+      userIds, 
+      subject, 
+      message, 
+      type, 
+      imageUrl, 
+      ctaText, 
+      ctaUrl,
+      isBulk 
+    }: MessageRequest = await req.json();
 
-    console.log('Sending message to user:', userId, 'Type:', type);
+    console.log(`Sending ${isBulk ? 'bulk' : 'individual'} message to ${userIds.length} user(s)`);
 
-    // Get user info
-    const { data: userData, error: userError } = await supabase
+    // Get users info
+    const { data: usersData, error: usersError } = await supabase
       .from('users')
-      .select('first_name, last_name, email, phone')
-      .eq('id', userId)
-      .single();
+      .select('id, first_name, last_name, email, phone')
+      .in('id', userIds);
 
-    if (userError || !userData) {
-      throw new Error('User not found');
+    if (usersError || !usersData) {
+      throw new Error('Users not found');
     }
 
-    const results: any = {
-      email: null,
-      whatsapp: null
+    const results = {
+      total: userIds.length,
+      sent: 0,
+      failed: 0,
+      errors: [] as string[]
     };
 
-    // Send Email
+    // Send emails
     if (type === 'email' || type === 'both') {
-      try {
-        const emailResponse = await resend.emails.send({
-          from: "Edura <onboarding@resend.dev>",
-          to: [userData.email],
-          subject: subject,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <div style="background: linear-gradient(135deg, #1e40af 0%, #059669 100%); padding: 30px; text-align: center;">
-                <h1 style="color: white; margin: 0;">Edura</h1>
-              </div>
-              <div style="padding: 30px; background-color: #f9fafb;">
-                <h2 style="color: #111827; margin-bottom: 20px;">Hello ${userData.first_name},</h2>
-                <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                  ${message.replace(/\n/g, '<br>')}
-                </div>
-                <p style="color: #6b7280; font-size: 14px;">
-                  This is an official communication from the Edura team.
-                </p>
-              </div>
-              <div style="background-color: #111827; padding: 20px; text-align: center;">
-                <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                  © 2025 Edura. All rights reserved.
-                </p>
-              </div>
-            </div>
-          `,
-        });
+      for (const user of usersData) {
+        if (!user.email) {
+          results.failed++;
+          results.errors.push(`${user.first_name} ${user.last_name}: No email address`);
+          continue;
+        }
 
-        console.log("Email sent successfully:", emailResponse);
-        results.email = { success: true, response: emailResponse };
-      } catch (emailError: any) {
-        console.error("Email sending failed:", emailError);
-        results.email = { success: false, error: emailError.message };
+        try {
+          const emailHtml = createEmailHtml(
+            user.first_name,
+            message,
+            imageUrl,
+            ctaText,
+            ctaUrl
+          );
+
+          const emailResponse = await resend.emails.send({
+            from: "Edura <onboarding@resend.dev>",
+            to: [user.email],
+            subject: subject,
+            html: emailHtml,
+          });
+
+          console.log(`Email sent to ${user.email}:`, emailResponse);
+          results.sent++;
+        } catch (emailError: any) {
+          console.error(`Email failed for ${user.email}:`, emailError);
+          results.failed++;
+          results.errors.push(`${user.email}: ${emailError.message}`);
+        }
       }
     }
 
-    // Send WhatsApp (placeholder - requires WhatsApp Business API)
+    // WhatsApp handling (placeholder)
     if (type === 'whatsapp' || type === 'both') {
-      if (userData.phone) {
-        // Note: You'll need to implement actual WhatsApp Business API integration
-        // For now, this is a placeholder
-        console.log('WhatsApp message would be sent to:', userData.phone);
-        results.whatsapp = { 
-          success: false, 
-          error: 'WhatsApp Business API not configured. Contact support to enable.' 
-        };
-      } else {
-        results.whatsapp = { 
-          success: false, 
-          error: 'User has no phone number on file' 
-        };
-      }
+      console.log('WhatsApp sending not yet implemented');
     }
 
     return new Response(JSON.stringify(results), {

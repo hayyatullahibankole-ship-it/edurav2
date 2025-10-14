@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Mail, MessageCircle, Send, Users, Search, Phone } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Mail, MessageCircle, Send, Users, Search, Phone, Image, X, Link as LinkIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -25,19 +26,66 @@ export default function CustomerCommunications({ users }: CustomerCommunications
   const [messageForm, setMessageForm] = useState({
     subject: '',
     message: '',
-    type: 'email' as 'email' | 'whatsapp' | 'both'
+    type: 'email' as 'email' | 'whatsapp' | 'both',
+    imageUrl: '',
+    ctaText: '',
+    ctaUrl: ''
   });
+
+  const [bulkMode, setBulkMode] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const filteredUsers = users.filter(user => 
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Error', description: 'Please upload an image file', variant: 'destructive' });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Error', description: 'Image must be less than 5MB', variant: 'destructive' });
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const filePath = `email-images/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('resources')
+        .upload(filePath, file, { upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('resources')
+        .getPublicUrl(filePath);
+
+      setMessageForm({ ...messageForm, imageUrl: publicUrl });
+      toast({ title: 'Success', description: 'Image uploaded successfully' });
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({ title: 'Error', description: error.message || 'Failed to upload image', variant: 'destructive' });
+    } finally {
+      setUploadingImage(false);
+      event.target.value = '';
+    }
+  };
+
   const handleSendMessage = async () => {
-    if (!selectedUser) {
+    if (!bulkMode && !selectedUser) {
       toast({
         title: "Error",
-        description: "Please select a user",
+        description: "Please select a user or enable bulk mode",
         variant: "destructive"
       });
       return;
@@ -52,43 +100,43 @@ export default function CustomerCommunications({ users }: CustomerCommunications
       return;
     }
 
+    const recipientIds = bulkMode 
+      ? users.filter(u => u.email).map(u => u.id)
+      : [selectedUser.id];
+
+    if (bulkMode && !confirm(`Send this message to ${recipientIds.length} customers?`)) {
+      return;
+    }
+
     try {
       setSending(true);
       
       const { data, error } = await supabase.functions.invoke('send-customer-message', {
         body: {
-          userId: selectedUser.id,
+          userIds: recipientIds,
           subject: messageForm.subject,
           message: messageForm.message,
-          type: messageForm.type
+          type: messageForm.type,
+          imageUrl: messageForm.imageUrl || undefined,
+          ctaText: messageForm.ctaText || undefined,
+          ctaUrl: messageForm.ctaUrl || undefined,
+          isBulk: bulkMode
         }
       });
 
       if (error) throw error;
 
-      // Check results
-      const results = data as { email?: any; whatsapp?: any };
-      let successCount = 0;
-      let failureMessages = [];
-
-      if (results.email?.success) successCount++;
-      else if (results.email) failureMessages.push(`Email: ${results.email.error}`);
-
-      if (results.whatsapp?.success) successCount++;
-      else if (results.whatsapp) failureMessages.push(`WhatsApp: ${results.whatsapp.error}`);
-
-      if (successCount > 0) {
-        toast({
-          title: "Success",
-          description: `Message sent successfully via ${successCount} channel${successCount > 1 ? 's' : ''}${failureMessages.length > 0 ? '. ' + failureMessages.join(', ') : ''}`,
-        });
-        
-        setIsComposing(false);
-        setMessageForm({ subject: '', message: '', type: 'email' });
-        setSelectedUser(null);
-      } else {
-        throw new Error(failureMessages.join(', ') || 'Failed to send message');
-      }
+      toast({
+        title: "Success",
+        description: bulkMode 
+          ? `Message sent to ${recipientIds.length} customers successfully`
+          : "Message sent successfully"
+      });
+      
+      setIsComposing(false);
+      setMessageForm({ subject: '', message: '', type: 'email', imageUrl: '', ctaText: '', ctaUrl: '' });
+      setSelectedUser(null);
+      setBulkMode(false);
       
     } catch (error: any) {
       console.error('Error sending message:', error);
@@ -121,27 +169,43 @@ export default function CustomerCommunications({ users }: CustomerCommunications
               <DialogTitle>Send Message to Customer</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="recipient">Recipient</Label>
-                <Select 
-                  value={selectedUser?.id || ''} 
-                  onValueChange={(value) => {
-                    const user = users.find(u => u.id === value);
-                    setSelectedUser(user);
+              <div className="flex items-center space-x-2 p-3 bg-muted rounded-lg">
+                <Checkbox 
+                  id="bulkMode" 
+                  checked={bulkMode}
+                  onCheckedChange={(checked) => {
+                    setBulkMode(checked as boolean);
+                    if (checked) setSelectedUser(null);
                   }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a user" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.first_name} {user.last_name} - {user.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
+                <Label htmlFor="bulkMode" className="cursor-pointer">
+                  Send to all customers ({users.filter(u => u.email).length} recipients)
+                </Label>
               </div>
+
+              {!bulkMode && (
+                <div>
+                  <Label htmlFor="recipient">Recipient</Label>
+                  <Select 
+                    value={selectedUser?.id || ''} 
+                    onValueChange={(value) => {
+                      const user = users.find(u => u.id === value);
+                      setSelectedUser(user);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a user" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.first_name} {user.last_name} - {user.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div>
                 <Label htmlFor="messageType">Channel</Label>
@@ -198,13 +262,81 @@ export default function CustomerCommunications({ users }: CustomerCommunications
                 />
               </div>
 
+              {/* Image Upload */}
+              <div>
+                <Label>Attach Image (Optional)</Label>
+                <div className="mt-2">
+                  {messageForm.imageUrl ? (
+                    <div className="relative inline-block">
+                      <img 
+                        src={messageForm.imageUrl} 
+                        alt="Attached" 
+                        className="h-32 w-auto rounded-lg border"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6"
+                        onClick={() => setMessageForm({...messageForm, imageUrl: ''})}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Input
+                        id="image-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImage}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('image-upload')?.click()}
+                        disabled={uploadingImage}
+                      >
+                        <Image className="w-4 h-4 mr-2" />
+                        {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* CTA Button */}
+              <div className="space-y-2">
+                <Label>Call-to-Action Button (Optional)</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    placeholder="Button text (e.g., View Courses)"
+                    value={messageForm.ctaText}
+                    onChange={(e) => setMessageForm({...messageForm, ctaText: e.target.value})}
+                  />
+                  <Input
+                    placeholder="Button URL"
+                    value={messageForm.ctaUrl}
+                    onChange={(e) => setMessageForm({...messageForm, ctaUrl: e.target.value})}
+                  />
+                </div>
+                {messageForm.ctaText && messageForm.ctaUrl && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <LinkIcon className="w-3 h-3" />
+                    <span>Button will link to: {messageForm.ctaUrl}</span>
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-3 pt-4">
                 <Button 
                   onClick={handleSendMessage} 
-                  disabled={sending || !selectedUser}
+                  disabled={sending || (!bulkMode && !selectedUser)}
                   className="flex-1"
                 >
-                  {sending ? 'Sending...' : 'Send Message'}
+                  {sending ? 'Sending...' : bulkMode ? `Send to ${users.filter(u => u.email).length} Customers` : 'Send Message'}
                 </Button>
                 <Button 
                   variant="outline" 
