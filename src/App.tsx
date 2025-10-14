@@ -32,6 +32,8 @@ import Forum from "./pages/Forum";
 import ForumNewPost from "./pages/ForumNewPost";
 import ForumPost from "./pages/ForumPost";
 import ChallengeArena from "./pages/ChallengeArena";
+import ChallengeDetail from "./pages/ChallengeDetail";
+import SchoolRegistration from "./pages/SchoolRegistration";
 
 const queryClient = new QueryClient();
 
@@ -117,6 +119,12 @@ const App = () => (
                 <ChallengeArena />
               </ProtectedRoute>
             } />
+            <Route path="/challenge/:challengeId" element={
+              <ProtectedRoute>
+                <ChallengeDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/school-registration" element={<Layout><SchoolRegistration /></Layout>} />
             <Route path="/blog" element={<Layout><Blog /></Layout>} />
             <Route path="/blog/:slug" element={<Layout><Blog /></Layout>} />
             <Route path="/terms" element={<Layout><Terms /></Layout>} />
