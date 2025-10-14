@@ -497,8 +497,23 @@ export default function ResourceManagement() {
     !brokenResources.some(broken => broken.id === resource.id)
   );
 
+  // Early return with loading state if data is still loading on first mount
+  if (loading && resources.length === 0 && subjects.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-slate-400">Loading resources...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6"
+data-testid="resource-management-container">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">Resource Management</h2>
