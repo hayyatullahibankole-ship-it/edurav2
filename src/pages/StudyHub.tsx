@@ -4,8 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Book, ChevronRight } from 'lucide-react';
+import { Book, ChevronRight, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import Layout from '@/components/Layout';
 
@@ -35,6 +36,18 @@ export default function StudyHub() {
 
     if (canAccessPremium) {
       fetchTopics();
+
+      // Subscribe to real-time updates
+      const topicsChannel = supabase
+        .channel('study-topics-updates')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'study_topics' }, () => {
+          fetchTopics();
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(topicsChannel);
+      };
     }
   }, [canAccessPremium, subLoading, selectedExamType, navigate]);
 
@@ -78,6 +91,16 @@ export default function StudyHub() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-4 sm:py-8">
+        <div className="mb-6">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/dashboard')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </div>
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">📚 Study Companion Hub</h1>
           <p className="text-sm sm:text-base text-muted-foreground">Master topics before taking your CBT tests</p>

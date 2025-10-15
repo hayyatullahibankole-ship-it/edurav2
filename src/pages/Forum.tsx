@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { MessageSquare, ThumbsUp, Eye, Pin, CheckCircle2, Search } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Eye, Pin, CheckCircle2, Search, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import Layout from '@/components/Layout';
 import { formatDistanceToNow } from 'date-fns';
@@ -45,6 +45,18 @@ export default function Forum() {
       return;
     }
     fetchPosts();
+
+    // Subscribe to real-time updates
+    const postsChannel = supabase
+      .channel('forum-posts-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'forum_posts' }, () => {
+        fetchPosts();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(postsChannel);
+    };
   }, [user, navigate]);
 
   const fetchPosts = async () => {
@@ -89,6 +101,16 @@ export default function Forum() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-4 sm:py-8">
+        <div className="mb-6">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/dashboard')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </div>
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex-1">

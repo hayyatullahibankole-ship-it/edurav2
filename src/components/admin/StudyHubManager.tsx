@@ -49,6 +49,26 @@ export default function StudyHubManager() {
 
   useEffect(() => {
     fetchData();
+
+    // Subscribe to real-time updates
+    const topicsChannel = supabase
+      .channel('study-topics-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'study_topics' }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    const lessonsChannel = supabase
+      .channel('study-lessons-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'study_lessons' }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(topicsChannel);
+      supabase.removeChannel(lessonsChannel);
+    };
   }, []);
 
   const fetchData = async () => {

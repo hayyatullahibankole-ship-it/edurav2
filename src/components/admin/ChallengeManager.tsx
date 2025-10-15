@@ -52,6 +52,26 @@ export default function ChallengeManager() {
 
   useEffect(() => {
     fetchData();
+
+    // Subscribe to real-time updates
+    const challengesChannel = supabase
+      .channel('challenges-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    const achievementsChannel = supabase
+      .channel('achievements-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'achievements' }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(challengesChannel);
+      supabase.removeChannel(achievementsChannel);
+    };
   }, []);
 
   const fetchData = async () => {

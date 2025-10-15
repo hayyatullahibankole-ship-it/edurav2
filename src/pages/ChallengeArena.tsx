@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, Zap, Clock, Target, Award, TrendingUp } from 'lucide-react';
+import { Trophy, Zap, Clock, Target, Award, TrendingUp, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import Layout from '@/components/Layout';
 import { formatDistanceToNow } from 'date-fns';
@@ -54,6 +54,18 @@ export default function ChallengeArena() {
     if (isEnterprise) {
       fetchChallenges();
       fetchLeaderboard();
+
+      // Subscribe to real-time updates
+      const challengesChannel = supabase
+        .channel('challenges-updates')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, () => {
+          fetchChallenges();
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(challengesChannel);
+      };
     }
   }, [isEnterprise, subLoading, selectedTab, navigate]);
 
@@ -117,6 +129,16 @@ export default function ChallengeArena() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-4 sm:py-8">
+        <div className="mb-6">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/dashboard')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </div>
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">🏆 Challenge Arena</h1>
           <p className="text-sm sm:text-base text-muted-foreground">Compete, improve, and climb the leaderboard</p>
