@@ -173,7 +173,10 @@ export default function ForumPost() {
     }
   };
 
-  const handleUpvote = async (replyId?: string) => {
+  const handleUpvote = async (e: React.MouseEvent, replyId?: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!userProfile?.id) return;
 
     const hasVoted = replyId
@@ -353,7 +356,7 @@ export default function ForumPost() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleUpvote()}
+                  onClick={(e) => handleUpvote(e)}
                   className={`gap-1 ${
                     userVotes.some(v => v.post_id === postId) 
                       ? 'text-primary bg-primary/10' 
@@ -411,7 +414,7 @@ export default function ForumPost() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleUpvote(reply.id)}
+                      onClick={(e) => handleUpvote(e, reply.id)}
                       className={`gap-1 h-8 ${
                         userVotes.some(v => v.reply_id === reply.id)
                           ? 'text-primary bg-primary/10'

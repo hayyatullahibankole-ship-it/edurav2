@@ -17,6 +17,7 @@ interface Lesson {
   summary: string;
   estimated_minutes: number;
   topic_id: string;
+  media_urls?: any;
   study_topics: {
     title: string;
     subjects: { name: string };
@@ -166,8 +167,47 @@ export default function LessonView() {
               Lesson Content
             </CardTitle>
           </CardHeader>
-          <CardContent className="prose dark:prose-invert max-w-none">
+          <CardContent className="prose dark:prose-invert max-w-none space-y-4">
             <MathRenderer content={lesson.content} />
+            
+            {/* Display media in the order they were uploaded */}
+            {lesson.media_urls && Array.isArray(lesson.media_urls) && lesson.media_urls.length > 0 && (
+              <div className="space-y-4 mt-6">
+                {lesson.media_urls.map((media: any, index: number) => (
+                  <div key={index} className="not-prose">
+                    {media.type === 'image' ? (
+                      <div className="space-y-2">
+                        <img 
+                          src={media.url} 
+                          alt={media.caption || `Lesson image ${index + 1}`}
+                          className="w-full rounded-lg"
+                        />
+                        {media.caption && (
+                          <p className="text-sm text-muted-foreground text-center italic">
+                            {media.caption}
+                          </p>
+                        )}
+                      </div>
+                    ) : media.type === 'video' ? (
+                      <div className="space-y-2">
+                        <video 
+                          controls 
+                          className="w-full rounded-lg"
+                          src={media.url}
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                        {media.caption && (
+                          <p className="text-sm text-muted-foreground text-center italic">
+                            {media.caption}
+                          </p>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
