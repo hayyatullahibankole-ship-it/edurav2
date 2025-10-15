@@ -65,23 +65,23 @@ export default function ChallengeDetail() {
           return;
         }
 
-        // Fetch random questions from the challenge's subjects
+        // Fetch random questions securely via RPC (RLS-safe)
         const questionsPerSubject = Math.ceil(challengeData.question_count / subjectIds.length);
 
-        const allQuestions: Question[] = [];
-        for (const subjectId of subjectIds) {
-          const { data: subjectQuestions } = await supabase
-            .from('questions')
-            .select('id, question_text, options, type')
-            .eq('subject_id', subjectId)
-            .eq('is_active', true)
-            .limit(questionsPerSubject);
+        const { data: rpcQuestions, error: rpcError } = await supabase
+          .rpc('get_random_questions_for_subjects', {
+            subject_ids: subjectIds,
+            per_subject_count: questionsPerSubject,
+          });
 
-          if (subjectQuestions) {
-            allQuestions.push(...subjectQuestions);
-          }
-        }
+        if (rpcError) throw rpcError;
 
+        const allQuestions: Question[] = (rpcQuestions || []).map((q: any) => ({
+          id: q.id,
+          question_text: q.question_text,
+          options: q.options,
+          type: q.type,
+        }));
         if (allQuestions.length === 0) {
           toast.error('No questions available for this challenge');
           navigate('/challenge-arena');
