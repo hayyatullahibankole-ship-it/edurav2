@@ -92,12 +92,33 @@ export default function ChallengeDetail() {
           }
         }
 
+        // Filter subjects by course category to ensure only category-specific subjects are used
+        const courseCategory = challengeData.course_category || 'science';
+        const { data: categorySubjects, error: categoryError } = await supabase
+          .from('subjects')
+          .select('id')
+          .eq('course_category', courseCategory)
+          .eq('is_active', true);
+        
+        if (categoryError) throw categoryError;
+        
+        const categorizedSubjectIds = (categorySubjects || []).map(s => s.id);
+        
+        // Only use subjects that match the challenge's course category
+        const filteredSubjectIds = subjectIds.filter(id => categorizedSubjectIds.includes(id));
+        
+        if (filteredSubjectIds.length === 0) {
+          toast.error(`No ${courseCategory} subjects configured for this challenge`);
+          navigate('/challenge-arena');
+          return;
+        }
+
         // Fetch random questions securely via RPC (RLS-safe)
-        const questionsPerSubject = Math.ceil(challengeData.question_count / subjectIds.length);
+        const questionsPerSubject = Math.ceil(challengeData.question_count / filteredSubjectIds.length);
 
         const { data: rpcQuestions, error: rpcError } = await supabase
           .rpc('get_random_questions_for_subjects', {
-            subject_ids: subjectIds,
+            subject_ids: filteredSubjectIds,
             per_subject_count: questionsPerSubject,
           });
 

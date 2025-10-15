@@ -29,6 +29,7 @@ export default function ChallengeManager() {
     title: '',
     description: '',
     challenge_type: 'daily' as 'daily' | 'weekly' | 'special',
+    course_category: 'science' as 'science' | 'art' | 'management',
     start_date: new Date().toISOString().split('T')[0],
     end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     question_count: 20,
@@ -236,6 +237,7 @@ export default function ChallengeManager() {
       title: '',
       description: '',
       challenge_type: 'daily',
+      course_category: 'science',
       start_date: new Date().toISOString().split('T')[0],
       end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       question_count: 20,
@@ -266,6 +268,7 @@ export default function ChallengeManager() {
       title: challenge.title,
       description: challenge.description || '',
       challenge_type: challenge.challenge_type,
+      course_category: challenge.course_category || 'science',
       start_date: challenge.start_date.split('T')[0],
       end_date: challenge.end_date.split('T')[0],
       question_count: challenge.question_count,
@@ -370,6 +373,55 @@ export default function ChallengeManager() {
                       />
                     </div>
                   </div>
+                  <div>
+                    <Label>Course Category</Label>
+                    <Select 
+                      value={challengeForm.course_category} 
+                      onValueChange={(v: any) => setChallengeForm({ ...challengeForm, course_category: v, subject_ids: [] })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="science">Science</SelectItem>
+                        <SelectItem value="art">Art</SelectItem>
+                        <SelectItem value="management">Commercial/Management</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Subjects (from {challengeForm.course_category})</Label>
+                    <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
+                      {subjects
+                        .filter(s => s.course_category === challengeForm.course_category)
+                        .map((subject) => (
+                          <label key={subject.id} className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={challengeForm.subject_ids.includes(subject.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setChallengeForm({
+                                    ...challengeForm,
+                                    subject_ids: [...challengeForm.subject_ids, subject.id]
+                                  });
+                                } else {
+                                  setChallengeForm({
+                                    ...challengeForm,
+                                    subject_ids: challengeForm.subject_ids.filter(id => id !== subject.id)
+                                  });
+                                }
+                              }}
+                              className="rounded"
+                            />
+                            <span className="text-sm">{subject.name}</span>
+                          </label>
+                        ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {challengeForm.subject_ids.length} subject(s) selected
+                    </p>
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label>Start Date</Label>
@@ -450,6 +502,7 @@ export default function ChallengeManager() {
                         <Badge variant="outline">{challenge.duration_minutes} mins</Badge>
                         <Badge variant="outline">{challenge.points_reward} points</Badge>
                         <Badge variant="outline">Level {challenge.difficulty_level}</Badge>
+                        <Badge variant="secondary">{challenge.course_category || 'science'}</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-2">
                         {new Date(challenge.start_date).toLocaleDateString()} - {new Date(challenge.end_date).toLocaleDateString()}

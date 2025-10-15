@@ -1599,6 +1599,7 @@ export type Database = {
       subjects: {
         Row: {
           code: string | null
+          course_category: Database["public"]["Enums"]["course_category"] | null
           created_at: string | null
           default_question_count: number | null
           description: string | null
@@ -1608,6 +1609,9 @@ export type Database = {
         }
         Insert: {
           code?: string | null
+          course_category?:
+            | Database["public"]["Enums"]["course_category"]
+            | null
           created_at?: string | null
           default_question_count?: number | null
           description?: string | null
@@ -1617,6 +1621,9 @@ export type Database = {
         }
         Update: {
           code?: string | null
+          course_category?:
+            | Database["public"]["Enums"]["course_category"]
+            | null
           created_at?: string | null
           default_question_count?: number | null
           description?: string | null
