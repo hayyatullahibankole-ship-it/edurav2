@@ -249,11 +249,19 @@ export default function LessonView() {
         {questions.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Practice Questions</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Practice Questions</CardTitle>
+                <Button onClick={() => navigate(`/study-hub/lesson/${lessonId}/quiz`)}>
+                  Take Quiz
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Test your understanding with {questions.length} practice questions (5-10 minutes)
+              </p>
               <div className="space-y-6">
-                {questions.map((question, index) => (
+                {questions.slice(0, 3).map((question, index) => (
                   <div key={question.id}>
                     <div className="mb-4">
                       <p className="font-medium mb-3">
@@ -279,9 +287,14 @@ export default function LessonView() {
                         )}
                       </div>
                     </div>
-                    {index < questions.length - 1 && <Separator className="my-6" />}
+                    {index < Math.min(questions.length, 3) - 1 && <Separator className="my-6" />}
                   </div>
                 ))}
+                {questions.length > 3 && (
+                  <p className="text-sm text-muted-foreground text-center">
+                    ...and {questions.length - 3} more questions in the quiz
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
