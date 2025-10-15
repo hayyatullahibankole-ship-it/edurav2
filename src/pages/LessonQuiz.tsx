@@ -55,7 +55,7 @@ export default function LessonQuiz() {
       // Fetch lesson details
       const { data: lessonData } = await supabase
         .from('study_lessons')
-        .select('title')
+        .select('title, content')
         .eq('id', lessonId)
         .single();
 
@@ -63,7 +63,7 @@ export default function LessonQuiz() {
         setLessonTitle(lessonData.title);
       }
 
-      // Fetch quiz questions for this lesson
+      // First, try to fetch manually assigned questions
       const { data: questionsData, error } = await supabase
         .from('lesson_questions')
         .select('*, questions(*)')
@@ -72,12 +72,49 @@ export default function LessonQuiz() {
 
       if (error) throw error;
 
-      const formattedQuestions = questionsData?.map((lq: any) => ({
+      let formattedQuestions = questionsData?.map((lq: any) => ({
         id: lq.questions.id,
         question_text: lq.questions.question_text,
         options: lq.questions.options,
         correct_answer: lq.questions.correct_answer
       })) || [];
+
+      // If no manual questions, generate with AI
+      if (formattedQuestions.length === 0 && lessonData?.content) {
+        toast.info('Generating quiz questions...');
+        
+        const { data: { session } } = await supabase.auth.getSession();
+        const response = await fetch(
+          `https://zqapbmllkywsuywpfava.supabase.co/functions/v1/generate-lesson-quiz`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session?.access_token}`,
+            },
+            body: JSON.stringify({
+              lessonContent: lessonData.content,
+              lessonTitle: lessonData.title,
+              questionCount: 10
+            })
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to generate quiz questions');
+        }
+
+        const { questions: generatedQuestions } = await response.json();
+        
+        // Format AI-generated questions
+        formattedQuestions = generatedQuestions.map((q: any, idx: number) => ({
+          id: `ai-${idx}`,
+          question_text: q.question_text,
+          options: q.options,
+          correct_answer: q.correct_answer,
+          explanation: q.explanation
+        }));
+      }
 
       setQuestions(formattedQuestions);
 
