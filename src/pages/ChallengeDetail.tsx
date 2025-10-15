@@ -60,9 +60,20 @@ export default function ChallengeDetail() {
         }
 
         if (!subjectIds || subjectIds.length === 0) {
-          toast.error('Challenge has no subjects configured');
-          navigate('/challenge-arena');
-          return;
+          // Fallback: use all subjects that have active questions
+          const { data: subjectCounts, error: subjectsError } = await supabase.rpc('get_subject_question_counts');
+          if (subjectsError) {
+            console.error('Error fetching subjects:', subjectsError);
+          }
+          subjectIds = (subjectCounts || [])
+            .map((s: any) => s.subject_id)
+            .filter((id: string | null) => Boolean(id));
+
+          if (!subjectIds || subjectIds.length === 0) {
+            toast.error('No subjects available for this challenge');
+            navigate('/challenge-arena');
+            return;
+          }
         }
 
         // Fetch random questions securely via RPC (RLS-safe)
