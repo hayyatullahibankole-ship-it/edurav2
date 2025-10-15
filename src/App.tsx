@@ -33,6 +33,7 @@ import ForumNewPost from "./pages/ForumNewPost";
 import ForumPost from "./pages/ForumPost";
 import ChallengeArena from "./pages/ChallengeArena";
 import ChallengeDetail from "./pages/ChallengeDetail";
+import ChallengeResults from "./pages/ChallengeResults";
 import SchoolRegistration from "./pages/SchoolRegistration";
 import LessonQuiz from "./pages/LessonQuiz";
 
@@ -71,6 +72,11 @@ const App = () => (
             <Route path="/test-results/:attemptId" element={
               <ProtectedRoute>
                 <Layout showNavbar={false}><TestResults /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/challenge-results/:attemptId" element={
+              <ProtectedRoute>
+                <ChallengeResults />
               </ProtectedRoute>
             } />
             <Route path="/exam" element={

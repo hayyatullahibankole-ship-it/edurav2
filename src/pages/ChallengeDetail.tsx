@@ -29,6 +29,22 @@ export default function ChallengeDetail() {
 
     const fetchChallengeAndCreateAttempt = async () => {
       try {
+        // Check if user has already attempted this challenge
+        const { data: existingAttempt, error: attemptCheckError } = await supabase
+          .from('challenge_attempts')
+          .select('id')
+          .eq('challenge_id', challengeId)
+          .eq('user_id', userProfile.id)
+          .maybeSingle();
+
+        if (attemptCheckError) throw attemptCheckError;
+
+        if (existingAttempt) {
+          toast.error('You have already attempted this challenge');
+          navigate('/challenge-arena');
+          return;
+        }
+
         // Fetch challenge details
         const { data: challengeData, error: challengeError } = await supabase
           .from('challenges')
@@ -172,7 +188,7 @@ export default function ChallengeDetail() {
       }]);
 
       toast.success('Challenge completed!');
-      navigate(`/test-results/${attemptId}`);
+      navigate(`/challenge-results/${attemptId}`);
     } catch (error) {
       console.error('Error submitting challenge:', error);
       toast.error('Failed to submit challenge');

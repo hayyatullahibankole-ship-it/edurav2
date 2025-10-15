@@ -22,6 +22,7 @@ interface Challenge {
   points_reward: number;
   start_date: string;
   end_date: string;
+  isCompleted?: boolean;
 }
 
 interface LeaderboardEntry {
@@ -44,6 +45,7 @@ export default function ChallengeArena() {
   const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState('daily');
   const [courseCategory, setCourseCategory] = useState<'science' | 'art' | 'management'>('science');
+  const [userAttempts, setUserAttempts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!subLoading && !isEnterprise) {
@@ -55,6 +57,7 @@ export default function ChallengeArena() {
     if (isEnterprise) {
       fetchChallenges();
       fetchLeaderboard();
+      fetchUserAttempts();
 
       // Subscribe to real-time updates
       const challengesChannel = supabase
@@ -69,6 +72,31 @@ export default function ChallengeArena() {
       };
     }
   }, [isEnterprise, subLoading, selectedTab, courseCategory, navigate]);
+
+  const fetchUserAttempts = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: userProfile } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single();
+
+      if (!userProfile) return;
+
+      const { data, error } = await supabase
+        .from('challenge_attempts')
+        .select('challenge_id')
+        .eq('user_id', userProfile.id);
+
+      if (error) throw error;
+      setUserAttempts(new Set(data?.map(a => a.challenge_id) || []));
+    } catch (error) {
+      console.error('Error fetching user attempts:', error);
+    }
+  };
 
   const fetchChallenges = async () => {
     try {
@@ -86,7 +114,13 @@ export default function ChallengeArena() {
         .order('start_date', { ascending: false });
 
       if (error) throw error;
-      setChallenges(data || []);
+      
+      const challengesWithStatus = (data || []).map(challenge => ({
+        ...challenge,
+        isCompleted: userAttempts.has(challenge.id)
+      }));
+      
+      setChallenges(challengesWithStatus);
     } catch (error) {
       console.error('Error fetching challenges:', error);
       toast.error('Failed to load challenges');
@@ -239,8 +273,10 @@ export default function ChallengeArena() {
                         <Button 
                           className="w-full"
                           onClick={() => navigate(`/challenge/${challenge.id}`)}
+                          disabled={challenge.isCompleted}
+                          variant={challenge.isCompleted ? "secondary" : "default"}
                         >
-                          Start Challenge
+                          {challenge.isCompleted ? '✓ Already Completed' : 'Start Challenge'}
                         </Button>
                       </CardContent>
                     </Card>
