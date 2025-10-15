@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Clock, FileText, Download, PlayCircle, BookOpen } from 'lucide-react';
+import { Clock, FileText, Download, PlayCircle, BookOpen, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Layout from '@/components/Layout';
 import { MathRenderer } from '@/components/ui/math-renderer';
@@ -47,6 +47,7 @@ export default function LessonView() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
     if (lessonId) {
@@ -58,7 +59,7 @@ export default function LessonView() {
     try {
       setLoading(true);
 
-      const [lessonRes, resourcesRes, questionsRes] = await Promise.all([
+      const [lessonRes, resourcesRes, questionsRes, completionRes] = await Promise.all([
         supabase
           .from('study_lessons')
           .select('*, study_topics(title, subjects(name))')
@@ -73,13 +74,19 @@ export default function LessonView() {
           .from('lesson_questions')
           .select('*, questions(*)')
           .eq('lesson_id', lessonId)
-          .order('display_order')
+          .order('display_order'),
+        supabase
+          .from('lesson_completions')
+          .select('*')
+          .eq('lesson_id', lessonId)
+          .maybeSingle()
       ]);
 
       if (lessonRes.error) throw lessonRes.error;
       
       setLesson(lessonRes.data);
       setResources(resourcesRes.data || []);
+      setIsCompleted(!!completionRes.data);
       
       // Extract questions from the join
       const questionData = questionsRes.data?.map((lq: any) => ({
@@ -146,6 +153,12 @@ export default function LessonView() {
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <Badge className="text-xs">{lesson.study_topics?.subjects?.name}</Badge>
             <Badge variant="secondary" className="text-xs">{lesson.study_topics?.title}</Badge>
+            {isCompleted && (
+              <Badge variant="default" className="text-xs bg-green-500 hover:bg-green-600">
+                <CheckCircle2 className="h-3 w-3 mr-1" />
+                Completed
+              </Badge>
+            )}
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3">{lesson.title}</h1>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">

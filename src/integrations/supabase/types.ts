@@ -824,6 +824,54 @@ export type Database = {
           },
         ]
       }
+      lesson_completions: {
+        Row: {
+          completed_at: string
+          created_at: string | null
+          id: string
+          lesson_id: string
+          quiz_percentage: number | null
+          quiz_score: number | null
+          time_spent_minutes: number | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          created_at?: string | null
+          id?: string
+          lesson_id: string
+          quiz_percentage?: number | null
+          quiz_score?: number | null
+          time_spent_minutes?: number | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string | null
+          id?: string
+          lesson_id?: string
+          quiz_percentage?: number | null
+          quiz_score?: number | null
+          time_spent_minutes?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_completions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "study_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_questions: {
         Row: {
           display_order: number | null

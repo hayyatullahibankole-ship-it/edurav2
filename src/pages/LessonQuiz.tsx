@@ -145,9 +145,37 @@ export default function LessonQuiz() {
       }
     });
 
+    const percentage = (correctCount / questions.length) * 100;
+    const timeSpentMinutes = Math.ceil((600 - timeLeft) / 60);
+
     setScore(correctCount);
     setSubmitted(true);
-    toast.success(`Quiz completed! Score: ${correctCount}/${questions.length}`);
+
+    // If passed (60% or more), mark lesson as completed
+    if (percentage >= 60 && userProfile) {
+      try {
+        const { error } = await supabase
+          .from('lesson_completions')
+          .upsert({
+            user_id: userProfile.id,
+            lesson_id: lessonId,
+            quiz_score: correctCount,
+            quiz_percentage: percentage,
+            time_spent_minutes: timeSpentMinutes,
+            completed_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id,lesson_id'
+          });
+
+        if (error) throw error;
+        toast.success(`🎉 Lesson completed! Score: ${correctCount}/${questions.length}`);
+      } catch (error) {
+        console.error('Error saving completion:', error);
+        toast.success(`Quiz completed! Score: ${correctCount}/${questions.length}`);
+      }
+    } else {
+      toast.success(`Quiz completed! Score: ${correctCount}/${questions.length}`);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -185,9 +213,14 @@ export default function LessonQuiz() {
                 You scored {score} out of {questions.length}
               </div>
               {passed ? (
-                <div className="flex items-center justify-center gap-2 text-green-500">
-                  <CheckCircle2 className="h-6 w-6" />
-                  <span className="text-lg font-semibold">Passed!</span>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center gap-2 text-green-500">
+                    <CheckCircle2 className="h-6 w-6" />
+                    <span className="text-lg font-semibold">Passed!</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    ✅ Lesson marked as completed
+                  </p>
                 </div>
               ) : (
                 <p className="text-muted-foreground">

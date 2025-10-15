@@ -15,6 +15,7 @@ interface Lesson {
   summary: string;
   estimated_minutes: number;
   display_order: number;
+  isCompleted?: boolean;
 }
 
 interface Resource {
@@ -42,7 +43,7 @@ export default function StudyTopic() {
     try {
       setLoading(true);
 
-      const [topicRes, lessonsRes] = await Promise.all([
+      const [topicRes, lessonsRes, completionsRes] = await Promise.all([
         supabase
           .from('study_topics')
           .select('*, subjects(name)')
@@ -53,14 +54,28 @@ export default function StudyTopic() {
           .select('*')
           .eq('topic_id', topicId)
           .eq('is_active', true)
-          .order('display_order')
+          .order('display_order'),
+        supabase
+          .from('lesson_completions')
+          .select('lesson_id')
       ]);
 
       if (topicRes.error) throw topicRes.error;
       if (lessonsRes.error) throw lessonsRes.error;
 
       setTopic(topicRes.data);
-      setLessons(lessonsRes.data || []);
+
+      // Mark completed lessons
+      const completedLessonIds = new Set(
+        completionsRes.data?.map(c => c.lesson_id) || []
+      );
+
+      const lessonsWithCompletion = (lessonsRes.data || []).map(lesson => ({
+        ...lesson,
+        isCompleted: completedLessonIds.has(lesson.id)
+      }));
+
+      setLessons(lessonsWithCompletion);
     } catch (error) {
       console.error('Error fetching topic:', error);
       toast.error('Failed to load topic details');
@@ -128,6 +143,12 @@ export default function StudyTopic() {
                       <span className="text-xs sm:text-sm font-medium text-muted-foreground">
                         Lesson {index + 1}
                       </span>
+                      {lesson.isCompleted && (
+                        <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-xs">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Done
+                        </Badge>
+                      )}
                     </div>
                     <CardTitle className="text-base sm:text-lg line-clamp-2">{lesson.title}</CardTitle>
                     <CardDescription className="mt-2 text-xs sm:text-sm line-clamp-2">
