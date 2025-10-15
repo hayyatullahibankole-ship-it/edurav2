@@ -395,6 +395,7 @@ export type Database = {
       challenges: {
         Row: {
           challenge_type: string | null
+          course_category: Database["public"]["Enums"]["course_category"]
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -411,6 +412,7 @@ export type Database = {
         }
         Insert: {
           challenge_type?: string | null
+          course_category?: Database["public"]["Enums"]["course_category"]
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -427,6 +429,7 @@ export type Database = {
         }
         Update: {
           challenge_type?: string | null
+          course_category?: Database["public"]["Enums"]["course_category"]
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -2651,6 +2654,7 @@ export type Database = {
         | "GRADED"
         | "SUSPENDED"
       booking_status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED"
+      course_category: "science" | "art" | "management"
       exam_type: "JAMB" | "WAEC" | "CUSTOM"
       question_type:
         | "MCQ_SINGLE"
@@ -2797,6 +2801,7 @@ export const Constants = {
         "SUSPENDED",
       ],
       booking_status: ["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"],
+      course_category: ["science", "art", "management"],
       exam_type: ["JAMB", "WAEC", "CUSTOM"],
       question_type: [
         "MCQ_SINGLE",

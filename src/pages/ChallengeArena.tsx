@@ -43,6 +43,7 @@ export default function ChallengeArena() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState('daily');
+  const [courseCategory, setCourseCategory] = useState<'science' | 'art' | 'management'>('science');
 
   useEffect(() => {
     if (!subLoading && !isEnterprise) {
@@ -67,7 +68,7 @@ export default function ChallengeArena() {
         supabase.removeChannel(challengesChannel);
       };
     }
-  }, [isEnterprise, subLoading, selectedTab, navigate]);
+  }, [isEnterprise, subLoading, selectedTab, courseCategory, navigate]);
 
   const fetchChallenges = async () => {
     try {
@@ -79,6 +80,7 @@ export default function ChallengeArena() {
         .select('*')
         .eq('is_active', true)
         .eq('challenge_type', selectedTab)
+        .eq('course_category', courseCategory)
         .lte('start_date', now)
         .gte('end_date', now)
         .order('start_date', { ascending: false });
@@ -178,6 +180,14 @@ export default function ChallengeArena() {
             </CardContent>
           </Card>
         </div>
+
+        <Tabs value={courseCategory} onValueChange={(v) => setCourseCategory(v as 'science' | 'art' | 'management')} className="mb-4 sm:mb-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="science" className="text-xs sm:text-sm">Science</TabsTrigger>
+            <TabsTrigger value="art" className="text-xs sm:text-sm">Art</TabsTrigger>
+            <TabsTrigger value="management" className="text-xs sm:text-sm">Management</TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-6 sm:mb-8">
           <TabsList className="grid w-full grid-cols-3">

@@ -68,6 +68,11 @@ const App = () => (
                 <Layout showNavbar={false}><TestResults /></Layout>
               </ProtectedRoute>
             } />
+            <Route path="/test-results/:attemptId" element={
+              <ProtectedRoute>
+                <Layout showNavbar={false}><TestResults /></Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/exam" element={
               <ProtectedRoute>
                 <Layout showNavbar={false}><CBTExam /></Layout>
