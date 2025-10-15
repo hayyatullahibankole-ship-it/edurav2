@@ -2,3 +2,6 @@ project_id = "zqapbmllkywsuywpfava"
 
 [functions.blog-share]
 verify_jwt = false
+
+[functions.generate-lesson-quiz]
+verify_jwt = true
