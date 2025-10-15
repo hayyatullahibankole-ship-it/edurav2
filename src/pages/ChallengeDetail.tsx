@@ -46,8 +46,26 @@ export default function ChallengeDetail() {
         setExamTitle(challengeData.title);
         setDuration(challengeData.duration_minutes * 60);
 
+        // Parse subject_ids from JSON string to array
+        let subjectIds: string[] = [];
+        try {
+          subjectIds = typeof challengeData.subject_ids === 'string' 
+            ? JSON.parse(challengeData.subject_ids)
+            : challengeData.subject_ids;
+        } catch (e) {
+          console.error('Error parsing subject_ids:', e);
+          toast.error('Invalid challenge configuration');
+          navigate('/challenge-arena');
+          return;
+        }
+
+        if (!subjectIds || subjectIds.length === 0) {
+          toast.error('Challenge has no subjects configured');
+          navigate('/challenge-arena');
+          return;
+        }
+
         // Fetch random questions from the challenge's subjects
-        const subjectIds = challengeData.subject_ids as string[];
         const questionsPerSubject = Math.ceil(challengeData.question_count / subjectIds.length);
 
         const allQuestions: Question[] = [];

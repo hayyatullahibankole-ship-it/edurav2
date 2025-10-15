@@ -246,59 +246,70 @@ export default function LessonView() {
         )}
 
         {/* Practice Questions */}
-        {questions.length > 0 && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Practice Questions</CardTitle>
-                <Button onClick={() => navigate(`/study-hub/lesson/${lessonId}/quiz`)}>
-                  Take Quiz
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Test your understanding with {questions.length} practice questions (5-10 minutes)
-              </p>
-              <div className="space-y-6">
-                {questions.slice(0, 3).map((question, index) => (
-                  <div key={question.id}>
-                    <div className="mb-4">
-                      <p className="font-medium mb-3">
-                        {index + 1}. <MathRenderer content={question.question_text} />
-                      </p>
-                      <div className="space-y-2 ml-4">
-                        {question.options && typeof question.options === 'object' && (
-                          Array.isArray(question.options) ? (
-                            question.options.map((option: string, optIndex: number) => (
-                              <div key={optIndex} className="text-sm">
-                                <span className="font-medium">{String.fromCharCode(65 + optIndex)}.</span>{' '}
-                                <MathRenderer content={option} />
-                              </div>
-                            ))
-                          ) : (
-                            Object.entries(question.options).map(([key, value]) => (
-                              <div key={key} className="text-sm">
-                                <span className="font-medium">{key}.</span>{' '}
-                                <MathRenderer content={String(value)} />
-                              </div>
-                            ))
-                          )
-                        )}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Practice Questions</CardTitle>
+              <Button onClick={() => navigate(`/study-hub/lesson/${lessonId}/quiz`)}>
+                Take Quiz
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {questions.length > 0 ? (
+              <>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Test your understanding with {questions.length} practice questions (5-10 minutes)
+                </p>
+                <div className="space-y-6">
+                  {questions.slice(0, 3).map((question, index) => (
+                    <div key={question.id}>
+                      <div className="mb-4">
+                        <p className="font-medium mb-3">
+                          {index + 1}. <MathRenderer content={question.question_text} />
+                        </p>
+                        <div className="space-y-2 ml-4">
+                          {question.options && typeof question.options === 'object' && (
+                            Array.isArray(question.options) ? (
+                              question.options.map((option: string, optIndex: number) => (
+                                <div key={optIndex} className="text-sm">
+                                  <span className="font-medium">{String.fromCharCode(65 + optIndex)}.</span>{' '}
+                                  <MathRenderer content={option} />
+                                </div>
+                              ))
+                            ) : (
+                              Object.entries(question.options).map(([key, value]) => (
+                                <div key={key} className="text-sm">
+                                  <span className="font-medium">{key}.</span>{' '}
+                                  <MathRenderer content={String(value)} />
+                                </div>
+                              ))
+                            )
+                          )}
+                        </div>
                       </div>
+                      {index < Math.min(questions.length, 3) - 1 && <Separator className="my-6" />}
                     </div>
-                    {index < Math.min(questions.length, 3) - 1 && <Separator className="my-6" />}
-                  </div>
-                ))}
-                {questions.length > 3 && (
-                  <p className="text-sm text-muted-foreground text-center">
-                    ...and {questions.length - 3} more questions in the quiz
-                  </p>
-                )}
+                  ))}
+                  {questions.length > 3 && (
+                    <p className="text-sm text-muted-foreground text-center">
+                      ...and {questions.length - 3} more questions in the quiz
+                    </p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  No practice questions available yet. Quiz will be generated automatically when you click "Take Quiz".
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  The quiz will be created based on this lesson's content using AI.
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );
