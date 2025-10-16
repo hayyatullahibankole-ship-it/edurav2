@@ -81,78 +81,40 @@ export const useCleanResults = (attemptId: string | null) => {
           return;
         }
 
-        // Fetch results with extended polling to avoid race conditions
-        const pollResults = async (retries = 8, delayMs = 750) => {
+        // Optimized polling - trigger handles computation now
+        const pollResults = async (retries = 4, delayMs = 500) => {
           for (let i = 0; i < retries; i++) {
             const { data, error } = await supabase
               .from('results')
               .select('id,attempt_id,raw_score,scaled_score,correct_answers,wrong_answers,unanswered,total_questions,percentage,subject_breakdown,time_taken_minutes,created_at')
               .eq('attempt_id', attemptId)
               .maybeSingle();
+            
             if (error) {
-              console.warn('Results fetch attempt error:', error);
+              console.warn('Results fetch error:', error);
             }
+            
             if (data) return data;
-            await new Promise((r) => setTimeout(r, delayMs));
+            
+            // Only wait if not last retry
+            if (i < retries - 1) {
+              await new Promise((r) => setTimeout(r, delayMs));
+            }
           }
           return null;
         };
 
         let resultsData = await pollResults();
 
-        // Fallback: compute results from secure review RPC if still missing
+        // If still no results after polling, trigger manual computation once
         if (!resultsData) {
-          const { data: reviewData, error: reviewError } = await supabase
-            .rpc('get_review_questions_for_attempt', { attempt_uuid: attemptId });
-          if (!reviewError && Array.isArray(reviewData) && reviewData.length > 0) {
-            const total = reviewData.length;
-            const correct = reviewData.filter((q: any) => q.is_correct).length;
-            const answered = reviewData.filter((q: any) => q.user_answer_index !== null).length;
-            const wrong = Math.max(answered - correct, 0);
-            const unanswered = Math.max(total - answered, 0);
-            const percentage = total > 0 ? (correct / total) * 100 : 0;
-
-            const subjectBreakdown: any = {};
-            reviewData.forEach((q: any) => {
-              const subj = q.subject_name || 'Unknown';
-              subjectBreakdown[subj] = subjectBreakdown[subj] || { total: 0, correct: 0, percentage: 0 };
-              subjectBreakdown[subj].total += 1;
-              if (q.is_correct) subjectBreakdown[subj].correct += 1;
-            });
-            Object.keys(subjectBreakdown).forEach((k) => {
-              const s = subjectBreakdown[k];
-              s.percentage = s.total > 0 ? (s.correct / s.total) * 100 : 0;
-            });
-
-            resultsData = {
-              id: 'fallback',
-              attempt_id: attemptId,
-              raw_score: correct,
-              scaled_score: total > 0 ? Math.round((correct / total) * 400) : 0,
-              correct_answers: correct,
-              wrong_answers: wrong,
-              unanswered,
-              total_questions: total,
-              percentage,
-              subject_breakdown: subjectBreakdown,
-              time_taken_minutes: 0,
-              created_at: new Date().toISOString(),
-            } as any;
-          }
-        }
-
-        // Detect mismatch between saved results and answer review; auto-recompute once
-        if (resultsData) {
-          const { data: reviewCheck } = await supabase.rpc('get_review_questions_for_attempt', { attempt_uuid: attemptId });
-          if (Array.isArray(reviewCheck)) {
-            const total = reviewCheck.length;
-            const correct = reviewCheck.filter((q: any) => q.is_correct).length;
-            if (total > 0 && correct > 0 && (resultsData.correct_answers === 0 || resultsData.percentage === 0)) {
-              await supabase.rpc('recompute_results_for_attempt', { attempt_uuid: attemptId });
-              // quick re-poll after recompute
-              const recomputed = await pollResults(5, 500);
-              if (recomputed) resultsData = recomputed;
-            }
+          console.log('No results found, triggering manual computation...');
+          try {
+            await supabase.rpc('recompute_results_for_attempt', { attempt_uuid: attemptId });
+            // Short re-poll after manual trigger
+            resultsData = await pollResults(2, 300);
+          } catch (err) {
+            console.error('Manual recompute failed:', err);
           }
         }
 
