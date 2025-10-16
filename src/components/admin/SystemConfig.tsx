@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,10 +24,12 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function SystemConfig() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [settings, setSettings] = useState({
     // General Settings
     siteName: 'Edura Platform',
@@ -60,12 +62,88 @@ export default function SystemConfig() {
     maintenanceMessage: 'System is under maintenance. Please try again later.',
   });
 
+  // Load existing settings on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('settings')
+          .select('*');
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const configMap: any = {};
+          data.forEach(setting => {
+            configMap[setting.key] = setting.value;
+          });
+
+          setSettings(prev => ({
+            ...prev,
+            siteName: configMap.site_name || prev.siteName,
+            siteDescription: configMap.site_description || prev.siteDescription,
+            adminEmail: configMap.admin_email || prev.adminEmail,
+            timezone: configMap.timezone || prev.timezone,
+            defaultExamDuration: configMap.default_exam_duration || prev.defaultExamDuration,
+            maxAttempts: configMap.max_attempts || prev.maxAttempts,
+            passingScore: configMap.passing_score || prev.passingScore,
+            shuffleQuestions: configMap.shuffle_questions ?? prev.shuffleQuestions,
+            shuffleOptions: configMap.shuffle_options ?? prev.shuffleOptions,
+            enableAntiCheat: configMap.enable_anti_cheat ?? prev.enableAntiCheat,
+            browserLockMode: configMap.browser_lock_mode ?? prev.browserLockMode,
+            screenshotPrevention: configMap.screenshot_prevention ?? prev.screenshotPrevention,
+            sessionTimeout: configMap.session_timeout || prev.sessionTimeout,
+            smtpHost: configMap.smtp_host || prev.smtpHost,
+            smtpPort: configMap.smtp_port || prev.smtpPort,
+            smtpUsername: configMap.smtp_username || prev.smtpUsername,
+            enableEmailNotifications: configMap.enable_email_notifications ?? prev.enableEmailNotifications,
+            maintenanceMode: configMap.maintenance_mode ?? prev.maintenanceMode,
+            maintenanceMessage: configMap.maintenance_message || prev.maintenanceMessage,
+          }));
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      } finally {
+        setInitialLoad(false);
+      }
+    };
+
+    loadSettings();
+  }, []);
+
   const handleSaveSettings = async () => {
     try {
       setLoading(true);
       
-      // Here you would typically save to your settings table
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      // Prepare settings for database
+      const settingsToSave = [
+        { key: 'site_name', value: settings.siteName, description: 'Platform name' },
+        { key: 'site_description', value: settings.siteDescription, description: 'Platform description' },
+        { key: 'admin_email', value: settings.adminEmail, description: 'Administrator email' },
+        { key: 'timezone', value: settings.timezone, description: 'Default timezone' },
+        { key: 'default_exam_duration', value: settings.defaultExamDuration, description: 'Default exam duration in minutes' },
+        { key: 'max_attempts', value: settings.maxAttempts, description: 'Maximum exam attempts' },
+        { key: 'passing_score', value: settings.passingScore, description: 'Default passing percentage' },
+        { key: 'shuffle_questions', value: settings.shuffleQuestions, description: 'Shuffle questions in exams' },
+        { key: 'shuffle_options', value: settings.shuffleOptions, description: 'Shuffle answer options' },
+        { key: 'enable_anti_cheat', value: settings.enableAntiCheat, description: 'Enable anti-cheat monitoring' },
+        { key: 'browser_lock_mode', value: settings.browserLockMode, description: 'Enable browser lock mode' },
+        { key: 'screenshot_prevention', value: settings.screenshotPrevention, description: 'Prevent screenshots' },
+        { key: 'session_timeout', value: settings.sessionTimeout, description: 'Session timeout in minutes' },
+        { key: 'smtp_host', value: settings.smtpHost, description: 'SMTP server host' },
+        { key: 'smtp_port', value: settings.smtpPort, description: 'SMTP server port' },
+        { key: 'smtp_username', value: settings.smtpUsername, description: 'SMTP username' },
+        { key: 'enable_email_notifications', value: settings.enableEmailNotifications, description: 'Enable email notifications' },
+        { key: 'maintenance_mode', value: settings.maintenanceMode, description: 'Enable maintenance mode' },
+        { key: 'maintenance_message', value: settings.maintenanceMessage, description: 'Maintenance message' },
+      ];
+
+      // Upsert all settings
+      const { error } = await supabase
+        .from('settings')
+        .upsert(settingsToSave, { onConflict: 'key' });
+
+      if (error) throw error;
       
       toast({
         title: "Settings Saved",
@@ -76,7 +154,7 @@ export default function SystemConfig() {
       console.error('Error saving settings:', error);
       toast({
         title: "Error",
-        description: "Failed to save settings",
+        description: "Failed to save settings. Please try again.",
         variant: "destructive"
       });
     } finally {
