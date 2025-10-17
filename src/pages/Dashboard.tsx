@@ -40,7 +40,6 @@ import { QuickActionButton } from "@/components/dashboard/QuickActionButton";
 import { NotificationBell } from "@/components/NotificationBell";
 import OnboardingTour from "@/components/OnboardingTour";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import MobileNav from "@/components/MobileNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Dashboard = () => {
@@ -643,14 +642,6 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
-
-      {/* Mobile Navigation */}
-      {isMobile && (
-        <MobileNav activeTab={activeTab} onTabChange={setActiveTab} />
-      )}
-      
-      {/* Add padding to bottom on mobile to prevent content being hidden by nav */}
-      {isMobile && <div className="h-20" />}
     </div>
   );
 };

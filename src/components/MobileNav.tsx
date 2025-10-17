@@ -77,48 +77,67 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
         {/* Navigation Items */}
         <div className="relative flex items-center justify-around h-20 px-2">
           {/* Home Button */}
-          <button
-            onClick={() => onTabChange("dashboard")}
-            className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 ${
-              activeTab === "dashboard"
-                ? "text-primary"
-                : "text-muted-foreground active:scale-95"
-            }`}
-          >
-            {activeTab === "dashboard" && (
-              <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
-            )}
-            <div className={`relative p-2 rounded-xl transition-all duration-300 ${
-              activeTab === "dashboard" 
-                ? "bg-primary text-white shadow-lg scale-110" 
-                : "bg-muted/50"
-            }`}>
-              <Home className="h-4 w-4" />
-            </div>
-            <span className={`text-[10px] font-semibold ${
-              activeTab === "dashboard" ? "text-primary" : ""
-            }`}>
-              Home
-            </span>
-          </button>
+          <Link to="/dashboard">
+            <button
+              className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 ${
+                activeTab === "dashboard"
+                  ? "text-primary"
+                  : "text-muted-foreground active:scale-95"
+              }`}
+            >
+              {activeTab === "dashboard" && (
+                <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
+              )}
+              <div className={`relative p-2 rounded-xl transition-all duration-300 ${
+                activeTab === "dashboard" 
+                  ? "bg-primary text-white shadow-lg scale-110" 
+                  : "bg-muted/50"
+              }`}>
+                <Home className="h-4 w-4" />
+              </div>
+              <span className={`text-[10px] font-semibold ${
+                activeTab === "dashboard" ? "text-primary" : ""
+              }`}>
+                Home
+              </span>
+            </button>
+          </Link>
 
           {/* Study Hub Button */}
           <Link to="/study-hub">
-            <button className="relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 text-muted-foreground active:scale-95">
-              <div className="relative p-2 rounded-xl transition-all duration-300 bg-muted/50">
+            <button className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 ${
+              activeTab === "study" ? "text-primary" : "text-muted-foreground active:scale-95"
+            }`}>
+              {activeTab === "study" && (
+                <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
+              )}
+              <div className={`relative p-2 rounded-xl transition-all duration-300 ${
+                activeTab === "study" ? "bg-primary text-white shadow-lg scale-110" : "bg-muted/50"
+              }`}>
                 <Library className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-semibold">Study</span>
+              <span className={`text-[10px] font-semibold ${
+                activeTab === "study" ? "text-primary" : ""
+              }`}>Study</span>
             </button>
           </Link>
 
           {/* Arena Button */}
           <Link to="/challenge-arena">
-            <button className="relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 text-muted-foreground active:scale-95">
-              <div className="relative p-2 rounded-xl transition-all duration-300 bg-muted/50">
+            <button className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 ${
+              activeTab === "arena" ? "text-primary" : "text-muted-foreground active:scale-95"
+            }`}>
+              {activeTab === "arena" && (
+                <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
+              )}
+              <div className={`relative p-2 rounded-xl transition-all duration-300 ${
+                activeTab === "arena" ? "bg-primary text-white shadow-lg scale-110" : "bg-muted/50"
+              }`}>
                 <Sword className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-semibold">Arena</span>
+              <span className={`text-[10px] font-semibold ${
+                activeTab === "arena" ? "text-primary" : ""
+              }`}>Arena</span>
             </button>
           </Link>
 
@@ -212,11 +231,20 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
 
           {/* Forum Button */}
           <Link to="/forum">
-            <button className="relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 text-muted-foreground active:scale-95">
-              <div className="relative p-2 rounded-xl transition-all duration-300 bg-muted/50">
+            <button className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 ${
+              activeTab === "forum" ? "text-primary" : "text-muted-foreground active:scale-95"
+            }`}>
+              {activeTab === "forum" && (
+                <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
+              )}
+              <div className={`relative p-2 rounded-xl transition-all duration-300 ${
+                activeTab === "forum" ? "bg-primary text-white shadow-lg scale-110" : "bg-muted/50"
+              }`}>
                 <MessageSquare className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-semibold">Forum</span>
+              <span className={`text-[10px] font-semibold ${
+                activeTab === "forum" ? "text-primary" : ""
+              }`}>Forum</span>
             </button>
           </Link>
 
