@@ -39,6 +39,8 @@ import { FeatureCard } from "@/components/dashboard/FeatureCard";
 import { QuickActionButton } from "@/components/dashboard/QuickActionButton";
 import { NotificationBell } from "@/components/NotificationBell";
 import OnboardingTour from "@/components/OnboardingTour";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -46,6 +48,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   // State for dashboard statistics
   const [stats, setStats] = useState({
@@ -261,6 +264,10 @@ const Dashboard = () => {
     }
   };
 
+  if (loading) {
+    return <LoadingAnimation />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <OnboardingTour 
@@ -404,43 +411,43 @@ const Dashboard = () => {
                     </div>
                   </CardHeader>
                   <CardContent className="relative">
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
                       <ScheduleTestModal defaultExamType="jamb">
-                        <Button className="w-full h-24 flex-col gap-2 text-lg font-semibold group relative overflow-hidden">
+                        <Button className={`w-full ${isMobile ? 'h-20' : 'h-24'} flex-col gap-2 ${isMobile ? 'text-base' : 'text-lg'} font-semibold group relative overflow-hidden shadow-lg active:scale-95 transition-all`}>
                           <div className="absolute inset-0 bg-gradient-to-r from-primary-glow to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <Play className="h-7 w-7 relative z-10 group-hover:scale-110 transition-transform" />
+                          <Play className={`${isMobile ? 'h-6 w-6' : 'h-7 w-7'} relative z-10 group-hover:scale-110 transition-transform`} />
                           <span className="relative z-10">JAMB Practice</span>
                         </Button>
                       </ScheduleTestModal>
                       <ScheduleTestModal defaultExamType="waec">
-                        <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2">
-                          <Play className="h-7 w-7" />
+                        <Button variant="outline" className={`w-full ${isMobile ? 'h-20' : 'h-24'} flex-col gap-2 ${isMobile ? 'text-base' : 'text-lg'} font-semibold hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all`}>
+                          <Play className={`${isMobile ? 'h-6 w-6' : 'h-7 w-7'}`} />
                           WAEC Practice
                         </Button>
                       </ScheduleTestModal>
                       <ScheduleTestModal defaultExamType="neco">
-                        <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2">
-                          <Play className="h-7 w-7" />
+                        <Button variant="outline" className={`w-full ${isMobile ? 'h-20' : 'h-24'} flex-col gap-2 ${isMobile ? 'text-base' : 'text-lg'} font-semibold hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all`}>
+                          <Play className={`${isMobile ? 'h-6 w-6' : 'h-7 w-7'}`} />
                           NECO Practice
                         </Button>
                       </ScheduleTestModal>
                       <ScheduleTestModal defaultExamType="post-utme">
-                        <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2">
-                          <Play className="h-7 w-7" />
+                        <Button variant="outline" className={`w-full ${isMobile ? 'h-20' : 'h-24'} flex-col gap-2 ${isMobile ? 'text-base' : 'text-lg'} font-semibold hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all`}>
+                          <Play className={`${isMobile ? 'h-6 w-6' : 'h-7 w-7'}`} />
                           Post-UTME
                         </Button>
                       </ScheduleTestModal>
                     </div>
-                    <div className="mt-4 grid md:grid-cols-2 gap-4">
-                      <Link to="/resources">
-                        <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:bg-muted hover-lift border-2">
-                          <FileText className="h-6 w-6" />
+                    <div className={`mt-4 grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
+                      <Link to="/resources" className="w-full">
+                        <Button variant="outline" className={`w-full ${isMobile ? 'h-16' : 'h-20'} flex-col gap-2 hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all`}>
+                          <FileText className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'}`} />
                           Browse Resources
                         </Button>
                       </Link>
-                      <Link to="/consultation">
-                        <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:bg-muted hover-lift border-2">
-                          <Calendar className="h-6 w-6" />
+                      <Link to="/consultation" className="w-full">
+                        <Button variant="outline" className={`w-full ${isMobile ? 'h-16' : 'h-20'} flex-col gap-2 hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all`}>
+                          <Calendar className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'}`} />
                           Book Session
                         </Button>
                       </Link>
