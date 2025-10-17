@@ -1,4 +1,5 @@
-import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles } from "lucide-react";
+import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles, Sword, MessageSquare, Library } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -74,11 +75,11 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
         <div className="absolute inset-0 bg-background/80 backdrop-blur-xl border-t border-border/50" />
         
         {/* Navigation Items */}
-        <div className="relative flex items-center justify-around h-20 px-4">
+        <div className="relative flex items-center justify-around h-20 px-2">
           {/* Home Button */}
           <button
             onClick={() => onTabChange("dashboard")}
-            className={`relative flex flex-col items-center gap-1.5 px-6 py-2 rounded-2xl transition-all duration-300 ${
+            className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 ${
               activeTab === "dashboard"
                 ? "text-primary"
                 : "text-muted-foreground active:scale-95"
@@ -87,19 +88,39 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
             {activeTab === "dashboard" && (
               <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
             )}
-            <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${
+            <div className={`relative p-2 rounded-xl transition-all duration-300 ${
               activeTab === "dashboard" 
                 ? "bg-primary text-white shadow-lg scale-110" 
                 : "bg-muted/50"
             }`}>
-              <Home className="h-5 w-5" />
+              <Home className="h-4 w-4" />
             </div>
-            <span className={`text-xs font-semibold ${
+            <span className={`text-[10px] font-semibold ${
               activeTab === "dashboard" ? "text-primary" : ""
             }`}>
               Home
             </span>
           </button>
+
+          {/* Study Hub Button */}
+          <Link to="/study-hub">
+            <button className="relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 text-muted-foreground active:scale-95">
+              <div className="relative p-2 rounded-xl transition-all duration-300 bg-muted/50">
+                <Library className="h-4 w-4" />
+              </div>
+              <span className="text-[10px] font-semibold">Study</span>
+            </button>
+          </Link>
+
+          {/* Arena Button */}
+          <Link to="/challenge-arena">
+            <button className="relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 text-muted-foreground active:scale-95">
+              <div className="relative p-2 rounded-xl transition-all duration-300 bg-muted/50">
+                <Sword className="h-4 w-4" />
+              </div>
+              <span className="text-[10px] font-semibold">Arena</span>
+            </button>
+          </Link>
 
           {/* Tests Button - Center with Special Styling */}
           <Sheet open={testsSheetOpen} onOpenChange={setTestsSheetOpen}>
@@ -189,10 +210,20 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
             </SheetContent>
           </Sheet>
 
+          {/* Forum Button */}
+          <Link to="/forum">
+            <button className="relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 text-muted-foreground active:scale-95">
+              <div className="relative p-2 rounded-xl transition-all duration-300 bg-muted/50">
+                <MessageSquare className="h-4 w-4" />
+              </div>
+              <span className="text-[10px] font-semibold">Forum</span>
+            </button>
+          </Link>
+
           {/* Profile Button */}
           <button
             onClick={() => onTabChange("profile")}
-            className={`relative flex flex-col items-center gap-1.5 px-6 py-2 rounded-2xl transition-all duration-300 ${
+            className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300 ${
               activeTab === "profile" || activeTab === "settings"
                 ? "text-primary"
                 : "text-muted-foreground active:scale-95"
@@ -201,14 +232,14 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
             {(activeTab === "profile" || activeTab === "settings") && (
               <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
             )}
-            <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${
+            <div className={`relative p-2 rounded-xl transition-all duration-300 ${
               activeTab === "profile" || activeTab === "settings"
                 ? "bg-primary text-white shadow-lg scale-110" 
                 : "bg-muted/50"
             }`}>
-              <User className="h-5 w-5" />
+              <User className="h-4 w-4" />
             </div>
-            <span className={`text-xs font-semibold ${
+            <span className={`text-[10px] font-semibold ${
               activeTab === "profile" || activeTab === "settings" ? "text-primary" : ""
             }`}>
               Profile
