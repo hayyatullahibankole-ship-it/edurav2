@@ -54,7 +54,6 @@ All colors MUST be HSL for consistency across light/dark modes.
     /* Info - Cyan for information */
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
-    --info-glow: 199 89% 58%;
 
     /* Borders and inputs */
     --border: 220 13% 91%;
@@ -128,7 +127,6 @@ All colors MUST be HSL for consistency across light/dark modes.
     
     --info: 199 89% 52%;
     --info-foreground: 0 0% 100%;
-    --info-glow: 199 89% 62%;
 
     --border: 222 47% 20%;
     --input: 222 47% 16%;
@@ -184,45 +182,6 @@ All colors MUST be HSL for consistency across light/dark modes.
     animation: bounce 2s infinite;
   }
   
-  @keyframes spin-slow {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  
-  .animate-spin-slow {
-    animation: spin-slow 3s linear infinite;
-  }
-  
-  @keyframes bounce-subtle {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-  }
-  
-  .animate-bounce-subtle {
-    animation: bounce-subtle 2s ease-in-out infinite;
-  }
-  
-  @keyframes shine {
-    0% {
-      left: -100%;
-    }
-    100% {
-      left: 200%;
-    }
-  }
-  
-  .animate-shine {
-    animation: shine 2s ease-in-out infinite;
-  }
-  
   @keyframes float {
     0%, 100% {
       transform: translateY(0px);
@@ -230,23 +189,6 @@ All colors MUST be HSL for consistency across light/dark modes.
     50% {
       transform: translateY(-10px);
     }
-  }
-  
-  @keyframes gradient-shift {
-    0%, 100% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-  }
-  
-  .animate-gradient-shift {
-    animation: gradient-shift 6s ease infinite;
-  }
-  
-  .animate-pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
   }
   
   .hover-lift {
@@ -304,39 +246,6 @@ All colors MUST be HSL for consistency across light/dark modes.
   
   .pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
-  }
-  
-  /* Active scale animation */
-  .active\:scale-98:active {
-    transform: scale(0.98);
-  }
-  
-  @keyframes bounce-slow {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-5px);
-    }
-  }
-  
-  .animate-bounce-slow {
-    animation: bounce-slow 2s ease-in-out infinite;
-  }
-  
-  @keyframes fade-in-up {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .animate-fade-in-up {
-    animation: fade-in-up 0.6s ease-out forwards;
   }
   
   /* Slide in animations */
