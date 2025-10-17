@@ -184,6 +184,45 @@ All colors MUST be HSL for consistency across light/dark modes.
     animation: bounce 2s infinite;
   }
   
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-spin-slow {
+    animation: spin-slow 3s linear infinite;
+  }
+  
+  @keyframes bounce-subtle {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  .animate-bounce-subtle {
+    animation: bounce-subtle 2s ease-in-out infinite;
+  }
+  
+  @keyframes shine {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 200%;
+    }
+  }
+  
+  .animate-shine {
+    animation: shine 2s ease-in-out infinite;
+  }
+  
   @keyframes float {
     0%, 100% {
       transform: translateY(0px);

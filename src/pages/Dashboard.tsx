@@ -41,6 +41,9 @@ import { NotificationBell } from "@/components/NotificationBell";
 import OnboardingTour from "@/components/OnboardingTour";
 import BottomNav from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import { MobileStatCard } from "@/components/dashboard/MobileStatCard";
+import { ActionCard } from "@/components/dashboard/ActionCard";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -263,87 +266,70 @@ const Dashboard = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <LoadingAnimation message="Loading your dashboard..." />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <OnboardingTour 
         isOpen={showOnboarding} 
         onComplete={() => setShowOnboarding(false)} 
       />
-      {/* Modern Mobile-First Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent animate-gradient-shift bg-[length:200%_200%]">
-        {/* Animated Background Pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
+      {/* Sleek Mobile Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30" />
         
-        {/* Floating Orbs */}
-        <div className="absolute top-10 left-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-10 right-20 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
-        
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
-          {/* Top Bar - Profile & Actions */}
-          <div className="flex items-center justify-between mb-6 animate-fade-in-up">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-16 w-16 md:h-20 md:w-20 ring-4 ring-white/30 shadow-2xl">
+        <div className="container mx-auto px-4 py-6 relative z-10">
+          {/* Profile Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-14 w-14 ring-4 ring-white/30">
                 <AvatarImage src={userProfile?.avatar_url} />
-                <AvatarFallback className="bg-white/20 text-white text-xl font-bold backdrop-blur-sm">
+                <AvatarFallback className="bg-white/20 text-white text-lg font-bold">
                   {userProfile?.first_name?.[0] || user?.email?.[0].toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm mb-2 text-xs">
-                  {subscriptionLoading ? (
-                    <span className="animate-pulse">Loading...</span>
+                <h2 className="text-white font-bold text-lg">
+                  Hey, {userProfile?.first_name || user?.email?.split('@')[0]}! 👋
+                </h2>
+                <Badge className="bg-white/20 text-white border-white/30 text-xs mt-1">
+                  {isPremium ? (
+                    <span className="flex items-center gap-1">
+                      <Zap className="h-3 w-3" />
+                      Premium
+                    </span>
                   ) : (
-                    isPremium ? (
-                      <span className="flex items-center gap-1">
-                        <Zap className="h-3 w-3 animate-pulse" />
-                        Premium
-                      </span>
-                    ) : (
-                      'Free'
-                    )
+                    'Free Plan'
                   )}
                 </Badge>
-                <h2 className="text-white font-bold text-xl md:text-2xl">
-                  {userProfile?.first_name || user?.email?.split('@')[0]}
-                </h2>
-                <p className="text-white/80 text-sm">Keep crushing it! 🔥</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <NotificationBell />
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={handleLogout}
-                className="hidden md:flex bg-white/10 hover:bg-white/20 text-white border border-white/20"
-              >
-                <LogOut className="h-5 w-5" />
-              </Button>
-            </div>
+            <NotificationBell />
           </div>
 
-          {/* Stats Row - Compact for Mobile */}
-          <div className="grid grid-cols-4 gap-2 md:gap-4 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-4 text-center border border-white/20">
-              <Target className="h-5 w-5 md:h-6 md:w-6 text-white mx-auto mb-1 md:mb-2" />
-              <div className="text-white font-bold text-lg md:text-2xl">{loading ? "..." : stats.testsTaken}</div>
-              <div className="text-white/70 text-xs">Tests</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-4 text-center border border-white/20">
-              <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-white mx-auto mb-1 md:mb-2" />
-              <div className="text-white font-bold text-lg md:text-2xl">{loading ? "..." : `${stats.averageScore}%`}</div>
-              <div className="text-white/70 text-xs">Score</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-4 text-center border border-white/20">
-              <Clock className="h-5 w-5 md:h-6 md:w-6 text-white mx-auto mb-1 md:mb-2" />
-              <div className="text-white font-bold text-lg md:text-2xl">{loading ? "..." : `${stats.studyHours}h`}</div>
-              <div className="text-white/70 text-xs">Hours</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-4 text-center border border-white/20">
-              <Trophy className="h-5 w-5 md:h-6 md:w-6 text-white mx-auto mb-1 md:mb-2" />
-              <div className="text-white font-bold text-lg md:text-2xl">{loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}</div>
-              <div className="text-white/70 text-xs">Rank</div>
-            </div>
+          {/* Mini Stats */}
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { icon: Target, value: stats.testsTaken, label: "Tests" },
+              { icon: TrendingUp, value: `${stats.averageScore}%`, label: "Score" },
+              { icon: Clock, value: `${stats.studyHours}h`, label: "Hours" },
+              { icon: Trophy, value: stats.rank > 0 ? `#${stats.rank}` : "-", label: "Rank" }
+            ].map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <div key={index} className="bg-white/10 backdrop-blur-md rounded-xl p-2 text-center">
+                  <Icon className="h-4 w-4 text-white mx-auto mb-1" />
+                  <div className="text-white font-bold text-sm">{stat.value}</div>
+                  <div className="text-white/70 text-[10px]">{stat.label}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -366,170 +352,301 @@ const Dashboard = () => {
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
-
-            {/* Quick Actions - Mobile Optimized Cards */}
-            <div className="grid grid-cols-2 gap-3 md:gap-4 animate-fade-in-up">
-              <ScheduleTestModal defaultExamType="jamb">
-                <Card className="bg-gradient-to-br from-primary to-primary-glow text-white border-0 cursor-pointer hover-lift active:scale-95 transition-all">
-                  <CardContent className="p-4 md:p-6 flex flex-col items-center justify-center gap-2 h-32 md:h-40">
-                    <div className="p-2 md:p-3 bg-white/20 rounded-full">
-                      <Play className="h-5 w-5 md:h-7 md:w-7" />
+            {/* Quick Action Cards - Modern Design */}
+            <div>
+              <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                <Rocket className="h-5 w-5 text-primary" />
+                Start Practicing
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <ScheduleTestModal defaultExamType="jamb">
+                  <div className="relative overflow-hidden rounded-2xl h-36 bg-gradient-to-br from-primary to-primary-glow cursor-pointer transform transition-all hover:scale-105 active:scale-95">
+                    <div className="relative z-10 flex flex-col items-center justify-center gap-2 text-white h-full">
+                      <div className="p-3 bg-white/20 rounded-2xl">
+                        <Play className="h-7 w-7" />
+                      </div>
+                      <div className="text-center">
+                        <h3 className="font-bold text-base">JAMB</h3>
+                        <p className="text-xs text-white/80">Full Mock</p>
+                      </div>
                     </div>
-                    <span className="text-sm md:text-lg font-bold text-center">JAMB</span>
-                  </CardContent>
-                </Card>
-              </ScheduleTestModal>
-              
-              <ScheduleTestModal defaultExamType="waec">
-                <Card className="bg-gradient-to-br from-secondary to-accent border-0 cursor-pointer hover-lift active:scale-95 transition-all">
-                  <CardContent className="p-4 md:p-6 flex flex-col items-center justify-center gap-2 h-32 md:h-40">
-                    <div className="p-2 md:p-3 bg-white/20 rounded-full">
-                      <BookOpen className="h-5 w-5 md:h-7 md:w-7 text-white" />
+                  </div>
+                </ScheduleTestModal>
+                
+                <ScheduleTestModal defaultExamType="waec">
+                  <div className="relative overflow-hidden rounded-2xl h-36 bg-gradient-to-br from-secondary to-accent cursor-pointer transform transition-all hover:scale-105 active:scale-95">
+                    <div className="relative z-10 flex flex-col items-center justify-center gap-2 text-white h-full">
+                      <div className="p-3 bg-white/20 rounded-2xl">
+                        <BookOpen className="h-7 w-7" />
+                      </div>
+                      <div className="text-center">
+                        <h3 className="font-bold text-base">WAEC</h3>
+                        <p className="text-xs text-white/80">Practice</p>
+                      </div>
                     </div>
-                    <span className="text-sm md:text-lg font-bold text-center text-white">WAEC</span>
-                  </CardContent>
-                </Card>
-              </ScheduleTestModal>
-              
-              <ScheduleTestModal defaultExamType="neco">
-                <Card className="bg-gradient-to-br from-info to-info-glow border-0 cursor-pointer hover-lift active:scale-95 transition-all">
-                  <CardContent className="p-4 md:p-6 flex flex-col items-center justify-center gap-2 h-32 md:h-40">
-                    <div className="p-2 md:p-3 bg-white/20 rounded-full">
-                      <FileText className="h-5 w-5 md:h-7 md:w-7 text-white" />
+                  </div>
+                </ScheduleTestModal>
+                
+                <ScheduleTestModal defaultExamType="neco">
+                  <div className="relative overflow-hidden rounded-2xl h-36 bg-gradient-to-br from-info to-info-glow cursor-pointer transform transition-all hover:scale-105 active:scale-95">
+                    <div className="relative z-10 flex flex-col items-center justify-center gap-2 text-white h-full">
+                      <div className="p-3 bg-white/20 rounded-2xl">
+                        <FileText className="h-7 w-7" />
+                      </div>
+                      <div className="text-center">
+                        <h3 className="font-bold text-base">NECO</h3>
+                        <p className="text-xs text-white/80">Test Mode</p>
+                      </div>
                     </div>
-                    <span className="text-sm md:text-lg font-bold text-center text-white">NECO</span>
-                  </CardContent>
-                </Card>
-              </ScheduleTestModal>
-              
-              <ScheduleTestModal defaultExamType="post-utme">
-                <Card className="bg-gradient-to-br from-warning to-destructive border-0 cursor-pointer hover-lift active:scale-95 transition-all">
-                  <CardContent className="p-4 md:p-6 flex flex-col items-center justify-center gap-2 h-32 md:h-40">
-                    <div className="p-2 md:p-3 bg-white/20 rounded-full">
-                      <Award className="h-5 w-5 md:h-7 md:w-7 text-white" />
+                  </div>
+                </ScheduleTestModal>
+                
+                <ScheduleTestModal defaultExamType="post-utme">
+                  <div className="relative overflow-hidden rounded-2xl h-36 bg-gradient-to-br from-warning to-destructive cursor-pointer transform transition-all hover:scale-105 active:scale-95">
+                    <div className="relative z-10 flex flex-col items-center justify-center gap-2 text-white h-full">
+                      <div className="p-3 bg-white/20 rounded-2xl">
+                        <Award className="h-7 w-7" />
+                      </div>
+                      <div className="text-center">
+                        <h3 className="font-bold text-base">POST-UTME</h3>
+                        <p className="text-xs text-white/80">Prepare</p>
+                      </div>
                     </div>
-                    <span className="text-sm md:text-lg font-bold text-center text-white">POST-UTME</span>
-                  </CardContent>
-                </Card>
-              </ScheduleTestModal>
+                  </div>
+                </ScheduleTestModal>
+              </div>
             </div>
 
-            {/* Feature Cards - Mad UI */}
-            <div className="grid md:grid-cols-3 gap-4">
-              <FeatureCard 
-                icon={GraduationCap}
-                title="Study Hub"
-                description="Learn with expert content"
-                href="/study-hub"
-                gradient="from-primary to-secondary"
-                badge="Popular"
-              />
-              <FeatureCard 
-                icon={MessageSquare}
-                title="Ask Tutor"
-                description="Get instant help 24/7"
-                href="/forum"
-                gradient="from-success to-accent"
-                badge="24/7"
-              />
-              <FeatureCard 
-                icon={Sword}
-                title="Challenge Arena"
-                description="Compete & win prizes"
-                href="/challenge-arena"
-                gradient="from-warning to-destructive"
-                badge="New"
-              />
+            {/* Performance Stats - Enhanced */}
+            <div>
+              <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-success" />
+                Your Performance
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <MobileStatCard
+                  icon={Target}
+                  label="Tests Completed"
+                  value={stats.testsTaken}
+                  gradient="from-primary to-primary-glow"
+                  trend={{ value: "+12%", isPositive: true }}
+                />
+                <MobileStatCard
+                  icon={TrendingUp}
+                  label="Average Score"
+                  value={`${stats.averageScore}%`}
+                  gradient="from-success to-success-glow"
+                  trend={stats.averageScore >= 70 ? { value: "Excellent", isPositive: true } : undefined}
+                />
+                <MobileStatCard
+                  icon={Clock}
+                  label="Study Time"
+                  value={`${stats.studyHours}h`}
+                  gradient="from-info to-info-glow"
+                />
+                <MobileStatCard
+                  icon={Trophy}
+                  label="Your Rank"
+                  value={stats.rank > 0 ? `#${stats.rank}` : "N/A"}
+                  gradient="from-warning to-destructive"
+                  trend={stats.rank > 0 && stats.rank <= 10 ? { value: "Top 10!", isPositive: true } : undefined}
+                />
+              </div>
             </div>
 
-            {/* Recent Tests & Progress */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* Recent Test Results */}
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Trophy className="h-5 w-5 text-primary" />
-                    Recent Tests
-                  </CardTitle>
-                  <CardDescription>Your latest performance</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {loading ? (
-                      <div className="text-center text-muted-foreground py-8">Loading...</div>
-                    ) : recentTests.length > 0 ? (
-                      recentTests.map((test: any, index: number) => (
-                        <Link key={index} to={`/results?attempt=${test.attemptId}`} className="block">
-                          <div className="flex items-center justify-between p-3 border border-border rounded-xl hover:bg-muted/50 hover-lift active:scale-98 transition-all">
-                            <div className="flex items-center gap-3">
-                              <div className="bg-primary/10 p-2 rounded-lg">
-                                <BookOpen className="h-4 w-4 text-primary" />
-                              </div>
-                              <div>
-                                <h4 className="font-semibold text-sm">{test.subject}</h4>
-                                <p className="text-xs text-muted-foreground">{test.date}</p>
-                              </div>
+            {/* Feature Cards */}
+            <div>
+              <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-accent" />
+                Explore Features
+              </h3>
+              <div className="grid grid-cols-1 gap-3">
+                <Link to="/study-hub">
+                  <div className="relative group overflow-hidden rounded-2xl h-28 bg-gradient-to-r from-primary to-secondary cursor-pointer transform transition-all hover:scale-105 active:scale-95">
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMSIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
+                    <div className="relative z-10 flex items-center gap-4 p-6 h-full">
+                      <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                        <GraduationCap className="h-8 w-8 text-white" />
+                      </div>
+                      <div className="text-white">
+                        <h4 className="font-bold text-lg mb-1">Study Hub</h4>
+                        <p className="text-sm text-white/80">Video lessons & study materials</p>
+                      </div>
+                      <Badge className="ml-auto bg-white/20 text-white border-white/30">Popular</Badge>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link to="/forum">
+                  <div className="relative group overflow-hidden rounded-2xl h-28 bg-gradient-to-r from-success to-accent cursor-pointer transform transition-all hover:scale-105 active:scale-95">
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMSIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
+                    <div className="relative z-10 flex items-center gap-4 p-6 h-full">
+                      <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                        <MessageSquare className="h-8 w-8 text-white" />
+                      </div>
+                      <div className="text-white">
+                        <h4 className="font-bold text-lg mb-1">Ask Tutor</h4>
+                        <p className="text-sm text-white/80">Get help from experts 24/7</p>
+                      </div>
+                      <Badge className="ml-auto bg-white/20 text-white border-white/30">24/7</Badge>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link to="/challenge-arena">
+                  <div className="relative group overflow-hidden rounded-2xl h-28 bg-gradient-to-r from-warning to-destructive cursor-pointer transform transition-all hover:scale-105 active:scale-95">
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMSIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
+                    <div className="relative z-10 flex items-center gap-4 p-6 h-full">
+                      <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                        <Sword className="h-8 w-8 text-white" />
+                      </div>
+                      <div className="text-white">
+                        <h4 className="font-bold text-lg mb-1">Challenge Arena</h4>
+                        <p className="text-sm text-white/80">Compete & win prizes</p>
+                      </div>
+                      <Badge className="ml-auto bg-white/20 text-white border-white/30 animate-pulse">New</Badge>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div>
+              <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                <Clock className="h-5 w-5 text-info" />
+                Recent Tests
+              </h3>
+              {recentTests.length > 0 ? (
+                <div className="space-y-2">
+                  {recentTests.map((test: any, index: number) => (
+                    <Link key={index} to={`/results?attempt=${test.attemptId}`}>
+                      <div className="bg-card border border-border rounded-xl p-4 hover:shadow-lg transition-all hover:-translate-y-0.5 active:scale-98">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                              <BookOpen className="h-5 w-5 text-primary" />
                             </div>
-                            <div className="text-right">
-                              <div className="text-lg font-bold text-primary">{test.score}%</div>
-                              <p className="text-xs text-muted-foreground">{test.duration}</p>
+                            <div>
+                              <h4 className="font-semibold text-sm">{test.subject}</h4>
+                              <p className="text-xs text-muted-foreground">{test.date}</p>
                             </div>
                           </div>
-                        </Link>
-                      ))
-                    ) : (
-                      <div className="text-center text-muted-foreground py-8">
-                        No tests yet. Start practicing! 🚀
+                          <div className="text-right">
+                            <div className="text-xl font-bold text-primary">{test.score}%</div>
+                            <p className="text-xs text-muted-foreground">{test.duration}</p>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Subject Progress */}
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-success" />
-                    Subject Progress
-                  </CardTitle>
-                  <CardDescription>Track your improvement</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {loading ? (
-                      <div className="text-center text-muted-foreground py-8">Loading...</div>
-                    ) : subjectProgress.length > 0 ? (
-                      subjectProgress.map((subject, index) => (
-                        <SubjectProgressCard
-                          key={index}
-                          subject={subject.subject}
-                          progress={subject.progress}
-                        />
-                      ))
-                    ) : (
-                      <div className="text-center text-muted-foreground py-8">
-                        Complete tests to track progress! 📊
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <Card className="border-dashed">
+                  <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+                    <Trophy className="h-12 w-12 text-muted-foreground/50 mb-3" />
+                    <p className="text-sm text-muted-foreground mb-4">No tests yet. Let's get started!</p>
+                    <ScheduleTestModal>
+                      <Button size="sm">Take Your First Test</Button>
+                    </ScheduleTestModal>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
+            {/* Subject Progress */}
+            {subjectProgress.length > 0 && (
+              <div>
+                <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                  <Target className="h-5 w-5 text-success" />
+                  Subject Progress
+                </h3>
+                <div className="space-y-3">
+                  {subjectProgress.map((subject, index) => (
+                    <SubjectProgressCard
+                      key={index}
+                      subject={subject.subject}
+                      progress={subject.progress}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </TabsContent>
 
-          <TabsContent value="profile" className="mt-8">
+            {/* Recent Activity */}
+            <div>
+              <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                <Clock className="h-5 w-5 text-info" />
+                Recent Tests
+              </h3>
+              {recentTests.length > 0 ? (
+                <div className="space-y-2">
+                  {recentTests.map((test: any, index: number) => (
+                    <Link key={index} to={`/results?attempt=${test.attemptId}`}>
+                      <div className="bg-card border border-border rounded-xl p-4 hover:shadow-lg transition-all hover:-translate-y-0.5 active:scale-98">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                              <BookOpen className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-sm">{test.subject}</h4>
+                              <p className="text-xs text-muted-foreground">{test.date}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xl font-bold text-primary">{test.score}%</div>
+                            <p className="text-xs text-muted-foreground">{test.duration}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <Card className="border-dashed">
+                  <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+                    <Trophy className="h-12 w-12 text-muted-foreground/50 mb-3" />
+                    <p className="text-sm text-muted-foreground mb-4">No tests yet. Let's get started!</p>
+                    <ScheduleTestModal>
+                      <Button size="sm">Take Your First Test</Button>
+                    </ScheduleTestModal>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Subject Progress */}
+            {subjectProgress.length > 0 && (
+              <div>
+                <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                  <Target className="h-5 w-5 text-success" />
+                  Subject Progress
+                </h3>
+                <div className="space-y-3">
+                  {subjectProgress.map((subject, index) => (
+                    <SubjectProgressCard
+                      key={index}
+                      subject={subject.subject}
+                      progress={subject.progress}
+                    />
+                   ))}
+                </div>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="profile">
             <ProfileSettings />
           </TabsContent>
 
-          <TabsContent value="settings" className="mt-8">
+          <TabsContent value="settings">
             <AccountSettings />
           </TabsContent>
         </Tabs>
       </div>
       
-      {/* Bottom Navigation for Mobile */}
       <BottomNav />
     </div>
   );
