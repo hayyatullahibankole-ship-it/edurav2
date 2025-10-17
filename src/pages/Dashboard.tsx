@@ -335,44 +335,75 @@ const Dashboard = () => {
             {/* Quick Stats Grid */}
             <QuickStatsGrid stats={stats} loading={loading} />
 
-            {/* Study Streak & Quick Actions Row */}
-            <div className="grid md:grid-cols-3 gap-4">
-              <StreakCard currentStreak={stats.testsTaken > 0 ? 5 : 0} bestStreak={7} />
-              
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Rocket className="h-5 w-5 text-primary" />
-                    Quick Start
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
-                    <ScheduleTestModal defaultExamType="jamb">
-                      <Button className="w-full h-20 flex flex-col gap-2" size="lg">
-                        <Play className="h-5 w-5" />
-                        <span className="text-sm font-semibold">JAMB Practice</span>
-                      </Button>
-                    </ScheduleTestModal>
-                    <ScheduleTestModal defaultExamType="waec">
-                      <Button variant="outline" className="w-full h-20 flex flex-col gap-2" size="lg">
-                        <BookOpen className="h-5 w-5" />
-                        <span className="text-sm font-semibold">WAEC Practice</span>
-                      </Button>
-                    </ScheduleTestModal>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Jump into Practice Mode */}
+            <Card className="bg-gradient-to-br from-primary/10 via-background to-background border-2 border-primary/20">
+              <CardContent className="pt-6">
+                <h2 className="text-2xl font-extrabold mb-3 tracking-tight">Jump into practice mode</h2>
+                <ScheduleTestModal>
+                  <Button size="lg" className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all">
+                    <Play className="h-6 w-6 mr-2" />
+                    Start Test
+                  </Button>
+                </ScheduleTestModal>
+              </CardContent>
+            </Card>
+
+            {/* Study Streak */}
+            <Card className="border-2 border-success/20 bg-gradient-to-br from-success/5 via-background to-background">
+              <CardContent className="pt-6">
+                <h2 className="text-3xl font-extrabold mb-2 tracking-tight">Study Streak</h2>
+                <p className="text-muted-foreground text-lg mb-6">Keep the momentum going!</p>
+                <div className="text-center py-6">
+                  <div className="text-7xl font-black text-success mb-3">{stats.testsTaken}</div>
+                  <p className="text-lg text-muted-foreground font-medium">Tests completed</p>
+                </div>
+                <ScheduleTestModal>
+                  <Button size="lg" className="w-full h-14 text-lg font-bold bg-success hover:bg-success/90 shadow-lg hover:shadow-xl transition-all">
+                    Take Another Test
+                  </Button>
+                </ScheduleTestModal>
+              </CardContent>
+            </Card>
+
+            {/* Subscription Status */}
+            <Card className="border-2 border-border">
+              <CardContent className="pt-6">
+                <h2 className="text-3xl font-extrabold mb-2 tracking-tight">Subscription</h2>
+                <p className="text-muted-foreground text-lg mb-6">{isPremium ? 'Premium Plan' : 'Free Plan'}</p>
+                <div className="flex flex-col items-center gap-4 py-4">
+                  <Badge 
+                    variant={isPremium ? "default" : "secondary"} 
+                    className="text-lg px-6 py-2 font-bold"
+                  >
+                    {isPremium ? 'ACTIVE' : 'FREE'}
+                  </Badge>
+                  {isPremium && subscription && (
+                    <p className="text-sm text-muted-foreground">
+                      Active Premium Subscription
+                    </p>
+                  )}
+                  <Link to="/payment" className="w-full">
+                    <Button variant="outline" size="lg" className="w-full h-12 text-base font-semibold">
+                      {isPremium ? 'Manage Subscription' : 'Upgrade to Premium'}
+                    </Button>
+                  </Link>
+                  {!isPremium && (
+                    <p className="text-sm text-center text-muted-foreground px-4">
+                      Go to Settings to Activate Windows 🤣
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Explore Features */}
-            <Card>
+            <Card className="border-2 border-accent/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-accent" />
+                <h2 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
+                  <Sparkles className="h-8 w-8 text-accent" />
                   Explore & Learn
-                </CardTitle>
-                <CardDescription>Unlock your full potential with these features</CardDescription>
+                </h2>
+                <p className="text-lg text-muted-foreground mt-2">Unlock your full potential with these features</p>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-3 gap-4">
@@ -427,13 +458,13 @@ const Dashboard = () => {
             {/* Recent Tests & Subject Progress Side by Side */}
             <div className="grid md:grid-cols-2 gap-6">
               {/* Recent Tests */}
-              <Card>
+              <Card className="border-2 border-primary/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Trophy className="h-5 w-5 text-primary" />
+                  <h3 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+                    <Trophy className="h-7 w-7 text-primary" />
                     Recent Activity
-                  </CardTitle>
-                  <CardDescription>Your latest test results</CardDescription>
+                  </h3>
+                  <p className="text-base text-muted-foreground mt-1">Your latest test results</p>
                 </CardHeader>
                 <CardContent>
                   {recentTests.length > 0 ? (
@@ -471,13 +502,13 @@ const Dashboard = () => {
               </Card>
 
               {/* Subject Progress */}
-              <Card>
+              <Card className="border-2 border-success/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-success" />
+                  <h3 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+                    <Target className="h-7 w-7 text-success" />
                     Subject Progress
-                  </CardTitle>
-                  <CardDescription>Track your mastery</CardDescription>
+                  </h3>
+                  <p className="text-base text-muted-foreground mt-1">Track your mastery</p>
                 </CardHeader>
                 <CardContent>
                   {subjectProgress.length > 0 ? (
