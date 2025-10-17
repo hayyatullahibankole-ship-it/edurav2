@@ -275,11 +275,12 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <OnboardingTour 
-        isOpen={showOnboarding} 
-        onComplete={() => setShowOnboarding(false)} 
-      />
+    <>
+      <div className="min-h-screen bg-background">
+        <OnboardingTour 
+          isOpen={showOnboarding} 
+          onComplete={() => setShowOnboarding(false)} 
+        />
       {/* Sleek Mobile Header */}
       <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30" />
@@ -572,7 +573,6 @@ const Dashboard = () => {
                 </div>
               </div>
             )}
-          </TabsContent>
 
             {/* Recent Activity */}
             <div>
@@ -616,25 +616,6 @@ const Dashboard = () => {
                 </Card>
               )}
             </div>
-
-            {/* Subject Progress */}
-            {subjectProgress.length > 0 && (
-              <div>
-                <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-                  <Target className="h-5 w-5 text-success" />
-                  Subject Progress
-                </h3>
-                <div className="space-y-3">
-                  {subjectProgress.map((subject, index) => (
-                    <SubjectProgressCard
-                      key={index}
-                      subject={subject.subject}
-                      progress={subject.progress}
-                    />
-                   ))}
-                </div>
-              </div>
-            )}
           </TabsContent>
 
           <TabsContent value="profile">
@@ -649,6 +630,7 @@ const Dashboard = () => {
       
       <BottomNav />
     </div>
+    </>
   );
 };
 
