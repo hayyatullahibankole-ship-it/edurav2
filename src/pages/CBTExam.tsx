@@ -61,6 +61,7 @@ const CBTExam = () => {
       onSubmit={submitExam}
       duration={examDuration}
       examTitle="CBT Practice Exam"
+      submitting={submitting}
     />
   );
 };

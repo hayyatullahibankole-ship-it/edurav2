@@ -14,9 +14,10 @@ interface CleanCBTInterfaceProps {
   questions: CBTQuestion[];
   answers: CBTAnswers;
   onAnswerSelect: (questionId: string, optionIndex: number) => void;
-  onSubmit: (timeSpent: number) => void;
+  onSubmit: (timeSpent: number) => Promise<void>;
   duration: number;
   examTitle?: string;
+  submitting?: boolean;
 }
 
 export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
@@ -25,7 +26,8 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
   onAnswerSelect,
   onSubmit,
   duration,
-  examTitle = 'CBT Exam'
+  examTitle = 'CBT Exam',
+  submitting = false
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(duration * 60);
@@ -56,7 +58,10 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleSubmitClick = () => {
+  const handleSubmitClick = async () => {
+    // Prevent double submission
+    if (submitting) return;
+    
     // Block submission for free/basic users
     if (!subscriptionLoading && !canAccessPremium) {
       setShowSubmitDialog(false);
@@ -64,7 +69,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
       return;
     }
     const timeSpent = (duration * 60) - timeLeft;
-    onSubmit(timeSpent);
+    await onSubmit(timeSpent);
   };
 
   const progressPercentage = (Object.keys(answers).length / questions.length) * 100;
@@ -95,8 +100,9 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
               variant="secondary"
               size="sm"
               onClick={() => setShowSubmitDialog(true)}
+              disabled={submitting}
             >
-              Submit Test
+              {submitting ? 'Submitting...' : 'Submit Test'}
             </Button>
           </div>
         </div>
@@ -270,8 +276,9 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
                 <Button 
                   onClick={handleSubmitClick}
                   className="flex-1"
+                  disabled={submitting}
                 >
-                  Submit
+                  {submitting ? 'Submitting...' : 'Submit'}
                 </Button>
               </div>
             </CardContent>

@@ -259,7 +259,7 @@ export const useCBTExam = (attemptId: string | null) => {
 
   // Submit exam - optimized for speed
   const submitExam = useCallback(async (timeSpentSeconds: number) => {
-    if (!attemptId) return;
+    if (!attemptId || submitting) return;
 
     setSubmitting(true);
     try {
@@ -309,8 +309,10 @@ export const useCBTExam = (attemptId: string | null) => {
         description: 'Redirecting to results...'
       });
 
-      // Navigate to results - paywall check happens there before loading results
-      navigate(`/results?attempt=${attemptId}`);
+      // Small delay before navigation to ensure toast is visible
+      setTimeout(() => {
+        navigate(`/results?attempt=${attemptId}`);
+      }, 500);
 
     } catch (error) {
       console.error('Submission error:', error);
@@ -319,10 +321,9 @@ export const useCBTExam = (attemptId: string | null) => {
         description: 'Failed to submit exam. Please try again.',
         variant: 'destructive'
       });
-    } finally {
       setSubmitting(false);
     }
-  }, [attemptId, questions, answers, navigate, toast]);
+  }, [attemptId, questions, answers, navigate, toast, submitting]);
 
   return {
     questions,
