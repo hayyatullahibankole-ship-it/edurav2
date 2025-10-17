@@ -39,6 +39,8 @@ import { FeatureCard } from "@/components/dashboard/FeatureCard";
 import { QuickActionButton } from "@/components/dashboard/QuickActionButton";
 import { NotificationBell } from "@/components/NotificationBell";
 import OnboardingTour from "@/components/OnboardingTour";
+import BottomNav from "@/components/BottomNav";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -267,7 +269,7 @@ const Dashboard = () => {
         isOpen={showOnboarding} 
         onComplete={() => setShowOnboarding(false)} 
       />
-      {/* Hero Header with Animated Gradient */}
+      {/* Modern Mobile-First Header */}
       <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent animate-gradient-shift bg-[length:200%_200%]">
         {/* Animated Background Pattern */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
@@ -276,348 +278,245 @@ const Dashboard = () => {
         <div className="absolute top-10 left-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-float" />
         <div className="absolute bottom-10 right-20 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
         
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-left animate-fade-in-up">
-              <div className="flex items-center gap-2 mb-3 justify-center md:justify-start">
-                <div className="relative">
-                  <Sparkles className="h-6 w-6 text-white animate-pulse" />
-                  <div className="absolute inset-0 bg-white/20 blur-xl animate-pulse" />
-                </div>
-                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm hover:bg-white/30 transition-all cursor-default">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+          {/* Top Bar - Profile & Actions */}
+          <div className="flex items-center justify-between mb-6 animate-fade-in-up">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-16 w-16 md:h-20 md:w-20 ring-4 ring-white/30 shadow-2xl">
+                <AvatarImage src={userProfile?.avatar_url} />
+                <AvatarFallback className="bg-white/20 text-white text-xl font-bold backdrop-blur-sm">
+                  {userProfile?.first_name?.[0] || user?.email?.[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm mb-2 text-xs">
                   {subscriptionLoading ? (
                     <span className="animate-pulse">Loading...</span>
                   ) : (
                     isPremium ? (
-                      <span className="flex items-center gap-1.5">
-                        <Zap className="h-3.5 w-3.5 animate-pulse" />
-                        Premium Member
+                      <span className="flex items-center gap-1">
+                        <Zap className="h-3 w-3 animate-pulse" />
+                        Premium
                       </span>
                     ) : (
-                      'Free Member'
+                      'Free'
                     )
                   )}
                 </Badge>
+                <h2 className="text-white font-bold text-xl md:text-2xl">
+                  {userProfile?.first_name || user?.email?.split('@')[0]}
+                </h2>
+                <p className="text-white/80 text-sm">Keep crushing it! 🔥</p>
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-3 drop-shadow-lg animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                Welcome back, {userProfile?.first_name || user?.email?.split('@')[0]}! 👋
-              </h1>
-              <p className="text-white/90 text-lg md:text-xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                Ready to ace your exams? Let's continue your journey to success! 🚀
-              </p>
             </div>
-            <div className="flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <div className="flex items-center gap-2">
               <NotificationBell />
               <Button 
-                variant="secondary" 
+                variant="ghost" 
+                size="icon"
                 onClick={handleLogout}
-                className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all hover-lift"
+                className="hidden md:flex bg-white/10 hover:bg-white/20 text-white border border-white/20"
               >
-                <LogOut className="h-4 w-4" />
-                Logout
+                <LogOut className="h-5 w-5" />
               </Button>
+            </div>
+          </div>
+
+          {/* Stats Row - Compact for Mobile */}
+          <div className="grid grid-cols-4 gap-2 md:gap-4 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-4 text-center border border-white/20">
+              <Target className="h-5 w-5 md:h-6 md:w-6 text-white mx-auto mb-1 md:mb-2" />
+              <div className="text-white font-bold text-lg md:text-2xl">{loading ? "..." : stats.testsTaken}</div>
+              <div className="text-white/70 text-xs">Tests</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-4 text-center border border-white/20">
+              <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-white mx-auto mb-1 md:mb-2" />
+              <div className="text-white font-bold text-lg md:text-2xl">{loading ? "..." : `${stats.averageScore}%`}</div>
+              <div className="text-white/70 text-xs">Score</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-4 text-center border border-white/20">
+              <Clock className="h-5 w-5 md:h-6 md:w-6 text-white mx-auto mb-1 md:mb-2" />
+              <div className="text-white font-bold text-lg md:text-2xl">{loading ? "..." : `${stats.studyHours}h`}</div>
+              <div className="text-white/70 text-xs">Hours</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-4 text-center border border-white/20">
+              <Trophy className="h-5 w-5 md:h-6 md:w-6 text-white mx-auto mb-1 md:mb-2" />
+              <div className="text-white font-bold text-lg md:text-2xl">{loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}</div>
+              <div className="text-white/70 text-xs">Rank</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={(value) => {
-          console.log('Tab changed to:', value);
-          setActiveTab(value);
-        }}>
-          <TabsList className="grid w-full grid-cols-3 relative z-50">
-            <TabsTrigger value="dashboard" className="pointer-events-auto cursor-pointer">
-              <Target className="h-4 w-4 mr-2" />
-              Dashboard
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3 mb-6 md:hidden">
+            <TabsTrigger value="dashboard">
+              <Target className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Dashboard</span>
             </TabsTrigger>
-            <TabsTrigger value="profile" className="pointer-events-auto cursor-pointer">
-              <User className="h-4 w-4 mr-2" />
-              Profile
+            <TabsTrigger value="profile">
+              <User className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="pointer-events-auto cursor-pointer">
-              <Settings className="h-4 w-4 mr-2" />
-              Account
+            <TabsTrigger value="settings">
+              <Settings className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Account</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="dashboard" className="mt-8 space-y-8">
-            {/* Quick Stats - Enhanced */}
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="animate-fade-in-up" style={{ animationDelay: '0s' }}>
-                <StatCard 
-                  icon={Target}
-                  label="Tests Taken"
-                  value={loading ? "..." : stats.testsTaken}
-                  subtext="Total attempts"
-                  gradient="from-primary to-primary-glow"
-                  iconColor="text-primary"
-                />
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <StatCard 
-                  icon={TrendingUp}
-                  label="Average Score"
-                  value={loading ? "..." : `${stats.averageScore}%`}
-                  subtext="Across all tests"
-                  gradient="from-success to-success-glow"
-                  iconColor="text-success"
-                />
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <StatCard 
-                  icon={Clock}
-                  label="Study Hours"
-                  value={loading ? "..." : `${stats.studyHours}h`}
-                  subtext="Time invested"
-                  gradient="from-info to-secondary"
-                  iconColor="text-info"
-                />
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                <StatCard 
-                  icon={Trophy}
-                  label="Rank"
-                  value={loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}
-                  subtext={`Out of ${stats.totalStudents} students`}
-                  gradient="from-warning to-warning"
-                  iconColor="text-warning"
-                />
-              </div>
-            </div>
+          <TabsContent value="dashboard" className="space-y-6">
 
-            <div className="grid lg:grid-cols-3 gap-8">
-              {/* Main Content */}
-              <div className="lg:col-span-2 space-y-8">
-                {/* Quick Actions - Enhanced with Glassmorphism */}
-                <Card className="border-0 shadow-xl backdrop-blur-sm bg-gradient-to-br from-card to-muted/30 overflow-hidden hover-lift">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
-                  <CardHeader className="relative">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <Rocket className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-2xl">Quick Actions</CardTitle>
-                        <CardDescription>Jump back into your studies</CardDescription>
-                      </div>
+            {/* Quick Actions - Mobile Optimized Cards */}
+            <div className="grid grid-cols-2 gap-3 md:gap-4 animate-fade-in-up">
+              <ScheduleTestModal defaultExamType="jamb">
+                <Card className="bg-gradient-to-br from-primary to-primary-glow text-white border-0 cursor-pointer hover-lift active:scale-95 transition-all">
+                  <CardContent className="p-4 md:p-6 flex flex-col items-center justify-center gap-2 h-32 md:h-40">
+                    <div className="p-2 md:p-3 bg-white/20 rounded-full">
+                      <Play className="h-5 w-5 md:h-7 md:w-7" />
                     </div>
-                  </CardHeader>
-                  <CardContent className="relative">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <ScheduleTestModal defaultExamType="jamb">
-                        <Button className="w-full h-24 flex-col gap-2 text-lg font-semibold group relative overflow-hidden">
-                          <div className="absolute inset-0 bg-gradient-to-r from-primary-glow to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <Play className="h-7 w-7 relative z-10 group-hover:scale-110 transition-transform" />
-                          <span className="relative z-10">JAMB Practice</span>
-                        </Button>
-                      </ScheduleTestModal>
-                      <ScheduleTestModal defaultExamType="waec">
-                        <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2">
-                          <Play className="h-7 w-7" />
-                          WAEC Practice
-                        </Button>
-                      </ScheduleTestModal>
-                      <ScheduleTestModal defaultExamType="neco">
-                        <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2">
-                          <Play className="h-7 w-7" />
-                          NECO Practice
-                        </Button>
-                      </ScheduleTestModal>
-                      <ScheduleTestModal defaultExamType="post-utme">
-                        <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2">
-                          <Play className="h-7 w-7" />
-                          Post-UTME
-                        </Button>
-                      </ScheduleTestModal>
-                    </div>
-                    <div className="mt-4 grid md:grid-cols-2 gap-4">
-                      <Link to="/resources">
-                        <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:bg-muted hover-lift border-2">
-                          <FileText className="h-6 w-6" />
-                          Browse Resources
-                        </Button>
-                      </Link>
-                      <Link to="/consultation">
-                        <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:bg-muted hover-lift border-2">
-                          <Calendar className="h-6 w-6" />
-                          Book Session
-                        </Button>
-                      </Link>
-                    </div>
+                    <span className="text-sm md:text-lg font-bold text-center">JAMB</span>
                   </CardContent>
                 </Card>
+              </ScheduleTestModal>
+              
+              <ScheduleTestModal defaultExamType="waec">
+                <Card className="bg-gradient-to-br from-secondary to-accent border-0 cursor-pointer hover-lift active:scale-95 transition-all">
+                  <CardContent className="p-4 md:p-6 flex flex-col items-center justify-center gap-2 h-32 md:h-40">
+                    <div className="p-2 md:p-3 bg-white/20 rounded-full">
+                      <BookOpen className="h-5 w-5 md:h-7 md:w-7 text-white" />
+                    </div>
+                    <span className="text-sm md:text-lg font-bold text-center text-white">WAEC</span>
+                  </CardContent>
+                </Card>
+              </ScheduleTestModal>
+              
+              <ScheduleTestModal defaultExamType="neco">
+                <Card className="bg-gradient-to-br from-info to-info-glow border-0 cursor-pointer hover-lift active:scale-95 transition-all">
+                  <CardContent className="p-4 md:p-6 flex flex-col items-center justify-center gap-2 h-32 md:h-40">
+                    <div className="p-2 md:p-3 bg-white/20 rounded-full">
+                      <FileText className="h-5 w-5 md:h-7 md:w-7 text-white" />
+                    </div>
+                    <span className="text-sm md:text-lg font-bold text-center text-white">NECO</span>
+                  </CardContent>
+                </Card>
+              </ScheduleTestModal>
+              
+              <ScheduleTestModal defaultExamType="post-utme">
+                <Card className="bg-gradient-to-br from-warning to-destructive border-0 cursor-pointer hover-lift active:scale-95 transition-all">
+                  <CardContent className="p-4 md:p-6 flex flex-col items-center justify-center gap-2 h-32 md:h-40">
+                    <div className="p-2 md:p-3 bg-white/20 rounded-full">
+                      <Award className="h-5 w-5 md:h-7 md:w-7 text-white" />
+                    </div>
+                    <span className="text-sm md:text-lg font-bold text-center text-white">POST-UTME</span>
+                  </CardContent>
+                </Card>
+              </ScheduleTestModal>
+            </div>
 
-                {/* Learning Hub - Mad Features! */}
-                <div>
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold flex items-center gap-2 mb-2">
-                      <Rocket className="h-6 w-6 text-primary animate-bounce-slow" />
-                      Unlock Your Potential
-                    </h2>
-                    <p className="text-muted-foreground">Explore our amazing features designed to help you succeed</p>
-                  </div>
-                  <div className="grid md:grid-cols-3 gap-6">
-                    <FeatureCard 
-                      icon={GraduationCap}
-                      title="Study Hub"
-                      description="Access comprehensive lessons, video tutorials, and study materials curated by experts"
-                      href="/study-hub"
-                      gradient="from-primary to-secondary"
-                      badge="Popular"
-                    />
-                    <FeatureCard 
-                      icon={MessageSquare}
-                      title="Ask Tutor"
-                      description="Get instant help from tutors and peers. Ask questions, share knowledge, and learn together"
-                      href="/forum"
-                      gradient="from-success to-accent"
-                      badge="24/7"
-                    />
-                    <FeatureCard 
-                      icon={Sword}
-                      title="Challenge Arena"
-                      description="Compete with students nationwide! Earn points, climb leaderboards, and win amazing prizes"
-                      href="/challenge-arena"
-                      gradient="from-warning to-destructive"
-                      badge="New"
-                    />
-                  </div>
-                </div>
+            {/* Feature Cards - Mad UI */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <FeatureCard 
+                icon={GraduationCap}
+                title="Study Hub"
+                description="Learn with expert content"
+                href="/study-hub"
+                gradient="from-primary to-secondary"
+                badge="Popular"
+              />
+              <FeatureCard 
+                icon={MessageSquare}
+                title="Ask Tutor"
+                description="Get instant help 24/7"
+                href="/forum"
+                gradient="from-success to-accent"
+                badge="24/7"
+              />
+              <FeatureCard 
+                icon={Sword}
+                title="Challenge Arena"
+                description="Compete & win prizes"
+                href="/challenge-arena"
+                gradient="from-warning to-destructive"
+                badge="New"
+              />
+            </div>
 
-                {/* Recent Test Results */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Test Results</CardTitle>
-                    <CardDescription>Your latest performance overview</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {loading ? (
-                        <div className="text-center text-muted-foreground">Loading...</div>
-                      ) : recentTests.length > 0 ? (
-                        recentTests.map((test: any, index: number) => (
-                          <Link key={index} to={`/results?attempt=${test.attemptId}`} className="block">
-                            <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
-                              <div className="flex items-center gap-4">
-                                <div className="bg-primary/10 p-2 rounded-lg">
-                                  <BookOpen className="h-5 w-5 text-primary" />
-                                </div>
-                                <div>
-                                  <h4 className="font-semibold">{test.subject}</h4>
-                                  <p className="text-sm text-muted-foreground">{test.date}</p>
-                                </div>
+            {/* Recent Tests & Progress */}
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Recent Test Results */}
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-primary" />
+                    Recent Tests
+                  </CardTitle>
+                  <CardDescription>Your latest performance</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {loading ? (
+                      <div className="text-center text-muted-foreground py-8">Loading...</div>
+                    ) : recentTests.length > 0 ? (
+                      recentTests.map((test: any, index: number) => (
+                        <Link key={index} to={`/results?attempt=${test.attemptId}`} className="block">
+                          <div className="flex items-center justify-between p-3 border border-border rounded-xl hover:bg-muted/50 hover-lift active:scale-98 transition-all">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-primary/10 p-2 rounded-lg">
+                                <BookOpen className="h-4 w-4 text-primary" />
                               </div>
-                              <div className="text-right">
-                                <div className="text-lg font-bold text-accent">{test.score}%</div>
-                                <p className="text-sm text-muted-foreground">{test.duration}</p>
+                              <div>
+                                <h4 className="font-semibold text-sm">{test.subject}</h4>
+                                <p className="text-xs text-muted-foreground">{test.date}</p>
                               </div>
                             </div>
-                          </Link>
-                        ))
-                      ) : (
-                        <div className="text-center text-muted-foreground">
-                          No test results yet. Take your first test to see results here!
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-primary">{test.score}%</div>
+                              <p className="text-xs text-muted-foreground">{test.duration}</p>
+                            </div>
+                          </div>
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="text-center text-muted-foreground py-8">
+                        No tests yet. Start practicing! 🚀
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
-                {/* Subject Progress */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Subject Progress</CardTitle>
-                    <CardDescription>Track your improvement across subjects</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-6">
-                      {loading ? (
-                        <div className="text-center text-muted-foreground">Loading...</div>
-                      ) : subjectProgress.length > 0 ? (
-                        <div className="grid gap-6">
-                          {subjectProgress.map((subject, index) => (
-                            <SubjectProgressCard
-                              key={index}
-                              subject={subject.subject}
-                              progress={subject.progress}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center text-muted-foreground">
-                          Complete some tests to track your subject progress!
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Sidebar */}
-              <div className="space-y-6">
-                {/* Start Test */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Test</CardTitle>
-                    <CardDescription>Jump into practice mode</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ScheduleTestModal>
-                      <Button className="w-full">
-                        <Play className="h-4 w-4 mr-2" />
-                        Start Test
-                      </Button>
-                    </ScheduleTestModal>
-                  </CardContent>
-                </Card>
-
-                {/* Study Streak */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Study Streak</CardTitle>
-                    <CardDescription>Keep the momentum going!</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center">
-                      <div className="text-4xl font-bold text-accent mb-2">{loading ? "..." : stats.testsTaken}</div>
-                      <p className="text-sm text-muted-foreground">Tests completed</p>
-                      <ScheduleTestModal>
-                        <Button className="w-full mt-4">Take Another Test</Button>
-                      </ScheduleTestModal>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Subscription Status */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Subscription</CardTitle>
-                    <CardDescription>
-                      {subscriptionLoading ? 'Loading...' : (subscription?.subscription_plans?.name || 'Free Plan')}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center">
-                      <Badge className="mb-4 bg-accent text-accent-foreground">
-                        {subscriptionLoading ? 'Loading...' : (subscription?.status || 'Free')}
-                      </Badge>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {subscription?.end_date 
-                          ? `Expires on ${new Date(subscription.end_date).toLocaleDateString()}`
-                          : 'No expiration'
-                        }
-                      </p>
-                      <Link to="/payment">
-                        <Button variant="outline" className="w-full">
-                          {subscription ? 'Manage Subscription' : 'Upgrade Plan'}
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+              {/* Subject Progress */}
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5 text-success" />
+                    Subject Progress
+                  </CardTitle>
+                  <CardDescription>Track your improvement</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {loading ? (
+                      <div className="text-center text-muted-foreground py-8">Loading...</div>
+                    ) : subjectProgress.length > 0 ? (
+                      subjectProgress.map((subject, index) => (
+                        <SubjectProgressCard
+                          key={index}
+                          subject={subject.subject}
+                          progress={subject.progress}
+                        />
+                      ))
+                    ) : (
+                      <div className="text-center text-muted-foreground py-8">
+                        Complete tests to track progress! 📊
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
+
           </TabsContent>
 
           <TabsContent value="profile" className="mt-8">
@@ -629,6 +528,9 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Bottom Navigation for Mobile */}
+      <BottomNav />
     </div>
   );
 };
