@@ -27,7 +27,7 @@ const Layout = ({ children, showNavbar = true, showWhatsAppButton = true }: Layo
 
   const handleTabChange = (tab: string) => {
     if (tab === "dashboard") navigate("/dashboard");
-    else if (tab === "profile") navigate("/dashboard"); // Navigate to dashboard and it will handle the tab
+    else if (tab === "profile") navigate("/dashboard?tab=profile");
   };
 
   return (

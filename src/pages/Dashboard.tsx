@@ -25,7 +25,7 @@ import {
   Rocket,
   Sparkles
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,10 +45,20 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
   const { subscription, loading: subscriptionLoading, isPremium } = useSubscription();
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [searchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get("tab") || "dashboard";
+  const [activeTab, setActiveTab] = useState(tabFromUrl);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  // Update active tab when URL parameter changes
+  useEffect(() => {
+    const urlTab = searchParams.get("tab") || "dashboard";
+    if (urlTab !== activeTab) {
+      setActiveTab(urlTab);
+    }
+  }, [searchParams]);
   
   // State for dashboard statistics
   const [stats, setStats] = useState({
