@@ -267,29 +267,51 @@ const Dashboard = () => {
         isOpen={showOnboarding} 
         onComplete={() => setShowOnboarding(false)} 
       />
-      {/* Hero Header with Gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent">
+      {/* Hero Header with Animated Gradient */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent animate-gradient-shift bg-[length:200%_200%]">
+        {/* Animated Background Pattern */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
+        
+        {/* Floating Orbs */}
+        <div className="absolute top-10 left-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-10 right-20 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+        
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-center md:text-left animate-fade-in-up">
-              <div className="flex items-center gap-2 mb-2 justify-center md:justify-start">
-                <Sparkles className="h-6 w-6 text-white animate-pulse" />
-                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
-                  {subscriptionLoading ? 'Loading...' : (isPremium ? '✨ Premium Member' : 'Free Member')}
+              <div className="flex items-center gap-2 mb-3 justify-center md:justify-start">
+                <div className="relative">
+                  <Sparkles className="h-6 w-6 text-white animate-pulse" />
+                  <div className="absolute inset-0 bg-white/20 blur-xl animate-pulse" />
+                </div>
+                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm hover:bg-white/30 transition-all cursor-default">
+                  {subscriptionLoading ? (
+                    <span className="animate-pulse">Loading...</span>
+                  ) : (
+                    isPremium ? (
+                      <span className="flex items-center gap-1.5">
+                        <Zap className="h-3.5 w-3.5 animate-pulse" />
+                        Premium Member
+                      </span>
+                    ) : (
+                      'Free Member'
+                    )
+                  )}
                 </Badge>
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-3 drop-shadow-lg animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                 Welcome back, {userProfile?.first_name || user?.email?.split('@')[0]}! 👋
               </h1>
-              <p className="text-white/90 text-lg">Ready to ace your exams? Let's continue your journey to success!</p>
+              <p className="text-white/90 text-lg md:text-xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                Ready to ace your exams? Let's continue your journey to success! 🚀
+              </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <NotificationBell />
               <Button 
                 variant="secondary" 
                 onClick={handleLogout}
-                className="flex items-center gap-2 shadow-lg"
+                className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all hover-lift"
               >
                 <LogOut className="h-4 w-4" />
                 Logout
@@ -320,87 +342,104 @@ const Dashboard = () => {
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-8 space-y-8">
-            {/* Quick Stats */}
-            <div className="grid md:grid-cols-4 gap-6 animate-scale-in">
-              <StatCard 
-                icon={Target}
-                label="Tests Taken"
-                value={loading ? "..." : stats.testsTaken}
-                subtext="Total attempts"
-                gradient="from-primary to-primary-glow"
-                iconColor="text-primary"
-              />
-              <StatCard 
-                icon={TrendingUp}
-                label="Average Score"
-                value={loading ? "..." : `${stats.averageScore}%`}
-                subtext="Across all tests"
-                gradient="from-success to-success-glow"
-                iconColor="text-success"
-              />
-              <StatCard 
-                icon={Clock}
-                label="Study Hours"
-                value={loading ? "..." : `${stats.studyHours}h`}
-                subtext="Time invested"
-                gradient="from-info to-secondary"
-                iconColor="text-info"
-              />
-              <StatCard 
-                icon={Trophy}
-                label="Rank"
-                value={loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}
-                subtext={`Out of ${stats.totalStudents} students`}
-                gradient="from-warning to-warning"
-                iconColor="text-warning"
-              />
+            {/* Quick Stats - Enhanced */}
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="animate-fade-in-up" style={{ animationDelay: '0s' }}>
+                <StatCard 
+                  icon={Target}
+                  label="Tests Taken"
+                  value={loading ? "..." : stats.testsTaken}
+                  subtext="Total attempts"
+                  gradient="from-primary to-primary-glow"
+                  iconColor="text-primary"
+                />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                <StatCard 
+                  icon={TrendingUp}
+                  label="Average Score"
+                  value={loading ? "..." : `${stats.averageScore}%`}
+                  subtext="Across all tests"
+                  gradient="from-success to-success-glow"
+                  iconColor="text-success"
+                />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                <StatCard 
+                  icon={Clock}
+                  label="Study Hours"
+                  value={loading ? "..." : `${stats.studyHours}h`}
+                  subtext="Time invested"
+                  gradient="from-info to-secondary"
+                  iconColor="text-info"
+                />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                <StatCard 
+                  icon={Trophy}
+                  label="Rank"
+                  value={loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}
+                  subtext={`Out of ${stats.totalStudents} students`}
+                  gradient="from-warning to-warning"
+                  iconColor="text-warning"
+                />
+              </div>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-8">
-                {/* Quick Actions */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                    <CardDescription>Jump back into your studies</CardDescription>
+                {/* Quick Actions - Enhanced with Glassmorphism */}
+                <Card className="border-0 shadow-xl backdrop-blur-sm bg-gradient-to-br from-card to-muted/30 overflow-hidden hover-lift">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
+                  <CardHeader className="relative">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <Rocket className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-2xl">Quick Actions</CardTitle>
+                        <CardDescription>Jump back into your studies</CardDescription>
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="relative">
                     <div className="grid md:grid-cols-2 gap-4">
                       <ScheduleTestModal defaultExamType="jamb">
-                        <Button className="w-full h-20 flex-col gap-2">
-                          <Play className="h-6 w-6" />
-                          JAMB Practice
+                        <Button className="w-full h-24 flex-col gap-2 text-lg font-semibold group relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-primary-glow to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <Play className="h-7 w-7 relative z-10 group-hover:scale-110 transition-transform" />
+                          <span className="relative z-10">JAMB Practice</span>
                         </Button>
                       </ScheduleTestModal>
                       <ScheduleTestModal defaultExamType="waec">
-                        <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                          <Play className="h-6 w-6" />
+                        <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2">
+                          <Play className="h-7 w-7" />
                           WAEC Practice
                         </Button>
                       </ScheduleTestModal>
                       <ScheduleTestModal defaultExamType="neco">
-                        <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                          <Play className="h-6 w-6" />
+                        <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2">
+                          <Play className="h-7 w-7" />
                           NECO Practice
                         </Button>
                       </ScheduleTestModal>
                       <ScheduleTestModal defaultExamType="post-utme">
-                        <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                          <Play className="h-6 w-6" />
-                          Post-UTME Practice
+                        <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2">
+                          <Play className="h-7 w-7" />
+                          Post-UTME
                         </Button>
                       </ScheduleTestModal>
                     </div>
                     <div className="mt-4 grid md:grid-cols-2 gap-4">
                       <Link to="/resources">
-                        <Button variant="outline" className="w-full h-20 flex-col gap-2">
+                        <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:bg-muted hover-lift border-2">
                           <FileText className="h-6 w-6" />
                           Browse Resources
                         </Button>
                       </Link>
                       <Link to="/consultation">
-                        <Button variant="outline" className="w-full h-20 flex-col gap-2">
+                        <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:bg-muted hover-lift border-2">
                           <Calendar className="h-6 w-6" />
                           Book Session
                         </Button>

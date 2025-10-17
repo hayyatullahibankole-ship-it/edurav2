@@ -8,10 +8,13 @@ import {
   Video, 
   FileText, 
   PlayCircle,
-  ExternalLink
+  ExternalLink,
+  TrendingUp,
+  Target
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import ScheduleTestModal from "./ScheduleTestModal";
+import { cn } from '@/lib/utils';
 
 interface SubjectProgressCardProps {
   subject: string;
@@ -119,57 +122,109 @@ const SubjectProgressCard: React.FC<SubjectProgressCardProps> = ({
     }
   };
 
+  // Determine color and gradient based on percentage
+  const getProgressStyles = (pct: number) => {
+    if (pct >= 70) return {
+      color: 'text-success',
+      gradient: 'from-success to-success-glow',
+      bg: 'bg-success/10',
+      badge: 'bg-success/20 text-success border-success/30'
+    };
+    if (pct >= 50) return {
+      color: 'text-warning',
+      gradient: 'from-warning to-warning',
+      bg: 'bg-warning/10',
+      badge: 'bg-warning/20 text-warning border-warning/30'
+    };
+    return {
+      color: 'text-destructive',
+      gradient: 'from-destructive to-destructive',
+      bg: 'bg-destructive/10',
+      badge: 'bg-destructive/20 text-destructive border-destructive/30'
+    };
+  };
+
+  const styles = getProgressStyles(progress);
+
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-3">
+    <Card className="h-full hover:shadow-2xl transition-all hover-lift border-0 bg-gradient-to-br from-card to-muted/30 group relative overflow-hidden">
+      {/* Animated background accent */}
+      <div className={cn(
+        "absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-opacity",
+        styles.bg
+      )} />
+      
+      {/* Top accent bar */}
+      <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r", styles.gradient)} />
+      
+      <CardHeader className="pb-3 relative">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <BookOpen className="h-5 w-5 text-primary" />
+          <div className={cn(
+            "p-3 rounded-xl bg-gradient-to-br shadow-lg group-hover:scale-110 transition-transform",
+            styles.gradient
+          )}>
+            <BookOpen className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1">
-            <CardTitle className="text-lg">{subject}</CardTitle>
+            <CardTitle className="text-lg flex items-center gap-2">
+              {subject}
+              {progress >= 70 && (
+                <TrendingUp className="h-4 w-4 text-success animate-bounce" />
+              )}
+            </CardTitle>
             <CardDescription className="text-sm">
-              Focus Area: {focusArea || getDefaultFocusArea(subject)}
+              Focus: {focusArea || getDefaultFocusArea(subject)}
             </CardDescription>
           </div>
-          <Badge variant="secondary" className="text-xs">
+          <Badge className={cn("text-xs font-bold", styles.badge)}>
             {progress}%
           </Badge>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 relative">
         <div>
           <div className="flex justify-between mb-2">
-            <span className="text-sm font-medium">Progress</span>
-            <span className="text-sm text-muted-foreground">{progress}%</span>
+            <span className="text-sm font-medium flex items-center gap-1.5">
+              <Target className="h-3.5 w-3.5" />
+              Progress
+            </span>
+            <span className={cn("text-sm font-bold", styles.color)}>{progress}%</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className={cn("h-2.5", styles.bg)} />
+          <div className="flex justify-between mt-1.5 text-xs text-muted-foreground">
+            <span>0%</span>
+            <span className="font-medium">Target: 70%</span>
+            <span>100%</span>
+          </div>
         </div>
 
-        <div>
-          <h4 className="text-sm font-medium mb-2">Recommended Action</h4>
-          <p className="text-sm text-muted-foreground">
+        <div className="p-3 rounded-lg bg-muted/50 border border-border">
+          <h4 className="text-sm font-semibold mb-1.5 flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            Recommended Action
+          </h4>
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {recommendedAction || getDefaultRecommendation(subject)}
           </p>
         </div>
 
         <div>
-          <h4 className="text-sm font-medium mb-3">Study Resources</h4>
-          <div className="space-y-2">
+          <h4 className="text-sm font-semibold mb-2.5">Study Resources</h4>
+          <div className="space-y-1.5">
             {resources.map((resource, index) => (
               <button
                 key={index}
                 onClick={() => handleResourceClick(resource)}
-                className="w-full flex items-center gap-2 p-2 text-left text-sm hover:bg-muted/50 rounded-md transition-colors group"
+                className="w-full flex items-center gap-3 p-2.5 text-left text-sm hover:bg-muted rounded-lg transition-all group/item border border-transparent hover:border-border"
               >
-                <div className="text-accent">
+                <div className={cn("p-1.5 rounded-md", styles.bg)}>
                   {getResourceIcon(resource.type)}
                 </div>
-                <span className="flex-1 group-hover:text-primary transition-colors">
+                <span className="flex-1 group-hover/item:text-primary transition-colors font-medium">
                   {resource.title}
                 </span>
-                <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover/item:opacity-100 transition-opacity" />
               </button>
             ))}
           </div>
@@ -178,7 +233,10 @@ const SubjectProgressCard: React.FC<SubjectProgressCardProps> = ({
         <div className="pt-2">
           <ScheduleTestModal>
             <Button 
-              className="w-full bg-accent hover:bg-accent/90 text-white"
+              className={cn(
+                "w-full bg-gradient-to-r shadow-lg hover:shadow-xl transition-all group-hover:scale-105",
+                styles.gradient
+              )}
               size="sm"
             >
               <PlayCircle className="h-4 w-4 mr-2" />
@@ -190,5 +248,8 @@ const SubjectProgressCard: React.FC<SubjectProgressCardProps> = ({
     </Card>
   );
 };
+
+// Add missing import
+import { Sparkles } from 'lucide-react';
 
 export default SubjectProgressCard;
