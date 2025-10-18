@@ -149,24 +149,42 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
         return `<ol class="list-decimal pl-5 my-6 space-y-2 text-base [&>li::marker]:text-primary [&>li::marker]:font-bold">${listHTML}</ol>`;
       }
 
-      // Handle tab-separated tables (before markdown table check)
+      // Handle tab-separated tables (with validation)
       if (trimmedBlock.includes('\t')) {
         const rows = trimmedBlock.split('\n').filter(row => row.trim());
-        if (rows.length > 1) {
-          // First row is header
-          const headerCells = rows[0].split('\t').map(cell => 
-            `<th class="border border-border bg-primary/10 px-3 py-2 sm:px-4 sm:py-3 font-bold text-left text-xs sm:text-sm">${renderMathInline(cell.trim())}</th>`
-          ).join('');
+        
+        // Only treat as table if:
+        // 1. Has at least 2 rows (header + data)
+        // 2. First row looks like a header (no question marks, no numbers at start)
+        // 3. All rows have similar number of tabs (consistent columns)
+        if (rows.length >= 2) {
+          const firstRow = rows[0];
+          const tabCount = (firstRow.match(/\t/g) || []).length;
           
-          // Remaining rows are body
-          const bodyRows = rows.slice(1).map((row, idx) => {
-            const cells = row.split('\t').map(cell =>
-              `<td class="border border-border px-3 py-2 sm:px-4 sm:py-3 text-sm">${renderMathInline(cell.trim())}</td>`
+          // Validate this is actually a table:
+          const looksLikeTable = 
+            tabCount >= 1 && // Has at least one tab (2+ columns)
+            !firstRow.match(/^\d+[\.)]\s/) && // Not a numbered list
+            !firstRow.includes('?') && // Not a question
+            rows.slice(1).every(row => {
+              const rowTabs = (row.match(/\t/g) || []).length;
+              return Math.abs(rowTabs - tabCount) <= 1; // Similar tab count
+            });
+          
+          if (looksLikeTable) {
+            const headerCells = rows[0].split('\t').map(cell => 
+              `<th class="border border-border bg-primary/10 px-3 py-2 sm:px-4 sm:py-3 font-bold text-left text-xs sm:text-sm">${renderMathInline(cell.trim())}</th>`
             ).join('');
-            return `<tr class="${idx % 2 === 0 ? 'bg-card' : 'bg-muted/20'} hover:bg-muted/40 transition-colors">${cells}</tr>`;
-          }).join('');
+            
+            const bodyRows = rows.slice(1).map((row, idx) => {
+              const cells = row.split('\t').map(cell =>
+                `<td class="border border-border px-3 py-2 sm:px-4 sm:py-3 text-sm">${renderMathInline(cell.trim())}</td>`
+              ).join('');
+              return `<tr class="${idx % 2 === 0 ? 'bg-card' : 'bg-muted/20'} hover:bg-muted/40 transition-colors">${cells}</tr>`;
+            }).join('');
 
-          return `<div class="overflow-x-auto my-6"><table class="w-full border-collapse border-2 border-border rounded-lg overflow-hidden shadow-sm text-sm sm:text-base"><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table></div>`;
+            return `<div class="overflow-x-auto my-6"><table class="w-full border-collapse border-2 border-border rounded-lg overflow-hidden shadow-sm text-sm sm:text-base"><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table></div>`;
+          }
         }
       }
 
