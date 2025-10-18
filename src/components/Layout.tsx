@@ -4,7 +4,7 @@ import WhatsAppButton from "./WhatsAppButton";
 import MobileNav from "./MobileNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useNativeApp } from "@/hooks/useNativeApp";
+import { useInstalledApp } from "@/hooks/useInstalledApp";
 
 interface LayoutProps {
   children: ReactNode;
@@ -13,8 +13,7 @@ interface LayoutProps {
 }
 
 const Layout = ({ children, showNavbar = true, showWhatsAppButton = true }: LayoutProps) => {
-  const isMobile = useIsMobile();
-  const { isNative } = useNativeApp();
+  const { isInstalledApp } = useInstalledApp();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,8 +38,8 @@ const Layout = ({ children, showNavbar = true, showWhatsAppButton = true }: Layo
       </main>
       {showWhatsAppButton && <WhatsAppButton />}
       
-      {/* Mobile Navigation - Show for native apps or mobile screen size */}
-      {(isNative || isMobile) && (
+      {/* Mobile Navigation - Show only for installed apps */}
+      {isInstalledApp && (
         <>
           <MobileNav activeTab={getActiveTab()} onTabChange={handleTabChange} />
           {/* Add padding to bottom to prevent content being hidden by nav */}

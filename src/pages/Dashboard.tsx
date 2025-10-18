@@ -45,7 +45,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import OnboardingTour from "@/components/OnboardingTour";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useNativeApp } from "@/hooks/useNativeApp";
+import { useInstalledApp } from "@/hooks/useInstalledApp";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -56,7 +56,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const { isNative } = useNativeApp();
+  const { isInstalledApp } = useInstalledApp();
 
   // Update active tab when URL parameter changes
   useEffect(() => {
@@ -372,12 +372,12 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className={`container mx-auto px-4 sm:px-6 lg:px-8 py-4 ${(isNative || isMobile) ? 'pb-24' : ''}`}>
+      <div className={`container mx-auto px-4 sm:px-6 lg:px-8 py-4 ${isInstalledApp ? 'pb-24' : ''}`}>
         <Tabs value={activeTab} onValueChange={(value) => {
           console.log('Tab changed to:', value);
           setActiveTab(value);
         }}>
-          <TabsList className={`grid w-full grid-cols-3 relative z-50 ${(isNative || isMobile) ? 'hidden' : ''}`}>
+          <TabsList className={`grid w-full grid-cols-3 relative z-50 ${isInstalledApp ? 'hidden' : ''}`}>
             <TabsTrigger value="dashboard" className="pointer-events-auto cursor-pointer">
               <Target className="h-4 w-4 mr-2" />
               Dashboard
@@ -394,7 +394,7 @@ const Dashboard = () => {
 
           <TabsContent value="dashboard" className="mt-4 space-y-4">
             {/* Quick Stats - Mobile vs Desktop */}
-            {(isNative || isMobile) ? (
+            {isInstalledApp ? (
               <div className="grid grid-cols-2 gap-3 animate-fade-in">
                 <MobileStatCard 
                   icon={Target}

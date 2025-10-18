@@ -3,14 +3,12 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import AuthForm from '@/components/AuthForm';
 import MobileAuthForm from '@/components/MobileAuthForm';
-import { useNativeApp } from '@/hooks/useNativeApp';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useInstalledApp } from '@/hooks/useInstalledApp';
 
 export default function Auth() {
   const { user, loading, isAdmin, userRole } = useAuth();
   const navigate = useNavigate();
-  const { isNative } = useNativeApp();
-  const isMobileView = useIsMobile();
+  const { isInstalledApp } = useInstalledApp();
 
   useEffect(() => {
     if (user && !loading && userRole !== null) {
@@ -38,8 +36,8 @@ export default function Auth() {
     return <Navigate to={isAdmin ? "/admin" : "/dashboard"} replace />;
   }
 
-  // Show mobile auth form for native apps or mobile screen size
-  if (isNative || isMobileView) {
+  // Show mobile auth form only for installed apps (PWA or native)
+  if (isInstalledApp) {
     return <MobileAuthForm />;
   }
 
