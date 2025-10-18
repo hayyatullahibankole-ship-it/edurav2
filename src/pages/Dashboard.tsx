@@ -24,7 +24,8 @@ import {
   Award,
   Rocket,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  TestTubes
 } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -540,31 +541,87 @@ const Dashboard = () => {
                 {!isMobile && <div className="h-4" />}
                 
                 {isMobile && (
-                  <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 border border-primary/20 animate-fade-in">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-3xl" />
-                    
-                    <div className="relative z-10">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="p-2.5 bg-primary/20 rounded-xl">
-                          <Zap className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-base">Subscription</h3>
-                          <p className="text-xs text-muted-foreground">{isPremium ? 'Premium Active' : 'Free Plan'}</p>
-                        </div>
+                  <>
+                    {/* Mobile Quick Actions */}
+                    <div className="space-y-3 animate-fade-in">
+                      <div className="flex items-center gap-2 px-1">
+                        <Rocket className="h-5 w-5 text-primary" />
+                        <h2 className="text-lg font-bold">Quick Actions</h2>
                       </div>
                       
-                      <Link to="/payment">
-                        <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary to-primary-glow text-white shadow-lg active:scale-[0.98] transition-all">
-                          <div className="flex items-center gap-2">
-                            <Sparkles className="h-5 w-5" />
-                            <span className="font-semibold">{isPremium ? 'Manage Plan' : 'Go Premium'}</span>
-                          </div>
-                          <ChevronRight className="h-5 w-5" />
-                        </div>
+                      <ScheduleTestModal defaultExamType="jamb">
+                        <Card className="border-2 border-primary/20 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all active:scale-[0.97] cursor-pointer bg-gradient-to-br from-primary/5 to-transparent">
+                          <CardContent className="p-5 flex items-center gap-4">
+                            <div className="p-3.5 bg-gradient-to-br from-primary via-primary-glow to-secondary rounded-2xl shadow-lg">
+                              <Play className="h-7 w-7 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-bold text-lg mb-0.5">Take a Test</h3>
+                              <p className="text-sm text-muted-foreground">JAMB, WAEC, NECO & more</p>
+                            </div>
+                            <ChevronRight className="h-6 w-6 text-primary" />
+                          </CardContent>
+                        </Card>
+                      </ScheduleTestModal>
+                      
+                      <Link to="/study-hub">
+                        <Card className="border border-accent/30 shadow-md hover:shadow-lg hover:border-accent/50 transition-all active:scale-[0.97] cursor-pointer">
+                          <CardContent className="p-5 flex items-center gap-4">
+                            <div className="p-3.5 bg-gradient-to-br from-accent to-info rounded-2xl shadow-md">
+                              <BookOpen className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-bold text-base">Study Companion</h3>
+                              <p className="text-sm text-muted-foreground">Lessons & topic guides</p>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                          </CardContent>
+                        </Card>
+                      </Link>
+                      
+                      <Link to="/demo-test">
+                        <Card className="border border-info/30 shadow-md hover:shadow-lg hover:border-info/50 transition-all active:scale-[0.97] cursor-pointer">
+                          <CardContent className="p-5 flex items-center gap-4">
+                            <div className="p-3.5 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl shadow-md">
+                              <TestTubes className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-bold text-base">Practice Test</h3>
+                              <p className="text-sm text-muted-foreground">Quick test yourself</p>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                          </CardContent>
+                        </Card>
                       </Link>
                     </div>
-                  </div>
+
+                    {/* Subscription Card */}
+                    <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 border border-primary/20 animate-fade-in">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-3xl" />
+                      
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-2.5 bg-primary/20 rounded-xl">
+                            <Zap className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-base">Subscription</h3>
+                            <p className="text-xs text-muted-foreground">{isPremium ? 'Premium Active' : 'Free Plan'}</p>
+                          </div>
+                        </div>
+                        
+                        <Link to="/payment">
+                          <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary to-primary-glow text-white shadow-lg active:scale-[0.98] transition-all">
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="h-5 w-5" />
+                              <span className="font-semibold">{isPremium ? 'Manage Plan' : 'Go Premium'}</span>
+                            </div>
+                            <ChevronRight className="h-5 w-5" />
+                          </div>
+                        </Link>
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 {/* Premium Features - Compact Row */}
