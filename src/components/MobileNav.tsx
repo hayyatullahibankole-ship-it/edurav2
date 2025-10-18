@@ -1,4 +1,4 @@
-import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles, Sword, MessageSquare, Library } from "lucide-react";
+import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles, Sword, Library } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,202 +79,202 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
 
   return (
     <>
-      {/* Navigation Bar */}
+      {/* Modern Professional Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        {/* Backdrop blur effect */}
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-xl border-t border-border/50" />
+        {/* Glass Effect Background */}
+        <div className="absolute inset-0 bg-background/95 backdrop-blur-2xl border-t border-border/40" />
         
-        {/* Navigation Items - Centered Layout with Tests in middle */}
-        <div className="relative flex items-center justify-between h-20 px-4 w-full">
-          {/* Left Side - 2 buttons */}
-          <div className="flex items-center gap-2 flex-1 justify-start">
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent pointer-events-none" />
+        
+        {/* Navigation Container - 5 Button Layout */}
+        <div className="relative h-18 px-2 py-2">
+          <div className="flex items-center justify-around max-w-md mx-auto">
             {/* Home Button */}
-            <Link to="/dashboard">
+            <Link to="/dashboard" className="flex-1 flex justify-center">
               <button
-                className={`relative flex flex-col items-center gap-1 px-2 py-2 rounded-2xl transition-all duration-300 ${
+                className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-300 ${
                   activeTab === "dashboard"
-                    ? "text-primary"
-                    : "text-muted-foreground active:scale-95"
+                    ? "scale-105"
+                    : "active:scale-95"
                 }`}
               >
                 {activeTab === "dashboard" && (
-                  <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
+                  <div className="absolute inset-0 bg-primary/10 rounded-2xl" />
                 )}
-                <div className={`relative p-2 rounded-xl transition-all duration-300 ${
+                <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${
                   activeTab === "dashboard" 
-                    ? "bg-primary text-white shadow-lg scale-110" 
-                    : "bg-muted/50"
+                    ? "bg-gradient-to-br from-primary to-primary-glow text-white shadow-lg shadow-primary/30" 
+                    : "bg-muted/60 text-muted-foreground"
                 }`}>
-                  <Home className="h-4 w-4" />
+                  <Home className="h-5 w-5" />
                 </div>
-                <span className={`text-[10px] font-semibold ${
-                  activeTab === "dashboard" ? "text-primary" : ""
+                <span className={`text-[10px] font-bold tracking-wide ${
+                  activeTab === "dashboard" ? "text-primary" : "text-muted-foreground"
                 }`}>
                   Home
                 </span>
               </button>
             </Link>
 
-            {/* Study Hub Button */}
-            <Link to="/study-hub">
-              <button className={`relative flex flex-col items-center gap-1 px-2 py-2 rounded-2xl transition-all duration-300 ${
-                activeTab === "study" ? "text-primary" : "text-muted-foreground active:scale-95"
+            {/* Study Button */}
+            <Link to="/study-hub" className="flex-1 flex justify-center">
+              <button className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-300 ${
+                activeTab === "study" ? "scale-105" : "active:scale-95"
               }`}>
                 {activeTab === "study" && (
-                  <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
+                  <div className="absolute inset-0 bg-secondary/10 rounded-2xl" />
                 )}
-                <div className={`relative p-2 rounded-xl transition-all duration-300 ${
-                  activeTab === "study" ? "bg-primary text-white shadow-lg scale-110" : "bg-muted/50"
+                <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${
+                  activeTab === "study" 
+                    ? "bg-gradient-to-br from-secondary to-info text-white shadow-lg shadow-secondary/30" 
+                    : "bg-muted/60 text-muted-foreground"
                 }`}>
-                  <Library className="h-4 w-4" />
+                  <Library className="h-5 w-5" />
                 </div>
-                <span className={`text-[10px] font-semibold ${
-                  activeTab === "study" ? "text-primary" : ""
-                }`}>Study</span>
+                <span className={`text-[10px] font-bold tracking-wide ${
+                  activeTab === "study" ? "text-secondary" : "text-muted-foreground"
+                }`}>
+                  Study
+                </span>
               </button>
             </Link>
-          </div>
 
-          {/* Center - Tests Button with Special Styling */}
-          <div className="absolute left-1/2 transform -translate-x-1/2">
-            <Sheet open={testsSheetOpen} onOpenChange={setTestsSheetOpen}>
-              <SheetTrigger asChild>
-                <button className="relative flex flex-col items-center -mt-8">
-                  {/* Floating Action Button */}
-                  <div className="relative">
-                    {/* Multi-layer Glow Effects */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-accent rounded-3xl blur-2xl opacity-60 animate-pulse" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-3xl blur-xl opacity-40" />
+            {/* Center - Tests FAB (Elevated) */}
+            <div className="flex-1 flex justify-center">
+              <Sheet open={testsSheetOpen} onOpenChange={setTestsSheetOpen}>
+                <SheetTrigger asChild>
+                  <button className="relative -mt-6">
+                    {/* Glow effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-accent rounded-2xl blur-xl opacity-50" />
                     
-                    {/* Main Button - Modern Glassmorphism */}
-                    <div className="relative w-16 h-16 rounded-3xl bg-gradient-to-br from-primary via-secondary to-accent shadow-2xl flex items-center justify-center active:scale-95 transition-all duration-300 border-2 border-white/20 backdrop-blur-sm">
-                      {/* Inner glow */}
-                      <div className="absolute inset-1 rounded-[22px] bg-gradient-to-br from-white/20 to-transparent" />
+                    {/* Main FAB */}
+                    <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl flex items-center justify-center active:scale-95 transition-all duration-300 border border-white/20">
+                      {/* Inner shine */}
+                      <div className="absolute inset-1 rounded-xl bg-gradient-to-br from-white/20 to-transparent" />
                       
                       {/* Icon */}
-                      <BookOpen className="h-7 w-7 text-white relative z-10 drop-shadow-lg" />
+                      <BookOpen className="h-7 w-7 text-white relative z-10" />
                       
-                      {/* Premium Sparkle Badge */}
-                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-warning to-warning/80 rounded-full flex items-center justify-center shadow-lg animate-bounce border-2 border-white/30">
-                        <Sparkles className="h-3 w-3 text-white drop-shadow" />
+                      {/* Active indicator */}
+                      <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-warning rounded-full border-2 border-background">
+                        <Sparkles className="h-2.5 w-2.5 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                       </div>
-
-                      {/* Rotating ring effect */}
-                      <div className="absolute inset-0 rounded-3xl border-2 border-white/10 animate-spin-slow" style={{ animationDuration: '8s' }} />
                     </div>
+                    
+                    <span className="block mt-1.5 text-[10px] font-bold text-foreground text-center">Tests</span>
+                  </button>
+                </SheetTrigger>
+                
+                <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl p-0 border-t-4 border-primary">
+                  {/* Header with Gradient */}
+                  <div className="relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+                    
+                    <SheetHeader className="relative text-left p-6 pb-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                          <GraduationCap className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <SheetTitle className="text-2xl font-extrabold">Choose Your Test</SheetTitle>
+                          <SheetDescription className="text-base">
+                            Select exam type to begin practice
+                          </SheetDescription>
+                        </div>
+                      </div>
+                    </SheetHeader>
                   </div>
-                  
-                  <span className="mt-2 text-xs font-bold text-foreground drop-shadow-sm">Tests</span>
-                </button>
-              </SheetTrigger>
-              
-              <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl p-0 border-t-4 border-primary">
-                {/* Header with Gradient */}
-                <div className="relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10" />
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-                  
-                  <SheetHeader className="relative text-left p-6 pb-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
-                        <GraduationCap className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <SheetTitle className="text-2xl font-extrabold">Choose Your Test</SheetTitle>
-                        <SheetDescription className="text-base">
-                          Select exam type to begin practice
-                        </SheetDescription>
-                      </div>
-                    </div>
-                  </SheetHeader>
-                </div>
 
-                {/* Test Options */}
-                <div className="p-6 space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 120px)' }}>
-                  <TestCard
-                    examType="jamb"
-                    title="JAMB CBT"
-                    description="Practice for UTME with real exam format"
-                    icon={GraduationCap}
-                    badge="Popular"
-                    gradient="from-primary to-primary-glow"
-                    onClose={() => setTestsSheetOpen(false)}
-                  />
+                  {/* Test Options */}
+                  <div className="p-6 space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 120px)' }}>
+                    <TestCard
+                      examType="jamb"
+                      title="JAMB CBT"
+                      description="Practice for UTME with real exam format"
+                      icon={GraduationCap}
+                      badge="Popular"
+                      gradient="from-primary to-primary-glow"
+                      onClose={() => setTestsSheetOpen(false)}
+                    />
 
-                  <TestCard
-                    examType="waec"
-                    title="WAEC"
-                    description="West African Examinations Council"
-                    icon={FileCheck}
-                    gradient="from-secondary to-info"
-                    onClose={() => setTestsSheetOpen(false)}
-                  />
+                    <TestCard
+                      examType="waec"
+                      title="WAEC"
+                      description="West African Examinations Council"
+                      icon={FileCheck}
+                      gradient="from-secondary to-info"
+                      onClose={() => setTestsSheetOpen(false)}
+                    />
 
-                  <TestCard
-                    examType="neco"
-                    title="NECO"
-                    description="National Examinations Council"
-                    icon={Award}
-                    gradient="from-accent to-success"
-                    onClose={() => setTestsSheetOpen(false)}
-                  />
+                    <TestCard
+                      examType="neco"
+                      title="NECO"
+                      description="National Examinations Council"
+                      icon={Award}
+                      gradient="from-accent to-success"
+                      onClose={() => setTestsSheetOpen(false)}
+                    />
 
-                  <TestCard
-                    examType="post-utme"
-                    title="Post-UTME"
-                    description="University screening examination"
-                    icon={Zap}
-                    badge="New"
-                    gradient="from-warning to-destructive"
-                    onClose={() => setTestsSheetOpen(false)}
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+                    <TestCard
+                      examType="post-utme"
+                      title="Post-UTME"
+                      description="University screening examination"
+                      icon={Zap}
+                      badge="New"
+                      gradient="from-warning to-destructive"
+                      onClose={() => setTestsSheetOpen(false)}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
 
-          {/* Right Side - 2 buttons */}
-          <div className="flex items-center gap-2 flex-1 justify-end">
-            {/* Forum Button */}
-            <Link to="/forum">
-              <button className={`relative flex flex-col items-center gap-1 px-2 py-2 rounded-2xl transition-all duration-300 ${
-                activeTab === "forum" ? "text-primary" : "text-muted-foreground active:scale-95"
+            {/* Arena Button */}
+            <Link to="/challenge-arena" className="flex-1 flex justify-center">
+              <button className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-300 ${
+                activeTab === "arena" ? "scale-105" : "active:scale-95"
               }`}>
-                {activeTab === "forum" && (
-                  <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
+                {activeTab === "arena" && (
+                  <div className="absolute inset-0 bg-warning/10 rounded-2xl" />
                 )}
-                <div className={`relative p-2 rounded-xl transition-all duration-300 ${
-                  activeTab === "forum" ? "bg-primary text-white shadow-lg scale-110" : "bg-muted/50"
+                <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${
+                  activeTab === "arena" 
+                    ? "bg-gradient-to-br from-warning to-destructive text-white shadow-lg shadow-warning/30" 
+                    : "bg-muted/60 text-muted-foreground"
                 }`}>
-                  <MessageSquare className="h-4 w-4" />
+                  <Sword className="h-5 w-5" />
                 </div>
-                <span className={`text-[10px] font-semibold ${
-                  activeTab === "forum" ? "text-primary" : ""
-                }`}>Forum</span>
+                <span className={`text-[10px] font-bold tracking-wide ${
+                  activeTab === "arena" ? "text-warning" : "text-muted-foreground"
+                }`}>
+                  Arena
+                </span>
               </button>
             </Link>
 
             {/* Profile Button */}
             <button
               onClick={() => onTabChange("profile")}
-              className={`relative flex flex-col items-center gap-1 px-2 py-2 rounded-2xl transition-all duration-300 ${
+              className={`flex-1 flex justify-center relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-300 ${
                 activeTab === "profile" || activeTab === "settings"
-                  ? "text-primary"
-                  : "text-muted-foreground active:scale-95"
+                  ? "scale-105"
+                  : "active:scale-95"
               }`}
             >
               {(activeTab === "profile" || activeTab === "settings") && (
-                <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
+                <div className="absolute inset-0 bg-accent/10 rounded-2xl" />
               )}
-              <div className={`relative p-2 rounded-xl transition-all duration-300 ${
+              <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${
                 activeTab === "profile" || activeTab === "settings"
-                  ? "bg-primary text-white shadow-lg scale-110" 
-                  : "bg-muted/50"
+                  ? "bg-gradient-to-br from-accent to-success text-white shadow-lg shadow-accent/30" 
+                  : "bg-muted/60 text-muted-foreground"
               }`}>
-                <User className="h-4 w-4" />
+                <User className="h-5 w-5" />
               </div>
-              <span className={`text-[10px] font-semibold ${
-                activeTab === "profile" || activeTab === "settings" ? "text-primary" : ""
+              <span className={`text-[10px] font-bold tracking-wide ${
+                activeTab === "profile" || activeTab === "settings" ? "text-accent" : "text-muted-foreground"
               }`}>
                 Profile
               </span>

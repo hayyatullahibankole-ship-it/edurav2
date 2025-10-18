@@ -21,7 +21,6 @@ const Layout = ({ children, showNavbar = true, showWhatsAppButton = true }: Layo
     if (location.pathname === "/dashboard") return "dashboard";
     if (location.pathname === "/study-hub") return "study";
     if (location.pathname === "/challenge-arena") return "arena";
-    if (location.pathname === "/forum") return "forum";
     return "";
   };
 
