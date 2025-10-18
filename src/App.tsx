@@ -57,7 +57,7 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
 
-      {/* Root route - redirect based on platform - prevent overlap */}
+      {/* Root route - redirect based on platform */}
       <Route 
         path="/" 
         element={
@@ -65,10 +65,8 @@ const AppRoutes = () => {
         } 
       />
       
-      {/* For testing mobile experience - only accessible via direct navigation */}
-      <Route path="/mobile-preview" element={
-        !isInstalledApp ? <Navigate to="/mobile-splash" replace /> : <Navigate to="/" replace />
-      } />
+      {/* For testing mobile experience in web preview */}
+      <Route path="/mobile-preview" element={<Navigate to="/mobile-splash" replace />} />
       
       <Route path="/auth" element={<Layout showNavbar={false}><Auth /></Layout>} />
       <Route path="/dashboard" element={

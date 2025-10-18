@@ -343,15 +343,14 @@ const MobileHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-muted/20 pb-24">
-      {/* Header with Premium Gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary/95 via-secondary/90 to-accent/85 p-6 pb-10 rounded-b-[2rem]">
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-5 -left-5 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
+    <div className="min-h-screen bg-background pb-24">
+      {/* Header with Gradient */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent p-6 pb-8">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
         
         <div className="relative z-10">
           {/* Top Bar */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6">
             <div className="bg-white p-2 rounded-xl shadow-lg">
               <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
             </div>
@@ -376,63 +375,107 @@ const MobileHome = () => {
             </div>
           </div>
 
-          {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
-              Hey {userProfile?.first_name || 'Student'}! 👋
+          {/* Welcome */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-white mb-1">
+              Welcome back, {userProfile?.first_name || 'Student'}! 👋
             </h1>
-            <p className="text-white/90 text-base font-medium">
-              {stats.averageScore > 0 ? `You're averaging ${stats.averageScore}% - Keep crushing it!` : 'Ready to ace your exams?'}
+            <p className="text-white/80 text-sm">
+              {stats.averageScore > 0 ? `${stats.averageScore}% average score` : 'Ready to start learning?'}
             </p>
           </div>
 
-          {/* Quick Stats - Enhanced */}
-          <div className="grid grid-cols-3 gap-4">
-            <Card className="bg-white/15 backdrop-blur-md border-white/30 shadow-xl hover:bg-white/20 transition-all">
-              <CardContent className="p-4 text-center">
-                <div className="bg-white/20 p-2 rounded-xl w-fit mx-auto mb-2">
-                  <Target className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.testsTaken}</div>
-                <div className="text-xs text-white/90 font-medium">Tests Taken</div>
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-3">
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardContent className="p-3 text-center">
+                <Target className="h-5 w-5 text-white mx-auto mb-1" />
+                <div className="text-xl font-bold text-white">{stats.testsTaken}</div>
+                <div className="text-xs text-white/80">Tests</div>
               </CardContent>
             </Card>
-            <Card className="bg-white/15 backdrop-blur-md border-white/30 shadow-xl hover:bg-white/20 transition-all">
-              <CardContent className="p-4 text-center">
-                <div className="bg-white/20 p-2 rounded-xl w-fit mx-auto mb-2">
-                  <TrendingUp className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.averageScore}%</div>
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardContent className="p-3 text-center">
+                <TrendingUp className="h-5 w-5 text-white mx-auto mb-1" />
+                <div className="text-xl font-bold text-white">{stats.averageScore}%</div>
                 <div className="text-xs text-white/80">Average</div>
               </CardContent>
             </Card>
-            <Card className="bg-white/15 backdrop-blur-md border-white/30 shadow-xl hover:bg-white/20 transition-all">
-              <CardContent className="p-4 text-center">
-                <div className="bg-white/20 p-2 rounded-xl w-fit mx-auto mb-2">
-                  <Flame className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">{streak.current}</div>
-                <div className="text-xs text-white/90 font-medium">Day Streak</div>
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardContent className="p-3 text-center">
+                <Clock className="h-5 w-5 text-white mx-auto mb-1" />
+                <div className="text-xl font-bold text-white">{stats.studyHours}h</div>
+                <div className="text-xs text-white/80">Study</div>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
 
-      {/* Main Content - Better Organized */}
-      <div className="px-5 py-8 space-y-8">
-        {/* Motivational Quote - Enhanced */}
-        {motivationalQuote && (
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl" />
-            <CardContent className="p-6 relative z-10">
-              <Sparkles className="h-5 w-5 text-primary mx-auto mb-3" />
-              <p className="text-sm font-medium text-foreground/90 text-center leading-relaxed">
-                "{motivationalQuote}"
+      {/* Main Content */}
+      <div className="p-4 space-y-4 -mt-4">
+        {/* Study Streak */}
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-warning/10 to-destructive/10">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="p-4 bg-gradient-to-br from-warning to-destructive rounded-2xl shadow-lg">
+                  <Flame className="h-8 w-8 text-white" />
+                </div>
+                {streak.current > 0 && (
+                  <div className="absolute -top-1 -right-1 bg-white rounded-full px-2 py-0.5 shadow-lg">
+                    <span className="text-xs font-bold text-warning">{streak.current}</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-lg mb-1">
+                  {streak.current > 0 ? `${streak.current} Day Streak! 🔥` : 'Start Your Streak!'}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {streak.current > 0 
+                    ? `Longest: ${streak.longest} days. Keep it up!` 
+                    : 'Take a test daily to build your streak'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Daily Goal Tracker */}
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-base">Daily Goal</h3>
+              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                {dailyGoal.answered}/{dailyGoal.target}
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-primary to-primary-glow rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min((dailyGoal.answered / dailyGoal.target) * 100, 100)}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {dailyGoal.answered >= dailyGoal.target 
+                  ? '🎉 Goal achieved! Great work!' 
+                  : `${dailyGoal.target - dailyGoal.answered} more questions to reach your goal`}
               </p>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Motivational Quote */}
+        <Card className="border-0 shadow-md bg-gradient-to-br from-accent/5 to-primary/5">
+          <CardContent className="p-4">
+            <div className="flex gap-3">
+              <Sparkles className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+              <p className="text-sm italic text-foreground/80">"{motivationalQuote}"</p>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Leaderboard Preview */}
         {leaderboard.length > 0 && (
@@ -479,111 +522,97 @@ const MobileHome = () => {
           </div>
         )}
 
-        {/* Quick Actions - More Prominent */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-xl font-bold">Start Learning</h2>
-            <Badge variant="secondary" className="text-xs">Quick Access</Badge>
-          </div>
-          <Card 
-            className="border-2 border-primary/20 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all active:scale-[0.97] cursor-pointer bg-gradient-to-br from-primary/5 to-transparent"
-            onClick={() => setShowTestPanel(true)}
-          >
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className="p-3.5 bg-gradient-to-br from-primary via-primary-glow to-secondary rounded-2xl shadow-lg">
-                <Play className="h-7 w-7 text-white" />
+        {/* Recent Results */}
+        <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/10 to-secondary/10">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-lg">
+                <Play className="h-6 w-6 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-lg mb-0.5">Take a Test</h3>
-                <p className="text-sm text-muted-foreground">JAMB, WAEC, NECO & more</p>
+                <h3 className="font-bold text-lg mb-1">Start Practice Test</h3>
+                <p className="text-sm text-muted-foreground">Continue your exam prep</p>
               </div>
-              <ChevronRight className="h-6 w-6 text-primary" />
-            </CardContent>
-          </Card>
+              <Button
+                size="sm"
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => {
+                  if (Capacitor.isNativePlatform()) {
+                    Haptics.impact({ style: ImpactStyle.Light });
+                  }
+                  playTapSound();
+                  setShowTestPanel(true);
+                }}
+              >
+                Start
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
+        {/* Feature Cards */}
+        <div className="space-y-3">
+          <h2 className="text-lg font-bold px-1">Explore Features</h2>
+          
+          {/* Challenge Arena */}
           <Card 
-            className="border border-accent/30 shadow-md hover:shadow-lg hover:border-accent/50 transition-all active:scale-[0.97] cursor-pointer"
-            onClick={() => handleNavigation('/study-hub')}
+            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
+            onClick={() => handleNavigation('/challenge-arena')}
           >
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className="p-3.5 bg-gradient-to-br from-accent to-info rounded-2xl shadow-md">
-                <BookOpen className="h-6 w-6 text-white" />
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="p-2.5 bg-gradient-to-br from-warning to-destructive rounded-xl">
+                <Trophy className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-base">Study Companion</h3>
-                <p className="text-sm text-muted-foreground">Lessons & topic guides</p>
+                <h3 className="font-bold text-base">Challenge Arena</h3>
+                <p className="text-xs text-muted-foreground">Compete & win prizes</p>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </CardContent>
           </Card>
 
-          {/* Feature Cards */}
-          <div className="space-y-3 mt-6">
-            <h3 className="text-lg font-semibold px-1">More Features</h3>
-          
-            {/* Challenge Arena */}
-            <Card 
-              className="border border-warning/30 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
-              onClick={() => handleNavigation('/challenge-arena')}
-            >
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2.5 bg-gradient-to-br from-warning to-destructive rounded-xl">
-                  <Trophy className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-sm">Challenge Arena</h3>
-                  <p className="text-xs text-muted-foreground">Compete & win prizes</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </CardContent>
-            </Card>
+          {/* Resources */}
+          <Card 
+            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
+            onClick={() => handleNavigation('/resources')}
+          >
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="p-2.5 bg-gradient-to-br from-info to-secondary rounded-xl">
+                <BookOpen className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base">Study Resources</h3>
+                <p className="text-xs text-muted-foreground">Past questions & materials</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
 
-            {/* Resources */}
-            <Card 
-              className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
-              onClick={() => handleNavigation('/resources')}
-            >
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2.5 bg-gradient-to-br from-info to-secondary rounded-xl">
-                  <BookOpen className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-sm">Study Resources</h3>
-                  <p className="text-xs text-muted-foreground">Past questions & materials</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </CardContent>
-            </Card>
-
-            {/* Consultation */}
-            <Card 
-              className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
-              onClick={() => handleNavigation('/consultation')}
-            >
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2.5 bg-gradient-to-br from-accent to-primary rounded-xl">
-                  <Award className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-sm">Expert Tutors</h3>
-                  <p className="text-xs text-muted-foreground">Book consultation sessions</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </CardContent>
-            </Card>
-          </div>
+          {/* Consultation */}
+          <Card 
+            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
+            onClick={() => handleNavigation('/consultation')}
+          >
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="p-2.5 bg-gradient-to-br from-accent to-primary rounded-xl">
+                <Award className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base">Expert Tutors</h3>
+                <p className="text-xs text-muted-foreground">Book consultation sessions</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Recent Results - Better Section */}
+        {/* Recent Results */}
         {recentResults.length > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
-              <div>
-                <h2 className="text-xl font-bold">Your Results</h2>
-                <p className="text-xs text-muted-foreground">Recent test performance</p>
-              </div>
+              <h2 className="text-lg font-bold">Recent Results</h2>
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size="sm"
                 onClick={() => handleNavigation('/dashboard?tab=results')}
                 className="text-xs"
