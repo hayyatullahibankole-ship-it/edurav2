@@ -562,56 +562,94 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* Learning Hub - Mad Features! */}
+                {/* Premium Features Grid */}
                 <div>
-                  <div className="mb-3">
+                  <div className="mb-4">
                     <h2 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold flex items-center gap-2 mb-1`}>
                       <Rocket className="h-5 w-5 text-primary animate-bounce-slow" />
-                      Explore Features
+                      Premium Features
                     </h2>
-                    <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>Everything you need to succeed</p>
+                    <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>Everything you need to excel in your exams</p>
                   </div>
-                  <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'md:grid-cols-3 gap-4'}`}>
-                    <FeatureCard 
-                      icon={GraduationCap}
-                      title="Study Hub"
-                      description="Access comprehensive lessons, video tutorials, and study materials curated by experts"
-                      href="/study-hub"
-                      gradient="from-primary to-secondary"
-                      badge="Popular"
-                    />
-                    <FeatureCard 
-                      icon={MessageSquare}
-                      title="Ask Tutor"
-                      description="Get instant help from tutors and peers. Ask questions, share knowledge, and learn together"
-                      href="/forum"
-                      gradient="from-success to-accent"
-                      badge="24/7"
-                    />
-                    <FeatureCard 
-                      icon={Sword}
-                      title="Challenge Arena"
-                      description="Compete with students nationwide! Earn points, climb leaderboards, and win amazing prizes"
-                      href="/challenge-arena"
-                      gradient="from-warning to-destructive"
-                      badge="New"
-                    />
-                    <FeatureCard 
-                      icon={FileText}
-                      title="Resources"
-                      description="Download past questions, syllabus, and study materials for all exam types"
-                      href="/resources"
-                      gradient="from-info to-secondary"
-                      badge=""
-                    />
-                    <FeatureCard 
-                      icon={Calendar}
-                      title="Consultation"
-                      description="Book one-on-one sessions with expert tutors to get personalized guidance"
-                      href="/consultation"
-                      gradient="from-accent to-primary"
-                      badge=""
-                    />
+                  <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'md:grid-cols-3 gap-5'}`}>
+                    {/* Challenge Arena Card */}
+                    <Link to="/challenge-arena" className="group">
+                      <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-warning/10 via-destructive/10 to-warning/5">
+                        <div className="absolute inset-0 bg-gradient-to-br from-warning via-destructive to-warning opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-warning/20 rounded-full blur-3xl group-hover:blur-2xl transition-all" />
+                        
+                        <CardHeader className="relative pb-3">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="p-3 bg-gradient-to-br from-warning to-destructive rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-500">
+                              <Sword className="h-6 w-6 text-white" />
+                            </div>
+                            <Badge className="bg-warning/20 text-warning border-warning/30">New</Badge>
+                          </div>
+                          <CardTitle className="text-xl font-bold mb-2">Challenge Arena</CardTitle>
+                          <CardDescription className="text-sm leading-relaxed">
+                            Compete with students nationwide! Earn points, climb leaderboards, and win amazing prizes
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="relative pt-0">
+                          <div className="flex items-center text-warning text-sm font-medium group-hover:gap-2 transition-all">
+                            <span>Start Competing</span>
+                            <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    {/* Resources Card */}
+                    <Link to="/resources" className="group">
+                      <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-info/10 via-secondary/10 to-info/5">
+                        <div className="absolute inset-0 bg-gradient-to-br from-info via-secondary to-info opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-info/20 rounded-full blur-3xl group-hover:blur-2xl transition-all" />
+                        
+                        <CardHeader className="relative pb-3">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="p-3 bg-gradient-to-br from-info to-secondary rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-500">
+                              <FileText className="h-6 w-6 text-white" />
+                            </div>
+                          </div>
+                          <CardTitle className="text-xl font-bold mb-2">Study Resources</CardTitle>
+                          <CardDescription className="text-sm leading-relaxed">
+                            Download past questions, syllabus, and comprehensive study materials for all exam types
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="relative pt-0">
+                          <div className="flex items-center text-info text-sm font-medium group-hover:gap-2 transition-all">
+                            <span>Browse Resources</span>
+                            <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    {/* Consultation Card */}
+                    <Link to="/consultation" className="group">
+                      <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-accent/10 via-primary/10 to-accent/5">
+                        <div className="absolute inset-0 bg-gradient-to-br from-accent via-primary to-accent opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-accent/20 rounded-full blur-3xl group-hover:blur-2xl transition-all" />
+                        
+                        <CardHeader className="relative pb-3">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="p-3 bg-gradient-to-br from-accent to-primary rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-500">
+                              <Calendar className="h-6 w-6 text-white" />
+                            </div>
+                          </div>
+                          <CardTitle className="text-xl font-bold mb-2">Expert Consultation</CardTitle>
+                          <CardDescription className="text-sm leading-relaxed">
+                            Book one-on-one sessions with expert tutors for personalized guidance and support
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="relative pt-0">
+                          <div className="flex items-center text-accent text-sm font-medium group-hover:gap-2 transition-all">
+                            <span>Book Session</span>
+                            <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
                   </div>
                 </div>
 
