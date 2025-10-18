@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { GraduationCap, Target, Trophy, Zap, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 const onboardingSlides = [
@@ -41,7 +42,9 @@ const MobileOnboarding = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const handleNext = async () => {
-    await Haptics.impact({ style: ImpactStyle.Light });
+    if (Capacitor.isNativePlatform()) {
+      await Haptics.impact({ style: ImpactStyle.Light });
+    }
     
     if (currentSlide === onboardingSlides.length - 1) {
       localStorage.setItem('hasSeenMobileOnboarding', 'true');
@@ -52,14 +55,18 @@ const MobileOnboarding = () => {
   };
 
   const handlePrev = async () => {
-    await Haptics.impact({ style: ImpactStyle.Light });
+    if (Capacitor.isNativePlatform()) {
+      await Haptics.impact({ style: ImpactStyle.Light });
+    }
     if (currentSlide > 0) {
       setCurrentSlide(prev => prev - 1);
     }
   };
 
   const handleSkip = async () => {
-    await Haptics.impact({ style: ImpactStyle.Medium });
+    if (Capacitor.isNativePlatform()) {
+      await Haptics.impact({ style: ImpactStyle.Medium });
+    }
     localStorage.setItem('hasSeenMobileOnboarding', 'true');
     navigate('/auth');
   };

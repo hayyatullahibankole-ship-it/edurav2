@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
+import { Capacitor } from '@capacitor/core';
 import { Sparkles, GraduationCap } from 'lucide-react';
 
 const MobileSplash = () => {
@@ -10,13 +11,17 @@ const MobileSplash = () => {
   useEffect(() => {
     const initApp = async () => {
       try {
-        // Configure status bar
-        await StatusBar.setStyle({ style: Style.Light });
-        await StatusBar.setBackgroundColor({ color: '#0ea5e9' });
+        // Only use native APIs if on native platform
+        if (Capacitor.isNativePlatform()) {
+          await StatusBar.setStyle({ style: Style.Light });
+          await StatusBar.setBackgroundColor({ color: '#0ea5e9' });
+        }
         
         // Hide splash screen after delay
         setTimeout(async () => {
-          await SplashScreen.hide();
+          if (Capacitor.isNativePlatform()) {
+            await SplashScreen.hide();
+          }
           
           // Check if user has seen onboarding
           const hasSeenOnboarding = localStorage.getItem('hasSeenMobileOnboarding');
@@ -29,7 +34,11 @@ const MobileSplash = () => {
         }, 2500);
       } catch (error) {
         console.error('Error initializing app:', error);
-        navigate('/mobile-onboarding');
+        // Still navigate even if there's an error
+        setTimeout(() => {
+          const hasSeenOnboarding = localStorage.getItem('hasSeenMobileOnboarding');
+          navigate(hasSeenOnboarding ? '/auth' : '/mobile-onboarding');
+        }, 2500);
       }
     };
 

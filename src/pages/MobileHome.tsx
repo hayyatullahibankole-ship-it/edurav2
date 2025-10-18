@@ -19,6 +19,7 @@ import {
   User,
   LogOut
 } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import MobileNav from '@/components/MobileNav';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -77,13 +78,17 @@ const MobileHome = () => {
   };
 
   const handleNavigation = async (path: string) => {
-    await Haptics.impact({ style: ImpactStyle.Light });
+    if (Capacitor.isNativePlatform()) {
+      await Haptics.impact({ style: ImpactStyle.Light });
+    }
     playTapSound();
     navigate(path);
   };
 
   const handleLogout = async () => {
-    await Haptics.impact({ style: ImpactStyle.Medium });
+    if (Capacitor.isNativePlatform()) {
+      await Haptics.impact({ style: ImpactStyle.Medium });
+    }
     await signOut();
     navigate('/auth');
   };

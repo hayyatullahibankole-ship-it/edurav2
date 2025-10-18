@@ -65,6 +65,9 @@ const AppRoutes = () => {
         } 
       />
       
+      {/* For testing mobile experience in web preview */}
+      <Route path="/mobile-preview" element={<Navigate to="/mobile-splash" replace />} />
+      
       <Route path="/auth" element={<Layout showNavbar={false}><Auth /></Layout>} />
       <Route path="/dashboard" element={
         <ProtectedRoute>
