@@ -1,4 +1,4 @@
-import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles, Sword, Library } from "lucide-react";
+import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles, Sword, MessageSquare, Library } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,12 +35,16 @@ interface TestCardWithCloseProps extends TestCardProps {
 
 const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, onClose }: TestCardProps) => {
   return (
-    <ScheduleTestModal defaultExamType={examType} onOpenChange={(open) => {
-      // Close the sheet when the modal opens
-      if (open) {
-        setTimeout(() => onClose(), 200);
-      }
-    }}>
+    <ScheduleTestModal 
+      defaultExamType={examType} 
+      onOpenChange={(open) => {
+        // Only close the sheet when the modal is fully opening
+        if (open) {
+          // Use a longer delay to ensure modal is mounted
+          setTimeout(() => onClose(), 300);
+        }
+      }}
+    >
       <Card 
         className={`relative overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.97] hover-lift group border-0 shadow-lg`}
       >
@@ -95,7 +99,7 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
               className={`absolute top-0 left-0 h-0.5 bg-gradient-to-r from-primary to-primary-glow transition-all duration-500 ease-out ${
                 activeTab === "dashboard" ? "w-1/5 translate-x-[10%]" :
                 activeTab === "study" ? "w-1/5 translate-x-[110%]" :
-                activeTab === "arena" ? "w-1/5 translate-x-[310%]" :
+                activeTab === "forum" ? "w-1/5 translate-x-[310%]" :
                 activeTab === "profile" || activeTab === "settings" ? "w-1/5 translate-x-[410%]" :
                 "w-0"
               }`}
@@ -242,25 +246,25 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
               </Sheet>
             </div>
 
-            {/* Arena Button */}
-            <Link to="/challenge-arena" className="flex-1 flex justify-center">
+            {/* Forum Button */}
+            <Link to="/forum" className="flex-1 flex justify-center">
               <button className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
-                activeTab === "arena" ? "scale-105" : "scale-100 hover:scale-105 active:scale-95"
+                activeTab === "forum" ? "scale-105" : "scale-100 hover:scale-105 active:scale-95"
               }`}>
-                {activeTab === "arena" && (
+                {activeTab === "forum" && (
                   <div className="absolute inset-0 bg-warning/10 rounded-2xl animate-fade-in" />
                 )}
                 <div className={`relative p-2.5 rounded-xl transition-all duration-500 ${
-                  activeTab === "arena" 
+                  activeTab === "forum" 
                     ? "bg-gradient-to-br from-warning to-destructive text-white shadow-lg shadow-warning/30 scale-110" 
                     : "bg-muted/60 text-muted-foreground hover:bg-muted"
                 }`}>
-                  <Sword className={`h-5 w-5 transition-transform duration-300 ${activeTab === "arena" ? "scale-110 rotate-12" : ""}`} />
+                  <MessageSquare className={`h-5 w-5 transition-transform duration-300 ${activeTab === "forum" ? "scale-110" : ""}`} />
                 </div>
                 <span className={`text-[10px] font-bold tracking-wide transition-all duration-300 ${
-                  activeTab === "arena" ? "text-warning scale-110" : "text-muted-foreground"
+                  activeTab === "forum" ? "text-warning scale-110" : "text-muted-foreground"
                 }`}>
-                  Arena
+                  Forum
                 </span>
               </button>
             </Link>

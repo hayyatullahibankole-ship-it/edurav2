@@ -542,6 +542,41 @@ const Dashboard = () => {
                         </div>
                       </div>
                     </ScheduleTestModal>
+                    
+                    {/* Challenge Arena - Prominent Card */}
+                    <Link to="/challenge-arena">
+                      <div className="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 active:scale-[0.98] cursor-pointer group bg-gradient-to-br from-accent via-success to-success-glow shadow-xl mt-2">
+                        {/* Animated background pattern */}
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')]" />
+                        </div>
+                        
+                        {/* Shine effect */}
+                        <div className="absolute inset-0 opacity-0 group-active:opacity-30 transition-opacity duration-300">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent" />
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="relative z-10 flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm mb-2">
+                              <Trophy className="h-3 w-3 text-white" />
+                              <span className="text-xs font-bold text-white">Compete & Win</span>
+                            </div>
+                            <h3 className="text-2xl font-bold text-white mb-1">Challenge Arena</h3>
+                            <p className="text-sm text-white/80">Battle students nationwide</p>
+                          </div>
+                          
+                          {/* Icon */}
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-white/30 rounded-2xl blur-xl" />
+                            <div className="relative w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-active:scale-110 transition-transform">
+                              <Sword className="h-8 w-8 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
                   </div>
                 ) : (
                   /* Desktop Quick Actions */
