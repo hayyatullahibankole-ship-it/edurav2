@@ -20,7 +20,12 @@ import {
   User,
   LogOut,
   GraduationCap,
-  FileText
+  FileText,
+  Brain,
+  Bell,
+  BellOff,
+  TrendingDown,
+  Flame
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -45,6 +50,11 @@ const MobileHome = () => {
   const [recentResults, setRecentResults] = useState<any[]>([]);
   const [streak, setStreak] = useState({ current: 0, longest: 0 });
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [dailyGoal, setDailyGoal] = useState({ answered: 0, target: 20 });
+  const [weakAreas, setWeakAreas] = useState<any[]>([]);
+  const [performanceData, setPerformanceData] = useState<any[]>([]);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [motivationalQuote, setMotivationalQuote] = useState('');
   const [showTestPanel, setShowTestPanel] = useState(false);
   const [showProfileSheet, setShowProfileSheet] = useState(false);
 
@@ -53,6 +63,11 @@ const MobileHome = () => {
       fetchStats();
       fetchStreak();
       fetchLeaderboard();
+      fetchDailyGoal();
+      fetchWeakAreas();
+      fetchPerformanceData();
+      fetchNotificationSettings();
+      setRandomQuote();
     }
   }, [userProfile]);
 
@@ -234,6 +249,175 @@ const MobileHome = () => {
     }
   };
 
+  const fetchDailyGoal = async () => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Count questions answered today
+      const { data: todayAttempts } = await supabase
+        .from('attempts')
+        .select('id')
+        .eq('user_id', userProfile?.id)
+        .gte('created_at', today.toISOString());
+
+      if (todayAttempts) {
+        const { count } = await supabase
+          .from('attempt_answers')
+          .select('*', { count: 'exact', head: true })
+          .in('attempt_id', todayAttempts.map(a => a.id))
+          .not('answer', 'is', null);
+
+        setDailyGoal({ answered: count || 0, target: 20 });
+      }
+    } catch (error) {
+      console.error('Error fetching daily goal:', error);
+    }
+  };
+
+  const fetchWeakAreas = async () => {
+    try {
+      const { data: attempts } = await supabase
+        .rpc('get_student_exam_progress');
+      
+      const userAttempts = attempts?.filter(a => 
+        a.user_id === userProfile?.id && a.status === 'SUBMITTED'
+      ) || [];
+
+      // Get results for each attempt and calculate subject performance
+      const subjectScores = new Map();
+      
+      for (const attempt of userAttempts.slice(-10)) { // Last 10 attempts
+        const { data: result } = await supabase
+          .from('results')
+          .select('subject_breakdown')
+          .eq('attempt_id', attempt.id)
+          .maybeSingle();
+
+        if (result?.subject_breakdown) {
+          Object.entries(result.subject_breakdown).forEach(([subjectId, data]: [string, any]) => {
+            if (!subjectScores.has(subjectId)) {
+              subjectScores.set(subjectId, { total: 0, count: 0, subjectId });
+            }
+            const subjectData = subjectScores.get(subjectId);
+            subjectData.total += data.percentage || 0;
+            subjectData.count += 1;
+          });
+        }
+      }
+
+      // Get subjects with lowest scores
+      const weakSubjects = Array.from(subjectScores.values())
+        .map(s => ({ ...s, avgScore: Math.round(s.total / s.count) }))
+        .sort((a, b) => a.avgScore - b.avgScore)
+        .slice(0, 3);
+
+      // Enrich with subject names
+      const enrichedWeak = await Promise.all(
+        weakSubjects.map(async (subject) => {
+          const { data } = await supabase
+            .from('subjects')
+            .select('name')
+            .eq('id', subject.subjectId)
+            .single();
+          
+          return {
+            name: data?.name || 'Unknown',
+            score: subject.avgScore
+          };
+        })
+      );
+
+      setWeakAreas(enrichedWeak);
+    } catch (error) {
+      console.error('Error fetching weak areas:', error);
+    }
+  };
+
+  const fetchPerformanceData = async () => {
+    try {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const { data: attempts } = await supabase
+        .from('attempts')
+        .select('id, submitted_at')
+        .eq('user_id', userProfile?.id)
+        .eq('status', 'SUBMITTED')
+        .gte('submitted_at', sevenDaysAgo.toISOString())
+        .order('submitted_at', { ascending: true });
+
+      if (attempts) {
+        const dailyScores = await Promise.all(
+          attempts.map(async (attempt) => {
+            const { data: result } = await supabase
+              .from('results')
+              .select('percentage')
+              .eq('attempt_id', attempt.id)
+              .maybeSingle();
+
+            return {
+              date: new Date(attempt.submitted_at).toLocaleDateString('en-US', { weekday: 'short' }),
+              score: Math.round(result?.percentage || 0)
+            };
+          })
+        );
+
+        setPerformanceData(dailyScores);
+      }
+    } catch (error) {
+      console.error('Error fetching performance data:', error);
+    }
+  };
+
+  const fetchNotificationSettings = async () => {
+    try {
+      const { data } = await supabase
+        .from('user_preferences')
+        .select('sms_results')
+        .eq('user_id', userProfile?.id)
+        .single();
+
+      setNotificationsEnabled(data?.sms_results || false);
+    } catch (error) {
+      console.error('Error fetching notification settings:', error);
+    }
+  };
+
+  const toggleNotifications = async () => {
+    try {
+      const newValue = !notificationsEnabled;
+      await supabase
+        .from('user_preferences')
+        .update({ sms_results: newValue })
+        .eq('user_id', userProfile?.id);
+
+      setNotificationsEnabled(newValue);
+      if (Capacitor.isNativePlatform()) {
+        await Haptics.impact({ style: ImpactStyle.Light });
+      }
+      playTapSound();
+    } catch (error) {
+      console.error('Error toggling notifications:', error);
+    }
+  };
+
+  const setRandomQuote = () => {
+    const quotes = [
+      "Success is the sum of small efforts repeated daily.",
+      "The expert in anything was once a beginner.",
+      "Study hard, stay focused, and achieve greatness!",
+      "Every question you answer brings you closer to your goal.",
+      "Consistency is the key to mastering any subject.",
+      "Believe in yourself and all that you are capable of.",
+      "Your future is created by what you do today, not tomorrow.",
+      "Practice makes progress. Keep going!",
+      "Knowledge is power. Keep learning every day.",
+      "The harder you work, the luckier you get."
+    ];
+    setMotivationalQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+  };
+
   const handleNavigation = async (path: string) => {
     if (Capacitor.isNativePlatform()) {
       await Haptics.impact({ style: ImpactStyle.Light });
@@ -327,7 +511,7 @@ const MobileHome = () => {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <div className="p-4 bg-gradient-to-br from-warning to-destructive rounded-2xl shadow-lg">
-                  <Zap className="h-8 w-8 text-white" />
+                  <Flame className="h-8 w-8 text-white" />
                 </div>
                 {streak.current > 0 && (
                   <div className="absolute -top-1 -right-1 bg-white rounded-full px-2 py-0.5 shadow-lg">
@@ -345,6 +529,69 @@ const MobileHome = () => {
                     : 'Take a test daily to build your streak'}
                 </p>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Daily Goal Tracker */}
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-base">Daily Goal</h3>
+              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                {dailyGoal.answered}/{dailyGoal.target}
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-primary to-primary-glow rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min((dailyGoal.answered / dailyGoal.target) * 100, 100)}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {dailyGoal.answered >= dailyGoal.target 
+                  ? '🎉 Goal achieved! Great work!' 
+                  : `${dailyGoal.target - dailyGoal.answered} more questions to reach your goal`}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Motivational Quote */}
+        <Card className="border-0 shadow-md bg-gradient-to-br from-accent/5 to-primary/5">
+          <CardContent className="p-4">
+            <div className="flex gap-3">
+              <Sparkles className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+              <p className="text-sm italic text-foreground/80">"{motivationalQuote}"</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Study Reminder Toggle */}
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {notificationsEnabled ? (
+                  <Bell className="h-5 w-5 text-primary" />
+                ) : (
+                  <BellOff className="h-5 w-5 text-muted-foreground" />
+                )}
+                <div>
+                  <p className="font-semibold text-sm">Study Reminders</p>
+                  <p className="text-xs text-muted-foreground">
+                    {notificationsEnabled ? 'Enabled' : 'Disabled'}
+                  </p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant={notificationsEnabled ? "default" : "outline"}
+                onClick={toggleNotifications}
+              >
+                {notificationsEnabled ? 'On' : 'Off'}
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -393,6 +640,58 @@ const MobileHome = () => {
             </Card>
           </div>
         )}
+
+        {/* Performance Graph */}
+        {performanceData.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold px-1">7-Day Performance</h2>
+            <Card className="border-0 shadow-md">
+              <CardContent className="p-4">
+                <div className="flex items-end justify-between gap-2 h-32">
+                  {performanceData.map((day, index) => (
+                    <div key={index} className="flex-1 flex flex-col items-center gap-1">
+                      <div className="flex-1 w-full flex items-end">
+                        <div 
+                          className="w-full bg-gradient-to-t from-primary to-primary-glow rounded-t-lg transition-all duration-500"
+                          style={{ height: `${day.score}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground font-medium">{day.date}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Weak Areas */}
+        {weakAreas.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold px-1">Focus Areas</h2>
+            <div className="space-y-2">
+              {weakAreas.map((subject, index) => (
+                <Card key={index} className="border-0 shadow-md">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-destructive/10 rounded-lg">
+                        <Brain className="h-5 w-5 text-destructive" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">{subject.name}</p>
+                        <p className="text-xs text-muted-foreground">Needs improvement</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-destructive">{subject.score}%</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Quick Start Test */}
         <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/10 to-secondary/10">
           <CardContent className="p-5">
@@ -527,6 +826,57 @@ const MobileHome = () => {
                         </p>
                       </div>
                       <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Performance Graph */}
+        {performanceData.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold px-1">7-Day Performance</h2>
+            <Card className="border-0 shadow-md">
+              <CardContent className="p-4">
+                <div className="flex items-end justify-between gap-2 h-32">
+                  {performanceData.map((day, index) => (
+                    <div key={index} className="flex-1 flex flex-col items-center gap-1">
+                      <div className="flex-1 w-full flex items-end">
+                        <div 
+                          className="w-full bg-gradient-to-t from-primary to-primary-glow rounded-t-lg transition-all duration-500"
+                          style={{ height: `${day.score}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground font-medium">{day.date}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Weak Areas */}
+        {weakAreas.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold px-1">Focus Areas</h2>
+            <div className="space-y-2">
+              {weakAreas.map((subject, index) => (
+                <Card key={index} className="border-0 shadow-md">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-destructive/10 rounded-lg">
+                        <Brain className="h-5 w-5 text-destructive" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">{subject.name}</p>
+                        <p className="text-xs text-muted-foreground">Needs improvement</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-destructive">{subject.score}%</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
