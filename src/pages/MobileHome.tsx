@@ -345,7 +345,7 @@ const MobileHome = () => {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header with Gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent p-6 pb-8">
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent p-6 pb-12 rounded-b-[3rem]">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
         
         <div className="relative z-10">
@@ -413,7 +413,7 @@ const MobileHome = () => {
       </div>
 
       {/* Main Content */}
-      <div className="p-4 space-y-4 -mt-4">
+      <div className="p-4 space-y-4 -mt-8">
         {/* Study Streak */}
         <Card className="border-0 shadow-lg bg-gradient-to-br from-warning/10 to-destructive/10">
           <CardContent className="p-5">
