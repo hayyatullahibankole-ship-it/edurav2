@@ -29,10 +29,16 @@ import { useAuth } from "@/hooks/useAuth";
 interface ScheduleTestModalProps {
   children: React.ReactNode;
   defaultExamType?: string;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, defaultExamType }) => {
+const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, defaultExamType, onOpenChange }) => {
   const [open, setOpen] = useState(false);
+  
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    onOpenChange?.(newOpen);
+  };
   const [step, setStep] = useState(1);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -584,7 +590,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>

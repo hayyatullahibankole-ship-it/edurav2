@@ -29,19 +29,20 @@ interface TestCardProps {
   onClose: () => void;
 }
 
-const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, onClose }: TestCardProps) => {
-  const handleClick = () => {
-    // Small delay before closing to allow the modal to open
-    setTimeout(() => {
-      onClose();
-    }, 100);
-  };
+interface TestCardWithCloseProps extends TestCardProps {
+  onModalOpen: () => void;
+}
 
+const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, onClose }: TestCardProps) => {
   return (
-    <ScheduleTestModal defaultExamType={examType}>
+    <ScheduleTestModal defaultExamType={examType} onOpenChange={(open) => {
+      // Close the sheet when the modal opens
+      if (open) {
+        setTimeout(() => onClose(), 200);
+      }
+    }}>
       <Card 
         className={`relative overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.97] hover-lift group border-0 shadow-lg`}
-        onClick={handleClick}
       >
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-5 group-active:opacity-10 transition-opacity`} />
         

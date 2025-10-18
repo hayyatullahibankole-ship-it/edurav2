@@ -37,7 +37,7 @@ import ScheduleTestModal from "@/components/ScheduleTestModal";
 import SubjectProgressCard from "@/components/SubjectProgressCard";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { FeatureCard } from "@/components/dashboard/FeatureCard";
-import { QuickActionButton } from "@/components/dashboard/QuickActionButton";
+import { ModernQuickAction } from "@/components/dashboard/ModernQuickAction";
 import { NotificationBell } from "@/components/NotificationBell";
 import OnboardingTour from "@/components/OnboardingTour";
 import LoadingAnimation from "@/components/LoadingAnimation";
@@ -407,64 +407,188 @@ const Dashboard = () => {
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-8">
-                {/* Quick Actions - Enhanced with Glassmorphism */}
-                <Card className="border-0 shadow-xl backdrop-blur-sm bg-gradient-to-br from-card to-muted/30 overflow-hidden hover-lift">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
-                  <CardHeader className="relative">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 bg-primary/10 rounded-lg">
+                {/* Quick Actions - Modern Mobile Design */}
+                {isMobile ? (
+                  <div className="space-y-3">
+                    <div className="mb-4">
+                      <h2 className="text-xl font-bold flex items-center gap-2">
                         <Rocket className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-2xl">Quick Actions</CardTitle>
-                        <CardDescription>Jump back into your studies</CardDescription>
-                      </div>
+                        Quick Start
+                      </h2>
+                      <p className="text-sm text-muted-foreground">Choose your practice test</p>
                     </div>
-                  </CardHeader>
-                  <CardContent className="relative">
-                    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
-                      <ScheduleTestModal defaultExamType="jamb">
-                        <Button className={`w-full ${isMobile ? 'h-20' : 'h-24'} flex-col gap-2 ${isMobile ? 'text-base' : 'text-lg'} font-semibold group relative overflow-hidden shadow-lg active:scale-95 transition-all`}>
-                          <div className="absolute inset-0 bg-gradient-to-r from-primary-glow to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <Play className={`${isMobile ? 'h-6 w-6' : 'h-7 w-7'} relative z-10 group-hover:scale-110 transition-transform`} />
-                          <span className="relative z-10">JAMB Practice</span>
-                        </Button>
-                      </ScheduleTestModal>
+                    
+                    <ScheduleTestModal defaultExamType="jamb">
+                      <div className="relative overflow-hidden rounded-3xl p-5 transition-all duration-300 active:scale-[0.97] cursor-pointer group bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-lg hover:shadow-xl">
+                        {/* Animated shine effect */}
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="relative z-10 flex items-center justify-between">
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-white/90 mb-1">Start Now</p>
+                            <h3 className="text-xl font-bold text-white">JAMB Practice</h3>
+                          </div>
+                          
+                          {/* Icon */}
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-white/20 rounded-full blur-xl" />
+                            <div className="relative w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform">
+                              <Play className="h-7 w-7 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Bottom accent line */}
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30" />
+                      </div>
+                    </ScheduleTestModal>
+                    
+                    <div className="grid grid-cols-2 gap-3">
                       <ScheduleTestModal defaultExamType="waec">
-                        <Button variant="outline" className={`w-full ${isMobile ? 'h-20' : 'h-24'} flex-col gap-2 ${isMobile ? 'text-base' : 'text-lg'} font-semibold hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all`}>
-                          <Play className={`${isMobile ? 'h-6 w-6' : 'h-7 w-7'}`} />
-                          WAEC Practice
-                        </Button>
+                        <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.97] cursor-pointer group bg-gradient-to-br from-secondary to-info shadow-md hover:shadow-lg">
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                          </div>
+                          
+                          <div className="relative z-10">
+                            <div className="flex items-center justify-between mb-3">
+                              <p className="text-xs font-medium text-white/90">Practice</p>
+                              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                                <Play className="h-5 w-5 text-white" />
+                              </div>
+                            </div>
+                            <h3 className="text-base font-bold text-white">WAEC</h3>
+                          </div>
+                        </div>
                       </ScheduleTestModal>
+                      
                       <ScheduleTestModal defaultExamType="neco">
-                        <Button variant="outline" className={`w-full ${isMobile ? 'h-20' : 'h-24'} flex-col gap-2 ${isMobile ? 'text-base' : 'text-lg'} font-semibold hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all`}>
-                          <Play className={`${isMobile ? 'h-6 w-6' : 'h-7 w-7'}`} />
-                          NECO Practice
-                        </Button>
-                      </ScheduleTestModal>
-                      <ScheduleTestModal defaultExamType="post-utme">
-                        <Button variant="outline" className={`w-full ${isMobile ? 'h-20' : 'h-24'} flex-col gap-2 ${isMobile ? 'text-base' : 'text-lg'} font-semibold hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all`}>
-                          <Play className={`${isMobile ? 'h-6 w-6' : 'h-7 w-7'}`} />
-                          Post-UTME
-                        </Button>
+                        <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.97] cursor-pointer group bg-gradient-to-br from-accent to-success shadow-md hover:shadow-lg">
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                          </div>
+                          
+                          <div className="relative z-10">
+                            <div className="flex items-center justify-between mb-3">
+                              <p className="text-xs font-medium text-white/90">Practice</p>
+                              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                                <Play className="h-5 w-5 text-white" />
+                              </div>
+                            </div>
+                            <h3 className="text-base font-bold text-white">NECO</h3>
+                          </div>
+                        </div>
                       </ScheduleTestModal>
                     </div>
-                    <div className={`mt-4 grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
+                    
+                    <ScheduleTestModal defaultExamType="post-utme">
+                      <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.97] cursor-pointer group bg-gradient-to-br from-warning to-destructive shadow-md hover:shadow-lg">
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                        </div>
+                        
+                        <div className="relative z-10 flex items-center justify-between">
+                          <div className="flex-1">
+                            <p className="text-xs font-medium text-white/90 mb-1">University Prep</p>
+                            <h3 className="text-base font-bold text-white">Post-UTME</h3>
+                          </div>
+                          
+                          <div className="relative">
+                            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform">
+                              <Zap className="h-6 w-6 text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ScheduleTestModal>
+                    
+                    <div className="grid grid-cols-2 gap-3 pt-2">
                       <Link to="/resources" className="w-full">
-                        <Button variant="outline" className={`w-full ${isMobile ? 'h-16' : 'h-20'} flex-col gap-2 hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all`}>
-                          <FileText className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'}`} />
-                          Browse Resources
-                        </Button>
+                        <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.97] cursor-pointer group bg-card border-2 border-primary/20 hover:border-primary shadow-md hover:shadow-lg">
+                          <div className="relative z-10">
+                            <div className="flex items-center justify-between mb-2">
+                              <FileText className="h-5 w-5 text-primary" />
+                            </div>
+                            <h3 className="text-sm font-bold">Resources</h3>
+                          </div>
+                        </div>
                       </Link>
+                      
                       <Link to="/consultation" className="w-full">
-                        <Button variant="outline" className={`w-full ${isMobile ? 'h-16' : 'h-20'} flex-col gap-2 hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all`}>
-                          <Calendar className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'}`} />
-                          Book Session
-                        </Button>
+                        <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.97] cursor-pointer group bg-card border-2 border-secondary/20 hover:border-secondary shadow-md hover:shadow-lg">
+                          <div className="relative z-10">
+                            <div className="flex items-center justify-between mb-2">
+                              <Calendar className="h-5 w-5 text-secondary" />
+                            </div>
+                            <h3 className="text-sm font-bold">Book Session</h3>
+                          </div>
+                        </div>
                       </Link>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                ) : (
+                  /* Desktop Quick Actions */
+                  <Card className="border-0 shadow-xl backdrop-blur-sm bg-gradient-to-br from-card to-muted/30 overflow-hidden hover-lift">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
+                    <CardHeader className="relative">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <Rocket className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-2xl">Quick Actions</CardTitle>
+                          <CardDescription>Jump back into your studies</CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="relative">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <ScheduleTestModal defaultExamType="jamb">
+                          <Button className="w-full h-24 flex-col gap-2 text-lg font-semibold group relative overflow-hidden shadow-lg active:scale-95 transition-all">
+                            <div className="absolute inset-0 bg-gradient-to-r from-primary-glow to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <Play className="h-7 w-7 relative z-10 group-hover:scale-110 transition-transform" />
+                            <span className="relative z-10">JAMB Practice</span>
+                          </Button>
+                        </ScheduleTestModal>
+                        <ScheduleTestModal defaultExamType="waec">
+                          <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all">
+                            <Play className="h-7 w-7" />
+                            WAEC Practice
+                          </Button>
+                        </ScheduleTestModal>
+                        <ScheduleTestModal defaultExamType="neco">
+                          <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all">
+                            <Play className="h-7 w-7" />
+                            NECO Practice
+                          </Button>
+                        </ScheduleTestModal>
+                        <ScheduleTestModal defaultExamType="post-utme">
+                          <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all">
+                            <Play className="h-7 w-7" />
+                            Post-UTME
+                          </Button>
+                        </ScheduleTestModal>
+                      </div>
+                      <div className="mt-4 grid md:grid-cols-2 gap-4">
+                        <Link to="/resources" className="w-full">
+                          <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all">
+                            <FileText className="h-6 w-6" />
+                            Browse Resources
+                          </Button>
+                        </Link>
+                        <Link to="/consultation" className="w-full">
+                          <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all">
+                            <Calendar className="h-6 w-6" />
+                            Book Session
+                          </Button>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Subscription Management - Mobile Only */}
                 {isMobile && (
