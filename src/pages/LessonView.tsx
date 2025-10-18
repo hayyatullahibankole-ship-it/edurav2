@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Clock, FileText, Download, PlayCircle, BookOpen, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Layout from '@/components/Layout';
-import { MathRenderer } from '@/components/ui/math-renderer';
+import { ContentRenderer } from '@/components/ui/content-renderer';
 
 interface Lesson {
   id: string;
@@ -180,8 +180,8 @@ export default function LessonView() {
               Lesson Content
             </CardTitle>
           </CardHeader>
-          <CardContent className="prose dark:prose-invert max-w-none space-y-4">
-            <MathRenderer content={lesson.content} />
+          <CardContent>
+            <ContentRenderer content={lesson.content} />
             
             {/* Display media in the order they were uploaded */}
             {lesson.media_urls && Array.isArray(lesson.media_urls) && lesson.media_urls.length > 0 && (
@@ -279,7 +279,7 @@ export default function LessonView() {
                     <div key={question.id}>
                       <div className="mb-4">
                         <p className="font-medium mb-3">
-                          {index + 1}. <MathRenderer content={question.question_text} />
+                          {index + 1}. <ContentRenderer content={question.question_text} className="inline" />
                         </p>
                         <div className="space-y-2 ml-4">
                           {question.options && typeof question.options === 'object' && (
@@ -287,14 +287,14 @@ export default function LessonView() {
                               question.options.map((option: string, optIndex: number) => (
                                 <div key={optIndex} className="text-sm">
                                   <span className="font-medium">{String.fromCharCode(65 + optIndex)}.</span>{' '}
-                                  <MathRenderer content={option} />
+                                  <ContentRenderer content={option} className="inline" />
                                 </div>
                               ))
                             ) : (
                               Object.entries(question.options).map(([key, value]) => (
                                 <div key={key} className="text-sm">
                                   <span className="font-medium">{key}.</span>{' '}
-                                  <MathRenderer content={String(value)} />
+                                  <ContentRenderer content={String(value)} className="inline" />
                                 </div>
                               ))
                             )
