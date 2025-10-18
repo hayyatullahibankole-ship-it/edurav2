@@ -64,10 +64,10 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
         // Detect section headers (capitalized lines without markdown #, short length)
         if (!trimmedBlock.includes('\n') && 
             /^[A-Z]/.test(trimmedBlock) && 
-            trimmedBlock.length < 60 &&
+            trimmedBlock.length < 80 &&
             !trimmedBlock.endsWith('.') &&
             !trimmedBlock.match(/^\d+[\.)]/)) {
-          return `<h2 class="text-lg sm:text-xl font-bold mt-8 mb-4 pb-2 border-b border-primary/20 text-primary">${renderMathInline(trimmedBlock)}</h2>`;
+          return `<h2 class="text-lg sm:text-xl font-bold mt-10 mb-5 text-foreground">${renderMathInline(trimmedBlock)}</h2>`;
         }
 
         // Handle headers (# Header, ## Header, ### Header)
@@ -146,29 +146,30 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
           i++;
         }
         
-        return `<ol class="list-decimal pl-5 my-6 space-y-2 text-base [&>li::marker]:text-primary [&>li::marker]:font-bold">${listHTML}</ol>`;
+        return `<ol class="list-decimal pl-5 my-8 space-y-3 text-base [&>li::marker]:text-primary [&>li::marker]:font-bold">${listHTML}</ol>`;
       }
 
-      // Handle tab-separated tables (with validation)
+      // Handle tab-separated tables (with strict validation)
       if (trimmedBlock.includes('\t')) {
         const rows = trimmedBlock.split('\n').filter(row => row.trim());
         
-        // Only treat as table if:
-        // 1. Has at least 2 rows (header + data)
-        // 2. First row looks like a header (no question marks, no numbers at start)
-        // 3. All rows have similar number of tabs (consistent columns)
-        if (rows.length >= 2) {
+        // Only treat as table if it meets ALL criteria
+        if (rows.length >= 3) { // Need header + at least 2 data rows
           const firstRow = rows[0];
           const tabCount = (firstRow.match(/\t/g) || []).length;
           
-          // Validate this is actually a table:
+          // Very strict validation - must look like a real table
           const looksLikeTable = 
-            tabCount >= 1 && // Has at least one tab (2+ columns)
+            tabCount >= 2 && // At least 3 columns
+            firstRow.split('\t').length >= 3 && // Confirm 3+ columns
             !firstRow.match(/^\d+[\.)]\s/) && // Not a numbered list
             !firstRow.includes('?') && // Not a question
+            !firstRow.includes('(') && // Not answer options
+            firstRow.length < 200 && // Header row should be short
             rows.slice(1).every(row => {
               const rowTabs = (row.match(/\t/g) || []).length;
-              return Math.abs(rowTabs - tabCount) <= 1; // Similar tab count
+              const hasOptions = row.includes('(A)') || row.includes('(B)');
+              return !hasOptions && Math.abs(rowTabs - tabCount) <= 1;
             });
           
           if (looksLikeTable) {
@@ -183,7 +184,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
               return `<tr class="${idx % 2 === 0 ? 'bg-card' : 'bg-muted/20'} hover:bg-muted/40 transition-colors">${cells}</tr>`;
             }).join('');
 
-            return `<div class="overflow-x-auto my-6"><table class="w-full border-collapse border-2 border-border rounded-lg overflow-hidden shadow-sm text-sm sm:text-base"><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table></div>`;
+            return `<div class="overflow-x-auto my-8"><table class="w-full border-collapse border border-border rounded-lg overflow-hidden shadow-sm text-sm sm:text-base"><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table></div>`;
           }
         }
       }
@@ -214,7 +215,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
           .map(line => renderMathInline(line))
           .join('<br/>');
         
-        return formatted ? `<p class="mb-4 leading-relaxed text-base">${formatted}</p>` : '';
+        return formatted ? `<p class="mb-5 leading-relaxed text-base">${formatted}</p>` : '';
       })
       .filter(p => p)
       .join('');
