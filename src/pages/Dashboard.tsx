@@ -378,7 +378,7 @@ const Dashboard = () => {
           console.log('Tab changed to:', value);
           setActiveTab(value);
         }}>
-          <TabsList className={`grid w-full grid-cols-3 relative z-50 ${isInstalledApp ? 'hidden' : ''}`}>
+          <TabsList className={`grid w-full grid-cols-2 relative z-50 ${isInstalledApp ? 'hidden' : ''}`}>
             <TabsTrigger value="dashboard" className="pointer-events-auto cursor-pointer">
               <Target className="h-4 w-4 mr-2" />
               Dashboard
@@ -386,10 +386,6 @@ const Dashboard = () => {
             <TabsTrigger value="profile" className="pointer-events-auto cursor-pointer">
               <User className="h-4 w-4 mr-2" />
               Profile
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="pointer-events-auto cursor-pointer">
-              <Settings className="h-4 w-4 mr-2" />
-              Account
             </TabsTrigger>
           </TabsList>
 
@@ -475,7 +471,7 @@ const Dashboard = () => {
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-4">
                 {/* Quick Actions - Desktop Only (Mobile has nav FAB) */}
-                {!isMobile && (
+                {!isInstalledApp && (
                   /* Desktop Quick Actions */
                   <Card className="border-0 shadow-xl backdrop-blur-sm bg-gradient-to-br from-card to-muted/30 overflow-hidden hover-lift">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
@@ -577,7 +573,7 @@ const Dashboard = () => {
                   </div>
                   <div className={`grid ${isMobile ? 'grid-cols-1 gap-2' : 'md:grid-cols-2 lg:grid-cols-3 gap-4'}`}>
                     {/* Study Hub Card - Desktop/Tablet Only */}
-                    {!isMobile && (
+                    {!isInstalledApp && (
                       <Link to="/study-hub" className="group">
                         <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-primary/5 to-secondary/5">
                           <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl" />
@@ -601,7 +597,7 @@ const Dashboard = () => {
                     )}
 
                     {/* Ask Tutor Card - Desktop/Tablet Only */}
-                    {!isMobile && (
+                    {!isInstalledApp && (
                       <Link to="/forum" className="group">
                         <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-success/5 to-accent/5">
                           <div className="absolute top-0 right-0 w-20 h-20 bg-success/10 rounded-full blur-2xl" />
@@ -891,12 +887,6 @@ const Dashboard = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="settings" className="mt-8">
-            <div className="space-y-8">
-              <ProfileSettings />
-              <AccountSettings />
-            </div>
-          </TabsContent>
         </Tabs>
       </div>
     </div>
