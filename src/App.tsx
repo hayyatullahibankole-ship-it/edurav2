@@ -1,13 +1,17 @@
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import MobileSplash from "./pages/MobileSplash";
+import MobileOnboarding from "./pages/MobileOnboarding";
+import MobileHome from "./pages/MobileHome";
+import { useNativeApp } from "./hooks/useNativeApp";
 
 import AdminPortal from "./pages/AdminPortal";
 import AdminLogin from "./pages/AdminLogin";
@@ -39,20 +43,34 @@ import LessonQuiz from "./pages/LessonQuiz";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Layout><Home /></Layout>} />
-            <Route path="/auth" element={<Layout showNavbar={false}><Auth /></Layout>} />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Layout showNavbar={false}><Dashboard /></Layout>
-              </ProtectedRoute>
-            } />
+const AppRoutes = () => {
+  const { isNative } = useNativeApp();
+
+  return (
+    <Routes>
+      {/* Mobile-specific routes */}
+      <Route path="/mobile-splash" element={<MobileSplash />} />
+      <Route path="/mobile-onboarding" element={<MobileOnboarding />} />
+      <Route path="/mobile-home" element={
+        <ProtectedRoute>
+          <MobileHome />
+        </ProtectedRoute>
+      } />
+
+      {/* Root route - redirect based on platform */}
+      <Route 
+        path="/" 
+        element={
+          isNative ? <Navigate to="/mobile-splash" replace /> : <Layout><Home /></Layout>
+        } 
+      />
+      
+      <Route path="/auth" element={<Layout showNavbar={false}><Auth /></Layout>} />
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          {isNative ? <MobileHome /> : <Layout showNavbar={false}><Dashboard /></Layout>}
+        </ProtectedRoute>
+      } />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={
               <ProtectedRoute requireAdmin>
@@ -149,6 +167,16 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<Layout><NotFound /></Layout>} />
           </Routes>
+  );
+};
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <BrowserRouter>
+          <AppRoutes />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
