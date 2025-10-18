@@ -88,6 +88,16 @@ export default function StudyHub() {
     return null;
   }
 
+  // Group topics by subject
+  const topicsBySubject = topics.reduce((acc, topic) => {
+    const subjectName = topic.subjects?.name || 'Other';
+    if (!acc[subjectName]) {
+      acc[subjectName] = [];
+    }
+    acc[subjectName].push(topic);
+    return acc;
+  }, {} as Record<string, StudyTopic[]>);
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-4 sm:py-8">
@@ -103,7 +113,7 @@ export default function StudyHub() {
         </div>
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">📚 Study Companion Hub</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Master topics before taking your CBT tests</p>
+          <p className="text-sm sm:text-base text-muted-foreground">Master topics organized by subject → lessons</p>
         </div>
 
         <Tabs value={selectedExamType} onValueChange={(val) => setSelectedExamType(val)} className="mb-6 sm:mb-8">
@@ -122,33 +132,46 @@ export default function StudyHub() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {topics.map((topic) => (
-                  <Card 
-                    key={topic.id} 
-                    className="hover:shadow-lg transition-all cursor-pointer animate-fade-in hover-scale"
-                    onClick={() => navigate(`/study-hub/topic/${topic.id}`)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <CardTitle className="text-base sm:text-lg mb-2 line-clamp-2">{topic.title}</CardTitle>
-                          <Badge variant="secondary" className="text-xs">
-                            {topic.subjects?.name}
-                          </Badge>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <div className="space-y-6">
+                {Object.entries(topicsBySubject).map(([subject, subjectTopics]) => (
+                  <div key={subject} className="animate-fade-in">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <Book className="h-5 w-5 text-primary" />
                       </div>
-                      <CardDescription className="line-clamp-2 text-xs sm:text-sm mt-2">
-                        {topic.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
-                        <span>Difficulty: {topic.difficulty_level}/5</span>
+                      <div>
+                        <h2 className="text-xl font-bold">{subject}</h2>
+                        <p className="text-xs text-muted-foreground">{subjectTopics.length} {subjectTopics.length === 1 ? 'topic' : 'topics'}</p>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                    <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      {subjectTopics.map((topic) => (
+                        <Card 
+                          key={topic.id} 
+                          className="hover:shadow-lg transition-all cursor-pointer animate-fade-in hover-scale border-l-4"
+                          style={{ borderLeftColor: `hsl(var(--primary))` }}
+                          onClick={() => navigate(`/study-hub/topic/${topic.id}`)}
+                        >
+                          <CardHeader className="pb-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <CardTitle className="text-base sm:text-lg mb-2 line-clamp-2">{topic.title}</CardTitle>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    Level {topic.difficulty_level}/5
+                                  </Badge>
+                                </div>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                            </div>
+                            <CardDescription className="line-clamp-2 text-xs sm:text-sm mt-2">
+                              {topic.description}
+                            </CardDescription>
+                          </CardHeader>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             )}

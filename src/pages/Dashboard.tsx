@@ -297,14 +297,12 @@ const Dashboard = () => {
         <div className="absolute top-10 left-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-float" />
         <div className="absolute bottom-10 right-20 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
         
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-left animate-fade-in-up">
-              <div className="flex items-center gap-2 mb-3 justify-center md:justify-start">
-                <div className="relative">
-                  <Sparkles className="h-6 w-6 text-white animate-pulse" />
-                  <div className="absolute inset-0 bg-white/20 blur-xl animate-pulse" />
-                </div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className={`${isMobile ? 'w-full' : 'text-center md:text-left'} animate-fade-in-up`}>
+              {/* Edura Logo + Badge */}
+              <div className="flex items-center gap-3 mb-3 justify-center md:justify-start">
+                <img src="/src/assets/edura-logo.png" alt="Edura" className="h-8 w-auto" />
                 <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm hover:bg-white/30 transition-all cursor-default">
                   {subscriptionLoading ? (
                     <span className="animate-pulse">Loading...</span>
@@ -312,37 +310,65 @@ const Dashboard = () => {
                     isPremium ? (
                       <span className="flex items-center gap-1.5">
                         <Zap className="h-3.5 w-3.5 animate-pulse" />
-                        Premium Member
+                        Premium
                       </span>
                     ) : (
-                      'Free Member'
+                      'Free'
                     )
                   )}
                 </Badge>
+                {/* Move notification and logout to top right on mobile */}
+                {isMobile && (
+                  <div className="flex items-center gap-2 ml-auto">
+                    <NotificationBell />
+                    <Button 
+                      size="sm"
+                      variant="secondary" 
+                      onClick={handleLogout}
+                      className="flex items-center gap-1 shadow-lg"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                )}
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-3 drop-shadow-lg animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                Welcome back, {userProfile?.first_name || user?.email?.split('@')[0]}! 👋
-              </h1>
-              <p className="text-white/90 text-lg md:text-xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                Ready to ace your exams? Let's continue your journey to success! 🚀
-              </p>
+              {/* Welcome Section with Stats */}
+              <div className={`${isMobile ? 'flex items-center justify-between gap-3' : ''}`}>
+                <div>
+                  <h1 className="text-2xl md:text-4xl font-bold text-white mb-1 drop-shadow-lg animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                    Welcome back, {userProfile?.first_name || user?.email?.split('@')[0]}! 👋
+                  </h1>
+                  <p className="text-white/90 text-sm md:text-lg animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                    {stats.averageScore > 0 ? `${stats.averageScore}% average` : 'Ready to ace your exams?'} • {stats.testsTaken} {stats.testsTaken === 1 ? 'test' : 'tests'} completed
+                  </p>
+                </div>
+                {isMobile && stats.averageScore > 0 && (
+                  <div className="flex-shrink-0 text-center bg-white/20 backdrop-blur-sm rounded-2xl p-3 border border-white/30">
+                    <div className="text-2xl font-bold text-white">{stats.averageScore}%</div>
+                    <div className="text-xs text-white/80">Success</div>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <NotificationBell />
-              <Button 
-                variant="secondary" 
-                onClick={handleLogout}
-                className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all hover-lift"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </Button>
-            </div>
+            {/* Desktop notifications and logout */}
+            {!isMobile && (
+              <div className="flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                <NotificationBell />
+                <Button 
+                  variant="secondary" 
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all hover-lift"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <div className={`container mx-auto px-4 sm:px-6 lg:px-8 py-8 ${isMobile ? 'pb-24' : ''}`}>
+      <div className={`container mx-auto px-4 sm:px-6 lg:px-8 py-4 ${isMobile ? 'pb-24' : ''}`}>
         <Tabs value={activeTab} onValueChange={(value) => {
           console.log('Tab changed to:', value);
           setActiveTab(value);
@@ -362,7 +388,7 @@ const Dashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="dashboard" className="mt-8 space-y-8">
+          <TabsContent value="dashboard" className="mt-4 space-y-4">
             {/* Quick Stats - Mobile vs Desktop */}
             {isMobile ? (
               <div className="grid grid-cols-2 gap-3 animate-fade-in">
@@ -440,9 +466,9 @@ const Dashboard = () => {
               </div>
             )}
 
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="grid lg:grid-cols-3 gap-4">
               {/* Main Content */}
-              <div className="lg:col-span-2 space-y-8">
+              <div className="lg:col-span-2 space-y-4">
                 {/* Quick Actions - Desktop Only (Mobile has nav FAB) */}
                 {!isMobile && (
                   /* Desktop Quick Actions */
@@ -538,43 +564,54 @@ const Dashboard = () => {
 
                 {/* Learning Hub - Mad Features! */}
                 <div>
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold flex items-center gap-2 mb-2">
-                      <Rocket className="h-6 w-6 text-primary animate-bounce-slow" />
-                      Unlock Your Potential
+                  <div className="mb-3">
+                    <h2 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold flex items-center gap-2 mb-1`}>
+                      <Rocket className="h-5 w-5 text-primary animate-bounce-slow" />
+                      Explore Features
                     </h2>
-                    <p className="text-muted-foreground">Explore our amazing features designed to help you succeed</p>
+                    <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>Everything you need to succeed</p>
                   </div>
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {/* Hide these cards on mobile since they're in the mobile nav */}
-                    {!isMobile && (
-                      <>
-                        <FeatureCard 
-                          icon={GraduationCap}
-                          title="Study Hub"
-                          description="Access comprehensive lessons, video tutorials, and study materials curated by experts"
-                          href="/study-hub"
-                          gradient="from-primary to-secondary"
-                          badge="Popular"
-                        />
-                        <FeatureCard 
-                          icon={MessageSquare}
-                          title="Ask Tutor"
-                          description="Get instant help from tutors and peers. Ask questions, share knowledge, and learn together"
-                          href="/forum"
-                          gradient="from-success to-accent"
-                          badge="24/7"
-                        />
-                        <FeatureCard 
-                          icon={Sword}
-                          title="Challenge Arena"
-                          description="Compete with students nationwide! Earn points, climb leaderboards, and win amazing prizes"
-                          href="/challenge-arena"
-                          gradient="from-warning to-destructive"
-                          badge="New"
-                        />
-                      </>
-                    )}
+                  <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'md:grid-cols-3 gap-4'}`}>
+                    <FeatureCard 
+                      icon={GraduationCap}
+                      title="Study Hub"
+                      description="Access comprehensive lessons, video tutorials, and study materials curated by experts"
+                      href="/study-hub"
+                      gradient="from-primary to-secondary"
+                      badge="Popular"
+                    />
+                    <FeatureCard 
+                      icon={MessageSquare}
+                      title="Ask Tutor"
+                      description="Get instant help from tutors and peers. Ask questions, share knowledge, and learn together"
+                      href="/forum"
+                      gradient="from-success to-accent"
+                      badge="24/7"
+                    />
+                    <FeatureCard 
+                      icon={Sword}
+                      title="Challenge Arena"
+                      description="Compete with students nationwide! Earn points, climb leaderboards, and win amazing prizes"
+                      href="/challenge-arena"
+                      gradient="from-warning to-destructive"
+                      badge="New"
+                    />
+                    <FeatureCard 
+                      icon={FileText}
+                      title="Resources"
+                      description="Download past questions, syllabus, and study materials for all exam types"
+                      href="/resources"
+                      gradient="from-info to-secondary"
+                      badge=""
+                    />
+                    <FeatureCard 
+                      icon={Calendar}
+                      title="Consultation"
+                      description="Book one-on-one sessions with expert tutors to get personalized guidance"
+                      href="/consultation"
+                      gradient="from-accent to-primary"
+                      badge=""
+                    />
                   </div>
                 </div>
 
@@ -711,7 +748,7 @@ const Dashboard = () => {
               </div>
 
               {/* Sidebar */}
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {/* Start Test */}
                 <Card>
                   <CardHeader>
