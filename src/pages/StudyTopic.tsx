@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, FileText, Video, Download, PlayCircle, CheckCircle2 } from 'lucide-react';
+import { Clock, FileText, Video, Download, PlayCircle, CheckCircle2, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
@@ -106,67 +106,108 @@ export default function StudyTopic() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-4 sm:py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-8 min-h-screen bg-gradient-to-b from-background to-muted/20">
         <Button
-          variant="ghost"
+          variant="outline"
           onClick={() => navigate('/study-hub')}
-          className="mb-4 text-xs sm:text-sm"
+          className="mb-6 gap-2 hover:bg-primary/10 transition-colors"
         >
-          ← Back to Study Hub
+          <ChevronRight className="h-4 w-4 rotate-180" />
+          Back to Study Hub
         </Button>
 
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-2">{topic.title}</h1>
-          <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
-            <Badge className="text-xs">{topic.subjects?.name}</Badge>
-            <Badge variant="secondary" className="text-xs">{topic.exam_type}</Badge>
-            <span className="text-xs sm:text-sm text-muted-foreground">
-              Difficulty: {topic.difficulty_level}/5
-            </span>
+        {/* Topic Hero Section */}
+        <div className="mb-10 sm:mb-12 relative">
+          <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
+          <div className="relative z-10">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="p-4 bg-gradient-to-br from-primary/20 to-accent/10 rounded-2xl shadow-lg">
+                <FileText className="h-10 w-10 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                  {topic.title}
+                </h1>
+                <div className="flex flex-wrap items-center gap-3 mb-4">
+                  <Badge className="text-sm px-3 py-1">{topic.subjects?.name}</Badge>
+                  <Badge variant="secondary" className="text-sm px-3 py-1">{topic.exam_type}</Badge>
+                  <span className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                    📊 Difficulty: {topic.difficulty_level}/5
+                  </span>
+                </div>
+                <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-3xl">
+                  {topic.description}
+                </p>
+              </div>
+            </div>
           </div>
-          <p className="text-sm sm:text-base text-muted-foreground">{topic.description}</p>
         </div>
 
-        <div className="space-y-4">
-          <h2 className="text-xl sm:text-2xl font-semibold mb-4">Lessons ({lessons.length})</h2>
+        {/* Lessons Section */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold">Course Lessons</h2>
+              <p className="text-sm text-muted-foreground mt-1">{lessons.length} lessons to master this topic</p>
+            </div>
+            <Badge variant="outline" className="text-sm">
+              {lessons.filter(l => l.isCompleted).length}/{lessons.length} Done
+            </Badge>
+          </div>
           
-          {lessons.map((lesson, index) => (
-            <Card 
-              key={lesson.id}
-              className="hover:shadow-lg transition-all cursor-pointer animate-fade-in hover-scale"
-              onClick={() => navigate(`/study-hub/lesson/${lesson.id}`)}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs sm:text-sm font-medium text-muted-foreground">
-                        Lesson {index + 1}
-                      </span>
-                      {lesson.isCompleted && (
-                        <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-xs">
-                          <CheckCircle2 className="h-3 w-3 mr-1" />
-                          Done
-                        </Badge>
-                      )}
+          <div className="space-y-4">
+            {lessons.map((lesson, index) => (
+              <Card 
+                key={lesson.id}
+                className="group hover:shadow-2xl transition-all duration-300 cursor-pointer animate-fade-in hover:-translate-y-1 border-2 border-transparent hover:border-primary/30 bg-gradient-to-br from-card to-card/50"
+                onClick={() => navigate(`/study-hub/lesson/${lesson.id}`)}
+              >
+                <CardHeader className="pb-4">
+                  <div className="flex items-start gap-4">
+                    {/* Lesson Number Badge */}
+                    <div className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg ${
+                      lesson.isCompleted 
+                        ? 'bg-gradient-to-br from-green-500 to-green-600 text-white' 
+                        : 'bg-gradient-to-br from-primary to-secondary text-white'
+                    }`}>
+                      {lesson.isCompleted ? <CheckCircle2 className="h-7 w-7" /> : index + 1}
                     </div>
-                    <CardTitle className="text-base sm:text-lg line-clamp-2">{lesson.title}</CardTitle>
-                    <CardDescription className="mt-2 text-xs sm:text-sm line-clamp-2">
-                      {lesson.summary}
-                    </CardDescription>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className="text-sm font-semibold text-primary">
+                          Lesson {index + 1}
+                        </span>
+                        {lesson.isCompleted && (
+                          <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-xs">
+                            ✓ Completed
+                          </Badge>
+                        )}
+                        <Badge variant="outline" className="text-xs">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {lesson.estimated_minutes} min
+                        </Badge>
+                      </div>
+                      
+                      <CardTitle className="text-xl sm:text-2xl font-bold mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        {lesson.title}
+                      </CardTitle>
+                      
+                      <CardDescription className="text-sm sm:text-base line-clamp-2 leading-relaxed">
+                        {lesson.summary}
+                      </CardDescription>
+                    </div>
+
+                    <div className="flex-shrink-0">
+                      <div className="p-2 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                        <PlayCircle className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span>{lesson.estimated_minutes} min</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
 
           {lessons.length === 0 && (
             <Card className="animate-fade-in">
