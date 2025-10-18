@@ -25,7 +25,9 @@ import {
   Bell,
   BellOff,
   TrendingDown,
-  Flame
+  Flame,
+  MessageSquare,
+  Calendar
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -343,33 +345,26 @@ const MobileHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-muted/20 pb-24">
-      {/* Header with Premium Gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary/95 via-secondary/90 to-accent/85 p-6 pb-10 rounded-b-[2rem]">
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-5 -left-5 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
-        
-        <div className="relative z-10">
+    <div className="min-h-screen bg-background pb-24">
+      {/* Clean Header */}
+      <div className="bg-card border-b">
+        <div className="p-4">
           {/* Top Bar */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="bg-white p-2 rounded-xl shadow-lg">
-              <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
-            </div>
+          <div className="flex items-center justify-between mb-6">
+            <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
             <div className="flex items-center gap-2">
-              <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
-                {isPremium ? (
-                  <span className="flex items-center gap-1">
-                    <Zap className="h-3 w-3" />
-                    Premium
-                  </span>
-                ) : 'Free'}
-              </Badge>
+              {isPremium && (
+                <Badge variant="default" className="text-xs">
+                  <Zap className="h-3 w-3 mr-1" />
+                  Premium
+                </Badge>
+              )}
               <NotificationBell />
               <Button
                 size="sm"
-                variant="secondary"
+                variant="ghost"
                 onClick={handleLogout}
-                className="h-8 w-8 p-0"
+                className="h-9 w-9 p-0"
               >
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -377,50 +372,44 @@ const MobileHome = () => {
           </div>
 
           {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
-              Hey {userProfile?.first_name || 'Student'}! 👋
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-foreground mb-1">
+              Hello, {userProfile?.first_name || 'Student'}
             </h1>
-            <p className="text-white/90 text-base font-medium">
-              {stats.averageScore > 0 ? `You're averaging ${stats.averageScore}% - Keep crushing it!` : 'Ready to ace your exams?'}
+            <p className="text-sm text-muted-foreground">
+              {stats.averageScore > 0 ? `Your average score: ${stats.averageScore}%` : 'Ready to start learning?'}
             </p>
           </div>
 
-          {/* Quick Stats - Enhanced */}
-          <div className="grid grid-cols-3 gap-4">
-            <Card className="bg-white/15 backdrop-blur-md border-white/30 shadow-xl hover:bg-white/20 transition-all">
+          {/* Clean Stats Grid */}
+          <div className="grid grid-cols-3 gap-3">
+            <Card className="border shadow-sm">
               <CardContent className="p-4 text-center">
-                <div className="bg-white/20 p-2 rounded-xl w-fit mx-auto mb-2">
-                  <Target className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.testsTaken}</div>
-                <div className="text-xs text-white/90 font-medium">Tests Taken</div>
+                <Target className="h-5 w-5 text-primary mx-auto mb-2" />
+                <div className="text-xl font-bold text-foreground">{stats.testsTaken}</div>
+                <div className="text-xs text-muted-foreground mt-1">Tests</div>
               </CardContent>
             </Card>
-            <Card className="bg-white/15 backdrop-blur-md border-white/30 shadow-xl hover:bg-white/20 transition-all">
+            <Card className="border shadow-sm">
               <CardContent className="p-4 text-center">
-                <div className="bg-white/20 p-2 rounded-xl w-fit mx-auto mb-2">
-                  <TrendingUp className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.averageScore}%</div>
-                <div className="text-xs text-white/80">Average</div>
+                <TrendingUp className="h-5 w-5 text-success mx-auto mb-2" />
+                <div className="text-xl font-bold text-foreground">{stats.averageScore}%</div>
+                <div className="text-xs text-muted-foreground mt-1">Average</div>
               </CardContent>
             </Card>
-            <Card className="bg-white/15 backdrop-blur-md border-white/30 shadow-xl hover:bg-white/20 transition-all">
+            <Card className="border shadow-sm">
               <CardContent className="p-4 text-center">
-                <div className="bg-white/20 p-2 rounded-xl w-fit mx-auto mb-2">
-                  <Flame className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">{streak.current}</div>
-                <div className="text-xs text-white/90 font-medium">Day Streak</div>
+                <Flame className="h-5 w-5 text-warning mx-auto mb-2" />
+                <div className="text-xl font-bold text-foreground">{streak.current}</div>
+                <div className="text-xs text-muted-foreground mt-1">Streak</div>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
 
-      {/* Main Content - Better Organized */}
-      <div className="px-5 py-8 space-y-8">
+      {/* Main Content - Clean Design */}
+      <div className="px-4 py-6 space-y-6">
         {/* Motivational Quote - Enhanced */}
         {motivationalQuote && (
           <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 relative overflow-hidden">
@@ -434,43 +423,59 @@ const MobileHome = () => {
           </Card>
         )}
 
-        {/* Leaderboard Preview */}
+      {/* Main Content - Clean Design */}
+      <div className="px-4 py-6 space-y-6">
+        {/* Motivational Quote - Minimal */}
+        {motivationalQuote && (
+          <Card className="border shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {motivationalQuote}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Leaderboard Preview - Clean */}
         {leaderboard.length > 0 && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <h2 className="text-lg font-bold">Top Performers</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Top Performers</h2>
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => handleNavigation('/challenge-arena')}
-                className="text-xs"
+                className="text-xs text-primary"
               >
                 View All
               </Button>
             </div>
-            <Card className="border-0 shadow-md">
-              <CardContent className="p-4 space-y-2">
+            <Card className="border shadow-sm">
+              <CardContent className="p-3 space-y-2">
                 {leaderboard.slice(0, 3).map((entry) => (
                   <div 
                     key={entry.rank}
-                    className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
-                      entry.isCurrentUser ? 'bg-primary/10 border border-primary/20' : 'bg-muted/30'
+                    className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                      entry.isCurrentUser ? 'bg-primary/5 border border-primary/20' : 'bg-muted/30'
                     }`}
                   >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                      entry.rank === 1 ? 'bg-warning text-white' :
-                      entry.rank === 2 ? 'bg-muted-foreground/20 text-foreground' :
-                      'bg-muted text-muted-foreground'
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                      entry.rank === 1 ? 'bg-warning/20 text-warning' :
+                      entry.rank === 2 ? 'bg-muted text-foreground' :
+                      'bg-muted/50 text-muted-foreground'
                     }`}>
-                      {entry.rank === 1 ? '👑' : entry.rank}
+                      {entry.rank === 1 ? '🏆' : entry.rank}
                     </div>
-                    <div className="flex-1">
-                      <p className={`font-semibold text-sm ${entry.isCurrentUser ? 'text-primary' : ''}`}>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-semibold truncate ${entry.isCurrentUser ? 'text-primary' : 'text-foreground'}`}>
                         {entry.isCurrentUser ? 'You' : entry.name}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold">{entry.score}%</p>
+                      <p className="text-base font-bold text-foreground">{entry.score}%</p>
                     </div>
                   </div>
                 ))}
@@ -479,114 +484,100 @@ const MobileHome = () => {
           </div>
         )}
 
-        {/* Quick Actions - More Prominent */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-xl font-bold">Start Learning</h2>
-            <Badge variant="secondary" className="text-xs">Quick Access</Badge>
-          </div>
+        {/* Quick Actions - Clean Cards */}
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold">Quick Actions</h2>
+          
           <Card 
-            className="border-2 border-primary/20 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all active:scale-[0.97] cursor-pointer bg-gradient-to-br from-primary/5 to-transparent"
+            className="border-2 border-primary shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
             onClick={() => setShowTestPanel(true)}
           >
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className="p-3.5 bg-gradient-to-br from-primary via-primary-glow to-secondary rounded-2xl shadow-lg">
-                <Play className="h-7 w-7 text-white" />
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-3 bg-primary rounded-xl">
+                <Play className="h-6 w-6 text-primary-foreground" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-lg mb-0.5">Take a Test</h3>
-                <p className="text-sm text-muted-foreground">JAMB, WAEC, NECO & more</p>
-              </div>
-              <ChevronRight className="h-6 w-6 text-primary" />
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="border border-accent/30 shadow-md hover:shadow-lg hover:border-accent/50 transition-all active:scale-[0.97] cursor-pointer"
-            onClick={() => handleNavigation('/study-hub')}
-          >
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className="p-3.5 bg-gradient-to-br from-accent to-info rounded-2xl shadow-md">
-                <BookOpen className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-base">Study Companion</h3>
-                <p className="text-sm text-muted-foreground">Lessons & topic guides</p>
+                <h3 className="font-semibold text-base">Take a Test</h3>
+                <p className="text-xs text-muted-foreground">Choose your exam type</p>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </CardContent>
           </Card>
 
-          {/* Feature Cards */}
-          <div className="space-y-3 mt-6">
-            <h3 className="text-lg font-semibold px-1">More Features</h3>
-          
-            {/* Challenge Arena */}
+          <Card 
+            className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+            onClick={() => handleNavigation('/study-hub')}
+          >
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-3 bg-accent/10 rounded-xl">
+                <BookOpen className="h-6 w-6 text-accent" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-base">Study Hub</h3>
+                <p className="text-xs text-muted-foreground">Lessons & resources</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+
+          {/* Feature Cards - Compact Grid */}
+          <div className="grid grid-cols-2 gap-3 mt-4">
             <Card 
-              className="border border-warning/30 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
+              className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
               onClick={() => handleNavigation('/challenge-arena')}
             >
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2.5 bg-gradient-to-br from-warning to-destructive rounded-xl">
-                  <Trophy className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-sm">Challenge Arena</h3>
-                  <p className="text-xs text-muted-foreground">Compete & win prizes</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <CardContent className="p-4 text-center">
+                <Trophy className="h-6 w-6 text-warning mx-auto mb-2" />
+                <h3 className="font-medium text-sm">Challenges</h3>
+                <p className="text-xs text-muted-foreground mt-1">Compete</p>
               </CardContent>
             </Card>
 
-            {/* Resources */}
             <Card 
-              className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
+              className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
               onClick={() => handleNavigation('/resources')}
             >
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2.5 bg-gradient-to-br from-info to-secondary rounded-xl">
-                  <BookOpen className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-sm">Study Resources</h3>
-                  <p className="text-xs text-muted-foreground">Past questions & materials</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <CardContent className="p-4 text-center">
+                <FileText className="h-6 w-6 text-info mx-auto mb-2" />
+                <h3 className="font-medium text-sm">Resources</h3>
+                <p className="text-xs text-muted-foreground mt-1">Materials</p>
               </CardContent>
             </Card>
 
-            {/* Consultation */}
             <Card 
-              className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
+              className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+              onClick={() => handleNavigation('/forum')}
+            >
+              <CardContent className="p-4 text-center">
+                <MessageSquare className="h-6 w-6 text-success mx-auto mb-2" />
+                <h3 className="font-medium text-sm">Forum</h3>
+                <p className="text-xs text-muted-foreground mt-1">Discuss</p>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
               onClick={() => handleNavigation('/consultation')}
             >
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2.5 bg-gradient-to-br from-accent to-primary rounded-xl">
-                  <Award className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-sm">Expert Tutors</h3>
-                  <p className="text-xs text-muted-foreground">Book consultation sessions</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <CardContent className="p-4 text-center">
+                <Calendar className="h-6 w-6 text-secondary mx-auto mb-2" />
+                <h3 className="font-medium text-sm">Booking</h3>
+                <p className="text-xs text-muted-foreground mt-1">Sessions</p>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Recent Results - Better Section */}
+        {/* Recent Results - Clean Section */}
         {recentResults.length > 0 && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between px-1">
-              <div>
-                <h2 className="text-xl font-bold">Your Results</h2>
-                <p className="text-xs text-muted-foreground">Recent test performance</p>
-              </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Recent Tests</h2>
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size="sm"
                 onClick={() => handleNavigation('/dashboard?tab=results')}
-                className="text-xs"
+                className="text-xs text-primary"
               >
                 View All
               </Button>
@@ -595,7 +586,7 @@ const MobileHome = () => {
               {recentResults.map((result, index) => (
                 <Card 
                   key={index} 
-                  className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
+                  className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
                   onClick={() => handleNavigation(`/results?attempt=${result.attempt_id}`)}
                 >
                   <CardContent className="p-4">
@@ -609,24 +600,16 @@ const MobileHome = () => {
                           result.percentage >= 50 ? 'text-warning' : 'text-destructive'
                         }`} />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-sm">{result.examTitle}</h3>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(result.submittedAt).toLocaleDateString()}
-                        </p>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm truncate">{result.examTitle}</h3>
+                        <p className="text-xs text-muted-foreground">{result.date}</p>
                       </div>
                       <div className="text-right">
-                        <p className={`text-2xl font-bold ${
+                        <p className={`text-lg font-bold ${
                           result.percentage >= 70 ? 'text-success' : 
                           result.percentage >= 50 ? 'text-warning' : 'text-destructive'
-                        }`}>
-                          {Math.round(result.percentage)}%
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {result.correct_answers}/{result.total_questions}
-                        </p>
+                        }`}>{result.percentage}%</p>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
                     </div>
                   </CardContent>
                 </Card>
@@ -635,48 +618,22 @@ const MobileHome = () => {
           </div>
         )}
 
-        {/* Your Progress */}
-        {stats.testsTaken > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-lg font-bold px-1">Your Progress</h2>
-            <Card className="border-0 shadow-md">
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Trophy className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm">Keep it up!</p>
-                      <p className="text-xs text-muted-foreground">You're doing great</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-primary">{stats.testsTaken}</p>
-                    <p className="text-xs text-muted-foreground">tests taken</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Subscription CTA */}
+        {/* Subscription CTA - Clean */}
         {!isPremium && (
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-accent/10 to-primary/10">
+          <Card className="border shadow-sm">
             <CardContent className="p-5">
               <div className="flex items-start gap-3">
-                <div className="p-2 bg-gradient-to-br from-accent to-primary rounded-xl">
-                  <Sparkles className="h-5 w-5 text-white" />
+                <div className="p-2.5 bg-primary/10 rounded-xl">
+                  <Sparkles className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-base mb-1">Upgrade to Premium</h3>
+                  <h3 className="font-semibold text-base mb-1">Upgrade to Premium</h3>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Unlock unlimited tests, detailed analytics, and expert support
+                    Unlock unlimited tests, detailed analytics & expert support
                   </p>
                   <Button
                     size="sm"
-                    className="w-full bg-gradient-to-r from-accent to-primary"
+                    className="w-full"
                     onClick={() => handleNavigation('/payment')}
                   >
                     Go Premium
@@ -686,6 +643,7 @@ const MobileHome = () => {
             </CardContent>
           </Card>
         )}
+      </div>
       </div>
 
       {/* WhatsApp Support Button */}
@@ -723,8 +681,8 @@ const MobileHome = () => {
               <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-gradient-to-br from-primary to-primary-glow rounded-xl">
-                      <GraduationCap className="h-6 w-6 text-white" />
+                    <div className="p-3 bg-primary/10 rounded-xl">
+                      <GraduationCap className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-base">JAMB CBT</h3>
@@ -741,8 +699,8 @@ const MobileHome = () => {
               <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-gradient-to-br from-success to-success-glow rounded-xl">
-                      <FileText className="h-6 w-6 text-white" />
+                    <div className="p-3 bg-success/10 rounded-xl">
+                      <FileText className="h-6 w-6 text-success" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-base">WAEC</h3>
@@ -759,8 +717,8 @@ const MobileHome = () => {
               <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-gradient-to-br from-info to-secondary rounded-xl">
-                      <BookOpen className="h-6 w-6 text-white" />
+                    <div className="p-3 bg-info/10 rounded-xl">
+                      <BookOpen className="h-6 w-6 text-info" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-base">NECO</h3>
@@ -777,8 +735,8 @@ const MobileHome = () => {
               <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-gradient-to-br from-accent to-primary rounded-xl">
-                      <Target className="h-6 w-6 text-white" />
+                    <div className="p-3 bg-accent/10 rounded-xl">
+                      <Target className="h-6 w-6 text-accent" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-base">Post-UTME</h3>
