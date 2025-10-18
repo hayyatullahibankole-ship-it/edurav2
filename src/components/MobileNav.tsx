@@ -36,14 +36,7 @@ interface TestCardWithCloseProps extends TestCardProps {
 const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, onClose }: TestCardProps) => {
   return (
     <ScheduleTestModal 
-      defaultExamType={examType} 
-      onOpenChange={(open) => {
-        // Only close the sheet when the modal is fully opening
-        if (open) {
-          // Use a longer delay to ensure modal is mounted
-          setTimeout(() => onClose(), 300);
-        }
-      }}
+      defaultExamType={examType}
     >
       <Card 
         className={`relative overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.97] hover-lift group border-0 shadow-lg`}
