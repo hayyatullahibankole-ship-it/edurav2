@@ -38,6 +38,9 @@ import SubjectProgressCard from "@/components/SubjectProgressCard";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { FeatureCard } from "@/components/dashboard/FeatureCard";
 import { ModernQuickAction } from "@/components/dashboard/ModernQuickAction";
+import { MobileStatCard } from "@/components/dashboard/MobileStatCard";
+import { MobileTestCard } from "@/components/dashboard/MobileTestCard";
+import { MobileSubjectCard } from "@/components/dashboard/MobileSubjectCard";
 import { NotificationBell } from "@/components/NotificationBell";
 import OnboardingTour from "@/components/OnboardingTour";
 import LoadingAnimation from "@/components/LoadingAnimation";
@@ -339,7 +342,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className={`container mx-auto px-4 sm:px-6 lg:px-8 py-8 ${isMobile ? 'pb-24' : ''}`}>
         <Tabs value={activeTab} onValueChange={(value) => {
           console.log('Tab changed to:', value);
           setActiveTab(value);
@@ -360,174 +363,185 @@ const Dashboard = () => {
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-8 space-y-8">
-            {/* Quick Stats - Enhanced with 2-column grid on mobile */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-              <div className="animate-fade-in-up" style={{ animationDelay: '0s' }}>
-                <StatCard 
+            {/* Quick Stats - Mobile vs Desktop */}
+            {isMobile ? (
+              <div className="grid grid-cols-2 gap-3 animate-fade-in">
+                <MobileStatCard 
                   icon={Target}
                   label="Tests Taken"
                   value={loading ? "..." : stats.testsTaken}
-                  subtext="Total attempts"
                   gradient="from-primary to-primary-glow"
-                  iconColor="text-primary"
+                  delay="0s"
                 />
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <StatCard 
+                <MobileStatCard 
                   icon={TrendingUp}
-                  label="Average Score"
+                  label="Avg Score"
                   value={loading ? "..." : `${stats.averageScore}%`}
-                  subtext="Across all tests"
                   gradient="from-success to-success-glow"
-                  iconColor="text-success"
+                  delay="0.05s"
                 />
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <StatCard 
+                <MobileStatCard 
                   icon={Clock}
                   label="Study Hours"
                   value={loading ? "..." : `${stats.studyHours}h`}
-                  subtext="Time invested"
-                  gradient="from-info to-secondary"
-                  iconColor="text-info"
+                  gradient="from-secondary to-info"
+                  delay="0.1s"
                 />
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                <StatCard 
+                <MobileStatCard 
                   icon={Trophy}
-                  label="Rank"
+                  label="Your Rank"
                   value={loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}
-                  subtext={`Out of ${stats.totalStudents} students`}
-                  gradient="from-warning to-warning"
-                  iconColor="text-warning"
+                  gradient="from-warning to-destructive"
+                  delay="0.15s"
                 />
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+                <div className="animate-fade-in-up" style={{ animationDelay: '0s' }}>
+                  <StatCard 
+                    icon={Target}
+                    label="Tests Taken"
+                    value={loading ? "..." : stats.testsTaken}
+                    subtext="Total attempts"
+                    gradient="from-primary to-primary-glow"
+                    iconColor="text-primary"
+                  />
+                </div>
+                <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                  <StatCard 
+                    icon={TrendingUp}
+                    label="Average Score"
+                    value={loading ? "..." : `${stats.averageScore}%`}
+                    subtext="Across all tests"
+                    gradient="from-success to-success-glow"
+                    iconColor="text-success"
+                  />
+                </div>
+                <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                  <StatCard 
+                    icon={Clock}
+                    label="Study Hours"
+                    value={loading ? "..." : `${stats.studyHours}h`}
+                    subtext="Time invested"
+                    gradient="from-info to-secondary"
+                    iconColor="text-info"
+                  />
+                </div>
+                <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                  <StatCard 
+                    icon={Trophy}
+                    label="Rank"
+                    value={loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}
+                    subtext={`Out of ${stats.totalStudents} students`}
+                    gradient="from-warning to-warning"
+                    iconColor="text-warning"
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-8">
-                {/* Quick Actions - Modern Mobile Design */}
+                {/* Quick Actions - Modern Mobile vs Desktop Design */}
                 {isMobile ? (
-                  <div className="space-y-3">
-                    <div className="mb-4">
-                      <h2 className="text-xl font-bold flex items-center gap-2">
-                        <Rocket className="h-5 w-5 text-primary" />
-                        Quick Start
-                      </h2>
-                      <p className="text-sm text-muted-foreground">Choose your practice test</p>
+                  <div className="space-y-4 animate-fade-in">
+                    {/* Section Header */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-xl font-bold flex items-center gap-2">
+                          <Rocket className="h-5 w-5 text-primary" />
+                          Quick Start
+                        </h2>
+                        <p className="text-xs text-muted-foreground mt-0.5">Choose your practice test</p>
+                      </div>
                     </div>
                     
+                    {/* Main JAMB Card - Featured */}
                     <ScheduleTestModal defaultExamType="jamb">
-                      <div className="relative overflow-hidden rounded-3xl p-5 transition-all duration-300 active:scale-[0.97] cursor-pointer group bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-lg hover:shadow-xl">
-                        {/* Animated shine effect */}
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500">
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      <div className="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 active:scale-[0.98] cursor-pointer group bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-xl">
+                        {/* Animated background pattern */}
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')]" />
+                        </div>
+                        
+                        {/* Shine effect */}
+                        <div className="absolute inset-0 opacity-0 group-active:opacity-30 transition-opacity duration-300">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent" />
                         </div>
                         
                         {/* Content */}
                         <div className="relative z-10 flex items-center justify-between">
                           <div className="flex-1">
-                            <p className="text-sm font-medium text-white/90 mb-1">Start Now</p>
-                            <h3 className="text-xl font-bold text-white">JAMB Practice</h3>
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm mb-2">
+                              <Sparkles className="h-3 w-3 text-white" />
+                              <span className="text-xs font-bold text-white">Most Popular</span>
+                            </div>
+                            <h3 className="text-2xl font-bold text-white mb-1">JAMB CBT</h3>
+                            <p className="text-sm text-white/80">Start practicing now</p>
                           </div>
                           
                           {/* Icon */}
                           <div className="relative">
-                            <div className="absolute inset-0 bg-white/20 rounded-full blur-xl" />
-                            <div className="relative w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform">
-                              <Play className="h-7 w-7 text-white drop-shadow-lg" />
+                            <div className="absolute inset-0 bg-white/30 rounded-2xl blur-xl" />
+                            <div className="relative w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-active:scale-110 transition-transform">
+                              <Play className="h-8 w-8 text-white drop-shadow-lg" />
                             </div>
                           </div>
                         </div>
-                        
-                        {/* Bottom accent line */}
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30" />
                       </div>
                     </ScheduleTestModal>
                     
+                    {/* Grid of other exams */}
                     <div className="grid grid-cols-2 gap-3">
                       <ScheduleTestModal defaultExamType="waec">
-                        <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.97] cursor-pointer group bg-gradient-to-br from-secondary to-info shadow-md hover:shadow-lg">
-                          <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500">
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                          </div>
-                          
+                        <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.98] cursor-pointer group bg-gradient-to-br from-secondary to-info shadow-lg">
                           <div className="relative z-10">
-                            <div className="flex items-center justify-between mb-3">
-                              <p className="text-xs font-medium text-white/90">Practice</p>
-                              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                            <div className="flex justify-end mb-2">
+                              <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
                                 <Play className="h-5 w-5 text-white" />
                               </div>
                             </div>
-                            <h3 className="text-base font-bold text-white">WAEC</h3>
+                            <h3 className="text-lg font-bold text-white">WAEC</h3>
+                            <p className="text-xs text-white/80">Practice now</p>
                           </div>
                         </div>
                       </ScheduleTestModal>
                       
                       <ScheduleTestModal defaultExamType="neco">
-                        <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.97] cursor-pointer group bg-gradient-to-br from-accent to-success shadow-md hover:shadow-lg">
-                          <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500">
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                          </div>
-                          
+                        <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.98] cursor-pointer group bg-gradient-to-br from-accent to-success shadow-lg">
                           <div className="relative z-10">
-                            <div className="flex items-center justify-between mb-3">
-                              <p className="text-xs font-medium text-white/90">Practice</p>
-                              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                            <div className="flex justify-end mb-2">
+                              <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
                                 <Play className="h-5 w-5 text-white" />
                               </div>
                             </div>
-                            <h3 className="text-base font-bold text-white">NECO</h3>
+                            <h3 className="text-lg font-bold text-white">NECO</h3>
+                            <p className="text-xs text-white/80">Practice now</p>
                           </div>
                         </div>
                       </ScheduleTestModal>
                     </div>
                     
+                    {/* Post-UTME - Full width */}
                     <ScheduleTestModal defaultExamType="post-utme">
-                      <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.97] cursor-pointer group bg-gradient-to-br from-warning to-destructive shadow-md hover:shadow-lg">
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500">
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                        </div>
-                        
+                      <div className="relative overflow-hidden rounded-2xl p-5 transition-all duration-300 active:scale-[0.98] cursor-pointer group bg-gradient-to-br from-warning to-destructive shadow-lg">
                         <div className="relative z-10 flex items-center justify-between">
                           <div className="flex-1">
-                            <p className="text-xs font-medium text-white/90 mb-1">University Prep</p>
-                            <h3 className="text-base font-bold text-white">Post-UTME</h3>
+                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm mb-1.5">
+                              <Sparkles className="h-3 w-3 text-white" />
+                              <span className="text-xs font-semibold text-white">New</span>
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Post-UTME</h3>
+                            <p className="text-xs text-white/80">University screening prep</p>
                           </div>
                           
-                          <div className="relative">
-                            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform">
-                              <Zap className="h-6 w-6 text-white drop-shadow-lg" />
-                            </div>
+                          <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-active:scale-110 transition-transform">
+                            <Zap className="h-6 w-6 text-white drop-shadow-lg" />
                           </div>
                         </div>
                       </div>
                     </ScheduleTestModal>
-                    
-                    <div className="grid grid-cols-2 gap-3 pt-2">
-                      <Link to="/resources" className="w-full">
-                        <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.97] cursor-pointer group bg-card border-2 border-primary/20 hover:border-primary shadow-md hover:shadow-lg">
-                          <div className="relative z-10">
-                            <div className="flex items-center justify-between mb-2">
-                              <FileText className="h-5 w-5 text-primary" />
-                            </div>
-                            <h3 className="text-sm font-bold">Resources</h3>
-                          </div>
-                        </div>
-                      </Link>
-                      
-                      <Link to="/consultation" className="w-full">
-                        <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.97] cursor-pointer group bg-card border-2 border-secondary/20 hover:border-secondary shadow-md hover:shadow-lg">
-                          <div className="relative z-10">
-                            <div className="flex items-center justify-between mb-2">
-                              <Calendar className="h-5 w-5 text-secondary" />
-                            </div>
-                            <h3 className="text-sm font-bold">Book Session</h3>
-                          </div>
-                        </div>
-                      </Link>
-                    </div>
                   </div>
                 ) : (
                   /* Desktop Quick Actions */
@@ -592,32 +606,31 @@ const Dashboard = () => {
 
                 {/* Subscription Management - Mobile Only */}
                 {isMobile && (
-                  <Card className="border-0 shadow-xl backdrop-blur-sm bg-gradient-to-br from-card to-muted/30 overflow-hidden hover-lift">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
-                    <CardHeader className="relative">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 bg-primary/10 rounded-lg">
+                  <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 border border-primary/20 animate-fade-in">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-3xl" />
+                    
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="p-2.5 bg-primary/20 rounded-xl">
                           <Zap className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <CardTitle className="text-xl">Subscription</CardTitle>
-                          <CardDescription>Manage your plan</CardDescription>
+                          <h3 className="font-bold text-base">Subscription</h3>
+                          <p className="text-xs text-muted-foreground">{isPremium ? 'Premium Active' : 'Free Plan'}</p>
                         </div>
                       </div>
-                    </CardHeader>
-                    <CardContent className="relative">
-                      <Link to="/payment" className="block">
-                        <Button className="w-full h-16 flex items-center justify-between text-base font-semibold group relative overflow-hidden shadow-lg">
-                          <div className="absolute inset-0 bg-gradient-to-r from-primary-glow to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <div className="flex items-center gap-2 relative z-10">
-                            <Zap className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                            <span>{isPremium ? 'Manage Premium Plan' : 'Upgrade to Premium'}</span>
+                      
+                      <Link to="/payment">
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary to-primary-glow text-white shadow-lg active:scale-[0.98] transition-all">
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="h-5 w-5" />
+                            <span className="font-semibold">{isPremium ? 'Manage Plan' : 'Go Premium'}</span>
                           </div>
-                          <ChevronRight className="h-5 w-5 relative z-10 group-hover:translate-x-1 transition-transform" />
-                        </Button>
+                          <ChevronRight className="h-5 w-5" />
+                        </div>
                       </Link>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 )}
 
                 {/* Learning Hub - Mad Features! */}
@@ -662,73 +675,136 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Recent Test Results */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Test Results</CardTitle>
-                    <CardDescription>Your latest performance overview</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {loading ? (
-                        <div className="text-center text-muted-foreground">Loading...</div>
-                      ) : recentTests.length > 0 ? (
-                        recentTests.map((test: any, index: number) => (
-                          <Link key={index} to={`/results?attempt=${test.attemptId}`} className="block">
-                            <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
-                              <div className="flex items-center gap-4">
-                                <div className="bg-primary/10 p-2 rounded-lg">
-                                  <BookOpen className="h-5 w-5 text-primary" />
-                                </div>
-                                <div>
-                                  <h4 className="font-semibold">{test.subject}</h4>
-                                  <p className="text-sm text-muted-foreground">{test.date}</p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-lg font-bold text-accent">{test.score}%</div>
-                                <p className="text-sm text-muted-foreground">{test.duration}</p>
-                              </div>
-                            </div>
-                          </Link>
-                        ))
-                      ) : (
-                        <div className="text-center text-muted-foreground">
-                          No test results yet. Take your first test to see results here!
-                        </div>
-                      )}
+                {/* Recent Test Results - Mobile Optimized */}
+                {isMobile ? (
+                  <div className="space-y-3 animate-fade-in">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-lg font-bold">Recent Tests</h2>
+                        <p className="text-xs text-muted-foreground">Your latest performance</p>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+                    
+                    {loading ? (
+                      <div className="text-center text-muted-foreground py-8">Loading...</div>
+                    ) : recentTests.length > 0 ? (
+                      <div className="space-y-2">
+                        {recentTests.map((test: any, index: number) => (
+                          <MobileTestCard
+                            key={index}
+                            title={test.subject}
+                            score={test.score}
+                            date={test.date}
+                            icon={BookOpen}
+                            onClick={() => navigate(`/results?attempt=${test.attemptId}`)}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center p-8 rounded-2xl bg-muted/50 border border-dashed border-border">
+                        <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                        <p className="text-sm text-muted-foreground">No tests yet</p>
+                        <p className="text-xs text-muted-foreground mt-1">Take your first test to see results!</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Recent Test Results</CardTitle>
+                      <CardDescription>Your latest performance overview</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {loading ? (
+                          <div className="text-center text-muted-foreground">Loading...</div>
+                        ) : recentTests.length > 0 ? (
+                          recentTests.map((test: any, index: number) => (
+                            <Link key={index} to={`/results?attempt=${test.attemptId}`} className="block">
+                              <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                                <div className="flex items-center gap-4">
+                                  <div className="bg-primary/10 p-2 rounded-lg">
+                                    <BookOpen className="h-5 w-5 text-primary" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold">{test.subject}</h4>
+                                    <p className="text-sm text-muted-foreground">{test.date}</p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-lg font-bold text-accent">{test.score}%</div>
+                                  <p className="text-sm text-muted-foreground">{test.duration}</p>
+                                </div>
+                              </div>
+                            </Link>
+                          ))
+                        ) : (
+                          <div className="text-center text-muted-foreground">
+                            No test results yet. Take your first test to see results here!
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                {/* Subject Progress */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Subject Progress</CardTitle>
-                    <CardDescription>Track your improvement across subjects</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-6">
-                      {loading ? (
-                        <div className="text-center text-muted-foreground">Loading...</div>
-                      ) : subjectProgress.length > 0 ? (
-                        <div className="grid gap-6">
-                          {subjectProgress.map((subject, index) => (
-                            <SubjectProgressCard
-                              key={index}
-                              subject={subject.subject}
-                              progress={subject.progress}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center text-muted-foreground">
-                          Complete some tests to track your subject progress!
-                        </div>
-                      )}
+                {/* Subject Progress - Mobile Optimized */}
+                {isMobile ? (
+                  <div className="space-y-3 animate-fade-in">
+                    <div>
+                      <h2 className="text-lg font-bold">Subject Progress</h2>
+                      <p className="text-xs text-muted-foreground">Track your improvement</p>
                     </div>
-                  </CardContent>
-                </Card>
+                    
+                    {loading ? (
+                      <div className="text-center text-muted-foreground py-8">Loading...</div>
+                    ) : subjectProgress.length > 0 ? (
+                      <div className="space-y-2">
+                        {subjectProgress.map((subject, index) => (
+                          <MobileSubjectCard
+                            key={index}
+                            subject={subject.subject}
+                            progress={subject.progress}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center p-8 rounded-2xl bg-muted/50 border border-dashed border-border">
+                        <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                        <p className="text-sm text-muted-foreground">No progress data yet</p>
+                        <p className="text-xs text-muted-foreground mt-1">Complete tests to track your progress</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Subject Progress</CardTitle>
+                      <CardDescription>Track your improvement across subjects</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-6">
+                        {loading ? (
+                          <div className="text-center text-muted-foreground">Loading...</div>
+                        ) : subjectProgress.length > 0 ? (
+                          <div className="grid gap-6">
+                            {subjectProgress.map((subject, index) => (
+                              <SubjectProgressCard
+                                key={index}
+                                subject={subject.subject}
+                                progress={subject.progress}
+                              />
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center text-muted-foreground">
+                            Complete some tests to track your subject progress!
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               {/* Sidebar */}
