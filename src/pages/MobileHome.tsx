@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { 
   BookOpen, 
   Trophy, 
@@ -17,7 +18,9 @@ import {
   Award,
   Sparkles,
   User,
-  LogOut
+  LogOut,
+  GraduationCap,
+  FileText
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -25,6 +28,8 @@ import MobileNav from '@/components/MobileNav';
 import { useSubscription } from '@/hooks/useSubscription';
 import { playTapSound } from '@/utils/sounds';
 import eduraLogo from '@/assets/edura-logo.png';
+import ScheduleTestModal from '@/components/ScheduleTestModal';
+import ProfileSettings from '@/components/ProfileSettings';
 
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
@@ -36,6 +41,8 @@ const MobileHome = () => {
     studyHours: 0,
     rank: 0
   });
+  const [showTestPanel, setShowTestPanel] = useState(false);
+  const [showProfileSheet, setShowProfileSheet] = useState(false);
 
   useEffect(() => {
     if (userProfile?.id) {
@@ -179,7 +186,13 @@ const MobileHome = () => {
               <Button
                 size="sm"
                 className="bg-primary hover:bg-primary/90"
-                onClick={() => handleNavigation('/dashboard')}
+                onClick={() => {
+                  if (Capacitor.isNativePlatform()) {
+                    Haptics.impact({ style: ImpactStyle.Light });
+                  }
+                  playTapSound();
+                  setShowTestPanel(true);
+                }}
               >
                 Start
               </Button>
@@ -272,9 +285,116 @@ const MobileHome = () => {
 
       {/* Mobile Navigation */}
       <MobileNav activeTab="dashboard" onTabChange={(tab) => {
-        if (tab === "profile") navigate('/dashboard?tab=profile');
-        else if (tab === "settings") navigate('/dashboard?tab=settings');
+        if (tab === "profile") {
+          if (Capacitor.isNativePlatform()) {
+            Haptics.impact({ style: ImpactStyle.Light });
+          }
+          playTapSound();
+          setShowProfileSheet(true);
+        } else if (tab === "settings") {
+          navigate('/dashboard?tab=settings');
+        }
       }} />
+
+      {/* Test Selection Sheet */}
+      <Sheet open={showTestPanel} onOpenChange={setShowTestPanel}>
+        <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="flex items-center gap-2 text-xl">
+              <GraduationCap className="h-6 w-6" />
+              Choose Your Test
+            </SheetTitle>
+          </SheetHeader>
+          <div className="space-y-3 overflow-y-auto h-[calc(85vh-100px)]">
+            {/* JAMB Test */}
+            <ScheduleTestModal defaultExamType="JAMB">
+              <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-gradient-to-br from-primary to-primary-glow rounded-xl">
+                      <GraduationCap className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-base">JAMB CBT</h3>
+                      <p className="text-xs text-muted-foreground">Practice JAMB UTME questions</p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+            </ScheduleTestModal>
+
+            {/* WAEC Test */}
+            <ScheduleTestModal defaultExamType="WAEC">
+              <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-gradient-to-br from-success to-success-glow rounded-xl">
+                      <FileText className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-base">WAEC</h3>
+                      <p className="text-xs text-muted-foreground">WAEC past questions</p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+            </ScheduleTestModal>
+
+            {/* NECO Test */}
+            <ScheduleTestModal defaultExamType="NECO">
+              <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-gradient-to-br from-info to-secondary rounded-xl">
+                      <BookOpen className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-base">NECO</h3>
+                      <p className="text-xs text-muted-foreground">NECO exam preparation</p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+            </ScheduleTestModal>
+
+            {/* Post-UTME Test */}
+            <ScheduleTestModal defaultExamType="POST-UTME">
+              <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-gradient-to-br from-accent to-primary rounded-xl">
+                      <Target className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-base">Post-UTME</h3>
+                      <p className="text-xs text-muted-foreground">University screening prep</p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+            </ScheduleTestModal>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Profile Sheet */}
+      <Sheet open={showProfileSheet} onOpenChange={setShowProfileSheet}>
+        <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Profile Settings
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-6 overflow-y-auto h-[calc(90vh-80px)]">
+            <ProfileSettings />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
