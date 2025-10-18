@@ -51,9 +51,7 @@ const MobileHome = () => {
   const [streak, setStreak] = useState({ current: 0, longest: 0 });
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [dailyGoal, setDailyGoal] = useState({ answered: 0, target: 20 });
-  const [weakAreas, setWeakAreas] = useState<any[]>([]);
   const [performanceData, setPerformanceData] = useState<any[]>([]);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [motivationalQuote, setMotivationalQuote] = useState('');
   const [showTestPanel, setShowTestPanel] = useState(false);
   const [showProfileSheet, setShowProfileSheet] = useState(false);
@@ -64,9 +62,7 @@ const MobileHome = () => {
       fetchStreak();
       fetchLeaderboard();
       fetchDailyGoal();
-      fetchWeakAreas();
       fetchPerformanceData();
-      fetchNotificationSettings();
       setRandomQuote();
     }
   }, [userProfile]);
@@ -275,65 +271,6 @@ const MobileHome = () => {
     }
   };
 
-  const fetchWeakAreas = async () => {
-    try {
-      const { data: attempts } = await supabase
-        .rpc('get_student_exam_progress');
-      
-      const userAttempts = attempts?.filter(a => 
-        a.user_id === userProfile?.id && a.status === 'SUBMITTED'
-      ) || [];
-
-      // Get results for each attempt and calculate subject performance
-      const subjectScores = new Map();
-      
-      for (const attempt of userAttempts.slice(-10)) { // Last 10 attempts
-        const { data: result } = await supabase
-          .from('results')
-          .select('subject_breakdown')
-          .eq('attempt_id', attempt.id)
-          .maybeSingle();
-
-        if (result?.subject_breakdown) {
-          Object.entries(result.subject_breakdown).forEach(([subjectId, data]: [string, any]) => {
-            if (!subjectScores.has(subjectId)) {
-              subjectScores.set(subjectId, { total: 0, count: 0, subjectId });
-            }
-            const subjectData = subjectScores.get(subjectId);
-            subjectData.total += data.percentage || 0;
-            subjectData.count += 1;
-          });
-        }
-      }
-
-      // Get subjects with lowest scores
-      const weakSubjects = Array.from(subjectScores.values())
-        .map(s => ({ ...s, avgScore: Math.round(s.total / s.count) }))
-        .sort((a, b) => a.avgScore - b.avgScore)
-        .slice(0, 3);
-
-      // Enrich with subject names
-      const enrichedWeak = await Promise.all(
-        weakSubjects.map(async (subject) => {
-          const { data } = await supabase
-            .from('subjects')
-            .select('name')
-            .eq('id', subject.subjectId)
-            .single();
-          
-          return {
-            name: data?.name || 'Unknown',
-            score: subject.avgScore
-          };
-        })
-      );
-
-      setWeakAreas(enrichedWeak);
-    } catch (error) {
-      console.error('Error fetching weak areas:', error);
-    }
-  };
-
   const fetchPerformanceData = async () => {
     try {
       const sevenDaysAgo = new Date();
@@ -367,38 +304,6 @@ const MobileHome = () => {
       }
     } catch (error) {
       console.error('Error fetching performance data:', error);
-    }
-  };
-
-  const fetchNotificationSettings = async () => {
-    try {
-      const { data } = await supabase
-        .from('user_preferences')
-        .select('sms_results')
-        .eq('user_id', userProfile?.id)
-        .single();
-
-      setNotificationsEnabled(data?.sms_results || false);
-    } catch (error) {
-      console.error('Error fetching notification settings:', error);
-    }
-  };
-
-  const toggleNotifications = async () => {
-    try {
-      const newValue = !notificationsEnabled;
-      await supabase
-        .from('user_preferences')
-        .update({ sms_results: newValue })
-        .eq('user_id', userProfile?.id);
-
-      setNotificationsEnabled(newValue);
-      if (Capacitor.isNativePlatform()) {
-        await Haptics.impact({ style: ImpactStyle.Light });
-      }
-      playTapSound();
-    } catch (error) {
-      console.error('Error toggling notifications:', error);
     }
   };
 
@@ -455,6 +360,14 @@ const MobileHome = () => {
                   </span>
                 ) : 'Free'}
               </Badge>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => navigate('/dashboard?tab=notifications')}
+                className="h-8 w-8 p-0"
+              >
+                <Bell className="h-4 w-4" />
+              </Button>
               <Button
                 size="sm"
                 variant="secondary"
@@ -568,34 +481,6 @@ const MobileHome = () => {
           </CardContent>
         </Card>
 
-        {/* Study Reminder Toggle */}
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {notificationsEnabled ? (
-                  <Bell className="h-5 w-5 text-primary" />
-                ) : (
-                  <BellOff className="h-5 w-5 text-muted-foreground" />
-                )}
-                <div>
-                  <p className="font-semibold text-sm">Study Reminders</p>
-                  <p className="text-xs text-muted-foreground">
-                    {notificationsEnabled ? 'Enabled' : 'Disabled'}
-                  </p>
-                </div>
-              </div>
-              <Button
-                size="sm"
-                variant={notificationsEnabled ? "default" : "outline"}
-                onClick={toggleNotifications}
-              >
-                {notificationsEnabled ? 'On' : 'Off'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Leaderboard Preview */}
         {leaderboard.length > 0 && (
           <div className="space-y-3">
@@ -641,58 +526,7 @@ const MobileHome = () => {
           </div>
         )}
 
-        {/* Performance Graph */}
-        {performanceData.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-lg font-bold px-1">7-Day Performance</h2>
-            <Card className="border-0 shadow-md">
-              <CardContent className="p-4">
-                <div className="flex items-end justify-between gap-2 h-32">
-                  {performanceData.map((day, index) => (
-                    <div key={index} className="flex-1 flex flex-col items-center gap-1">
-                      <div className="flex-1 w-full flex items-end">
-                        <div 
-                          className="w-full bg-gradient-to-t from-primary to-primary-glow rounded-t-lg transition-all duration-500"
-                          style={{ height: `${day.score}%` }}
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground font-medium">{day.date}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Weak Areas */}
-        {weakAreas.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-lg font-bold px-1">Focus Areas</h2>
-            <div className="space-y-2">
-              {weakAreas.map((subject, index) => (
-                <Card key={index} className="border-0 shadow-md">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-destructive/10 rounded-lg">
-                        <Brain className="h-5 w-5 text-destructive" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-sm">{subject.name}</p>
-                        <p className="text-xs text-muted-foreground">Needs improvement</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-destructive">{subject.score}%</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Quick Start Test */}
+        {/* Recent Results */}
         <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/10 to-secondary/10">
           <CardContent className="p-5">
             <div className="flex items-center gap-4">
@@ -826,57 +660,6 @@ const MobileHome = () => {
                         </p>
                       </div>
                       <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Performance Graph */}
-        {performanceData.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-lg font-bold px-1">7-Day Performance</h2>
-            <Card className="border-0 shadow-md">
-              <CardContent className="p-4">
-                <div className="flex items-end justify-between gap-2 h-32">
-                  {performanceData.map((day, index) => (
-                    <div key={index} className="flex-1 flex flex-col items-center gap-1">
-                      <div className="flex-1 w-full flex items-end">
-                        <div 
-                          className="w-full bg-gradient-to-t from-primary to-primary-glow rounded-t-lg transition-all duration-500"
-                          style={{ height: `${day.score}%` }}
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground font-medium">{day.date}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Weak Areas */}
-        {weakAreas.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-lg font-bold px-1">Focus Areas</h2>
-            <div className="space-y-2">
-              {weakAreas.map((subject, index) => (
-                <Card key={index} className="border-0 shadow-md">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-destructive/10 rounded-lg">
-                        <Brain className="h-5 w-5 text-destructive" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-sm">{subject.name}</p>
-                        <p className="text-xs text-muted-foreground">Needs improvement</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-destructive">{subject.score}%</p>
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
