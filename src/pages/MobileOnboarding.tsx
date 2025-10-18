@@ -75,37 +75,45 @@ const MobileOnboarding = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Image Section */}
-        <div className={`flex-1 bg-gradient-to-br ${slide.gradient} flex items-center justify-center relative overflow-hidden`}>
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent z-10" />
-          
+        {/* Top Section with Gradient */}
+        <div className={`relative bg-gradient-to-br ${slide.gradient} pt-16 pb-8 px-6`}>
           {/* Background Pattern */}
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
           
-          {/* Image */}
-          <div className="relative z-20 w-full h-full animate-fade-in" key={currentSlide}>
-            <img 
-              src={slide.image} 
-              alt={slide.title}
-              className="w-full h-full object-cover animate-scale-in"
-              style={{ animationDuration: '0.8s' }}
-            />
+          {/* Image Container - Framed */}
+          <div className="relative z-10 animate-fade-in-up" key={currentSlide}>
+            <div className="relative mx-auto max-w-sm">
+              {/* Decorative ring */}
+              <div className="absolute -inset-4 bg-white/20 rounded-3xl blur-2xl" />
+              
+              {/* Image Frame */}
+              <div className="relative bg-white/10 backdrop-blur-md p-3 rounded-3xl shadow-2xl border border-white/30">
+                <div className="relative overflow-hidden rounded-2xl aspect-[4/3]">
+                  <img 
+                    src={slide.image} 
+                    alt={slide.title}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Subtle gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Content Section */}
-        <div className="bg-background p-8 rounded-t-[2rem] -mt-8 relative z-10 shadow-2xl">
-          <div className="text-center mb-8 animate-fade-in" key={`content-${currentSlide}`}>
-            <h2 className="text-3xl font-bold mb-2">{slide.title}</h2>
-            <p className="text-primary font-semibold text-lg mb-3">{slide.subtitle}</p>
-            <p className="text-muted-foreground text-base leading-relaxed">
+        <div className="flex-1 bg-background px-8 pt-8 pb-6">
+          <div className="text-center mb-6 animate-fade-in" key={`content-${currentSlide}`} style={{ animationDelay: '0.2s' }}>
+            <h2 className="text-2xl font-bold mb-2 text-foreground">{slide.title}</h2>
+            <p className="text-primary font-semibold text-base mb-3">{slide.subtitle}</p>
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
               {slide.description}
             </p>
           </div>
 
           {/* Indicators */}
-          <div className="flex justify-center gap-2 mb-8">
+          <div className="flex justify-center gap-2 mb-6">
             {onboardingSlides.map((_, index) => (
               <div
                 key={index}
@@ -121,10 +129,10 @@ const MobileOnboarding = () => {
           {/* Button */}
           <Button
             onClick={handleNext}
-            className="w-full h-14 text-lg font-semibold rounded-2xl shadow-lg bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
+            className="w-full h-12 text-base font-semibold rounded-xl shadow-lg bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
-            {currentSlide === onboardingSlides.length - 1 ? "Let's Go" : 'Next'}
-            <ArrowRight className="ml-2 h-5 w-5" />
+            {currentSlide === onboardingSlides.length - 1 ? "Get Started" : 'Continue'}
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </div>
