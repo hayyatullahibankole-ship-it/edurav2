@@ -414,6 +414,36 @@ const MobileHome = () => {
 
       {/* Main Content */}
       <div className="p-4 space-y-4 -mt-4">
+        {/* Quick Test Button - Web Mobile Only (moved to top) */}
+        {!Capacitor.isNativePlatform() && (
+          <Card 
+            className="border-0 shadow-xl bg-gradient-to-br from-success/20 via-primary/10 to-accent/20 cursor-pointer transform transition-all hover:scale-[1.02] active:scale-[0.98]"
+            onClick={() => handleNavigation('/demo-test')}
+          >
+            <CardContent className="p-5">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <div className="p-4 bg-gradient-to-br from-success to-success/70 rounded-2xl shadow-lg">
+                    <Play className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg animate-pulse">
+                    <Zap className="h-3 w-3 text-success" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
+                    Start Practice Test
+                    <ChevronRight className="h-5 w-5 text-success" />
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Quick 10-question practice session
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Study Streak */}
         <Card className="border-0 shadow-lg bg-gradient-to-br from-warning/10 to-destructive/10">
           <CardContent className="p-5">
