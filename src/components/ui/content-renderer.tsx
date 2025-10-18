@@ -53,169 +53,66 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
   const formatContent = (text: string): string => {
     if (!text) return '';
 
-    // Split by double line breaks to create paragraphs
-    const blocks = text.split('\n\n');
+    // Preserve original formatting - split by paragraphs (double newline)
+    const paragraphs = text.split('\n\n');
     
-    return blocks
-      .map(block => {
-        const trimmedBlock = block.trim();
-        if (!trimmedBlock) return '';
+    return paragraphs
+      .map(para => {
+        const trimmed = para.trim();
+        if (!trimmed) return '';
 
-        // Detect section headers (capitalized lines without markdown #, short length)
-        if (!trimmedBlock.includes('\n') && 
-            /^[A-Z]/.test(trimmedBlock) && 
-            trimmedBlock.length < 80 &&
-            !trimmedBlock.endsWith('.') &&
-            !trimmedBlock.match(/^\d+[\.)]/)) {
-          return `<h2 class="text-lg sm:text-xl font-bold mt-10 mb-5 text-foreground">${renderMathInline(trimmedBlock)}</h2>`;
+        // Handle section headers (ALL CAPS or Title Case lines without periods)
+        const lines = trimmed.split('\n');
+        if (lines.length === 1 && 
+            /^[A-Z]/.test(trimmed) && 
+            trimmed.length < 100 &&
+            !trimmed.endsWith('.') &&
+            !trimmed.match(/^\d+[\.)]/)) {
+          return `<h2 class="text-lg sm:text-xl font-bold mt-8 mb-4 text-foreground">${renderMathInline(trimmed)}</h2>`;
         }
 
-        // Handle headers (# Header, ## Header, ### Header)
-        if (trimmedBlock.startsWith('#')) {
-          const headerMatch = trimmedBlock.match(/^(#{1,6})\s+(.+)$/);
-          if (headerMatch) {
-            const level = headerMatch[1].length;
-            const headerText = renderMathInline(headerMatch[2]);
-            const sizes = ['text-2xl sm:text-3xl', 'text-xl sm:text-2xl', 'text-lg sm:text-xl', 'text-base sm:text-lg', 'text-base sm:text-lg', 'text-base'];
-            const margins = level <= 2 ? 'mt-8 mb-4' : 'mt-6 mb-3';
-            return `<h${level} class="font-bold ${margins} ${sizes[level - 1]}">${headerText}</h${level}>`;
-          }
-        }
-
-        // Handle blockquotes (> text)
-        if (trimmedBlock.startsWith('>')) {
-          const quoteText = trimmedBlock
-            .split('\n')
-            .map(line => line.replace(/^>\s*/, ''))
-            .join('<br/>');
-          return `<blockquote class="border-l-4 border-primary/40 bg-muted/30 px-4 py-3 my-6 italic text-muted-foreground text-sm sm:text-base rounded-r-lg">${renderMathInline(quoteText)}</blockquote>`;
-        }
-
-        // Handle horizontal rules (---)
-        if (trimmedBlock === '---' || trimmedBlock === '***') {
-          return '<hr class="my-8 border-t border-border"/>';
-        }
-
-        // Handle unordered lists (- item or * item or emoji bullets)
-        if (/^[-*•]\s/.test(trimmedBlock) || /^[\u0030-\u0039\uFE0F\u20E3]+\s/.test(trimmedBlock)) {
-          const listItems = trimmedBlock
-            .split('\n')
-            .filter(line => line.trim())
-            .map(line => {
-              // Check if it's an emoji bullet
-              const emojiMatch = line.match(/^([\u0030-\u0039\uFE0F\u20E3]+)\s*(.+)$/);
-              if (emojiMatch) {
-                return `<li class="mb-2 flex items-start gap-3"><span class="text-xl flex-shrink-0 mt-0.5">${emojiMatch[1]}</span><span class="flex-1 leading-relaxed text-sm sm:text-base">${renderMathInline(emojiMatch[2])}</span></li>`;
-              }
-              const itemText = line.replace(/^[-*•]\s*/, '');
-              return `<li class="mb-2 leading-relaxed">${renderMathInline(itemText)}</li>`;
-            })
-            .join('');
-          return `<ul class="list-disc pl-5 my-6 space-y-1 text-base">${listItems}</ul>`;
-        }
-
-      // Handle numbered lists (1. item, 2. item) with special Example: handling
-      if (/^\d+\.\s/.test(trimmedBlock)) {
-        const lines = trimmedBlock.split('\n').filter(line => line.trim());
-        let listHTML = '';
-        let i = 0;
-        
-        while (i < lines.length) {
-          const line = lines[i];
-          const numberMatch = line.match(/^(\d+)\.\s*(.+)$/);
-          
-          if (numberMatch) {
-            const itemText = numberMatch[2];
-            let exampleHTML = '';
+        // Handle tab-separated tables (strict validation)
+        if (trimmed.includes('\t')) {
+          const rows = trimmed.split('\n').filter(row => row.trim());
+          if (rows.length >= 3) {
+            const firstRow = rows[0];
+            const tabCount = (firstRow.match(/\t/g) || []).length;
+            const looksLikeTable = 
+              tabCount >= 2 &&
+              !firstRow.match(/^\d+[\.)]\s/) &&
+              !firstRow.includes('?') &&
+              !firstRow.includes('(A)') &&
+              rows.slice(1).every(row => {
+                const rowTabs = (row.match(/\t/g) || []).length;
+                return !row.includes('(A)') && Math.abs(rowTabs - tabCount) <= 1;
+              });
             
-            // Check if next line is an Example:
-            if (i + 1 < lines.length && lines[i + 1].trim().startsWith('Example:')) {
-              const exampleText = lines[i + 1].replace(/^Example:\s*/i, '');
-              exampleHTML = `<div class="mt-2 ml-4 sm:ml-6 p-2 sm:p-3 bg-muted/20 rounded border-l-2 sm:border-l-4 border-primary/40">
-                <span class="text-xs font-semibold text-primary uppercase tracking-wide">Example</span>
-                <p class="text-sm mt-1 text-muted-foreground">${renderMathInline(exampleText)}</p>
-              </div>`;
-              i++; // Skip the example line
+            if (looksLikeTable) {
+              const headerCells = rows[0].split('\t').map(cell => 
+                `<th class="border border-border bg-primary/10 px-3 py-2 font-semibold text-left text-sm">${renderMathInline(cell.trim())}</th>`
+              ).join('');
+              const bodyRows = rows.slice(1).map((row, idx) => {
+                const cells = row.split('\t').map(cell =>
+                  `<td class="border border-border px-3 py-2 text-sm">${renderMathInline(cell.trim())}</td>`
+                ).join('');
+                return `<tr class="${idx % 2 === 0 ? 'bg-card' : 'bg-muted/20'}">${cells}</tr>`;
+              }).join('');
+              return `<div class="overflow-x-auto my-6"><table class="w-full border-collapse border border-border rounded-lg text-sm"><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table></div>`;
             }
-            
-            listHTML += `<li class="mb-4">
-              <div class="text-base leading-relaxed font-medium">${renderMathInline(itemText)}</div>
-              ${exampleHTML}
-            </li>`;
-          }
-          i++;
-        }
-        
-        return `<ol class="list-decimal pl-5 my-8 space-y-3 text-base [&>li::marker]:text-primary [&>li::marker]:font-bold">${listHTML}</ol>`;
-      }
-
-      // Handle tab-separated tables (with strict validation)
-      if (trimmedBlock.includes('\t')) {
-        const rows = trimmedBlock.split('\n').filter(row => row.trim());
-        
-        // Only treat as table if it meets ALL criteria
-        if (rows.length >= 3) { // Need header + at least 2 data rows
-          const firstRow = rows[0];
-          const tabCount = (firstRow.match(/\t/g) || []).length;
-          
-          // Very strict validation - must look like a real table
-          const looksLikeTable = 
-            tabCount >= 2 && // At least 3 columns
-            firstRow.split('\t').length >= 3 && // Confirm 3+ columns
-            !firstRow.match(/^\d+[\.)]\s/) && // Not a numbered list
-            !firstRow.includes('?') && // Not a question
-            !firstRow.includes('(') && // Not answer options
-            firstRow.length < 200 && // Header row should be short
-            rows.slice(1).every(row => {
-              const rowTabs = (row.match(/\t/g) || []).length;
-              const hasOptions = row.includes('(A)') || row.includes('(B)');
-              return !hasOptions && Math.abs(rowTabs - tabCount) <= 1;
-            });
-          
-          if (looksLikeTable) {
-            const headerCells = rows[0].split('\t').map(cell => 
-              `<th class="border border-border bg-primary/10 px-3 py-2 sm:px-4 sm:py-3 font-bold text-left text-xs sm:text-sm">${renderMathInline(cell.trim())}</th>`
-            ).join('');
-            
-            const bodyRows = rows.slice(1).map((row, idx) => {
-              const cells = row.split('\t').map(cell =>
-                `<td class="border border-border px-3 py-2 sm:px-4 sm:py-3 text-sm">${renderMathInline(cell.trim())}</td>`
-              ).join('');
-              return `<tr class="${idx % 2 === 0 ? 'bg-card' : 'bg-muted/20'} hover:bg-muted/40 transition-colors">${cells}</tr>`;
-            }).join('');
-
-            return `<div class="overflow-x-auto my-8"><table class="w-full border-collapse border border-border rounded-lg overflow-hidden shadow-sm text-sm sm:text-base"><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table></div>`;
-          }
-        }
-      }
-
-        // Handle markdown tables (basic markdown table detection)
-        if (trimmedBlock.includes('|') && trimmedBlock.split('\n').length > 1) {
-          const rows = trimmedBlock.split('\n').filter(row => row.trim());
-          if (rows.length > 1 && rows[1].includes('---')) {
-            const headerCells = rows[0].split('|').filter(cell => cell.trim()).map(cell => 
-              `<th class="border border-border bg-muted px-6 py-4 font-bold text-left">${renderMathInline(cell.trim())}</th>`
-            ).join('');
-            
-            const bodyRows = rows.slice(2).map((row, idx) => {
-              const cells = row.split('|').filter(cell => cell.trim()).map(cell =>
-                `<td class="border border-border px-6 py-4">${renderMathInline(cell.trim())}</td>`
-              ).join('');
-              return `<tr class="${idx % 2 === 0 ? 'bg-card' : 'bg-muted/20'} hover:bg-muted/40 transition-colors">${cells}</tr>`;
-            }).join('');
-
-            return `<table class="w-full my-10 border-collapse border-2 border-border rounded-lg overflow-hidden shadow-sm"><thead class="bg-primary/10"><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table>`;
           }
         }
 
-        // Regular paragraph - replace single line breaks with <br/>
-        const formatted = trimmedBlock
+        // Render lines as-is with proper spacing
+        const processedLines = trimmed
           .split('\n')
-          .filter(line => line.trim())
-          .map(line => renderMathInline(line))
+          .map(line => {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) return '<br/>';
+            return renderMathInline(trimmedLine);
+          })
           .join('<br/>');
         
-        return formatted ? `<p class="mb-5 leading-relaxed text-base">${formatted}</p>` : '';
+        return `<div class="mb-6 text-base leading-relaxed whitespace-pre-wrap">${processedLines}</div>`;
       })
       .filter(p => p)
       .join('');

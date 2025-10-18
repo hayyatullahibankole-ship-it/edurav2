@@ -5,7 +5,6 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Book, ChevronRight, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import Layout from '@/components/Layout';
@@ -24,7 +23,6 @@ export default function StudyHub() {
   const navigate = useNavigate();
   const { canAccessPremium, loading: subLoading } = useSubscription();
   const [topics, setTopics] = useState<StudyTopic[]>([]);
-  const [selectedExamType, setSelectedExamType] = useState('JAMB');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,7 +47,7 @@ export default function StudyHub() {
         supabase.removeChannel(topicsChannel);
       };
     }
-  }, [canAccessPremium, subLoading, selectedExamType, navigate]);
+  }, [canAccessPremium, subLoading, navigate]);
 
   const fetchTopics = async () => {
     try {
@@ -60,7 +58,6 @@ export default function StudyHub() {
           *,
           subjects (name)
         `)
-        .eq('exam_type', selectedExamType as any)
         .eq('is_active', true)
         .order('display_order');
 
@@ -116,67 +113,57 @@ export default function StudyHub() {
           <p className="text-sm sm:text-base text-muted-foreground">Master topics organized by subject → lessons</p>
         </div>
 
-        <Tabs value={selectedExamType} onValueChange={(val) => setSelectedExamType(val)} className="mb-6 sm:mb-8">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="JAMB" className="text-xs sm:text-sm">JAMB</TabsTrigger>
-            <TabsTrigger value="WAEC" className="text-xs sm:text-sm">WAEC</TabsTrigger>
-            <TabsTrigger value="NECO" className="text-xs sm:text-sm">NECO</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value={selectedExamType} className="mt-4 sm:mt-6">
-            {topics.length === 0 ? (
-              <Card className="animate-fade-in">
-                <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12 px-4">
-                  <Book className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4" />
-                  <p className="text-sm sm:text-base text-muted-foreground text-center">No study topics available yet for {selectedExamType}</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-6">
-                {Object.entries(topicsBySubject).map(([subject, subjectTopics]) => (
-                  <div key={subject} className="animate-fade-in">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <Book className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-bold">{subject}</h2>
-                        <p className="text-xs text-muted-foreground">{subjectTopics.length} {subjectTopics.length === 1 ? 'topic' : 'topics'}</p>
-                      </div>
-                    </div>
-                    <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      {subjectTopics.map((topic) => (
-                        <Card 
-                          key={topic.id} 
-                          className="hover:shadow-lg transition-all cursor-pointer animate-fade-in hover-scale border-l-4"
-                          style={{ borderLeftColor: `hsl(var(--primary))` }}
-                          onClick={() => navigate(`/study-hub/topic/${topic.id}`)}
-                        >
-                          <CardHeader className="pb-3">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <CardTitle className="text-base sm:text-lg mb-2 line-clamp-2">{topic.title}</CardTitle>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="text-xs">
-                                    Level {topic.difficulty_level}/5
-                                  </Badge>
-                                </div>
-                              </div>
-                              <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                            </div>
-                            <CardDescription className="line-clamp-2 text-xs sm:text-sm mt-2">
-                              {topic.description}
-                            </CardDescription>
-                          </CardHeader>
-                        </Card>
-                      ))}
-                    </div>
+        {topics.length === 0 ? (
+          <Card className="animate-fade-in">
+            <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12 px-4">
+              <Book className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4" />
+              <p className="text-sm sm:text-base text-muted-foreground text-center">No study topics available yet</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {Object.entries(topicsBySubject).map(([subject, subjectTopics]) => (
+              <div key={subject} className="animate-fade-in">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Book className="h-5 w-5 text-primary" />
                   </div>
-                ))}
+                  <div>
+                    <h2 className="text-xl font-bold">{subject}</h2>
+                    <p className="text-xs text-muted-foreground">{subjectTopics.length} {subjectTopics.length === 1 ? 'topic' : 'topics'}</p>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {subjectTopics.map((topic) => (
+                    <Card 
+                      key={topic.id} 
+                      className="hover:shadow-lg transition-all cursor-pointer animate-fade-in hover-scale border-l-4"
+                      style={{ borderLeftColor: `hsl(var(--primary))` }}
+                      onClick={() => navigate(`/study-hub/topic/${topic.id}`)}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-base sm:text-lg mb-2 line-clamp-2">{topic.title}</CardTitle>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                Level {topic.difficulty_level}/5
+                              </Badge>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                        </div>
+                        <CardDescription className="line-clamp-2 text-xs sm:text-sm mt-2">
+                          {topic.description}
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  ))}
+                </div>
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
+            ))}
+          </div>
+        )}
       </div>
     </Layout>
   );
