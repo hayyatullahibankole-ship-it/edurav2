@@ -625,7 +625,7 @@ const MobileHome = () => {
                 <Card 
                   key={index} 
                   className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
-                  onClick={() => handleNavigation(`/results/${result.attempt_id}`)}
+                  onClick={() => handleNavigation(`/results?attempt=${result.attempt_id}`)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">
