@@ -413,7 +413,7 @@ const MobileHome = () => {
       </div>
 
       {/* Main Content */}
-      <div className="p-4 space-y-4 -mt-8">
+      <div className="p-4 space-y-4 -mt-2">
         {/* Study Streak */}
         <Card className="border-0 shadow-lg bg-gradient-to-br from-warning/10 to-destructive/10">
           <CardContent className="p-5">
