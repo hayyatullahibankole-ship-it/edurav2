@@ -67,7 +67,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
           if (headerMatch) {
             const level = headerMatch[1].length;
             const headerText = renderMathInline(headerMatch[2]);
-            return `<h${level} class="font-bold mt-6 mb-3 ${level === 1 ? 'text-3xl' : level === 2 ? 'text-2xl' : level === 3 ? 'text-xl' : 'text-lg'}">${headerText}</h${level}>`;
+            return `<h${level} class="font-bold mt-10 mb-5 ${level === 1 ? 'text-4xl' : level === 2 ? 'text-3xl' : level === 3 ? 'text-2xl' : level === 4 ? 'text-xl' : 'text-lg'} ${level <= 2 ? 'border-b-2 border-border/30 pb-3' : ''}">${headerText}</h${level}>`;
           }
         }
 
@@ -77,25 +77,30 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
             .split('\n')
             .map(line => line.replace(/^>\s*/, ''))
             .join('<br/>');
-          return `<blockquote class="border-l-4 border-primary pl-4 py-2 my-4 italic text-muted-foreground">${renderMathInline(quoteText)}</blockquote>`;
+          return `<blockquote class="border-l-[6px] border-primary bg-muted/30 rounded-r-lg px-6 py-4 my-8 italic text-foreground/90 shadow-sm">${renderMathInline(quoteText)}</blockquote>`;
         }
 
         // Handle horizontal rules (---)
         if (trimmedBlock === '---' || trimmedBlock === '***') {
-          return '<hr class="my-6 border-t border-border"/>';
+          return '<hr class="my-10 border-t-2 border-border/50"/>';
         }
 
         // Handle unordered lists (- item or * item or emoji bullets)
-        if (/^[-*•]\s/.test(trimmedBlock) || /^[0-9️⃣]+\s/.test(trimmedBlock)) {
+        if (/^[-*•]\s/.test(trimmedBlock) || /^[\u0030-\u0039\uFE0F\u20E3]+\s/.test(trimmedBlock)) {
           const listItems = trimmedBlock
             .split('\n')
             .filter(line => line.trim())
             .map(line => {
-              const itemText = line.replace(/^[-*•]\s*/, '').replace(/^[0-9️⃣]+\s*/, '');
-              return `<li class="mb-2">${renderMathInline(itemText)}</li>`;
+              // Check if it's an emoji bullet
+              const emojiMatch = line.match(/^([\u0030-\u0039\uFE0F\u20E3]+)\s*(.+)$/);
+              if (emojiMatch) {
+                return `<li class="mb-4 flex items-start gap-3"><span class="text-2xl flex-shrink-0 mt-0.5">${emojiMatch[1]}</span><span class="flex-1 leading-relaxed">${renderMathInline(emojiMatch[2])}</span></li>`;
+              }
+              const itemText = line.replace(/^[-*•]\s*/, '');
+              return `<li class="mb-3 leading-relaxed">${renderMathInline(itemText)}</li>`;
             })
             .join('');
-          return `<ul class="list-disc pl-6 my-4 space-y-2">${listItems}</ul>`;
+          return `<ul class="list-disc pl-6 my-6 space-y-1">${listItems}</ul>`;
         }
 
         // Handle numbered lists (1. item, 2. item)
@@ -105,10 +110,10 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
             .filter(line => line.trim())
             .map(line => {
               const itemText = line.replace(/^\d+\.\s*/, '');
-              return `<li class="mb-2">${renderMathInline(itemText)}</li>`;
+              return `<li class="mb-3 leading-relaxed">${renderMathInline(itemText)}</li>`;
             })
             .join('');
-          return `<ol class="list-decimal pl-6 my-4 space-y-2">${listItems}</ol>`;
+          return `<ol class="list-decimal pl-6 my-6 space-y-1">${listItems}</ol>`;
         }
 
         // Handle tables (basic markdown table detection)
@@ -116,17 +121,17 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
           const rows = trimmedBlock.split('\n').filter(row => row.trim());
           if (rows.length > 1 && rows[1].includes('---')) {
             const headerCells = rows[0].split('|').filter(cell => cell.trim()).map(cell => 
-              `<th class="border border-border px-4 py-2 font-semibold">${renderMathInline(cell.trim())}</th>`
+              `<th class="border border-border bg-muted px-6 py-4 font-bold text-left">${renderMathInline(cell.trim())}</th>`
             ).join('');
             
-            const bodyRows = rows.slice(2).map(row => {
+            const bodyRows = rows.slice(2).map((row, idx) => {
               const cells = row.split('|').filter(cell => cell.trim()).map(cell =>
-                `<td class="border border-border px-4 py-2">${renderMathInline(cell.trim())}</td>`
+                `<td class="border border-border px-6 py-4">${renderMathInline(cell.trim())}</td>`
               ).join('');
-              return `<tr>${cells}</tr>`;
+              return `<tr class="${idx % 2 === 0 ? 'bg-card' : 'bg-muted/20'} hover:bg-muted/40 transition-colors">${cells}</tr>`;
             }).join('');
 
-            return `<table class="w-full my-6 border-collapse border border-border"><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table>`;
+            return `<table class="w-full my-8 border-collapse border-2 border-border rounded-lg overflow-hidden shadow-sm"><thead class="bg-primary/10"><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table>`;
           }
         }
 
@@ -137,7 +142,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
           .map(line => renderMathInline(line))
           .join('<br/>');
         
-        return formatted ? `<p class="mb-4 leading-relaxed">${formatted}</p>` : '';
+        return formatted ? `<p class="mb-6 leading-loose text-base">${formatted}</p>` : '';
       })
       .filter(p => p)
       .join('');
@@ -151,7 +156,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
 
   return (
     <div 
-      className={`prose dark:prose-invert max-w-none ${className}`}
+      className={`prose dark:prose-invert max-w-none prose-headings:scroll-mt-20 ${className}`}
       dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
     />
   );
