@@ -4,27 +4,30 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import onboardingStudy from '@/assets/onboarding-study.jpg';
+import onboardingExam from '@/assets/onboarding-exam.jpg';
+import onboardingSuccess from '@/assets/onboarding-success.jpg';
 
 const onboardingSlides = [
   {
     title: 'Practice Anytime, Anywhere',
     subtitle: 'Master JAMB, WAEC, NECO & Post-UTME',
     description: 'Access thousands of past questions with real exam simulation',
-    image: '📱',
+    image: onboardingStudy,
     gradient: 'from-primary to-secondary',
   },
   {
-    title: 'Track Your Progress',
-    subtitle: 'Data-driven insights',
-    description: 'Monitor performance, identify weak areas, and improve systematically',
-    image: '📊',
+    title: 'Ace Your Exams',
+    subtitle: 'Focused preparation',
+    description: 'Take timed practice tests that mirror real exam conditions',
+    image: onboardingExam,
     gradient: 'from-secondary to-accent',
   },
   {
-    title: 'Compete & Excel',
-    subtitle: 'Challenge Arena',
-    description: 'Join nationwide competitions, climb leaderboards, win amazing prizes',
-    image: '🏆',
+    title: 'Celebrate Success',
+    subtitle: 'Achieve your dreams',
+    description: 'Join thousands of students who achieved excellence with Edura',
+    image: onboardingSuccess,
     gradient: 'from-accent to-success',
   },
 ];
@@ -74,10 +77,20 @@ const MobileOnboarding = () => {
       <div className="flex-1 flex flex-col">
         {/* Image Section */}
         <div className={`flex-1 bg-gradient-to-br ${slide.gradient} flex items-center justify-center relative overflow-hidden`}>
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30" />
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent z-10" />
           
-          <div className="relative z-10 text-center px-6 animate-fade-in" key={currentSlide}>
-            <div className="text-9xl mb-8 animate-float">{slide.image}</div>
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
+          
+          {/* Image */}
+          <div className="relative z-20 w-full h-full animate-fade-in" key={currentSlide}>
+            <img 
+              src={slide.image} 
+              alt={slide.title}
+              className="w-full h-full object-cover animate-scale-in"
+              style={{ animationDuration: '0.8s' }}
+            />
           </div>
         </div>
 
