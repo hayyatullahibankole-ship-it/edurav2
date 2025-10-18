@@ -12,17 +12,10 @@
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "https://storage.googleapis.com/gpt-engineer-file-uploads/qbxQW8rAQxXOqqqHt7nazjc7N1w2/uploads/1758960166171-1002547319.png",
+      "src": "/app-icon-white.png",
       "type": "image/png",
-      "sizes": "1024x1024",
-      "isSquare": true,
-      "isPng": true,
-      "isWebp": false,
-      "isJpg": false,
-      "width": 1024,
-      "is512x512": false,
-      "is256x256": false,
-      "is192x192": false
+      "sizes": "512x512",
+      "purpose": "any maskable"
     },
     {
       "src": "https://storage.googleapis.com/gpt-engineer-file-uploads/qbxQW8rAQxXOqqqHt7nazjc7N1w2/social-images/social-1758960159527-1002547319.png",

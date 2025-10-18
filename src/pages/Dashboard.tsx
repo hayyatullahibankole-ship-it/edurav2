@@ -384,14 +384,14 @@ const Dashboard = () => {
                   icon={Clock}
                   label="Study Hours"
                   value={loading ? "..." : `${stats.studyHours}h`}
-                  gradient="from-secondary to-info"
+                  gradient="from-info to-secondary"
                   delay="0.1s"
                 />
                 <MobileStatCard 
                   icon={Trophy}
                   label="Your Rank"
                   value={loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}
-                  gradient="from-warning to-destructive"
+                  gradient="from-primary via-primary-glow to-success"
                   delay="0.15s"
                 />
               </div>
@@ -443,187 +443,8 @@ const Dashboard = () => {
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-8">
-                {/* Quick Actions - Modern Mobile vs Desktop Design */}
-                {isMobile ? (
-                  <div className="space-y-4 animate-fade-in">
-                    {/* Section Header */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h2 className="text-xl font-bold flex items-center gap-2">
-                          <Rocket className="h-5 w-5 text-primary" />
-                          Quick Start
-                        </h2>
-                        <p className="text-xs text-muted-foreground mt-0.5">Choose your practice test</p>
-                      </div>
-                    </div>
-                    
-                    {/* Main JAMB Card - Featured */}
-                    <ScheduleTestModal defaultExamType="jamb">
-                      <div className="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 active:scale-[0.98] cursor-pointer group bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-xl">
-                        {/* Animated background pattern */}
-                        <div className="absolute inset-0 opacity-10">
-                          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')]" />
-                        </div>
-                        
-                        {/* Shine effect */}
-                        <div className="absolute inset-0 opacity-0 group-active:opacity-30 transition-opacity duration-300">
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent" />
-                        </div>
-                        
-                        {/* Content */}
-                        <div className="relative z-10 flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm mb-2">
-                              <Sparkles className="h-3 w-3 text-white" />
-                              <span className="text-xs font-bold text-white">Most Popular</span>
-                            </div>
-                            <h3 className="text-2xl font-bold text-white mb-1">JAMB CBT</h3>
-                            <p className="text-sm text-white/80">Start practicing now</p>
-                          </div>
-                          
-                          {/* Icon */}
-                          <div className="relative">
-                            <div className="absolute inset-0 bg-white/30 rounded-2xl blur-xl" />
-                            <div className="relative w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-active:scale-110 transition-transform">
-                              <Play className="h-8 w-8 text-white drop-shadow-lg" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </ScheduleTestModal>
-                    
-                    {/* Grid of other exams */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <ScheduleTestModal defaultExamType="waec">
-                        <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.98] cursor-pointer group bg-gradient-to-br from-secondary to-info shadow-lg">
-                          <div className="relative z-10">
-                            <div className="flex justify-end mb-2">
-                              <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
-                                <Play className="h-5 w-5 text-white" />
-                              </div>
-                            </div>
-                            <h3 className="text-lg font-bold text-white">WAEC</h3>
-                            <p className="text-xs text-white/80">Practice now</p>
-                          </div>
-                        </div>
-                      </ScheduleTestModal>
-                      
-                      <ScheduleTestModal defaultExamType="neco">
-                        <div className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-[0.98] cursor-pointer group bg-gradient-to-br from-accent to-success shadow-lg">
-                          <div className="relative z-10">
-                            <div className="flex justify-end mb-2">
-                              <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
-                                <Play className="h-5 w-5 text-white" />
-                              </div>
-                            </div>
-                            <h3 className="text-lg font-bold text-white">NECO</h3>
-                            <p className="text-xs text-white/80">Practice now</p>
-                          </div>
-                        </div>
-                      </ScheduleTestModal>
-                    </div>
-                    
-                    {/* Post-UTME - Full width */}
-                    <ScheduleTestModal defaultExamType="post-utme">
-                      <div className="relative overflow-hidden rounded-2xl p-5 transition-all duration-300 active:scale-[0.98] cursor-pointer group bg-gradient-to-br from-warning to-destructive shadow-lg">
-                        <div className="relative z-10 flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm mb-1.5">
-                              <Sparkles className="h-3 w-3 text-white" />
-                              <span className="text-xs font-semibold text-white">New</span>
-                            </div>
-                            <h3 className="text-lg font-bold text-white">Post-UTME</h3>
-                            <p className="text-xs text-white/80">University screening prep</p>
-                          </div>
-                          
-                          <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-active:scale-110 transition-transform">
-                            <Zap className="h-6 w-6 text-white drop-shadow-lg" />
-                          </div>
-                        </div>
-                      </div>
-                    </ScheduleTestModal>
-                    
-                    {/* Challenge Arena - Prominent Card */}
-                    <Link to="/challenge-arena">
-                      <div className="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 active:scale-[0.98] cursor-pointer group bg-gradient-to-br from-accent via-success to-success-glow shadow-xl mt-2">
-                        {/* Animated background pattern */}
-                        <div className="absolute inset-0 opacity-10">
-                          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')]" />
-                        </div>
-                        
-                        {/* Shine effect */}
-                        <div className="absolute inset-0 opacity-0 group-active:opacity-30 transition-opacity duration-300">
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent" />
-                        </div>
-                        
-                        {/* Content */}
-                        <div className="relative z-10 flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm mb-2">
-                              <Trophy className="h-3 w-3 text-white" />
-                              <span className="text-xs font-bold text-white">Compete & Win</span>
-                            </div>
-                            <h3 className="text-2xl font-bold text-white mb-1">Challenge Arena</h3>
-                            <p className="text-sm text-white/80">Battle students nationwide</p>
-                          </div>
-                          
-                          {/* Icon */}
-                          <div className="relative">
-                            <div className="absolute inset-0 bg-white/30 rounded-2xl blur-xl" />
-                            <div className="relative w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-active:scale-110 transition-transform">
-                              <Sword className="h-8 w-8 text-white drop-shadow-lg" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                    
-                    {/* Resources & Consultation - Grid */}
-                    <div className="grid grid-cols-2 gap-3 mt-3">
-                      {/* Resources Card */}
-                      <Link to="/resources">
-                        <div className="relative overflow-hidden rounded-2xl p-5 transition-all duration-300 active:scale-[0.98] cursor-pointer group bg-gradient-to-br from-info to-secondary shadow-lg">
-                          <div className="relative z-10">
-                            <div className="flex justify-between items-start mb-3">
-                              <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm">
-                                <FileText className="h-5 w-5 text-white" />
-                              </div>
-                              <ChevronRight className="h-5 w-5 text-white/70 group-active:translate-x-1 transition-transform" />
-                            </div>
-                            <h3 className="text-base font-bold text-white mb-1">Resources</h3>
-                            <p className="text-xs text-white/80">Study materials</p>
-                          </div>
-                          
-                          {/* Subtle pattern */}
-                          <div className="absolute inset-0 opacity-5">
-                            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA0MCAwIEwgMCAwIDAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')]" />
-                          </div>
-                        </div>
-                      </Link>
-                      
-                      {/* Book Consultation Card */}
-                      <Link to="/consultation">
-                        <div className="relative overflow-hidden rounded-2xl p-5 transition-all duration-300 active:scale-[0.98] cursor-pointer group bg-gradient-to-br from-warning via-warning to-destructive shadow-lg">
-                          <div className="relative z-10">
-                            <div className="flex justify-between items-start mb-3">
-                              <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm">
-                                <Calendar className="h-5 w-5 text-white" />
-                              </div>
-                              <ChevronRight className="h-5 w-5 text-white/70 group-active:translate-x-1 transition-transform" />
-                            </div>
-                            <h3 className="text-base font-bold text-white mb-1">Book Now</h3>
-                            <p className="text-xs text-white/80">1-on-1 session</p>
-                          </div>
-                          
-                          {/* Subtle pattern */}
-                          <div className="absolute inset-0 opacity-5">
-                            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA0MCAwIEwgMCAwIDAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')]" />
-                          </div>
-                        </div>
-                      </Link>
-                    </div>
-                  </div>
-                ) : (
+                {/* Quick Actions - Desktop Only (Mobile has nav FAB) */}
+                {!isMobile && (
                   /* Desktop Quick Actions */
                   <Card className="border-0 shadow-xl backdrop-blur-sm bg-gradient-to-br from-card to-muted/30 overflow-hidden hover-lift">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
@@ -685,6 +506,8 @@ const Dashboard = () => {
                 )}
 
                 {/* Subscription Management - Mobile Only */}
+                {!isMobile && <div className="h-4" />}
+                
                 {isMobile && (
                   <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 border border-primary/20 animate-fade-in">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-3xl" />
