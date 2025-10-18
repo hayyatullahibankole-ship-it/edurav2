@@ -23,7 +23,9 @@ import {
   Zap,
   Award,
   Rocket,
-  Sparkles
+  Sparkles,
+  Download,
+  BarChart3
 } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -465,40 +467,57 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                {/* Learning Hub - Mad Features! */}
+                {/* Learning Hub - Streamlined Features */}
                 <div>
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold flex items-center gap-2 mb-2">
                       <Rocket className="h-6 w-6 text-primary animate-bounce-slow" />
                       Unlock Your Potential
                     </h2>
-                    <p className="text-muted-foreground">Explore our amazing features designed to help you succeed</p>
+                    <p className="text-muted-foreground">Explore features designed to help you succeed</p>
                   </div>
-                  <div className="grid md:grid-cols-3 gap-6">
-                    <FeatureCard 
-                      icon={GraduationCap}
-                      title="Study Hub"
-                      description="Access comprehensive lessons, video tutorials, and study materials curated by experts"
-                      href="/study-hub"
-                      gradient="from-primary to-secondary"
-                      badge="Popular"
-                    />
-                    <FeatureCard 
-                      icon={MessageSquare}
-                      title="Ask Tutor"
-                      description="Get instant help from tutors and peers. Ask questions, share knowledge, and learn together"
-                      href="/forum"
-                      gradient="from-success to-accent"
-                      badge="24/7"
-                    />
-                    <FeatureCard 
-                      icon={Sword}
-                      title="Challenge Arena"
-                      description="Compete with students nationwide! Earn points, climb leaderboards, and win amazing prizes"
-                      href="/challenge-arena"
-                      gradient="from-warning to-destructive"
-                      badge="New"
-                    />
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Link to="/resources" className="block">
+                      <Card className="group hover:shadow-2xl transition-all duration-300 cursor-pointer border-0 bg-gradient-to-br from-success/5 to-info/5 hover-lift h-full">
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <CardTitle className="text-xl mb-2 group-hover:text-primary transition-colors">Resource Library</CardTitle>
+                              <CardDescription>
+                                Download PDFs, past questions, and study guides
+                              </CardDescription>
+                            </div>
+                            <FileText className="h-10 w-10 text-success opacity-80 group-hover:scale-110 transition-transform" />
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <Button variant="outline" className="w-full group-hover:scale-105 transition-transform">
+                            <Download className="mr-2 h-5 w-5" />
+                            Browse Resources
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Card className="group hover:shadow-2xl transition-all duration-300 cursor-pointer border-0 bg-gradient-to-br from-info/5 to-secondary/5 hover-lift">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle className="text-xl mb-2 group-hover:text-primary transition-colors">Performance Analytics</CardTitle>
+                            <CardDescription>
+                              View detailed insights and track progress
+                            </CardDescription>
+                          </div>
+                          <TrendingUp className="h-10 w-10 text-info opacity-80 group-hover:scale-110 transition-transform" />
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <Button variant="outline" className="w-full group-hover:scale-105 transition-transform" onClick={() => setActiveTab("results")}>
+                          <BarChart3 className="mr-2 h-5 w-5" />
+                          View Analytics
+                        </Button>
+                      </CardContent>
+                    </Card>
                   </div>
                 </div>
 
