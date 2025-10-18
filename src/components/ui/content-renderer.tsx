@@ -53,41 +53,27 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
   const formatContent = (text: string): string => {
     if (!text) return '';
 
-    // Preserve original formatting - split by paragraphs (double newline)
-    const paragraphs = text.split('\n\n');
+    // Split by double newlines to preserve paragraph structure
+    const blocks = text.split('\n\n');
     
-    return paragraphs
-      .map(para => {
-        const trimmed = para.trim();
+    return blocks
+      .map(block => {
+        const trimmed = block.trim();
         if (!trimmed) return '';
 
-        // Handle section headers (ALL CAPS or Title Case lines without periods)
-        const lines = trimmed.split('\n');
-        if (lines.length === 1 && 
-            /^[A-Z]/.test(trimmed) && 
-            trimmed.length < 100 &&
-            !trimmed.endsWith('.') &&
-            !trimmed.match(/^\d+[\.)]/)) {
-          return `<h2 class="text-lg sm:text-xl font-bold mt-8 mb-4 text-foreground">${renderMathInline(trimmed)}</h2>`;
-        }
-
-        // Handle tab-separated tables (strict validation)
+        // Check for tables ONLY (strict: 3+ tabs, 3+ rows, no questions/answers)
         if (trimmed.includes('\t')) {
           const rows = trimmed.split('\n').filter(row => row.trim());
           if (rows.length >= 3) {
             const firstRow = rows[0];
             const tabCount = (firstRow.match(/\t/g) || []).length;
-            const looksLikeTable = 
+            const isRealTable = 
               tabCount >= 2 &&
-              !firstRow.match(/^\d+[\.)]\s/) &&
               !firstRow.includes('?') &&
-              !firstRow.includes('(A)') &&
-              rows.slice(1).every(row => {
-                const rowTabs = (row.match(/\t/g) || []).length;
-                return !row.includes('(A)') && Math.abs(rowTabs - tabCount) <= 1;
-              });
+              !firstRow.includes('(') &&
+              rows.every(row => !row.includes('(A)') && !row.includes('(B)'));
             
-            if (looksLikeTable) {
+            if (isRealTable) {
               const headerCells = rows[0].split('\t').map(cell => 
                 `<th class="border border-border bg-primary/10 px-3 py-2 font-semibold text-left text-sm">${renderMathInline(cell.trim())}</th>`
               ).join('');
@@ -102,17 +88,13 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
           }
         }
 
-        // Render lines as-is with proper spacing
-        const processedLines = trimmed
+        // For everything else: preserve exact formatting with line breaks
+        const processedContent = trimmed
           .split('\n')
-          .map(line => {
-            const trimmedLine = line.trim();
-            if (!trimmedLine) return '<br/>';
-            return renderMathInline(trimmedLine);
-          })
-          .join('<br/>');
+          .map(line => renderMathInline(line))
+          .join('\n');
         
-        return `<div class="mb-6 text-base leading-relaxed whitespace-pre-wrap">${processedLines}</div>`;
+        return `<div class="mb-6 text-base leading-relaxed whitespace-pre-line">${processedContent}</div>`;
       })
       .filter(p => p)
       .join('');
