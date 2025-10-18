@@ -128,45 +128,56 @@ export default function StudyTopic() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-xl sm:text-2xl font-semibold mb-4">Lessons ({lessons.length})</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl sm:text-2xl font-semibold">Lessons</h2>
+            <Badge variant="outline" className="text-xs">{lessons.length} {lessons.length === 1 ? 'Lesson' : 'Lessons'}</Badge>
+          </div>
           
-          {lessons.map((lesson, index) => (
-            <Card 
-              key={lesson.id}
-              className="hover:shadow-lg transition-all cursor-pointer animate-fade-in hover-scale"
-              onClick={() => navigate(`/study-hub/lesson/${lesson.id}`)}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs sm:text-sm font-medium text-muted-foreground">
-                        Lesson {index + 1}
-                      </span>
-                      {lesson.isCompleted && (
-                        <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-xs">
-                          <CheckCircle2 className="h-3 w-3 mr-1" />
-                          Done
-                        </Badge>
-                      )}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {lessons.map((lesson, index) => (
+              <Card 
+                key={lesson.id}
+                className="hover:shadow-lg transition-all cursor-pointer animate-fade-in hover-scale border-l-4 group relative overflow-hidden"
+                style={{ borderLeftColor: lesson.isCompleted ? 'hsl(var(--success))' : 'hsl(var(--primary))' }}
+                onClick={() => navigate(`/study-hub/lesson/${lesson.id}`)}
+              >
+                {lesson.isCompleted && (
+                  <div className="absolute top-2 right-2 z-10">
+                    <div className="bg-success rounded-full p-1 shadow-lg">
+                      <CheckCircle2 className="h-4 w-4 text-white" />
                     </div>
-                    <CardTitle className="text-base sm:text-lg line-clamp-2">{lesson.title}</CardTitle>
-                    <CardDescription className="mt-2 text-xs sm:text-sm line-clamp-2">
-                      {lesson.summary}
-                    </CardDescription>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span>{lesson.estimated_minutes} min</span>
+                )}
+                <CardHeader className="pb-3 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs font-medium">
+                      Lesson {index + 1}
+                    </Badge>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span>{lesson.estimated_minutes} min</span>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <CardTitle className="text-base sm:text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                    {lesson.title}
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm line-clamp-3 leading-relaxed">
+                    {lesson.summary}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start gap-2 text-xs group-hover:text-primary group-hover:bg-primary/5"
+                  >
+                    <PlayCircle className="h-4 w-4" />
+                    {lesson.isCompleted ? 'Review Lesson' : 'Start Lesson'}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
           {lessons.length === 0 && (
             <Card className="animate-fade-in">

@@ -344,9 +344,10 @@ const MobileHome = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header with Gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent p-6 pb-8">
+      {/* Header with Gradient and Curved Bottom */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent p-6 pb-12">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-1 left-0 right-0 h-8 bg-background rounded-t-[3rem]" />
         
         <div className="relative z-10">
           {/* Top Bar */}
@@ -413,17 +414,44 @@ const MobileHome = () => {
       </div>
 
       {/* Main Content */}
-      <div className="p-4 space-y-4 -mt-4">
+      <div className="p-4 space-y-4 -mt-8">
+        {/* Start Test Button - Web Mobile Only */}
+        {!Capacitor.isNativePlatform() && (
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-primary via-secondary to-accent overflow-hidden">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+                  <Play className="h-7 w-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg mb-1 text-white">Start Practice Test</h3>
+                  <p className="text-sm text-white/90">Begin your exam preparation</p>
+                </div>
+                <Button
+                  size="sm"
+                  className="bg-white text-primary hover:bg-white/90 shadow-lg"
+                  onClick={() => {
+                    playTapSound();
+                    setShowTestPanel(true);
+                  }}
+                >
+                  Start
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Study Streak */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-warning/10 to-destructive/10">
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-warning/10 via-destructive/5 to-warning/10">
           <CardContent className="p-5">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="p-4 bg-gradient-to-br from-warning to-destructive rounded-2xl shadow-lg">
+                <div className="p-4 bg-gradient-to-br from-warning via-destructive to-warning rounded-2xl shadow-lg animate-pulse">
                   <Flame className="h-8 w-8 text-white" />
                 </div>
                 {streak.current > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-white rounded-full px-2 py-0.5 shadow-lg">
+                  <div className="absolute -top-1 -right-1 bg-white rounded-full px-2 py-0.5 shadow-lg border-2 border-warning">
                     <span className="text-xs font-bold text-warning">{streak.current}</span>
                   </div>
                 )}
@@ -434,7 +462,7 @@ const MobileHome = () => {
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {streak.current > 0 
-                    ? `Longest: ${streak.longest} days. Keep it up!` 
+                    ? `Longest: ${streak.longest} days. Keep going!` 
                     : 'Take a test daily to build your streak'}
                 </p>
               </div>
@@ -443,18 +471,21 @@ const MobileHome = () => {
         </Card>
 
         {/* Daily Goal Tracker */}
-        <Card className="border-0 shadow-md">
+        <Card className="border-0 shadow-md bg-gradient-to-br from-background to-primary/5">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-base">Daily Goal</h3>
-              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+              <h3 className="font-bold text-base flex items-center gap-2">
+                <Target className="h-4 w-4 text-primary" />
+                Daily Goal
+              </h3>
+              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 font-bold">
                 {dailyGoal.answered}/{dailyGoal.target}
               </Badge>
             </div>
             <div className="space-y-2">
-              <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-muted rounded-full h-3 overflow-hidden shadow-inner">
                 <div 
-                  className="h-full bg-gradient-to-r from-primary to-primary-glow rounded-full transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-primary via-secondary to-primary-glow rounded-full transition-all duration-500 shadow-sm"
                   style={{ width: `${Math.min((dailyGoal.answered / dailyGoal.target) * 100, 100)}%` }}
                 />
               </div>
@@ -468,11 +499,14 @@ const MobileHome = () => {
         </Card>
 
         {/* Motivational Quote */}
-        <Card className="border-0 shadow-md bg-gradient-to-br from-accent/5 to-primary/5">
-          <CardContent className="p-4">
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-accent/10 via-primary/5 to-secondary/10 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full blur-2xl" />
+          <CardContent className="p-4 relative z-10">
             <div className="flex gap-3">
-              <Sparkles className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
-              <p className="text-sm italic text-foreground/80">"{motivationalQuote}"</p>
+              <div className="p-2 bg-accent/20 rounded-lg">
+                <Sparkles className="h-5 w-5 text-accent flex-shrink-0" />
+              </div>
+              <p className="text-sm italic text-foreground font-medium leading-relaxed">"{motivationalQuote}"</p>
             </div>
           </CardContent>
         </Card>
@@ -522,33 +556,33 @@ const MobileHome = () => {
           </div>
         )}
 
-        {/* Recent Results */}
-        <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/10 to-secondary/10">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-lg">
-                <Play className="h-6 w-6 text-white" />
+        {/* Start Practice Test - Native Only */}
+        {Capacitor.isNativePlatform() && (
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 hover:shadow-2xl transition-shadow">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-primary via-secondary to-accent rounded-2xl shadow-lg">
+                  <Play className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg mb-1">Start Practice Test</h3>
+                  <p className="text-sm text-muted-foreground">Continue your exam prep</p>
+                </div>
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 shadow-md"
+                  onClick={async () => {
+                    await Haptics.impact({ style: ImpactStyle.Light });
+                    playTapSound();
+                    setShowTestPanel(true);
+                  }}
+                >
+                  Start
+                </Button>
               </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-lg mb-1">Start Practice Test</h3>
-                <p className="text-sm text-muted-foreground">Continue your exam prep</p>
-              </div>
-              <Button
-                size="sm"
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => {
-                  if (Capacitor.isNativePlatform()) {
-                    Haptics.impact({ style: ImpactStyle.Light });
-                  }
-                  playTapSound();
-                  setShowTestPanel(true);
-                }}
-              >
-                Start
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Feature Cards */}
         <div className="space-y-3">
