@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import eduraLogo from "@/assets/edura-logo.png";
-import { NotificationBell } from "@/components/NotificationBell";
+import NotificationBell from "@/components/NotificationBell";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

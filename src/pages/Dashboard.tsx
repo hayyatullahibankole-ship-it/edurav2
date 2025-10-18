@@ -41,7 +41,7 @@ import { ModernQuickAction } from "@/components/dashboard/ModernQuickAction";
 import { MobileStatCard } from "@/components/dashboard/MobileStatCard";
 import { MobileTestCard } from "@/components/dashboard/MobileTestCard";
 import { MobileSubjectCard } from "@/components/dashboard/MobileSubjectCard";
-import { NotificationBell } from "@/components/NotificationBell";
+import NotificationBell from "@/components/NotificationBell";
 import OnboardingTour from "@/components/OnboardingTour";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import { useIsMobile } from "@/hooks/use-mobile";

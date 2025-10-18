@@ -42,7 +42,7 @@ import NotificationBell from '@/components/NotificationBell';
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
   const { isPremium } = useSubscription();
-  const { requestPermission, permissionStatus } = usePushNotifications();
+  usePushNotifications(); // Initialize push notifications
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     testsTaken: 0,

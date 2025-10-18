@@ -1952,6 +1952,8 @@ export type Database = {
           onboarding_completed_at: string | null
           profile_visibility: string
           push_notifications: boolean
+          push_notifications_enabled: boolean | null
+          push_token: string | null
           show_study_progress: boolean
           show_test_scores: boolean
           sms_results: boolean
@@ -1977,6 +1979,8 @@ export type Database = {
           onboarding_completed_at?: string | null
           profile_visibility?: string
           push_notifications?: boolean
+          push_notifications_enabled?: boolean | null
+          push_token?: string | null
           show_study_progress?: boolean
           show_test_scores?: boolean
           sms_results?: boolean
@@ -2002,6 +2006,8 @@ export type Database = {
           onboarding_completed_at?: string | null
           profile_visibility?: string
           push_notifications?: boolean
+          push_notifications_enabled?: boolean | null
+          push_token?: string | null
           show_study_progress?: boolean
           show_test_scores?: boolean
           sms_results?: boolean
