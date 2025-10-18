@@ -475,30 +475,35 @@ const Dashboard = () => {
                     <p className="text-muted-foreground">Explore our amazing features designed to help you succeed</p>
                   </div>
                   <div className="grid md:grid-cols-3 gap-6">
-                    <FeatureCard 
-                      icon={GraduationCap}
-                      title="Study Hub"
-                      description="Access comprehensive lessons, video tutorials, and study materials curated by experts"
-                      href="/study-hub"
-                      gradient="from-primary to-secondary"
-                      badge="Popular"
-                    />
-                    <FeatureCard 
-                      icon={MessageSquare}
-                      title="Ask Tutor"
-                      description="Get instant help from tutors and peers. Ask questions, share knowledge, and learn together"
-                      href="/forum"
-                      gradient="from-success to-accent"
-                      badge="24/7"
-                    />
-                    <FeatureCard 
-                      icon={Sword}
-                      title="Challenge Arena"
-                      description="Compete with students nationwide! Earn points, climb leaderboards, and win amazing prizes"
-                      href="/challenge-arena"
-                      gradient="from-warning to-destructive"
-                      badge="New"
-                    />
+                    {/* Hide these cards on mobile since they're in the mobile nav */}
+                    {!isMobile && (
+                      <>
+                        <FeatureCard 
+                          icon={GraduationCap}
+                          title="Study Hub"
+                          description="Access comprehensive lessons, video tutorials, and study materials curated by experts"
+                          href="/study-hub"
+                          gradient="from-primary to-secondary"
+                          badge="Popular"
+                        />
+                        <FeatureCard 
+                          icon={MessageSquare}
+                          title="Ask Tutor"
+                          description="Get instant help from tutors and peers. Ask questions, share knowledge, and learn together"
+                          href="/forum"
+                          gradient="from-success to-accent"
+                          badge="24/7"
+                        />
+                        <FeatureCard 
+                          icon={Sword}
+                          title="Challenge Arena"
+                          description="Compete with students nationwide! Earn points, climb leaderboards, and win amazing prizes"
+                          href="/challenge-arena"
+                          gradient="from-warning to-destructive"
+                          badge="New"
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
 

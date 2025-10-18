@@ -30,22 +30,22 @@ export const StatCard = ({
       {/* Subtle top border accent */}
       <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r", gradient)} />
       
-      <CardContent className="p-6 relative">
+      <CardContent className="md:p-6 p-3 relative">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-sm text-muted-foreground mb-2 font-medium uppercase tracking-wide">{label}</p>
-            <p className="text-4xl font-bold mb-1 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
+            <p className="md:text-sm text-xs text-muted-foreground md:mb-2 mb-1 font-medium uppercase tracking-wide">{label}</p>
+            <p className="md:text-4xl text-2xl font-bold md:mb-1 mb-0.5 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
               {value}
             </p>
             {subtext && (
-              <p className="text-xs text-muted-foreground">{subtext}</p>
+              <p className="md:text-xs text-[10px] text-muted-foreground">{subtext}</p>
             )}
           </div>
           <div className={cn(
-            "p-3 rounded-xl bg-gradient-to-br shadow-lg group-hover:scale-110 transition-transform",
+            "md:p-3 p-2 rounded-xl bg-gradient-to-br shadow-lg group-hover:scale-110 transition-transform",
             gradient
           )}>
-            <Icon className="h-7 w-7 text-white" />
+            <Icon className="md:h-7 md:w-7 h-5 w-5 text-white" />
           </div>
         </div>
       </CardContent>

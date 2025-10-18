@@ -29,40 +29,49 @@ interface TestCardProps {
   onClose: () => void;
 }
 
-const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, onClose }: TestCardProps) => (
-  <ScheduleTestModal defaultExamType={examType}>
-    <Card 
-      className={`relative overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.97] hover-lift group border-0 shadow-lg`}
-      onClick={onClose}
-    >
-      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-5 group-active:opacity-10 transition-opacity`} />
-      
-      <div className="relative p-5 flex items-center gap-4">
-        {/* Icon Container */}
-        <div className={`relative w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
-          <Icon className="h-7 w-7 text-white" />
-          <div className="absolute inset-0 rounded-2xl bg-white/20 animate-pulse" />
-        </div>
+const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, onClose }: TestCardProps) => {
+  const handleClick = () => {
+    // Small delay before closing to allow the modal to open
+    setTimeout(() => {
+      onClose();
+    }, 100);
+  };
 
-        {/* Content */}
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-bold text-lg">{title}</h3>
-            {badge && (
-              <Badge className="bg-primary/10 text-primary border-primary/20 text-xs px-2 py-0">
-                {badge}
-              </Badge>
-            )}
+  return (
+    <ScheduleTestModal defaultExamType={examType}>
+      <Card 
+        className={`relative overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.97] hover-lift group border-0 shadow-lg`}
+        onClick={handleClick}
+      >
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-5 group-active:opacity-10 transition-opacity`} />
+        
+        <div className="relative p-5 flex items-center gap-4">
+          {/* Icon Container */}
+          <div className={`relative w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
+            <Icon className="h-7 w-7 text-white" />
+            <div className="absolute inset-0 rounded-2xl bg-white/20 animate-pulse" />
           </div>
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </div>
 
-        {/* Arrow */}
-        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-      </div>
-    </Card>
-  </ScheduleTestModal>
-);
+          {/* Content */}
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-bold text-lg">{title}</h3>
+              {badge && (
+                <Badge className="bg-primary/10 text-primary border-primary/20 text-xs px-2 py-0">
+                  {badge}
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">{description}</p>
+          </div>
+
+          {/* Arrow */}
+          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+        </div>
+      </Card>
+    </ScheduleTestModal>
+  );
+};
 
 const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
   const [testsSheetOpen, setTestsSheetOpen] = useState(false);
@@ -147,21 +156,29 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
               <button className="relative flex flex-col items-center -mt-8">
                 {/* Floating Action Button */}
                 <div className="relative">
-                  {/* Glow Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full blur-xl opacity-50 animate-pulse" />
+                  {/* Multi-layer Glow Effects */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-accent rounded-3xl blur-2xl opacity-60 animate-pulse" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-3xl blur-xl opacity-40" />
                   
-                  {/* Main Button */}
-                  <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary via-secondary to-accent shadow-2xl flex items-center justify-center active:scale-95 transition-transform">
-                    <BookOpen className="h-7 w-7 text-white" />
+                  {/* Main Button - Modern Glassmorphism */}
+                  <div className="relative w-16 h-16 rounded-3xl bg-gradient-to-br from-primary via-secondary to-accent shadow-2xl flex items-center justify-center active:scale-95 transition-all duration-300 border-2 border-white/20 backdrop-blur-sm">
+                    {/* Inner glow */}
+                    <div className="absolute inset-1 rounded-[22px] bg-gradient-to-br from-white/20 to-transparent" />
                     
-                    {/* Sparkle Badge */}
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-warning rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                      <Sparkles className="h-3 w-3 text-white" />
+                    {/* Icon */}
+                    <BookOpen className="h-7 w-7 text-white relative z-10 drop-shadow-lg" />
+                    
+                    {/* Premium Sparkle Badge */}
+                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-warning to-warning/80 rounded-full flex items-center justify-center shadow-lg animate-bounce border-2 border-white/30">
+                      <Sparkles className="h-3 w-3 text-white drop-shadow" />
                     </div>
+
+                    {/* Rotating ring effect */}
+                    <div className="absolute inset-0 rounded-3xl border-2 border-white/10 animate-spin-slow" style={{ animationDuration: '8s' }} />
                   </div>
                 </div>
                 
-                <span className="mt-2 text-xs font-semibold text-foreground">Tests</span>
+                <span className="mt-2 text-xs font-bold text-foreground drop-shadow-sm">Tests</span>
               </button>
             </SheetTrigger>
             

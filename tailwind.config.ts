@@ -134,6 +134,7 @@ export default {
         "gradient-shift": "gradient-shift 3s ease infinite",
         "fade-in-up": "fade-in-up 0.5s ease-out",
         "scale-in": "scale-in 0.3s ease-out",
+        "spin-slow": "spin 8s linear infinite",
       },
     },
   },
