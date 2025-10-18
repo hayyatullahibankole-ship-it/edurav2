@@ -381,50 +381,48 @@ const MobileHome = () => {
             </p>
           </div>
 
-          {/* Clean Stats Grid */}
+          {/* Stats Grid with Gradients */}
           <div className="grid grid-cols-3 gap-3">
-            <Card className="border shadow-sm">
-              <CardContent className="p-4 text-center">
-                <Target className="h-5 w-5 text-primary mx-auto mb-2" />
-                <div className="text-xl font-bold text-foreground">{stats.testsTaken}</div>
-                <div className="text-xs text-muted-foreground mt-1">Tests</div>
-              </CardContent>
-            </Card>
-            <Card className="border shadow-sm">
-              <CardContent className="p-4 text-center">
-                <TrendingUp className="h-5 w-5 text-success mx-auto mb-2" />
-                <div className="text-xl font-bold text-foreground">{stats.averageScore}%</div>
-                <div className="text-xs text-muted-foreground mt-1">Average</div>
-              </CardContent>
-            </Card>
-            <Card className="border shadow-sm">
-              <CardContent className="p-4 text-center">
-                <Flame className="h-5 w-5 text-warning mx-auto mb-2" />
-                <div className="text-xl font-bold text-foreground">{streak.current}</div>
-                <div className="text-xs text-muted-foreground mt-1">Streak</div>
-              </CardContent>
-            </Card>
+            <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+              <div className="relative z-10">
+                <Target className="h-5 w-5 text-white/90 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-white">{stats.testsTaken}</div>
+                <div className="text-xs text-white/80 mt-1">Tests</div>
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg">
+              <div className="relative z-10">
+                <TrendingUp className="h-5 w-5 text-white/90 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-white">{stats.averageScore}%</div>
+                <div className="text-xs text-white/80 mt-1">Average</div>
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-orange-500 to-red-600 shadow-lg">
+              <div className="relative z-10">
+                <Flame className="h-5 w-5 text-white/90 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-white">{streak.current}</div>
+                <div className="text-xs text-white/80 mt-1">Streak</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content - Clean Design */}
       <div className="px-4 py-6 space-y-6">
-        {/* Motivational Quote - Minimal */}
+        {/* Motivational Quote with Gradient */}
         {motivationalQuote && (
-          <Card className="border shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {motivationalQuote}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 shadow-lg">
+            <div className="relative z-10 flex items-start gap-3">
+              <Sparkles className="h-6 w-6 text-white flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-white leading-relaxed font-medium">
+                {motivationalQuote}
+              </p>
+            </div>
+          </div>
         )}
 
-        {/* Leaderboard Preview - Clean */}
+        {/* Leaderboard with Gradient */}
         {leaderboard.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -433,127 +431,113 @@ const MobileHome = () => {
                 variant="ghost" 
                 size="sm"
                 onClick={() => handleNavigation('/challenge-arena')}
-                className="text-xs text-primary"
+                className="text-xs"
               >
                 View All
               </Button>
             </div>
-            <Card className="border shadow-sm">
-              <CardContent className="p-3 space-y-2">
+            <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
+              <div className="space-y-2">
                 {leaderboard.slice(0, 3).map((entry) => (
                   <div 
                     key={entry.rank}
-                    className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                      entry.isCurrentUser ? 'bg-primary/5 border border-primary/20' : 'bg-muted/30'
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
+                      entry.isCurrentUser 
+                        ? 'bg-white/20 backdrop-blur-sm border border-white/30' 
+                        : 'bg-white/10 backdrop-blur-sm'
                     }`}
                   >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                      entry.rank === 1 ? 'bg-warning/20 text-warning' :
-                      entry.rank === 2 ? 'bg-muted text-foreground' :
-                      'bg-muted/50 text-muted-foreground'
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${
+                      entry.rank === 1 ? 'bg-gradient-to-br from-yellow-300 to-yellow-500 text-yellow-900' :
+                      entry.rank === 2 ? 'bg-gradient-to-br from-gray-200 to-gray-400 text-gray-800' :
+                      'bg-gradient-to-br from-orange-300 to-orange-500 text-orange-900'
                     }`}>
                       {entry.rank === 1 ? '🏆' : entry.rank}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-semibold truncate ${entry.isCurrentUser ? 'text-primary' : 'text-foreground'}`}>
-                        {entry.isCurrentUser ? 'You' : entry.name}
+                      <p className="text-sm font-semibold truncate text-white">
+                        {entry.isCurrentUser ? 'You ⭐' : entry.name}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-base font-bold text-foreground">{entry.score}%</p>
+                      <p className="text-lg font-bold text-white">{entry.score}%</p>
                     </div>
                   </div>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Quick Actions - Clean Cards */}
+        {/* Quick Actions with Gradients */}
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">Quick Actions</h2>
           
-          <Card 
-            className="border-2 border-primary shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+          <div 
+            className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-blue-600 to-indigo-700 shadow-xl active:scale-[0.98] transition-all cursor-pointer"
             onClick={() => setShowTestPanel(true)}
           >
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="p-3 bg-primary rounded-xl">
-                <Play className="h-6 w-6 text-primary-foreground" />
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <Play className="h-7 w-7 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-base">Take a Test</h3>
-                <p className="text-xs text-muted-foreground">Choose your exam type</p>
+                <h3 className="font-bold text-lg text-white">Take a Test</h3>
+                <p className="text-sm text-white/80">Start practicing now</p>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </CardContent>
-          </Card>
+              <ChevronRight className="h-6 w-6 text-white/80" />
+            </div>
+          </div>
 
-          <Card 
-            className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
-            onClick={() => handleNavigation('/study-hub')}
-          >
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="p-3 bg-accent/10 rounded-xl">
-                <BookOpen className="h-6 w-6 text-accent" />
+          {/* Feature Cards Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            <div 
+              className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg active:scale-[0.98] transition-all cursor-pointer"
+              onClick={() => handleNavigation('/study-hub')}
+            >
+              <div className="relative z-10 text-center">
+                <BookOpen className="h-7 w-7 text-white mx-auto mb-2" />
+                <h3 className="font-semibold text-sm text-white">Study Hub</h3>
+                <p className="text-xs text-white/80 mt-1">Learn</p>
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-base">Study Hub</h3>
-                <p className="text-xs text-muted-foreground">Lessons & resources</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* Feature Cards - Compact Grid */}
-          <div className="grid grid-cols-2 gap-3 mt-4">
-            <Card 
-              className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+            <div 
+              className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg active:scale-[0.98] transition-all cursor-pointer"
               onClick={() => handleNavigation('/challenge-arena')}
             >
-              <CardContent className="p-4 text-center">
-                <Trophy className="h-6 w-6 text-warning mx-auto mb-2" />
-                <h3 className="font-medium text-sm">Challenges</h3>
-                <p className="text-xs text-muted-foreground mt-1">Compete</p>
-              </CardContent>
-            </Card>
+              <div className="relative z-10 text-center">
+                <Trophy className="h-7 w-7 text-white mx-auto mb-2" />
+                <h3 className="font-semibold text-sm text-white">Challenges</h3>
+                <p className="text-xs text-white/80 mt-1">Compete</p>
+              </div>
+            </div>
 
-            <Card 
-              className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+            <div 
+              className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg active:scale-[0.98] transition-all cursor-pointer"
               onClick={() => handleNavigation('/resources')}
             >
-              <CardContent className="p-4 text-center">
-                <FileText className="h-6 w-6 text-info mx-auto mb-2" />
-                <h3 className="font-medium text-sm">Resources</h3>
-                <p className="text-xs text-muted-foreground mt-1">Materials</p>
-              </CardContent>
-            </Card>
+              <div className="relative z-10 text-center">
+                <FileText className="h-7 w-7 text-white mx-auto mb-2" />
+                <h3 className="font-semibold text-sm text-white">Resources</h3>
+                <p className="text-xs text-white/80 mt-1">Materials</p>
+              </div>
+            </div>
 
-            <Card 
-              className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+            <div 
+              className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg active:scale-[0.98] transition-all cursor-pointer"
               onClick={() => handleNavigation('/forum')}
             >
-              <CardContent className="p-4 text-center">
-                <MessageSquare className="h-6 w-6 text-success mx-auto mb-2" />
-                <h3 className="font-medium text-sm">Forum</h3>
-                <p className="text-xs text-muted-foreground mt-1">Discuss</p>
-              </CardContent>
-            </Card>
-
-            <Card 
-              className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
-              onClick={() => handleNavigation('/consultation')}
-            >
-              <CardContent className="p-4 text-center">
-                <Calendar className="h-6 w-6 text-secondary mx-auto mb-2" />
-                <h3 className="font-medium text-sm">Booking</h3>
-                <p className="text-xs text-muted-foreground mt-1">Sessions</p>
-              </CardContent>
-            </Card>
+              <div className="relative z-10 text-center">
+                <MessageSquare className="h-7 w-7 text-white mx-auto mb-2" />
+                <h3 className="font-semibold text-sm text-white">Forum</h3>
+                <p className="text-xs text-white/80 mt-1">Discuss</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Recent Results - Clean Section */}
+        {/* Recent Results with Gradient */}
         {recentResults.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -562,71 +546,66 @@ const MobileHome = () => {
                 variant="ghost" 
                 size="sm"
                 onClick={() => handleNavigation('/dashboard?tab=results')}
-                className="text-xs text-primary"
+                className="text-xs"
               >
                 View All
               </Button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {recentResults.map((result, index) => (
-                <Card 
-                  key={index} 
-                  className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                <div 
+                  key={index}
+                  className={`relative overflow-hidden rounded-2xl p-4 shadow-lg active:scale-[0.98] transition-all cursor-pointer ${
+                    result.percentage >= 70 
+                      ? 'bg-gradient-to-br from-green-500 to-emerald-600' 
+                      : result.percentage >= 50 
+                      ? 'bg-gradient-to-br from-amber-500 to-orange-600' 
+                      : 'bg-gradient-to-br from-red-500 to-rose-600'
+                  }`}
                   onClick={() => handleNavigation(`/results?attempt=${result.attempt_id}`)}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-xl ${
-                        result.percentage >= 70 ? 'bg-success/10' : 
-                        result.percentage >= 50 ? 'bg-warning/10' : 'bg-destructive/10'
-                      }`}>
-                        <Target className={`h-5 w-5 ${
-                          result.percentage >= 70 ? 'text-success' : 
-                          result.percentage >= 50 ? 'text-warning' : 'text-destructive'
-                        }`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm truncate">{result.examTitle}</h3>
-                        <p className="text-xs text-muted-foreground">{result.date}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className={`text-lg font-bold ${
-                          result.percentage >= 70 ? 'text-success' : 
-                          result.percentage >= 50 ? 'text-warning' : 'text-destructive'
-                        }`}>{result.percentage}%</p>
-                      </div>
+                  <div className="relative z-10 flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm">
+                      <Target className="h-6 w-6 text-white" />
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-base truncate text-white">{result.examTitle}</h3>
+                      <p className="text-xs text-white/80">{new Date(result.submittedAt).toLocaleDateString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-white">{result.percentage}%</p>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Subscription CTA - Clean */}
+        {/* Premium CTA with Gradient */}
         {!isPremium && (
-          <Card className="border shadow-sm">
-            <CardContent className="p-5">
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 bg-primary/10 rounded-xl">
-                  <Sparkles className="h-6 w-6 text-primary" />
+          <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-purple-600 via-pink-600 to-rose-600 shadow-xl">
+            <div className="relative z-10">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <Sparkles className="h-7 w-7 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-base mb-1">Upgrade to Premium</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Unlock unlimited tests, detailed analytics & expert support
+                  <h3 className="font-bold text-xl text-white mb-2">Go Premium!</h3>
+                  <p className="text-sm text-white/90 leading-relaxed">
+                    Unlock unlimited tests, detailed analytics, expert support & more
                   </p>
-                  <Button
-                    size="sm"
-                    className="w-full"
-                    onClick={() => handleNavigation('/payment')}
-                  >
-                    Go Premium
-                  </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              <Button
+                size="lg"
+                className="w-full bg-white text-purple-600 hover:bg-white/90 font-bold shadow-lg"
+                onClick={() => handleNavigation('/payment')}
+              >
+                Upgrade Now
+              </Button>
+            </div>
+          </div>
         )}
       </div>
 
