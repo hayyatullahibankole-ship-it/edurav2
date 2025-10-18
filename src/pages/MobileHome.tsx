@@ -42,6 +42,7 @@ const MobileHome = () => {
     studyHours: 0,
     rank: 0
   });
+  const [recentResults, setRecentResults] = useState<any[]>([]);
   const [showTestPanel, setShowTestPanel] = useState(false);
   const [showProfileSheet, setShowProfileSheet] = useState(false);
 
@@ -81,6 +82,28 @@ const MobileHome = () => {
       );
 
       setStats({ testsTaken, averageScore, studyHours, rank: 0 });
+
+      // Fetch recent results (last 3)
+      const recentWithExam = await Promise.all(
+        attemptsWithResults
+          .filter(a => a.results?.length > 0)
+          .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
+          .slice(0, 3)
+          .map(async (attempt) => {
+            const { data: exam } = await supabase
+              .from('exams')
+              .select('title, type')
+              .eq('id', attempt.exam_id)
+              .single();
+            return {
+              ...attempt.results[0],
+              examTitle: exam?.title || 'Test',
+              examType: exam?.type || 'JAMB',
+              submittedAt: attempt.submitted_at
+            };
+          })
+      );
+      setRecentResults(recentWithExam);
     } catch (error) {
       console.error('Error fetching stats:', error);
     }
@@ -257,7 +280,65 @@ const MobileHome = () => {
           </Card>
         </div>
 
-        {/* Recent Activity */}
+        {/* Recent Results */}
+        {recentResults.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-lg font-bold">Recent Results</h2>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => handleNavigation('/dashboard?tab=results')}
+                className="text-xs"
+              >
+                View All
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {recentResults.map((result, index) => (
+                <Card 
+                  key={index} 
+                  className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
+                  onClick={() => handleNavigation(`/results/${result.attempt_id}`)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl ${
+                        result.percentage >= 70 ? 'bg-success/10' : 
+                        result.percentage >= 50 ? 'bg-warning/10' : 'bg-destructive/10'
+                      }`}>
+                        <Target className={`h-5 w-5 ${
+                          result.percentage >= 70 ? 'text-success' : 
+                          result.percentage >= 50 ? 'text-warning' : 'text-destructive'
+                        }`} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-sm">{result.examTitle}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(result.submittedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-2xl font-bold ${
+                          result.percentage >= 70 ? 'text-success' : 
+                          result.percentage >= 50 ? 'text-warning' : 'text-destructive'
+                        }`}>
+                          {Math.round(result.percentage)}%
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {result.correct_answers}/{result.total_questions}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Your Progress */}
         {stats.testsTaken > 0 && (
           <div className="space-y-3">
             <h2 className="text-lg font-bold px-1">Your Progress</h2>
