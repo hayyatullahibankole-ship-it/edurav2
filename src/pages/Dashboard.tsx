@@ -23,7 +23,8 @@ import {
   Zap,
   Award,
   Rocket,
-  Sparkles
+  Sparkles,
+  ChevronRight
 } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -359,8 +360,8 @@ const Dashboard = () => {
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-8 space-y-8">
-            {/* Quick Stats - Enhanced */}
-            <div className="grid md:grid-cols-4 gap-6">
+            {/* Quick Stats - Enhanced with 2-column grid on mobile */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
               <div className="animate-fade-in-up" style={{ animationDelay: '0s' }}>
                 <StatCard 
                   icon={Target}
@@ -464,6 +465,36 @@ const Dashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Subscription Management - Mobile Only */}
+                {isMobile && (
+                  <Card className="border-0 shadow-xl backdrop-blur-sm bg-gradient-to-br from-card to-muted/30 overflow-hidden hover-lift">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
+                    <CardHeader className="relative">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <Zap className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-xl">Subscription</CardTitle>
+                          <CardDescription>Manage your plan</CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="relative">
+                      <Link to="/payment" className="block">
+                        <Button className="w-full h-16 flex items-center justify-between text-base font-semibold group relative overflow-hidden shadow-lg">
+                          <div className="absolute inset-0 bg-gradient-to-r from-primary-glow to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <div className="flex items-center gap-2 relative z-10">
+                            <Zap className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span>{isPremium ? 'Manage Premium Plan' : 'Upgrade to Premium'}</span>
+                          </div>
+                          <ChevronRight className="h-5 w-5 relative z-10 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Learning Hub - Mad Features! */}
                 <div>
