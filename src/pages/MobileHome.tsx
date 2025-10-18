@@ -25,9 +25,7 @@ import {
   Bell,
   BellOff,
   TrendingDown,
-  Flame,
-  MessageSquare,
-  Calendar
+  Flame
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -345,26 +343,33 @@ const MobileHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Clean Header */}
-      <div className="bg-card border-b">
-        <div className="p-4">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-muted/20 pb-24">
+      {/* Header with Premium Gradient */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/95 via-secondary/90 to-accent/85 p-6 pb-10 rounded-b-[2rem]">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-5 -left-5 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
+        
+        <div className="relative z-10">
           {/* Top Bar */}
-          <div className="flex items-center justify-between mb-6">
-            <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
+          <div className="flex items-center justify-between mb-8">
+            <div className="bg-white p-2 rounded-xl shadow-lg">
+              <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
+            </div>
             <div className="flex items-center gap-2">
-              {isPremium && (
-                <Badge variant="default" className="text-xs">
-                  <Zap className="h-3 w-3 mr-1" />
-                  Premium
-                </Badge>
-              )}
+              <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                {isPremium ? (
+                  <span className="flex items-center gap-1">
+                    <Zap className="h-3 w-3" />
+                    Premium
+                  </span>
+                ) : 'Free'}
+              </Badge>
               <NotificationBell />
               <Button
                 size="sm"
-                variant="ghost"
+                variant="secondary"
                 onClick={handleLogout}
-                className="h-9 w-9 p-0"
+                className="h-8 w-8 p-0"
               >
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -372,61 +377,68 @@ const MobileHome = () => {
           </div>
 
           {/* Welcome Section */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-foreground mb-1">
-              Hello, {userProfile?.first_name || 'Student'}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
+              Hey {userProfile?.first_name || 'Student'}! 👋
             </h1>
-            <p className="text-sm text-muted-foreground">
-              {stats.averageScore > 0 ? `Your average score: ${stats.averageScore}%` : 'Ready to start learning?'}
+            <p className="text-white/90 text-base font-medium">
+              {stats.averageScore > 0 ? `You're averaging ${stats.averageScore}% - Keep crushing it!` : 'Ready to ace your exams?'}
             </p>
           </div>
 
-          {/* Stats Grid with Gradients */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
-              <div className="relative z-10">
-                <Target className="h-5 w-5 text-white/90 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{stats.testsTaken}</div>
-                <div className="text-xs text-white/80 mt-1">Tests</div>
-              </div>
-            </div>
-            <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg">
-              <div className="relative z-10">
-                <TrendingUp className="h-5 w-5 text-white/90 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{stats.averageScore}%</div>
-                <div className="text-xs text-white/80 mt-1">Average</div>
-              </div>
-            </div>
-            <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-orange-500 to-red-600 shadow-lg">
-              <div className="relative z-10">
-                <Flame className="h-5 w-5 text-white/90 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{streak.current}</div>
-                <div className="text-xs text-white/80 mt-1">Streak</div>
-              </div>
-            </div>
+          {/* Quick Stats - Enhanced */}
+          <div className="grid grid-cols-3 gap-4">
+            <Card className="bg-white/15 backdrop-blur-md border-white/30 shadow-xl hover:bg-white/20 transition-all">
+              <CardContent className="p-4 text-center">
+                <div className="bg-white/20 p-2 rounded-xl w-fit mx-auto mb-2">
+                  <Target className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-white mb-1">{stats.testsTaken}</div>
+                <div className="text-xs text-white/90 font-medium">Tests Taken</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white/15 backdrop-blur-md border-white/30 shadow-xl hover:bg-white/20 transition-all">
+              <CardContent className="p-4 text-center">
+                <div className="bg-white/20 p-2 rounded-xl w-fit mx-auto mb-2">
+                  <TrendingUp className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-white mb-1">{stats.averageScore}%</div>
+                <div className="text-xs text-white/80">Average</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white/15 backdrop-blur-md border-white/30 shadow-xl hover:bg-white/20 transition-all">
+              <CardContent className="p-4 text-center">
+                <div className="bg-white/20 p-2 rounded-xl w-fit mx-auto mb-2">
+                  <Flame className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-white mb-1">{streak.current}</div>
+                <div className="text-xs text-white/90 font-medium">Day Streak</div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
 
-      {/* Main Content - Clean Design */}
-      <div className="px-4 py-6 space-y-6">
-        {/* Motivational Quote with Gradient */}
+      {/* Main Content - Better Organized */}
+      <div className="px-5 py-8 space-y-8">
+        {/* Motivational Quote - Enhanced */}
         {motivationalQuote && (
-          <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 shadow-lg">
-            <div className="relative z-10 flex items-start gap-3">
-              <Sparkles className="h-6 w-6 text-white flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-white leading-relaxed font-medium">
-                {motivationalQuote}
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl" />
+            <CardContent className="p-6 relative z-10">
+              <Sparkles className="h-5 w-5 text-primary mx-auto mb-3" />
+              <p className="text-sm font-medium text-foreground/90 text-center leading-relaxed">
+                "{motivationalQuote}"
               </p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Leaderboard with Gradient */}
+        {/* Leaderboard Preview */}
         {leaderboard.length > 0 && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Top Performers</h2>
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-lg font-bold">Top Performers</h2>
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -436,114 +448,142 @@ const MobileHome = () => {
                 View All
               </Button>
             </div>
-            <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
-              <div className="space-y-2">
+            <Card className="border-0 shadow-md">
+              <CardContent className="p-4 space-y-2">
                 {leaderboard.slice(0, 3).map((entry) => (
                   <div 
                     key={entry.rank}
                     className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
-                      entry.isCurrentUser 
-                        ? 'bg-white/20 backdrop-blur-sm border border-white/30' 
-                        : 'bg-white/10 backdrop-blur-sm'
+                      entry.isCurrentUser ? 'bg-primary/10 border border-primary/20' : 'bg-muted/30'
                     }`}
                   >
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${
-                      entry.rank === 1 ? 'bg-gradient-to-br from-yellow-300 to-yellow-500 text-yellow-900' :
-                      entry.rank === 2 ? 'bg-gradient-to-br from-gray-200 to-gray-400 text-gray-800' :
-                      'bg-gradient-to-br from-orange-300 to-orange-500 text-orange-900'
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                      entry.rank === 1 ? 'bg-warning text-white' :
+                      entry.rank === 2 ? 'bg-muted-foreground/20 text-foreground' :
+                      'bg-muted text-muted-foreground'
                     }`}>
-                      {entry.rank === 1 ? '🏆' : entry.rank}
+                      {entry.rank === 1 ? '👑' : entry.rank}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate text-white">
-                        {entry.isCurrentUser ? 'You ⭐' : entry.name}
+                    <div className="flex-1">
+                      <p className={`font-semibold text-sm ${entry.isCurrentUser ? 'text-primary' : ''}`}>
+                        {entry.isCurrentUser ? 'You' : entry.name}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-white">{entry.score}%</p>
+                      <p className="text-lg font-bold">{entry.score}%</p>
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         )}
 
-        {/* Quick Actions with Gradients */}
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Quick Actions</h2>
-          
-          <div 
-            className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-blue-600 to-indigo-700 shadow-xl active:scale-[0.98] transition-all cursor-pointer"
+        {/* Quick Actions - More Prominent */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-xl font-bold">Start Learning</h2>
+            <Badge variant="secondary" className="text-xs">Quick Access</Badge>
+          </div>
+          <Card 
+            className="border-2 border-primary/20 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all active:scale-[0.97] cursor-pointer bg-gradient-to-br from-primary/5 to-transparent"
             onClick={() => setShowTestPanel(true)}
           >
-            <div className="relative z-10 flex items-center gap-4">
-              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+            <CardContent className="p-5 flex items-center gap-4">
+              <div className="p-3.5 bg-gradient-to-br from-primary via-primary-glow to-secondary rounded-2xl shadow-lg">
                 <Play className="h-7 w-7 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-lg text-white">Take a Test</h3>
-                <p className="text-sm text-white/80">Start practicing now</p>
+                <h3 className="font-bold text-lg mb-0.5">Take a Test</h3>
+                <p className="text-sm text-muted-foreground">JAMB, WAEC, NECO & more</p>
               </div>
-              <ChevronRight className="h-6 w-6 text-white/80" />
-            </div>
-          </div>
+              <ChevronRight className="h-6 w-6 text-primary" />
+            </CardContent>
+          </Card>
 
-          {/* Feature Cards Grid */}
-          <div className="grid grid-cols-2 gap-3">
-            <div 
-              className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg active:scale-[0.98] transition-all cursor-pointer"
-              onClick={() => handleNavigation('/study-hub')}
-            >
-              <div className="relative z-10 text-center">
-                <BookOpen className="h-7 w-7 text-white mx-auto mb-2" />
-                <h3 className="font-semibold text-sm text-white">Study Hub</h3>
-                <p className="text-xs text-white/80 mt-1">Learn</p>
+          <Card 
+            className="border border-accent/30 shadow-md hover:shadow-lg hover:border-accent/50 transition-all active:scale-[0.97] cursor-pointer"
+            onClick={() => handleNavigation('/study-hub')}
+          >
+            <CardContent className="p-5 flex items-center gap-4">
+              <div className="p-3.5 bg-gradient-to-br from-accent to-info rounded-2xl shadow-md">
+                <BookOpen className="h-6 w-6 text-white" />
               </div>
-            </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base">Study Companion</h3>
+                <p className="text-sm text-muted-foreground">Lessons & topic guides</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
 
-            <div 
-              className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg active:scale-[0.98] transition-all cursor-pointer"
+          {/* Feature Cards */}
+          <div className="space-y-3 mt-6">
+            <h3 className="text-lg font-semibold px-1">More Features</h3>
+          
+            {/* Challenge Arena */}
+            <Card 
+              className="border border-warning/30 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
               onClick={() => handleNavigation('/challenge-arena')}
             >
-              <div className="relative z-10 text-center">
-                <Trophy className="h-7 w-7 text-white mx-auto mb-2" />
-                <h3 className="font-semibold text-sm text-white">Challenges</h3>
-                <p className="text-xs text-white/80 mt-1">Compete</p>
-              </div>
-            </div>
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-warning to-destructive rounded-xl">
+                  <Trophy className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-sm">Challenge Arena</h3>
+                  <p className="text-xs text-muted-foreground">Compete & win prizes</p>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </CardContent>
+            </Card>
 
-            <div 
-              className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg active:scale-[0.98] transition-all cursor-pointer"
+            {/* Resources */}
+            <Card 
+              className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
               onClick={() => handleNavigation('/resources')}
             >
-              <div className="relative z-10 text-center">
-                <FileText className="h-7 w-7 text-white mx-auto mb-2" />
-                <h3 className="font-semibold text-sm text-white">Resources</h3>
-                <p className="text-xs text-white/80 mt-1">Materials</p>
-              </div>
-            </div>
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-info to-secondary rounded-xl">
+                  <BookOpen className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-sm">Study Resources</h3>
+                  <p className="text-xs text-muted-foreground">Past questions & materials</p>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </CardContent>
+            </Card>
 
-            <div 
-              className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg active:scale-[0.98] transition-all cursor-pointer"
-              onClick={() => handleNavigation('/forum')}
+            {/* Consultation */}
+            <Card 
+              className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
+              onClick={() => handleNavigation('/consultation')}
             >
-              <div className="relative z-10 text-center">
-                <MessageSquare className="h-7 w-7 text-white mx-auto mb-2" />
-                <h3 className="font-semibold text-sm text-white">Forum</h3>
-                <p className="text-xs text-white/80 mt-1">Discuss</p>
-              </div>
-            </div>
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-accent to-primary rounded-xl">
+                  <Award className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-sm">Expert Tutors</h3>
+                  <p className="text-xs text-muted-foreground">Book consultation sessions</p>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </CardContent>
+            </Card>
           </div>
         </div>
 
-        {/* Recent Results with Gradient */}
+        {/* Recent Results - Better Section */}
         {recentResults.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Recent Tests</h2>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <div>
+                <h2 className="text-xl font-bold">Your Results</h2>
+                <p className="text-xs text-muted-foreground">Recent test performance</p>
+              </div>
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="sm"
                 onClick={() => handleNavigation('/dashboard?tab=results')}
                 className="text-xs"
@@ -551,61 +591,100 @@ const MobileHome = () => {
                 View All
               </Button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {recentResults.map((result, index) => (
-                <div 
-                  key={index}
-                  className={`relative overflow-hidden rounded-2xl p-4 shadow-lg active:scale-[0.98] transition-all cursor-pointer ${
-                    result.percentage >= 70 
-                      ? 'bg-gradient-to-br from-green-500 to-emerald-600' 
-                      : result.percentage >= 50 
-                      ? 'bg-gradient-to-br from-amber-500 to-orange-600' 
-                      : 'bg-gradient-to-br from-red-500 to-rose-600'
-                  }`}
+                <Card 
+                  key={index} 
+                  className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
                   onClick={() => handleNavigation(`/results?attempt=${result.attempt_id}`)}
                 >
-                  <div className="relative z-10 flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm">
-                      <Target className="h-6 w-6 text-white" />
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl ${
+                        result.percentage >= 70 ? 'bg-success/10' : 
+                        result.percentage >= 50 ? 'bg-warning/10' : 'bg-destructive/10'
+                      }`}>
+                        <Target className={`h-5 w-5 ${
+                          result.percentage >= 70 ? 'text-success' : 
+                          result.percentage >= 50 ? 'text-warning' : 'text-destructive'
+                        }`} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-sm">{result.examTitle}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(result.submittedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-2xl font-bold ${
+                          result.percentage >= 70 ? 'text-success' : 
+                          result.percentage >= 50 ? 'text-warning' : 'text-destructive'
+                        }`}>
+                          {Math.round(result.percentage)}%
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {result.correct_answers}/{result.total_questions}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-base truncate text-white">{result.examTitle}</h3>
-                      <p className="text-xs text-white/80">{new Date(result.submittedAt).toLocaleDateString()}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-white">{result.percentage}%</p>
-                    </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
         )}
 
-        {/* Premium CTA with Gradient */}
+        {/* Your Progress */}
+        {stats.testsTaken > 0 && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold px-1">Your Progress</h2>
+            <Card className="border-0 shadow-md">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Trophy className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">Keep it up!</p>
+                      <p className="text-xs text-muted-foreground">You're doing great</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-primary">{stats.testsTaken}</p>
+                    <p className="text-xs text-muted-foreground">tests taken</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Subscription CTA */}
         {!isPremium && (
-          <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-purple-600 via-pink-600 to-rose-600 shadow-xl">
-            <div className="relative z-10">
-              <div className="flex items-start gap-3 mb-4">
-                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-                  <Sparkles className="h-7 w-7 text-white" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-accent/10 to-primary/10">
+            <CardContent className="p-5">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-gradient-to-br from-accent to-primary rounded-xl">
+                  <Sparkles className="h-5 w-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-xl text-white mb-2">Go Premium!</h3>
-                  <p className="text-sm text-white/90 leading-relaxed">
-                    Unlock unlimited tests, detailed analytics, expert support & more
+                  <h3 className="font-bold text-base mb-1">Upgrade to Premium</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Unlock unlimited tests, detailed analytics, and expert support
                   </p>
+                  <Button
+                    size="sm"
+                    className="w-full bg-gradient-to-r from-accent to-primary"
+                    onClick={() => handleNavigation('/payment')}
+                  >
+                    Go Premium
+                  </Button>
                 </div>
               </div>
-              <Button
-                size="lg"
-                className="w-full bg-white text-purple-600 hover:bg-white/90 font-bold shadow-lg"
-                onClick={() => handleNavigation('/payment')}
-              >
-                Upgrade Now
-              </Button>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
       </div>
 
@@ -644,8 +723,8 @@ const MobileHome = () => {
               <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-primary/10 rounded-xl">
-                      <GraduationCap className="h-6 w-6 text-primary" />
+                    <div className="p-3 bg-gradient-to-br from-primary to-primary-glow rounded-xl">
+                      <GraduationCap className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-base">JAMB CBT</h3>
@@ -662,8 +741,8 @@ const MobileHome = () => {
               <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-success/10 rounded-xl">
-                      <FileText className="h-6 w-6 text-success" />
+                    <div className="p-3 bg-gradient-to-br from-success to-success-glow rounded-xl">
+                      <FileText className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-base">WAEC</h3>
@@ -680,8 +759,8 @@ const MobileHome = () => {
               <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-info/10 rounded-xl">
-                      <BookOpen className="h-6 w-6 text-info" />
+                    <div className="p-3 bg-gradient-to-br from-info to-secondary rounded-xl">
+                      <BookOpen className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-base">NECO</h3>
@@ -698,8 +777,8 @@ const MobileHome = () => {
               <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-accent/10 rounded-xl">
-                      <Target className="h-6 w-6 text-accent" />
+                    <div className="p-3 bg-gradient-to-br from-accent to-primary rounded-xl">
+                      <Target className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-base">Post-UTME</h3>
