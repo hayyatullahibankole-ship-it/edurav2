@@ -25,7 +25,8 @@ import {
   Bell,
   BellOff,
   TrendingDown,
-  Flame
+  Flame,
+  TestTubes
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -512,6 +513,22 @@ const MobileHome = () => {
               <div className="flex-1">
                 <h3 className="font-bold text-base">Study Companion</h3>
                 <p className="text-sm text-muted-foreground">Lessons & topic guides</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="border border-info/30 shadow-md hover:shadow-lg hover:border-info/50 transition-all active:scale-[0.97] cursor-pointer"
+            onClick={() => handleNavigation('/demo-test')}
+          >
+            <CardContent className="p-5 flex items-center gap-4">
+              <div className="p-3.5 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl shadow-md">
+                <TestTubes className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base">Practice Test</h3>
+                <p className="text-sm text-muted-foreground">Quick test yourself</p>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </CardContent>
