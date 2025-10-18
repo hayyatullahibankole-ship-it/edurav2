@@ -174,77 +174,51 @@ export default function LessonView() {
 
         {/* Lesson Content */}
         <Card className="mb-6">
-          <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <BookOpen className="h-6 w-6 text-primary" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
               Lesson Content
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6 space-y-8">
-            {/* Text Content */}
-            <div className="prose dark:prose-invert max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h3:text-xl prose-p:leading-relaxed prose-p:text-base">
-              <MathRenderer content={lesson.content} />
-            </div>
+          <CardContent className="prose dark:prose-invert max-w-none space-y-4">
+            <MathRenderer content={lesson.content} />
             
-            {/* Media Gallery */}
+            {/* Display media in the order they were uploaded */}
             {lesson.media_urls && Array.isArray(lesson.media_urls) && lesson.media_urls.length > 0 && (
-              <div className="space-y-6 mt-8 border-t pt-6">
-                <h3 className="text-lg font-semibold flex items-center gap-2 text-foreground">
-                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">
-                    {lesson.media_urls.length}
-                  </span>
-                  Visual Resources
-                </h3>
-                
-                <div className="grid gap-6 sm:grid-cols-2">
-                  {lesson.media_urls.map((media: any, index: number) => (
-                    <div key={index} className="rounded-xl overflow-hidden border-2 border-border hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-lg">
-                      {media.type === 'image' ? (
-                        <div className="space-y-3">
-                          <div className="relative group">
-                            <img 
-                              src={media.url} 
-                              alt={media.caption || `Lesson image ${index + 1}`}
-                              className="w-full h-auto object-cover"
-                            />
-                            <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
-                              Image {index + 1}
-                            </div>
-                          </div>
-                          {media.caption && (
-                            <div className="px-4 pb-4">
-                              <p className="text-sm text-muted-foreground leading-relaxed">
-                                {media.caption}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ) : media.type === 'video' ? (
-                        <div className="space-y-3">
-                          <div className="relative">
-                            <video 
-                              controls 
-                              className="w-full"
-                              src={media.url}
-                            >
-                              Your browser does not support the video tag.
-                            </video>
-                            <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
-                              Video {index + 1}
-                            </div>
-                          </div>
-                          {media.caption && (
-                            <div className="px-4 pb-4">
-                              <p className="text-sm text-muted-foreground leading-relaxed">
-                                {media.caption}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
+              <div className="space-y-4 mt-6">
+                {lesson.media_urls.map((media: any, index: number) => (
+                  <div key={index} className="not-prose">
+                    {media.type === 'image' ? (
+                      <div className="space-y-2">
+                        <img 
+                          src={media.url} 
+                          alt={media.caption || `Lesson image ${index + 1}`}
+                          className="w-full rounded-lg"
+                        />
+                        {media.caption && (
+                          <p className="text-sm text-muted-foreground text-center italic">
+                            {media.caption}
+                          </p>
+                        )}
+                      </div>
+                    ) : media.type === 'video' ? (
+                      <div className="space-y-2">
+                        <video 
+                          controls 
+                          className="w-full rounded-lg"
+                          src={media.url}
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                        {media.caption && (
+                          <p className="text-sm text-muted-foreground text-center italic">
+                            {media.caption}
+                          </p>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
