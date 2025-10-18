@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
+import eduraLogo from '@/assets/edura-logo.png';
 
 const MobileSplash = () => {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ const MobileSplash = () => {
       {/* Logo */}
       <div className="relative z-10 text-center animate-fade-in">
         <div className="bg-white rounded-3xl p-6 shadow-2xl inline-block mb-4">
-          <img src="/src/assets/edura-logo.png" alt="Edura" className="h-16 w-auto" />
+          <img src={eduraLogo} alt="Edura" className="h-16 w-auto" />
         </div>
         <h1 className="text-3xl font-bold text-white">Edura CBT</h1>
       </div>

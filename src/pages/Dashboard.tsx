@@ -46,6 +46,7 @@ import OnboardingTour from "@/components/OnboardingTour";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
+import eduraLogo from "@/assets/edura-logo.png";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -305,7 +306,7 @@ const Dashboard = () => {
               {/* Edura Logo + Badge */}
               <div className="flex items-center gap-3 mb-3 justify-center md:justify-start">
                 <div className="bg-white p-2.5 rounded-xl shadow-lg">
-                  <img src="/src/assets/edura-logo.png" alt="Edura" className="h-10 w-auto" />
+                  <img src={eduraLogo} alt="Edura" className="h-10 w-auto" />
                 </div>
                 <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm hover:bg-white/30 transition-all cursor-default">
                   {subscriptionLoading ? (

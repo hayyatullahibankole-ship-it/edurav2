@@ -12,6 +12,7 @@ import { emailSchema, passwordSchema, nameSchema } from "@/utils/inputValidation
 import { generateSessionToken, storeSessionToken, setSessionToken } from "@/utils/sessionManager";
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import eduraLogo from "@/assets/edura-logo.png";
 
 const loginSchema = z.object({
   email: emailSchema,
@@ -149,7 +150,7 @@ export default function MobileAuthForm() {
         
         <div className="relative z-10 h-full flex flex-col items-center justify-center px-6 text-center">
           <div className="bg-white rounded-3xl p-4 shadow-2xl mb-4">
-            <img src="/src/assets/edura-logo.png" alt="Edura" className="h-12 w-auto" />
+            <img src={eduraLogo} alt="Edura" className="h-12 w-auto" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">
             {isLogin ? 'Welcome Back!' : 'Join Edura'}

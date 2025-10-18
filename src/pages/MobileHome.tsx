@@ -24,6 +24,7 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import MobileNav from '@/components/MobileNav';
 import { useSubscription } from '@/hooks/useSubscription';
 import { playTapSound } from '@/utils/sounds';
+import eduraLogo from '@/assets/edura-logo.png';
 
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
@@ -103,7 +104,7 @@ const MobileHome = () => {
           {/* Top Bar */}
           <div className="flex items-center justify-between mb-6">
             <div className="bg-white p-2 rounded-xl shadow-lg">
-              <img src="/src/assets/edura-logo.png" alt="Edura" className="h-8 w-auto" />
+              <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
             </div>
             <div className="flex items-center gap-2">
               <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
