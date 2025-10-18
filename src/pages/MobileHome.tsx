@@ -43,12 +43,16 @@ const MobileHome = () => {
     rank: 0
   });
   const [recentResults, setRecentResults] = useState<any[]>([]);
+  const [streak, setStreak] = useState({ current: 0, longest: 0 });
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [showTestPanel, setShowTestPanel] = useState(false);
   const [showProfileSheet, setShowProfileSheet] = useState(false);
 
   useEffect(() => {
     if (userProfile?.id) {
       fetchStats();
+      fetchStreak();
+      fetchLeaderboard();
     }
   }, [userProfile]);
 
@@ -106,6 +110,127 @@ const MobileHome = () => {
       setRecentResults(recentWithExam);
     } catch (error) {
       console.error('Error fetching stats:', error);
+    }
+  };
+
+  const fetchStreak = async () => {
+    try {
+      // Get user's test history to calculate streak
+      const { data: attempts } = await supabase
+        .from('attempts')
+        .select('submitted_at')
+        .eq('user_id', userProfile?.id)
+        .eq('status', 'SUBMITTED')
+        .order('submitted_at', { ascending: false });
+
+      if (!attempts || attempts.length === 0) {
+        setStreak({ current: 0, longest: 0 });
+        return;
+      }
+
+      // Calculate current streak
+      let currentStreak = 0;
+      let longestStreak = 0;
+      let tempStreak = 1;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Check if user tested today or yesterday for current streak
+      const lastTest = new Date(attempts[0].submitted_at);
+      lastTest.setHours(0, 0, 0, 0);
+      const daysDiff = Math.floor((today.getTime() - lastTest.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (daysDiff <= 1) {
+        currentStreak = 1;
+        
+        // Calculate consecutive days
+        for (let i = 1; i < attempts.length; i++) {
+          const prevDate = new Date(attempts[i - 1].submitted_at);
+          const currDate = new Date(attempts[i].submitted_at);
+          prevDate.setHours(0, 0, 0, 0);
+          currDate.setHours(0, 0, 0, 0);
+          
+          const diff = Math.floor((prevDate.getTime() - currDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          if (diff === 1) {
+            currentStreak++;
+            tempStreak++;
+          } else {
+            longestStreak = Math.max(longestStreak, tempStreak);
+            tempStreak = 1;
+          }
+        }
+      }
+
+      longestStreak = Math.max(longestStreak, tempStreak, currentStreak);
+      setStreak({ current: currentStreak, longest: longestStreak });
+    } catch (error) {
+      console.error('Error fetching streak:', error);
+    }
+  };
+
+  const fetchLeaderboard = async () => {
+    try {
+      // Get top performers based on average percentage
+      const { data: topUsers } = await supabase
+        .rpc('get_student_exam_progress');
+
+      if (!topUsers) return;
+
+      // Calculate average scores for each user
+      const userScores = new Map();
+      
+      for (const attempt of topUsers) {
+        if (attempt.status === 'SUBMITTED') {
+          const { data: result } = await supabase
+            .from('results')
+            .select('percentage')
+            .eq('attempt_id', attempt.id)
+            .maybeSingle();
+
+          if (result) {
+            const userId = attempt.user_id;
+            if (!userScores.has(userId)) {
+              userScores.set(userId, { total: 0, count: 0, userId });
+            }
+            const userData = userScores.get(userId);
+            userData.total += result.percentage;
+            userData.count += 1;
+          }
+        }
+      }
+
+      // Calculate averages and sort
+      const leaderboardData = Array.from(userScores.values())
+        .map(u => ({ userId: u.userId, avgScore: Math.round(u.total / u.count), testCount: u.count }))
+        .sort((a, b) => b.avgScore - a.avgScore)
+        .slice(0, 5);
+
+      // Get user details
+      const enrichedLeaderboard = await Promise.all(
+        leaderboardData.map(async (entry, index) => {
+          const { data: user } = await supabase
+            .from('users')
+            .select('first_name, last_name')
+            .eq('id', entry.userId)
+            .single();
+          
+          return {
+            rank: index + 1,
+            name: user ? `${user.first_name} ${user.last_name}` : 'Anonymous',
+            score: entry.avgScore,
+            isCurrentUser: entry.userId === userProfile?.id
+          };
+        })
+      );
+
+      setLeaderboard(enrichedLeaderboard);
+      
+      // Update user's rank in stats
+      const userRank = enrichedLeaderboard.find(u => u.isCurrentUser)?.rank || 0;
+      setStats(prev => ({ ...prev, rank: userRank }));
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
     }
   };
 
@@ -196,6 +321,78 @@ const MobileHome = () => {
 
       {/* Main Content */}
       <div className="p-4 space-y-4 -mt-4">
+        {/* Study Streak */}
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-warning/10 to-destructive/10">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="p-4 bg-gradient-to-br from-warning to-destructive rounded-2xl shadow-lg">
+                  <Zap className="h-8 w-8 text-white" />
+                </div>
+                {streak.current > 0 && (
+                  <div className="absolute -top-1 -right-1 bg-white rounded-full px-2 py-0.5 shadow-lg">
+                    <span className="text-xs font-bold text-warning">{streak.current}</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-lg mb-1">
+                  {streak.current > 0 ? `${streak.current} Day Streak! 🔥` : 'Start Your Streak!'}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {streak.current > 0 
+                    ? `Longest: ${streak.longest} days. Keep it up!` 
+                    : 'Take a test daily to build your streak'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Leaderboard Preview */}
+        {leaderboard.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-lg font-bold">Top Performers</h2>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => handleNavigation('/challenge-arena')}
+                className="text-xs"
+              >
+                View All
+              </Button>
+            </div>
+            <Card className="border-0 shadow-md">
+              <CardContent className="p-4 space-y-2">
+                {leaderboard.slice(0, 3).map((entry) => (
+                  <div 
+                    key={entry.rank}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
+                      entry.isCurrentUser ? 'bg-primary/10 border border-primary/20' : 'bg-muted/30'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                      entry.rank === 1 ? 'bg-warning text-white' :
+                      entry.rank === 2 ? 'bg-muted-foreground/20 text-foreground' :
+                      'bg-muted text-muted-foreground'
+                    }`}>
+                      {entry.rank === 1 ? '👑' : entry.rank}
+                    </div>
+                    <div className="flex-1">
+                      <p className={`font-semibold text-sm ${entry.isCurrentUser ? 'text-primary' : ''}`}>
+                        {entry.isCurrentUser ? 'You' : entry.name}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold">{entry.score}%</p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        )}
         {/* Quick Start Test */}
         <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/10 to-secondary/10">
           <CardContent className="p-5">
