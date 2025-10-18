@@ -36,10 +36,13 @@ import eduraLogo from '@/assets/edura-logo.png';
 import ScheduleTestModal from '@/components/ScheduleTestModal';
 import ProfileSettings from '@/components/ProfileSettings';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
+import NotificationBell from '@/components/NotificationBell';
 
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
   const { isPremium } = useSubscription();
+  const { requestPermission, permissionStatus } = usePushNotifications();
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     testsTaken: 0,
@@ -360,14 +363,7 @@ const MobileHome = () => {
                   </span>
                 ) : 'Free'}
               </Badge>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => navigate('/dashboard?tab=notifications')}
-                className="h-8 w-8 p-0"
-              >
-                <Bell className="h-4 w-4" />
-              </Button>
+              <NotificationBell />
               <Button
                 size="sm"
                 variant="secondary"
