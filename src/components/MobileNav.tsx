@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import ScheduleTestModal from "./ScheduleTestModal";
 import { useState } from "react";
+import { playTapSound, playPopSound, playWhooshSound } from "@/utils/sounds";
 
 interface MobileNavProps {
   activeTab: string;
@@ -40,6 +41,7 @@ const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, o
     >
       <Card 
         className={`relative overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.97] hover-lift group border-0 shadow-lg`}
+        onClick={() => playPopSound()}
       >
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-5 group-active:opacity-10 transition-opacity`} />
         
@@ -100,6 +102,7 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
             {/* Home Button */}
             <Link to="/dashboard" className="flex-1 flex justify-center">
               <button
+                onClick={() => playTapSound()}
                 className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
                   activeTab === "dashboard"
                     ? "scale-105"
@@ -126,7 +129,9 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
 
             {/* Study Button */}
             <Link to="/study-hub" className="flex-1 flex justify-center">
-              <button className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
+              <button 
+                onClick={() => playTapSound()}
+                className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
                 activeTab === "study" ? "scale-105" : "scale-100 hover:scale-105 active:scale-95"
               }`}>
                 {activeTab === "study" && (
@@ -149,9 +154,15 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
 
             {/* Center - Tests FAB (Elevated) with Enhanced Flow */}
             <div className="flex-1 flex justify-center">
-              <Sheet open={testsSheetOpen} onOpenChange={setTestsSheetOpen}>
+              <Sheet open={testsSheetOpen} onOpenChange={(open) => {
+                setTestsSheetOpen(open);
+                if (open) playWhooshSound();
+              }}>
                 <SheetTrigger asChild>
-                  <button className="relative -mt-6 animate-float">
+                  <button 
+                    onClick={() => playPopSound()}
+                    className="relative -mt-6 animate-float"
+                  >
                     {/* Multi-layer Glow with animation */}
                     <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-accent rounded-2xl blur-xl opacity-50 animate-pulse-slow" />
                     <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-2xl blur-2xl opacity-30 animate-pulse" style={{ animationDelay: '0.5s' }} />
@@ -241,7 +252,9 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
 
             {/* Forum Button */}
             <Link to="/forum" className="flex-1 flex justify-center">
-              <button className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
+              <button 
+                onClick={() => playTapSound()}
+                className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
                 activeTab === "forum" ? "scale-105" : "scale-100 hover:scale-105 active:scale-95"
               }`}>
                 {activeTab === "forum" && (
@@ -264,7 +277,10 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
 
             {/* Profile Button */}
             <button
-              onClick={() => onTabChange("profile")}
+              onClick={() => {
+                playTapSound();
+                onTabChange("profile");
+              }}
               className={`flex-1 flex justify-center relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
                 activeTab === "profile" || activeTab === "settings"
                   ? "scale-105"

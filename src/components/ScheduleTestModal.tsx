@@ -25,6 +25,7 @@ import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { playSuccessSound } from "@/utils/sounds";
 
 interface ScheduleTestModalProps {
   children: React.ReactNode;
@@ -247,6 +248,8 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
 
       if (attemptError) throw attemptError;
 
+      playSuccessSound();
+      
       toast({
         title: "Test Started Successfully!",
         description: `${testConfig.title || 'Practice Test'} has been started`,
