@@ -19,15 +19,24 @@ const Layout = ({ children, showNavbar = true, showWhatsAppButton = true }: Layo
 
   // Determine active tab based on current route
   const getActiveTab = () => {
-    if (location.pathname === "/dashboard") return "dashboard";
+    if (location.pathname === "/dashboard" || location.pathname === "/mobile-home") return "dashboard";
     if (location.pathname === "/study-hub") return "study";
     if (location.pathname === "/forum") return "forum";
+    if (location.pathname.includes("profile") || location.search.includes("tab=profile") || location.search.includes("tab=settings")) return "profile";
     return "";
   };
 
   const handleTabChange = (tab: string) => {
-    if (tab === "dashboard") navigate("/dashboard");
-    else if (tab === "profile") navigate("/dashboard?tab=profile");
+    if (tab === "dashboard") {
+      // Navigate to mobile-home if on mobile, otherwise dashboard
+      navigate(isInstalledApp ? "/mobile-home" : "/dashboard");
+    } else if (tab === "study") {
+      navigate("/study-hub");
+    } else if (tab === "forum") {
+      navigate("/forum");
+    } else if (tab === "profile") {
+      navigate("/dashboard?tab=profile");
+    }
   };
 
   return (

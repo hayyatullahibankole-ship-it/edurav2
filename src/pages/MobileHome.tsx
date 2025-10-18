@@ -30,6 +30,7 @@ import { playTapSound } from '@/utils/sounds';
 import eduraLogo from '@/assets/edura-logo.png';
 import ScheduleTestModal from '@/components/ScheduleTestModal';
 import ProfileSettings from '@/components/ProfileSettings';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
@@ -256,6 +257,32 @@ const MobileHome = () => {
           </Card>
         </div>
 
+        {/* Recent Activity */}
+        {stats.testsTaken > 0 && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold px-1">Your Progress</h2>
+            <Card className="border-0 shadow-md">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Trophy className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">Keep it up!</p>
+                      <p className="text-xs text-muted-foreground">You're doing great</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-primary">{stats.testsTaken}</p>
+                    <p className="text-xs text-muted-foreground">tests taken</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Subscription CTA */}
         {!isPremium && (
           <Card className="border-0 shadow-lg bg-gradient-to-br from-accent/10 to-primary/10">
@@ -283,6 +310,9 @@ const MobileHome = () => {
         )}
       </div>
 
+      {/* WhatsApp Support Button */}
+      <WhatsAppButton />
+
       {/* Mobile Navigation */}
       <MobileNav activeTab="dashboard" onTabChange={(tab) => {
         if (tab === "profile") {
@@ -291,6 +321,10 @@ const MobileHome = () => {
           }
           playTapSound();
           setShowProfileSheet(true);
+        } else if (tab === "study") {
+          navigate('/study-hub');
+        } else if (tab === "forum") {
+          navigate('/forum');
         } else if (tab === "settings") {
           navigate('/dashboard?tab=settings');
         }
