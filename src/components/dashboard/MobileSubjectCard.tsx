@@ -14,7 +14,7 @@ export const MobileSubjectCard = ({ subject, progress }: MobileSubjectCardProps)
   };
 
   return (
-    <div className="p-4 rounded-2xl bg-card border border-border">
+    <div className="p-4 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-md transition-all duration-500 ease-out hover:scale-[1.01] animate-fade-in">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-primary/10">

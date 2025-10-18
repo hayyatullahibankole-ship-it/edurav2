@@ -26,7 +26,7 @@ export const MobileTestCard = ({
   return (
     <div
       onClick={onClick}
-      className="relative overflow-hidden rounded-2xl p-4 bg-card border border-border hover:border-primary/50 transition-all duration-300 active:scale-[0.98] cursor-pointer group"
+      className="relative overflow-hidden rounded-2xl p-4 bg-card border border-border hover:border-primary/50 hover:shadow-lg transition-all duration-500 ease-out hover:scale-[1.02] active:scale-[0.98] cursor-pointer group animate-fade-in"
     >
       <div className="flex items-center gap-3">
         {/* Icon */}

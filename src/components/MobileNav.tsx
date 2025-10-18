@@ -79,38 +79,48 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
 
   return (
     <>
-      {/* Modern Professional Navigation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        {/* Glass Effect Background */}
-        <div className="absolute inset-0 bg-background/95 backdrop-blur-2xl border-t border-border/40" />
+      {/* Modern Professional Navigation Bar with Flow */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden animate-slide-up">
+        {/* Glass Effect Background with subtle animation */}
+        <div className="absolute inset-0 bg-background/95 backdrop-blur-2xl border-t border-border/40 transition-all duration-500" />
         
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent pointer-events-none" />
+        {/* Animated gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-transparent pointer-events-none animate-pulse-slow" />
         
         {/* Navigation Container - 5 Button Layout */}
         <div className="relative h-18 px-2 py-2">
           <div className="flex items-center justify-around max-w-md mx-auto">
+            {/* Active indicator line that slides */}
+            <div 
+              className={`absolute top-0 left-0 h-0.5 bg-gradient-to-r from-primary to-primary-glow transition-all duration-500 ease-out ${
+                activeTab === "dashboard" ? "w-1/5 translate-x-[10%]" :
+                activeTab === "study" ? "w-1/5 translate-x-[110%]" :
+                activeTab === "arena" ? "w-1/5 translate-x-[310%]" :
+                activeTab === "profile" || activeTab === "settings" ? "w-1/5 translate-x-[410%]" :
+                "w-0"
+              }`}
+            />
             {/* Home Button */}
             <Link to="/dashboard" className="flex-1 flex justify-center">
               <button
-                className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-300 ${
+                className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
                   activeTab === "dashboard"
                     ? "scale-105"
-                    : "active:scale-95"
+                    : "scale-100 hover:scale-105 active:scale-95"
                 }`}
               >
                 {activeTab === "dashboard" && (
-                  <div className="absolute inset-0 bg-primary/10 rounded-2xl" />
+                  <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
                 )}
-                <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${
+                <div className={`relative p-2.5 rounded-xl transition-all duration-500 ${
                   activeTab === "dashboard" 
-                    ? "bg-gradient-to-br from-primary to-primary-glow text-white shadow-lg shadow-primary/30" 
-                    : "bg-muted/60 text-muted-foreground"
+                    ? "bg-gradient-to-br from-primary to-primary-glow text-white shadow-lg shadow-primary/30 scale-110" 
+                    : "bg-muted/60 text-muted-foreground hover:bg-muted"
                 }`}>
-                  <Home className="h-5 w-5" />
+                  <Home className={`h-5 w-5 transition-transform duration-300 ${activeTab === "dashboard" ? "scale-110" : ""}`} />
                 </div>
-                <span className={`text-[10px] font-bold tracking-wide ${
-                  activeTab === "dashboard" ? "text-primary" : "text-muted-foreground"
+                <span className={`text-[10px] font-bold tracking-wide transition-all duration-300 ${
+                  activeTab === "dashboard" ? "text-primary scale-110" : "text-muted-foreground"
                 }`}>
                   Home
                 </span>
@@ -119,50 +129,51 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
 
             {/* Study Button */}
             <Link to="/study-hub" className="flex-1 flex justify-center">
-              <button className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-300 ${
-                activeTab === "study" ? "scale-105" : "active:scale-95"
+              <button className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
+                activeTab === "study" ? "scale-105" : "scale-100 hover:scale-105 active:scale-95"
               }`}>
                 {activeTab === "study" && (
-                  <div className="absolute inset-0 bg-secondary/10 rounded-2xl" />
+                  <div className="absolute inset-0 bg-secondary/10 rounded-2xl animate-fade-in" />
                 )}
-                <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${
+                <div className={`relative p-2.5 rounded-xl transition-all duration-500 ${
                   activeTab === "study" 
-                    ? "bg-gradient-to-br from-secondary to-info text-white shadow-lg shadow-secondary/30" 
-                    : "bg-muted/60 text-muted-foreground"
+                    ? "bg-gradient-to-br from-secondary to-info text-white shadow-lg shadow-secondary/30 scale-110" 
+                    : "bg-muted/60 text-muted-foreground hover:bg-muted"
                 }`}>
-                  <Library className="h-5 w-5" />
+                  <Library className={`h-5 w-5 transition-transform duration-300 ${activeTab === "study" ? "scale-110" : ""}`} />
                 </div>
-                <span className={`text-[10px] font-bold tracking-wide ${
-                  activeTab === "study" ? "text-secondary" : "text-muted-foreground"
+                <span className={`text-[10px] font-bold tracking-wide transition-all duration-300 ${
+                  activeTab === "study" ? "text-secondary scale-110" : "text-muted-foreground"
                 }`}>
                   Study
                 </span>
               </button>
             </Link>
 
-            {/* Center - Tests FAB (Elevated) */}
+            {/* Center - Tests FAB (Elevated) with Enhanced Flow */}
             <div className="flex-1 flex justify-center">
               <Sheet open={testsSheetOpen} onOpenChange={setTestsSheetOpen}>
                 <SheetTrigger asChild>
-                  <button className="relative -mt-6">
-                    {/* Glow effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-accent rounded-2xl blur-xl opacity-50" />
+                  <button className="relative -mt-6 animate-float">
+                    {/* Multi-layer Glow with animation */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-accent rounded-2xl blur-xl opacity-50 animate-pulse-slow" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-2xl blur-2xl opacity-30 animate-pulse" style={{ animationDelay: '0.5s' }} />
                     
-                    {/* Main FAB */}
-                    <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl flex items-center justify-center active:scale-95 transition-all duration-300 border border-white/20">
+                    {/* Main FAB with enhanced transitions */}
+                    <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-500 ease-out border border-white/20">
                       {/* Inner shine */}
-                      <div className="absolute inset-1 rounded-xl bg-gradient-to-br from-white/20 to-transparent" />
+                      <div className="absolute inset-1 rounded-xl bg-gradient-to-br from-white/20 to-transparent animate-shimmer" />
                       
-                      {/* Icon */}
-                      <BookOpen className="h-7 w-7 text-white relative z-10" />
+                      {/* Icon with rotation on hover */}
+                      <BookOpen className="h-7 w-7 text-white relative z-10 transition-transform duration-300 hover:rotate-12" />
                       
-                      {/* Active indicator */}
-                      <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-warning rounded-full border-2 border-background">
-                        <Sparkles className="h-2.5 w-2.5 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                      {/* Active indicator with bounce */}
+                      <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gradient-to-br from-warning to-warning/80 rounded-full border-2 border-background animate-bounce-slow">
+                        <Sparkles className="h-2.5 w-2.5 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
                       </div>
                     </div>
                     
-                    <span className="block mt-1.5 text-[10px] font-bold text-foreground text-center">Tests</span>
+                    <span className="block mt-1.5 text-[10px] font-bold text-foreground text-center transition-all duration-300">Tests</span>
                   </button>
                 </SheetTrigger>
                 
@@ -233,21 +244,21 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
 
             {/* Arena Button */}
             <Link to="/challenge-arena" className="flex-1 flex justify-center">
-              <button className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-300 ${
-                activeTab === "arena" ? "scale-105" : "active:scale-95"
+              <button className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
+                activeTab === "arena" ? "scale-105" : "scale-100 hover:scale-105 active:scale-95"
               }`}>
                 {activeTab === "arena" && (
-                  <div className="absolute inset-0 bg-warning/10 rounded-2xl" />
+                  <div className="absolute inset-0 bg-warning/10 rounded-2xl animate-fade-in" />
                 )}
-                <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${
+                <div className={`relative p-2.5 rounded-xl transition-all duration-500 ${
                   activeTab === "arena" 
-                    ? "bg-gradient-to-br from-warning to-destructive text-white shadow-lg shadow-warning/30" 
-                    : "bg-muted/60 text-muted-foreground"
+                    ? "bg-gradient-to-br from-warning to-destructive text-white shadow-lg shadow-warning/30 scale-110" 
+                    : "bg-muted/60 text-muted-foreground hover:bg-muted"
                 }`}>
-                  <Sword className="h-5 w-5" />
+                  <Sword className={`h-5 w-5 transition-transform duration-300 ${activeTab === "arena" ? "scale-110 rotate-12" : ""}`} />
                 </div>
-                <span className={`text-[10px] font-bold tracking-wide ${
-                  activeTab === "arena" ? "text-warning" : "text-muted-foreground"
+                <span className={`text-[10px] font-bold tracking-wide transition-all duration-300 ${
+                  activeTab === "arena" ? "text-warning scale-110" : "text-muted-foreground"
                 }`}>
                   Arena
                 </span>
@@ -257,24 +268,24 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
             {/* Profile Button */}
             <button
               onClick={() => onTabChange("profile")}
-              className={`flex-1 flex justify-center relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-300 ${
+              className={`flex-1 flex justify-center relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
                 activeTab === "profile" || activeTab === "settings"
                   ? "scale-105"
-                  : "active:scale-95"
+                  : "scale-100 hover:scale-105 active:scale-95"
               }`}
             >
               {(activeTab === "profile" || activeTab === "settings") && (
-                <div className="absolute inset-0 bg-accent/10 rounded-2xl" />
+                <div className="absolute inset-0 bg-accent/10 rounded-2xl animate-fade-in" />
               )}
-              <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${
+              <div className={`relative p-2.5 rounded-xl transition-all duration-500 ${
                 activeTab === "profile" || activeTab === "settings"
-                  ? "bg-gradient-to-br from-accent to-success text-white shadow-lg shadow-accent/30" 
-                  : "bg-muted/60 text-muted-foreground"
+                  ? "bg-gradient-to-br from-accent to-success text-white shadow-lg shadow-accent/30 scale-110" 
+                  : "bg-muted/60 text-muted-foreground hover:bg-muted"
               }`}>
-                <User className="h-5 w-5" />
+                <User className={`h-5 w-5 transition-transform duration-300 ${activeTab === "profile" || activeTab === "settings" ? "scale-110" : ""}`} />
               </div>
-              <span className={`text-[10px] font-bold tracking-wide ${
-                activeTab === "profile" || activeTab === "settings" ? "text-accent" : "text-muted-foreground"
+              <span className={`text-[10px] font-bold tracking-wide transition-all duration-300 ${
+                activeTab === "profile" || activeTab === "settings" ? "text-accent scale-110" : "text-muted-foreground"
               }`}>
                 Profile
               </span>

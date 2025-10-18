@@ -18,7 +18,7 @@ export const MobileStatCard = ({
 }: MobileStatCardProps) => {
   return (
     <div 
-      className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 active:scale-95 group"
+      className="relative overflow-hidden rounded-2xl p-4 transition-all duration-500 ease-out hover:scale-105 active:scale-95 group animate-fade-in-up cursor-pointer"
       style={{ animationDelay: delay }}
     >
       {/* Gradient Background */}
