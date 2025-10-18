@@ -381,101 +381,107 @@ const MobileHome = () => {
             </p>
           </div>
 
-          {/* Clean Stats Grid */}
+          {/* Stats Grid */}
           <div className="grid grid-cols-3 gap-3">
-            <Card className="border shadow-sm">
+            <Card className="border-0 shadow-md bg-gradient-to-br from-primary/10 to-primary/5 hover:shadow-lg transition-all">
               <CardContent className="p-4 text-center">
-                <Target className="h-5 w-5 text-primary mx-auto mb-2" />
-                <div className="text-xl font-bold text-foreground">{stats.testsTaken}</div>
-                <div className="text-xs text-muted-foreground mt-1">Tests</div>
+                <div className="p-2 bg-primary/10 rounded-full w-fit mx-auto mb-2">
+                  <Target className="h-5 w-5 text-primary" />
+                </div>
+                <div className="text-2xl font-bold text-foreground">{stats.testsTaken}</div>
+                <div className="text-xs text-muted-foreground mt-1 font-medium">Tests Taken</div>
               </CardContent>
             </Card>
-            <Card className="border shadow-sm">
+            <Card className="border-0 shadow-md bg-gradient-to-br from-success/10 to-success/5 hover:shadow-lg transition-all">
               <CardContent className="p-4 text-center">
-                <TrendingUp className="h-5 w-5 text-success mx-auto mb-2" />
-                <div className="text-xl font-bold text-foreground">{stats.averageScore}%</div>
-                <div className="text-xs text-muted-foreground mt-1">Average</div>
+                <div className="p-2 bg-success/10 rounded-full w-fit mx-auto mb-2">
+                  <TrendingUp className="h-5 w-5 text-success" />
+                </div>
+                <div className="text-2xl font-bold text-foreground">{stats.averageScore}%</div>
+                <div className="text-xs text-muted-foreground mt-1 font-medium">Avg Score</div>
               </CardContent>
             </Card>
-            <Card className="border shadow-sm">
+            <Card className="border-0 shadow-md bg-gradient-to-br from-warning/10 to-warning/5 hover:shadow-lg transition-all">
               <CardContent className="p-4 text-center">
-                <Flame className="h-5 w-5 text-warning mx-auto mb-2" />
-                <div className="text-xl font-bold text-foreground">{streak.current}</div>
-                <div className="text-xs text-muted-foreground mt-1">Streak</div>
+                <div className="p-2 bg-warning/10 rounded-full w-fit mx-auto mb-2">
+                  <Flame className="h-5 w-5 text-warning" />
+                </div>
+                <div className="text-2xl font-bold text-foreground">{streak.current}</div>
+                <div className="text-xs text-muted-foreground mt-1 font-medium">Day Streak</div>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
 
-      {/* Main Content - Clean Design */}
+      {/* Main Content */}
       <div className="px-4 py-6 space-y-6">
-        {/* Motivational Quote - Enhanced */}
+        {/* Motivational Quote */}
         {motivationalQuote && (
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/5 via-primary/10 to-accent/5 relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-accent/10 rounded-full blur-3xl" />
             <CardContent className="p-6 relative z-10">
-              <Sparkles className="h-5 w-5 text-primary mx-auto mb-3" />
-              <p className="text-sm font-medium text-foreground/90 text-center leading-relaxed">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-primary/10 rounded-full">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </div>
+                <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent" />
+              </div>
+              <p className="text-sm font-medium text-foreground/90 text-center leading-relaxed italic">
                 "{motivationalQuote}"
               </p>
             </CardContent>
           </Card>
         )}
 
-      {/* Main Content - Clean Design */}
-      <div className="px-4 py-6 space-y-6">
-        {/* Motivational Quote - Minimal */}
-        {motivationalQuote && (
-          <Card className="border shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {motivationalQuote}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Leaderboard Preview - Clean */}
+        {/* Leaderboard Preview */}
         {leaderboard.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Top Performers</h2>
+              <div className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-warning" />
+                <h2 className="text-lg font-bold">Top Performers</h2>
+              </div>
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => handleNavigation('/challenge-arena')}
-                className="text-xs text-primary"
+                className="text-xs text-primary font-semibold"
               >
-                View All
+                View All <ChevronRight className="h-3 w-3 ml-1" />
               </Button>
             </div>
-            <Card className="border shadow-sm">
-              <CardContent className="p-3 space-y-2">
+            <Card className="border-0 shadow-lg bg-gradient-to-b from-card to-muted/20">
+              <CardContent className="p-4 space-y-3">
                 {leaderboard.slice(0, 3).map((entry) => (
                   <div 
                     key={entry.rank}
-                    className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                      entry.isCurrentUser ? 'bg-primary/5 border border-primary/20' : 'bg-muted/30'
+                    className={`flex items-center gap-3 p-4 rounded-xl transition-all hover:scale-[1.02] ${
+                      entry.isCurrentUser 
+                        ? 'bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-primary/30 shadow-sm' 
+                        : 'bg-background/80 border border-border'
                     }`}
                   >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                      entry.rank === 1 ? 'bg-warning/20 text-warning' :
-                      entry.rank === 2 ? 'bg-muted text-foreground' :
-                      'bg-muted/50 text-muted-foreground'
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-base font-bold shadow-md ${
+                      entry.rank === 1 ? 'bg-gradient-to-br from-warning to-warning/70 text-white' :
+                      entry.rank === 2 ? 'bg-gradient-to-br from-muted-foreground/20 to-muted-foreground/30 text-foreground' :
+                      'bg-gradient-to-br from-muted to-muted/70 text-muted-foreground'
                     }`}>
                       {entry.rank === 1 ? '🏆' : entry.rank}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-semibold truncate ${entry.isCurrentUser ? 'text-primary' : 'text-foreground'}`}>
-                        {entry.isCurrentUser ? 'You' : entry.name}
+                      <p className={`text-sm font-bold truncate ${entry.isCurrentUser ? 'text-primary' : 'text-foreground'}`}>
+                        {entry.isCurrentUser ? 'You 🎯' : entry.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {entry.isCurrentUser ? 'Keep it up!' : 'Top performer'}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-base font-bold text-foreground">{entry.score}%</p>
+                      <p className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                        {entry.score}%
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -484,131 +490,145 @@ const MobileHome = () => {
           </div>
         )}
 
-        {/* Quick Actions - Clean Cards */}
+        {/* Quick Actions */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Quick Actions</h2>
+          <div className="flex items-center gap-2 mb-1">
+            <Zap className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-bold">Quick Actions</h2>
+          </div>
           
           <Card 
-            className="border-2 border-primary shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+            className="border-0 shadow-lg bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer overflow-hidden relative"
             onClick={() => setShowTestPanel(true)}
           >
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="p-3 bg-primary rounded-xl">
-                <Play className="h-6 w-6 text-primary-foreground" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+            <CardContent className="p-5 flex items-center gap-4 relative z-10">
+              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
+                <Play className="h-7 w-7 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-base">Take a Test</h3>
-                <p className="text-xs text-muted-foreground">Choose your exam type</p>
+                <h3 className="font-bold text-base text-white mb-0.5">Take a Test</h3>
+                <p className="text-xs text-white/80">Choose your exam type</p>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <ChevronRight className="h-6 w-6 text-white/80" />
             </CardContent>
           </Card>
 
           <Card 
-            className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+            className="border-0 shadow-lg bg-gradient-to-r from-accent to-accent/90 hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer overflow-hidden relative"
             onClick={() => handleNavigation('/study-hub')}
           >
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="p-3 bg-accent/10 rounded-xl">
-                <BookOpen className="h-6 w-6 text-accent" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+            <CardContent className="p-5 flex items-center gap-4 relative z-10">
+              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
+                <BookOpen className="h-7 w-7 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-base">Study Hub</h3>
-                <p className="text-xs text-muted-foreground">Lessons & resources</p>
+                <h3 className="font-bold text-base text-white mb-0.5">Study Hub</h3>
+                <p className="text-xs text-white/80">Lessons & resources</p>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <ChevronRight className="h-6 w-6 text-white/80" />
             </CardContent>
           </Card>
 
-          {/* Feature Cards - Compact Grid */}
+          {/* Feature Cards Grid */}
           <div className="grid grid-cols-2 gap-3 mt-4">
             <Card 
-              className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+              className="border-0 shadow-lg bg-gradient-to-br from-warning/10 to-warning/5 hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer"
               onClick={() => handleNavigation('/challenge-arena')}
             >
-              <CardContent className="p-4 text-center">
-                <Trophy className="h-6 w-6 text-warning mx-auto mb-2" />
-                <h3 className="font-medium text-sm">Challenges</h3>
-                <p className="text-xs text-muted-foreground mt-1">Compete</p>
+              <CardContent className="p-5 text-center">
+                <div className="p-3 bg-warning/10 rounded-xl w-fit mx-auto mb-3 shadow-sm">
+                  <Trophy className="h-7 w-7 text-warning" />
+                </div>
+                <h3 className="font-bold text-sm mb-1">Challenges</h3>
+                <p className="text-xs text-muted-foreground">Compete now</p>
               </CardContent>
             </Card>
 
             <Card 
-              className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+              className="border-0 shadow-lg bg-gradient-to-br from-info/10 to-info/5 hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer"
               onClick={() => handleNavigation('/resources')}
             >
-              <CardContent className="p-4 text-center">
-                <FileText className="h-6 w-6 text-info mx-auto mb-2" />
-                <h3 className="font-medium text-sm">Resources</h3>
-                <p className="text-xs text-muted-foreground mt-1">Materials</p>
+              <CardContent className="p-5 text-center">
+                <div className="p-3 bg-info/10 rounded-xl w-fit mx-auto mb-3 shadow-sm">
+                  <FileText className="h-7 w-7 text-info" />
+                </div>
+                <h3 className="font-bold text-sm mb-1">Resources</h3>
+                <p className="text-xs text-muted-foreground">Study materials</p>
               </CardContent>
             </Card>
 
             <Card 
-              className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+              className="border-0 shadow-lg bg-gradient-to-br from-success/10 to-success/5 hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer"
               onClick={() => handleNavigation('/forum')}
             >
-              <CardContent className="p-4 text-center">
-                <MessageSquare className="h-6 w-6 text-success mx-auto mb-2" />
-                <h3 className="font-medium text-sm">Forum</h3>
-                <p className="text-xs text-muted-foreground mt-1">Discuss</p>
+              <CardContent className="p-5 text-center">
+                <div className="p-3 bg-success/10 rounded-xl w-fit mx-auto mb-3 shadow-sm">
+                  <MessageSquare className="h-7 w-7 text-success" />
+                </div>
+                <h3 className="font-bold text-sm mb-1">Forum</h3>
+                <p className="text-xs text-muted-foreground">Join discussions</p>
               </CardContent>
             </Card>
 
             <Card 
-              className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+              className="border-0 shadow-lg bg-gradient-to-br from-secondary/10 to-secondary/5 hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer"
               onClick={() => handleNavigation('/consultation')}
             >
-              <CardContent className="p-4 text-center">
-                <Calendar className="h-6 w-6 text-secondary mx-auto mb-2" />
-                <h3 className="font-medium text-sm">Booking</h3>
-                <p className="text-xs text-muted-foreground mt-1">Sessions</p>
+              <CardContent className="p-5 text-center">
+                <div className="p-3 bg-secondary/10 rounded-xl w-fit mx-auto mb-3 shadow-sm">
+                  <Calendar className="h-7 w-7 text-secondary" />
+                </div>
+                <h3 className="font-bold text-sm mb-1">Booking</h3>
+                <p className="text-xs text-muted-foreground">Book sessions</p>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Recent Results - Clean Section */}
+        {/* Recent Results */}
         {recentResults.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Recent Tests</h2>
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-bold">Recent Tests</h2>
+              </div>
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => handleNavigation('/dashboard?tab=results')}
-                className="text-xs text-primary"
+                className="text-xs text-primary font-semibold"
               >
-                View All
+                View All <ChevronRight className="h-3 w-3 ml-1" />
               </Button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {recentResults.map((result, index) => (
                 <Card 
                   key={index} 
-                  className="border shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                  className="border-0 shadow-lg hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer overflow-hidden"
                   onClick={() => handleNavigation(`/results?attempt=${result.attempt_id}`)}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-xl ${
-                        result.percentage >= 70 ? 'bg-success/10' : 
-                        result.percentage >= 50 ? 'bg-warning/10' : 'bg-destructive/10'
+                  <CardContent className="p-0">
+                    <div className="flex items-center gap-0">
+                      <div className={`p-4 ${
+                        result.percentage >= 70 ? 'bg-gradient-to-br from-success to-success/80' : 
+                        result.percentage >= 50 ? 'bg-gradient-to-br from-warning to-warning/80' : 
+                        'bg-gradient-to-br from-destructive to-destructive/80'
                       }`}>
-                        <Target className={`h-5 w-5 ${
-                          result.percentage >= 70 ? 'text-success' : 
-                          result.percentage >= 50 ? 'text-warning' : 'text-destructive'
-                        }`} />
+                        <Target className="h-6 w-6 text-white" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm truncate">{result.examTitle}</h3>
+                      <div className="flex-1 min-w-0 p-4">
+                        <h3 className="font-bold text-sm truncate mb-1">{result.examTitle}</h3>
                         <p className="text-xs text-muted-foreground">{result.date}</p>
                       </div>
-                      <div className="text-right">
-                        <p className={`text-lg font-bold ${
+                      <div className="p-4 text-right">
+                        <p className={`text-2xl font-bold ${
                           result.percentage >= 70 ? 'text-success' : 
                           result.percentage >= 50 ? 'text-warning' : 'text-destructive'
-                        }`}>{result.percentage}%</p>
+                        }`}>{result.percentage}<span className="text-sm">%</span></p>
                       </div>
                     </div>
                   </CardContent>
@@ -618,32 +638,33 @@ const MobileHome = () => {
           </div>
         )}
 
-        {/* Subscription CTA - Clean */}
+        {/* Subscription CTA */}
         {!isPremium && (
-          <Card className="border shadow-sm">
-            <CardContent className="p-5">
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 bg-primary/10 rounded-xl">
-                  <Sparkles className="h-6 w-6 text-primary" />
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-primary via-primary to-accent relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+            <CardContent className="p-6 relative z-10">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
+                  <Sparkles className="h-7 w-7 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-base mb-1">Upgrade to Premium</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
+                  <h3 className="font-bold text-lg text-white mb-2">Upgrade to Premium</h3>
+                  <p className="text-sm text-white/90 mb-4 leading-relaxed">
                     Unlock unlimited tests, detailed analytics & expert support
                   </p>
                   <Button
-                    size="sm"
-                    className="w-full"
+                    size="default"
+                    className="w-full bg-white text-primary hover:bg-white/90 font-bold shadow-lg"
                     onClick={() => handleNavigation('/payment')}
                   >
-                    Go Premium
+                    Go Premium Now
                   </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
-      </div>
       </div>
 
       {/* WhatsApp Support Button */}
