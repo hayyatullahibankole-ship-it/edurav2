@@ -29,47 +29,40 @@ interface TestCardProps {
   onClose: () => void;
 }
 
-const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, onClose }: TestCardProps) => {
-  const handleClick = () => {
-    // Close the sheet after a small delay to allow modal to open
-    setTimeout(() => onClose(), 100);
-  };
-
-  return (
-    <ScheduleTestModal defaultExamType={examType}>
-      <Card 
-        className={`relative overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.97] hover-lift group border-0 shadow-lg`}
-        onClick={handleClick}
-      >
-        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-5 group-active:opacity-10 transition-opacity`} />
-        
-        <div className="relative p-5 flex items-center gap-4">
-          {/* Icon Container */}
-          <div className={`relative w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
-            <Icon className="h-7 w-7 text-white" />
-            <div className="absolute inset-0 rounded-2xl bg-white/20 animate-pulse" />
-          </div>
-
-          {/* Content */}
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-bold text-lg">{title}</h3>
-              {badge && (
-                <Badge className="bg-primary/10 text-primary border-primary/20 text-xs px-2 py-0">
-                  {badge}
-                </Badge>
-              )}
-            </div>
-            <p className="text-sm text-muted-foreground">{description}</p>
-          </div>
-
-          {/* Arrow */}
-          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, onClose }: TestCardProps) => (
+  <ScheduleTestModal defaultExamType={examType}>
+    <Card 
+      className={`relative overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.97] hover-lift group border-0 shadow-lg`}
+      onClick={onClose}
+    >
+      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-5 group-active:opacity-10 transition-opacity`} />
+      
+      <div className="relative p-5 flex items-center gap-4">
+        {/* Icon Container */}
+        <div className={`relative w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
+          <Icon className="h-7 w-7 text-white" />
+          <div className="absolute inset-0 rounded-2xl bg-white/20 animate-pulse" />
         </div>
-      </Card>
-    </ScheduleTestModal>
-  );
-};
+
+        {/* Content */}
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-bold text-lg">{title}</h3>
+            {badge && (
+              <Badge className="bg-primary/10 text-primary border-primary/20 text-xs px-2 py-0">
+                {badge}
+              </Badge>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+
+        {/* Arrow */}
+        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+      </div>
+    </Card>
+  </ScheduleTestModal>
+);
 
 const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
   const [testsSheetOpen, setTestsSheetOpen] = useState(false);
@@ -148,32 +141,27 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
             </button>
           </Link>
 
-          {/* Tests Button - Centered with Modern Design */}
+          {/* Tests Button - Center with Special Styling */}
           <Sheet open={testsSheetOpen} onOpenChange={setTestsSheetOpen}>
             <SheetTrigger asChild>
-              <button className="relative flex flex-col items-center -mt-6">
-                {/* Floating Action Button with Modern Design */}
+              <button className="relative flex flex-col items-center -mt-8">
+                {/* Floating Action Button */}
                 <div className="relative">
-                  {/* Multi-layer Glow Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-accent rounded-full blur-2xl opacity-40 animate-pulse" />
-                  <div className="absolute inset-0 bg-gradient-to-tr from-accent to-primary rounded-full blur-xl opacity-30" />
+                  {/* Glow Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full blur-xl opacity-50 animate-pulse" />
                   
-                  {/* Main Button with Glass Morphism */}
-                  <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-secondary to-accent shadow-2xl flex items-center justify-center active:scale-95 transition-all duration-300 group hover:shadow-3xl">
-                    {/* Inner Glass Layer */}
-                    <div className="absolute inset-0.5 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm" />
+                  {/* Main Button */}
+                  <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary via-secondary to-accent shadow-2xl flex items-center justify-center active:scale-95 transition-transform">
+                    <BookOpen className="h-7 w-7 text-white" />
                     
-                    {/* Icon */}
-                    <BookOpen className="h-7 w-7 text-white relative z-10 group-hover:scale-110 transition-transform" />
-                    
-                    {/* Premium Badge */}
-                    <div className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-gradient-to-br from-warning to-destructive rounded-full flex items-center justify-center shadow-lg border-2 border-background">
-                      <Sparkles className="h-3.5 w-3.5 text-white animate-pulse" />
+                    {/* Sparkle Badge */}
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-warning rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                      <Sparkles className="h-3 w-3 text-white" />
                     </div>
                   </div>
                 </div>
                 
-                <span className="mt-2 text-[11px] font-bold text-foreground tracking-wide">Tests</span>
+                <span className="mt-2 text-xs font-semibold text-foreground">Tests</span>
               </button>
             </SheetTrigger>
             
