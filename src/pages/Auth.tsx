@@ -2,10 +2,15 @@ import React, { useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import AuthForm from '@/components/AuthForm';
+import MobileAuthForm from '@/components/MobileAuthForm';
+import { useNativeApp } from '@/hooks/useNativeApp';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function Auth() {
   const { user, loading, isAdmin, userRole } = useAuth();
   const navigate = useNavigate();
+  const { isNative } = useNativeApp();
+  const isMobileView = useIsMobile();
 
   useEffect(() => {
     if (user && !loading && userRole !== null) {
@@ -31,6 +36,11 @@ export default function Auth() {
 
   if (user && userRole !== null) {
     return <Navigate to={isAdmin ? "/admin" : "/dashboard"} replace />;
+  }
+
+  // Show mobile auth form for native apps or mobile view
+  if (isNative || isMobileView) {
+    return <MobileAuthForm />;
   }
 
   return <AuthForm />;
