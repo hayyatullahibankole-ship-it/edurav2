@@ -12,6 +12,7 @@ import MobileSplash from "./pages/MobileSplash";
 import MobileOnboarding from "./pages/MobileOnboarding";
 import MobileHome from "./pages/MobileHome";
 import { useNativeApp } from "./hooks/useNativeApp";
+import { useIsMobile } from "./hooks/use-mobile";
 
 import AdminPortal from "./pages/AdminPortal";
 import AdminLogin from "./pages/AdminLogin";
@@ -45,6 +46,8 @@ const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const { isNative } = useNativeApp();
+  const isMobile = useIsMobile();
+  const isMobileExperience = isNative || isMobile;
 
   return (
     <Routes>
@@ -61,7 +64,7 @@ const AppRoutes = () => {
       <Route 
         path="/" 
         element={
-          isNative ? <Navigate to="/mobile-splash" replace /> : <Layout><Home /></Layout>
+          isMobileExperience ? <Navigate to="/mobile-splash" replace /> : <Layout><Home /></Layout>
         } 
       />
       
@@ -71,7 +74,7 @@ const AppRoutes = () => {
       <Route path="/auth" element={<Layout showNavbar={false}><Auth /></Layout>} />
       <Route path="/dashboard" element={
         <ProtectedRoute>
-          {isNative ? <MobileHome /> : <Layout showNavbar={false}><Dashboard /></Layout>}
+          {isMobileExperience ? <MobileHome /> : <Layout showNavbar={false}><Dashboard /></Layout>}
         </ProtectedRoute>
       } />
             <Route path="/admin/login" element={<AdminLogin />} />

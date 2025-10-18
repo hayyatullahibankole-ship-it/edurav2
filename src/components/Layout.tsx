@@ -39,8 +39,8 @@ const Layout = ({ children, showNavbar = true, showWhatsAppButton = true }: Layo
       </main>
       {showWhatsAppButton && <WhatsAppButton />}
       
-      {/* Mobile Navigation - Show only for native apps */}
-      {isNative && (
+      {/* Mobile Navigation - Show for native apps or mobile screen size */}
+      {(isNative || isMobile) && (
         <>
           <MobileNav activeTab={getActiveTab()} onTabChange={handleTabChange} />
           {/* Add padding to bottom to prevent content being hidden by nav */}

@@ -38,8 +38,8 @@ export default function Auth() {
     return <Navigate to={isAdmin ? "/admin" : "/dashboard"} replace />;
   }
 
-  // Show mobile auth form only for native apps
-  if (isNative) {
+  // Show mobile auth form for native apps or mobile screen size
+  if (isNative || isMobileView) {
     return <MobileAuthForm />;
   }
 
