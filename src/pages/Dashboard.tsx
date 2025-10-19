@@ -41,6 +41,10 @@ import { ModernQuickAction } from "@/components/dashboard/ModernQuickAction";
 import { MobileStatCard } from "@/components/dashboard/MobileStatCard";
 import { MobileTestCard } from "@/components/dashboard/MobileTestCard";
 import { MobileSubjectCard } from "@/components/dashboard/MobileSubjectCard";
+import { SyllabusCoverageCard } from "@/components/dashboard/SyllabusCoverageCard";
+import { WeakTopicsCard } from "@/components/dashboard/WeakTopicsCard";
+import { StreakCard } from "@/components/dashboard/StreakCard";
+import { OfflineModeCard } from "@/components/dashboard/OfflineModeCard";
 import NotificationBell from "@/components/NotificationBell";
 import OnboardingTour from "@/components/OnboardingTour";
 import LoadingAnimation from "@/components/LoadingAnimation";
@@ -668,6 +672,12 @@ const Dashboard = () => {
                   </div>
                 </div>
 
+                {/* Syllabus Coverage Tracker - Desktop Only */}
+                {!isInstalledApp && <SyllabusCoverageCard />}
+                
+                {/* Weak Topics Recommendations - Desktop Only */}
+                {!isInstalledApp && <WeakTopicsCard />}
+
                 {/* Recent Test Results - Mobile Optimized */}
                 {isMobile ? (
                   <div className="space-y-3 animate-fade-in">
@@ -818,22 +828,8 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                {/* Study Streak */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Study Streak</CardTitle>
-                    <CardDescription>Keep the momentum going!</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center">
-                      <div className="text-4xl font-bold text-accent mb-2">{loading ? "..." : stats.testsTaken}</div>
-                      <p className="text-sm text-muted-foreground">Tests completed</p>
-                      <ScheduleTestModal>
-                        <Button className="w-full mt-4">Take Another Test</Button>
-                      </ScheduleTestModal>
-                    </div>
-                  </CardContent>
-                </Card>
+                {/* Daily Practice Streak Card */}
+                <StreakCard />
 
                 {/* Subscription Status */}
                 <Card>
@@ -862,6 +858,9 @@ const Dashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Offline Mode Card */}
+                <OfflineModeCard />
               </div>
             </div>
           </TabsContent>

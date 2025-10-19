@@ -973,6 +973,53 @@ export type Database = {
           },
         ]
       }
+      offline_downloads: {
+        Row: {
+          created_at: string | null
+          download_date: string | null
+          exam_type: Database["public"]["Enums"]["exam_type"]
+          expires_at: string | null
+          id: string
+          is_synced: boolean | null
+          last_synced_at: string | null
+          questions_data: Json
+          subject_ids: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          download_date?: string | null
+          exam_type: Database["public"]["Enums"]["exam_type"]
+          expires_at?: string | null
+          id?: string
+          is_synced?: boolean | null
+          last_synced_at?: string | null
+          questions_data: Json
+          subject_ids?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          download_date?: string | null
+          exam_type?: Database["public"]["Enums"]["exam_type"]
+          expires_at?: string | null
+          id?: string
+          is_synced?: boolean | null
+          last_synced_at?: string | null
+          questions_data?: Json
+          subject_ids?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offline_downloads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questions: {
         Row: {
           correct_answer: string
@@ -1777,6 +1824,66 @@ export type Database = {
           },
         ]
       }
+      syllabus_coverage: {
+        Row: {
+          attempted_questions: number
+          correct_questions: number
+          coverage_percentage: number | null
+          created_at: string | null
+          id: string
+          last_practiced_at: string | null
+          mastery_percentage: number | null
+          subject_id: string
+          topic_name: string
+          total_questions: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          attempted_questions?: number
+          correct_questions?: number
+          coverage_percentage?: number | null
+          created_at?: string | null
+          id?: string
+          last_practiced_at?: string | null
+          mastery_percentage?: number | null
+          subject_id: string
+          topic_name: string
+          total_questions?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          attempted_questions?: number
+          correct_questions?: number
+          coverage_percentage?: number | null
+          created_at?: string | null
+          id?: string
+          last_practiced_at?: string | null
+          mastery_percentage?: number | null
+          subject_id?: string
+          topic_name?: string
+          total_questions?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syllabus_coverage_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_settings: {
         Row: {
           created_at: string
@@ -2066,6 +2173,50 @@ export type Database = {
           },
         ]
       }
+      user_streaks: {
+        Row: {
+          created_at: string | null
+          current_streak: number
+          id: string
+          last_practice_date: string | null
+          longest_streak: number
+          streak_milestones: Json | null
+          total_practice_days: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_streak?: number
+          id?: string
+          last_practice_date?: string | null
+          longest_streak?: number
+          streak_milestones?: Json | null
+          total_practice_days?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_streak?: number
+          id?: string
+          last_practice_date?: string | null
+          longest_streak?: number
+          streak_milestones?: Json | null
+          total_practice_days?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_streaks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_study_progress: {
         Row: {
           completed: boolean | null
@@ -2186,6 +2337,60 @@ export type Database = {
         }
         Relationships: []
       }
+      weak_topic_recommendations: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_recommended_at: string | null
+          recommended_practice_count: number | null
+          subject_id: string
+          times_recommended: number | null
+          topic_name: string
+          user_id: string
+          weakness_score: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_recommended_at?: string | null
+          recommended_practice_count?: number | null
+          subject_id: string
+          times_recommended?: number | null
+          topic_name: string
+          user_id: string
+          weakness_score: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_recommended_at?: string | null
+          recommended_practice_count?: number | null
+          subject_id?: string
+          times_recommended?: number | null
+          topic_name?: string
+          user_id?: string
+          weakness_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weak_topic_recommendations_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weak_topic_recommendations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -2286,6 +2491,15 @@ export type Database = {
         Args: { target_subject?: string }
         Returns: {
           updated_count: number
+        }[]
+      }
+      generate_weak_topic_recommendations: {
+        Args: { p_user_id: string }
+        Returns: {
+          recommended_count: number
+          subject_name: string
+          topic_name: string
+          weakness_score: number
         }[]
       }
       get_admin_proctoring_data: {
@@ -2673,6 +2887,10 @@ export type Database = {
       send_immediate_result_notification: {
         Args: { attempt_uuid: string }
         Returns: boolean
+      }
+      update_user_streak: {
+        Args: { p_user_id: string }
+        Returns: Json
       }
       validate_admin_action: {
         Args: { action_type: string; target_data?: Json }
