@@ -514,20 +514,6 @@ const Dashboard = () => {
                           </Button>
                         </ScheduleTestModal>
                       </div>
-                      <div className="mt-4 grid md:grid-cols-2 gap-4">
-                        <Link to="/resources" className="w-full">
-                          <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all">
-                            <FileText className="h-6 w-6" />
-                            Browse Resources
-                          </Button>
-                        </Link>
-                        <Link to="/consultation" className="w-full">
-                          <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all">
-                            <Calendar className="h-6 w-6" />
-                            Book Session
-                          </Button>
-                        </Link>
-                      </div>
                     </CardContent>
                   </Card>
                 )}
