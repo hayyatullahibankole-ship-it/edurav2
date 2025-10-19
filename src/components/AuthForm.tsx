@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { emailSchema, passwordSchema, nameSchema, phoneSchema } from "@/utils/inputValidation";
 import eduraLogo from "@/assets/edura-logo.png";
@@ -52,6 +52,17 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Capture referral code from URL
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+      setIsLogin(false); // Switch to signup if there's a referral code
+    }
+  }, [searchParams]);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -214,6 +225,34 @@ export default function AuthForm() {
           
           // Update session token in database
           await setSessionToken(signUpData.user.id, newSessionToken);
+
+          // Process referral if code exists
+          if (referralCode) {
+            try {
+              const { data: userProfile } = await supabase
+                .from('users')
+                .select('id')
+                .eq('auth_user_id', signUpData.user.id)
+                .single();
+
+              if (userProfile?.id) {
+                const { data: referralProcessed } = await supabase.rpc('process_referral_signup', {
+                  new_user_id: userProfile.id,
+                  referral_code_param: referralCode
+                });
+
+                if (referralProcessed) {
+                  toast({
+                    title: "Referral bonus earned!",
+                    description: "You've received welcome points for joining with a referral code.",
+                  });
+                }
+              }
+            } catch (refError) {
+              console.error('Referral processing error:', refError);
+              // Don't block signup if referral processing fails
+            }
+          }
         }
 
         toast({
@@ -297,6 +336,13 @@ export default function AuthForm() {
           </CardHeader>
 
           <CardContent className="space-y-6">
+            {referralCode && !isLogin && (
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-sm">
+                <p className="text-primary font-medium">🎉 Referral code applied: {referralCode}</p>
+                <p className="text-muted-foreground mt-1">You'll earn bonus points when you sign up!</p>
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <>

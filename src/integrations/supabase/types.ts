@@ -2931,6 +2931,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_unique_referral_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_weak_topic_recommendations: {
         Args: { p_user_id: string }
         Returns: {
@@ -3301,6 +3305,10 @@ export type Database = {
           notification_type?: string
         }
         Returns: undefined
+      }
+      process_referral_signup: {
+        Args: { new_user_id: string; referral_code_param: string }
+        Returns: boolean
       }
       recompute_results_for_attempt: {
         Args: { attempt_uuid: string }

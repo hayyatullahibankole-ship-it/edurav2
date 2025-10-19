@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { emailSchema, passwordSchema, nameSchema } from "@/utils/inputValidation";
 import { generateSessionToken, storeSessionToken, setSessionToken } from "@/utils/sessionManager";
@@ -36,6 +36,17 @@ export default function MobileAuthForm() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Capture referral code from URL
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+      setIsLogin(false); // Switch to signup if there's a referral code
+    }
+  }, [searchParams]);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -114,6 +125,33 @@ export default function MobileAuthForm() {
           const newSessionToken = generateSessionToken();
           storeSessionToken(newSessionToken);
           await setSessionToken(signUpData.user.id, newSessionToken);
+
+          // Process referral if code exists
+          if (referralCode) {
+            try {
+              const { data: userProfile } = await supabase
+                .from('users')
+                .select('id')
+                .eq('auth_user_id', signUpData.user.id)
+                .single();
+
+              if (userProfile?.id) {
+                const { data: referralProcessed } = await supabase.rpc('process_referral_signup', {
+                  new_user_id: userProfile.id,
+                  referral_code_param: referralCode
+                });
+
+                if (referralProcessed) {
+                  toast({
+                    title: "Referral bonus earned!",
+                    description: "You've received welcome points!",
+                  });
+                }
+              }
+            } catch (refError) {
+              console.error('Referral processing error:', refError);
+            }
+          }
         }
 
         toast({
@@ -163,6 +201,13 @@ export default function MobileAuthForm() {
 
       {/* Form Section */}
       <div className="flex-1 bg-background px-6 pt-6 pb-8 -mt-6 rounded-t-[2rem] relative z-20 shadow-2xl">
+        {referralCode && !isLogin && (
+          <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-sm mb-4">
+            <p className="text-primary font-medium">🎉 Referral code: {referralCode}</p>
+            <p className="text-muted-foreground mt-1 text-xs">Earn bonus points when you sign up!</p>
+          </div>
+        )}
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <div className="grid grid-cols-2 gap-3">
