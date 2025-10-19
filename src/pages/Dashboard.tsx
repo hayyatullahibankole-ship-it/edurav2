@@ -665,82 +665,6 @@ const Dashboard = () => {
                         </CardContent>
                       </Card>
                     </Link>
-
-                    {/* Study Planner Card */}
-                    <Link to="/study-planner" className="group">
-                      <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-success/5 to-accent/5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-success/10 rounded-full blur-2xl" />
-                        <CardContent className="relative p-5">
-                          <div className="flex items-center gap-4 mb-2">
-                            <div className="p-2.5 bg-gradient-to-br from-success to-accent rounded-xl shadow-md group-hover:scale-105 transition-transform">
-                              <Target className="h-6 w-6 text-white" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-lg mb-1">Study Planner</h3>
-                              <p className="text-sm text-muted-foreground line-clamp-1">Schedule study sessions</p>
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-success group-hover:translate-x-1 transition-transform flex-shrink-0" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-
-                    {/* Performance Report Card */}
-                    <Link to="/performance-report" className="group">
-                      <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-info/5 to-success/5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-info/10 rounded-full blur-2xl" />
-                        <CardContent className="relative p-5">
-                          <div className="flex items-center gap-4 mb-2">
-                            <div className="p-2.5 bg-gradient-to-br from-info to-success rounded-xl shadow-md group-hover:scale-105 transition-transform">
-                              <TrendingUp className="h-6 w-6 text-white" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-lg mb-1">Performance Reports</h3>
-                              <p className="text-sm text-muted-foreground line-clamp-1">View & print reports</p>
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-info group-hover:translate-x-1 transition-transform flex-shrink-0" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-
-                    {/* Referral Program Card */}
-                    <Link to="/referral-program" className="group">
-                      <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-primary/5 to-warning/5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl" />
-                        <CardContent className="relative p-5">
-                          <div className="flex items-center gap-4 mb-2">
-                            <div className="p-2.5 bg-gradient-to-br from-primary to-warning rounded-xl shadow-md group-hover:scale-105 transition-transform">
-                              <Trophy className="h-6 w-6 text-white" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-lg mb-1">Referral Program</h3>
-                              <p className="text-sm text-muted-foreground line-clamp-1">Earn rewards</p>
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-primary group-hover:translate-x-1 transition-transform flex-shrink-0" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-
-                    {/* Payment Options Card */}
-                    <Link to="/payment-options" className="group">
-                      <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-warning/5 to-primary/5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-warning/10 rounded-full blur-2xl" />
-                        <CardContent className="relative p-5">
-                          <div className="flex items-center gap-4 mb-2">
-                            <div className="p-2.5 bg-gradient-to-br from-warning to-primary rounded-xl shadow-md group-hover:scale-105 transition-transform">
-                              <Zap className="h-6 w-6 text-white" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-lg mb-1">Payment Options</h3>
-                              <p className="text-sm text-muted-foreground line-clamp-1">View payment methods</p>
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-warning group-hover:translate-x-1 transition-transform flex-shrink-0" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
                   </div>
                 </div>
 
@@ -921,6 +845,58 @@ const Dashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Study Planner */}
+                <Link to="/study-planner">
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5 text-success" />
+                        Study Planner
+                      </CardTitle>
+                      <CardDescription>Schedule study sessions</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+
+                {/* Performance Reports */}
+                <Link to="/performance-report">
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-info" />
+                        Reports
+                      </CardTitle>
+                      <CardDescription>View & print reports</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+
+                {/* Referral Program */}
+                <Link to="/referral-program">
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Trophy className="h-5 w-5 text-warning" />
+                        Referrals
+                      </CardTitle>
+                      <CardDescription>Earn rewards</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+
+                {/* Payment Options */}
+                <Link to="/payment-options">
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="h-5 w-5 text-primary" />
+                        Payments
+                      </CardTitle>
+                      <CardDescription>Payment methods</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
               </div>
             </div>
           </TabsContent>
