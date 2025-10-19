@@ -35,6 +35,8 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        // Increase cache size limit to 10 MB for large bundle
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -83,6 +85,31 @@ export default defineConfig(({ mode }) => ({
       }
     })
   ].filter(Boolean),
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunk for React and core libraries
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // UI components chunk
+          'vendor-ui': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-tooltip',
+          ],
+          // Chart/visualization libraries
+          'vendor-charts': ['recharts'],
+          // PDF and canvas utilities
+          'vendor-pdf': ['jspdf', 'html2canvas'],
+          // Math rendering
+          'vendor-math': ['katex'],
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
