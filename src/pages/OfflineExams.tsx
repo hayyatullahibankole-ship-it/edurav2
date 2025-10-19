@@ -49,24 +49,19 @@ const OfflineExams = () => {
     try {
       setDownloading(true);
 
-      // Get subjects for the exam type
-      const { data: examData } = await supabase
-        .from('exams')
-        .select(`
-          id,
-          exam_subjects (
-            subject_id
-          )
-        `)
-        .eq('type', selectedExamType as any)
-        .eq('is_published', true)
-        .single();
+      // Get available subjects from the database
+      const { data: subjects, error: subjectsError } = await supabase
+        .from('subjects')
+        .select('id')
+        .limit(4); // Get 4 subjects for a typical exam
 
-      if (!examData) {
-        throw new Error('Exam not found');
+      if (subjectsError) throw subjectsError;
+
+      if (!subjects || subjects.length === 0) {
+        throw new Error('No subjects available');
       }
 
-      const subjectIds = examData.exam_subjects.map((es: any) => es.subject_id);
+      const subjectIds = subjects.map(s => s.id);
 
       const examId = await OfflineExamManager.downloadExamForOffline(
         selectedExamType,
@@ -76,7 +71,7 @@ const OfflineExams = () => {
 
       toast({
         title: 'Download Complete! 📥',
-        description: 'Exam downloaded successfully. You can now practice offline.',
+        description: `Downloaded ${subjects.length} subjects with 10 questions each.`,
       });
 
       await loadOfflineExams();
@@ -84,7 +79,7 @@ const OfflineExams = () => {
       console.error('Error downloading exam:', error);
       toast({
         title: 'Download Failed',
-        description: 'Failed to download exam. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to download exam. Please try again.',
         variant: 'destructive',
       });
     } finally {
