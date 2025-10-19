@@ -118,9 +118,9 @@ const PaymentOptions = () => {
             <Button 
               variant="secondary" 
               className="mt-4"
-              onClick={() => toast({ title: 'Coming Soon', description: 'Wallet funding will be available soon!' })}
+              disabled
             >
-              Fund Wallet
+              Fund Wallet (Coming Soon)
             </Button>
           </CardContent>
         </Card>

@@ -25,7 +25,8 @@ import {
   Bell,
   BellOff,
   TrendingDown,
-  Flame
+  Flame,
+  Calendar
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -600,6 +601,74 @@ const MobileHome = () => {
               <div className="flex-1">
                 <h3 className="font-bold text-base">Expert Tutors</h3>
                 <p className="text-xs text-muted-foreground">Book consultation sessions</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+
+          {/* Study Planner */}
+          <Card 
+            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
+            onClick={() => handleNavigation('/study-planner')}
+          >
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="p-2.5 bg-gradient-to-br from-accent to-success rounded-xl">
+                <Calendar className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base">Study Planner</h3>
+                <p className="text-xs text-muted-foreground">Schedule study sessions</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+
+          {/* Performance Report */}
+          <Card 
+            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
+            onClick={() => handleNavigation('/performance-report')}
+          >
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="p-2.5 bg-gradient-to-br from-success to-info rounded-xl">
+                <FileText className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base">Performance Report</h3>
+                <p className="text-xs text-muted-foreground">View & print reports</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+
+          {/* Referral Program */}
+          <Card 
+            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
+            onClick={() => handleNavigation('/referral-program')}
+          >
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="p-2.5 bg-gradient-to-br from-primary to-warning rounded-xl">
+                <Trophy className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base">Referral Program</h3>
+                <p className="text-xs text-muted-foreground">Earn rewards</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+
+          {/* Payment Options */}
+          <Card 
+            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
+            onClick={() => handleNavigation('/payment-options')}
+          >
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="p-2.5 bg-gradient-to-br from-warning to-primary rounded-xl">
+                <Zap className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-base">Payment Options</h3>
+                <p className="text-xs text-muted-foreground">View payment methods</p>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </CardContent>
