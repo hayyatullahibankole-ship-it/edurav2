@@ -44,6 +44,10 @@ import ChallengeDetail from "./pages/ChallengeDetail";
 import ChallengeResults from "./pages/ChallengeResults";
 import SchoolRegistration from "./pages/SchoolRegistration";
 import OfflineExams from "./pages/OfflineExams";
+import StudyPlanner from "./pages/StudyPlanner";
+import ReferralProgram from "./pages/ReferralProgram";
+import PaymentOptions from "./pages/PaymentOptions";
+import PerformanceReport from "./pages/PerformanceReport";
 import LessonQuiz from "./pages/LessonQuiz";
 
 const queryClient = new QueryClient();
@@ -176,6 +180,26 @@ const AppRoutes = () => {
             <Route path="/offline-exams" element={
               <ProtectedRoute>
                 <Layout><OfflineExams /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/study-planner" element={
+              <ProtectedRoute>
+                <Layout><StudyPlanner /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/referral-program" element={
+              <ProtectedRoute>
+                <Layout><ReferralProgram /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/payment-options" element={
+              <ProtectedRoute>
+                <Layout><PaymentOptions /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/performance-report" element={
+              <ProtectedRoute>
+                <Layout><PerformanceReport /></Layout>
               </ProtectedRoute>
             } />
             <Route path="/study-hub/lesson/:lessonId/quiz" element={

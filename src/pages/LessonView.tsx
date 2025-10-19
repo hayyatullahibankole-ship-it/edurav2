@@ -9,6 +9,7 @@ import { Clock, FileText, Download, PlayCircle, BookOpen, CheckCircle2 } from 'l
 import { toast } from 'sonner';
 import Layout from '@/components/Layout';
 import { ContentRenderer } from '@/components/ui/content-renderer';
+import { VideoPlayer } from '@/components/study/VideoPlayer';
 
 interface Lesson {
   id: string;
@@ -18,6 +19,9 @@ interface Lesson {
   estimated_minutes: number;
   topic_id: string;
   media_urls?: any;
+  video_url?: string;
+  video_platform?: string;
+  video_duration_minutes?: number;
   study_topics: {
     title: string;
     subjects: { name: string };
