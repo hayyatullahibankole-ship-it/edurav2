@@ -41,10 +41,6 @@ import { ModernQuickAction } from "@/components/dashboard/ModernQuickAction";
 import { MobileStatCard } from "@/components/dashboard/MobileStatCard";
 import { MobileTestCard } from "@/components/dashboard/MobileTestCard";
 import { MobileSubjectCard } from "@/components/dashboard/MobileSubjectCard";
-import { SyllabusCoverageCard } from "@/components/dashboard/SyllabusCoverageCard";
-import { WeakTopicsCard } from "@/components/dashboard/WeakTopicsCard";
-import { StreakCard } from "@/components/dashboard/StreakCard";
-import { OfflineModeCard } from "@/components/dashboard/OfflineModeCard";
 import NotificationBell from "@/components/NotificationBell";
 import OnboardingTour from "@/components/OnboardingTour";
 import LoadingAnimation from "@/components/LoadingAnimation";
@@ -672,12 +668,6 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Syllabus Coverage Tracker - Desktop Only */}
-                {!isInstalledApp && <SyllabusCoverageCard />}
-                
-                {/* Weak Topics Recommendations - Desktop Only */}
-                {!isInstalledApp && <WeakTopicsCard />}
-
                 {/* Recent Test Results - Mobile Optimized */}
                 {isMobile ? (
                   <div className="space-y-3 animate-fade-in">
@@ -828,9 +818,6 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                {/* Daily Practice Streak Card */}
-                <StreakCard />
-
                 {/* Subscription Status */}
                 <Card>
                   <CardHeader>
@@ -858,9 +845,6 @@ const Dashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
-
-                {/* Offline Mode Card */}
-                <OfflineModeCard />
               </div>
             </div>
           </TabsContent>
