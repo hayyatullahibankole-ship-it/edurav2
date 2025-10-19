@@ -5,6 +5,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { OfflineIndicator } from "./components/OfflineIndicator";
+import { useOfflineSync } from "./hooks/useOfflineSync";
+import { offlineStorage } from "./utils/offlineStorage";
+import { useEffect } from "react";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -39,15 +43,26 @@ import ChallengeArena from "./pages/ChallengeArena";
 import ChallengeDetail from "./pages/ChallengeDetail";
 import ChallengeResults from "./pages/ChallengeResults";
 import SchoolRegistration from "./pages/SchoolRegistration";
+import OfflineExams from "./pages/OfflineExams";
 import LessonQuiz from "./pages/LessonQuiz";
 
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const { isInstalledApp } = useInstalledApp();
+  useOfflineSync(); // Enable offline sync
+
+  // Initialize offline storage and cleanup on mount
+  useEffect(() => {
+    offlineStorage.init().then(() => {
+      offlineStorage.cleanupExpiredData();
+    });
+  }, []);
 
   return (
-    <Routes>
+    <>
+      <OfflineIndicator />
+      <Routes>
       {/* Mobile-specific routes */}
       <Route path="/mobile-splash" element={<MobileSplash />} />
       <Route path="/mobile-onboarding" element={<MobileOnboarding />} />
@@ -158,6 +173,11 @@ const AppRoutes = () => {
               </ProtectedRoute>
             } />
             <Route path="/school-registration" element={<Layout><SchoolRegistration /></Layout>} />
+            <Route path="/offline-exams" element={
+              <ProtectedRoute>
+                <Layout><OfflineExams /></Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/study-hub/lesson/:lessonId/quiz" element={
               <ProtectedRoute>
                 <LessonQuiz />
@@ -170,6 +190,7 @@ const AppRoutes = () => {
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<Layout><NotFound /></Layout>} />
           </Routes>
+    </>
   );
 };
 

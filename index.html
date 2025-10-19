@@ -4,9 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edura - Advanced CBT Exam Platform</title>
-    <meta name="description" content="Edura - Nigeria's premier Computer-Based Test (CBT) platform for JAMB, WAEC, NECO, and Post-UTME preparation. Practice with authentic past questions, get instant results, and track your progress.">
-    <meta name="keywords" content="CBT, JAMB, WAEC, NECO, Post-UTME, exam preparation, Nigeria, past questions, online testing">
+    <meta name="description" content="Edura - Nigeria's premier Computer-Based Test (CBT) platform for JAMB, WAEC, NECO, and Post-UTME preparation. Practice with authentic past questions, get instant results, and track your progress. Now with offline mode!">
+    <meta name="keywords" content="CBT, JAMB, WAEC, NECO, Post-UTME, exam preparation, Nigeria, past questions, online testing, offline mode">
     <meta name="author" content="Edura Team" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#667eea" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Edura CBT" />
+    <link rel="apple-touch-icon" href="/app-icon-white.png" />
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,19 +24,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://edura.app/" />
 
-
-
-
     <link rel="manifest" href="/manifest.json">
-        
-    <script>
-    if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/pwabuilder-sw.js")
-      .then(() => console.log("Service Worker registered"))
-      .catch(err => console.error("SW registration failed:", err));
-     }
-     </script>
-    
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />

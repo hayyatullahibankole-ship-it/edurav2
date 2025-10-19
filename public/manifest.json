@@ -1,47 +1,50 @@
 {
   "id": "com.edura.app",
   "background_color": "#ffffff",
-  "description": "Edura - Nigeria's premier Computer-Based Test (CBT) platform for JAMB, WAEC, NECO, and Post-UTME preparation. Practice with authentic past questions, get instant results, and track your progress.",
+  "description": "Edura - Nigeria's premier Computer-Based Test (CBT) platform for JAMB, WAEC, NECO, and Post-UTME preparation. Practice with authentic past questions, get instant results, and track your progress. Now with offline mode!",
   "dir": "ltr",
   "display": "standalone",
   "name": "Edura - Advanced CBT Exam Platform",
   "orientation": "any",
   "scope": "/",
-  "short_name": "Edura - Advanced CBT Exam Platform",
+  "short_name": "Edura CBT",
   "start_url": "/",
-  "theme_color": "#ffffff",
+  "theme_color": "#667eea",
+  "categories": ["education", "productivity"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/app-icon-white.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Practice Test",
+      "short_name": "Practice",
+      "description": "Start a practice test",
+      "url": "/demo-test",
+      "icons": [
+        {
+          "src": "/app-icon-white.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
-      "src": "https://storage.googleapis.com/gpt-engineer-file-uploads/qbxQW8rAQxXOqqqHt7nazjc7N1w2/social-images/social-1758960159527-1002547319.png",
-      "type": "image/png",
-      "sizes": "1024x1024",
-      "isSquare": true,
-      "isPng": true,
-      "isWebp": false,
-      "isJpg": false,
-      "width": 1024,
-      "is512x512": false,
-      "is256x256": false,
-      "is192x192": false
-    },
-    {
-      "src": "https://edura.space/favicon.ico",
-      "type": "image/png",
-      "sizes": "73x74",
-      "isSquare": false,
-      "isPng": true,
-      "isWebp": false,
-      "isJpg": false,
-      "width": 73,
-      "is512x512": false,
-      "is256x256": false,
-      "is192x192": false
+      "name": "Offline Exams",
+      "short_name": "Offline",
+      "description": "Access offline exams",
+      "url": "/offline-exams",
+      "icons": [
+        {
+          "src": "/app-icon-white.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
