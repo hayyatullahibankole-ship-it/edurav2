@@ -656,23 +656,6 @@ const MobileHome = () => {
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </CardContent>
           </Card>
-
-          {/* Payment Options */}
-          <Card 
-            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
-            onClick={() => handleNavigation('/payment-options')}
-          >
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-warning to-primary rounded-xl">
-                <Zap className="h-5 w-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-base">Payment Options</h3>
-                <p className="text-xs text-muted-foreground">View payment methods</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </CardContent>
-          </Card>
         </div>
 
         {/* Recent Results */}

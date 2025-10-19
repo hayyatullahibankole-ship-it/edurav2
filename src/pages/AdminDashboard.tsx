@@ -48,7 +48,6 @@ import ResourceManagement from '@/components/admin/ResourceManagement';
 import AnalyticsHub from '@/components/admin/AnalyticsHub';
 import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
-import { PaymentSettings } from '@/components/admin/PaymentSettings';
 import PricingManager from '@/components/admin/PricingManager';
 import NotificationManager from '@/components/admin/NotificationManager';
 
@@ -620,7 +619,7 @@ export default function AdminDashboard() {
         {/* Enhanced Admin Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <TabsList className="grid grid-cols-4 lg:grid-cols-11 w-full lg:w-auto bg-card border overflow-x-auto">
+            <TabsList className="grid grid-cols-4 lg:grid-cols-10 w-full lg:w-auto bg-card border overflow-x-auto">
               <TabsTrigger value="overview" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Overview</TabsTrigger>
               <TabsTrigger value="users" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Users</TabsTrigger>
               <TabsTrigger value="exams" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Exams</TabsTrigger>
@@ -628,7 +627,6 @@ export default function AdminDashboard() {
               <TabsTrigger value="resources" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Resources</TabsTrigger>
               <TabsTrigger value="subscriptions" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Subscriptions</TabsTrigger>
               <TabsTrigger value="analytics" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Analytics</TabsTrigger>
-              <TabsTrigger value="payments" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Payments</TabsTrigger>
               <TabsTrigger value="notifications" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Notifications</TabsTrigger>
               <TabsTrigger value="security" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Security</TabsTrigger>
               <TabsTrigger value="monitor" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Monitor</TabsTrigger>
@@ -745,10 +743,6 @@ export default function AdminDashboard() {
 
           <TabsContent value="analytics" className="space-y-6">
             <AnalyticsHub />
-          </TabsContent>
-
-          <TabsContent value="payments" className="space-y-6">
-            <PaymentSettings />
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">

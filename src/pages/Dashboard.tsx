@@ -884,19 +884,6 @@ const Dashboard = () => {
                     </CardHeader>
                   </Card>
                 </Link>
-
-                {/* Payment Options */}
-                <Link to="/payment-options">
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Zap className="h-5 w-5 text-primary" />
-                        Payments
-                      </CardTitle>
-                      <CardDescription>Payment methods</CardDescription>
-                    </CardHeader>
-                  </Card>
-                </Link>
               </div>
             </div>
           </TabsContent>

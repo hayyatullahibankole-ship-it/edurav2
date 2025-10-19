@@ -46,7 +46,6 @@ import SchoolRegistration from "./pages/SchoolRegistration";
 import OfflineExams from "./pages/OfflineExams";
 import StudyPlanner from "./pages/StudyPlanner";
 import ReferralProgram from "./pages/ReferralProgram";
-import PaymentOptions from "./pages/PaymentOptions";
 import PerformanceReport from "./pages/PerformanceReport";
 import LessonQuiz from "./pages/LessonQuiz";
 
@@ -190,11 +189,6 @@ const AppRoutes = () => {
             <Route path="/referral-program" element={
               <ProtectedRoute>
                 <Layout><ReferralProgram /></Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/payment-options" element={
-              <ProtectedRoute>
-                <Layout><PaymentOptions /></Layout>
               </ProtectedRoute>
             } />
             <Route path="/performance-report" element={
