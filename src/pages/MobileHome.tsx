@@ -39,6 +39,7 @@ import ProfileSettings from '@/components/ProfileSettings';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import NotificationBell from '@/components/NotificationBell';
+import { AIAssistant } from '@/components/AIAssistant';
 
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
@@ -888,6 +889,12 @@ const MobileHome = () => {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* WhatsApp Support Button */}
+      <WhatsAppButton />
+
+      {/* AI Assistant */}
+      <AIAssistant />
     </div>
   );
 };
