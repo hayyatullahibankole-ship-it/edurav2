@@ -150,20 +150,30 @@ export const AIAssistant = () => {
 
   if (!isOpen) {
     return (
-      <Button
-        onClick={() => setIsOpen(true)}
-        size="lg"
-        className="fixed bottom-6 right-24 h-14 w-14 rounded-full shadow-2xl z-50 bg-gradient-to-br from-green-500 to-green-600 hover:scale-110 transition-all animate-fade-in p-0"
-      >
-        {/* Glow effect */}
-        <div className="absolute inset-0 rounded-full bg-green-500/50 blur-xl animate-pulse" />
+      <div className="fixed bottom-6 right-6 z-50 animate-fade-in">
+        <Button
+          onClick={() => setIsOpen(true)}
+          size="lg"
+          className="w-14 h-14 rounded-full shadow-2xl animate-bounce-slow bg-gradient-to-br from-green-500 to-green-600 hover:scale-110 transition-all p-0 relative"
+        >
+          {/* Glow effect */}
+          <div className="absolute inset-0 rounded-full bg-green-500/50 blur-xl animate-pulse" />
+          
+          {/* Icon */}
+          <MessageCircle className="relative h-6 w-6 text-white" />
+          
+          {/* AI Badge */}
+          <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-white text-green-600 text-[10px] font-bold rounded-full shadow-md border-2 border-green-500">
+            AI
+          </span>
+        </Button>
         
-        {/* Icon */}
-        <MessageCircle className="relative h-6 w-6 text-white" />
-        
-        {/* Status indicator */}
-        <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-300 rounded-full animate-pulse border-2 border-white" />
-      </Button>
+        {/* Label tooltip */}
+        <div className="absolute -top-12 right-0 bg-green-600 text-white px-3 py-1 rounded-lg text-xs whitespace-nowrap shadow-lg animate-pulse">
+          Ask AI Assistant
+          <div className="absolute bottom-[-4px] right-4 w-2 h-2 bg-green-600 transform rotate-45" />
+        </div>
+      </div>
     );
   }
 
