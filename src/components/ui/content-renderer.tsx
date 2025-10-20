@@ -61,6 +61,25 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
         const trimmed = block.trim();
         if (!trimmed) return '';
 
+        // Check if block contains numbered list (1. 2. 3. etc at start of lines)
+        const hasNumberedList = /^\d+\.\s/.test(trimmed) || trimmed.includes('\n1.') || trimmed.includes('\n2.');
+        if (hasNumberedList) {
+          const listItems = trimmed
+            .split(/\n/)
+            .map(line => {
+              const match = line.match(/^(\d+)\.\s+(.+)$/);
+              if (match) {
+                const [, num, content] = match;
+                return `<div class="flex gap-3 mb-4"><span class="font-semibold min-w-[24px]">${num}.</span><span class="flex-1">${renderMathInline(content)}</span></div>`;
+              }
+              // Line continuation (not a new number)
+              return line.trim() ? `<div class="ml-9 mb-2">${renderMathInline(line)}</div>` : '';
+            })
+            .filter(l => l)
+            .join('');
+          return `<div class="mb-12">${listItems}</div>`;
+        }
+
         // Check for tables ONLY (strict: 3+ tabs, 3+ rows, no questions/answers)
         if (trimmed.includes('\t')) {
           const rows = trimmed.split('\n').filter(row => row.trim());
@@ -94,7 +113,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
           .map(line => renderMathInline(line))
           .join('\n');
         
-        return `<div class="mb-6 text-base leading-relaxed whitespace-pre-line">${processedContent}</div>`;
+        return `<div class="mb-12 text-base leading-relaxed whitespace-pre-line">${processedContent}</div>`;
       })
       .filter(p => p)
       .join('');

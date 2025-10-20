@@ -5,7 +5,52 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { MathRenderer } from "@/components/ui/math-renderer";
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+
+// Process markdown formatting (bold, italic) AND LaTeX math
+const processMarkdown = (text: string): string => {
+  let processed = text;
+  
+  // First, process LaTeX display math ($$...$$)
+  processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (match, math) => {
+    try {
+      return `<div class="my-4 text-center">${katex.renderToString(math.trim(), {
+        displayMode: true,
+        throwOnError: false,
+        strict: false,
+        trust: true,
+      })}</div>`;
+    } catch (e) {
+      return `<div class="text-red-600 text-sm">Math Error</div>`;
+    }
+  });
+  
+  // Then process inline math ($...$)
+  processed = processed.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
+    try {
+      return katex.renderToString(math.trim(), {
+        displayMode: false,
+        throwOnError: false,
+        strict: false,
+        trust: true,
+      });
+    } catch (e) {
+      return `<span class="text-red-600 text-sm">Math Error</span>`;
+    }
+  });
+  
+  // Then process markdown formatting
+  // Bold: **text** -> <strong>text</strong>
+  processed = processed.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold">$1</strong>');
+  // Italic: *text* -> <em>text</em> (but avoid matching **)
+  processed = processed.replace(/(?<!\*)\*(?!\*)([^*\n]+?)\*(?!\*)/g, '<em class="italic">$1</em>');
+  
+  // Preserve line breaks
+  processed = processed.replace(/\n/g, '<br/>');
+  
+  return processed;
+};
 
 interface Message {
   role: "user" | "assistant";
@@ -272,7 +317,12 @@ export const AIAssistant = () => {
               }`}
             >
               {message.role === "assistant" ? (
-                <MathRenderer content={message.content} className="text-sm leading-relaxed" />
+                <div 
+                  className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ 
+                    __html: processMarkdown(message.content)
+                  }}
+                />
               ) : (
                 <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
               )}
