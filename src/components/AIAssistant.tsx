@@ -165,33 +165,32 @@ export const AIAssistant = () => {
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={() => setIsOpen(true)}
-          size="lg"
-          className="w-16 h-16 rounded-2xl shadow-2xl bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 hover:scale-110 transition-all duration-500 p-0 relative group animate-bounce-slow"
+          className="w-14 h-14 rounded-2xl shadow-2xl bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 hover:scale-110 transition-all duration-500 p-0 relative group animate-bounce-slow"
         >
           {/* Multi-layered animated glow effect */}
           <div className="absolute inset-0 rounded-2xl bg-green-400/60 blur-2xl animate-pulse" />
           <div className="absolute inset-0 rounded-2xl bg-green-300/40 blur-xl animate-pulse" style={{ animationDelay: '0.5s' }} />
           <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-green-400 to-emerald-400 opacity-50 blur-md animate-pulse" style={{ animationDelay: '1s' }} />
           
-          {/* Morphing Icon with looking around animation */}
-          <div className="relative h-7 w-7 mx-auto transition-all duration-300 animate-[wiggle_2s_ease-in-out_infinite]">
-            <IconComponent className="h-full w-full text-white drop-shadow-lg transition-all duration-500" />
+          {/* Morphing Icon - centered and contained */}
+          <div className="relative w-full h-full flex items-center justify-center">
+            <IconComponent className="h-6 w-6 text-white drop-shadow-lg transition-all duration-500" />
           </div>
           
           {/* AI Badge */}
-          <div className="absolute -top-2 -right-2 px-2.5 py-1 bg-white text-green-600 text-[11px] font-bold rounded-lg shadow-lg border border-green-200 animate-pulse">
+          <div className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 bg-white text-green-600 text-[10px] font-bold rounded-md shadow-lg border border-green-200 animate-pulse">
             AI
           </div>
           
           {/* Multiple pulsing indicators */}
-          <span className="absolute top-1 left-1 h-2 w-2 bg-green-300 rounded-full animate-ping" />
-          <span className="absolute top-1 left-1 h-2 w-2 bg-green-300 rounded-full" />
+          <span className="absolute top-1 left-1 h-1.5 w-1.5 bg-green-300 rounded-full animate-ping" />
+          <span className="absolute top-1 left-1 h-1.5 w-1.5 bg-green-300 rounded-full" />
         </Button>
         
         {/* Modern tooltip */}
-        <div className="absolute -top-14 right-0 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap shadow-xl animate-pulse backdrop-blur-sm">
-          AI Study Assistant
-          <div className="absolute bottom-[-6px] right-6 w-3 h-3 bg-green-600 transform rotate-45" />
+        <div className="absolute -top-12 right-0 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap shadow-xl animate-pulse backdrop-blur-sm">
+          AI Assistant
+          <div className="absolute bottom-[-4px] right-5 w-2 h-2 bg-green-600 transform rotate-45" />
         </div>
       </div>
     );
