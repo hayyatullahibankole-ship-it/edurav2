@@ -37,6 +37,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const validateCurrentSession = async (): Promise<boolean> => {
     if (!user) return false;
     
+    // If offline, skip validation and trust cached session
+    if (!navigator.onLine) {
+      console.log('Offline mode - skipping session validation');
+      return true;
+    }
+    
     const localToken = getSessionToken();
     if (!localToken) {
       console.warn('No local session token found');
@@ -44,20 +50,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return false;
     }
 
-    const isValid = await validateSessionToken(user.id, localToken);
-    
-    if (!isValid) {
-      console.warn('Session token invalid - logging out');
-      toast({
-        title: "Session Expired",
-        description: "You've been logged out because your account was accessed from another device.",
-        variant: "destructive",
-      });
+    try {
+      const isValid = await validateSessionToken(user.id, localToken);
+      
+      if (!isValid) {
+        console.warn('Session token invalid - logging out');
+        toast({
+          title: "Session Expired",
+          description: "You've been logged out because your account was accessed from another device.",
+          variant: "destructive",
+        });
+        await signOut();
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      // If validation fails due to network error, assume session is valid offline
+      console.warn('Session validation failed, checking if offline:', error);
+      if (!navigator.onLine) {
+        return true;
+      }
+      // If online but validation failed for other reasons, log out
       await signOut();
       return false;
     }
-
-    return true;
   };
 
   useEffect(() => {
