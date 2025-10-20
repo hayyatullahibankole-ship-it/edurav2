@@ -5,6 +5,7 @@ import MobileNav from "./MobileNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
+import { AIAssistant } from "./AIAssistant";
 
 interface LayoutProps {
   children: ReactNode;
@@ -46,6 +47,7 @@ const Layout = ({ children, showNavbar = true, showWhatsAppButton = true }: Layo
         {children}
       </main>
       {showWhatsAppButton && <WhatsAppButton />}
+      <AIAssistant />
       
       {/* Mobile Navigation - Show only for installed apps */}
       {isInstalledApp && (
