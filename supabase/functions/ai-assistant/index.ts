@@ -13,15 +13,19 @@ serve(async (req) => {
 
   try {
     const { messages } = await req.json();
+    console.log("Received messages:", messages?.length, "messages");
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
     // Process messages to handle images (convert to multimodal format)
     const processedMessages = messages.map((msg: any) => {
       if (msg.images && msg.images.length > 0) {
+        console.log("Processing message with images:", msg.images.length);
         // Convert to multimodal format for vision models
         return {
           role: msg.role,
@@ -233,6 +237,8 @@ Response:
 
 Be friendly, encouraging, and supportive. Keep responses concise and actionable.`;
 
+    console.log("Calling AI gateway with processed messages");
+    
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -248,6 +254,8 @@ Be friendly, encouraging, and supportive. Keep responses concise and actionable.
         stream: true,
       }),
     });
+
+    console.log("AI gateway response status:", response.status);
 
     if (!response.ok) {
       if (response.status === 429) {

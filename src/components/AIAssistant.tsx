@@ -1,10 +1,16 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, X, Send, Mic, MicOff, Loader2, Brain, Zap, MessageCircle, Image as ImageIcon, XCircle } from "lucide-react";
+import { Sparkles, X, Send, Mic, MicOff, Loader2, Brain, Zap, MessageCircle, Image as ImageIcon, XCircle, Camera, Paperclip, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
@@ -69,6 +75,7 @@ export const AIAssistant = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -155,6 +162,7 @@ export const AIAssistant = () => {
       reader.onloadend = () => {
         const base64String = reader.result as string;
         setUploadedImages((prev) => [...prev, base64String]);
+        toast.success("Image added successfully");
       };
       reader.readAsDataURL(file);
     });
@@ -162,6 +170,9 @@ export const AIAssistant = () => {
     // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
+    }
+    if (cameraInputRef.current) {
+      cameraInputRef.current.value = "";
     }
   };
 
@@ -180,6 +191,8 @@ export const AIAssistant = () => {
     setIsLoading(true);
 
     try {
+      console.log("Sending message to AI assistant...", { messageCount: newMessages.length, hasImages: !!images?.length });
+      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`,
         {
@@ -192,8 +205,12 @@ export const AIAssistant = () => {
         }
       );
 
+      console.log("Response status:", response.status);
+
       if (!response.ok) {
-        throw new Error("Failed to get response");
+        const errorText = await response.text();
+        console.error("AI Assistant error response:", errorText);
+        throw new Error(`Failed to get response: ${response.status} - ${errorText}`);
       }
 
       const reader = response.body?.getReader();
@@ -241,7 +258,9 @@ export const AIAssistant = () => {
       }
     } catch (error) {
       console.error("AI Assistant error:", error);
-      toast.error("Failed to get response. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Failed to get response";
+      toast.error(errorMessage);
+      // Remove the user message that failed
       setMessages(messages);
     } finally {
       setIsLoading(false);
@@ -437,17 +456,39 @@ export const AIAssistant = () => {
         )}
         
         <div className="flex gap-3">
-          <div className="flex-1">
-            <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask me anything..."
-              className="min-h-[64px] resize-none border-green-200 dark:border-green-900/50 focus-visible:ring-green-500 rounded-2xl shadow-sm"
-              disabled={isLoading}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex-1 relative">
+            {/* Upload options dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-2 top-2 h-8 w-8 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/20"
+                  disabled={isLoading}
+                >
+                  <Paperclip className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuItem 
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadedImages.length >= 5}
+                  className="cursor-pointer"
+                >
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  Add photos & files
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => cameraInputRef.current?.click()}
+                  disabled={uploadedImages.length >= 5}
+                  className="cursor-pointer"
+                >
+                  <Camera className="h-4 w-4 mr-2" />
+                  Take photo
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <input
               ref={fileInputRef}
               type="file"
@@ -456,16 +497,25 @@ export const AIAssistant = () => {
               onChange={handleImageUpload}
               className="hidden"
             />
-            <Button
-              size="icon"
-              onClick={() => fileInputRef.current?.click()}
-              variant="outline"
-              disabled={isLoading || uploadedImages.length >= 5}
-              className="rounded-xl h-12 w-12 shadow-sm border-green-200 dark:border-green-900/50 hover:bg-green-50 dark:hover:bg-green-950 hover:text-green-700 dark:hover:text-green-300 hover:border-green-300"
-              title="Upload images"
-            >
-              <ImageIcon className="h-5 w-5" />
-            </Button>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask me anything..."
+              className="min-h-[64px] pl-12 resize-none border-green-200 dark:border-green-900/50 focus-visible:ring-green-500 rounded-2xl shadow-sm"
+              disabled={isLoading}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
             <Button
               size="icon"
               onClick={toggleVoiceInput}
