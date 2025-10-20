@@ -153,37 +153,53 @@ export const AIAssistant = () => {
       <Button
         onClick={() => setIsOpen(true)}
         size="lg"
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50"
+        className="fixed bottom-6 right-24 h-14 w-14 rounded-full shadow-2xl z-50 bg-gradient-to-br from-green-500 to-green-600 hover:scale-110 transition-all animate-fade-in p-0"
       >
-        <MessageCircle className="h-6 w-6" />
+        {/* Glow effect */}
+        <div className="absolute inset-0 rounded-full bg-green-500/50 blur-xl animate-pulse" />
+        
+        {/* Icon */}
+        <MessageCircle className="relative h-6 w-6 text-white" />
+        
+        {/* Status indicator */}
+        <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-300 rounded-full animate-pulse border-2 border-white" />
       </Button>
     );
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-background border rounded-lg shadow-2xl flex flex-col z-50">
+    <div className="fixed bottom-6 right-24 w-96 h-[600px] bg-background border-2 border-green-500/20 rounded-2xl shadow-2xl flex flex-col z-50 animate-scale-in">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-green-500 to-green-600 rounded-t-2xl">
         <div className="flex items-center gap-2">
-          <MessageCircle className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold">Edura AI Assistant</h3>
+          <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
+            <MessageCircle className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-white">Edura AI Assistant</h3>
+            <p className="text-xs text-white/80">Always here to help</p>
+          </div>
         </div>
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setIsOpen(false)}
+          className="text-white hover:bg-white/20"
         >
           <X className="h-4 w-4" />
         </Button>
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+      <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-green-50/50 to-background dark:from-green-950/10" ref={scrollRef}>
         {messages.length === 0 && (
-          <div className="text-center text-muted-foreground py-8">
-            <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <div className="text-center text-muted-foreground py-8 animate-fade-in">
+            <div className="h-16 w-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+              <MessageCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+            </div>
+            <h4 className="font-semibold mb-2 text-foreground">Welcome to Edura AI! 👋</h4>
             <p className="text-sm">
-              Hi! I'm your AI study assistant. Ask me anything about exams,
+              I'm your AI study assistant. Ask me anything about exams,
               study tips, or how to use Edura!
             </p>
           </div>
@@ -191,39 +207,42 @@ export const AIAssistant = () => {
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`mb-4 ${
+            className={`mb-4 animate-fade-in ${
               message.role === "user" ? "text-right" : "text-left"
             }`}
           >
             <div
-              className={`inline-block px-4 py-2 rounded-lg max-w-[85%] ${
+              className={`inline-block px-4 py-3 rounded-2xl max-w-[85%] shadow-sm ${
                 message.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
+                  ? "bg-green-600 text-white rounded-br-sm"
+                  : "bg-muted rounded-bl-sm"
               }`}
             >
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
             </div>
           </div>
         ))}
         {isLoading && (
-          <div className="text-left mb-4">
-            <div className="inline-block px-4 py-2 rounded-lg bg-muted">
-              <Loader2 className="h-4 w-4 animate-spin" />
+          <div className="text-left mb-4 animate-fade-in">
+            <div className="inline-block px-4 py-3 rounded-2xl bg-muted shadow-sm">
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin text-green-600" />
+                <span className="text-sm text-muted-foreground">Thinking...</span>
+              </div>
             </div>
           </div>
         )}
       </ScrollArea>
 
       {/* Input */}
-      <div className="p-4 border-t">
+      <div className="p-4 border-t bg-background">
         <div className="flex gap-2">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask me anything..."
-            className="min-h-[60px] resize-none"
+            className="min-h-[60px] resize-none border-green-200 dark:border-green-900 focus-visible:ring-green-500"
             disabled={isLoading}
           />
           <div className="flex flex-col gap-2">
@@ -232,6 +251,7 @@ export const AIAssistant = () => {
               onClick={toggleVoiceInput}
               variant={isListening ? "destructive" : "outline"}
               disabled={isLoading}
+              className={isListening ? "" : "border-green-200 dark:border-green-900 hover:bg-green-50 dark:hover:bg-green-950 hover:text-green-700 dark:hover:text-green-300"}
             >
               {isListening ? (
                 <MicOff className="h-4 w-4" />
@@ -243,6 +263,7 @@ export const AIAssistant = () => {
               size="icon"
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
+              className="bg-green-600 hover:bg-green-700 text-white"
             >
               <Send className="h-4 w-4" />
             </Button>
