@@ -53,71 +53,63 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
   const formatContent = (text: string): string => {
     if (!text) return '';
 
-    // Split by double newlines to preserve paragraph structure
-    const blocks = text.split('\n\n');
+    // Split content into lines and process them
+    const lines = text.split('\n');
+    let result = '';
+    let currentParagraph: string[] = [];
+    let inNumberedList = false;
     
-    return blocks
-      .map(block => {
-        const trimmed = block.trim();
-        if (!trimmed) return '';
-
-        // Check if block contains numbered list (1. 2. 3. etc at start of lines)
-        const hasNumberedList = /^\d+\.\s/.test(trimmed) || trimmed.includes('\n1.') || trimmed.includes('\n2.');
-        if (hasNumberedList) {
-          const listItems = trimmed
-            .split(/\n/)
-            .map(line => {
-              const match = line.match(/^(\d+)\.\s+(.+)$/);
-              if (match) {
-                const [, num, content] = match;
-                return `<div class="flex gap-3 mb-4"><span class="font-semibold min-w-[24px]">${num}.</span><span class="flex-1">${renderMathInline(content)}</span></div>`;
-              }
-              // Line continuation (not a new number)
-              return line.trim() ? `<div class="ml-9 mb-2">${renderMathInline(line)}</div>` : '';
-            })
-            .filter(l => l)
-            .join('');
-          return `<div class="mb-12">${listItems}</div>`;
+    const flushParagraph = () => {
+      if (currentParagraph.length > 0) {
+        const content = currentParagraph.join('\n');
+        result += `<div class="mb-12 text-base leading-relaxed">${renderMathInline(content)}</div>`;
+        currentParagraph = [];
+      }
+    };
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      // Empty line - flush current paragraph
+      if (!line) {
+        if (inNumberedList) {
+          inNumberedList = false;
         }
-
-        // Check for tables ONLY (strict: 3+ tabs, 3+ rows, no questions/answers)
-        if (trimmed.includes('\t')) {
-          const rows = trimmed.split('\n').filter(row => row.trim());
-          if (rows.length >= 3) {
-            const firstRow = rows[0];
-            const tabCount = (firstRow.match(/\t/g) || []).length;
-            const isRealTable = 
-              tabCount >= 2 &&
-              !firstRow.includes('?') &&
-              !firstRow.includes('(') &&
-              rows.every(row => !row.includes('(A)') && !row.includes('(B)'));
-            
-            if (isRealTable) {
-              const headerCells = rows[0].split('\t').map(cell => 
-                `<th class="border border-border bg-primary/10 px-3 py-2 font-semibold text-left text-sm">${renderMathInline(cell.trim())}</th>`
-              ).join('');
-              const bodyRows = rows.slice(1).map((row, idx) => {
-                const cells = row.split('\t').map(cell =>
-                  `<td class="border border-border px-3 py-2 text-sm">${renderMathInline(cell.trim())}</td>`
-                ).join('');
-                return `<tr class="${idx % 2 === 0 ? 'bg-card' : 'bg-muted/20'}">${cells}</tr>`;
-              }).join('');
-              return `<div class="overflow-x-auto my-6"><table class="w-full border-collapse border border-border rounded-lg text-sm"><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table></div>`;
-            }
-          }
-        }
-
-        // For everything else: preserve exact formatting with line breaks
-        const processedContent = trimmed
-          .split('\n')
-          .map(line => renderMathInline(line))
-          .join('\n');
+        flushParagraph();
+        continue;
+      }
+      
+      // Check if line starts with a number followed by period (numbered list item)
+      const numberedMatch = line.match(/^(\d+)\.\s+(.+)$/);
+      
+      if (numberedMatch) {
+        // Flush any existing paragraph before starting numbered list
+        flushParagraph();
         
-        return `<div class="mb-12 text-base leading-relaxed whitespace-pre-line">${processedContent}</div>`;
-      })
-      .filter(p => p)
-      .join('');
+        const [, num, content] = numberedMatch;
+        result += `<div class="flex gap-3 mb-6">
+          <span class="font-semibold text-primary min-w-[32px]">${num}.</span>
+          <div class="flex-1 leading-relaxed">${renderMathInline(content)}</div>
+        </div>`;
+        inNumberedList = true;
+      } else if (inNumberedList && line && !line.match(/^\d+\./)) {
+        // Continuation of previous numbered item (indented content)
+        result += `<div class="ml-11 mb-3 leading-relaxed">${renderMathInline(line)}</div>`;
+      } else {
+        // Regular paragraph line
+        if (inNumberedList) {
+          inNumberedList = false;
+        }
+        currentParagraph.push(line);
+      }
+    }
+    
+    // Flush any remaining paragraph
+    flushParagraph();
+    
+    return result;
   };
+
 
   const formattedHTML = formatContent(processedContent);
   const sanitizedHTML = DOMPurify.sanitize(formattedHTML, {
