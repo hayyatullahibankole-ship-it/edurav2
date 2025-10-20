@@ -50,6 +50,7 @@ import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
 import PricingManager from '@/components/admin/PricingManager';
 import NotificationManager from '@/components/admin/NotificationManager';
+import ReferralManager from '@/components/admin/ReferralManager';
 
 
 export default function AdminDashboard() {
@@ -619,13 +620,14 @@ export default function AdminDashboard() {
         {/* Enhanced Admin Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <TabsList className="grid grid-cols-4 lg:grid-cols-10 w-full lg:w-auto bg-card border overflow-x-auto">
+            <TabsList className="grid grid-cols-4 lg:grid-cols-11 w-full lg:w-auto bg-card border overflow-x-auto">
               <TabsTrigger value="overview" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Overview</TabsTrigger>
               <TabsTrigger value="users" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Users</TabsTrigger>
               <TabsTrigger value="exams" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Exams</TabsTrigger>
               <TabsTrigger value="questions" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Questions</TabsTrigger>
               <TabsTrigger value="resources" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Resources</TabsTrigger>
               <TabsTrigger value="subscriptions" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Subscriptions</TabsTrigger>
+              <TabsTrigger value="referrals" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Referrals</TabsTrigger>
               <TabsTrigger value="analytics" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Analytics</TabsTrigger>
               <TabsTrigger value="notifications" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Notifications</TabsTrigger>
               <TabsTrigger value="security" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Security</TabsTrigger>
@@ -739,6 +741,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="subscriptions" className="space-y-6">
             <PricingManager />
+          </TabsContent>
+
+          <TabsContent value="referrals" className="space-y-6">
+            <ReferralManager />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">

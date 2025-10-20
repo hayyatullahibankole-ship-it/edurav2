@@ -377,20 +377,20 @@ const Blog = () => {
               </div>
             </div>
 
-            <div className="prose prose-lg max-w-none dark:prose-invert">
+            <div className="prose prose-lg max-w-none dark:prose-invert [&>p]:mb-8">
               <p className="text-xl text-muted-foreground leading-relaxed mb-8">
                 {currentPost.excerpt}
               </p>
               
               {currentPost.content ? (
                 <div 
-                  className="whitespace-pre-wrap" 
+                  className="whitespace-pre-wrap [&>p]:mb-8" 
                   dangerouslySetInnerHTML={{ 
                     __html: DOMPurify.sanitize(formatContent(currentPost.content)) 
                   }} 
                 />
               ) : (
-                <div className="space-y-6 text-lg leading-relaxed">
+                <div className="space-y-8 text-lg leading-relaxed">
                   <p>This is a comprehensive article about {currentPost.title.toLowerCase()}. The content covers important aspects and provides valuable insights for students and professionals.</p>
                   
                   <p>Key topics covered include:</p>
