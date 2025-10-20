@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Mic, MicOff, Loader2 } from "lucide-react";
+import { Sparkles, X, Send, Mic, MicOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
@@ -154,64 +154,88 @@ export const AIAssistant = () => {
         <Button
           onClick={() => setIsOpen(true)}
           size="lg"
-          className="w-14 h-14 rounded-full shadow-2xl animate-bounce-slow bg-gradient-to-br from-green-500 to-green-600 hover:scale-110 transition-all p-0 relative"
+          className="w-16 h-16 rounded-2xl shadow-2xl bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 hover:scale-105 transition-all duration-300 p-0 relative group"
         >
-          {/* Glow effect */}
-          <div className="absolute inset-0 rounded-full bg-green-500/50 blur-xl animate-pulse" />
+          {/* Animated glow effect */}
+          <div className="absolute inset-0 rounded-2xl bg-green-400/60 blur-xl group-hover:blur-2xl transition-all duration-300 animate-pulse" />
           
-          {/* Icon */}
-          <MessageCircle className="relative h-6 w-6 text-white" />
+          {/* Icon with animation */}
+          <Sparkles className="relative h-7 w-7 text-white drop-shadow-lg group-hover:rotate-12 transition-transform duration-300" />
           
           {/* AI Badge */}
-          <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-white text-green-600 text-[10px] font-bold rounded-full shadow-md border-2 border-green-500">
+          <div className="absolute -top-2 -right-2 px-2.5 py-1 bg-white text-green-600 text-[11px] font-bold rounded-lg shadow-lg border border-green-200">
             AI
-          </span>
+          </div>
+          
+          {/* Pulsing dot indicator */}
+          <span className="absolute top-1 left-1 h-2 w-2 bg-green-300 rounded-full animate-pulse" />
         </Button>
         
-        {/* Label tooltip */}
-        <div className="absolute -top-12 right-0 bg-green-600 text-white px-3 py-1 rounded-lg text-xs whitespace-nowrap shadow-lg animate-pulse">
-          Ask AI Assistant
-          <div className="absolute bottom-[-4px] right-4 w-2 h-2 bg-green-600 transform rotate-45" />
+        {/* Modern tooltip */}
+        <div className="absolute -top-14 right-0 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap shadow-xl animate-pulse backdrop-blur-sm">
+          AI Study Assistant
+          <div className="absolute bottom-[-6px] right-6 w-3 h-3 bg-green-600 transform rotate-45" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed bottom-6 right-24 w-96 h-[600px] bg-background border-2 border-green-500/20 rounded-2xl shadow-2xl flex flex-col z-50 animate-scale-in">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-green-500 to-green-600 rounded-t-2xl">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
-            <MessageCircle className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-white">Edura AI Assistant</h3>
-            <p className="text-xs text-white/80">Always here to help</p>
-          </div>
+    <div className="fixed bottom-6 right-6 w-[420px] h-[650px] bg-background/95 backdrop-blur-xl border border-green-500/30 rounded-3xl shadow-2xl flex flex-col z-50 animate-scale-in overflow-hidden">
+      {/* Modern Header with Gradient */}
+      <div className="relative p-5 bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 overflow-hidden">
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-40 h-40 bg-white rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 right-0 w-40 h-40 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsOpen(false)}
-          className="text-white hover:bg-white/20"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              <Sparkles className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-white text-lg">Edura AI</h3>
+              <p className="text-xs text-white/90 font-medium">Your Smart Study Companion</p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsOpen(false)}
+            className="text-white hover:bg-white/20 rounded-xl transition-all"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-green-50/50 to-background dark:from-green-950/10" ref={scrollRef}>
+      {/* Messages Area */}
+      <ScrollArea className="flex-1 p-5 bg-gradient-to-b from-green-50/30 via-background to-background dark:from-green-950/10" ref={scrollRef}>
         {messages.length === 0 && (
-          <div className="text-center text-muted-foreground py-8 animate-fade-in">
-            <div className="h-16 w-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-              <MessageCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+          <div className="text-center py-12 animate-fade-in">
+            <div className="relative inline-block mb-6">
+              <div className="absolute inset-0 bg-green-500/20 rounded-full blur-2xl" />
+              <div className="relative h-20 w-20 mx-auto rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-xl">
+                <Sparkles className="h-10 w-10 text-white" />
+              </div>
             </div>
-            <h4 className="font-semibold mb-2 text-foreground">Welcome to Edura AI! 👋</h4>
-            <p className="text-sm">
-              I'm your AI study assistant. Ask me anything about exams,
-              study tips, or how to use Edura!
+            <h4 className="font-bold mb-3 text-foreground text-lg">Welcome to Edura AI! ✨</h4>
+            <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
+              I'm your intelligent study assistant. Ask me anything about exams, subjects, or study strategies!
             </p>
+            <div className="mt-6 flex flex-wrap gap-2 justify-center">
+              <div className="px-3 py-1.5 bg-green-100 dark:bg-green-900/20 rounded-lg text-xs text-green-700 dark:text-green-300 font-medium">
+                Exam Tips
+              </div>
+              <div className="px-3 py-1.5 bg-green-100 dark:bg-green-900/20 rounded-lg text-xs text-green-700 dark:text-green-300 font-medium">
+                Study Plans
+              </div>
+              <div className="px-3 py-1.5 bg-green-100 dark:bg-green-900/20 rounded-lg text-xs text-green-700 dark:text-green-300 font-medium">
+                Subject Help
+              </div>
+            </div>
           </div>
         )}
         {messages.map((message, index) => (
@@ -222,10 +246,10 @@ export const AIAssistant = () => {
             }`}
           >
             <div
-              className={`inline-block px-4 py-3 rounded-2xl max-w-[85%] shadow-sm ${
+              className={`inline-block px-5 py-3 rounded-2xl max-w-[85%] shadow-md ${
                 message.role === "user"
-                  ? "bg-green-600 text-white rounded-br-sm"
-                  : "bg-muted rounded-bl-sm"
+                  ? "bg-gradient-to-br from-green-500 to-green-600 text-white rounded-br-md"
+                  : "bg-card border border-border rounded-bl-md"
               }`}
             >
               <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
@@ -234,25 +258,25 @@ export const AIAssistant = () => {
         ))}
         {isLoading && (
           <div className="text-left mb-4 animate-fade-in">
-            <div className="inline-block px-4 py-3 rounded-2xl bg-muted shadow-sm">
-              <div className="flex items-center gap-2">
+            <div className="inline-block px-5 py-3 rounded-2xl bg-card border border-border shadow-md rounded-bl-md">
+              <div className="flex items-center gap-3">
                 <Loader2 className="h-4 w-4 animate-spin text-green-600" />
-                <span className="text-sm text-muted-foreground">Thinking...</span>
+                <span className="text-sm text-muted-foreground font-medium">Thinking...</span>
               </div>
             </div>
           </div>
         )}
       </ScrollArea>
 
-      {/* Input */}
-      <div className="p-4 border-t bg-background">
-        <div className="flex gap-2">
+      {/* Modern Input Area */}
+      <div className="p-5 border-t bg-background/50 backdrop-blur-sm">
+        <div className="flex gap-3">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask me anything..."
-            className="min-h-[60px] resize-none border-green-200 dark:border-green-900 focus-visible:ring-green-500"
+            className="min-h-[64px] resize-none border-green-200 dark:border-green-900/50 focus-visible:ring-green-500 rounded-2xl shadow-sm"
             disabled={isLoading}
           />
           <div className="flex flex-col gap-2">
@@ -261,21 +285,21 @@ export const AIAssistant = () => {
               onClick={toggleVoiceInput}
               variant={isListening ? "destructive" : "outline"}
               disabled={isLoading}
-              className={isListening ? "" : "border-green-200 dark:border-green-900 hover:bg-green-50 dark:hover:bg-green-950 hover:text-green-700 dark:hover:text-green-300"}
+              className={`rounded-xl h-12 w-12 shadow-sm ${isListening ? "" : "border-green-200 dark:border-green-900/50 hover:bg-green-50 dark:hover:bg-green-950 hover:text-green-700 dark:hover:text-green-300 hover:border-green-300"}`}
             >
               {isListening ? (
-                <MicOff className="h-4 w-4" />
+                <MicOff className="h-5 w-5" />
               ) : (
-                <Mic className="h-4 w-4" />
+                <Mic className="h-5 w-5" />
               )}
             </Button>
             <Button
               size="icon"
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl h-12 w-12 shadow-md hover:shadow-lg transition-all"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
             </Button>
           </div>
         </div>
