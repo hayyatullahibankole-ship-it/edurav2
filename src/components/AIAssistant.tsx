@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, X, Send, Mic, MicOff, Loader2 } from "lucide-react";
+import { Sparkles, X, Send, Mic, MicOff, Loader2, Brain, Zap, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,8 +16,20 @@ export const AIAssistant = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [currentIcon, setCurrentIcon] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+
+  const icons = [Sparkles, Brain, Zap, MessageCircle];
+  const IconComponent = icons[currentIcon];
+
+  // Icon morphing animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIcon((prev) => (prev + 1) % icons.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -150,25 +162,30 @@ export const AIAssistant = () => {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-50 animate-fade-in">
+      <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={() => setIsOpen(true)}
           size="lg"
-          className="w-16 h-16 rounded-2xl shadow-2xl bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 hover:scale-105 transition-all duration-300 p-0 relative group"
+          className="w-16 h-16 rounded-2xl shadow-2xl bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 hover:scale-110 transition-all duration-500 p-0 relative group animate-bounce-slow"
         >
-          {/* Animated glow effect */}
-          <div className="absolute inset-0 rounded-2xl bg-green-400/60 blur-xl group-hover:blur-2xl transition-all duration-300 animate-pulse" />
+          {/* Multi-layered animated glow effect */}
+          <div className="absolute inset-0 rounded-2xl bg-green-400/60 blur-2xl animate-pulse" />
+          <div className="absolute inset-0 rounded-2xl bg-green-300/40 blur-xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+          <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-green-400 to-emerald-400 opacity-50 blur-md animate-pulse" style={{ animationDelay: '1s' }} />
           
-          {/* Icon with animation */}
-          <Sparkles className="relative h-7 w-7 text-white drop-shadow-lg group-hover:rotate-12 transition-transform duration-300" />
+          {/* Morphing Icon with looking around animation */}
+          <div className="relative h-7 w-7 mx-auto transition-all duration-300 animate-[wiggle_2s_ease-in-out_infinite]">
+            <IconComponent className="h-full w-full text-white drop-shadow-lg transition-all duration-500" />
+          </div>
           
           {/* AI Badge */}
-          <div className="absolute -top-2 -right-2 px-2.5 py-1 bg-white text-green-600 text-[11px] font-bold rounded-lg shadow-lg border border-green-200">
+          <div className="absolute -top-2 -right-2 px-2.5 py-1 bg-white text-green-600 text-[11px] font-bold rounded-lg shadow-lg border border-green-200 animate-pulse">
             AI
           </div>
           
-          {/* Pulsing dot indicator */}
-          <span className="absolute top-1 left-1 h-2 w-2 bg-green-300 rounded-full animate-pulse" />
+          {/* Multiple pulsing indicators */}
+          <span className="absolute top-1 left-1 h-2 w-2 bg-green-300 rounded-full animate-ping" />
+          <span className="absolute top-1 left-1 h-2 w-2 bg-green-300 rounded-full" />
         </Button>
         
         {/* Modern tooltip */}

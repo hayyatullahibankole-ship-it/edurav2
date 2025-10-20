@@ -153,6 +153,17 @@ export default {
             transform: "translateY(-10px)",
           },
         },
+        "wiggle": {
+          "0%, 100%": { 
+            transform: "rotate(0deg)" 
+          },
+          "25%": { 
+            transform: "rotate(-8deg)" 
+          },
+          "75%": { 
+            transform: "rotate(8deg)" 
+          },
+        },
         "scale-in": {
           "0%": {
             opacity: "0",
@@ -177,6 +188,7 @@ export default {
         "bounce-slow": "bounce 3s ease-in-out infinite",
         "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "shimmer": "shimmer 2s ease-in-out infinite",
+        "wiggle": "wiggle 2s ease-in-out infinite",
       },
     },
   },
