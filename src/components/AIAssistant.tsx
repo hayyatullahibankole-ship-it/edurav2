@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { MathRenderer } from "@/components/ui/math-renderer";
 
 interface Message {
   role: "user" | "assistant";
@@ -270,7 +271,11 @@ export const AIAssistant = () => {
                   : "bg-card border border-border rounded-bl-md"
               }`}
             >
-              <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+              {message.role === "assistant" ? (
+                <MathRenderer content={message.content} className="text-sm leading-relaxed" />
+              ) : (
+                <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+              )}
             </div>
           </div>
         ))}
