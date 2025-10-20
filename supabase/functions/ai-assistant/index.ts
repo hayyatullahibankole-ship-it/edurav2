@@ -29,8 +29,75 @@ serve(async (req) => {
       }
     );
 
-    // System prompt with context about Edura
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      console.error("Auth error:", authError);
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Fetch user profile and progress data
+    const [profileRes, attemptsRes, syllabusRes, streakRes, subscriptionRes] = await Promise.all([
+      supabaseClient.from('users').select('first_name, last_name, email').eq('auth_user_id', user.id).single(),
+      supabaseClient.from('attempts').select('id, status, created_at, exams(title, type)').eq('user_id', (await supabaseClient.from('users').select('id').eq('auth_user_id', user.id).single()).data?.id).order('created_at', { ascending: false }).limit(10),
+      supabaseClient.from('syllabus_coverage').select('topic_name, attempted_questions, correct_questions, subjects(name)').eq('user_id', (await supabaseClient.from('users').select('id').eq('auth_user_id', user.id).single()).data?.id).order('last_practiced_at', { ascending: false }).limit(20),
+      supabaseClient.from('user_streaks').select('current_streak, longest_streak, total_practice_days').eq('user_id', (await supabaseClient.from('users').select('id').eq('auth_user_id', user.id).single()).data?.id).maybeSingle(),
+      supabaseClient.from('subscriptions').select('status, end_date, subscription_plans(name)').eq('user_id', (await supabaseClient.from('users').select('id').eq('auth_user_id', user.id).single()).data?.id).eq('status', 'ACTIVE').maybeSingle()
+    ]);
+
+    // Build user context
+    const userProfile = profileRes.data;
+    const recentAttempts = attemptsRes.data || [];
+    const topicCoverage = syllabusRes.data || [];
+    const streak = streakRes.data;
+    const subscription = subscriptionRes.data;
+
+    // Calculate weak topics (low accuracy)
+    const weakTopics = topicCoverage
+      .filter(t => t.attempted_questions > 0)
+      .map(t => ({
+        topic: t.topic_name,
+        subject: t.subjects?.name,
+        accuracy: Math.round((t.correct_questions / t.attempted_questions) * 100)
+      }))
+      .filter(t => t.accuracy < 60)
+      .sort((a, b) => a.accuracy - b.accuracy)
+      .slice(0, 5);
+
+    const userContext = `
+**Student Profile:**
+- Name: ${userProfile?.first_name} ${userProfile?.last_name}
+- Subscription: ${subscription ? subscription.subscription_plans?.name : 'Free'}
+- Study Streak: ${streak ? `${streak.current_streak} days (longest: ${streak.longest_streak} days)` : 'No active streak'}
+- Total Practice Days: ${streak?.total_practice_days || 0}
+
+**Recent Activity:**
+- Completed ${recentAttempts.filter(a => a.status === 'SUBMITTED').length} exams recently
+- Recent exams: ${recentAttempts.slice(0, 5).map(a => `${a.exams?.title} (${a.exams?.type})`).join(', ') || 'None yet'}
+
+**Topics Practiced (Recent 20):**
+${topicCoverage.slice(0, 10).map(t => `- ${t.subjects?.name || 'Unknown'}: ${t.topic_name} (${t.attempted_questions} questions, ${Math.round((t.correct_questions / t.attempted_questions) * 100)}% accuracy)`).join('\n') || '- No topics practiced yet'}
+
+**Weak Areas (Need Focus):**
+${weakTopics.length > 0 ? weakTopics.map(t => `- ${t.subject}: ${t.topic} (${t.accuracy}% accuracy)`).join('\n') : '- No weak areas identified yet - keep practicing!'}
+`;
+
+    // System prompt with user context
     const systemPrompt = `You are Edura AI, an intelligent educational assistant for Nigerian students preparing for JAMB, WAEC, and other exams.
+
+${userContext}
+
+**IMPORTANT - Use This Student's Data:**
+- Reference their name when appropriate
+- Acknowledge their recent exam attempts and performance
+- Provide specific guidance based on their weak topics
+- Celebrate their study streak if they have one
+- Encourage them to focus on areas where they're struggling
+- Personalize study recommendations based on their progress
+- If they ask about their progress, refer to the data above
 
 Your primary capabilities:
 - Help students understand concepts and subjects with DETAILED, THOROUGH explanations
