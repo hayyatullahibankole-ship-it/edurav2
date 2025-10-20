@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Message {
   role: "user" | "assistant";
@@ -19,6 +20,7 @@ export const AIAssistant = () => {
   const [currentIcon, setCurrentIcon] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  const isMobile = useIsMobile();
 
   const icons = [Sparkles, Brain, Zap, MessageCircle];
   const IconComponent = icons[currentIcon];
@@ -162,7 +164,7 @@ export const AIAssistant = () => {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className={`fixed z-50 ${isMobile ? 'bottom-40 right-4' : 'bottom-6 right-6'}`}>
         <Button
           onClick={() => setIsOpen(true)}
           className="w-14 h-14 rounded-2xl shadow-2xl bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 hover:scale-110 transition-all duration-500 p-0 relative group animate-bounce-slow"
@@ -197,7 +199,7 @@ export const AIAssistant = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-[420px] h-[650px] bg-background/95 backdrop-blur-xl border border-green-500/30 rounded-3xl shadow-2xl flex flex-col z-50 animate-scale-in overflow-hidden">
+    <div className={`fixed w-[420px] h-[650px] bg-background/95 backdrop-blur-xl border border-green-500/30 rounded-3xl shadow-2xl flex flex-col z-50 animate-scale-in overflow-hidden ${isMobile ? 'bottom-40 right-4' : 'bottom-6 right-6'}`}>
       {/* Modern Header with Gradient */}
       <div className="relative p-5 bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 overflow-hidden">
         {/* Animated background pattern */}
