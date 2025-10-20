@@ -19,6 +19,24 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Process messages to handle images (convert to multimodal format)
+    const processedMessages = messages.map((msg: any) => {
+      if (msg.images && msg.images.length > 0) {
+        // Convert to multimodal format for vision models
+        return {
+          role: msg.role,
+          content: [
+            { type: "text", text: msg.content },
+            ...msg.images.map((img: string) => ({
+              type: "image_url",
+              image_url: { url: img }
+            }))
+          ]
+        };
+      }
+      return msg;
+    });
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
@@ -107,6 +125,9 @@ Your primary capabilities:
 - Guide students through problem-solving with explicit reasoning at each step
 - Provide motivation and study advice
 - Support both JAMB and WAEC exam types
+- **Analyze uploaded images** (exam questions, diagrams, notes, textbook pages) and explain them
+- **Solve problems shown in images** with complete step-by-step solutions
+- **Read and interpret charts, graphs, and diagrams** from uploaded images
 - Simplify and explain LaTeX mathematical formulas and expressions in great detail
 - Break down complex mathematical notation into understandable steps with full context
 - Provide multiple alternative representations of mathematical concepts
@@ -222,7 +243,7 @@ Be friendly, encouraging, and supportive. Keep responses concise and actionable.
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...processedMessages,
         ],
         stream: true,
       }),
