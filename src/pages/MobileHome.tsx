@@ -6,6 +6,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   BookOpen, 
   Trophy, 
@@ -14,19 +16,20 @@ import {
   Clock,
   Zap,
   ChevronRight,
-  Play,
   Award,
   Sparkles,
-  User,
   LogOut,
   GraduationCap,
   FileText,
-  Brain,
-  Bell,
-  BellOff,
-  TrendingDown,
   Flame,
-  Calendar
+  Calendar,
+  Settings,
+  Bell,
+  Calculator,
+  Beaker,
+  Microscope,
+  Library,
+  MessageCircle
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -44,7 +47,7 @@ import { AIAssistant } from '@/components/AIAssistant';
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
   const { isPremium } = useSubscription();
-  usePushNotifications(); // Initialize push notifications
+  usePushNotifications();
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     testsTaken: 0,
@@ -56,10 +59,16 @@ const MobileHome = () => {
   const [streak, setStreak] = useState({ current: 0, longest: 0 });
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [dailyGoal, setDailyGoal] = useState({ answered: 0, target: 20 });
-  const [performanceData, setPerformanceData] = useState<any[]>([]);
-  const [motivationalQuote, setMotivationalQuote] = useState('');
   const [showTestPanel, setShowTestPanel] = useState(false);
   const [showProfileSheet, setShowProfileSheet] = useState(false);
+
+  const motivationalQuotes = [
+    "Success is the sum of small efforts repeated daily.",
+    "The expert in anything was once a beginner.",
+    "Study hard, stay focused, and achieve greatness!",
+    "Every question you answer brings you closer to your goal.",
+    "Consistency is the key to mastering any subject."
+  ];
 
   useEffect(() => {
     if (userProfile?.id) {
@@ -67,8 +76,6 @@ const MobileHome = () => {
       fetchStreak();
       fetchLeaderboard();
       fetchDailyGoal();
-      fetchPerformanceData();
-      setRandomQuote();
     }
   }, [userProfile]);
 
@@ -103,7 +110,7 @@ const MobileHome = () => {
 
       setStats({ testsTaken, averageScore, studyHours, rank: 0 });
 
-      // Fetch recent results (last 3)
+      // Fetch recent results
       const recentWithExam = await Promise.all(
         attemptsWithResults
           .filter(a => a.results?.length > 0)
@@ -131,7 +138,6 @@ const MobileHome = () => {
 
   const fetchStreak = async () => {
     try {
-      // Get user's test history to calculate streak
       const { data: attempts } = await supabase
         .from('attempts')
         .select('submitted_at')
@@ -144,14 +150,12 @@ const MobileHome = () => {
         return;
       }
 
-      // Calculate current streak
       let currentStreak = 0;
       let longestStreak = 0;
       let tempStreak = 1;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // Check if user tested today or yesterday for current streak
       const lastTest = new Date(attempts[0].submitted_at);
       lastTest.setHours(0, 0, 0, 0);
       const daysDiff = Math.floor((today.getTime() - lastTest.getTime()) / (1000 * 60 * 60 * 24));
@@ -159,7 +163,6 @@ const MobileHome = () => {
       if (daysDiff <= 1) {
         currentStreak = 1;
         
-        // Calculate consecutive days
         for (let i = 1; i < attempts.length; i++) {
           const prevDate = new Date(attempts[i - 1].submitted_at);
           const currDate = new Date(attempts[i].submitted_at);
@@ -187,13 +190,11 @@ const MobileHome = () => {
 
   const fetchLeaderboard = async () => {
     try {
-      // Get top performers based on average percentage
       const { data: topUsers } = await supabase
         .rpc('get_student_exam_progress');
 
       if (!topUsers) return;
 
-      // Calculate average scores for each user
       const userScores = new Map();
       
       for (const attempt of topUsers) {
@@ -216,13 +217,11 @@ const MobileHome = () => {
         }
       }
 
-      // Calculate averages and sort
       const leaderboardData = Array.from(userScores.values())
         .map(u => ({ userId: u.userId, avgScore: Math.round(u.total / u.count), testCount: u.count }))
         .sort((a, b) => b.avgScore - a.avgScore)
         .slice(0, 5);
 
-      // Get user details
       const enrichedLeaderboard = await Promise.all(
         leaderboardData.map(async (entry, index) => {
           const { data: user } = await supabase
@@ -242,7 +241,6 @@ const MobileHome = () => {
 
       setLeaderboard(enrichedLeaderboard);
       
-      // Update user's rank in stats
       const userRank = enrichedLeaderboard.find(u => u.isCurrentUser)?.rank || 0;
       setStats(prev => ({ ...prev, rank: userRank }));
     } catch (error) {
@@ -255,7 +253,6 @@ const MobileHome = () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
-      // Count questions answered today
       const { data: todayAttempts } = await supabase
         .from('attempts')
         .select('id')
@@ -276,58 +273,6 @@ const MobileHome = () => {
     }
   };
 
-  const fetchPerformanceData = async () => {
-    try {
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      const { data: attempts } = await supabase
-        .from('attempts')
-        .select('id, submitted_at')
-        .eq('user_id', userProfile?.id)
-        .eq('status', 'SUBMITTED')
-        .gte('submitted_at', sevenDaysAgo.toISOString())
-        .order('submitted_at', { ascending: true });
-
-      if (attempts) {
-        const dailyScores = await Promise.all(
-          attempts.map(async (attempt) => {
-            const { data: result } = await supabase
-              .from('results')
-              .select('percentage')
-              .eq('attempt_id', attempt.id)
-              .maybeSingle();
-
-            return {
-              date: new Date(attempt.submitted_at).toLocaleDateString('en-US', { weekday: 'short' }),
-              score: Math.round(result?.percentage || 0)
-            };
-          })
-        );
-
-        setPerformanceData(dailyScores);
-      }
-    } catch (error) {
-      console.error('Error fetching performance data:', error);
-    }
-  };
-
-  const setRandomQuote = () => {
-    const quotes = [
-      "Success is the sum of small efforts repeated daily.",
-      "The expert in anything was once a beginner.",
-      "Study hard, stay focused, and achieve greatness!",
-      "Every question you answer brings you closer to your goal.",
-      "Consistency is the key to mastering any subject.",
-      "Believe in yourself and all that you are capable of.",
-      "Your future is created by what you do today, not tomorrow.",
-      "Practice makes progress. Keep going!",
-      "Knowledge is power. Keep learning every day.",
-      "The harder you work, the luckier you get."
-    ];
-    setMotivationalQuote(quotes[Math.floor(Math.random() * quotes.length)]);
-  };
-
   const handleNavigation = async (path: string) => {
     if (Capacitor.isNativePlatform()) {
       await Haptics.impact({ style: ImpactStyle.Light });
@@ -345,403 +290,303 @@ const MobileHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Header with Gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent p-6 pb-8">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-background pb-20">
+      {/* Vibrant Header with Gradient */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-primary via-primary-glow to-secondary text-white p-6 pb-10 rounded-b-[2.5rem] shadow-2xl">
+        {/* Decorative circles */}
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-20 translate-x-20" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-16 -translate-x-16" />
         
         <div className="relative z-10">
-          {/* Top Bar */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="bg-white p-2 rounded-xl shadow-lg">
-              <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-14 w-14 border-3 border-white/30 shadow-xl ring-2 ring-white/20">
+                <AvatarFallback className="bg-white text-primary font-bold text-lg">
+                  {userProfile?.first_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-xs opacity-90 font-medium">Welcome back,</p>
+                <h2 className="font-bold text-xl">{userProfile?.first_name || 'Student'}</h2>
+                <p className="text-xs opacity-80">{isPremium ? '✨ Premium' : 'Free'}</p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
-                {isPremium ? (
-                  <span className="flex items-center gap-1">
-                    <Zap className="h-3 w-3" />
-                    Premium
-                  </span>
-                ) : 'Free'}
-              </Badge>
-              <NotificationBell />
               <Button
-                size="sm"
-                variant="secondary"
-                onClick={handleLogout}
-                className="h-8 w-8 p-0"
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowProfileSheet(true)}
+                className="text-white hover:bg-white/20 rounded-xl h-10 w-10 backdrop-blur-sm"
               >
-                <LogOut className="h-4 w-4" />
+                <Settings className="h-5 w-5" />
               </Button>
+              <NotificationBell />
             </div>
           </div>
 
-          {/* Welcome */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-white mb-1">
-              Welcome back, {userProfile?.first_name || 'Student'}! 👋
-            </h1>
-            <p className="text-white/80 text-sm">
-              {stats.averageScore > 0 ? `${stats.averageScore}% average score` : 'Ready to start learning?'}
-            </p>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-3 text-center">
-                <Target className="h-5 w-5 text-white mx-auto mb-1" />
-                <div className="text-xl font-bold text-white">{stats.testsTaken}</div>
-                <div className="text-xs text-white/80">Tests</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-3 text-center">
-                <TrendingUp className="h-5 w-5 text-white mx-auto mb-1" />
-                <div className="text-xl font-bold text-white">{stats.averageScore}%</div>
-                <div className="text-xs text-white/80">Average</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-3 text-center">
-                <Clock className="h-5 w-5 text-white mx-auto mb-1" />
-                <div className="text-xl font-bold text-white">{stats.studyHours}h</div>
-                <div className="text-xs text-white/80">Study</div>
-              </CardContent>
-            </Card>
+          {/* Greeting Message */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+            <p className="text-sm font-medium mb-1">Hi, what would you learn today?</p>
+            <div className="flex items-center gap-2 text-xs opacity-90">
+              <Calendar className="h-3 w-3" />
+              <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="p-4 space-y-4">
-        {/* Study Streak */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-warning/10 to-destructive/10">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="p-4 bg-gradient-to-br from-warning to-destructive rounded-2xl shadow-lg">
-                  <Flame className="h-8 w-8 text-white" />
-                </div>
-                {streak.current > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-white rounded-full px-2 py-0.5 shadow-lg">
-                    <span className="text-xs font-bold text-warning">{streak.current}</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-lg mb-1">
-                  {streak.current > 0 ? `${streak.current} Day Streak! 🔥` : 'Start Your Streak!'}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {streak.current > 0 
-                    ? `Longest: ${streak.longest} days. Keep it up!` 
-                    : 'Take a test daily to build your streak'}
-                </p>
+      <div className="p-4 space-y-6 -mt-6 relative z-20 animate-fade-in">
+        {/* Quick Stats Cards */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-gradient-to-br from-[#FF6B9D] to-[#FF8FAB] rounded-2xl p-4 text-white shadow-lg">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                <Trophy className="h-4 w-4" />
               </div>
             </div>
-          </CardContent>
-        </Card>
+            <p className="text-2xl font-bold mb-1">{stats.testsTaken}</p>
+            <p className="text-xs opacity-90">Tests Taken</p>
+          </div>
+          <div className="bg-gradient-to-br from-[#4ECDC4] to-[#44A08D] rounded-2xl p-4 text-white shadow-lg">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                <Target className="h-4 w-4" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold mb-1">{stats.averageScore}%</p>
+            <p className="text-xs opacity-90">Average Score</p>
+          </div>
+        </div>
 
-        {/* Daily Goal Tracker */}
-        <Card className="border-0 shadow-md">
+        {/* Subject Grid */}
+        <div>
+          <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-primary" />
+            Your Subjects
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => navigate('/cbt-exam?subject=Mathematics')}
+              className="bg-gradient-to-br from-[#FF6B6B] to-[#FF8E8E] rounded-2xl p-4 text-white text-left shadow-lg active:scale-95 transition-transform"
+            >
+              <div className="p-2 bg-white/20 rounded-xl w-fit mb-3 backdrop-blur-sm">
+                <Calculator className="h-6 w-6" />
+              </div>
+              <p className="font-bold text-sm mb-1">Mathematics</p>
+              <p className="text-xs opacity-90">35 Topics</p>
+            </button>
+            
+            <button
+              onClick={() => navigate('/cbt-exam?subject=Physics')}
+              className="bg-gradient-to-br from-[#5B7FD9] to-[#7B9EF5] rounded-2xl p-4 text-white text-left shadow-lg active:scale-95 transition-transform"
+            >
+              <div className="p-2 bg-white/20 rounded-xl w-fit mb-3 backdrop-blur-sm">
+                <Zap className="h-6 w-6" />
+              </div>
+              <p className="font-bold text-sm mb-1">Physics</p>
+              <p className="text-xs opacity-90">28 Topics</p>
+            </button>
+            
+            <button
+              onClick={() => navigate('/cbt-exam?subject=Chemistry')}
+              className="bg-gradient-to-br from-[#4ECDC4] to-[#44A08D] rounded-2xl p-4 text-white text-left shadow-lg active:scale-95 transition-transform"
+            >
+              <div className="p-2 bg-white/20 rounded-xl w-fit mb-3 backdrop-blur-sm">
+                <Beaker className="h-6 w-6" />
+              </div>
+              <p className="font-bold text-sm mb-1">Chemistry</p>
+              <p className="text-xs opacity-90">32 Topics</p>
+            </button>
+            
+            <button
+              onClick={() => navigate('/cbt-exam?subject=Biology')}
+              className="bg-gradient-to-br from-[#95E1D3] to-[#70C9B0] rounded-2xl p-4 text-white text-left shadow-lg active:scale-95 transition-transform"
+            >
+              <div className="p-2 bg-white/20 rounded-xl w-fit mb-3 backdrop-blur-sm">
+                <Microscope className="h-6 w-6" />
+              </div>
+              <p className="font-bold text-sm mb-1">Biology</p>
+              <p className="text-xs opacity-90">30 Topics</p>
+            </button>
+          </div>
+        </div>
+
+        {/* Study Streak */}
+        {streak.current > 0 && (
+          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-warning/10 via-warning/5 to-transparent">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-warning to-warning/80 shadow-lg">
+                    <Flame className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground font-medium">Study Streak</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-warning to-warning-glow bg-clip-text text-transparent">
+                      {streak.current} days
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Best Streak</p>
+                  <p className="text-lg font-bold">{streak.longest} days</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Daily Goal Progress */}
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-success/10 via-success/5 to-transparent">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-base">Daily Goal</h3>
-              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                {dailyGoal.answered}/{dailyGoal.target}
-              </Badge>
-            </div>
-            <div className="space-y-2">
-              <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-primary to-primary-glow rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min((dailyGoal.answered / dailyGoal.target) * 100, 100)}%` }}
-                />
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-success/20">
+                  <Target className="h-4 w-4 text-success" />
+                </div>
+                <h4 className="font-bold text-sm">Daily Goal</h4>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {dailyGoal.answered >= dailyGoal.target 
-                  ? '🎉 Goal achieved! Great work!' 
-                  : `${dailyGoal.target - dailyGoal.answered} more questions to reach your goal`}
-              </p>
+              <span className="text-xs font-semibold text-success">
+                {dailyGoal.answered}/{dailyGoal.target}
+              </span>
             </div>
+            <Progress 
+              value={(dailyGoal.answered / dailyGoal.target) * 100} 
+              className="h-2.5 bg-success/20"
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+              {dailyGoal.answered >= dailyGoal.target 
+                ? '🎉 Goal achieved!' 
+                : `${dailyGoal.target - dailyGoal.answered} more to reach your goal!`}
+            </p>
           </CardContent>
         </Card>
 
         {/* Motivational Quote */}
-        <Card className="border-0 shadow-md bg-gradient-to-br from-accent/5 to-primary/5">
-          <CardContent className="p-4">
-            <div className="flex gap-3">
-              <Sparkles className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
-              <p className="text-sm italic text-foreground/80">"{motivationalQuote}"</p>
+        <Card className="border-0 shadow-lg overflow-hidden relative bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-16 translate-x-16" />
+          <CardContent className="p-5 relative">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-xl bg-primary/20 flex-shrink-0">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-1 leading-relaxed">
+                  {motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]}
+                </p>
+                <p className="text-xs text-muted-foreground">Keep pushing forward! 🚀</p>
+              </div>
             </div>
           </CardContent>
         </Card>
-
-        {/* Leaderboard Preview */}
-        {leaderboard.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <h2 className="text-lg font-bold">Top Performers</h2>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => handleNavigation('/challenge-arena')}
-                className="text-xs"
-              >
-                View All
-              </Button>
-            </div>
-            <Card className="border-0 shadow-md">
-              <CardContent className="p-4 space-y-2">
-                {leaderboard.slice(0, 3).map((entry) => (
-                  <div 
-                    key={entry.rank}
-                    className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
-                      entry.isCurrentUser ? 'bg-primary/10 border border-primary/20' : 'bg-muted/30'
-                    }`}
-                  >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                      entry.rank === 1 ? 'bg-warning text-white' :
-                      entry.rank === 2 ? 'bg-muted-foreground/20 text-foreground' :
-                      'bg-muted text-muted-foreground'
-                    }`}>
-                      {entry.rank === 1 ? '👑' : entry.rank}
-                    </div>
-                    <div className="flex-1">
-                      <p className={`font-semibold text-sm ${entry.isCurrentUser ? 'text-primary' : ''}`}>
-                        {entry.isCurrentUser ? 'You' : entry.name}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold">{entry.score}%</p>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Recent Results */}
-        <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/10 to-secondary/10">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-lg">
-                <Play className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-lg mb-1">Start Practice Test</h3>
-                <p className="text-sm text-muted-foreground">Continue your exam prep</p>
-              </div>
-              <Button
-                size="sm"
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => {
-                  if (Capacitor.isNativePlatform()) {
-                    Haptics.impact({ style: ImpactStyle.Light });
-                  }
-                  playTapSound();
-                  setShowTestPanel(true);
-                }}
-              >
-                Start
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Feature Cards */}
-        <div className="space-y-3">
-          <h2 className="text-lg font-bold px-1">Explore Features</h2>
-          
-          {/* Challenge Arena */}
-          <Card 
-            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
-            onClick={() => handleNavigation('/challenge-arena')}
-          >
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-warning to-destructive rounded-xl">
-                <Trophy className="h-5 w-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-base">Challenge Arena</h3>
-                <p className="text-xs text-muted-foreground">Compete & win prizes</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </CardContent>
-          </Card>
-
-          {/* Resources */}
-          <Card 
-            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
-            onClick={() => handleNavigation('/resources')}
-          >
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-info to-secondary rounded-xl">
-                <BookOpen className="h-5 w-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-base">Study Resources</h3>
-                <p className="text-xs text-muted-foreground">Past questions & materials</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </CardContent>
-          </Card>
-
-          {/* Consultation */}
-          <Card 
-            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
-            onClick={() => handleNavigation('/consultation')}
-          >
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-accent to-primary rounded-xl">
-                <Award className="h-5 w-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-base">Expert Tutors</h3>
-                <p className="text-xs text-muted-foreground">Book consultation sessions</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </CardContent>
-          </Card>
-
-          {/* Study Planner */}
-          <Card 
-            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
-            onClick={() => handleNavigation('/study-planner')}
-          >
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-accent to-success rounded-xl">
-                <Calendar className="h-5 w-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-base">Study Planner</h3>
-                <p className="text-xs text-muted-foreground">Schedule study sessions</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </CardContent>
-          </Card>
-
-          {/* Performance Report */}
-          <Card 
-            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
-            onClick={() => handleNavigation('/performance-report')}
-          >
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-success to-info rounded-xl">
-                <FileText className="h-5 w-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-base">Performance Report</h3>
-                <p className="text-xs text-muted-foreground">View & print reports</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </CardContent>
-          </Card>
-
-          {/* Referral Program */}
-          <Card 
-            className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98]"
-            onClick={() => handleNavigation('/referral-program')}
-          >
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-primary to-warning rounded-xl">
-                <Trophy className="h-5 w-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-base">Referral Program</h3>
-                <p className="text-xs text-muted-foreground">Earn rewards</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Recent Results */}
         {recentResults.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <h2 className="text-lg font-bold">Recent Results</h2>
-              <Button 
-                variant="ghost" 
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-primary" />
+                Recent Results
+              </h3>
+              <Button
+                variant="ghost"
                 size="sm"
-                onClick={() => handleNavigation('/dashboard?tab=results')}
-                className="text-xs"
+                onClick={() => navigate('/performance-report')}
+                className="text-primary hover:text-primary h-8 text-xs"
               >
                 View All
+                <ChevronRight className="h-3 w-3 ml-1" />
               </Button>
             </div>
-            <div className="space-y-2">
-              {recentResults.map((result, index) => (
-                <Card 
-                  key={index} 
-                  className="border-0 shadow-md hover:shadow-lg transition-shadow active:scale-[0.98] cursor-pointer"
-                  onClick={() => handleNavigation(`/results?attempt=${result.attempt_id}`)}
+            <div className="space-y-3">
+              {recentResults.slice(0, 3).map((result) => (
+                <div
+                  key={result.id}
+                  onClick={() => navigate(`/results?attempt=${result.attempt_id}`)}
+                  className="bg-card rounded-2xl p-4 border border-border hover:border-primary/30 hover:shadow-lg transition-all active:scale-98 cursor-pointer"
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-xl ${
-                        result.percentage >= 70 ? 'bg-success/10' : 
-                        result.percentage >= 50 ? 'bg-warning/10' : 'bg-destructive/10'
-                      }`}>
-                        <Target className={`h-5 w-5 ${
-                          result.percentage >= 70 ? 'text-success' : 
-                          result.percentage >= 50 ? 'text-warning' : 'text-destructive'
-                        }`} />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="p-2.5 rounded-xl bg-primary/10">
+                        <FileText className="h-5 w-5 text-primary" />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-sm">{result.examTitle}</h3>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-sm truncate">{result.examTitle}</h4>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(result.submittedAt).toLocaleDateString()}
+                          {new Date(result.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
                       </div>
-                      <div className="text-right">
-                        <p className={`text-2xl font-bold ${
-                          result.percentage >= 70 ? 'text-success' : 
-                          result.percentage >= 50 ? 'text-warning' : 'text-destructive'
-                        }`}>
-                          {Math.round(result.percentage)}%
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {result.correct_answers}/{result.total_questions}
-                        </p>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="flex items-center gap-2 ml-2">
+                      <div className={`px-3 py-1.5 rounded-full font-bold text-sm text-white ${
+                        result.percentage >= 75 ? 'bg-gradient-to-r from-success to-success-glow' :
+                        result.percentage >= 50 ? 'bg-gradient-to-r from-warning to-warning' :
+                        'bg-gradient-to-r from-destructive to-destructive'
+                      }`}>
+                        {Math.round(result.percentage)}%
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Your Progress */}
-        {stats.testsTaken > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-lg font-bold px-1">Your Progress</h2>
-            <Card className="border-0 shadow-md">
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Trophy className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm">Keep it up!</p>
-                      <p className="text-xs text-muted-foreground">You're doing great</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-primary">{stats.testsTaken}</p>
-                    <p className="text-xs text-muted-foreground">tests taken</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        {/* Quick Actions */}
+        <div>
+          <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+            <Zap className="h-5 w-5 text-primary" />
+            Quick Actions
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setShowTestPanel(true)}
+              className="h-auto py-5 px-4 rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary text-white shadow-lg active:scale-95 transition-transform text-left"
+            >
+              <div className="p-2 bg-white/20 rounded-xl w-fit mb-3 backdrop-blur-sm">
+                <BookOpen className="h-6 w-6" />
+              </div>
+              <span className="text-sm font-bold block">Practice Test</span>
+              <span className="text-xs opacity-90">Start practicing</span>
+            </button>
+            
+            <button
+              onClick={() => navigate('/challenge-arena')}
+              className="h-auto py-5 px-4 rounded-2xl bg-gradient-to-br from-[#FF6B9D] to-[#FF8FAB] text-white shadow-lg active:scale-95 transition-transform text-left"
+            >
+              <div className="p-2 bg-white/20 rounded-xl w-fit mb-3 backdrop-blur-sm">
+                <Trophy className="h-6 w-6" />
+              </div>
+              <span className="text-sm font-bold block">Challenge</span>
+              <span className="text-xs opacity-90">Compete now</span>
+            </button>
+            
+            <button
+              onClick={() => navigate('/resources')}
+              className="h-auto py-5 px-4 rounded-2xl bg-card border-2 border-border hover:border-primary/30 hover:bg-primary/5 shadow-md active:scale-95 transition-all text-left"
+            >
+              <div className="p-2 bg-primary/10 rounded-xl w-fit mb-3">
+                <Library className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-sm font-bold block">Resources</span>
+              <span className="text-xs text-muted-foreground">Study materials</span>
+            </button>
+            
+            <button
+              onClick={() => navigate('/consultation')}
+              className="h-auto py-5 px-4 rounded-2xl bg-card border-2 border-border hover:border-primary/30 hover:bg-primary/5 shadow-md active:scale-95 transition-all text-left"
+            >
+              <div className="p-2 bg-primary/10 rounded-xl w-fit mb-3">
+                <MessageCircle className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-sm font-bold block">Get Help</span>
+              <span className="text-xs text-muted-foreground">Ask expert</span>
+            </button>
           </div>
-        )}
+        </div>
 
         {/* Subscription CTA */}
         {!isPremium && (
@@ -773,6 +618,9 @@ const MobileHome = () => {
       {/* WhatsApp Support Button */}
       <WhatsAppButton />
 
+      {/* AI Assistant */}
+      <AIAssistant />
+
       {/* Mobile Navigation */}
       <MobileNav activeTab="dashboard" onTabChange={(tab) => {
         if (tab === "profile") {
@@ -800,7 +648,6 @@ const MobileHome = () => {
             </SheetTitle>
           </SheetHeader>
           <div className="space-y-3 overflow-y-auto h-[calc(85vh-100px)]">
-            {/* JAMB Test */}
             <ScheduleTestModal defaultExamType="JAMB">
               <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
                 <CardContent className="p-4">
@@ -818,7 +665,6 @@ const MobileHome = () => {
               </Card>
             </ScheduleTestModal>
 
-            {/* WAEC Test */}
             <ScheduleTestModal defaultExamType="WAEC">
               <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
                 <CardContent className="p-4">
@@ -836,7 +682,6 @@ const MobileHome = () => {
               </Card>
             </ScheduleTestModal>
 
-            {/* NECO Test */}
             <ScheduleTestModal defaultExamType="NECO">
               <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
                 <CardContent className="p-4">
@@ -854,7 +699,6 @@ const MobileHome = () => {
               </Card>
             </ScheduleTestModal>
 
-            {/* Post-UTME Test */}
             <ScheduleTestModal defaultExamType="POST-UTME">
               <Card className="border-2 hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
                 <CardContent className="p-4">
@@ -875,26 +719,12 @@ const MobileHome = () => {
         </SheetContent>
       </Sheet>
 
-      {/* Profile Sheet */}
+      {/* Profile Settings Sheet */}
       <Sheet open={showProfileSheet} onOpenChange={setShowProfileSheet}>
         <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl">
-          <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Profile Settings
-            </SheetTitle>
-          </SheetHeader>
-          <div className="mt-6 overflow-y-auto h-[calc(90vh-80px)]">
-            <ProfileSettings />
-          </div>
+          <ProfileSettings />
         </SheetContent>
       </Sheet>
-
-      {/* WhatsApp Support Button */}
-      <WhatsAppButton />
-
-      {/* AI Assistant */}
-      <AIAssistant />
     </div>
   );
 };
