@@ -24,88 +24,109 @@ serve(async (req) => {
 
     // Process messages to handle images (convert to multimodal format)
     const processedMessages = messages.map((msg: any) => {
-      if (msg.images && msg.images.length > 0) {
+      if (msg.images && Array.isArray(msg.images) && msg.images.length > 0) {
         console.log("Processing message with images:", msg.images.length);
-        // Convert to multimodal format for vision models
-        return {
-          role: msg.role,
-          content: [
-            { type: "text", text: msg.content },
-            ...msg.images.map((img: string) => ({
-              type: "image_url",
-              image_url: { url: img }
-            }))
-          ]
-        };
+        // Validate and limit images
+        const validImages = msg.images
+          .filter((img: string) => typeof img === "string" && /^data:image\/(png|jpeg|jpg|webp|gif);base64,/.test(img))
+          .slice(0, 5);
+        if (validImages.length > 0) {
+          return {
+            role: msg.role,
+            content: [
+              { type: "text", text: msg.content },
+              ...validImages.map((img: string) => ({
+                type: "image_url",
+                image_url: { url: img }
+              }))
+            ]
+          };
+        }
       }
-      return msg;
+      return { role: msg.role, content: msg.content };
     });
 
+    const authHeader = req.headers.get("Authorization");
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
       {
         global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
+          headers: authHeader ? { Authorization: authHeader } : {},
         },
       }
     );
 
-    // Get authenticated user
+    // Try to get authenticated user (optional)
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    if (authError || !user) {
+    if (authError) {
       console.error("Auth error:", authError);
-      return new Response(
-        JSON.stringify({ error: "Authentication required" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
     }
 
-    // Fetch user profile and progress data
-    const [profileRes, attemptsRes, syllabusRes, streakRes, subscriptionRes] = await Promise.all([
-      supabaseClient.from('users').select('first_name, last_name, email').eq('auth_user_id', user.id).single(),
-      supabaseClient.from('attempts').select('id, status, created_at, exams(title, type)').eq('user_id', (await supabaseClient.from('users').select('id').eq('auth_user_id', user.id).single()).data?.id).order('created_at', { ascending: false }).limit(10),
-      supabaseClient.from('syllabus_coverage').select('topic_name, attempted_questions, correct_questions, subjects(name)').eq('user_id', (await supabaseClient.from('users').select('id').eq('auth_user_id', user.id).single()).data?.id).order('last_practiced_at', { ascending: false }).limit(20),
-      supabaseClient.from('user_streaks').select('current_streak, longest_streak, total_practice_days').eq('user_id', (await supabaseClient.from('users').select('id').eq('auth_user_id', user.id).single()).data?.id).maybeSingle(),
-      supabaseClient.from('subscriptions').select('status, end_date, subscription_plans(name)').eq('user_id', (await supabaseClient.from('users').select('id').eq('auth_user_id', user.id).single()).data?.id).eq('status', 'ACTIVE').maybeSingle()
-    ]);
-
-    // Build user context
-    const userProfile = profileRes.data;
-    const recentAttempts = attemptsRes.data || [];
-    const topicCoverage = syllabusRes.data || [];
-    const streak = streakRes.data;
-    const subscription = subscriptionRes.data;
-
-    // Calculate weak topics (low accuracy)
-    const weakTopics = topicCoverage
-      .filter(t => t.attempted_questions > 0)
-      .map(t => ({
-        topic: t.topic_name,
-        subject: t.subjects?.name,
-        accuracy: Math.round((t.correct_questions / t.attempted_questions) * 100)
-      }))
-      .filter(t => t.accuracy < 60)
-      .sort((a, b) => a.accuracy - b.accuracy)
-      .slice(0, 5);
-
-    const userContext = `
+    // Build user context (supports unauthenticated users)
+    let userContext = `
 **Student Profile:**
-- Name: ${userProfile?.first_name} ${userProfile?.last_name}
+- Not signed in
+- Subscription: Free
+- Study Streak: N/A
+- Total Practice Days: 0
+
+**Recent Activity:**
+- No recent exams
+
+**Topics Practiced:**
+- None yet
+
+**Weak Areas (Need Focus):**
+- None identified yet
+`;
+
+    if (user) {
+      // Fetch user profile and progress data
+      const userIdQuery = await supabaseClient.from('users').select('id, first_name, last_name, email').eq('auth_user_id', user.id).single();
+      const dbUser = userIdQuery.data;
+
+      const [attemptsRes, syllabusRes, streakRes, subscriptionRes] = await Promise.all([
+        dbUser ? supabaseClient.from('attempts').select('id, status, created_at, exams(title, type)').eq('user_id', dbUser.id).order('created_at', { ascending: false }).limit(10) : Promise.resolve({ data: [], error: null } as any),
+        dbUser ? supabaseClient.from('syllabus_coverage').select('topic_name, attempted_questions, correct_questions, subjects(name)').eq('user_id', dbUser.id).order('last_practiced_at', { ascending: false }).limit(20) : Promise.resolve({ data: [], error: null } as any),
+        dbUser ? supabaseClient.from('user_streaks').select('current_streak, longest_streak, total_practice_days').eq('user_id', dbUser.id).maybeSingle() : Promise.resolve({ data: null, error: null } as any),
+        dbUser ? supabaseClient.from('subscriptions').select('status, end_date, subscription_plans(name)').eq('user_id', dbUser.id).eq('status', 'ACTIVE').maybeSingle() : Promise.resolve({ data: null, error: null } as any)
+      ]);
+
+      const recentAttempts = (attemptsRes as any).data || [];
+      const topicCoverage = (syllabusRes as any).data || [];
+      const streak = (streakRes as any).data;
+      const subscription = (subscriptionRes as any).data;
+
+      const weakTopics = topicCoverage
+        .filter((t: any) => t.attempted_questions > 0)
+        .map((t: any) => ({
+          topic: t.topic_name,
+          subject: t.subjects?.name,
+          accuracy: Math.round((t.correct_questions / t.attempted_questions) * 100)
+        }))
+        .filter((t: any) => t.accuracy < 60)
+        .sort((a: any, b: any) => a.accuracy - b.accuracy)
+        .slice(0, 5);
+
+      userContext = `
+**Student Profile:**
+- Name: ${dbUser?.first_name} ${dbUser?.last_name}
 - Subscription: ${subscription ? subscription.subscription_plans?.name : 'Free'}
 - Study Streak: ${streak ? `${streak.current_streak} days (longest: ${streak.longest_streak} days)` : 'No active streak'}
 - Total Practice Days: ${streak?.total_practice_days || 0}
 
 **Recent Activity:**
-- Completed ${recentAttempts.filter(a => a.status === 'SUBMITTED').length} exams recently
-- Recent exams: ${recentAttempts.slice(0, 5).map(a => `${a.exams?.title} (${a.exams?.type})`).join(', ') || 'None yet'}
+- Completed ${recentAttempts.filter((a: any) => a.status === 'SUBMITTED').length} exams recently
+- Recent exams: ${recentAttempts.slice(0, 5).map((a: any) => `${a.exams?.title} (${a.exams?.type})`).join(', ') || 'None yet'}
 
 **Topics Practiced (Recent 20):**
-${topicCoverage.slice(0, 10).map(t => `- ${t.subjects?.name || 'Unknown'}: ${t.topic_name} (${t.attempted_questions} questions, ${Math.round((t.correct_questions / t.attempted_questions) * 100)}% accuracy)`).join('\n') || '- No topics practiced yet'}
+${topicCoverage.slice(0, 10).map((t: any) => `- ${t.subjects?.name || 'Unknown'}: ${t.topic_name} (${t.attempted_questions} questions, ${Math.round((t.correct_questions / t.attempted_questions) * 100)}% accuracy)`).join('\n') || '- No topics practiced yet'}
 
 **Weak Areas (Need Focus):**
-${weakTopics.length > 0 ? weakTopics.map(t => `- ${t.subject}: ${t.topic} (${t.accuracy}% accuracy)`).join('\n') : '- No weak areas identified yet - keep practicing!'}
+${weakTopics.length > 0 ? weakTopics.map((t: any) => `- ${t.subject}: ${t.topic} (${t.accuracy}% accuracy)`).join('\n') : '- No weak areas identified yet - keep practicing!'}
 `;
+    }
 
     // System prompt with user context
     const systemPrompt = `You are Edura AI, an intelligent educational assistant for Nigerian students preparing for JAMB, WAEC, and other exams.

@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import { supabase } from "@/integrations/supabase/client";
+import { sanitizeHtmlContent } from "@/utils/contentSecurity";
 
 // Process markdown formatting (bold, italic) AND LaTeX math
 const processMarkdown = (text: string): string => {
@@ -193,17 +195,20 @@ export const AIAssistant = () => {
     try {
       console.log("Sending message to AI assistant...", { messageCount: newMessages.length, hasImages: !!images?.length });
       
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ messages: newMessages }),
-        }
-      );
+const { data: { session } } = await supabase.auth.getSession();
+const headers: Record<string, string> = { "Content-Type": "application/json" };
+if (session?.access_token) {
+  headers.Authorization = `Bearer ${session.access_token}`;
+}
+
+const response = await fetch(
+  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`,
+  {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ messages: newMessages }),
+  }
+);
 
       console.log("Response status:", response.status);
 
@@ -410,7 +415,7 @@ export const AIAssistant = () => {
                 <div 
                   className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none"
                   dangerouslySetInnerHTML={{ 
-                    __html: processMarkdown(message.content)
+                    __html: sanitizeHtmlContent(processMarkdown(message.content))
                   }}
                 />
               ) : (
