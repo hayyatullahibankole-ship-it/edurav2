@@ -76,36 +76,13 @@ const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, o
 const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
   const [testsSheetOpen, setTestsSheetOpen] = useState(false);
 
-  const getIndicatorPosition = () => {
-    switch(activeTab) {
-      case "dashboard": return "8%";
-      case "study": return "28%";
-      case "forum": return "62%";
-      case "profile":
-      case "settings": return "82%";
-      default: return "8%";
-    }
-  };
-
   return (
     <>
-      {/* Fluid Navigation Bar with Moving Bubble */}
+      {/* Fluid Navigation Bar */}
       <div className="fixed bottom-4 left-4 right-4 z-50 md:hidden">
         <div className="relative max-w-md mx-auto">
-          {/* White Navigation Bar with Curved Cutout */}
+          {/* White Navigation Bar */}
           <div className="relative h-16 bg-white rounded-[28px] shadow-2xl overflow-visible">
-            {/* Animated Bubble Indicator */}
-            <div 
-              className="absolute -top-1 w-14 h-14 rounded-full bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-xl transition-all duration-500 ease-in-out z-20"
-              style={{ 
-                left: getIndicatorPosition(),
-                transform: 'translateX(-50%)'
-              }}
-            >
-              {/* Inner glow */}
-              <div className="absolute inset-1 rounded-full bg-white/20" />
-            </div>
-
             {/* Navigation Buttons */}
             <div className="relative h-full flex items-center justify-around px-4 z-10">
               {/* Home Button */}
@@ -116,11 +93,8 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 >
                   <Home 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "dashboard" ? "text-white" : "text-foreground/60"
+                      activeTab === "dashboard" ? "text-primary" : "text-foreground/60"
                     }`}
-                    style={{
-                      filter: activeTab === "dashboard" ? "drop-shadow(0 2px 8px rgba(255,255,255,0.5))" : "none"
-                    }}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
                     activeTab === "dashboard" ? "text-foreground/80 font-semibold" : "text-foreground/50"
@@ -138,11 +112,8 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 >
                   <Library 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "study" ? "text-white" : "text-foreground/60"
+                      activeTab === "study" ? "text-primary" : "text-foreground/60"
                     }`}
-                    style={{
-                      filter: activeTab === "study" ? "drop-shadow(0 2px 8px rgba(255,255,255,0.5))" : "none"
-                    }}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
                     activeTab === "study" ? "text-foreground/80 font-semibold" : "text-foreground/50"
@@ -246,11 +217,8 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 >
                   <MessageSquare 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "forum" ? "text-white" : "text-foreground/60"
+                      activeTab === "forum" ? "text-primary" : "text-foreground/60"
                     }`}
-                    style={{
-                      filter: activeTab === "forum" ? "drop-shadow(0 2px 8px rgba(255,255,255,0.5))" : "none"
-                    }}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
                     activeTab === "forum" ? "text-foreground/80 font-semibold" : "text-foreground/50"
@@ -271,11 +239,8 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 <div className="flex flex-col items-center justify-center gap-0.5 transition-all duration-300 active:scale-90 py-2">
                   <User 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "profile" || activeTab === "settings" ? "text-white" : "text-foreground/60"
+                      activeTab === "profile" || activeTab === "settings" ? "text-primary" : "text-foreground/60"
                     }`}
-                    style={{
-                      filter: (activeTab === "profile" || activeTab === "settings") ? "drop-shadow(0 2px 8px rgba(255,255,255,0.5))" : "none"
-                    }}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
                     activeTab === "profile" || activeTab === "settings" ? "text-foreground/80 font-semibold" : "text-foreground/50"
