@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Progress } from '@/components/ui/progress';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { 
   BookOpen, 
@@ -15,7 +15,7 @@ import {
   Clock,
   ChevronRight,
   Flame,
-  Settings,
+  LogOut,
   FileText,
   TrendingUp,
   Calculator,
@@ -27,8 +27,9 @@ import {
   Library,
   Award,
   GraduationCap,
-  MessageCircle,
-  Calendar
+  Calendar,
+  Video,
+  Gift
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -73,6 +74,11 @@ const MobileHome = () => {
       fetchDailyGoal();
     }
   }, [userProfile]);
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
 
   const fetchStats = async () => {
     try {
@@ -224,33 +230,55 @@ const MobileHome = () => {
         <div className="absolute -bottom-32 -left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
-      {/* Modern Compact Header */}
-      <header className="relative z-20 p-4 pt-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Avatar className="h-14 w-14 border-3 border-white shadow-xl ring-2 ring-primary/20">
-                <AvatarFallback className="bg-gradient-to-br from-primary via-primary-glow to-secondary text-white font-bold text-xl">
-                  {userProfile?.first_name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success rounded-full border-2 border-background shadow-lg" />
+      {/* Modern Header with Curved Shape */}
+      <header className="relative z-20 overflow-hidden">
+        {/* Curved Background Shape */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary-glow/10 to-secondary/10">
+          <svg 
+            viewBox="0 0 1440 200" 
+            className="absolute bottom-0 left-0 w-full"
+            preserveAspectRatio="none"
+          >
+            <path 
+              d="M0,80 C320,120 640,140 960,120 C1280,100 1440,80 1440,80 L1440,0 L0,0 Z" 
+              fill="hsl(var(--primary) / 0.15)"
+            />
+            <path 
+              d="M0,100 C360,140 720,160 1080,140 C1320,120 1440,100 1440,100 L1440,0 L0,0 Z" 
+              fill="hsl(var(--primary-glow) / 0.1)"
+            />
+          </svg>
+        </div>
+
+        <div className="relative p-5 pt-8 pb-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Avatar className="h-16 w-16 border-3 border-white shadow-2xl ring-4 ring-primary/20">
+                  <AvatarFallback className="bg-gradient-to-br from-primary via-primary-glow to-secondary text-white font-bold text-2xl">
+                    {userProfile?.first_name?.charAt(0) || 'S'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success rounded-full border-3 border-background shadow-lg" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-semibold mb-0.5">Welcome back</p>
+                <h2 className="font-black text-2xl bg-gradient-to-r from-foreground via-primary to-primary-glow bg-clip-text text-transparent">
+                  {userProfile?.first_name || 'Student'}
+                </h2>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Hello 👋</p>
-              <h2 className="font-bold text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">{userProfile?.first_name || 'Student'}</h2>
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                className="rounded-2xl hover:bg-destructive/10 w-11 h-11 group"
+              >
+                <LogOut className="h-5 w-5 text-destructive group-hover:scale-110 transition-transform" />
+              </Button>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowProfileSheet(true)}
-              className="rounded-2xl hover:bg-primary/10 w-11 h-11"
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
           </div>
         </div>
       </header>
@@ -349,15 +377,14 @@ const MobileHome = () => {
 
         {/* Subjects - Modern Grid */}
         <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-black">Subjects</h3>
-            <Button variant="ghost" size="sm" className="text-xs font-semibold text-primary">
-              View All
-              <ChevronRight className="h-3 w-3 ml-1" />
-            </Button>
+          <div className="mb-5">
+            <h3 className="text-2xl font-black mb-1 bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+              Explore Subjects
+            </h3>
+            <p className="text-sm text-muted-foreground font-medium">Choose a subject to begin your journey</p>
           </div>
           
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-4 gap-4">
             {[
               { name: 'Math', icon: Calculator, color: 'from-blue-500 to-blue-600', bg: 'from-blue-500/20 to-blue-500/10', subject: 'Mathematics' },
               { name: 'Physics', icon: Sparkles, color: 'from-purple-500 to-purple-600', bg: 'from-purple-500/20 to-purple-500/10', subject: 'Physics' },
@@ -370,16 +397,16 @@ const MobileHome = () => {
             ].map((subject, index) => (
               <button
                 key={subject.name}
-                onClick={() => subject.subject ? handleNavigation(`/cbt-exam?subject=${subject.subject}`) : handleNavigation('/study-hub')}
+                onClick={() => subject.subject ? handleNavigation(`/study-hub?subject=${subject.subject}`) : handleNavigation('/study-hub')}
                 className="group relative"
                 style={{ animationDelay: `${0.05 * index}s` }}
               >
                 <div className={`relative overflow-hidden rounded-[24px] p-4 bg-gradient-to-br ${subject.bg} backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-2xl active:scale-95 transition-all duration-300`}>
                   <div 
-                    className={`w-12 h-12 mx-auto mb-2 rounded-[18px] bg-gradient-to-br ${subject.color} flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 relative overflow-hidden`}
+                    className={`w-14 h-14 mx-auto mb-2 rounded-[20px] bg-gradient-to-br ${subject.color} flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 relative overflow-hidden`}
                     style={{ boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.3)' }}
                   >
-                    <subject.icon className="h-6 w-6 text-white relative z-10" />
+                    <subject.icon className="h-7 w-7 text-white relative z-10" strokeWidth={2.5} />
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
                   </div>
                   <p className="font-bold text-[11px] text-center text-foreground/80">{subject.name}</p>
@@ -391,13 +418,18 @@ const MobileHome = () => {
 
         {/* Quick Actions - Modern Cards */}
         <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <h3 className="text-xl font-black mb-4">Quick Actions</h3>
+          <div className="mb-5">
+            <h3 className="text-2xl font-black mb-1 bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+              Quick Actions
+            </h3>
+            <p className="text-sm text-muted-foreground font-medium">Access key features instantly</p>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: 'Study Hub', icon: Library, color: 'from-primary to-primary-hover', path: '/study-hub' },
-              { label: 'Analytics', icon: TrendingUp, color: 'from-info to-info/80', path: '/performance-report' },
-              { label: 'Forum', icon: MessageCircle, color: 'from-secondary to-secondary/80', path: '/forum' },
-              { label: 'Challenges', icon: Award, color: 'from-warning to-warning/80', path: '/challenge-arena' },
+              { label: 'Study Planner', icon: Calendar, color: 'from-blue-500 to-cyan-500', path: '/study-planner' },
+              { label: 'Consultation', icon: Video, color: 'from-purple-500 to-pink-500', path: '/consultation' },
+              { label: 'Resources', icon: Library, color: 'from-green-500 to-emerald-500', path: '/resources' },
+              { label: 'Referral', icon: Gift, color: 'from-orange-500 to-amber-500', path: '/referral' },
             ].map((action, index) => (
               <button
                 key={action.label}
@@ -415,7 +447,7 @@ const MobileHome = () => {
                       className="p-4 rounded-[20px] bg-white/25 backdrop-blur-sm shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300"
                       style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.3)' }}
                     >
-                      <action.icon className="h-7 w-7 text-white" />
+                      <action.icon className="h-7 w-7 text-white" strokeWidth={2.5} />
                     </div>
                     <span className="text-sm font-bold text-white">{action.label}</span>
                   </div>
@@ -429,13 +461,18 @@ const MobileHome = () => {
         {/* Recent Tests - Compact Modern Cards */}
         {recentResults.length > 0 && (
           <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-black">Recent Tests</h3>
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-2xl font-black mb-1 bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+                  Recent Performance
+                </h3>
+                <p className="text-sm text-muted-foreground font-medium">Track your progress</p>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/performance-report')}
-                className="text-xs font-semibold text-primary"
+                className="text-xs font-semibold text-primary hover:bg-primary/10"
               >
                 View All
                 <ChevronRight className="h-3 w-3 ml-1" />
