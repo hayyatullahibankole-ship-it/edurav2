@@ -60,67 +60,85 @@ const MobileOnboarding = () => {
   const slide = onboardingSlides[currentSlide];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-background to-background/50 flex flex-col relative overflow-hidden">
+      {/* Animated Background Orbs */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+
       {/* Skip Button */}
-      <div className="absolute top-6 right-6 z-20">
+      <div className="absolute top-8 right-6 z-20">
         <Button
           variant="ghost"
           size="sm"
           onClick={handleSkip}
-          className="text-muted-foreground"
+          className="text-muted-foreground hover:text-foreground font-semibold rounded-[16px] hover:bg-muted/50 backdrop-blur-sm"
         >
           Skip
         </Button>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative z-10">
         {/* Top Section with Gradient */}
         <div className={`flex-1 bg-gradient-to-br ${slide.gradient} flex items-center justify-center relative overflow-hidden`}>
-          {/* Background Pattern */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
+          {/* Curved Bottom Shape */}
+          <div className="absolute bottom-0 left-0 right-0 h-12">
+            <svg viewBox="0 0 1440 48" fill="none" className="w-full h-full">
+              <path d="M0 48H1440V0C1440 0 1080 48 720 48C360 48 0 0 0 0V48Z" fill="hsl(var(--background))" />
+            </svg>
+          </div>
+
+          {/* Animated Background Orbs */}
+          <div className="absolute inset-0">
+            <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse" />
+            <div className="absolute bottom-20 left-10 w-40 h-40 bg-white/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+          </div>
           
-          {/* Image Container - Framed */}
-          <div className="relative z-10 px-6 animate-fade-in-up" key={currentSlide}>
+          {/* Image Container */}
+          <div className="relative z-10 px-8 animate-fade-in-up" key={currentSlide}>
             <div className="relative mx-auto max-w-sm">
-              {/* Decorative ring */}
-              <div className="absolute -inset-4 bg-white/20 rounded-3xl blur-2xl" />
+              {/* Glow Effect */}
+              <div className="absolute -inset-6 bg-white/20 rounded-[40px] blur-3xl" />
               
               {/* Image Frame */}
-              <div className="relative bg-white/10 backdrop-blur-md p-3 rounded-3xl shadow-2xl border border-white/30">
-                <div className="relative overflow-hidden rounded-2xl aspect-[4/3]">
+              <div 
+                className="relative bg-white/15 backdrop-blur-xl p-4 rounded-[32px] shadow-2xl border border-white/30"
+                style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.3)' }}
+              >
+                <div className="relative overflow-hidden rounded-[24px] aspect-[4/3]">
                   <img 
                     src={slide.image} 
                     alt={slide.title}
                     className="w-full h-full object-cover"
                   />
-                  {/* Subtle gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Content Section with Curved Top */}
-        <div className="bg-background p-8 rounded-t-[2rem] -mt-8 relative z-10 shadow-2xl">
+        {/* Content Section */}
+        <div className="bg-background px-8 pt-10 pb-8 relative">
           <div className="text-center mb-8 animate-fade-in" key={`content-${currentSlide}`} style={{ animationDelay: '0.2s' }}>
-            <h2 className="text-3xl font-bold mb-2">{slide.title}</h2>
-            <p className="text-primary font-semibold text-lg mb-3">{slide.subtitle}</p>
-            <p className="text-muted-foreground text-base leading-relaxed">
+            <h2 className="text-4xl font-black mb-3 bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent leading-tight">
+              {slide.title}
+            </h2>
+            <p className="text-primary font-bold text-xl mb-4">{slide.subtitle}</p>
+            <p className="text-muted-foreground text-base leading-relaxed max-w-md mx-auto font-medium">
               {slide.description}
             </p>
           </div>
 
           {/* Indicators */}
-          <div className="flex justify-center gap-2 mb-8">
+          <div className="flex justify-center gap-2.5 mb-8">
             {onboardingSlides.map((_, index) => (
               <div
                 key={index}
-                className={`h-2 rounded-full transition-all duration-300 ${
+                className={`h-2.5 rounded-full transition-all duration-300 shadow-lg ${
                   index === currentSlide
-                    ? 'w-8 bg-primary'
-                    : 'w-2 bg-muted'
+                    ? 'w-10 bg-gradient-to-r from-primary to-primary-glow'
+                    : 'w-2.5 bg-muted'
                 }`}
               />
             ))}
@@ -129,10 +147,11 @@ const MobileOnboarding = () => {
           {/* Button */}
           <Button
             onClick={handleNext}
-            className="w-full h-14 text-lg font-semibold rounded-2xl shadow-lg bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full h-16 text-lg font-black rounded-[24px] shadow-2xl bg-gradient-to-r from-primary via-primary-glow to-secondary hover:scale-[1.02] active:scale-[0.98] transition-all"
+            style={{ boxShadow: '0 12px 36px rgba(var(--primary), 0.4)' }}
           >
             {currentSlide === onboardingSlides.length - 1 ? "Get Started" : 'Next'}
-            <ArrowRight className="ml-2 h-5 w-5" />
+            <ArrowRight className="ml-2 h-6 w-6" strokeWidth={2.5} />
           </Button>
         </div>
       </div>

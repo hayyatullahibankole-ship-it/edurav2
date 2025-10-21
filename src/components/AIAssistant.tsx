@@ -293,7 +293,7 @@ const response = await fetch(
 
   if (!isOpen) {
     return (
-      <div className={`fixed z-50 ${isMobile ? 'bottom-24 right-5' : 'bottom-6 right-6'}`}>
+      <div className={`fixed z-50 ${isMobile ? 'bottom-36 right-5' : 'bottom-6 right-6'}`}>
         <Button
           onClick={() => setIsOpen(true)}
           className="w-16 h-16 rounded-[24px] shadow-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary hover:scale-110 transition-all duration-500 p-0 relative group overflow-hidden"
