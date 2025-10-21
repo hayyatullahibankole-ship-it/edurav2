@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
 import { 
   BookOpen, 
   Trophy, 
@@ -15,10 +16,19 @@ import {
   ChevronRight,
   Flame,
   Settings,
-  GraduationCap,
   FileText,
-  Zap,
-  TrendingUp
+  TrendingUp,
+  Calculator,
+  Beaker,
+  Microscope,
+  Globe,
+  Search,
+  Sparkles,
+  Library,
+  Award,
+  GraduationCap,
+  MessageCircle,
+  Calendar
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -46,6 +56,15 @@ const MobileHome = () => {
   const [streak, setStreak] = useState({ current: 0, longest: 0 });
   const [dailyGoal, setDailyGoal] = useState({ answered: 0, target: 20 });
   const [showProfileSheet, setShowProfileSheet] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const motivationalQuotes = [
+    "Success is the sum of small efforts repeated daily.",
+    "The expert in anything was once a beginner.",
+    "Study hard, stay focused, and achieve greatness!",
+    "Every question you answer brings you closer to your goal.",
+    "Consistency is the key to mastering any subject."
+  ];
 
   useEffect(() => {
     if (userProfile?.id) {
@@ -198,13 +217,13 @@ const MobileHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Clean Header */}
-      <header className="bg-card border-b border-border p-4">
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 pb-24">
+      {/* Header with Search */}
+      <header className="bg-card/80 backdrop-blur-xl border-b border-border/40 p-4 sticky top-0 z-10">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12 border-2 border-primary/20">
-              <AvatarFallback className="bg-primary text-white font-bold">
+            <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-lg">
+              <AvatarFallback className="bg-gradient-to-br from-primary to-primary-glow text-white font-bold text-lg">
                 {userProfile?.first_name?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
@@ -218,80 +237,209 @@ const MobileHome = () => {
               variant="ghost"
               size="icon"
               onClick={() => setShowProfileSheet(true)}
-              className="rounded-full"
+              className="rounded-full hover:bg-primary/10"
             >
               <Settings className="h-5 w-5" />
             </Button>
             <NotificationBell />
           </div>
         </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search subjects, tests..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 bg-muted/50 border-border/50 rounded-xl"
+          />
+        </div>
       </header>
 
       {/* Main Content */}
-      <div className="p-4 space-y-4">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-primary/10 to-primary/5">
-            <CardContent className="p-4 text-center">
-              <Trophy className="h-5 w-5 mx-auto mb-2 text-primary" />
-              <p className="text-2xl font-bold">{stats.testsTaken}</p>
-              <p className="text-xs text-muted-foreground">Tests</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-success/10 to-success/5">
-            <CardContent className="p-4 text-center">
-              <Target className="h-5 w-5 mx-auto mb-2 text-success" />
-              <p className="text-2xl font-bold">{stats.averageScore}%</p>
-              <p className="text-xs text-muted-foreground">Average</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-info/10 to-info/5">
-            <CardContent className="p-4 text-center">
-              <Clock className="h-5 w-5 mx-auto mb-2 text-info" />
-              <p className="text-2xl font-bold">{stats.studyHours}h</p>
-              <p className="text-xs text-muted-foreground">Study</p>
-            </CardContent>
-          </Card>
+      <div className="p-4 space-y-5">
+        {/* Stats Overview Card */}
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/10 via-primary/5 to-transparent overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Your Progress</p>
+                <h3 className="text-2xl font-bold">{stats.testsTaken} Tests Taken</h3>
+              </div>
+              <div className="p-3 rounded-2xl bg-primary/20">
+                <Trophy className="h-8 w-8 text-primary" />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="text-center p-3 rounded-xl bg-card/50">
+                <p className="text-2xl font-bold text-primary">{stats.averageScore}%</p>
+                <p className="text-xs text-muted-foreground mt-1">Average</p>
+              </div>
+              <div className="text-center p-3 rounded-xl bg-card/50">
+                <p className="text-2xl font-bold text-success">{stats.studyHours}h</p>
+                <p className="text-xs text-muted-foreground mt-1">Study Time</p>
+              </div>
+              <div className="text-center p-3 rounded-xl bg-card/50">
+                <p className="text-2xl font-bold text-warning">{streak.current}</p>
+                <p className="text-xs text-muted-foreground mt-1">Day Streak</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Subjects Grid */}
+        <div>
+          <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-primary" />
+            Your Subjects
+          </h3>
+          <div className="grid grid-cols-3 gap-3">
+            <button
+              onClick={() => handleNavigation('/cbt-exam?subject=Mathematics')}
+              className="group"
+            >
+              <Card className="border-0 shadow-md hover:shadow-xl transition-all active:scale-95 bg-gradient-to-br from-blue-500/10 to-blue-500/5">
+                <CardContent className="p-4 text-center">
+                  <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Calculator className="h-6 w-6 text-white" />
+                  </div>
+                  <p className="font-semibold text-sm mb-0.5">Mathematics</p>
+                  <p className="text-xs text-muted-foreground">35 Topics</p>
+                </CardContent>
+              </Card>
+            </button>
+
+            <button
+              onClick={() => handleNavigation('/cbt-exam?subject=Physics')}
+              className="group"
+            >
+              <Card className="border-0 shadow-md hover:shadow-xl transition-all active:scale-95 bg-gradient-to-br from-purple-500/10 to-purple-500/5">
+                <CardContent className="p-4 text-center">
+                  <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Sparkles className="h-6 w-6 text-white" />
+                  </div>
+                  <p className="font-semibold text-sm mb-0.5">Physics</p>
+                  <p className="text-xs text-muted-foreground">28 Topics</p>
+                </CardContent>
+              </Card>
+            </button>
+
+            <button
+              onClick={() => handleNavigation('/cbt-exam?subject=Chemistry')}
+              className="group"
+            >
+              <Card className="border-0 shadow-md hover:shadow-xl transition-all active:scale-95 bg-gradient-to-br from-green-500/10 to-green-500/5">
+                <CardContent className="p-4 text-center">
+                  <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Beaker className="h-6 w-6 text-white" />
+                  </div>
+                  <p className="font-semibold text-sm mb-0.5">Chemistry</p>
+                  <p className="text-xs text-muted-foreground">32 Topics</p>
+                </CardContent>
+              </Card>
+            </button>
+
+            <button
+              onClick={() => handleNavigation('/cbt-exam?subject=Biology')}
+              className="group"
+            >
+              <Card className="border-0 shadow-md hover:shadow-xl transition-all active:scale-95 bg-gradient-to-br from-teal-500/10 to-teal-500/5">
+                <CardContent className="p-4 text-center">
+                  <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Microscope className="h-6 w-6 text-white" />
+                  </div>
+                  <p className="font-semibold text-sm mb-0.5">Biology</p>
+                  <p className="text-xs text-muted-foreground">30 Topics</p>
+                </CardContent>
+              </Card>
+            </button>
+
+            <button
+              onClick={() => handleNavigation('/cbt-exam?subject=English')}
+              className="group"
+            >
+              <Card className="border-0 shadow-md hover:shadow-xl transition-all active:scale-95 bg-gradient-to-br from-orange-500/10 to-orange-500/5">
+                <CardContent className="p-4 text-center">
+                  <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <BookOpen className="h-6 w-6 text-white" />
+                  </div>
+                  <p className="font-semibold text-sm mb-0.5">English</p>
+                  <p className="text-xs text-muted-foreground">25 Topics</p>
+                </CardContent>
+              </Card>
+            </button>
+
+            <button
+              onClick={() => handleNavigation('/study-hub')}
+              className="group"
+            >
+              <Card className="border-0 shadow-md hover:shadow-xl transition-all active:scale-95 bg-gradient-to-br from-pink-500/10 to-pink-500/5">
+                <CardContent className="p-4 text-center">
+                  <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Globe className="h-6 w-6 text-white" />
+                  </div>
+                  <p className="font-semibold text-sm mb-0.5">More</p>
+                  <p className="text-xs text-muted-foreground">View All</p>
+                </CardContent>
+              </Card>
+            </button>
+          </div>
         </div>
 
-        {/* Streak Card */}
-        {streak.current > 0 && (
-          <Card className="border-0 shadow-sm bg-gradient-to-r from-warning/10 to-warning/5">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+        {/* Streak & Daily Goal */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Streak */}
+          {streak.current > 0 && (
+            <Card className="border-0 shadow-md bg-gradient-to-br from-warning/10 to-warning/5">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
                   <div className="p-2 rounded-xl bg-warning/20">
                     <Flame className="h-5 w-5 text-warning" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold">{streak.current} Day Streak</p>
-                    <p className="text-xs text-muted-foreground">Keep it up!</p>
+                    <p className="text-xl font-bold">{streak.current}</p>
+                    <p className="text-xs text-muted-foreground">Day Streak</p>
                   </div>
                 </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Daily Goal */}
+          <Card className="border-0 shadow-md bg-gradient-to-br from-success/10 to-success/5">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 rounded-xl bg-success/20">
+                  <Target className="h-5 w-5 text-success" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold">{dailyGoal.answered}/{dailyGoal.target}</p>
+                  <p className="text-xs text-muted-foreground">Daily Goal</p>
+                </div>
               </div>
+              <Progress 
+                value={(dailyGoal.answered / dailyGoal.target) * 100} 
+                className="h-1.5"
+              />
             </CardContent>
           </Card>
-        )}
+        </div>
 
-        {/* Daily Goal */}
-        <Card className="border-0 shadow-sm">
+        {/* Motivational Quote */}
+        <Card className="border-0 shadow-md bg-gradient-to-br from-primary/5 to-transparent">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-success" />
-                <span className="text-sm font-semibold">Daily Goal</span>
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-xl bg-primary/10 flex-shrink-0">
+                <Sparkles className="h-5 w-5 text-primary" />
               </div>
-              <span className="text-xs font-semibold text-success">
-                {dailyGoal.answered}/{dailyGoal.target}
-              </span>
+              <div className="flex-1">
+                <p className="text-sm font-medium leading-relaxed mb-1">
+                  {motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]}
+                </p>
+                <p className="text-xs text-muted-foreground">Keep pushing! 🚀</p>
+              </div>
             </div>
-            <Progress 
-              value={(dailyGoal.answered / dailyGoal.target) * 100} 
-              className="h-2"
-            />
           </CardContent>
         </Card>
 
@@ -299,12 +447,15 @@ const MobileHome = () => {
         {recentResults.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-base">Recent Tests</h3>
+              <h3 className="font-bold text-base flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-primary" />
+                Recent Tests
+              </h3>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/performance-report')}
-                className="text-xs h-8"
+                className="text-xs h-8 text-primary hover:text-primary"
               >
                 View All
                 <ChevronRight className="h-3 w-3 ml-1" />
@@ -315,7 +466,7 @@ const MobileHome = () => {
                 <Card
                   key={result.id}
                   onClick={() => navigate(`/results?attempt=${result.attempt_id}`)}
-                  className="border-0 shadow-sm cursor-pointer active:scale-98 transition-transform"
+                  className="border-0 shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -351,16 +502,16 @@ const MobileHome = () => {
           <div className="grid grid-cols-2 gap-3">
             <Button
               onClick={() => handleNavigation('/study-hub')}
-              className="h-20 flex-col gap-2 bg-gradient-to-br from-primary to-primary-hover"
+              className="h-24 flex-col gap-2 bg-gradient-to-br from-primary to-primary-hover shadow-lg hover:shadow-xl"
               size="lg"
             >
-              <BookOpen className="h-6 w-6" />
+              <Library className="h-6 w-6" />
               <span className="text-sm font-semibold">Study Hub</span>
             </Button>
             
             <Button
               onClick={() => handleNavigation('/performance-report')}
-              className="h-20 flex-col gap-2 bg-gradient-to-br from-info to-info/80"
+              className="h-24 flex-col gap-2 bg-gradient-to-br from-info to-info/80 shadow-lg hover:shadow-xl"
               size="lg"
             >
               <TrendingUp className="h-6 w-6" />
@@ -369,40 +520,45 @@ const MobileHome = () => {
             
             <Button
               onClick={() => handleNavigation('/forum')}
-              className="h-20 flex-col gap-2 bg-gradient-to-br from-secondary to-secondary/80"
+              className="h-24 flex-col gap-2 bg-gradient-to-br from-secondary to-secondary/80 shadow-lg hover:shadow-xl"
               size="lg"
             >
-              <GraduationCap className="h-6 w-6" />
+              <MessageCircle className="h-6 w-6" />
               <span className="text-sm font-semibold">Forum</span>
             </Button>
             
             <Button
-              onClick={() => handleNavigation('/resources')}
-              className="h-20 flex-col gap-2 bg-gradient-to-br from-accent to-success"
+              onClick={() => handleNavigation('/challenge-arena')}
+              className="h-24 flex-col gap-2 bg-gradient-to-br from-warning to-warning/80 shadow-lg hover:shadow-xl"
               size="lg"
             >
-              <Zap className="h-6 w-6" />
-              <span className="text-sm font-semibold">Resources</span>
+              <Award className="h-6 w-6" />
+              <span className="text-sm font-semibold">Challenges</span>
             </Button>
           </div>
         </div>
 
         {/* Premium CTA */}
         {!isPremium && (
-          <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-sm mb-1">Upgrade to Premium</p>
-                  <p className="text-xs text-muted-foreground">Unlock all features</p>
+          <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-lg">
+            <CardContent className="p-5">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-2xl bg-primary/20 flex-shrink-0">
+                  <Sparkles className="h-6 w-6 text-primary" />
                 </div>
-                <Button 
-                  size="sm"
-                  onClick={() => navigate('/payment')}
-                  className="bg-primary"
-                >
-                  Upgrade
-                </Button>
+                <div className="flex-1">
+                  <p className="font-bold text-base mb-1">Upgrade to Premium</p>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Unlock unlimited tests, AI tutor, and exclusive features
+                  </p>
+                  <Button 
+                    size="sm"
+                    onClick={() => navigate('/payment')}
+                    className="bg-primary hover:bg-primary-hover shadow-md"
+                  >
+                    Upgrade Now
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
