@@ -6,10 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, Zap, Clock, Target, Award, TrendingUp, ArrowLeft } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
+import { Trophy, Zap, Clock, Target, Award, TrendingUp, ArrowLeft, Flame, Star, Crown, Sparkles, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import Layout from '@/components/Layout';
 import { formatDistanceToNow } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Challenge {
   id: string;
@@ -39,6 +42,7 @@ interface LeaderboardEntry {
 
 export default function ChallengeArena() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { isEnterprise, loading: subLoading } = useSubscription();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -46,6 +50,8 @@ export default function ChallengeArena() {
   const [selectedTab, setSelectedTab] = useState('daily');
   const [courseCategory, setCourseCategory] = useState<'science' | 'art' | 'management'>('science');
   const [userAttempts, setUserAttempts] = useState<Set<string>>(new Set());
+  const [userStreak, setUserStreak] = useState(0);
+  const [userStats, setUserStats] = useState({ rank: 0, points: 0, achievements: 0 });
 
   useEffect(() => {
     if (!subLoading && !isEnterprise) {
@@ -162,178 +168,322 @@ export default function ChallengeArena() {
     return null;
   }
 
-  return (
-    <Layout>
-      <div className="container mx-auto px-4 py-4 sm:py-8">
-        <div className="mb-6">
+  // Mobile Dark Purple Design
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-[#1a0e2e] text-white pb-24">
+        {/* Header */}
+        <div className="bg-gradient-to-b from-[#2d1b4e] to-[#1a0e2e] p-6 pb-8">
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={() => navigate('/dashboard')}
-            className="gap-2"
+            className="mb-4 text-white hover:bg-white/10"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
           </Button>
+          
+          <h1 className="text-3xl font-bold mb-2">Challenge Arena</h1>
+          <p className="text-white/70 text-sm">Complete daily missions and compete!</p>
         </div>
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">🏆 Challenge Arena</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Compete, improve, and climb the leaderboard</p>
-        </div>
 
-        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mb-6 sm:mb-8">
-          <Card className="animate-fade-in">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Your Rank</CardTitle>
-              <Trophy className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">#--</div>
-              <p className="text-xs text-muted-foreground">Complete challenges to rank</p>
-            </CardContent>
-          </Card>
-
-          <Card className="animate-fade-in">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Total Points</CardTitle>
-              <Zap className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">Earn points by competing</p>
-            </CardContent>
-          </Card>
-
-          <Card className="animate-fade-in sm:col-span-2 md:col-span-1">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Achievements</CardTitle>
-              <Award className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">Unlock badges</p>
+        {/* Streak Card */}
+        <div className="px-6 -mt-6 mb-6">
+          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 border-0 shadow-xl">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-sm">
+                    <Flame className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-white">{userStreak} days</p>
+                    <p className="text-sm text-white/80">Current Streak</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-white/60" />
+              </div>
+              {userStreak > 0 && (
+                <div className="mt-4 pt-4 border-t border-white/20">
+                  <p className="text-xs text-white/80">
+                    Practice daily to maintain your streak!
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        <Tabs value={courseCategory} onValueChange={(v) => setCourseCategory(v as 'science' | 'art' | 'management')} className="mb-4 sm:mb-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="science" className="text-xs sm:text-sm">Science</TabsTrigger>
-            <TabsTrigger value="art" className="text-xs sm:text-sm">Art</TabsTrigger>
-            <TabsTrigger value="management" className="text-xs sm:text-sm">Management</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Stats Cards */}
+        <div className="px-6 mb-6">
+          <div className="grid grid-cols-3 gap-3">
+            <Card className="bg-[#2d1b4e] border-[#3d2b5e] shadow-lg">
+              <CardContent className="p-4 text-center">
+                <div className="p-2 rounded-xl bg-purple-500/20 w-fit mx-auto mb-2">
+                  <Trophy className="h-5 w-5 text-purple-400" />
+                </div>
+                <p className="text-2xl font-bold text-white">#{userStats.rank || '--'}</p>
+                <p className="text-xs text-white/60">Rank</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-[#2d1b4e] border-[#3d2b5e] shadow-lg">
+              <CardContent className="p-4 text-center">
+                <div className="p-2 rounded-xl bg-yellow-500/20 w-fit mx-auto mb-2">
+                  <Zap className="h-5 w-5 text-yellow-400" />
+                </div>
+                <p className="text-2xl font-bold text-white">{userStats.points}</p>
+                <p className="text-xs text-white/60">Points</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-[#2d1b4e] border-[#3d2b5e] shadow-lg">
+              <CardContent className="p-4 text-center">
+                <div className="p-2 rounded-xl bg-blue-500/20 w-fit mx-auto mb-2">
+                  <Award className="h-5 w-5 text-blue-400" />
+                </div>
+                <p className="text-2xl font-bold text-white">{userStats.achievements}</p>
+                <p className="text-xs text-white/60">Badges</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-6 sm:mb-8">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="daily" className="text-xs sm:text-sm">Daily</TabsTrigger>
-            <TabsTrigger value="weekly" className="text-xs sm:text-sm">Weekly</TabsTrigger>
-            <TabsTrigger value="special" className="text-xs sm:text-sm">Special</TabsTrigger>
-          </TabsList>
+        {/* Category Tabs */}
+        <div className="px-6 mb-4">
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {(['science', 'art', 'management'] as const).map((cat) => (
+              <Button
+                key={cat}
+                onClick={() => setCourseCategory(cat)}
+                variant="ghost"
+                className={`rounded-full px-6 whitespace-nowrap ${
+                  courseCategory === cat
+                    ? 'bg-purple-600 text-white hover:bg-purple-700'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
+                }`}
+              >
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </Button>
+            ))}
+          </div>
+        </div>
 
-          <TabsContent value={selectedTab} className="mt-4 sm:mt-6">
-            <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
-              <div className="space-y-4">
-                <h2 className="text-xl sm:text-2xl font-semibold">Active Challenges</h2>
-                
+        {/* Challenges Section */}
+        <div className="px-6 mb-6">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Target className="h-5 w-5 text-purple-400" />
+            Daily Missions
+          </h2>
+          
+          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+            <TabsList className="w-full bg-[#2d1b4e] border-[#3d2b5e] mb-4">
+              <TabsTrigger 
+                value="daily"
+                className="flex-1 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+              >
+                Daily
+              </TabsTrigger>
+              <TabsTrigger 
+                value="weekly"
+                className="flex-1 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+              >
+                Weekly
+              </TabsTrigger>
+              <TabsTrigger 
+                value="special"
+                className="flex-1 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+              >
+                Special
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value={selectedTab} className="mt-0">
+              <div className="space-y-3">
                 {challenges.length === 0 ? (
-                  <Card className="animate-fade-in">
-                    <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12 px-4">
-                      <Target className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4" />
-                      <p className="text-sm sm:text-base text-muted-foreground text-center">No active {selectedTab} challenges</p>
+                  <Card className="bg-[#2d1b4e] border-[#3d2b5e]">
+                    <CardContent className="py-12 text-center">
+                      <Target className="h-12 w-12 mx-auto mb-3 text-white/30" />
+                      <p className="text-white/60">No {selectedTab} challenges available</p>
                     </CardContent>
                   </Card>
                 ) : (
-                  challenges.map((challenge) => (
-                    <Card key={challenge.id} className="animate-fade-in">
-                      <CardHeader className="pb-3">
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                  challenges.map((challenge, index) => (
+                    <Card 
+                      key={challenge.id}
+                      className="bg-[#2d1b4e] border-[#3d2b5e] shadow-lg overflow-hidden"
+                    >
+                      <CardContent className="p-5">
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className={`p-3 rounded-2xl ${
+                            index === 0 ? 'bg-blue-500/20' :
+                            index === 1 ? 'bg-yellow-500/20' :
+                            index === 2 ? 'bg-pink-500/20' :
+                            'bg-purple-500/20'
+                          }`}>
+                            {index === 0 ? <Zap className="h-6 w-6 text-blue-400" /> :
+                             index === 1 ? <Star className="h-6 w-6 text-yellow-400" /> :
+                             index === 2 ? <Target className="h-6 w-6 text-pink-400" /> :
+                             <Trophy className="h-6 w-6 text-purple-400" />}
+                          </div>
                           <div className="flex-1">
-                            <CardTitle className="text-base sm:text-lg">{challenge.title}</CardTitle>
-                            <CardDescription className="mt-2 text-xs sm:text-sm">
-                              {challenge.description}
-                            </CardDescription>
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="font-bold text-white">{challenge.title}</h3>
+                              <Badge className="bg-yellow-500/20 text-yellow-400 border-0">
+                                +{challenge.points_reward} XP
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-white/60 mb-3">{challenge.description}</p>
+                            
+                            <div className="flex items-center gap-4 text-xs text-white/50 mb-4">
+                              <div className="flex items-center gap-1">
+                                <Target className="h-3 w-3" />
+                                {challenge.question_count}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {challenge.duration_minutes}m
+                              </div>
+                              <div>Level {challenge.difficulty_level}</div>
+                            </div>
+
+                            {challenge.isCompleted ? (
+                              <div className="flex items-center gap-2 text-sm text-green-400">
+                                <div className="h-2 w-2 rounded-full bg-green-400" />
+                                Completed
+                              </div>
+                            ) : (
+                              <Progress value={0} className="h-1.5 bg-white/10" />
+                            )}
                           </div>
-                          <Badge variant="secondary" className="text-xs self-start">
-                            {challenge.points_reward} pts
-                          </Badge>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground mb-4">
-                          <div className="flex items-center gap-1">
-                            <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            <span>{challenge.question_count} questions</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            <span>{challenge.duration_minutes} min</span>
-                          </div>
-                          <span>Difficulty: {challenge.difficulty_level}/5</span>
-                        </div>
-                        <Button 
-                          className="w-full"
+                        
+                        <Button
                           onClick={() => navigate(`/challenge/${challenge.id}`)}
                           disabled={challenge.isCompleted}
-                          variant={challenge.isCompleted ? "secondary" : "default"}
+                          className={`w-full ${
+                            challenge.isCompleted
+                              ? 'bg-white/10 text-white/50'
+                              : 'bg-purple-600 hover:bg-purple-700 text-white'
+                          }`}
                         >
-                          {challenge.isCompleted ? '✓ Already Completed' : 'Start Challenge'}
+                          {challenge.isCompleted ? '✓ Completed' : 'Start Challenge'}
                         </Button>
                       </CardContent>
                     </Card>
                   ))
                 )}
               </div>
+            </TabsContent>
+          </Tabs>
+        </div>
 
-              <div>
-                <h2 className="text-xl sm:text-2xl font-semibold mb-4">🏆 Leaderboard</h2>
-                <Card className="animate-fade-in">
-                  <CardContent className="pt-4 sm:pt-6">
-                    {leaderboard.length === 0 ? (
-                      <div className="text-center py-6 sm:py-8 text-muted-foreground">
-                        <TrendingUp className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2" />
-                        <p className="text-sm sm:text-base">No rankings yet</p>
+        {/* Leaderboard */}
+        <div className="px-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Crown className="h-5 w-5 text-yellow-400" />
+              Leaderboard
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-purple-400 hover:text-purple-300 hover:bg-white/10 h-8"
+            >
+              View All
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+
+          <Card className="bg-[#2d1b4e] border-[#3d2b5e] shadow-lg">
+            <CardContent className="p-4">
+              {leaderboard.length === 0 ? (
+                <div className="py-8 text-center">
+                  <TrendingUp className="h-12 w-12 mx-auto mb-3 text-white/30" />
+                  <p className="text-white/60 text-sm">No rankings yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {leaderboard.slice(0, 5).map((entry, index) => (
+                    <div 
+                      key={entry.user_id}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                    >
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0 ${
+                        index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white' :
+                        index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-white' :
+                        index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' :
+                        'bg-white/10 text-white/60'
+                      }`}>
+                        {index + 1}
                       </div>
-                    ) : (
-                      <div className="space-y-3 sm:space-y-4">
-                        {leaderboard.map((entry, index) => (
-                          <div 
-                            key={entry.user_id}
-                            className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-accent/50 animate-fade-in"
-                          >
-                            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0 ${
-                                index === 0 ? 'bg-yellow-500 text-white' :
-                                index === 1 ? 'bg-gray-400 text-white' :
-                                index === 2 ? 'bg-orange-600 text-white' :
-                                'bg-muted'
-                              }`}>
-                                {index + 1}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className="font-medium text-sm sm:text-base truncate">
-                                  {entry.users?.first_name} {entry.users?.last_name}
-                                </p>
-                                <p className="text-xs text-muted-foreground truncate">
-                                  {formatDistanceToNow(new Date(entry.completed_at), { addSuffix: true })}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right flex-shrink-0 ml-2">
-                              <p className="font-bold text-sm sm:text-base">{entry.score} pts</p>
-                              <p className="text-xs text-muted-foreground">
-                                {Math.floor(entry.time_taken_seconds / 60)}:{(entry.time_taken_seconds % 60).toString().padStart(2, '0')}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                      
+                      <Avatar className="h-10 w-10 border-2 border-white/20">
+                        <AvatarFallback className="bg-purple-600 text-white font-semibold">
+                          {entry.users?.first_name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-white text-sm truncate">
+                          {entry.users?.first_name} {entry.users?.last_name}
+                        </p>
+                        <p className="text-xs text-white/50">
+                          {formatDistanceToNow(new Date(entry.completed_at), { addSuffix: true })}
+                        </p>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
+                      
+                      <div className="text-right flex-shrink-0">
+                        <div className="flex items-center gap-1">
+                          <Zap className="h-3 w-3 text-yellow-400" />
+                          <p className="font-bold text-white">{entry.score}</p>
+                        </div>
+                        <p className="text-xs text-white/50">
+                          {Math.floor(entry.time_taken_seconds / 60)}:{(entry.time_taken_seconds % 60).toString().padStart(2, '0')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Premium CTA */}
+        <div className="px-6 mb-8">
+          <Card className="bg-gradient-to-br from-purple-600 to-purple-800 border-0 shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
+            <CardContent className="p-6 relative">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-sm">
+                  <Sparkles className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-white text-lg mb-1">Unlock Premium</h3>
+                  <p className="text-sm text-white/80 mb-4">
+                    Get unlimited challenges, exclusive badges, and more rewards!
+                  </p>
+                  <Button
+                    onClick={() => navigate('/payment')}
+                    className="bg-white text-purple-600 hover:bg-white/90 font-semibold"
+                  >
+                    Upgrade Now
+                  </Button>
+                </div>
               </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop Layout
+  return (
+    <Layout>
+      <div className="container mx-auto px-4 py-4 sm:py-8">
+...
       </div>
     </Layout>
   );
