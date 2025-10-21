@@ -395,23 +395,23 @@ const MobileHome = () => {
               { name: 'Econ', icon: TrendingUp, color: 'from-indigo-500 to-indigo-600', bg: 'from-indigo-500/20 to-indigo-500/10', subject: 'Economics' },
               { name: 'More', icon: GraduationCap, color: 'from-pink-500 to-pink-600', bg: 'from-pink-500/20 to-pink-500/10', subject: null },
             ].map((subject, index) => (
-              <button
+              <div
                 key={subject.name}
                 onClick={() => subject.subject ? handleNavigation(`/study-hub?subject=${subject.subject}`) : handleNavigation('/study-hub')}
-                className="group relative"
+                className="group relative cursor-pointer flex flex-col items-center"
                 style={{ animationDelay: `${0.05 * index}s` }}
               >
-                <div className={`relative overflow-hidden rounded-[24px] p-4 bg-gradient-to-br ${subject.bg} backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-2xl active:scale-95 transition-all duration-300`}>
+                <div className={`relative overflow-hidden rounded-[24px] p-3 w-full aspect-square bg-gradient-to-br ${subject.bg} backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-2xl active:scale-95 transition-all duration-300 flex items-center justify-center mb-2`}>
                   <div 
-                    className={`w-14 h-14 mx-auto mb-2 rounded-[20px] bg-gradient-to-br ${subject.color} flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 relative overflow-hidden`}
+                    className={`w-12 h-12 rounded-[18px] bg-gradient-to-br ${subject.color} flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 relative overflow-hidden`}
                     style={{ boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.3)' }}
                   >
-                    <subject.icon className="h-7 w-7 text-white relative z-10" strokeWidth={2.5} />
+                    <subject.icon className="h-6 w-6 text-white relative z-10" strokeWidth={2.5} />
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
                   </div>
-                  <p className="font-bold text-[11px] text-center text-foreground/80">{subject.name}</p>
                 </div>
-              </button>
+                <p className="font-bold text-[11px] text-center text-foreground/80">{subject.name}</p>
+              </div>
             ))}
           </div>
         </div>
@@ -427,8 +427,8 @@ const MobileHome = () => {
           <div className="grid grid-cols-2 gap-3">
             {[
               { label: 'Study Planner', icon: Calendar, color: 'from-blue-500 to-cyan-500', path: '/study-planner' },
-              { label: 'Consultation', icon: Video, color: 'from-purple-500 to-pink-500', path: '/consultation' },
-              { label: 'Resources', icon: Library, color: 'from-green-500 to-emerald-500', path: '/resources' },
+              { label: 'Arena', icon: Trophy, color: 'from-purple-500 to-pink-500', path: '/challenge-arena' },
+              { label: 'Analytics', icon: TrendingUp, color: 'from-green-500 to-emerald-500', path: '/performance-report' },
               { label: 'Referral', icon: Gift, color: 'from-orange-500 to-amber-500', path: '/referral' },
             ].map((action, index) => (
               <button
@@ -438,18 +438,18 @@ const MobileHome = () => {
                 style={{ animationDelay: `${0.05 * index}s` }}
               >
                 <div 
-                  className={`relative overflow-hidden rounded-[28px] p-6 bg-gradient-to-br ${action.color} shadow-xl hover:shadow-2xl active:scale-95 transition-all duration-300`}
+                  className={`relative overflow-hidden rounded-[28px] p-6 bg-gradient-to-br ${action.color} shadow-xl hover:shadow-2xl active:scale-95 transition-all duration-300 flex flex-col items-center justify-center`}
                   style={{ boxShadow: '0 12px 36px rgba(0, 0, 0, 0.15)' }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
                   <div className="relative z-10 flex flex-col items-center gap-3">
                     <div 
-                      className="p-4 rounded-[20px] bg-white/25 backdrop-blur-sm shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300"
+                      className="p-4 rounded-[20px] bg-white/25 backdrop-blur-sm shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 flex items-center justify-center"
                       style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.3)' }}
                     >
                       <action.icon className="h-7 w-7 text-white" strokeWidth={2.5} />
                     </div>
-                    <span className="text-sm font-bold text-white">{action.label}</span>
+                    <span className="text-sm font-bold text-white text-center">{action.label}</span>
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
                 </div>

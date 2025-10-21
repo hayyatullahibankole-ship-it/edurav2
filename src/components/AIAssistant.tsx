@@ -293,93 +293,105 @@ const response = await fetch(
 
   if (!isOpen) {
     return (
-      <div className={`fixed z-50 ${isMobile ? 'bottom-40 right-4' : 'bottom-6 right-6'}`}>
+      <div className={`fixed z-50 ${isMobile ? 'bottom-24 right-5' : 'bottom-6 right-6'}`}>
         <Button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 rounded-2xl shadow-2xl bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 hover:scale-110 transition-all duration-500 p-0 relative group animate-bounce-slow"
+          className="w-16 h-16 rounded-[24px] shadow-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary hover:scale-110 transition-all duration-500 p-0 relative group overflow-hidden"
+          style={{ boxShadow: '0 20px 60px rgba(var(--primary), 0.4)' }}
         >
-          {/* Multi-layered animated glow effect */}
-          <div className="absolute inset-0 rounded-2xl bg-green-400/60 blur-2xl animate-pulse" />
-          <div className="absolute inset-0 rounded-2xl bg-green-300/40 blur-xl animate-pulse" style={{ animationDelay: '0.5s' }} />
-          <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-green-400 to-emerald-400 opacity-50 blur-md animate-pulse" style={{ animationDelay: '1s' }} />
+          {/* Animated background orbs */}
+          <div className="absolute inset-0 rounded-[24px] bg-primary/60 blur-2xl animate-pulse" />
+          <div className="absolute inset-0 rounded-[24px] bg-primary-glow/40 blur-xl animate-pulse" style={{ animationDelay: '0.5s' }} />
           
-          {/* Morphing Icon - centered and contained */}
+          {/* Shimmer effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+          
+          {/* Morphing Icon */}
           <div className="relative w-full h-full flex items-center justify-center">
-            <IconComponent className="h-6 w-6 text-white drop-shadow-lg transition-all duration-500" />
+            <IconComponent className="h-7 w-7 text-white drop-shadow-lg transition-all duration-500" strokeWidth={2.5} />
           </div>
           
           {/* AI Badge */}
-          <div className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 bg-white text-green-600 text-[10px] font-bold rounded-md shadow-lg border border-green-200 animate-pulse">
+          <div className="absolute -top-2 -right-2 px-2 py-1 bg-white text-primary text-[10px] font-black rounded-xl shadow-xl border-2 border-primary/20 animate-pulse">
             AI
           </div>
           
-          {/* Multiple pulsing indicators */}
-          <span className="absolute top-1 left-1 h-1.5 w-1.5 bg-green-300 rounded-full animate-ping" />
-          <span className="absolute top-1 left-1 h-1.5 w-1.5 bg-green-300 rounded-full" />
+          {/* Pulsing dot indicator */}
+          <span className="absolute bottom-2 right-2 h-2 w-2 bg-white rounded-full animate-ping" />
+          <span className="absolute bottom-2 right-2 h-2 w-2 bg-white rounded-full" />
         </Button>
-        
-        {/* Modern tooltip */}
-        <div className="absolute -top-12 right-0 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap shadow-xl animate-pulse backdrop-blur-sm">
-          AI Assistant
-          <div className="absolute bottom-[-4px] right-5 w-2 h-2 bg-green-600 transform rotate-45" />
-        </div>
       </div>
     );
   }
 
   return (
-    <div className={`fixed w-[420px] h-[650px] bg-background/95 backdrop-blur-xl border border-green-500/30 rounded-3xl shadow-2xl flex flex-col z-50 animate-scale-in overflow-hidden ${isMobile ? 'bottom-40 right-4' : 'bottom-6 right-6'}`}>
+    <div className={`fixed bg-card/95 backdrop-blur-2xl border border-border/50 rounded-[32px] shadow-2xl flex flex-col z-50 animate-scale-in overflow-hidden ${isMobile ? 'inset-4 bottom-24' : 'w-[420px] h-[650px] bottom-6 right-6'}`}
+      style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.1)' }}
+    >
       {/* Modern Header with Gradient */}
-      <div className="relative p-5 bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 overflow-hidden">
-        {/* Animated background pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-40 h-40 bg-white rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-0 w-40 h-40 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+      <div className="relative p-6 bg-gradient-to-br from-primary via-primary-glow to-secondary overflow-hidden">
+        {/* Curved bottom shape */}
+        <div className="absolute bottom-0 left-0 right-0 h-4">
+          <svg viewBox="0 0 1440 24" fill="none" className="w-full h-full">
+            <path d="M0 24H1440V0C1440 0 1080 24 720 24C360 24 0 0 0 0V24Z" fill="hsl(var(--card))" fillOpacity="0.95" />
+          </svg>
         </div>
         
-        <div className="relative flex items-center justify-between">
+        {/* Animated background orbs */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-2xl animate-pulse" style={{ animationDelay: "1s" }} />
+        </div>
+        
+        <div className="relative flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
-              <Sparkles className="h-6 w-6 text-white" />
+            <div className="h-12 w-12 rounded-[20px] bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-xl"
+              style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.3)' }}
+            >
+              <Sparkles className="h-7 w-7 text-white" strokeWidth={2.5} />
             </div>
             <div>
-              <h3 className="font-bold text-white text-lg">Edura AI</h3>
-              <p className="text-xs text-white/90 font-medium">Your Smart Study Companion</p>
+              <h3 className="font-black text-white text-xl mb-0.5">Edura AI</h3>
+              <p className="text-xs text-white/90 font-semibold">Your Smart Study Companion</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsOpen(false)}
-            className="text-white hover:bg-white/20 rounded-xl transition-all"
+            className="text-white hover:bg-white/20 rounded-2xl transition-all h-11 w-11"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5" strokeWidth={2.5} />
           </Button>
         </div>
       </div>
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 p-5 bg-gradient-to-b from-green-50/30 via-background to-background dark:from-green-950/10">
+      <ScrollArea className="flex-1 p-5 bg-gradient-to-b from-background/50 to-background">
         {messages.length === 0 && (
           <div className="text-center py-12 animate-fade-in">
             <div className="relative inline-block mb-6">
-              <div className="absolute inset-0 bg-green-500/20 rounded-full blur-2xl" />
-              <div className="relative h-20 w-20 mx-auto rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-xl">
-                <Sparkles className="h-10 w-10 text-white" />
+              <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl" />
+              <div className="relative h-24 w-24 mx-auto rounded-[28px] bg-gradient-to-br from-primary via-primary-glow to-secondary flex items-center justify-center shadow-2xl"
+                style={{ boxShadow: '0 20px 60px rgba(var(--primary), 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3)' }}
+              >
+                <Sparkles className="h-12 w-12 text-white" strokeWidth={2.5} />
               </div>
             </div>
-            <h4 className="font-bold mb-3 text-foreground text-lg">Welcome to Edura AI! ✨</h4>
-            <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
+            <h4 className="font-black mb-2 text-foreground text-2xl bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+              Welcome to Edura AI! ✨
+            </h4>
+            <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed font-medium mb-6">
               I'm your intelligent study assistant. Ask me anything about exams, subjects, or study strategies!
             </p>
-            <div className="mt-6 flex flex-wrap gap-2 justify-center">
-              <div className="px-3 py-1.5 bg-green-100 dark:bg-green-900/20 rounded-lg text-xs text-green-700 dark:text-green-300 font-medium">
+            <div className="flex flex-wrap gap-2 justify-center">
+              <div className="px-4 py-2 bg-primary/10 rounded-[16px] text-xs text-primary font-bold border border-primary/20 shadow-lg">
                 📸 Upload Images
               </div>
-              <div className="px-3 py-1.5 bg-green-100 dark:bg-green-900/20 rounded-lg text-xs text-green-700 dark:text-green-300 font-medium">
+              <div className="px-4 py-2 bg-secondary/10 rounded-[16px] text-xs text-secondary-foreground font-bold border border-secondary/20 shadow-lg">
                 Exam Tips
               </div>
-              <div className="px-3 py-1.5 bg-green-100 dark:bg-green-900/20 rounded-lg text-xs text-green-700 dark:text-green-300 font-medium">
+              <div className="px-4 py-2 bg-accent/10 rounded-[16px] text-xs text-accent-foreground font-bold border border-accent/20 shadow-lg">
                 Study Plans
               </div>
             </div>
@@ -393,11 +405,16 @@ const response = await fetch(
             }`}
           >
             <div
-              className={`inline-block px-5 py-3 rounded-2xl max-w-[85%] shadow-md ${
+              className={`inline-block px-5 py-4 rounded-[24px] max-w-[85%] shadow-lg ${
                 message.role === "user"
-                  ? "bg-gradient-to-br from-green-500 to-green-600 text-white rounded-br-md"
-                  : "bg-card border border-border rounded-bl-md"
+                  ? "bg-gradient-to-br from-primary to-primary-glow text-white rounded-br-sm"
+                  : "bg-card/80 backdrop-blur-sm border border-border/50 rounded-bl-sm"
               }`}
+              style={message.role === "user" ? { 
+                boxShadow: '0 8px 24px rgba(var(--primary), 0.3)' 
+              } : {
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.1)'
+              }}
             >
               {message.images && message.images.length > 0 && (
                 <div className="mb-3 flex flex-wrap gap-2">
@@ -406,7 +423,7 @@ const response = await fetch(
                       key={idx}
                       src={img}
                       alt={`Uploaded ${idx + 1}`}
-                      className="max-w-[200px] max-h-[200px] rounded-lg object-cover"
+                      className="max-w-[200px] max-h-[200px] rounded-[16px] object-cover border-2 border-white/20"
                     />
                   ))}
                 </div>
@@ -419,17 +436,19 @@ const response = await fetch(
                   }}
                 />
               ) : (
-                <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                <p className="text-sm whitespace-pre-wrap leading-relaxed font-medium">{message.content}</p>
               )}
             </div>
           </div>
         ))}
         {isLoading && (
           <div className="text-left mb-4 animate-fade-in">
-            <div className="inline-block px-5 py-3 rounded-2xl bg-card border border-border shadow-md rounded-bl-md">
+            <div className="inline-block px-5 py-4 rounded-[24px] bg-card/80 backdrop-blur-sm border border-border/50 shadow-lg rounded-bl-sm"
+              style={{ boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.1)' }}
+            >
               <div className="flex items-center gap-3">
-                <Loader2 className="h-4 w-4 animate-spin text-green-600" />
-                <span className="text-sm text-muted-foreground font-medium">Thinking...</span>
+                <Loader2 className="h-5 w-5 animate-spin text-primary" strokeWidth={2.5} />
+                <span className="text-sm text-foreground font-bold">Thinking...</span>
               </div>
             </div>
           </div>
@@ -438,7 +457,7 @@ const response = await fetch(
       </ScrollArea>
 
       {/* Modern Input Area */}
-      <div className="p-5 border-t bg-background/50 backdrop-blur-sm">
+      <div className="p-5 border-t border-border/50 bg-card/50 backdrop-blur-sm">
         {/* Image Preview */}
         {uploadedImages.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
@@ -447,11 +466,11 @@ const response = await fetch(
                 <img
                   src={img}
                   alt={`Preview ${idx + 1}`}
-                  className="w-16 h-16 rounded-lg object-cover border-2 border-green-500"
+                  className="w-16 h-16 rounded-[16px] object-cover border-2 border-primary shadow-lg"
                 />
                 <button
                   onClick={() => removeImage(idx)}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                 >
                   <XCircle className="h-4 w-4" />
                 </button>
@@ -468,17 +487,17 @@ const response = await fetch(
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute left-2 top-2 h-8 w-8 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/20"
+                  className="absolute left-2 top-2 h-9 w-9 rounded-[14px] hover:bg-primary/10 z-10"
                   disabled={isLoading}
                 >
-                  <Paperclip className="h-4 w-4" />
+                  <Paperclip className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuContent align="start" className="w-56 rounded-[16px]">
                 <DropdownMenuItem 
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadedImages.length >= 5}
-                  className="cursor-pointer"
+                  className="cursor-pointer rounded-[12px]"
                 >
                   <ImageIcon className="h-4 w-4 mr-2" />
                   Add photos & files
@@ -486,7 +505,7 @@ const response = await fetch(
                 <DropdownMenuItem 
                   onClick={() => cameraInputRef.current?.click()}
                   disabled={uploadedImages.length >= 5}
-                  className="cursor-pointer"
+                  className="cursor-pointer rounded-[12px]"
                 >
                   <Camera className="h-4 w-4 mr-2" />
                   Take photo
@@ -516,8 +535,9 @@ const response = await fetch(
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask me anything..."
-              className="min-h-[64px] pl-12 resize-none border-green-200 dark:border-green-900/50 focus-visible:ring-green-500 rounded-2xl shadow-sm"
+              className="min-h-[64px] pl-12 pr-3 resize-none border-border/50 focus-visible:ring-primary rounded-[20px] shadow-lg bg-background/80 backdrop-blur-sm font-medium"
               disabled={isLoading}
+              style={{ boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)' }}
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -526,23 +546,24 @@ const response = await fetch(
               onClick={toggleVoiceInput}
               variant={isListening ? "destructive" : "outline"}
               disabled={isLoading}
-              className={`rounded-xl h-12 w-12 shadow-sm ${isListening ? "" : "border-green-200 dark:border-green-900/50 hover:bg-green-50 dark:hover:bg-green-950 hover:text-green-700 dark:hover:text-green-300 hover:border-green-300"}`}
+              className={`rounded-[18px] h-12 w-12 shadow-lg border-border/50 ${isListening ? "" : "hover:bg-secondary/10 hover:border-primary/30"}`}
               title="Voice input"
             >
               {isListening ? (
-                <MicOff className="h-5 w-5" />
+                <MicOff className="h-5 w-5" strokeWidth={2.5} />
               ) : (
-                <Mic className="h-5 w-5" />
+                <Mic className="h-5 w-5" strokeWidth={2.5} />
               )}
             </Button>
             <Button
               size="icon"
               onClick={handleSend}
               disabled={(!input.trim() && uploadedImages.length === 0) || isLoading}
-              className="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl h-12 w-12 shadow-md hover:shadow-lg transition-all"
+              className="bg-gradient-to-br from-primary via-primary-glow to-secondary hover:scale-105 text-white rounded-[18px] h-12 w-12 shadow-xl transition-all"
               title="Send message"
+              style={{ boxShadow: '0 8px 24px rgba(var(--primary), 0.4)' }}
             >
-              <Send className="h-5 w-5" />
+              <Send className="h-5 w-5" strokeWidth={2.5} />
             </Button>
           </div>
         </div>
