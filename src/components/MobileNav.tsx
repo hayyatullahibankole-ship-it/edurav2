@@ -78,49 +78,29 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
 
   return (
     <>
-      {/* Modern Professional Navigation Bar with Flow */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden animate-slide-up">
-        {/* Glass Effect Background with subtle animation */}
-        <div className="absolute inset-0 bg-background/95 backdrop-blur-2xl border-t border-border/40 transition-all duration-500" />
+      {/* Sleek Modern Navigation Bar with Blue Gradient */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+        {/* Blue gradient background with glassmorphism */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary-glow to-secondary opacity-95 backdrop-blur-xl" />
         
-        {/* Animated gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-transparent pointer-events-none animate-pulse-slow" />
-        
-        {/* Navigation Container - 5 Button Layout */}
-        <div className="relative h-18 px-2 py-2">
+        {/* Navigation Container */}
+        <div className="relative px-4 py-3 safe-area-pb">
           <div className="flex items-center justify-around max-w-md mx-auto">
-            {/* Active indicator line that slides */}
-            <div 
-              className={`absolute top-0 left-0 h-0.5 bg-gradient-to-r from-primary to-primary-glow transition-all duration-500 ease-out ${
-                activeTab === "dashboard" ? "w-1/5 translate-x-[10%]" :
-                activeTab === "study" ? "w-1/5 translate-x-[110%]" :
-                activeTab === "forum" ? "w-1/5 translate-x-[310%]" :
-                activeTab === "profile" || activeTab === "settings" ? "w-1/5 translate-x-[410%]" :
-                "w-0"
-              }`}
-            />
             {/* Home Button */}
             <Link to="/dashboard" className="flex-1 flex justify-center">
               <button
                 onClick={() => playTapSound()}
-                className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
-                  activeTab === "dashboard"
-                    ? "scale-105"
-                    : "scale-100 hover:scale-105 active:scale-95"
-                }`}
+                className="flex flex-col items-center gap-1 transition-all duration-300 active:scale-90"
               >
-                {activeTab === "dashboard" && (
-                  <div className="absolute inset-0 bg-primary/10 rounded-2xl animate-fade-in" />
-                )}
-                <div className={`relative p-2.5 rounded-xl transition-all duration-500 ${
+                <div className={`p-3 rounded-2xl transition-all duration-300 ${
                   activeTab === "dashboard" 
-                    ? "bg-gradient-to-br from-primary to-primary-glow text-white shadow-lg shadow-primary/30 scale-110" 
-                    : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                    ? "bg-white/30 shadow-lg scale-110" 
+                    : "bg-white/10 hover:bg-white/20"
                 }`}>
-                  <Home className={`h-5 w-5 transition-transform duration-300 ${activeTab === "dashboard" ? "scale-110" : ""}`} />
+                  <Home className="h-6 w-6 text-white" />
                 </div>
-                <span className={`text-[10px] font-bold tracking-wide transition-all duration-300 ${
-                  activeTab === "dashboard" ? "text-primary scale-110" : "text-muted-foreground"
+                <span className={`text-[11px] font-medium text-white transition-all duration-300 ${
+                  activeTab === "dashboard" ? "opacity-100" : "opacity-70"
                 }`}>
                   Home
                 </span>
@@ -131,28 +111,24 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
             <Link to="/study-hub" className="flex-1 flex justify-center">
               <button 
                 onClick={() => playTapSound()}
-                className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
-                activeTab === "study" ? "scale-105" : "scale-100 hover:scale-105 active:scale-95"
-              }`}>
-                {activeTab === "study" && (
-                  <div className="absolute inset-0 bg-secondary/10 rounded-2xl animate-fade-in" />
-                )}
-                <div className={`relative p-2.5 rounded-xl transition-all duration-500 ${
+                className="flex flex-col items-center gap-1 transition-all duration-300 active:scale-90"
+              >
+                <div className={`p-3 rounded-2xl transition-all duration-300 ${
                   activeTab === "study" 
-                    ? "bg-gradient-to-br from-secondary to-info text-white shadow-lg shadow-secondary/30 scale-110" 
-                    : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                    ? "bg-white/30 shadow-lg scale-110" 
+                    : "bg-white/10 hover:bg-white/20"
                 }`}>
-                  <Library className={`h-5 w-5 transition-transform duration-300 ${activeTab === "study" ? "scale-110" : ""}`} />
+                  <Library className="h-6 w-6 text-white" />
                 </div>
-                <span className={`text-[10px] font-bold tracking-wide transition-all duration-300 ${
-                  activeTab === "study" ? "text-secondary scale-110" : "text-muted-foreground"
+                <span className={`text-[11px] font-medium text-white transition-all duration-300 ${
+                  activeTab === "study" ? "opacity-100" : "opacity-70"
                 }`}>
                   Study
                 </span>
               </button>
             </Link>
 
-            {/* Center - Tests FAB (Elevated) with Enhanced Flow */}
+            {/* Center - Tests FAB */}
             <div className="flex-1 flex justify-center">
               <Sheet open={testsSheetOpen} onOpenChange={(open) => {
                 setTestsSheetOpen(open);
@@ -161,27 +137,17 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 <SheetTrigger asChild>
                   <button 
                     onClick={() => playPopSound()}
-                    className="relative -mt-6 animate-float"
+                    className="relative -mt-8 transition-all duration-300 active:scale-90"
                   >
-                    {/* Multi-layer Glow with animation */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-accent rounded-2xl blur-xl opacity-50 animate-pulse-slow" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-2xl blur-2xl opacity-30 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                    {/* Glow effect */}
+                    <div className="absolute inset-0 bg-white rounded-full blur-xl opacity-40" />
                     
-                    {/* Main FAB with enhanced transitions */}
-                    <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-500 ease-out border border-white/20">
-                      {/* Inner shine */}
-                      <div className="absolute inset-1 rounded-xl bg-gradient-to-br from-white/20 to-transparent animate-shimmer" />
-                      
-                      {/* Icon with rotation on hover */}
-                      <BookOpen className="h-7 w-7 text-white relative z-10 transition-transform duration-300 hover:rotate-12" />
-                      
-                      {/* Active indicator with bounce */}
-                      <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gradient-to-br from-warning to-warning/80 rounded-full border-2 border-background animate-bounce-slow">
-                        <Sparkles className="h-2.5 w-2.5 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
-                      </div>
+                    {/* Main FAB */}
+                    <div className="relative w-16 h-16 rounded-full bg-white shadow-2xl flex items-center justify-center">
+                      <BookOpen className="h-7 w-7 text-primary" />
                     </div>
                     
-                    <span className="block mt-1.5 text-[10px] font-bold text-foreground text-center transition-all duration-300">Tests</span>
+                    <span className="block mt-2 text-[11px] font-medium text-white">Tests</span>
                   </button>
                 </SheetTrigger>
                 
@@ -254,21 +220,17 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
             <Link to="/forum" className="flex-1 flex justify-center">
               <button 
                 onClick={() => playTapSound()}
-                className={`relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
-                activeTab === "forum" ? "scale-105" : "scale-100 hover:scale-105 active:scale-95"
-              }`}>
-                {activeTab === "forum" && (
-                  <div className="absolute inset-0 bg-warning/10 rounded-2xl animate-fade-in" />
-                )}
-                <div className={`relative p-2.5 rounded-xl transition-all duration-500 ${
+                className="flex flex-col items-center gap-1 transition-all duration-300 active:scale-90"
+              >
+                <div className={`p-3 rounded-2xl transition-all duration-300 ${
                   activeTab === "forum" 
-                    ? "bg-gradient-to-br from-warning to-destructive text-white shadow-lg shadow-warning/30 scale-110" 
-                    : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                    ? "bg-white/30 shadow-lg scale-110" 
+                    : "bg-white/10 hover:bg-white/20"
                 }`}>
-                  <MessageSquare className={`h-5 w-5 transition-transform duration-300 ${activeTab === "forum" ? "scale-110" : ""}`} />
+                  <MessageSquare className="h-6 w-6 text-white" />
                 </div>
-                <span className={`text-[10px] font-bold tracking-wide transition-all duration-300 ${
-                  activeTab === "forum" ? "text-warning scale-110" : "text-muted-foreground"
+                <span className={`text-[11px] font-medium text-white transition-all duration-300 ${
+                  activeTab === "forum" ? "opacity-100" : "opacity-70"
                 }`}>
                   Forum
                 </span>
@@ -281,24 +243,17 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 playTapSound();
                 onTabChange("profile");
               }}
-              className={`flex-1 flex justify-center relative flex flex-col items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-500 ease-out ${
-                activeTab === "profile" || activeTab === "settings"
-                  ? "scale-105"
-                  : "scale-100 hover:scale-105 active:scale-95"
-              }`}
+              className="flex-1 flex justify-center flex flex-col items-center gap-1 transition-all duration-300 active:scale-90"
             >
-              {(activeTab === "profile" || activeTab === "settings") && (
-                <div className="absolute inset-0 bg-accent/10 rounded-2xl animate-fade-in" />
-              )}
-              <div className={`relative p-2.5 rounded-xl transition-all duration-500 ${
+              <div className={`p-3 rounded-2xl transition-all duration-300 ${
                 activeTab === "profile" || activeTab === "settings"
-                  ? "bg-gradient-to-br from-accent to-success text-white shadow-lg shadow-accent/30 scale-110" 
-                  : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                  ? "bg-white/30 shadow-lg scale-110" 
+                  : "bg-white/10 hover:bg-white/20"
               }`}>
-                <User className={`h-5 w-5 transition-transform duration-300 ${activeTab === "profile" || activeTab === "settings" ? "scale-110" : ""}`} />
+                <User className="h-6 w-6 text-white" />
               </div>
-              <span className={`text-[10px] font-bold tracking-wide transition-all duration-300 ${
-                activeTab === "profile" || activeTab === "settings" ? "text-accent scale-110" : "text-muted-foreground"
+              <span className={`text-[11px] font-medium text-white transition-all duration-300 ${
+                activeTab === "profile" || activeTab === "settings" ? "opacity-100" : "opacity-70"
               }`}>
                 Profile
               </span>
