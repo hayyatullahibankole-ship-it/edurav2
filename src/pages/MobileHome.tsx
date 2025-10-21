@@ -217,352 +217,336 @@ const MobileHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 pb-24">
-      {/* Header with Search */}
-      <header className="bg-card/80 backdrop-blur-xl border-b border-border/40 p-4 sticky top-0 z-10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/10 pb-24 overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-32 -left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+
+      {/* Modern Compact Header */}
+      <header className="relative z-20 p-4 pt-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-lg">
-              <AvatarFallback className="bg-gradient-to-br from-primary to-primary-glow text-white font-bold text-lg">
-                {userProfile?.first_name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="h-14 w-14 border-3 border-white shadow-xl ring-2 ring-primary/20">
+                <AvatarFallback className="bg-gradient-to-br from-primary via-primary-glow to-secondary text-white font-bold text-xl">
+                  {userProfile?.first_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success rounded-full border-2 border-background shadow-lg" />
+            </div>
             <div>
-              <p className="text-xs text-muted-foreground">Welcome back</p>
-              <h2 className="font-bold text-lg">{userProfile?.first_name || 'Student'}</h2>
+              <p className="text-xs text-muted-foreground font-medium">Hello 👋</p>
+              <h2 className="font-bold text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">{userProfile?.first_name || 'Student'}</h2>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowProfileSheet(true)}
-              className="rounded-full hover:bg-primary/10"
+              className="rounded-2xl hover:bg-primary/10 w-11 h-11"
             >
               <Settings className="h-5 w-5" />
             </Button>
-            <NotificationBell />
           </div>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search subjects, tests..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-muted/50 border-border/50 rounded-xl"
-          />
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="p-4 space-y-5">
-        {/* Stats Overview Card */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/10 via-primary/5 to-transparent overflow-hidden">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-4">
+      <div className="relative z-10 px-4 space-y-6">
+        {/* Hero Stats Card - Modern Glassmorphic */}
+        <div 
+          className="relative overflow-hidden rounded-[32px] p-6 backdrop-blur-2xl bg-gradient-to-br from-white/40 via-white/30 to-white/20 dark:from-white/10 dark:via-white/5 dark:to-transparent border border-white/20 shadow-2xl animate-fade-in"
+          style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.3)' }}
+        >
+          {/* Gradient Orb */}
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-gradient-to-br from-primary to-secondary rounded-full opacity-20 blur-2xl" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Your Progress</p>
-                <h3 className="text-2xl font-bold">{stats.testsTaken} Tests Taken</h3>
+                <p className="text-sm text-foreground/60 font-medium mb-1">Your Journey</p>
+                <h3 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary-glow to-secondary bg-clip-text text-transparent">
+                  {stats.testsTaken} Tests
+                </h3>
               </div>
-              <div className="p-3 rounded-2xl bg-primary/20">
-                <Trophy className="h-8 w-8 text-primary" />
+              <div 
+                className="p-4 rounded-[24px] bg-gradient-to-br from-primary to-secondary shadow-xl relative overflow-hidden group"
+                style={{ boxShadow: '0 10px 30px rgba(var(--primary), 0.3)' }}
+              >
+                <Trophy className="h-8 w-8 text-white relative z-10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               </div>
             </div>
+            
+            {/* Stats Row */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-3 rounded-xl bg-card/50">
-                <p className="text-2xl font-bold text-primary">{stats.averageScore}%</p>
-                <p className="text-xs text-muted-foreground mt-1">Average</p>
+              <div className="relative group">
+                <div 
+                  className="p-4 rounded-[20px] bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/40 shadow-lg hover:scale-105 transition-all duration-300"
+                  style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.4), 0 8px 24px rgba(0, 0, 0, 0.06)' }}
+                >
+                  <p className="text-3xl font-black text-primary mb-1">{stats.averageScore}%</p>
+                  <p className="text-[10px] text-foreground/60 font-semibold uppercase tracking-wide">Score</p>
+                </div>
               </div>
-              <div className="text-center p-3 rounded-xl bg-card/50">
-                <p className="text-2xl font-bold text-success">{stats.studyHours}h</p>
-                <p className="text-xs text-muted-foreground mt-1">Study Time</p>
+              
+              <div className="relative group">
+                <div 
+                  className="p-4 rounded-[20px] bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/40 shadow-lg hover:scale-105 transition-all duration-300"
+                  style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.4), 0 8px 24px rgba(0, 0, 0, 0.06)' }}
+                >
+                  <p className="text-3xl font-black text-success mb-1">{stats.studyHours}h</p>
+                  <p className="text-[10px] text-foreground/60 font-semibold uppercase tracking-wide">Study</p>
+                </div>
               </div>
-              <div className="text-center p-3 rounded-xl bg-card/50">
-                <p className="text-2xl font-bold text-warning">{streak.current}</p>
-                <p className="text-xs text-muted-foreground mt-1">Day Streak</p>
+              
+              <div className="relative group">
+                <div 
+                  className="p-4 rounded-[20px] bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/40 shadow-lg hover:scale-105 transition-all duration-300"
+                  style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.4), 0 8px 24px rgba(0, 0, 0, 0.06)' }}
+                >
+                  <div className="flex items-center gap-1 mb-1">
+                    <Flame className="h-5 w-5 text-warning" />
+                    <p className="text-3xl font-black text-warning">{streak.current}</p>
+                  </div>
+                  <p className="text-[10px] text-foreground/60 font-semibold uppercase tracking-wide">Streak</p>
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Subjects Grid */}
-        <div>
-          <h3 className="text-base font-bold mb-3 flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-primary" />
-            Your Subjects
-          </h3>
-          <div className="grid grid-cols-3 gap-3">
-            <button
-              onClick={() => handleNavigation('/cbt-exam?subject=Mathematics')}
-              className="group"
-            >
-              <Card className="border-0 shadow-md hover:shadow-xl transition-all active:scale-95 bg-gradient-to-br from-blue-500/10 to-blue-500/5">
-                <CardContent className="p-4 text-center">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Calculator className="h-6 w-6 text-white" />
-                  </div>
-                  <p className="font-semibold text-sm mb-0.5">Mathematics</p>
-                  <p className="text-xs text-muted-foreground">35 Topics</p>
-                </CardContent>
-              </Card>
-            </button>
-
-            <button
-              onClick={() => handleNavigation('/cbt-exam?subject=Physics')}
-              className="group"
-            >
-              <Card className="border-0 shadow-md hover:shadow-xl transition-all active:scale-95 bg-gradient-to-br from-purple-500/10 to-purple-500/5">
-                <CardContent className="p-4 text-center">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Sparkles className="h-6 w-6 text-white" />
-                  </div>
-                  <p className="font-semibold text-sm mb-0.5">Physics</p>
-                  <p className="text-xs text-muted-foreground">28 Topics</p>
-                </CardContent>
-              </Card>
-            </button>
-
-            <button
-              onClick={() => handleNavigation('/cbt-exam?subject=Chemistry')}
-              className="group"
-            >
-              <Card className="border-0 shadow-md hover:shadow-xl transition-all active:scale-95 bg-gradient-to-br from-green-500/10 to-green-500/5">
-                <CardContent className="p-4 text-center">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Beaker className="h-6 w-6 text-white" />
-                  </div>
-                  <p className="font-semibold text-sm mb-0.5">Chemistry</p>
-                  <p className="text-xs text-muted-foreground">32 Topics</p>
-                </CardContent>
-              </Card>
-            </button>
-
-            <button
-              onClick={() => handleNavigation('/cbt-exam?subject=Biology')}
-              className="group"
-            >
-              <Card className="border-0 shadow-md hover:shadow-xl transition-all active:scale-95 bg-gradient-to-br from-teal-500/10 to-teal-500/5">
-                <CardContent className="p-4 text-center">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Microscope className="h-6 w-6 text-white" />
-                  </div>
-                  <p className="font-semibold text-sm mb-0.5">Biology</p>
-                  <p className="text-xs text-muted-foreground">30 Topics</p>
-                </CardContent>
-              </Card>
-            </button>
-
-            <button
-              onClick={() => handleNavigation('/cbt-exam?subject=English')}
-              className="group"
-            >
-              <Card className="border-0 shadow-md hover:shadow-xl transition-all active:scale-95 bg-gradient-to-br from-orange-500/10 to-orange-500/5">
-                <CardContent className="p-4 text-center">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <BookOpen className="h-6 w-6 text-white" />
-                  </div>
-                  <p className="font-semibold text-sm mb-0.5">English</p>
-                  <p className="text-xs text-muted-foreground">25 Topics</p>
-                </CardContent>
-              </Card>
-            </button>
-
-            <button
-              onClick={() => handleNavigation('/study-hub')}
-              className="group"
-            >
-              <Card className="border-0 shadow-md hover:shadow-xl transition-all active:scale-95 bg-gradient-to-br from-pink-500/10 to-pink-500/5">
-                <CardContent className="p-4 text-center">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Globe className="h-6 w-6 text-white" />
-                  </div>
-                  <p className="font-semibold text-sm mb-0.5">More</p>
-                  <p className="text-xs text-muted-foreground">View All</p>
-                </CardContent>
-              </Card>
-            </button>
           </div>
         </div>
 
-        {/* Streak & Daily Goal */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* Streak */}
-          {streak.current > 0 && (
-            <Card className="border-0 shadow-md bg-gradient-to-br from-warning/10 to-warning/5">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="p-2 rounded-xl bg-warning/20">
-                    <Flame className="h-5 w-5 text-warning" />
-                  </div>
-                  <div>
-                    <p className="text-xl font-bold">{streak.current}</p>
-                    <p className="text-xs text-muted-foreground">Day Streak</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Daily Goal */}
-          <Card className="border-0 shadow-md bg-gradient-to-br from-success/10 to-success/5">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 rounded-xl bg-success/20">
-                  <Target className="h-5 w-5 text-success" />
-                </div>
-                <div>
-                  <p className="text-xl font-bold">{dailyGoal.answered}/{dailyGoal.target}</p>
-                  <p className="text-xs text-muted-foreground">Daily Goal</p>
+        {/* Daily Goal Progress - Modern Circular */}
+        <div 
+          className="relative overflow-hidden rounded-[28px] p-5 bg-gradient-to-br from-success/20 via-success/10 to-transparent border border-success/20 shadow-lg animate-fade-in"
+          style={{ animationDelay: '0.1s' }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 flex-1">
+              <div 
+                className="relative w-16 h-16 rounded-full flex items-center justify-center"
+                style={{
+                  background: `conic-gradient(hsl(var(--success)) ${(dailyGoal.answered / dailyGoal.target) * 360}deg, rgba(255,255,255,0.3) 0deg)`,
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)'
+                }}
+              >
+                <div className="absolute inset-2 rounded-full bg-background flex items-center justify-center">
+                  <Target className="h-6 w-6 text-success" />
                 </div>
               </div>
-              <Progress 
-                value={(dailyGoal.answered / dailyGoal.target) * 100} 
-                className="h-1.5"
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Motivational Quote */}
-        <Card className="border-0 shadow-md bg-gradient-to-br from-primary/5 to-transparent">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-xl bg-primary/10 flex-shrink-0">
-                <Sparkles className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium leading-relaxed mb-1">
-                  {motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]}
-                </p>
-                <p className="text-xs text-muted-foreground">Keep pushing! 🚀</p>
+              <div>
+                <p className="text-2xl font-black text-success mb-0.5">{dailyGoal.answered}/{dailyGoal.target}</p>
+                <p className="text-xs text-foreground/60 font-semibold">Questions Today</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
+        </div>
 
-        {/* Recent Results */}
+        {/* Subjects - Modern Grid */}
+        <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-black">Subjects</h3>
+            <Button variant="ghost" size="sm" className="text-xs font-semibold text-primary">
+              View All
+              <ChevronRight className="h-3 w-3 ml-1" />
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-4 gap-3">
+            {[
+              { name: 'Math', icon: Calculator, color: 'from-blue-500 to-blue-600', bg: 'from-blue-500/20 to-blue-500/10', subject: 'Mathematics' },
+              { name: 'Physics', icon: Sparkles, color: 'from-purple-500 to-purple-600', bg: 'from-purple-500/20 to-purple-500/10', subject: 'Physics' },
+              { name: 'Chem', icon: Beaker, color: 'from-green-500 to-green-600', bg: 'from-green-500/20 to-green-500/10', subject: 'Chemistry' },
+              { name: 'Biology', icon: Microscope, color: 'from-teal-500 to-teal-600', bg: 'from-teal-500/20 to-teal-500/10', subject: 'Biology' },
+              { name: 'English', icon: BookOpen, color: 'from-orange-500 to-orange-600', bg: 'from-orange-500/20 to-orange-500/10', subject: 'English' },
+              { name: 'Geo', icon: Globe, color: 'from-cyan-500 to-cyan-600', bg: 'from-cyan-500/20 to-cyan-500/10', subject: 'Geography' },
+              { name: 'Econ', icon: TrendingUp, color: 'from-indigo-500 to-indigo-600', bg: 'from-indigo-500/20 to-indigo-500/10', subject: 'Economics' },
+              { name: 'More', icon: GraduationCap, color: 'from-pink-500 to-pink-600', bg: 'from-pink-500/20 to-pink-500/10', subject: null },
+            ].map((subject, index) => (
+              <button
+                key={subject.name}
+                onClick={() => subject.subject ? handleNavigation(`/cbt-exam?subject=${subject.subject}`) : handleNavigation('/study-hub')}
+                className="group relative"
+                style={{ animationDelay: `${0.05 * index}s` }}
+              >
+                <div className={`relative overflow-hidden rounded-[24px] p-4 bg-gradient-to-br ${subject.bg} backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-2xl active:scale-95 transition-all duration-300`}>
+                  <div 
+                    className={`w-12 h-12 mx-auto mb-2 rounded-[18px] bg-gradient-to-br ${subject.color} flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 relative overflow-hidden`}
+                    style={{ boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.3)' }}
+                  >
+                    <subject.icon className="h-6 w-6 text-white relative z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+                  </div>
+                  <p className="font-bold text-[11px] text-center text-foreground/80">{subject.name}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Actions - Modern Cards */}
+        <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <h3 className="text-xl font-black mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { label: 'Study Hub', icon: Library, color: 'from-primary to-primary-hover', path: '/study-hub' },
+              { label: 'Analytics', icon: TrendingUp, color: 'from-info to-info/80', path: '/performance-report' },
+              { label: 'Forum', icon: MessageCircle, color: 'from-secondary to-secondary/80', path: '/forum' },
+              { label: 'Challenges', icon: Award, color: 'from-warning to-warning/80', path: '/challenge-arena' },
+            ].map((action, index) => (
+              <button
+                key={action.label}
+                onClick={() => handleNavigation(action.path)}
+                className="group relative"
+                style={{ animationDelay: `${0.05 * index}s` }}
+              >
+                <div 
+                  className={`relative overflow-hidden rounded-[28px] p-6 bg-gradient-to-br ${action.color} shadow-xl hover:shadow-2xl active:scale-95 transition-all duration-300`}
+                  style={{ boxShadow: '0 12px 36px rgba(0, 0, 0, 0.15)' }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
+                  <div className="relative z-10 flex flex-col items-center gap-3">
+                    <div 
+                      className="p-4 rounded-[20px] bg-white/25 backdrop-blur-sm shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300"
+                      style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.3)' }}
+                    >
+                      <action.icon className="h-7 w-7 text-white" />
+                    </div>
+                    <span className="text-sm font-bold text-white">{action.label}</span>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Tests - Compact Modern Cards */}
         {recentResults.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-base flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-primary" />
-                Recent Tests
-              </h3>
+          <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-black">Recent Tests</h3>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/performance-report')}
-                className="text-xs h-8 text-primary hover:text-primary"
+                className="text-xs font-semibold text-primary"
               >
                 View All
                 <ChevronRight className="h-3 w-3 ml-1" />
               </Button>
             </div>
-            <div className="space-y-2">
-              {recentResults.map((result) => (
-                <Card
+            <div className="space-y-3">
+              {recentResults.map((result, index) => (
+                <button
                   key={result.id}
                   onClick={() => navigate(`/results?attempt=${result.attempt_id}`)}
-                  className="border-0 shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
+                  className="w-full group"
+                  style={{ animationDelay: `${0.05 * index}s` }}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <FileText className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm truncate">{result.examTitle}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(result.submittedAt).toLocaleDateString()}
-                          </p>
-                        </div>
+                  <div 
+                    className="relative overflow-hidden rounded-[24px] p-5 bg-card/80 backdrop-blur-sm border border-border/40 shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-300"
+                    style={{ boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)' }}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div 
+                        className="p-4 rounded-[20px] bg-gradient-to-br from-primary/15 to-primary/5 shadow-md group-hover:scale-110 transition-transform duration-300"
+                        style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.2)' }}
+                      >
+                        <FileText className="h-6 w-6 text-primary" />
                       </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        result.percentage >= 75 ? 'bg-success/20 text-success' :
-                        result.percentage >= 50 ? 'bg-warning/20 text-warning' :
-                        'bg-destructive/20 text-destructive'
-                      }`}>
+                      <div className="flex-1 text-left min-w-0">
+                        <p className="font-bold text-sm truncate mb-1">{result.examTitle}</p>
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {new Date(result.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </p>
+                      </div>
+                      <div 
+                        className={`px-4 py-2 rounded-[16px] font-black text-base shadow-lg ${
+                          result.percentage >= 75 ? 'bg-gradient-to-r from-success to-success-glow text-white' :
+                          result.percentage >= 50 ? 'bg-gradient-to-r from-warning to-warning text-white' :
+                          'bg-gradient-to-r from-destructive to-destructive text-white'
+                        }`}
+                        style={{ boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)' }}
+                      >
                         {result.percentage}%
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* Quick Actions */}
-        <div>
-          <h3 className="font-bold text-base mb-3">Quick Actions</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              onClick={() => handleNavigation('/study-hub')}
-              className="h-24 flex-col gap-2 bg-gradient-to-br from-primary to-primary-hover shadow-lg hover:shadow-xl"
-              size="lg"
+        {/* Motivational Quote - Modern Bubble */}
+        <div 
+          className="relative overflow-hidden rounded-[28px] p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 shadow-lg animate-fade-in"
+          style={{ animationDelay: '0.5s' }}
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+          <div className="relative z-10 flex items-start gap-4">
+            <div 
+              className="p-3 rounded-[20px] bg-primary/20 backdrop-blur-sm shadow-md flex-shrink-0"
+              style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.2)' }}
             >
-              <Library className="h-6 w-6" />
-              <span className="text-sm font-semibold">Study Hub</span>
-            </Button>
-            
-            <Button
-              onClick={() => handleNavigation('/performance-report')}
-              className="h-24 flex-col gap-2 bg-gradient-to-br from-info to-info/80 shadow-lg hover:shadow-xl"
-              size="lg"
-            >
-              <TrendingUp className="h-6 w-6" />
-              <span className="text-sm font-semibold">Analytics</span>
-            </Button>
-            
-            <Button
-              onClick={() => handleNavigation('/forum')}
-              className="h-24 flex-col gap-2 bg-gradient-to-br from-secondary to-secondary/80 shadow-lg hover:shadow-xl"
-              size="lg"
-            >
-              <MessageCircle className="h-6 w-6" />
-              <span className="text-sm font-semibold">Forum</span>
-            </Button>
-            
-            <Button
-              onClick={() => handleNavigation('/challenge-arena')}
-              className="h-24 flex-col gap-2 bg-gradient-to-br from-warning to-warning/80 shadow-lg hover:shadow-xl"
-              size="lg"
-            >
-              <Award className="h-6 w-6" />
-              <span className="text-sm font-semibold">Challenges</span>
-            </Button>
+              <Sparkles className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold leading-relaxed mb-2 text-foreground/90">
+                {motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]}
+              </p>
+              <p className="text-xs text-muted-foreground font-medium">Keep pushing forward! 🚀</p>
+            </div>
           </div>
         </div>
 
-        {/* Premium CTA */}
+        {/* Premium CTA - Eye-catching */}
         {!isPremium && (
-          <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-lg">
-            <CardContent className="p-5">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-2xl bg-primary/20 flex-shrink-0">
-                  <Sparkles className="h-6 w-6 text-primary" />
+          <div 
+            className="relative overflow-hidden rounded-[32px] p-6 bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl animate-fade-in"
+            style={{ 
+              animationDelay: '0.6s',
+              boxShadow: '0 20px 60px rgba(var(--primary), 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3)'
+            }}
+          >
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-white/20 rounded-full blur-3xl" />
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            
+            <div className="relative z-10">
+              <div className="flex items-start gap-4 mb-4">
+                <div 
+                  className="p-4 rounded-[20px] bg-white/25 backdrop-blur-sm shadow-xl"
+                  style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.4)' }}
+                >
+                  <Sparkles className="h-7 w-7 text-white" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-bold text-base mb-1">Upgrade to Premium</p>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Unlock unlimited tests, AI tutor, and exclusive features
+                  <p className="font-black text-xl text-white mb-2">Go Premium</p>
+                  <p className="text-sm text-white/90 font-medium leading-relaxed">
+                    Unlock unlimited tests, AI tutor, and exclusive study materials
                   </p>
-                  <Button 
-                    size="sm"
-                    onClick={() => navigate('/payment')}
-                    className="bg-primary hover:bg-primary-hover shadow-md"
-                  >
-                    Upgrade Now
-                  </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              <Button 
+                size="lg"
+                onClick={() => navigate('/payment')}
+                className="w-full bg-white hover:bg-white/90 text-primary font-bold shadow-xl rounded-[20px] h-14"
+              >
+                Upgrade Now
+                <Sparkles className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+          </div>
         )}
+
+        {/* Bottom Spacing */}
+        <div className="h-6" />
       </div>
 
       {/* Profile Settings Sheet */}
