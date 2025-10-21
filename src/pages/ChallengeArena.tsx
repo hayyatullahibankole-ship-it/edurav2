@@ -168,30 +168,34 @@ export default function ChallengeArena() {
     return null;
   }
 
-  // Mobile Dark Purple Design
+  // Modern Mobile Design
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-[#1a0e2e] text-white pb-24">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-24">
         {/* Header */}
-        <div className="bg-gradient-to-b from-[#2d1b4e] to-[#1a0e2e] p-6 pb-8">
+        <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 pb-8">
           <Button
             variant="ghost"
             onClick={() => navigate('/dashboard')}
-            className="mb-4 text-white hover:bg-white/10"
+            className="mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
           
-          <h1 className="text-3xl font-bold mb-2">Challenge Arena</h1>
-          <p className="text-white/70 text-sm">Complete daily missions and compete!</p>
+          <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
+            <Trophy className="h-8 w-8 text-primary" />
+            Challenge Arena
+          </h1>
+          <p className="text-muted-foreground text-sm">Complete daily missions and compete!</p>
         </div>
 
         {/* Streak Card */}
         <div className="px-6 -mt-6 mb-6">
-          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 border-0 shadow-xl">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
+          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 border-0 shadow-xl overflow-hidden">
+            <CardContent className="p-5 relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
+              <div className="flex items-center justify-between relative z-10">
                 <div className="flex items-center gap-3">
                   <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-sm">
                     <Flame className="h-8 w-8 text-white" />
@@ -204,7 +208,7 @@ export default function ChallengeArena() {
                 <ChevronRight className="h-5 w-5 text-white/60" />
               </div>
               {userStreak > 0 && (
-                <div className="mt-4 pt-4 border-t border-white/20">
+                <div className="mt-4 pt-4 border-t border-white/20 relative z-10">
                   <p className="text-xs text-white/80">
                     Practice daily to maintain your streak!
                   </p>
@@ -217,33 +221,33 @@ export default function ChallengeArena() {
         {/* Stats Cards */}
         <div className="px-6 mb-6">
           <div className="grid grid-cols-3 gap-3">
-            <Card className="bg-[#2d1b4e] border-[#3d2b5e] shadow-lg">
+            <Card className="bg-card border shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-4 text-center">
-                <div className="p-2 rounded-xl bg-purple-500/20 w-fit mx-auto mb-2">
-                  <Trophy className="h-5 w-5 text-purple-400" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 w-fit mx-auto mb-2">
+                  <Trophy className="h-5 w-5 text-yellow-600" />
                 </div>
-                <p className="text-2xl font-bold text-white">#{userStats.rank || '--'}</p>
-                <p className="text-xs text-white/60">Rank</p>
+                <p className="text-2xl font-bold">#{userStats.rank || '--'}</p>
+                <p className="text-xs text-muted-foreground">Rank</p>
               </CardContent>
             </Card>
             
-            <Card className="bg-[#2d1b4e] border-[#3d2b5e] shadow-lg">
+            <Card className="bg-card border shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-4 text-center">
-                <div className="p-2 rounded-xl bg-yellow-500/20 w-fit mx-auto mb-2">
-                  <Zap className="h-5 w-5 text-yellow-400" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 w-fit mx-auto mb-2">
+                  <Zap className="h-5 w-5 text-blue-600" />
                 </div>
-                <p className="text-2xl font-bold text-white">{userStats.points}</p>
-                <p className="text-xs text-white/60">Points</p>
+                <p className="text-2xl font-bold">{userStats.points}</p>
+                <p className="text-xs text-muted-foreground">Points</p>
               </CardContent>
             </Card>
             
-            <Card className="bg-[#2d1b4e] border-[#3d2b5e] shadow-lg">
+            <Card className="bg-card border shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-4 text-center">
-                <div className="p-2 rounded-xl bg-blue-500/20 w-fit mx-auto mb-2">
-                  <Award className="h-5 w-5 text-blue-400" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/20 w-fit mx-auto mb-2">
+                  <Award className="h-5 w-5 text-green-600" />
                 </div>
-                <p className="text-2xl font-bold text-white">{userStats.achievements}</p>
-                <p className="text-xs text-white/60">Badges</p>
+                <p className="text-2xl font-bold">{userStats.achievements}</p>
+                <p className="text-xs text-muted-foreground">Badges</p>
               </CardContent>
             </Card>
           </div>
@@ -256,12 +260,8 @@ export default function ChallengeArena() {
               <Button
                 key={cat}
                 onClick={() => setCourseCategory(cat)}
-                variant="ghost"
-                className={`rounded-full px-6 whitespace-nowrap ${
-                  courseCategory === cat
-                    ? 'bg-purple-600 text-white hover:bg-purple-700'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
+                variant={courseCategory === cat ? "default" : "outline"}
+                className="rounded-full px-6 whitespace-nowrap"
               >
                 {cat.charAt(0).toUpperCase() + cat.slice(1)}
               </Button>
@@ -272,27 +272,27 @@ export default function ChallengeArena() {
         {/* Challenges Section */}
         <div className="px-6 mb-6">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Target className="h-5 w-5 text-purple-400" />
+            <Target className="h-5 w-5 text-primary" />
             Daily Missions
           </h2>
           
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="w-full bg-[#2d1b4e] border-[#3d2b5e] mb-4">
+            <TabsList className="w-full bg-muted mb-4">
               <TabsTrigger 
                 value="daily"
-                className="flex-1 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                className="flex-1"
               >
                 Daily
               </TabsTrigger>
               <TabsTrigger 
                 value="weekly"
-                className="flex-1 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                className="flex-1"
               >
                 Weekly
               </TabsTrigger>
               <TabsTrigger 
                 value="special"
-                className="flex-1 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                className="flex-1"
               >
                 Special
               </TabsTrigger>
@@ -301,41 +301,47 @@ export default function ChallengeArena() {
             <TabsContent value={selectedTab} className="mt-0">
               <div className="space-y-3">
                 {challenges.length === 0 ? (
-                  <Card className="bg-[#2d1b4e] border-[#3d2b5e]">
+                  <Card>
                     <CardContent className="py-12 text-center">
-                      <Target className="h-12 w-12 mx-auto mb-3 text-white/30" />
-                      <p className="text-white/60">No {selectedTab} challenges available</p>
+                      <Target className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                      <p className="text-muted-foreground">No {selectedTab} challenges available</p>
                     </CardContent>
                   </Card>
                 ) : (
                   challenges.map((challenge, index) => (
                     <Card 
                       key={challenge.id}
-                      className="bg-[#2d1b4e] border-[#3d2b5e] shadow-lg overflow-hidden"
+                      className="shadow-lg hover:shadow-xl transition-all overflow-hidden border-l-4"
+                      style={{
+                        borderLeftColor: 
+                          index === 0 ? 'hsl(var(--primary))' :
+                          index === 1 ? '#fbbf24' :
+                          index === 2 ? '#ec4899' : 'hsl(var(--primary))'
+                      }}
                     >
                       <CardContent className="p-5">
                         <div className="flex items-start gap-4 mb-4">
                           <div className={`p-3 rounded-2xl ${
-                            index === 0 ? 'bg-blue-500/20' :
+                            index === 0 ? 'bg-primary/20' :
                             index === 1 ? 'bg-yellow-500/20' :
                             index === 2 ? 'bg-pink-500/20' :
-                            'bg-purple-500/20'
+                            'bg-primary/20'
                           }`}>
-                            {index === 0 ? <Zap className="h-6 w-6 text-blue-400" /> :
-                             index === 1 ? <Star className="h-6 w-6 text-yellow-400" /> :
-                             index === 2 ? <Target className="h-6 w-6 text-pink-400" /> :
-                             <Trophy className="h-6 w-6 text-purple-400" />}
+                            {index === 0 ? <Zap className="h-6 w-6 text-primary" /> :
+                             index === 1 ? <Star className="h-6 w-6 text-yellow-600" /> :
+                             index === 2 ? <Target className="h-6 w-6 text-pink-600" /> :
+                             <Trophy className="h-6 w-6 text-primary" />}
                           </div>
                           <div className="flex-1">
                             <div className="flex items-start justify-between mb-2">
-                              <h3 className="font-bold text-white">{challenge.title}</h3>
-                              <Badge className="bg-yellow-500/20 text-yellow-400 border-0">
+                              <h3 className="font-bold">{challenge.title}</h3>
+                              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
                                 +{challenge.points_reward} XP
                               </Badge>
                             </div>
-                            <p className="text-sm text-white/60 mb-3">{challenge.description}</p>
+                            <p className="text-sm text-muted-foreground mb-3">{challenge.description}</p>
                             
-                            <div className="flex items-center gap-4 text-xs text-white/50 mb-4">
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
                               <div className="flex items-center gap-1">
                                 <Target className="h-3 w-3" />
                                 {challenge.question_count}
@@ -348,12 +354,12 @@ export default function ChallengeArena() {
                             </div>
 
                             {challenge.isCompleted ? (
-                              <div className="flex items-center gap-2 text-sm text-green-400">
-                                <div className="h-2 w-2 rounded-full bg-green-400" />
+                              <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                                <div className="h-2 w-2 rounded-full bg-green-600 dark:bg-green-400" />
                                 Completed
                               </div>
                             ) : (
-                              <Progress value={0} className="h-1.5 bg-white/10" />
+                              <Progress value={0} className="h-1.5" />
                             )}
                           </div>
                         </div>
@@ -361,11 +367,8 @@ export default function ChallengeArena() {
                         <Button
                           onClick={() => navigate(`/challenge/${challenge.id}`)}
                           disabled={challenge.isCompleted}
-                          className={`w-full ${
-                            challenge.isCompleted
-                              ? 'bg-white/10 text-white/50'
-                              : 'bg-purple-600 hover:bg-purple-700 text-white'
-                          }`}
+                          className="w-full"
+                          variant={challenge.isCompleted ? "secondary" : "default"}
                         >
                           {challenge.isCompleted ? '✓ Completed' : 'Start Challenge'}
                         </Button>
@@ -382,61 +385,61 @@ export default function ChallengeArena() {
         <div className="px-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center gap-2">
-              <Crown className="h-5 w-5 text-yellow-400" />
+              <Crown className="h-5 w-5 text-yellow-600" />
               Leaderboard
             </h2>
             <Button
               variant="ghost"
               size="sm"
-              className="text-purple-400 hover:text-purple-300 hover:bg-white/10 h-8"
+              className="text-primary hover:text-primary/80 h-8"
             >
               View All
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
 
-          <Card className="bg-[#2d1b4e] border-[#3d2b5e] shadow-lg">
+          <Card className="shadow-lg">
             <CardContent className="p-4">
               {leaderboard.length === 0 ? (
                 <div className="py-8 text-center">
-                  <TrendingUp className="h-12 w-12 mx-auto mb-3 text-white/30" />
-                  <p className="text-white/60 text-sm">No rankings yet</p>
+                  <TrendingUp className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                  <p className="text-muted-foreground text-sm">No rankings yet</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {leaderboard.slice(0, 5).map((entry, index) => (
                     <div 
                       key={entry.user_id}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
                     >
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0 ${
                         index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white' :
                         index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-white' :
                         index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' :
-                        'bg-white/10 text-white/60'
+                        'bg-muted text-muted-foreground'
                       }`}>
                         {index + 1}
                       </div>
                       
-                      <Avatar className="h-10 w-10 border-2 border-white/20">
-                        <AvatarFallback className="bg-purple-600 text-white font-semibold">
+                      <Avatar className="h-10 w-10 border-2 border-primary/20">
+                        <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                           {entry.users?.first_name?.charAt(0) || 'U'}
                         </AvatarFallback>
                       </Avatar>
                       
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-white text-sm truncate">
+                        <p className="font-semibold text-sm truncate">
                           {entry.users?.first_name} {entry.users?.last_name}
                         </p>
-                        <p className="text-xs text-white/50">
+                        <p className="text-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(entry.completed_at), { addSuffix: true })}
                         </p>
                       </div>
                       
                       <div className="text-right flex-shrink-0">
                         <div className="flex items-center gap-1">
-                          <Zap className="h-3 w-3 text-yellow-400" />
-                          <p className="font-bold text-white">{entry.score}</p>
+                          <Zap className="h-3 w-3 text-yellow-600" />
+                          <p className="font-bold">{entry.score}</p>
                         </div>
                         <p className="text-xs text-white/50">
                           {Math.floor(entry.time_taken_seconds / 60)}:{(entry.time_taken_seconds % 60).toString().padStart(2, '0')}
