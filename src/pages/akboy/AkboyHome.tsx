@@ -167,34 +167,35 @@ export default function AkboyHome() {
               const Icon = iconMap[service.icon_name] || BookOpen;
               const serviceImage = serviceImages[service.title] || educationService;
               return (
-                <Card 
-                  key={service.id} 
-                  className="group overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-2 border-transparent hover:border-[#A8E6A1] bg-white"
-                  style={{ animationDelay: `${index * 100}ms` }}
+                <Link 
+                  key={service.id}
+                  to="/akboy/services"
                 >
-                  <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={serviceImage} 
-                      alt={service.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#075E54]/80 to-transparent"></div>
-                    <div className="absolute bottom-4 left-4 w-12 h-12 bg-[#FFD700] rounded-xl flex items-center justify-center">
-                      <Icon className="w-6 h-6 text-[#075E54]" />
+                  <Card 
+                    className="group overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-2 border-transparent hover:border-[#A8E6A1] bg-white cursor-pointer h-full"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="relative h-48 overflow-hidden">
+                      <img 
+                        src={serviceImage} 
+                        alt={service.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#075E54]/80 to-transparent"></div>
+                      <div className="absolute bottom-4 left-4 w-12 h-12 bg-[#FFD700] rounded-xl flex items-center justify-center">
+                        <Icon className="w-6 h-6 text-[#075E54]" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-[#075E54] mb-3 font-poppins">{service.title}</h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed font-lato">{service.short_description}</p>
-                    <Link 
-                      to="/akboy/services" 
-                      className="inline-flex items-center gap-2 text-[#075E54] font-semibold group-hover:gap-4 transition-all font-poppins"
-                    >
-                      Learn More 
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </Card>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-[#075E54] mb-3 font-poppins">{service.title}</h3>
+                      <p className="text-gray-600 mb-4 leading-relaxed font-lato">{service.short_description}</p>
+                      <div className="inline-flex items-center gap-2 text-[#075E54] font-semibold group-hover:gap-4 transition-all font-poppins">
+                        Learn More 
+                        <ArrowRight className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
               );
             })}
           </div>

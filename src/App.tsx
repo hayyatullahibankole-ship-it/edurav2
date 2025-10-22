@@ -29,12 +29,15 @@ import DemoTest from "./pages/DemoTest";
 
 import Resources from "./pages/Resources";
 import Consultation from "./pages/Consultation";
-import Blog from "./pages/Blog";
 import Payment from "./pages/Payment";
 import NotFound from "./pages/NotFound";
 import AkboyHome from "./pages/akboy/AkboyHome";
 import AkboyContact from "./pages/akboy/AkboyContact";
 import AkboyBlog from "./pages/akboy/AkboyBlog";
+import AkboyAbout from "./pages/akboy/AkboyAbout";
+import AkboyServices from "./pages/akboy/AkboyServices";
+import AkboyPortfolio from "./pages/akboy/AkboyPortfolio";
+import AkboyEvents from "./pages/akboy/AkboyEvents";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import AnswerReview from "./pages/AnswerReview";
@@ -216,13 +219,18 @@ const AppRoutes = () => {
                 <LessonQuiz />
               </ProtectedRoute>
             } />
-            <Route path="/blog" element={<Layout><Blog /></Layout>} />
-            <Route path="/blog/:slug" element={<Layout><Blog /></Layout>} />
+            {/* Blog redirects to AKBOY */}
+            <Route path="/blog" element={<Navigate to="/akboy/blog" replace />} />
+            <Route path="/blog/:slug" element={<Navigate to="/akboy/blog/:slug" replace />} />
             <Route path="/terms" element={<Layout><Terms /></Layout>} />
             <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
             
             {/* AKBOY Creative Hub Routes */}
             <Route path="/akboy" element={<AkboyHome />} />
+            <Route path="/akboy/about" element={<AkboyAbout />} />
+            <Route path="/akboy/services" element={<AkboyServices />} />
+            <Route path="/akboy/portfolio" element={<AkboyPortfolio />} />
+            <Route path="/akboy/events" element={<AkboyEvents />} />
             <Route path="/akboy/contact" element={<AkboyContact />} />
             <Route path="/akboy/blog" element={<AkboyBlog />} />
             <Route path="/akboy/blog/:slug" element={<AkboyBlog />} />

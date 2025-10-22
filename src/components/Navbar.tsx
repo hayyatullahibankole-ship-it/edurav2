@@ -42,9 +42,6 @@ const Navbar = () => {
                 </Link>
               </>
             )}
-            <Link to="/blog" className="text-foreground hover:text-primary transition-colors">
-              Blog
-            </Link>
             <Link to="/consultation" className="text-foreground hover:text-primary transition-colors">
               Consultation
             </Link>
@@ -135,13 +132,6 @@ const Navbar = () => {
                   </Link>
                 </>
               )}
-              <Link
-                to="/blog"
-                className="block px-3 py-2 text-foreground hover:bg-muted rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Blog
-              </Link>
               <Link
                 to="/consultation"
                 className="block px-3 py-2 text-foreground hover:bg-muted rounded-md"
