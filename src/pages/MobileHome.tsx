@@ -230,55 +230,76 @@ const MobileHome = () => {
         <div className="absolute -bottom-32 -left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
-      {/* Modern Header with Curved Shape */}
-      <header className="relative z-20 overflow-hidden">
-        {/* Curved Background Shape */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary-glow/10 to-secondary/10">
-          <svg 
-            viewBox="0 0 1440 200" 
-            className="absolute bottom-0 left-0 w-full"
-            preserveAspectRatio="none"
-          >
-            <path 
-              d="M0,80 C320,120 640,140 960,120 C1280,100 1440,80 1440,80 L1440,0 L0,0 Z" 
-              fill="hsl(var(--primary) / 0.15)"
-            />
-            <path 
-              d="M0,100 C360,140 720,160 1080,140 C1320,120 1440,100 1440,100 L1440,0 L0,0 Z" 
-              fill="hsl(var(--primary-glow) / 0.1)"
-            />
-          </svg>
-        </div>
-
-        <div className="relative p-5 pt-8 pb-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Avatar className="h-16 w-16 border-3 border-white shadow-2xl ring-4 ring-primary/20">
-                  <AvatarFallback className="bg-gradient-to-br from-primary via-primary-glow to-secondary text-white font-bold text-2xl">
-                    {userProfile?.first_name?.charAt(0) || 'S'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success rounded-full border-3 border-background shadow-lg" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground font-semibold mb-0.5">Welcome back</p>
-                <h2 className="font-black text-2xl bg-gradient-to-r from-foreground via-primary to-primary-glow bg-clip-text text-transparent">
-                  {userProfile?.first_name || 'Student'}
-                </h2>
-              </div>
+      {/* Modern Dark Header with Tabs */}
+      <header className="relative px-4 pt-6 pb-4 animate-fade-in">
+        <div 
+          className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#1a1d3a] via-[#252847] to-[#1a1d3a] p-6 shadow-2xl"
+          style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.1)' }}
+        >
+          {/* Animated gradient orbs */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
+          
+          {/* Top Bar */}
+          <div className="relative z-10 flex items-center justify-between mb-6">
+            {/* Avatar with online status */}
+            <div className="relative">
+              <Avatar className="h-12 w-12 border-2 border-white/20 shadow-xl">
+                <AvatarFallback className="bg-gradient-to-br from-primary via-primary-glow to-secondary text-white font-bold text-lg">
+                  {userProfile?.first_name?.charAt(0) || 'S'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success rounded-full border-2 border-[#1a1d3a]" />
             </div>
+
+            {/* App Branding */}
+            <div className="flex-1 flex flex-col items-center">
+              <h1 className="text-white font-black text-xl tracking-tight">EduRa</h1>
+              <p className="text-white/60 text-xs font-semibold">Learning Platform</p>
+            </div>
+
+            {/* Actions */}
             <div className="flex items-center gap-2">
               <NotificationBell />
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleLogout}
-                className="rounded-2xl hover:bg-destructive/10 w-11 h-11 group"
+                className="rounded-xl hover:bg-white/10 w-10 h-10 group text-white/80 hover:text-white"
               >
-                <LogOut className="h-5 w-5 text-destructive group-hover:scale-110 transition-transform" />
+                <LogOut className="h-4 w-4 group-hover:scale-110 transition-transform" />
               </Button>
             </div>
+          </div>
+
+          {/* Welcome Section */}
+          <div className="relative z-10 mb-4">
+            <p className="text-white/60 text-xs font-semibold mb-0.5">Welcome back</p>
+            <h2 className="text-white font-black text-2xl">
+              {userProfile?.first_name || 'Student'} 👋
+            </h2>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="relative z-10 flex gap-2 p-1.5 rounded-[20px] bg-white/10 backdrop-blur-xl border border-white/20">
+            <button 
+              className="flex-1 py-3 px-4 rounded-[16px] bg-gradient-to-br from-primary to-primary-glow text-white font-bold text-sm shadow-lg transition-all"
+              style={{ boxShadow: '0 4px 12px rgba(var(--primary), 0.4)' }}
+            >
+              Home
+            </button>
+            <button 
+              onClick={() => navigate('/study-hub')}
+              className="flex-1 py-3 px-4 rounded-[16px] text-white/70 hover:text-white hover:bg-white/5 font-semibold text-sm transition-all"
+            >
+              Study
+            </button>
+            <button 
+              onClick={() => navigate('/practice')}
+              className="flex-1 py-3 px-4 rounded-[16px] text-white/70 hover:text-white hover:bg-white/5 font-semibold text-sm transition-all"
+            >
+              Practice
+            </button>
           </div>
         </div>
       </header>
