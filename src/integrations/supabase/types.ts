@@ -2886,6 +2886,10 @@ export type Database = {
         Args: { user_auth_id: string }
         Returns: boolean
       }
+      compute_exam_results: {
+        Args: { attempt_uuid: string }
+        Returns: string
+      }
       convert_latex_mathbf_to_markdown: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3312,15 +3316,7 @@ export type Database = {
       }
       recompute_results_for_attempt: {
         Args: { attempt_uuid: string }
-        Returns: {
-          correct: number
-          percentage: number
-          scaled_score: number
-          total: number
-          unanswered: number
-          updated: boolean
-          wrong: number
-        }[]
+        Returns: string
       }
       record_login_attempt: {
         Args: {
