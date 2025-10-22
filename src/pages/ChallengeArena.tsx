@@ -15,6 +15,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { AIAssistant } from '@/components/AIAssistant';
+import MobileNav from '@/components/MobileNav';
+import { useInstalledApp } from '@/hooks/useInstalledApp';
 
 interface Challenge {
   id: string;
@@ -45,6 +47,7 @@ interface LeaderboardEntry {
 export default function ChallengeArena() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { isInstalledApp } = useInstalledApp();
   const { isEnterprise, loading: subLoading } = useSubscription();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -497,6 +500,12 @@ if (isMobile) {
           </Card>
         </div>
       </div>
+      {isInstalledApp && <MobileNav activeTab="dashboard" onTabChange={(tab) => {
+        if (tab === 'dashboard') navigate('/dashboard');
+        else if (tab === 'study') navigate('/study-hub');
+        else if (tab === 'forum') navigate('/forum');
+        else if (tab === 'profile') navigate('/dashboard?tab=profile');
+      }} />}
       <WhatsAppButton />
       <AIAssistant />
     </>
