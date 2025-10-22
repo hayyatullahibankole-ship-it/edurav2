@@ -83,8 +83,8 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     return (
       <>
         {children}
-        <div className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin opacity-60" />
+        <div className="pointer-events-none fixed inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </>
     );
