@@ -310,6 +310,42 @@ export default function AdminPortal() {
                 <span className="sm:hidden">Arena</span>
               </Button>
               <Button
+                variant={activeSection === 'akboy-services' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+                onClick={() => setActiveSection('akboy-services')}
+              >
+                <Palette className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">AKBOY Services</span>
+                <span className="sm:hidden">Services</span>
+              </Button>
+              <Button
+                variant={activeSection === 'akboy-portfolio' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+                onClick={() => setActiveSection('akboy-portfolio')}
+              >
+                <Briefcase className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">AKBOY Portfolio</span>
+                <span className="sm:hidden">Portfolio</span>
+              </Button>
+              <Button
+                variant={activeSection === 'akboy-events' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+                onClick={() => setActiveSection('akboy-events')}
+              >
+                <CalendarDays className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">AKBOY Events</span>
+                <span className="sm:hidden">Events</span>
+              </Button>
+              <Button
+                variant={activeSection === 'akboy-inquiries' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+                onClick={() => setActiveSection('akboy-inquiries')}
+              >
+                <Mail className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">AKBOY Inquiries</span>
+                <span className="sm:hidden">Inquiries</span>
+              </Button>
+              <Button
                 variant={activeSection === 'settings' ? 'secondary' : 'ghost'}
                 className="w-full justify-start text-left text-xs sm:text-sm col-span-2 lg:col-span-1 text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('settings')}
@@ -520,9 +556,14 @@ export default function AdminPortal() {
           {activeSection === 'challenges' && <ChallengeManager />}
           
           {activeSection === 'settings' && <SystemConfig />}
+          
+          {activeSection === 'akboy-services' && <AkboyServicesManager />}
+          {activeSection === 'akboy-portfolio' && <AkboyPortfolioManager />}
+          {activeSection === 'akboy-events' && <AkboyEventsManager />}
+          {activeSection === 'akboy-inquiries' && <AkboyInquiriesManager />}
 
           {/* Other sections can be implemented similarly */}
-          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings'].includes(activeSection) && (
+          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries'].includes(activeSection) && (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
