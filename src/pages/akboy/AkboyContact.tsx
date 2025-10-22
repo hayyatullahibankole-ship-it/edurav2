@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, MessageCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, MessageCircle, Clock } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 
 export default function AkboyContact() {
   const { toast } = useToast();
@@ -55,17 +56,12 @@ export default function AkboyContact() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-green-50">
-      {/* Header */}
-      <section className="py-12 px-4 bg-[#075E54] text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-2 text-sm mb-4">
-            <Link to="/akboy" className="hover:text-[#FFD700]">Home</Link>
-            <span>/</span>
-            <span>Contact</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold">Get in Touch</h1>
-          <p className="text-xl text-white/80 mt-2">We'd love to hear from you</p>
+    <AkboyLayout>
+      {/* Hero Header */}
+      <section className="py-16 px-4 bg-gradient-to-br from-[#075E54] to-[#0A8A74] text-white">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Get in Touch</h1>
+          <p className="text-xl text-white/90">We'd love to hear from you and discuss how we can help</p>
         </div>
       </section>
 
@@ -141,10 +137,10 @@ export default function AkboyContact() {
                 <div className="space-y-6">
                   <Card className="p-6 flex items-start gap-4">
                     <div className="w-12 h-12 bg-[#A8E6A1] rounded-full flex items-center justify-center flex-shrink-0">
-                      <Mail className="w-6 h-6 text-[#075E54]" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-[#075E54] mb-1">Email Us</h3>
+                  <Mail className="w-6 h-6 text-[#075E54]" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-[#075E54] mb-1 text-lg">Email Us</h3>
                       <p className="text-gray-600">akboycreativehub@gmail.com</p>
                       <a 
                         href="mailto:akboycreativehub@gmail.com"
@@ -224,7 +220,10 @@ export default function AkboyContact() {
 
               {/* Business Hours */}
               <Card className="p-6 bg-[#075E54] text-white">
-                <h3 className="text-xl font-bold mb-4 text-[#FFD700]">Business Hours</h3>
+                <div className="flex items-center gap-3 mb-4">
+                  <Clock className="w-6 h-6 text-[#FFD700]" />
+                  <h3 className="text-xl font-bold text-[#FFD700]">Business Hours</h3>
+                </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Monday - Friday</span>
@@ -244,6 +243,6 @@ export default function AkboyContact() {
           </div>
         </div>
       </section>
-    </div>
+    </AkboyLayout>
   );
 }
