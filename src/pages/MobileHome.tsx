@@ -223,22 +223,24 @@ const MobileHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/10 pb-24 overflow-hidden">
-      {/* Animated Background Elements */}
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 pb-24 overflow-hidden relative">
+      {/* Enhanced Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-32 -left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-20 -right-20 w-80 h-80 bg-gradient-to-br from-primary/20 to-primary-glow/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-secondary/20 to-success/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-br from-primary-glow/15 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      {/* Modern Header with Brand Colors */}
+      {/* Vibrant Modern Header */}
       <header className="relative px-4 pt-6 pb-4 animate-fade-in">
         <div 
-          className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#1e3a5f] via-[#2c5282] to-[#1a365d] p-6 shadow-2xl"
-          style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.1)' }}
+          className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-primary via-primary-glow to-secondary p-6 shadow-2xl"
+          style={{ boxShadow: '0 20px 60px rgba(0, 123, 255, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.2)' }}
         >
           {/* Animated gradient orbs */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/30 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-primary-glow/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
           
           {/* Top Bar */}
           <div className="relative z-10 flex items-center justify-between mb-6">
@@ -246,24 +248,24 @@ const MobileHome = () => {
             <div className="flex flex-col items-start gap-3 flex-1">
               {/* App Branding */}
               <div>
-                <h1 className="text-white font-black text-xl tracking-tight">EduRa</h1>
-                <p className="text-white/70 text-xs font-semibold">Learning Platform</p>
+                <h1 className="text-white font-black text-2xl tracking-tight drop-shadow-lg">EduRa</h1>
+                <p className="text-white/90 text-xs font-bold">Learning Platform</p>
               </div>
               
               {/* Welcome Section with Avatar */}
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <Avatar className="h-12 w-12 border-2 border-white/30 shadow-xl">
-                    <AvatarFallback className="bg-white/20 backdrop-blur-sm text-white font-bold text-lg">
+                  <Avatar className="h-14 w-14 border-3 border-white/40 shadow-2xl ring-2 ring-white/20">
+                    <AvatarFallback className="bg-gradient-to-br from-white/30 to-white/10 backdrop-blur-xl text-white font-black text-xl">
                       {userProfile?.first_name?.charAt(0) || 'S'}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success rounded-full border-2 border-[#1e3a5f]" />
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success rounded-full border-3 border-white shadow-lg animate-pulse" />
                 </div>
                 <div>
-                  <p className="text-white/70 text-xs font-medium">Welcome back</p>
-                  <h2 className="text-white font-bold text-base">
-                    {userProfile?.first_name || 'Student'}
+                  <p className="text-white/90 text-xs font-semibold mb-0.5">Welcome back</p>
+                  <h2 className="text-white font-black text-lg drop-shadow-md">
+                    {userProfile?.first_name || 'Student'} 👋
                   </h2>
                 </div>
               </div>
@@ -276,9 +278,9 @@ const MobileHome = () => {
                 variant="ghost"
                 size="icon"
                 onClick={handleLogout}
-                className="rounded-xl hover:bg-white/10 w-10 h-10 group text-white/80 hover:text-white"
+                className="rounded-2xl hover:bg-white/20 w-11 h-11 group text-white hover:text-white active:scale-95 transition-all shadow-lg backdrop-blur-sm"
               >
-                <LogOut className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                <LogOut className="h-5 w-5 group-hover:scale-110 group-hover:rotate-12 transition-all" />
               </Button>
             </div>
           </div>
@@ -309,93 +311,100 @@ const MobileHome = () => {
 
       {/* Main Content */}
       <div className="relative z-10 px-4 space-y-6">
-        {/* Hero Stats Card - Modern Glassmorphic */}
+        {/* Hero Stats Card - Enhanced */}
         <div 
-          className="relative overflow-hidden rounded-[32px] p-6 backdrop-blur-2xl bg-gradient-to-br from-white/40 via-white/30 to-white/20 dark:from-white/10 dark:via-white/5 dark:to-transparent border border-white/20 shadow-2xl animate-fade-in"
-          style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.3)' }}
+          className="relative overflow-hidden rounded-[32px] p-6 backdrop-blur-2xl bg-gradient-to-br from-white/50 via-white/40 to-white/30 dark:from-white/15 dark:via-white/10 dark:to-white/5 border-2 border-white/30 shadow-2xl animate-fade-in"
+          style={{ boxShadow: '0 25px 70px rgba(0, 123, 255, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.4)' }}
         >
-          {/* Gradient Orb */}
-          <div className="absolute -top-12 -right-12 w-32 h-32 bg-gradient-to-br from-primary to-secondary rounded-full opacity-20 blur-2xl" />
+          {/* Enhanced Gradient Orbs */}
+          <div className="absolute -top-16 -right-16 w-40 h-40 bg-gradient-to-br from-primary to-secondary rounded-full opacity-30 blur-3xl animate-pulse" />
+          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-br from-success to-primary rounded-full opacity-20 blur-2xl animate-pulse" style={{ animationDelay: '1.5s' }} />
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <p className="text-sm text-foreground/60 font-medium mb-1">Your Journey</p>
-                <h3 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary-glow to-secondary bg-clip-text text-transparent">
+                <p className="text-sm text-foreground/70 font-bold mb-1 uppercase tracking-wide">Your Journey</p>
+                <h3 className="text-4xl font-black bg-gradient-to-r from-primary via-primary-glow to-secondary bg-clip-text text-transparent animate-gradient-shift drop-shadow-sm">
                   {stats.testsTaken} Tests
                 </h3>
               </div>
               <div 
-                className="p-4 rounded-[24px] bg-gradient-to-br from-primary to-secondary shadow-xl relative overflow-hidden group"
-                style={{ boxShadow: '0 10px 30px rgba(var(--primary), 0.3)' }}
+                className="p-5 rounded-[24px] bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl relative overflow-hidden group animate-float"
+                style={{ boxShadow: '0 15px 40px rgba(0, 123, 255, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.3)' }}
               >
-                <Trophy className="h-8 w-8 text-white relative z-10" />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <Trophy className="h-9 w-9 text-white relative z-10 drop-shadow-lg" strokeWidth={2.5} />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               </div>
             </div>
             
-            {/* Stats Row */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* Enhanced Stats Row */}
+            <div className="grid grid-cols-3 gap-4">
               <div className="relative group">
                 <div 
-                  className="p-4 rounded-[20px] bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/40 shadow-lg hover:scale-105 transition-all duration-300"
-                  style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.4), 0 8px 24px rgba(0, 0, 0, 0.06)' }}
+                  className="p-5 rounded-[24px] bg-gradient-to-br from-white/70 to-white/50 dark:from-white/15 dark:to-white/10 backdrop-blur-xl border-2 border-white/50 shadow-xl hover:scale-110 hover:-rotate-2 active:scale-95 transition-all duration-300"
+                  style={{ boxShadow: 'inset 0 2px 10px rgba(255, 255, 255, 0.5), 0 10px 30px rgba(0, 123, 255, 0.15)' }}
                 >
-                  <p className="text-3xl font-black text-primary mb-1">{stats.averageScore}%</p>
-                  <p className="text-[10px] text-foreground/60 font-semibold uppercase tracking-wide">Score</p>
+                  <p className="text-4xl font-black text-primary mb-1 drop-shadow-sm">{stats.averageScore}%</p>
+                  <p className="text-[10px] text-foreground/70 font-bold uppercase tracking-wider">Score</p>
                 </div>
               </div>
               
               <div className="relative group">
                 <div 
-                  className="p-4 rounded-[20px] bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/40 shadow-lg hover:scale-105 transition-all duration-300"
-                  style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.4), 0 8px 24px rgba(0, 0, 0, 0.06)' }}
+                  className="p-5 rounded-[24px] bg-gradient-to-br from-white/70 to-white/50 dark:from-white/15 dark:to-white/10 backdrop-blur-xl border-2 border-white/50 shadow-xl hover:scale-110 hover:rotate-2 active:scale-95 transition-all duration-300"
+                  style={{ boxShadow: 'inset 0 2px 10px rgba(255, 255, 255, 0.5), 0 10px 30px rgba(16, 185, 129, 0.15)' }}
                 >
-                  <p className="text-3xl font-black text-success mb-1">{stats.studyHours}h</p>
-                  <p className="text-[10px] text-foreground/60 font-semibold uppercase tracking-wide">Study</p>
+                  <p className="text-4xl font-black text-success mb-1 drop-shadow-sm">{stats.studyHours}h</p>
+                  <p className="text-[10px] text-foreground/70 font-bold uppercase tracking-wider">Study</p>
                 </div>
               </div>
               
-              <div className="relative group">
+              <div className="relative group animate-bounce-slow">
                 <div 
-                  className="p-4 rounded-[20px] bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/40 shadow-lg hover:scale-105 transition-all duration-300"
-                  style={{ boxShadow: 'inset 0 2px 8px rgba(255, 255, 255, 0.4), 0 8px 24px rgba(0, 0, 0, 0.06)' }}
+                  className="p-5 rounded-[24px] bg-gradient-to-br from-warning/30 via-warning/20 to-warning/10 backdrop-blur-xl border-2 border-warning/40 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300"
+                  style={{ boxShadow: 'inset 0 2px 10px rgba(251, 146, 60, 0.3), 0 15px 40px rgba(251, 146, 60, 0.4)' }}
                 >
-                  <div className="flex items-center gap-1 mb-1">
-                    <Flame className="h-5 w-5 text-warning" />
-                    <p className="text-3xl font-black text-warning">{streak.current}</p>
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <Flame className="h-7 w-7 text-warning animate-pulse drop-shadow-lg" strokeWidth={2.5} />
+                    <p className="text-4xl font-black text-warning drop-shadow-sm">{streak.current}</p>
                   </div>
-                  <p className="text-[10px] text-foreground/60 font-semibold uppercase tracking-wide">Streak</p>
+                  <p className="text-[10px] text-warning font-black uppercase tracking-wider text-center">Streak</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Daily Goal Progress - Modern Circular */}
+        {/* Daily Goal Progress - Enhanced Circular */}
         <div 
-          className="relative overflow-hidden rounded-[28px] p-5 bg-gradient-to-br from-success/20 via-success/10 to-transparent border border-success/20 shadow-lg animate-fade-in"
-          style={{ animationDelay: '0.1s' }}
+          className="relative overflow-hidden rounded-[28px] p-6 bg-gradient-to-br from-success/30 via-success/20 to-success/10 border-2 border-success/30 shadow-xl animate-fade-in hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          style={{ 
+            animationDelay: '0.1s',
+            boxShadow: '0 15px 40px rgba(16, 185, 129, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.3)'
+          }}
         >
-          <div className="flex items-center justify-between">
+          {/* Glow orb */}
+          <div className="absolute -right-8 -top-8 w-32 h-32 bg-success/30 rounded-full blur-3xl animate-pulse" />
+          
+          <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-4 flex-1">
               <div 
-                className="relative w-16 h-16 rounded-full flex items-center justify-center"
+                className="relative w-20 h-20 rounded-full flex items-center justify-center shadow-2xl"
                 style={{
-                  background: `conic-gradient(hsl(var(--success)) ${(dailyGoal.answered / dailyGoal.target) * 360}deg, rgba(255,255,255,0.3) 0deg)`,
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)'
+                  background: `conic-gradient(hsl(var(--success)) ${(dailyGoal.answered / dailyGoal.target) * 360}deg, rgba(255,255,255,0.4) 0deg)`,
+                  boxShadow: '0 10px 30px rgba(16, 185, 129, 0.4)'
                 }}
               >
-                <div className="absolute inset-2 rounded-full bg-background flex items-center justify-center">
-                  <Target className="h-6 w-6 text-success" />
+                <div className="absolute inset-2 rounded-full bg-background flex items-center justify-center shadow-inner">
+                  <Target className="h-7 w-7 text-success animate-pulse" strokeWidth={2.5} />
                 </div>
               </div>
               <div>
-                <p className="text-2xl font-black text-success mb-0.5">{dailyGoal.answered}/{dailyGoal.target}</p>
-                <p className="text-xs text-foreground/60 font-semibold">Questions Today</p>
+                <p className="text-3xl font-black text-success mb-1 drop-shadow-sm">{dailyGoal.answered}/{dailyGoal.target}</p>
+                <p className="text-xs text-foreground/70 font-bold">Questions Today 🎯</p>
               </div>
             </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            <ChevronRight className="h-6 w-6 text-success/70" />
           </div>
         </div>
 
