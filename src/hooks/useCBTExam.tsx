@@ -275,12 +275,18 @@ export const useCBTExam = (attemptId: string | null) => {
           originalIndex = question.originalIndexMap[displayIndex];
         }
 
+        // Cap time to prevent numeric overflow (max ~24 days in seconds)
+        const avgTimePerQuestion = Math.min(
+          Math.floor(timeSpentSeconds / questions.length),
+          2000000 // Safe maximum value
+        );
+
         return {
           attempt_id: attemptId,
           question_id: question.id,
           answer: originalIndex,
           is_correct: null, // Will be validated server-side
-          time_spent_seconds: Math.floor(timeSpentSeconds / questions.length),
+          time_spent_seconds: avgTimePerQuestion,
           answered_at: new Date().toISOString()
         };
       });
