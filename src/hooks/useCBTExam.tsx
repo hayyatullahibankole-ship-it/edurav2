@@ -266,25 +266,25 @@ export const useCBTExam = (attemptId: string | null) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Prepare only answered questions to reduce writes and avoid null payloads
-      const answersToSubmit = questions.flatMap(question => {
+      // Prepare records for all questions (answered and unanswered)
+      const allRecords = questions.map((question) => {
         const displayIndex = answers[question.id];
-        if (displayIndex === undefined) return [] as any[];
-        const originalIndex = question.originalIndexMap[displayIndex] ?? null;
-        return [{
+        const originalIndex = displayIndex !== undefined
+          ? (question.originalIndexMap[displayIndex] ?? null)
+          : null;
+        return {
           attempt_id: attemptId,
           question_id: question.id,
           answer: originalIndex
-        }];
+        } as any;
       });
 
-      // Submit answers if any were provided
-      if (answersToSubmit.length > 0) {
-        const { error: answersError } = await supabase
-          .from('attempt_answers')
-          .upsert(answersToSubmit, { onConflict: 'attempt_id,question_id' });
-        if (answersError) throw answersError;
-      }
+      // Upsert all (DB defaults will handle timestamps/time_spent)
+      const { error: answersError } = await supabase
+        .from('attempt_answers')
+        .upsert(allRecords, { onConflict: 'attempt_id,question_id' });
+
+      if (answersError) throw answersError;
 
       // Update attempt status to SUBMITTED
       const { error: attemptError } = await supabase
@@ -297,16 +297,25 @@ export const useCBTExam = (attemptId: string | null) => {
 
       if (attemptError) throw attemptError;
 
-      // Show immediate feedback
+      // Poll for computed results to avoid "not ready" race condition
+      const start = Date.now();
+      let hasResult = false;
+      while (Date.now() - start < 5000) { // up to 5s
+        const { data } = await supabase
+          .from('results')
+          .select('id')
+          .eq('attempt_id', attemptId)
+          .maybeSingle();
+        if (data?.id) { hasResult = true; break; }
+        await new Promise(r => setTimeout(r, 400));
+      }
+
       toast({
         title: 'Exam Submitted Successfully',
-        description: 'Redirecting to results...'
+        description: hasResult ? 'Loading results...' : 'Processing your results...'
       });
 
-      // Small delay before navigation to ensure toast is visible
-      setTimeout(() => {
-        navigate(`/results?attempt=${attemptId}`);
-      }, 500);
+      navigate(`/results?attempt=${attemptId}`);
 
     } catch (error: any) {
       console.error('Submission error:', error);
