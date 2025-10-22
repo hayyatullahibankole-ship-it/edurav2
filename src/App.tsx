@@ -32,6 +32,8 @@ import Consultation from "./pages/Consultation";
 import Blog from "./pages/Blog";
 import Payment from "./pages/Payment";
 import NotFound from "./pages/NotFound";
+import AkboyHome from "./pages/akboy/AkboyHome";
+import AkboyContact from "./pages/akboy/AkboyContact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import AnswerReview from "./pages/AnswerReview";
@@ -217,6 +219,11 @@ const AppRoutes = () => {
             <Route path="/blog/:slug" element={<Layout><Blog /></Layout>} />
             <Route path="/terms" element={<Layout><Terms /></Layout>} />
             <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
+            
+            {/* AKBOY Creative Hub Routes */}
+            <Route path="/akboy" element={<AkboyHome />} />
+            <Route path="/akboy/contact" element={<AkboyContact />} />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<Layout><NotFound /></Layout>} />
           </Routes>

@@ -34,7 +34,11 @@ import {
   Newspaper,
   MessageCircle,
   GraduationCap,
-  Sword
+  Sword,
+  Palette,
+  Briefcase,
+  CalendarDays,
+  Mail
 } from 'lucide-react';
 import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
@@ -49,6 +53,10 @@ import CustomerCommunications from '@/components/admin/CustomerCommunications';
 import StudyHubManager from '@/components/admin/StudyHubManager';
 import ForumManager from '@/components/admin/ForumManager';
 import ChallengeManager from '@/components/admin/ChallengeManager';
+import { AkboyServicesManager } from '@/components/admin/AkboyServicesManager';
+import { AkboyPortfolioManager } from '@/components/admin/AkboyPortfolioManager';
+import { AkboyEventsManager } from '@/components/admin/AkboyEventsManager';
+import { AkboyInquiriesManager } from '@/components/admin/AkboyInquiriesManager';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
