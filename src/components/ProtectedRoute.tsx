@@ -70,11 +70,23 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     };
   }, [user, loading, validateCurrentSession, isOnExamPage, location.pathname, requireAdmin, userRole, sessionValid]);
 
-  if (loading || (user && sessionValid === null)) {
+  if (!user && loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
+    );
+  }
+
+  // When signed-in but still validating, show a non-blocking overlay
+  if (user && (loading || sessionValid === null)) {
+    return (
+      <>
+        {children}
+        <div className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin opacity-60" />
+        </div>
+      </>
     );
   }
 
