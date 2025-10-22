@@ -8,8 +8,7 @@ import hero1 from "@/assets/akboy-hero-1.jpg";
 import hero2 from "@/assets/akboy-hero-2.jpg";
 import hero3 from "@/assets/akboy-hero-3.jpg";
 import hero4 from "@/assets/akboy-hero-4.jpg";
-import eduraPhone1 from "@/assets/edura-phone-1.png";
-import eduraPhone2 from "@/assets/edura-phone-2.png";
+import eduraMockup from "@/assets/edura-dashboard-mockup.png";
 
 export default function AkboyHome() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -276,41 +275,42 @@ export default function AkboyHome() {
               </div>
             </div>
 
-            {/* Phone Mockups */}
-            <div className="relative animate-fade-in h-[600px] lg:h-[700px]">
-              {/* Background Glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-300/20 to-teal-300/20 rounded-[3rem] blur-3xl"></div>
-              
-              {/* Phone 1 - Front */}
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-64 z-20 hover:scale-105 transition-transform duration-300">
+            {/* Phone Mockup */}
+            <div className="relative animate-fade-in h-[600px] lg:h-[700px] flex items-center justify-center">
+              {/* Main Phone */}
+              <div className="relative z-20 w-full max-w-lg hover:scale-105 transition-transform duration-500">
                 <img 
-                  src={eduraPhone1}
+                  src={eduraMockup}
                   alt="Edura App Dashboard"
                   className="w-full drop-shadow-2xl animate-float"
                 />
               </div>
 
-              {/* Phone 2 - Angled */}
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-64 z-10 hover:scale-105 transition-transform duration-300" style={{animationDelay: '1s'}}>
-                <img 
-                  src={eduraPhone2}
-                  alt="Edura App Analytics"
-                  className="w-full drop-shadow-2xl animate-float"
-                />
-              </div>
-
-              {/* Floating Elements */}
-              <div className="absolute top-10 right-10 bg-white p-4 rounded-2xl shadow-xl animate-float hidden lg:block z-30">
-                <div className="text-3xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">98%</div>
-                <div className="text-xs text-muted-foreground font-semibold">Pass Rate</div>
+              {/* Floating Stats Cards */}
+              <div className="absolute top-10 right-0 bg-white p-6 rounded-2xl shadow-2xl animate-float hidden lg:block z-30 border-2 border-emerald-100">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-bold text-gray-700">Real-time Stats</span>
+                </div>
+                <div className="text-4xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1">10K+</div>
+                <div className="text-sm text-gray-600 font-semibold">Active Students</div>
               </div>
               
-              <div className="absolute bottom-10 left-10 bg-white p-4 rounded-2xl shadow-xl animate-float hidden lg:block z-30" style={{animationDelay: '0.5s'}}>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs font-semibold">Live Now</span>
+              <div className="absolute bottom-10 left-0 bg-white p-6 rounded-2xl shadow-2xl animate-float hidden lg:block z-30 border-2 border-emerald-100" style={{animationDelay: '0.5s'}}>
+                <div className="flex items-center gap-2 mb-2">
+                  <Trophy className="w-5 h-5 text-emerald-600" />
+                  <span className="text-sm font-bold text-gray-700">Success Rate</span>
                 </div>
-                <div className="text-xs text-muted-foreground">24/7 Available</div>
+                <div className="text-4xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1">98%</div>
+                <div className="text-sm text-gray-600 font-semibold">Pass Rate</div>
+              </div>
+
+              <div className="absolute top-1/2 -left-10 bg-white p-5 rounded-2xl shadow-2xl animate-float hidden xl:block z-30 border-2 border-emerald-100" style={{animationDelay: '1s'}}>
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                  <div className="text-3xl font-extrabold text-gray-900">4.9</div>
+                </div>
+                <div className="text-xs text-gray-600 font-semibold mt-1">User Rating</div>
               </div>
             </div>
           </div>

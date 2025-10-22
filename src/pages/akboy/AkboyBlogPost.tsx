@@ -73,26 +73,35 @@ export default function AkboyBlogPost() {
 
   return (
     <AkboyLayout>
+      {/* Floating Back Button */}
+      <Link to="/blog" className="fixed top-24 left-4 z-50 animate-fade-in">
+        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xl hover:shadow-emerald-500/50 transition-all hover:scale-105 rounded-full px-6 py-6">
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Back to Blog
+        </Button>
+      </Link>
+
       {/* Hero Section with Featured Image */}
-      <div className="relative h-[60vh] min-h-[500px] overflow-hidden">
-        {post.featured_image && (
+      <div className="relative h-[60vh] min-h-[500px] overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100">
+        {post.featured_image ? (
           <>
             <img
               src={post.featured_image}
               alt={post.title}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
           </>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-9xl">📝</span>
+          </div>
         )}
         <div className="absolute inset-0 flex items-end">
           <div className="max-w-4xl mx-auto px-4 pb-12 w-full">
-            <Link to="/blog">
-              <Button variant="ghost" className="text-white hover:bg-white/10 mb-6">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Blog
-              </Button>
-            </Link>
             {post.category && (
               <span className="inline-block bg-emerald-500 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
                 {post.category}

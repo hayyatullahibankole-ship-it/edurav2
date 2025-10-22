@@ -117,30 +117,39 @@ export default function AkboyBlog() {
               <p className="text-gray-600 text-lg font-lato">Try a different search or category.</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
               {filteredPosts.map((post) => (
                 <Card 
                   key={post.id} 
-                  className="group overflow-hidden border-2 border-gray-100 hover:border-emerald-200 hover:shadow-2xl shadow-xl transition-all duration-500 hover:-translate-y-3 rounded-2xl bg-white"
+                  className="group overflow-hidden border-2 border-gray-100 hover:border-emerald-200 hover:shadow-2xl shadow-xl transition-all duration-500 hover:-translate-y-3 rounded-2xl bg-white flex flex-col h-full"
                 >
-                  {post.featured_image && (
-                    <div className="relative h-56 overflow-hidden">
-                      <img 
-                        src={post.featured_image} 
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                      {post.category && (
-                        <div className="absolute top-4 left-4">
-                          <span className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg">
-                            {post.category}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  <div className="p-7">
+                  <div className="relative h-56 overflow-hidden flex-shrink-0 bg-gradient-to-br from-emerald-100 to-teal-100">
+                    {post.featured_image ? (
+                      <>
+                        <img 
+                          src={post.featured_image} 
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-6xl">📝</span>
+                      </div>
+                    )}
+                    {post.category && (
+                      <div className="absolute top-4 left-4">
+                        <span className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg">
+                          {post.category}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-7 flex flex-col flex-grow">
                     <div className="flex items-center gap-3 text-sm text-gray-500 mb-4 font-lato">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="w-4 h-4 text-emerald-600" />
@@ -155,7 +164,7 @@ export default function AkboyBlog() {
                     <h3 className="text-xl font-bold text-gray-900 mb-3 font-poppins line-clamp-2 group-hover:text-emerald-600 transition-colors">
                       {post.title}
                     </h3>
-                    <p className="text-gray-600 mb-5 line-clamp-3 font-lato leading-relaxed">
+                    <p className="text-gray-600 mb-5 line-clamp-3 font-lato leading-relaxed flex-grow">
                       {post.excerpt || post.content?.substring(0, 150) + "..."}
                     </p>
                     {post.tags && post.tags.length > 0 && (
@@ -170,7 +179,7 @@ export default function AkboyBlog() {
                     )}
                     <Link 
                       to={`/blog/${post.slug || post.id}`}
-                      className="inline-flex items-center gap-2 text-emerald-600 font-bold group-hover:gap-4 transition-all font-poppins text-sm uppercase tracking-wide"
+                      className="inline-flex items-center gap-2 text-emerald-600 font-bold group-hover:gap-4 transition-all font-poppins text-sm uppercase tracking-wide mt-auto"
                     >
                       Read Article
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
