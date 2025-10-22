@@ -266,25 +266,26 @@ export const useCBTExam = (attemptId: string | null) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Prepare records for all questions (answered and unanswered)
-      const allRecords = questions.map((question) => {
+      // Prepare only answered questions to reduce writes and avoid null payloads
+      const answersToSubmit = questions.flatMap(question => {
         const displayIndex = answers[question.id];
-        const originalIndex = displayIndex !== undefined
-          ? (question.originalIndexMap[displayIndex] ?? null)
-          : null;
-        return {
+        if (displayIndex === undefined) return [] as any[];
+        const originalIndex = question.originalIndexMap[displayIndex] ?? null;
+        return [{
           attempt_id: attemptId,
           question_id: question.id,
           answer: originalIndex
-        } as any;
+        }];
       });
 
-      // Upsert all (DB defaults will handle timestamps/time_spent)
-      const { error: answersError } = await supabase
-        .from('attempt_answers')
-        .upsert(allRecords, { onConflict: 'attempt_id,question_id' });
+      // Submit answers if any were provided
+      if (answersToSubmit.length > 0) {
+        const { error: answersError } = await supabase
+          .from('attempt_answers')
+          .upsert(answersToSubmit, { onConflict: 'attempt_id,question_id' });
 
-      if (answersError) throw answersError;
+        if (answersError) throw answersError;
+      }
 
       // Update attempt status to SUBMITTED
       const { error: attemptError } = await supabase
