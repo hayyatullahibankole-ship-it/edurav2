@@ -93,10 +93,10 @@ export default function AkboyBlogPost() {
 
       {/* Hero Section with Featured Image */}
       <div className="relative h-[60vh] min-h-[500px] overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100">
-        {post.featured_image ? (
+        {post.featured_image_url ? (
           <>
             <img
-              src={post.featured_image}
+              src={post.featured_image_url}
               alt={post.title}
               className="w-full h-full object-cover"
               onError={(e) => {

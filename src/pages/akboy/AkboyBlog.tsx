@@ -124,14 +124,15 @@ export default function AkboyBlog() {
                   className="group overflow-hidden border-2 border-gray-100 hover:border-emerald-200 hover:shadow-2xl shadow-xl transition-all duration-500 hover:-translate-y-3 rounded-2xl bg-white flex flex-col h-full"
                 >
                   <div className="relative h-56 overflow-hidden flex-shrink-0 bg-gradient-to-br from-emerald-100 to-teal-100">
-                    {post.featured_image ? (
+                    {post.featured_image_url ? (
                       <>
                         <img 
-                          src={post.featured_image} 
+                          src={post.featured_image_url} 
                           alt={post.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
+                            e.currentTarget.parentElement!.classList.add('bg-gradient-to-br', 'from-emerald-100', 'to-teal-100');
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
@@ -142,8 +143,8 @@ export default function AkboyBlog() {
                       </div>
                     )}
                     {post.category && (
-                      <div className="absolute top-4 left-4">
-                        <span className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg">
+                      <div className="absolute top-4 left-4 z-10">
+                        <span className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg uppercase">
                           {post.category}
                         </span>
                       </div>
