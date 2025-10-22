@@ -386,8 +386,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Blog Section */}
-      <BlogSection />
+      {/* Blog Section - Moved to AKBOY */}
+      {/* <BlogSection /> */}
       
       {/* Footer */}
       <Footer />
