@@ -1,141 +1,172 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Code, Palette, GraduationCap, Sparkles, Users, Award, TrendingUp, CheckCircle2, Phone, Mail, Star } from "lucide-react";
-import { Link } from "react-router-dom";
-import akboyHero from "@/assets/akboy-hero-gradient.jpg";
+import { Badge } from "@/components/ui/badge";
+import { AkboyLayout } from "@/components/akboy/AkboyLayout";
+import { 
+  BookOpen, Palette, Code, Users, TrendingUp, 
+  Briefcase, ArrowRight, Star, Quote, CheckCircle2,
+  Sparkles, Zap, Award, Target, Rocket, Heart, Globe, Lightbulb
+} from "lucide-react";
+import heroGradient from "@/assets/akboy-hero-gradient.jpg";
+import educationService from "@/assets/education-service.jpg";
+import designService from "@/assets/design-service.jpg";
+import webDevService from "@/assets/web-dev-service.jpg";
+import trainingService from "@/assets/training-service.jpg";
+import teamImage from "@/assets/akboy-team.jpg";
 import eduraMockup from "@/assets/edura-mobile-mockup.png";
 
-const AkboyHome = () => {
-  const services = [
-    {
-      icon: <Code className="w-8 h-8" />,
-      title: "Web Development",
-      description: "Custom websites and web applications built with cutting-edge technologies for optimal performance.",
-      features: ["Responsive Design", "SEO Optimized", "Fast Performance"]
-    },
-    {
-      icon: <Palette className="w-8 h-8" />,
-      title: "UI/UX Design",
-      description: "Beautiful, intuitive interfaces that create exceptional user experiences and drive engagement.",
-      features: ["User Research", "Wireframing", "Prototyping"]
-    },
-    {
-      icon: <GraduationCap className="w-8 h-8" />,
-      title: "EdTech Solutions",
-      description: "Innovative educational platforms that transform learning experiences for students and educators.",
-      features: ["Learning Management", "Analytics", "Mobile Apps"]
+export default function AkboyHome() {
+  const [stats, setStats] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [statsRes, servicesRes, testimonialsRes] = await Promise.all([
+        supabase.from("akboy_stats").select("*").eq("is_active", true).order("display_order"),
+        supabase.from("akboy_services").select("*").eq("is_active", true).order("display_order").limit(4),
+        supabase.from("akboy_testimonials").select("*").eq("is_active", true).order("display_order").limit(3),
+      ]);
+
+      if (statsRes.data) setStats(statsRes.data);
+      if (servicesRes.data) setServices(servicesRes.data);
+      if (testimonialsRes.data) setTestimonials(testimonialsRes.data);
+    } catch (error) {
+      console.error("Error fetching AKBOY data:", error);
     }
-  ];
+  };
 
-  const stats = [
-    { value: "6,561+", label: "Satisfied Clients", icon: <Users className="w-6 h-6" /> },
-    { value: "600+", label: "Finished Projects", icon: <Award className="w-6 h-6" /> },
-    { value: "250+", label: "Skilled Experts", icon: <TrendingUp className="w-6 h-6" /> },
-    { value: "1,001+", label: "Media Posts", icon: <Sparkles className="w-6 h-6" /> }
-  ];
+  const iconMap: { [key: string]: any } = {
+    Users, Briefcase, TrendingUp, BookOpen, Palette, Code,
+  };
 
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      role: "CEO, TechStart",
-      content: "AKBOY transformed our vision into reality. Their attention to detail and technical expertise is unmatched.",
-      rating: 5,
-      image: "SJ"
-    },
-    {
-      name: "Michael Chen",
-      role: "Founder, EduLearn",
-      content: "The Edura platform they built has revolutionized how we deliver education. Absolutely phenomenal work!",
-      rating: 5,
-      image: "MC"
-    }
-  ];
-
-  const whyChooseUs = [
-    { title: "Expert Team", description: "Skilled professionals with years of industry experience" },
-    { title: "Quality Delivery", description: "We deliver exceptional results on time, every time" },
-    { title: "24/7 Support", description: "Round-the-clock support for all your needs" },
-    { title: "Innovative Solutions", description: "Cutting-edge technology and creative approaches" }
-  ];
+  const serviceImages: { [key: string]: string } = {
+    "Educational Consultancy": educationService,
+    "Tutorial Services": educationService,
+    "Graphics Design": designService,
+    "Web Design": webDevService,
+    "Web Development": webDevService,
+    "Creative Training": trainingService,
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-emerald-600 via-teal-700 to-cyan-800">
-        {/* Decorative Elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-400/20 rounded-full blur-3xl animate-float" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
-          <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-cyan-400/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "4s" }} />
+    <AkboyLayout>
+      {/* Ultra Modern Hero Section */}
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        {/* Animated Gradient Background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-fuchsia-800 to-blue-900"></div>
+          <div className="absolute inset-0 opacity-30">
+            <img src={heroGradient} alt="" className="w-full h-full object-cover mix-blend-overlay" />
+          </div>
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-20 left-10 w-96 h-96 bg-fuchsia-500/20 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-cyan-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+            <div className="absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+          </div>
         </div>
 
-        {/* Wave Shape */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 320" className="w-full h-32 md:h-48 fill-background/50">
-            <path d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" />
-          </svg>
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8 animate-fade-in text-white">
-              <div className="inline-block">
-                <span className="px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-full text-sm font-semibold border border-white/20">
-                  🚀 Built For Success
-                </span>
-              </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            {/* Left Content */}
+            <div className="text-white space-y-10">
+              <Badge className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 px-4 py-2 text-base font-lato">
+                <Sparkles className="w-4 h-4 mr-2 text-fuchsia-300" />
+                Creative Innovation Hub
+              </Badge>
               
-              <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-                Get Our Business
-                <span className="block bg-gradient-to-r from-emerald-200 via-teal-200 to-cyan-200 bg-clip-text text-transparent">
-                  This IT Solution
-                </span>
-              </h1>
-              
-              <p className="text-lg md:text-xl text-white/90 max-w-2xl">
-                Delivering cutting-edge IT solutions, stunning designs, and innovative educational platforms that transform businesses and empower learners worldwide.
-              </p>
+              <div className="space-y-8">
+                <h1 className="text-6xl md:text-7xl lg:text-8xl font-extrabold leading-[1.1] font-poppins">
+                  <span className="block mb-4">Unleash Your</span>
+                  <span className="block bg-gradient-to-r from-fuchsia-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
+                    Creative Power
+                  </span>
+                </h1>
+                
+                <p className="text-2xl md:text-3xl text-white/90 leading-relaxed font-lato max-w-2xl">
+                  Transform ideas into reality with cutting-edge design, innovative education, and powerful technology solutions.
+                </p>
+              </div>
 
-              <div className="flex flex-wrap gap-4">
-                <Button size="lg" className="group bg-white text-emerald-700 hover:bg-white/90 shadow-xl hover:shadow-2xl transition-all">
-                  Subscribe Now
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <div className="flex flex-col sm:flex-row gap-5">
+                <Button 
+                  asChild 
+                  size="lg" 
+                  className="bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-600 hover:to-purple-700 text-white text-xl px-12 py-8 rounded-2xl font-bold shadow-2xl shadow-fuchsia-500/50 hover:scale-105 transition-all duration-300 font-poppins border-0"
+                >
+                  <Link to="/akboy/services">
+                    Explore Services
+                    <Rocket className="ml-3 w-6 h-6" />
+                  </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-emerald-700">
-                  Contact Us
-                  <ArrowRight className="ml-2 w-4 h-4" />
+                <Button 
+                  asChild 
+                  size="lg" 
+                  variant="outline"
+                  className="border-2 border-white/40 text-white bg-white/10 hover:bg-white hover:text-purple-900 text-xl px-12 py-8 rounded-2xl font-bold backdrop-blur-md transition-all duration-300 font-poppins"
+                >
+                  <Link to="/akboy/portfolio">View Portfolio</Link>
                 </Button>
               </div>
 
-              <div className="flex items-center gap-8 pt-4">
-                <div className="flex items-center gap-2">
-                  <Phone className="w-5 h-5 text-emerald-200" />
-                  <span className="text-sm font-semibold">+234 810 xxx xxxx</span>
+              {/* Dynamic Stats */}
+              {stats.length > 0 && (
+                <div className="grid grid-cols-3 gap-6 pt-10">
+                  {stats.slice(0, 3).map((stat, i) => (
+                    <div key={stat.id} className="group relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-purple-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all"></div>
+                      <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 hover:bg-white/20 hover:scale-105 hover:border-white/40 transition-all duration-300">
+                        <div className="text-5xl font-extrabold bg-gradient-to-r from-fuchsia-300 to-cyan-300 bg-clip-text text-transparent font-poppins mb-2">
+                          {stat.value}
+                        </div>
+                        <div className="text-sm text-white/80 font-lato font-medium">{stat.label}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Mail className="w-5 h-5 text-emerald-200" />
-                  <span className="text-sm font-semibold">info@akboy.com</span>
-                </div>
-              </div>
+              )}
             </div>
 
-            <div className="relative animate-fade-in" style={{ animationDelay: "0.2s" }}>
+            {/* Right Visual - 3D Floating Elements */}
+            <div className="relative hidden lg:block">
               <div className="relative">
-                <img 
-                  src={akboyHero} 
-                  alt="AKBOY Creative Hub" 
-                  className="rounded-2xl shadow-2xl"
-                />
-                <div className="absolute -bottom-6 -left-6 bg-white dark:bg-gray-900 p-6 rounded-xl shadow-xl border-2 border-emerald-200">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                      <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-emerald-600">6,561+</p>
-                      <p className="text-sm text-muted-foreground">Satisfied Clients</p>
+                {/* Main floating card */}
+                <div className="relative z-10">
+                  <div className="absolute -inset-6 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-500 rounded-[3rem] blur-3xl opacity-30 animate-pulse"></div>
+                  <div className="relative bg-white/10 backdrop-blur-2xl rounded-[3rem] p-8 border border-white/20 shadow-2xl hover:scale-105 transition-transform duration-500">
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-2xl p-6 text-white">
+                        <Lightbulb className="w-10 h-10 mb-4" />
+                        <div className="text-2xl font-bold font-poppins">Innovation</div>
+                      </div>
+                      <div className="bg-gradient-to-br from-purple-500 to-cyan-500 rounded-2xl p-6 text-white">
+                        <Globe className="w-10 h-10 mb-4" />
+                        <div className="text-2xl font-bold font-poppins">Global Reach</div>
+                      </div>
+                      <div className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl p-6 text-white col-span-2">
+                        <Award className="w-12 h-12 mb-4" />
+                        <div className="text-3xl font-bold font-poppins">Award-Winning</div>
+                        <p className="text-white/80 mt-2 font-lato">Excellence in Design & Education</p>
+                      </div>
                     </div>
                   </div>
+                </div>
+
+                {/* Floating badges */}
+                <div className="absolute -top-8 -right-8 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-2xl p-6 shadow-2xl animate-float z-20">
+                  <Target className="w-10 h-10 text-white mb-2" />
+                  <div className="text-sm font-bold text-white font-poppins">Results Driven</div>
+                </div>
+                <div className="absolute -bottom-8 -left-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl p-6 shadow-2xl animate-float z-20" style={{animationDelay: '1s'}}>
+                  <Rocket className="w-10 h-10 text-white mb-2" />
+                  <div className="text-sm font-bold text-white font-poppins">Fast Delivery</div>
                 </div>
               </div>
             </div>
@@ -143,233 +174,306 @@ const AkboyHome = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxIDAgNiAyLjY5IDYgNnMtMi42OSA2LTYgNi02LTIuNjktNi02IDIuNjktNiA2LTZ6IiBzdHJva2U9IiNmZmYiIHN0cm9rZS1vcGFjaXR5PSIuMSIvPjwvZz48L3N2Zz4=')] opacity-10" />
+      {/* Services Showcase */}
+      <section className="py-32 px-4 sm:px-6 lg:px-8 bg-gray-50 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-50/50 to-white"></div>
         
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">We Are Increasing Business Success</h2>
-            <p className="text-white/80 max-w-2xl mx-auto">Trusted by thousands of clients worldwide</p>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-20">
+            <Badge className="bg-purple-100 text-purple-900 border-purple-200 mb-6 px-5 py-2 text-base font-lato">
+              <Zap className="w-4 h-4 mr-2" />
+              Premium Services
+            </Badge>
+            <h2 className="text-6xl md:text-7xl font-extrabold mb-8 font-poppins">
+              <span className="bg-gradient-to-r from-purple-900 via-fuchsia-800 to-purple-900 bg-clip-text text-transparent">
+                What We Create
+              </span>
+            </h2>
+            <p className="text-gray-600 text-2xl max-w-3xl mx-auto font-lato leading-relaxed">
+              Cutting-edge solutions that drive real impact and transform businesses
+            </p>
           </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {services.map((service, index) => {
+              const Icon = iconMap[service.icon_name] || BookOpen;
+              const serviceImage = serviceImages[service.title] || educationService;
+              return (
+                <Link 
+                  key={service.id}
+                  to="/akboy/services"
+                  className="group"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="relative">
+                    <div className="absolute -inset-2 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-500 rounded-3xl opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500"></div>
+                    <Card className="relative h-full overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 bg-white">
+                      <div className="relative h-64 overflow-hidden">
+                        <img 
+                          src={serviceImage} 
+                          alt={service.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-purple-900 via-purple-900/50 to-transparent"></div>
+                        <div className="absolute bottom-4 left-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                            <Icon className="w-8 h-8 text-white" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-8">
+                        <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-900 to-fuchsia-800 bg-clip-text text-transparent mb-4 font-poppins">
+                          {service.title}
+                        </h3>
+                        <p className="text-gray-600 mb-6 leading-relaxed font-lato line-clamp-3">
+                          {service.short_description}
+                        </p>
+                        <div className="inline-flex items-center gap-2 text-purple-600 font-bold group-hover:gap-4 transition-all font-poppins">
+                          Discover More
+                          <ArrowRight className="w-5 h-5" />
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+          
+          <div className="text-center mt-20">
+            <Button asChild size="lg" className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white px-12 py-7 rounded-2xl text-xl font-bold shadow-2xl shadow-purple-500/30 hover:scale-105 transition-all font-poppins border-0">
+              <Link to="/akboy/services">
+                View All Services
+                <ArrowRight className="ml-3 w-6 h-6" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div 
-                key={index}
-                className="text-center space-y-3 animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-full mb-2">
-                  {stat.icon}
-                </div>
-                <p className="text-4xl md:text-5xl font-bold">{stat.value}</p>
-                <p className="text-white/80">{stat.label}</p>
+      {/* Edura Featured Project with Phone Mockup */}
+      <section className="py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-purple-900 via-fuchsia-900 to-blue-900">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-fuchsia-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-[900px] h-[900px] bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1.5s'}}></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Phone Mockup */}
+            <div className="relative order-2 lg:order-1">
+              <div className="absolute -inset-8 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-500 rounded-[4rem] blur-3xl opacity-40 animate-pulse"></div>
+              <div className="relative">
+                <img 
+                  src={eduraMockup} 
+                  alt="Edura Mobile App" 
+                  className="w-full max-w-md mx-auto drop-shadow-2xl hover:scale-105 transition-transform duration-700"
+                />
               </div>
-            ))}
+            </div>
+
+            {/* Content */}
+            <div className="text-white space-y-8 order-1 lg:order-2">
+              <Badge className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 px-5 py-2 text-base font-lato">
+                <Star className="w-4 h-4 mr-2 text-cyan-300" />
+                Flagship Product
+              </Badge>
+              <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold font-poppins leading-tight">
+                Edura CBT Platform
+              </h2>
+              <p className="text-2xl md:text-3xl text-white/90 leading-relaxed font-lato">
+                Africa's most advanced educational platform powered by AI, transforming how students prepare for exams.
+              </p>
+              
+              <ul className="space-y-5">
+                {[
+                  { icon: Zap, text: "Lightning-Fast CBT Practice Engine" },
+                  { icon: Brain, text: "AI-Powered Personalized Learning" },
+                  { icon: TrendingUp, text: "Real-Time Performance Analytics" },
+                  { icon: Globe, text: "Offline Mode for Anywhere Learning" }
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-5 group">
+                    <div className="w-12 h-12 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all shadow-xl">
+                      <feature.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-xl font-lato font-medium">{feature.text}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex flex-col sm:flex-row gap-5 pt-6">
+                <Button asChild size="lg" className="bg-white text-purple-900 hover:bg-white/90 px-10 py-7 rounded-2xl text-xl font-bold shadow-2xl hover:scale-105 transition-all font-poppins">
+                  <Link to="/">
+                    Launch Edura
+                    <ArrowRight className="ml-3 w-6 h-6" />
+                  </Link>
+                </Button>
+                <div className="flex items-center gap-8">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold bg-gradient-to-r from-cyan-300 to-fuchsia-300 bg-clip-text text-transparent font-poppins">10K+</div>
+                    <div className="text-white/70 font-lato">Active Users</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold bg-gradient-to-r from-fuchsia-300 to-purple-300 bg-clip-text text-transparent font-poppins">95%</div>
+                    <div className="text-white/70 font-lato">Success Rate</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <span className="text-emerald-600 font-semibold">WHY CHOOSE US</span>
-            <h2 className="text-3xl md:text-5xl font-bold mt-2 mb-4">
-              We Can Create With The<br />About Solution
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Combining technical excellence with creative innovation to deliver solutions that exceed expectations
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {whyChooseUs.map((item, index) => (
-              <Card 
-                key={index}
-                className="p-6 hover:shadow-lg transition-all border border-emerald-100 hover:border-emerald-300 animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                <p className="text-muted-foreground">{item.description}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <span className="text-emerald-600 font-semibold">OUR SERVICES</span>
-            <h2 className="text-3xl md:text-5xl font-bold mt-2 mb-4">
-              We Solve IT Problems<br />With Technology
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <Card 
-                key={index}
-                className="group p-8 hover:shadow-2xl transition-all duration-300 border border-emerald-100 hover:border-emerald-300 hover:-translate-y-2 animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform">
-                  {service.icon}
-                </div>
-                <h3 className="text-2xl font-bold mb-3 group-hover:text-emerald-600 transition-colors">{service.title}</h3>
-                <p className="text-muted-foreground mb-6">{service.description}</p>
-                
-                <ul className="space-y-2 mb-6">
-                  {service.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Button variant="ghost" className="group-hover:text-emerald-600">
-                  Learn More <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Project - Edura */}
-      <section className="py-20 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-200/30 rounded-full blur-3xl" />
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6 animate-fade-in">
-              <span className="text-emerald-600 font-semibold">FEATURED PROJECT</span>
-              <h2 className="text-3xl md:text-5xl font-bold">
-                Our Latest Incredible<br />
-                <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                  Client's Project
-                </span>
-              </h2>
-              
-              <Card className="p-6 bg-white border border-emerald-200 shadow-xl">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-                    <GraduationCap className="w-6 h-6 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold mb-2">Edura E-Learning</h3>
-                    <p className="text-muted-foreground">
-                      A comprehensive educational platform revolutionizing online learning with AI-powered features, 
-                      real-time analytics, and an intuitive mobile experience.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-6">
-                  {[
-                    "AI-Powered Study Assistant",
-                    "Interactive Practice Tests",
-                    "Real-time Performance Analytics",
-                    "Mobile-First Design"
-                  ].map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <Link to="/akboy/portfolio">
-                  <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white">
-                    View Portfolio
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </Link>
-              </Card>
+      <section className="py-32 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            <div className="relative">
+              <div className="absolute -inset-6 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-500 rounded-[3rem] blur-2xl opacity-20"></div>
+              <img 
+                src={teamImage} 
+                alt="Our Team" 
+                className="relative rounded-[3rem] shadow-2xl"
+              />
             </div>
-
-            <div className="relative animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-teal-400 opacity-20 blur-3xl rounded-full" />
-                <img 
-                  src={eduraMockup} 
-                  alt="Edura Mobile App" 
-                  className="relative z-10 mx-auto drop-shadow-2xl hover:scale-105 transition-transform duration-300"
-                />
+            
+            <div className="space-y-10">
+              <div>
+                <Badge className="bg-purple-100 text-purple-900 border-purple-200 mb-6 px-5 py-2 text-base font-lato">
+                  <Star className="w-4 h-4 mr-2" />
+                  Why AKBOY?
+                </Badge>
+                <h2 className="text-5xl md:text-6xl font-extrabold mb-8 font-poppins">
+                  <span className="bg-gradient-to-r from-purple-900 via-fuchsia-800 to-purple-900 bg-clip-text text-transparent">
+                    Excellence in Every Detail
+                  </span>
+                </h2>
+                <p className="text-gray-600 text-xl leading-relaxed font-lato">
+                  We don't just deliver projects – we craft experiences that drive growth and inspire innovation.
+                </p>
               </div>
+
+              <div className="space-y-6">
+                {[
+                  { icon: Target, title: "Precision & Results", desc: "Data-driven strategies that deliver measurable outcomes" },
+                  { icon: Heart, title: "Client Success First", desc: "Your goals become our mission, with dedicated support" },
+                  { icon: Rocket, title: "Innovation Leaders", desc: "Stay ahead with cutting-edge solutions and trends" },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-6 group p-6 rounded-2xl hover:bg-purple-50 transition-all">
+                    <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all shadow-lg">
+                      <item.icon className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-3 font-poppins">{item.title}</h3>
+                      <p className="text-gray-600 font-lato text-lg leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button asChild size="lg" className="bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-600 hover:to-purple-700 text-white px-10 py-7 rounded-2xl text-xl font-bold shadow-2xl hover:scale-105 transition-all font-poppins border-0">
+                <Link to="/akboy/about">
+                  Discover Our Story
+                  <ArrowRight className="ml-3 w-6 h-6" />
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <span className="text-emerald-600 font-semibold">TESTIMONIALS</span>
-            <h2 className="text-3xl md:text-5xl font-bold mt-2">
-              People Who Already Love Us
-            </h2>
+      {testimonials.length > 0 && (
+        <section className="py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-purple-50 to-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-20">
+              <Badge className="bg-purple-100 text-purple-900 border-purple-200 mb-6 px-5 py-2 text-base font-lato">
+                <Quote className="w-4 h-4 mr-2" />
+                Client Love
+              </Badge>
+              <h2 className="text-6xl md:text-7xl font-extrabold mb-8 font-poppins">
+                <span className="bg-gradient-to-r from-purple-900 via-fuchsia-800 to-purple-900 bg-clip-text text-transparent">
+                  Success Stories
+                </span>
+              </h2>
+              <p className="text-gray-600 text-2xl font-lato">Hear from our amazing clients</p>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {testimonials.map((testimonial, i) => (
+                <div key={testimonial.id} style={{ animationDelay: `${i * 100}ms` }}>
+                  <div className="relative">
+                    <div className="absolute -inset-2 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-500 rounded-3xl opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500"></div>
+                    <Card className="relative p-8 hover:shadow-2xl transition-all bg-white border-0 shadow-xl group h-full">
+                      <Quote className="absolute top-6 right-6 w-16 h-16 text-purple-200 opacity-50 group-hover:opacity-70 group-hover:scale-110 transition-all" />
+                      <div className="flex items-center gap-5 mb-6">
+                        {testimonial.image_url ? (
+                          <img 
+                            src={testimonial.image_url} 
+                            alt={testimonial.client_name}
+                            className="w-20 h-20 rounded-2xl object-cover ring-4 ring-purple-200 group-hover:ring-purple-400 transition-all"
+                          />
+                        ) : (
+                          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white font-bold text-3xl shadow-xl">
+                            {testimonial.client_name.charAt(0)}
+                          </div>
+                        )}
+                        <div>
+                          <h4 className="font-bold text-gray-900 text-xl font-poppins">{testimonial.client_name}</h4>
+                          <p className="text-gray-600 font-lato">{testimonial.role}</p>
+                        </div>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed mb-6 font-lato text-lg italic">&ldquo;{testimonial.content}&rdquo;</p>
+                      {testimonial.rating && (
+                        <div className="flex gap-1">
+                          {[...Array(testimonial.rating)].map((_, i) => (
+                            <Star key={i} className="w-6 h-6 fill-fuchsia-500 text-fuchsia-500" />
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+        </section>
+      )}
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {testimonials.map((testimonial, index) => (
-              <Card 
-                key={index}
-                className="p-8 hover:shadow-xl transition-all animate-fade-in border border-emerald-100"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-emerald-500 text-emerald-500" />
-                  ))}
-                </div>
-                
-                <p className="text-lg mb-6 italic">"{testimonial.content}"</p>
-                
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center font-bold text-emerald-700">
-                    {testimonial.image}
-                  </div>
-                  <div>
-                    <p className="font-bold">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+      {/* Final CTA */}
+      <section className="py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-purple-900 via-fuchsia-900 to-purple-900">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0di00aC0ydjRoLTR2Mmg0djRoMnYtNGg0di0yaC00em0wLTMwVjBoLTJ2NGgtNHYyaDR2NGgyVjZoNFY0aC00ek02IDM0di00SDR2NEgwdjJoNHY0aDJ2LTRoNHYtMkg2ek02IDRWMEG0djRIMHYyaDR2NGgyVjZoNFY0SDZ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-5"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(217,70,239,0.1),transparent_70%)]"></div>
         </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxIDAgNiAyLjY5IDYgNnMtMi42OSA2LTYgNi02LTIuNjktNi02IDIuNjktNiA2LTZ6IiBzdHJva2U9IiNmZmYiIHN0cm9rZS1vcGFjaXR5PSIuMSIvPjwvZz48L3N2Zz4=')] opacity-20" />
         
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="max-w-3xl mx-auto space-y-6">
-            <h2 className="text-3xl md:text-5xl font-bold">
-              Stay Connected With<br />Cutting Edge IT
-            </h2>
-            <p className="text-lg text-white/90">
-              Ready to transform your business? Let's create something amazing together.
-            </p>
-            <Button size="lg" variant="secondary" className="bg-white text-emerald-700 hover:bg-white/90">
-              Get Started Now
-              <ArrowRight className="ml-2 w-4 h-4" />
+        <div className="max-w-6xl mx-auto text-center space-y-12 relative z-10">
+          <Badge className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 px-6 py-3 text-lg font-lato">
+            <Rocket className="w-5 h-5 mr-2" />
+            Let's Create Together
+          </Badge>
+          <h2 className="text-6xl md:text-7xl lg:text-8xl font-extrabold text-white font-poppins leading-tight">
+            Ready to Transform<br />Your Vision?
+          </h2>
+          <p className="text-2xl md:text-3xl text-white/90 max-w-4xl mx-auto font-lato leading-relaxed">
+            Join thousands who trust AKBOY to bring their creative and educational dreams to life
+          </p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
+            <Button asChild size="lg" className="bg-white text-purple-900 hover:bg-white/90 px-14 py-9 text-2xl rounded-2xl font-extrabold shadow-2xl hover:scale-105 transition-all font-poppins">
+              <Link to="/akboy/contact">
+                Start Your Project
+                <ArrowRight className="ml-3 w-7 h-7" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="border-2 border-white/40 text-white hover:bg-white hover:text-purple-900 px-14 py-9 text-2xl rounded-2xl font-extrabold bg-white/10 backdrop-blur-md transition-all font-poppins">
+              <Link to="/akboy/portfolio">Explore Work</Link>
             </Button>
           </div>
         </div>
       </section>
-    </div>
+    </AkboyLayout>
   );
-};
+}
 
-export default AkboyHome;
+// Add Brain icon import fix
+const Brain = () => <Lightbulb />;
