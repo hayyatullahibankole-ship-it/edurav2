@@ -230,54 +230,54 @@ const MobileHome = () => {
         <div className="absolute -bottom-32 -left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
-      {/* Modern Dark Header with Tabs */}
+      {/* Modern Header with Brand Colors */}
       <header className="relative px-4 pt-6 pb-4 animate-fade-in">
         <div 
-          className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#1a1d3a] via-[#252847] to-[#1a1d3a] p-6 shadow-2xl"
-          style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.1)' }}
+          className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-primary via-primary-glow to-secondary p-6 shadow-2xl"
+          style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.2)' }}
         >
           {/* Animated gradient orbs */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
           
           {/* Top Bar */}
           <div className="relative z-10 flex items-center justify-between mb-6">
-            {/* Avatar with online status */}
-            <div className="relative">
-              <Avatar className="h-12 w-12 border-2 border-white/20 shadow-xl">
-                <AvatarFallback className="bg-gradient-to-br from-primary via-primary-glow to-secondary text-white font-bold text-lg">
-                  {userProfile?.first_name?.charAt(0) || 'S'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success rounded-full border-2 border-[#1a1d3a]" />
-            </div>
-
-            {/* App Branding */}
-            <div className="flex-1 flex flex-col items-center">
+            {/* App Branding - Left */}
+            <div className="flex flex-col items-start">
               <h1 className="text-white font-black text-xl tracking-tight">EduRa</h1>
-              <p className="text-white/60 text-xs font-semibold">Learning Platform</p>
+              <p className="text-white/80 text-xs font-semibold">Learning Platform</p>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              <NotificationBell />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleLogout}
-                className="rounded-xl hover:bg-white/10 w-10 h-10 group text-white/80 hover:text-white"
-              >
-                <LogOut className="h-4 w-4 group-hover:scale-110 transition-transform" />
-              </Button>
+            {/* Welcome Section with Avatar - Right */}
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-white/70 text-xs font-medium">Welcome back</p>
+                <h2 className="text-white font-bold text-sm">
+                  {userProfile?.first_name || 'Student'}
+                </h2>
+              </div>
+              <div className="relative">
+                <Avatar className="h-12 w-12 border-2 border-white/30 shadow-xl">
+                  <AvatarFallback className="bg-white/20 backdrop-blur-sm text-white font-bold text-lg">
+                    {userProfile?.first_name?.charAt(0) || 'S'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success rounded-full border-2 border-white" />
+              </div>
             </div>
           </div>
 
-          {/* Welcome Section */}
-          <div className="relative z-10 mb-4">
-            <p className="text-white/60 text-xs font-semibold mb-0.5">Welcome back</p>
-            <h2 className="text-white font-black text-2xl">
-              {userProfile?.first_name || 'Student'} 👋
-            </h2>
+          {/* Actions Row */}
+          <div className="relative z-10 flex items-center justify-end gap-2 mb-4">
+            <NotificationBell />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="rounded-xl hover:bg-white/10 w-10 h-10 group text-white/80 hover:text-white"
+            >
+              <LogOut className="h-4 w-4 group-hover:scale-110 transition-transform" />
+            </Button>
           </div>
 
           {/* Tab Navigation */}
