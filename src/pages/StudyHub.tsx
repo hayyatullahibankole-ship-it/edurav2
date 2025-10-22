@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 import Layout from '@/components/Layout';
 import { SubjectButton } from '@/components/dashboard/SubjectButton';
 import { useIsMobile } from '@/hooks/use-mobile';
+import WhatsAppButton from '@/components/WhatsAppButton';
+import { AIAssistant } from '@/components/AIAssistant';
 
 interface Subject {
   id: string;
@@ -154,9 +156,10 @@ if (accessDenied) {
   );
 }
 
-  // Mobile view
-  if (isMobile) {
-    return (
+// Mobile view
+if (isMobile) {
+  return (
+    <>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-24">
         {/* Header */}
         <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 pb-8">
@@ -245,8 +248,11 @@ if (accessDenied) {
           </div>
         )}
       </div>
-    );
-  }
+      <WhatsAppButton />
+      <AIAssistant />
+    </>
+  );
+}
 
   // Desktop view
   return (

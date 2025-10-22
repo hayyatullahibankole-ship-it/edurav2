@@ -293,7 +293,7 @@ const response = await fetch(
 
 if (!isOpen) {
     return (
-      <div className={`fixed z-50 ${isMobile ? 'bottom-36 right-5' : 'bottom-8 right-8'} group/ai-fab`}>
+      <div className={`fixed z-50 ${isMobile ? 'bottom-44 right-5' : 'bottom-8 right-8'} group/ai-fab`}>
         {/* Main AI Button */}
         <button
           onClick={() => setIsOpen(true)}
