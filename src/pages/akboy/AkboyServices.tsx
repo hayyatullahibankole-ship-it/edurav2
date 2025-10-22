@@ -47,7 +47,7 @@ export default function AkboyServices() {
   return (
     <AkboyLayout>
       {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#075E54] via-[#0A8A74] to-[#075E54]">
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-900 via-fuchsia-900 to-purple-900">
         <div className="absolute inset-0 opacity-10" style={{
           backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
         }}></div>
@@ -65,7 +65,7 @@ export default function AkboyServices() {
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="text-center py-20">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#075E54]"></div>
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-8">
@@ -77,7 +77,7 @@ export default function AkboyServices() {
                 return (
                   <Card 
                     key={service.id}
-                    className="overflow-hidden hover:shadow-2xl transition-all duration-500 group border-2 border-transparent hover:border-[#A8E6A1]"
+                    className="overflow-hidden hover:shadow-2xl transition-all duration-500 group border-2 border-transparent hover:border-purple-300"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <div className="relative h-64 overflow-hidden">
