@@ -34,6 +34,7 @@ import NotFound from "./pages/NotFound";
 import AkboyHome from "./pages/akboy/AkboyHome";
 import AkboyContact from "./pages/akboy/AkboyContact";
 import AkboyBlog from "./pages/akboy/AkboyBlog";
+import AkboyBlogPost from "./pages/akboy/AkboyBlogPost";
 import AkboyAbout from "./pages/akboy/AkboyAbout";
 import AkboyServices from "./pages/akboy/AkboyServices";
 import AkboyPortfolio from "./pages/akboy/AkboyPortfolio";
@@ -221,7 +222,7 @@ const AppRoutes = () => {
             } />
             {/* Blog Routes */}
             <Route path="/blog" element={<AkboyBlog />} />
-            <Route path="/blog/:slug" element={<AkboyBlog />} />
+            <Route path="/blog/:slug" element={<AkboyBlogPost />} />
             <Route path="/terms" element={<Layout><Terms /></Layout>} />
             <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
             
