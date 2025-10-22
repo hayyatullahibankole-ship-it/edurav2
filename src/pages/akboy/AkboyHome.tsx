@@ -3,12 +3,13 @@ import { Link } from "react-router-dom";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpen, Code, Palette, Users, ArrowRight, CheckCircle2, Sparkles, Trophy, Target } from "lucide-react";
+import { BookOpen, Code, Palette, Users, ArrowRight, CheckCircle2, Sparkles, Trophy, Target, Zap, Star } from "lucide-react";
 import hero1 from "@/assets/akboy-hero-1.jpg";
 import hero2 from "@/assets/akboy-hero-2.jpg";
 import hero3 from "@/assets/akboy-hero-3.jpg";
 import hero4 from "@/assets/akboy-hero-4.jpg";
-import eduraMockup from "@/assets/edura-mobile-mockup.png";
+import eduraPhone1 from "@/assets/edura-phone-1.png";
+import eduraPhone2 from "@/assets/edura-phone-2.png";
 
 export default function AkboyHome() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -176,103 +177,140 @@ export default function AkboyHome() {
       </section>
 
       {/* Featured Project - Edura */}
-      <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600 overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-emerald-300/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-          <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-teal-300/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+      <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-50 via-white to-teal-50 overflow-hidden">
+        {/* Decorative Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-200/30 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-teal-200/30 rounded-full blur-3xl"></div>
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-16 animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-100 rounded-full text-emerald-800 font-semibold mb-6">
+              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 animate-pulse" />
+              Featured Project
+            </div>
+            <h2 className="text-5xl md:text-6xl font-extrabold text-foreground mb-6">
+              Meet <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Edura</span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Africa's most advanced CBT platform revolutionizing exam preparation with AI-powered learning
+            </p>
+          </div>
+
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Content */}
-            <div className="text-white space-y-8 animate-fade-in">
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/15 backdrop-blur-md rounded-full text-sm font-bold border border-white/20 shadow-lg">
-                <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
-                Featured Project
-              </div>
-              
-              <div className="space-y-6">
-                <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight">
-                  Meet Edura:
-                  <span className="block bg-gradient-to-r from-yellow-200 via-white to-emerald-100 bg-clip-text text-transparent mt-2">
-                    The Future of Education
-                  </span>
-                </h2>
-                
-                <p className="text-xl md:text-2xl text-emerald-50 leading-relaxed font-light">
-                  A comprehensive educational platform designed to revolutionize learning. From JAMB preparation to university studies, Edura provides students with the tools they need to succeed.
-                </p>
-              </div>
-
-              <div className="space-y-4 pt-4">
+            <div className="space-y-8 animate-fade-in">
+              <div className="grid grid-cols-2 gap-4">
                 {[
-                  { icon: "🎯", text: "Interactive CBT practice with 10,000+ questions" },
-                  { icon: "🤖", text: "AI-powered personalized study recommendations" },
-                  { icon: "📊", text: "Real-time performance analytics & insights" },
-                  { icon: "📱", text: "Offline mode for learning anywhere, anytime" }
-                ].map((feature, index) => (
-                  <div 
-                    key={index} 
-                    className="flex items-center gap-4 p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 hover:scale-105 transition-all duration-300 group"
-                  >
-                    <div className="text-3xl group-hover:scale-110 transition-transform">{feature.icon}</div>
-                    <span className="text-lg font-medium text-white">{feature.text}</span>
+                  { icon: "🎯", label: "10,000+", sublabel: "Questions" },
+                  { icon: "🤖", label: "AI-Powered", sublabel: "Learning" },
+                  { icon: "📊", label: "Real-Time", sublabel: "Analytics" },
+                  { icon: "📱", label: "Offline", sublabel: "Mode" }
+                ].map((stat, i) => (
+                  <div key={i} className="bg-white p-6 rounded-2xl shadow-lg border-2 border-emerald-100 hover:border-emerald-300 hover:shadow-xl transition-all group">
+                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{stat.icon}</div>
+                    <div className="text-2xl font-bold text-emerald-600 mb-1">{stat.label}</div>
+                    <div className="text-sm text-muted-foreground font-medium">{stat.sublabel}</div>
                   </div>
                 ))}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-6">
+              <Card className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200">
+                <div className="space-y-4">
+                  {[
+                    "Comprehensive JAMB, WAEC & NECO preparation",
+                    "Intelligent performance tracking & insights",
+                    "Practice anywhere with offline functionality",
+                    "Personalized study recommendations"
+                  ].map((feature, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                        <CheckCircle2 className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-foreground font-medium">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   asChild 
                   size="lg" 
-                  className="bg-white text-emerald-900 hover:bg-yellow-50 text-lg px-10 py-7 h-auto font-bold shadow-2xl hover:shadow-yellow-500/20 hover:scale-105 transition-all rounded-2xl"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-lg px-8 py-6 h-auto font-bold shadow-xl hover:shadow-2xl transition-all rounded-2xl"
                 >
                   <Link to="/">
+                    <Zap className="mr-2 w-5 h-5" />
                     Visit Edura
-                    <ArrowRight className="ml-2 w-6 h-6" />
+                    <ArrowRight className="ml-2 w-5 h-5" />
                   </Link>
                 </Button>
-                <div className="flex items-center gap-8">
-                  <div className="text-center">
-                    <div className="text-4xl font-extrabold text-white mb-1">10K+</div>
-                    <div className="text-sm text-emerald-100">Active Users</div>
-                  </div>
-                  <div className="h-12 w-px bg-white/30"></div>
-                  <div className="text-center">
-                    <div className="text-4xl font-extrabold text-white mb-1">95%</div>
-                    <div className="text-sm text-emerald-100">Success Rate</div>
-                  </div>
+                <Button 
+                  asChild 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 text-lg px-8 py-6 h-auto font-semibold rounded-2xl"
+                >
+                  <Link to="/demo">Try Demo</Link>
+                </Button>
+              </div>
+
+              {/* Stats */}
+              <div className="flex items-center gap-8 pt-4">
+                <div>
+                  <div className="text-4xl font-extrabold text-emerald-600">10K+</div>
+                  <div className="text-sm text-muted-foreground">Active Users</div>
+                </div>
+                <div className="h-12 w-px bg-emerald-200"></div>
+                <div>
+                  <div className="text-4xl font-extrabold text-emerald-600">95%</div>
+                  <div className="text-sm text-muted-foreground">Success Rate</div>
+                </div>
+                <div className="h-12 w-px bg-emerald-200"></div>
+                <div>
+                  <div className="text-4xl font-extrabold text-emerald-600">4.9★</div>
+                  <div className="text-sm text-muted-foreground">User Rating</div>
                 </div>
               </div>
             </div>
 
-            {/* Phone Mockup */}
-            <div className="relative animate-fade-in lg:order-last order-first">
-              <div className="absolute -inset-8 bg-gradient-to-r from-yellow-300/30 via-white/30 to-emerald-300/30 rounded-[4rem] blur-3xl animate-pulse"></div>
-              <div className="relative">
-                <div className="absolute -inset-4 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-[3rem] blur-2xl opacity-30"></div>
+            {/* Phone Mockups */}
+            <div className="relative animate-fade-in h-[600px] lg:h-[700px]">
+              {/* Background Glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-300/20 to-teal-300/20 rounded-[3rem] blur-3xl"></div>
+              
+              {/* Phone 1 - Front */}
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-64 z-20 hover:scale-105 transition-transform duration-300">
                 <img 
-                  src={eduraMockup}
-                  alt="Edura Mobile App Dashboard"
-                  className="relative w-full max-w-lg mx-auto drop-shadow-2xl hover:scale-105 transition-transform duration-700 animate-float"
+                  src={eduraPhone1}
+                  alt="Edura App Dashboard"
+                  className="w-full drop-shadow-2xl animate-float"
                 />
               </div>
-              
-              {/* Floating Stats */}
-              <div className="absolute -top-6 -left-6 bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl animate-float hidden lg:block">
-                <div className="text-4xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1">
-                  98%
-                </div>
-                <div className="text-sm font-semibold text-gray-600">Pass Rate</div>
+
+              {/* Phone 2 - Angled */}
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-64 z-10 hover:scale-105 transition-transform duration-300" style={{animationDelay: '1s'}}>
+                <img 
+                  src={eduraPhone2}
+                  alt="Edura App Analytics"
+                  className="w-full drop-shadow-2xl animate-float"
+                />
+              </div>
+
+              {/* Floating Elements */}
+              <div className="absolute top-10 right-10 bg-white p-4 rounded-2xl shadow-xl animate-float hidden lg:block z-30">
+                <div className="text-3xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">98%</div>
+                <div className="text-xs text-muted-foreground font-semibold">Pass Rate</div>
               </div>
               
-              <div className="absolute -bottom-6 -right-6 bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl animate-float hidden lg:block" style={{animationDelay: '1s'}}>
-                <div className="text-4xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1">
-                  24/7
+              <div className="absolute bottom-10 left-10 bg-white p-4 rounded-2xl shadow-xl animate-float hidden lg:block z-30" style={{animationDelay: '0.5s'}}>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs font-semibold">Live Now</span>
                 </div>
-                <div className="text-sm font-semibold text-gray-600">Available</div>
+                <div className="text-xs text-muted-foreground">24/7 Available</div>
               </div>
             </div>
           </div>
