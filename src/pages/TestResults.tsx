@@ -116,7 +116,7 @@ export default function TestResults() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 relative pb-24">
+    <div className="min-h-screen isolate bg-gradient-to-br from-primary/5 via-background to-secondary/10 relative pb-24">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
         <div className="absolute top-20 -right-20 w-80 h-80 bg-gradient-to-br from-primary/20 to-primary-glow/20 rounded-full blur-3xl animate-float" />
@@ -284,7 +284,7 @@ export default function TestResults() {
         )}
 
         {/* Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="relative z-20 grid grid-cols-1 md:grid-cols-3 gap-4">
           <Button
             onClick={() => navigate(`/answer-review?attempt=${attemptId}`)}
             size="lg"
