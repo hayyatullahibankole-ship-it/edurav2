@@ -314,20 +314,11 @@ export const useCBTExam = (attemptId: string | null) => {
         navigate(`/results?attempt=${attemptId}`);
       }, 500);
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Submission error:', error);
-      
-      // More detailed error message
-      let errorMessage = 'Failed to submit exam. Please try again.';
-      if (error?.message) {
-        errorMessage = error.message;
-      } else if (error?.code === 'PGRST301') {
-        errorMessage = 'Session expired. Please log in again.';
-      }
-      
       toast({
         title: 'Submission Failed',
-        description: errorMessage,
+        description: 'Failed to submit exam. Please try again.',
         variant: 'destructive'
       });
       setSubmitting(false);
