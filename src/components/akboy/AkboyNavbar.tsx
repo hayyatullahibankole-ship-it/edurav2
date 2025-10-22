@@ -20,22 +20,22 @@ export function AkboyNavbar() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-purple-100 shadow-lg shadow-purple-100/50">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-emerald-100 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link to="/akboy" className="flex items-center space-x-3 group">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-2xl blur-md group-hover:blur-lg transition-all"></div>
-              <div className="relative w-14 h-14 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-2xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl blur-md group-hover:blur-lg transition-all"></div>
+              <div className="relative w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-xl">
                 <Sparkles className="w-7 h-7 text-white" />
               </div>
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-purple-900 to-fuchsia-800 bg-clip-text text-transparent leading-tight font-poppins">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent leading-tight">
                 AKBOY Creative Hub
               </h1>
-              <p className="text-xs text-gray-600 font-lato">Innovation & Excellence</p>
+              <p className="text-xs text-gray-600">Innovation & Excellence</p>
             </div>
           </Link>
 
@@ -47,8 +47,8 @@ export function AkboyNavbar() {
                 to={link.path}
                 className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                   isActive(link.path)
-                    ? "bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-lg shadow-purple-500/30"
-                    : "text-gray-700 hover:bg-purple-50 hover:text-purple-900"
+                    ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg"
+                    : "text-gray-700 hover:bg-emerald-50 hover:text-emerald-700"
                 }`}
               >
                 {link.name}
@@ -60,7 +60,7 @@ export function AkboyNavbar() {
           <div className="hidden lg:flex items-center space-x-4">
             <Button
               asChild
-              className="bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-600 hover:to-purple-700 text-white font-bold shadow-lg shadow-purple-500/30 hover:shadow-xl hover:scale-105 transition-all rounded-xl border-0"
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all rounded-xl"
             >
               <Link to="/akboy/contact">Get Started</Link>
             </Button>
@@ -69,7 +69,7 @@ export function AkboyNavbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-2.5 rounded-xl text-purple-900 hover:bg-purple-50 transition-colors"
+            className="lg:hidden p-2.5 rounded-xl text-emerald-700 hover:bg-emerald-50 transition-colors"
           >
             {isOpen ? <X size={26} /> : <Menu size={26} />}
           </button>
@@ -77,7 +77,7 @@ export function AkboyNavbar() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="lg:hidden py-6 border-t border-purple-100 animate-fade-in">
+          <div className="lg:hidden py-6 border-t border-emerald-100 animate-fade-in">
             <div className="flex flex-col space-y-3">
               {navLinks.map((link) => (
                 <Link
@@ -86,8 +86,8 @@ export function AkboyNavbar() {
                   onClick={() => setIsOpen(false)}
                   className={`px-5 py-3.5 rounded-xl text-base font-semibold transition-all ${
                     isActive(link.path)
-                      ? "bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-lg"
-                      : "text-gray-700 hover:bg-purple-50"
+                      ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg"
+                      : "text-gray-700 hover:bg-emerald-50"
                   }`}
                 >
                   {link.name}
@@ -95,7 +95,7 @@ export function AkboyNavbar() {
               ))}
               <Button
                 asChild
-                className="bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-600 hover:to-purple-700 text-white font-bold shadow-lg mt-4 rounded-xl border-0"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold shadow-lg mt-4 rounded-xl"
               >
                 <Link to="/akboy/contact" onClick={() => setIsOpen(false)}>
                   Get Started
