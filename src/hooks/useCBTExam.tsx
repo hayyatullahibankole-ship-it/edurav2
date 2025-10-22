@@ -287,10 +287,8 @@ export const useCBTExam = (attemptId: string | null) => {
           attempt_id: attemptId,
           question_id: question.id,
           answer: originalIndex,
-          is_correct: null, // Will be validated server-side
-          time_spent_seconds: timePerQ,
           answered_at: new Date().toISOString()
-        };
+        } as any;
       });
 
       // Submit all answers immediately
