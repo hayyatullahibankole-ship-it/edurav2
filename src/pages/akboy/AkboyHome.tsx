@@ -1,12 +1,26 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BookOpen, Code, Palette, Users, ArrowRight, CheckCircle2, Sparkles, Trophy, Target } from "lucide-react";
-import heroImage from "@/assets/akboy-hero-gradient.jpg";
+import hero1 from "@/assets/akboy-hero-1.jpg";
+import hero2 from "@/assets/akboy-hero-2.jpg";
+import hero3 from "@/assets/akboy-hero-3.jpg";
+import hero4 from "@/assets/akboy-hero-4.jpg";
 import eduraMockup from "@/assets/edura-mobile-mockup.png";
 
 export default function AkboyHome() {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const heroImages = [hero1, hero2, hero3, hero4];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+    }, 5000); // Change image every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
   const services = [
     {
       icon: BookOpen,
@@ -44,13 +58,39 @@ export default function AkboyHome() {
     <AkboyLayout>
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+        {/* Image Carousel Background */}
         <div className="absolute inset-0 z-0">
-          <img 
-            src={heroImage}
-            alt="AKBOY Creative Hub"
-            className="w-full h-full object-cover"
-          />
+          {heroImages.map((image, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-1000 ${
+                index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <img 
+                src={image}
+                alt={`AKBOY Creative Hub ${index + 1}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/95 via-teal-900/90 to-green-900/95"></div>
+          
+          {/* Carousel Indicators */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-3 z-20">
+            {heroImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentImageIndex(index)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  index === currentImageIndex 
+                    ? 'w-12 bg-white' 
+                    : 'w-2 bg-white/50 hover:bg-white/70'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
