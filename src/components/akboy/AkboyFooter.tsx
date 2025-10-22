@@ -65,7 +65,7 @@ export function AkboyFooter() {
               <li><Link to="/akboy/services" className="text-white/80 hover:text-white transition-colors">Our Services</Link></li>
               <li><Link to="/akboy/portfolio" className="text-white/80 hover:text-white transition-colors">Portfolio</Link></li>
               <li><Link to="/akboy/events" className="text-white/80 hover:text-white transition-colors">Events & Programs</Link></li>
-              <li><Link to="/akboy/blog" className="text-white/80 hover:text-white transition-colors">Blog</Link></li>
+              <li><Link to="/blog" className="text-white/80 hover:text-white transition-colors">Blog</Link></li>
               <li><Link to="/akboy/contact" className="text-white/80 hover:text-white transition-colors">Contact Us</Link></li>
             </ul>
           </div>

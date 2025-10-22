@@ -149,7 +149,7 @@ export default function AkboyBlog() {
                       </div>
                     )}
                     <Link 
-                      to={`/akboy/blog/${post.slug || post.id}`}
+                      to={`/blog/${post.slug || post.id}`}
                       className="inline-flex items-center gap-2 text-[#075E54] font-semibold group-hover:gap-4 transition-all font-poppins"
                     >
                       Read More 

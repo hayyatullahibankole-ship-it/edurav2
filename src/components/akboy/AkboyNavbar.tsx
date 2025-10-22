@@ -13,7 +13,7 @@ export function AkboyNavbar() {
     { name: "Services", path: "/akboy/services" },
     { name: "Portfolio", path: "/akboy/portfolio" },
     { name: "Events", path: "/akboy/events" },
-    { name: "Blog", path: "/akboy/blog" },
+    { name: "Blog", path: "/blog" },
     { name: "Contact", path: "/akboy/contact" },
   ];
 

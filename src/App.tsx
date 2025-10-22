@@ -219,9 +219,9 @@ const AppRoutes = () => {
                 <LessonQuiz />
               </ProtectedRoute>
             } />
-            {/* Blog redirects to AKBOY */}
-            <Route path="/blog" element={<Navigate to="/akboy/blog" replace />} />
-            <Route path="/blog/:slug" element={<Navigate to="/akboy/blog/:slug" replace />} />
+            {/* Blog Routes */}
+            <Route path="/blog" element={<AkboyBlog />} />
+            <Route path="/blog/:slug" element={<AkboyBlog />} />
             <Route path="/terms" element={<Layout><Terms /></Layout>} />
             <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
             
@@ -232,8 +232,6 @@ const AppRoutes = () => {
             <Route path="/akboy/portfolio" element={<AkboyPortfolio />} />
             <Route path="/akboy/events" element={<AkboyEvents />} />
             <Route path="/akboy/contact" element={<AkboyContact />} />
-            <Route path="/akboy/blog" element={<AkboyBlog />} />
-            <Route path="/akboy/blog/:slug" element={<AkboyBlog />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<Layout><NotFound /></Layout>} />
