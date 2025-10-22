@@ -19,9 +19,15 @@ import BlogSection from "@/components/BlogSection";
 import Footer from "@/components/Footer";
 import ScheduleTestModal from "@/components/ScheduleTestModal";
 import { useAuth } from "@/hooks/useAuth";
+import { useInstalledApp } from "@/hooks/useInstalledApp";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Download } from "lucide-react";
 
 const Home = () => {
   const { user } = useAuth();
+  const { isInstalledApp } = useInstalledApp();
+  const isMobile = useIsMobile();
+  const isMobileWeb = isMobile && !isInstalledApp;
   const features = [
     {
       icon: <Target className="h-6 w-6" />,
@@ -95,7 +101,14 @@ const Home = () => {
               Join successful students who achieved their dream scores.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {user ? (
+              {isMobileWeb ? (
+                <Link to="/install-app">
+                  <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
+                    <Download className="mr-2 h-5 w-5" />
+                    Install App
+                  </Button>
+                </Link>
+              ) : user ? (
                 <ScheduleTestModal defaultExamType="jamb">
                   <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
                     Start JAMB Practice
@@ -158,7 +171,14 @@ const Home = () => {
                     Score out of 400
                   </div>
                 </div>
-                {user ? (
+                {isMobileWeb ? (
+                  <Link to="/install-app">
+                    <Button className="w-full" size="lg">
+                      <Download className="mr-2 h-5 w-5" />
+                      Install App
+                    </Button>
+                  </Link>
+                ) : user ? (
                   <ScheduleTestModal defaultExamType="jamb">
                     <Button className="w-full" size="lg">
                       Start JAMB Practice
@@ -201,7 +221,14 @@ const Home = () => {
                     A1-F9 grading system
                   </div>
                 </div>
-                {user ? (
+                {isMobileWeb ? (
+                  <Link to="/install-app">
+                    <Button className="w-full" size="lg" variant="secondary">
+                      <Download className="mr-2 h-5 w-5" />
+                      Install App
+                    </Button>
+                  </Link>
+                ) : user ? (
                   <ScheduleTestModal defaultExamType="waec">
                     <Button className="w-full" size="lg" variant="secondary">
                       Start WAEC Practice
@@ -334,10 +361,19 @@ const Home = () => {
               Start your journey to exam success today. Free trial available - no credit card required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/auth">
+              <Link to={isMobileWeb ? "/install-app" : "/auth"}>
                 <Button size="lg" variant="secondary">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  {isMobileWeb ? (
+                    <>
+                      <Download className="mr-2 h-5 w-5" />
+                      Install App
+                    </>
+                  ) : (
+                    <>
+                      Start Free Trial
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </>
+                  )}
                 </Button>
               </Link>
               <Link to="/payment">

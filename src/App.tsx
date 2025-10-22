@@ -16,6 +16,7 @@ import MobileSplash from "./pages/MobileSplash";
 import MobileOnboarding from "./pages/MobileOnboarding";
 import MobileHome from "./pages/MobileHome";
 import MobileWebLanding from "./pages/MobileWebLanding";
+import InstallApp from "./pages/InstallApp";
 import { useInstalledApp } from "./hooks/useInstalledApp";
 import { useIsMobile } from "./hooks/use-mobile";
 
@@ -85,11 +86,13 @@ const AppRoutes = () => {
       <Route 
         path="/" 
         element={
-          isMobileWeb ? <MobileWebLanding /> : 
           isInstalledApp ? <Navigate to="/mobile-splash" replace /> : 
           <Layout><Home /></Layout>
         } 
       />
+      
+      {/* Install App Page */}
+      <Route path="/install-app" element={<Layout><InstallApp /></Layout>} />
       
       {/* For testing mobile experience in web preview */}
       <Route path="/mobile-preview" element={<Navigate to="/mobile-splash" replace />} />
@@ -97,8 +100,7 @@ const AppRoutes = () => {
       <Route path="/auth" element={<Layout showNavbar={false}><Auth /></Layout>} />
       <Route path="/dashboard" element={
         <ProtectedRoute>
-          {isMobileWeb ? <MobileWebLanding /> : 
-           isInstalledApp ? <MobileHome /> : 
+          {isInstalledApp ? <MobileHome /> : 
            <Layout showNavbar={false}><Dashboard /></Layout>}
         </ProtectedRoute>
       } />

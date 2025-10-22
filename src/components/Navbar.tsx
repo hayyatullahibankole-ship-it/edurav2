@@ -1,14 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Menu, X } from "lucide-react";
+import { GraduationCap, Menu, X, Download } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import eduraLogo from "@/assets/edura-logo.png";
 import NotificationBell from "@/components/NotificationBell";
+import { useInstalledApp } from "@/hooks/useInstalledApp";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isAdmin } = useAuth();
+  const { isInstalledApp } = useInstalledApp();
+  const isMobile = useIsMobile();
+  const isMobileWeb = isMobile && !isInstalledApp;
 
   return (
     <nav className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
@@ -52,14 +57,32 @@ const Navbar = () => {
           {user ? (
             <div className="hidden md:flex items-center space-x-2">
               <NotificationBell />
-              <Link to="/dashboard">
-                <Button variant="ghost">Dashboard</Button>
+              <Link to={isMobileWeb ? "/install-app" : "/dashboard"}>
+                <Button variant="ghost">
+                  {isMobileWeb ? (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Install App
+                    </>
+                  ) : (
+                    'Dashboard'
+                  )}
+                </Button>
               </Link>
             </div>
           ) : (
             <div className="hidden md:flex items-center space-x-4">
-              <Link to="/auth">
-                <Button>Get Started</Button>
+              <Link to={isMobileWeb ? "/install-app" : "/auth"}>
+                <Button>
+                  {isMobileWeb ? (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Install App
+                    </>
+                  ) : (
+                    'Get Started'
+                  )}
+                </Button>
               </Link>
             </div>
           )}
@@ -136,14 +159,32 @@ const Navbar = () => {
               <div className="px-3 py-2 space-y-2">
                 {user ? (
                   <>
-                    <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full">Dashboard</Button>
+                    <Link to={isMobileWeb ? "/install-app" : "/dashboard"} onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full">
+                        {isMobileWeb ? (
+                          <>
+                            <Download className="h-4 w-4 mr-2" />
+                            Install App
+                          </>
+                        ) : (
+                          'Dashboard'
+                        )}
+                      </Button>
                     </Link>
                   </>
                 ) : (
                   <>
-                    <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                      <Button className="w-full">Get Started</Button>
+                    <Link to={isMobileWeb ? "/install-app" : "/auth"} onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full">
+                        {isMobileWeb ? (
+                          <>
+                            <Download className="h-4 w-4 mr-2" />
+                            Install App
+                          </>
+                        ) : (
+                          'Get Started'
+                        )}
+                      </Button>
                     </Link>
                   </>
                 )}
