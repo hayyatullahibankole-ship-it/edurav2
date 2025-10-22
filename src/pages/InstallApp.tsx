@@ -1,8 +1,50 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Download, Smartphone, CheckCircle } from 'lucide-react';
-import { PWAInstallPrompt } from '@/components/PWAInstallPrompt';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
 
 export default function InstallApp() {
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showManualInstructions, setShowManualInstructions] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    // Show manual instructions after 2 seconds if no prompt is available
+    const timer = setTimeout(() => {
+      setShowManualInstructions(true);
+    }, 2000);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) {
+      setShowManualInstructions(true);
+      return;
+    }
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 overflow-hidden relative">
       {/* Animated Background */}
@@ -34,11 +76,18 @@ export default function InstallApp() {
             <p className="text-white/90 text-lg font-semibold mb-8 max-w-2xl mx-auto">
               Get the full mobile app experience with offline access, faster loading, and push notifications for your exam preparation.
             </p>
+
+            {/* Install Button */}
+            <Button
+              onClick={handleInstall}
+              size="lg"
+              className="bg-white text-primary hover:bg-white/90 font-black text-lg px-8 py-6 h-auto shadow-2xl hover:scale-105 active:scale-95 transition-all"
+            >
+              <Download className="h-6 w-6 mr-2" strokeWidth={2.5} />
+              Install App Now
+            </Button>
           </div>
         </div>
-
-        {/* PWA Install Prompt */}
-        <PWAInstallPrompt />
 
         {/* Benefits */}
         <div className="space-y-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
@@ -72,28 +121,29 @@ export default function InstallApp() {
           ))}
         </div>
 
-        {/* Manual Instructions */}
-        <Card 
-          className="border-2 border-secondary/30 overflow-hidden shadow-xl animate-fade-in"
-          style={{ animationDelay: '0.2s' }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent" />
-          <CardContent className="p-8 relative z-10">
-            <h3 className="text-xl font-black mb-4 text-center">
-              Manual Installation
-            </h3>
-            <div className="space-y-4 text-sm">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">1</div>
-                <p className="font-semibold"><strong>iPhone/iPad:</strong> Tap the Share button (square with arrow), then scroll down and tap "Add to Home Screen"</p>
+        {/* Manual Instructions - Show after delay or if install not available */}
+        {showManualInstructions && (
+          <Card 
+            className="border-2 border-secondary/30 overflow-hidden shadow-xl animate-fade-in"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent" />
+            <CardContent className="p-8 relative z-10">
+              <h3 className="text-xl font-black mb-4 text-center">
+                Manual Installation
+              </h3>
+              <div className="space-y-4 text-sm">
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">1</div>
+                  <p className="font-semibold"><strong>iPhone/iPad:</strong> Tap the Share button (square with arrow), then scroll down and tap "Add to Home Screen"</p>
+                </div>
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">2</div>
+                  <p className="font-semibold"><strong>Android:</strong> Tap the menu (three dots), then tap "Add to Home screen" or "Install app"</p>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">2</div>
-                <p className="font-semibold"><strong>Android:</strong> Tap the menu (three dots), then tap "Add to Home screen" or "Install app"</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
