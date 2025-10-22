@@ -45,33 +45,34 @@ export default function StudyHub() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [topics, setTopics] = useState<StudyTopic[]>([]);
-  const [loading, setLoading] = useState(true);
+const [loading, setLoading] = useState(true);
+const [accessDenied, setAccessDenied] = useState(false);
 
-  useEffect(() => {
-    if (!subLoading && !canAccessPremium) {
-      toast.error('Study Hub is available for Premium and Pro subscribers only');
-      navigate('/payment');
-      return;
-    }
+useEffect(() => {
+  if (!subLoading && !canAccessPremium) {
+    setAccessDenied(true);
+    setLoading(false);
+    return;
+  }
 
-    if (canAccessPremium) {
-      fetchSubjects();
+  if (canAccessPremium) {
+    fetchSubjects();
 
-      // Subscribe to real-time updates
-      const topicsChannel = supabase
-        .channel('study-topics-updates')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'study_topics' }, () => {
-          if (selectedSubject) {
-            fetchTopics(selectedSubject);
-          }
-        })
-        .subscribe();
+    // Subscribe to real-time updates
+    const topicsChannel = supabase
+      .channel('study-topics-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'study_topics' }, () => {
+        if (selectedSubject) {
+          fetchTopics(selectedSubject);
+        }
+      })
+      .subscribe();
 
-      return () => {
-        supabase.removeChannel(topicsChannel);
-      };
-    }
-  }, [canAccessPremium, subLoading, navigate, selectedSubject]);
+    return () => {
+      supabase.removeChannel(topicsChannel);
+    };
+  }
+}, [canAccessPremium, subLoading, navigate, selectedSubject]);
 
   const fetchSubjects = async () => {
     try {
@@ -135,9 +136,23 @@ export default function StudyHub() {
     );
   }
 
-  if (!canAccessPremium) {
-    return null;
-  }
+if (accessDenied) {
+  return (
+    <Layout>
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="mx-auto max-w-md">
+          <Book className="h-12 w-12 mx-auto text-primary mb-4" />
+          <h1 className="text-2xl font-bold mb-2">Study Hub is a Premium feature</h1>
+          <p className="text-muted-foreground mb-6">Upgrade to access subjects, topics, and guided lessons.</p>
+          <div className="flex gap-3 justify-center">
+            <Button onClick={() => navigate('/payment')}>Go Premium</Button>
+            <Button variant="outline" onClick={() => navigate('/dashboard')}>Back</Button>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}
 
   // Mobile view
   if (isMobile) {

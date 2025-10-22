@@ -51,33 +51,34 @@ export default function ChallengeArena() {
   const [courseCategory, setCourseCategory] = useState<'science' | 'art' | 'management'>('science');
   const [userAttempts, setUserAttempts] = useState<Set<string>>(new Set());
   const [userStreak, setUserStreak] = useState(0);
-  const [userStats, setUserStats] = useState({ rank: 0, points: 0, achievements: 0 });
+const [userStats, setUserStats] = useState({ rank: 0, points: 0, achievements: 0 });
+const [accessDenied, setAccessDenied] = useState(false);
 
-  useEffect(() => {
-    if (!subLoading && !isEnterprise) {
-      toast.error('Challenge Arena is available for Pro subscribers only');
-      navigate('/payment');
-      return;
-    }
+useEffect(() => {
+  if (!subLoading && !isEnterprise) {
+    setAccessDenied(true);
+    setLoading(false);
+    return;
+  }
 
-    if (isEnterprise) {
-      fetchChallenges();
-      fetchLeaderboard();
-      fetchUserAttempts();
+  if (isEnterprise) {
+    fetchChallenges();
+    fetchLeaderboard();
+    fetchUserAttempts();
 
-      // Subscribe to real-time updates
-      const challengesChannel = supabase
-        .channel('challenges-updates')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, () => {
-          fetchChallenges();
-        })
-        .subscribe();
+    // Subscribe to real-time updates
+    const challengesChannel = supabase
+      .channel('challenges-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'challenges' }, () => {
+        fetchChallenges();
+      })
+      .subscribe();
 
-      return () => {
-        supabase.removeChannel(challengesChannel);
-      };
-    }
-  }, [isEnterprise, subLoading, selectedTab, courseCategory, navigate]);
+    return () => {
+      supabase.removeChannel(challengesChannel);
+    };
+  }
+}, [isEnterprise, subLoading, selectedTab, courseCategory]);
 
   const fetchUserAttempts = async () => {
     try {
@@ -164,9 +165,23 @@ export default function ChallengeArena() {
     );
   }
 
-  if (!isEnterprise) {
-    return null;
-  }
+if (accessDenied) {
+  return (
+    <Layout>
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="mx-auto max-w-md">
+          <Trophy className="h-12 w-12 mx-auto text-primary mb-4" />
+          <h1 className="text-2xl font-bold mb-2">Challenge Arena is a Pro feature</h1>
+          <p className="text-muted-foreground mb-6">Upgrade to access daily missions, competitions, and leaderboards.</p>
+          <div className="flex gap-3 justify-center">
+            <Button onClick={() => navigate('/payment')}>Go Premium</Button>
+            <Button variant="outline" onClick={() => navigate('/dashboard')}>Back</Button>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}
 
   // Modern Mobile Design
   if (isMobile) {
@@ -482,12 +497,158 @@ export default function ChallengeArena() {
     );
   }
 
-  // Desktop Layout
-  return (
-    <Layout>
-      <div className="container mx-auto px-4 py-4 sm:py-8">
-...
+// Desktop Layout
+return (
+  <Layout>
+    <div className="container mx-auto px-4 py-8 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <Trophy className="h-7 w-7 text-primary" />
+          Challenge Arena
+        </h1>
+        <Button variant="outline" onClick={() => navigate('/dashboard')} className="gap-2">
+          <ArrowLeft className="h-4 w-4" /> Back
+        </Button>
       </div>
-    </Layout>
-  );
+
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex gap-2">
+          {(['science','art','management'] as const).map((cat) => (
+            <Button
+              key={cat}
+              onClick={() => setCourseCategory(cat)}
+              variant={courseCategory === cat ? 'default' : 'outline'}
+              className="rounded-full px-6 capitalize"
+            >
+              {cat}
+            </Button>
+          ))}
+        </div>
+        <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+          <TabsList>
+            <TabsTrigger value="daily">Daily</TabsTrigger>
+            <TabsTrigger value="weekly">Weekly</TabsTrigger>
+            <TabsTrigger value="special">Special</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <div>
+        {challenges.length === 0 ? (
+          <Card>
+            <CardContent className="py-16 text-center text-muted-foreground">
+              No {selectedTab} challenges available
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {challenges.map((challenge, index) => (
+              <Card 
+                key={challenge.id}
+                className="shadow-lg hover:shadow-xl transition-all overflow-hidden border-l-4"
+                style={{
+                  borderLeftColor: 
+                    index === 0 ? 'hsl(var(--primary))' :
+                    index === 1 ? '#fbbf24' :
+                    index === 2 ? '#ec4899' : 'hsl(var(--primary))'
+                }}
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className={`${index === 0 ? 'bg-primary/20' : index === 1 ? 'bg-yellow-500/20' : index === 2 ? 'bg-pink-500/20' : 'bg-primary/20'} p-3 rounded-2xl`}>
+                      {index === 0 ? <Zap className="h-6 w-6 text-primary" /> :
+                       index === 1 ? <Star className="h-6 w-6 text-yellow-600" /> :
+                       index === 2 ? <Target className="h-6 w-6 text-pink-600" /> :
+                       <Trophy className="h-6 w-6 text-primary" />}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-bold pr-2 line-clamp-2">{challenge.title}</h3>
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                          +{challenge.points_reward} XP
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-3">{challenge.description}</p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
+                        <div className="flex items-center gap-1">
+                          <Target className="h-3 w-3" />
+                          {challenge.question_count}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {challenge.duration_minutes}m
+                        </div>
+                        <div>Level {challenge.difficulty_level}</div>
+                      </div>
+                      {challenge.isCompleted ? (
+                        <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                          <div className="h-2 w-2 rounded-full bg-green-600 dark:bg-green-400" />
+                          Completed
+                        </div>
+                      ) : (
+                        <Progress value={0} className="h-1.5" />
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => navigate(`/challenge/${challenge.id}`)}
+                    disabled={challenge.isCompleted}
+                    className="w-full"
+                    variant={challenge.isCompleted ? 'secondary' : 'default'}
+                  >
+                    {challenge.isCompleted ? '✓ Completed' : 'Start Challenge'}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
+          <Crown className="h-5 w-5 text-yellow-600" />
+          Leaderboard
+        </h2>
+        <Card>
+          <CardContent className="p-4">
+            {leaderboard.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground">No rankings yet</div>
+            ) : (
+              <div className="space-y-3">
+                {leaderboard.slice(0, 10).map((entry, index) => (
+                  <div key={entry.user_id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                    <div className={`${index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white' : index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-white' : index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' : 'bg-muted text-muted-foreground'} w-10 h-10 rounded-full flex items-center justify-center font-bold`}>
+                      {index + 1}
+                    </div>
+                    <Avatar className="h-10 w-10 border-2 border-primary/20">
+                      <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                        {entry.users?.first_name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{entry.users?.first_name} {entry.users?.last_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(entry.completed_at), { addSuffix: true })}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="flex items-center gap-1">
+                        <Zap className="h-3 w-3 text-yellow-600" />
+                        <p className="font-bold">{entry.score}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {Math.floor(entry.time_taken_seconds / 60)}:{(entry.time_taken_seconds % 60).toString().padStart(2, '0')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  </Layout>
+);
 }
