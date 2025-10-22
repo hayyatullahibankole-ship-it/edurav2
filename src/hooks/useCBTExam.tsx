@@ -266,37 +266,25 @@ export const useCBTExam = (attemptId: string | null) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Prepare answers for bulk submission (without validation first)
-      const answersToSubmit = questions.map(question => {
+      // Prepare only answered questions to reduce writes and avoid null payloads
+      const answersToSubmit = questions.flatMap(question => {
         const displayIndex = answers[question.id];
-        let originalIndex: number | null = null;
-        
-        if (displayIndex !== undefined) {
-          originalIndex = question.originalIndexMap[displayIndex];
-        }
-
-        // Normalize and cap time to prevent numeric overflow
-        const totalSecondsNormalized = Number.isFinite(timeSpentSeconds)
-          ? (timeSpentSeconds > 100000 ? Math.floor(timeSpentSeconds / 1000) : Math.floor(timeSpentSeconds))
-          : 0;
-        const perQuestion = Math.max(0, Math.floor(totalSecondsNormalized / Math.max(questions.length, 1)));
-        const SAFE_MAX_SMALLINT = 32760; // fits SMALLINT
-        const timePerQ = Math.min(perQuestion, SAFE_MAX_SMALLINT);
-
-        return {
+        if (displayIndex === undefined) return [] as any[];
+        const originalIndex = question.originalIndexMap[displayIndex] ?? null;
+        return [{
           attempt_id: attemptId,
           question_id: question.id,
-          answer: originalIndex,
-          answered_at: new Date().toISOString()
-        } as any;
+          answer: originalIndex
+        }];
       });
 
-      // Submit all answers immediately
-      const { error: answersError } = await supabase
-        .from('attempt_answers')
-        .upsert(answersToSubmit, { onConflict: 'attempt_id,question_id' });
-
-      if (answersError) throw answersError;
+      // Submit answers if any were provided
+      if (answersToSubmit.length > 0) {
+        const { error: answersError } = await supabase
+          .from('attempt_answers')
+          .upsert(answersToSubmit, { onConflict: 'attempt_id,question_id' });
+        if (answersError) throw answersError;
+      }
 
       // Update attempt status to SUBMITTED
       const { error: attemptError } = await supabase
