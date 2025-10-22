@@ -25,7 +25,7 @@ export default function AkboyBlog() {
       const response = await supabase
         .from("blog_posts")
         .select("*")
-        .eq("published", true)
+        .eq("is_published", true)
         .order("created_at", { ascending: false });
 
       if (response.error) throw response.error;

@@ -361,4 +361,10 @@ All colors MUST be HSL for consistency across light/dark modes.
     background-clip: text;
     animation: gradient-shift 3s ease infinite;
   }
+
+  /* AKBOY gradient animation */
+  .animate-gradient {
+    background-size: 200% auto;
+    animation: gradient 8s linear infinite;
+  }
 }
