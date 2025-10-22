@@ -151,7 +151,7 @@ export default function TestResults() {
           className="border-2 border-primary/30 overflow-hidden shadow-2xl"
           style={{ boxShadow: '0 20px 60px rgba(0, 123, 255, 0.2)' }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
           <CardContent className="pt-8 relative z-10">
             <div className="text-center">
               <div 
@@ -190,7 +190,7 @@ export default function TestResults() {
             className="border-2 border-success/30 overflow-hidden shadow-xl hover:scale-105 active:scale-95 transition-all"
             style={{ boxShadow: '0 15px 40px rgba(16, 185, 129, 0.2)' }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-success/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-br from-success/10 to-transparent pointer-events-none" />
             <CardHeader className="pb-3 relative z-10">
               <CardTitle className="text-sm font-bold text-muted-foreground flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-success/20">
@@ -210,7 +210,7 @@ export default function TestResults() {
             className="border-2 border-destructive/30 overflow-hidden shadow-xl hover:scale-105 active:scale-95 transition-all"
             style={{ boxShadow: '0 15px 40px rgba(239, 68, 68, 0.2)' }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-destructive/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-br from-destructive/10 to-transparent pointer-events-none" />
             <CardHeader className="pb-3 relative z-10">
               <CardTitle className="text-sm font-bold text-muted-foreground flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-destructive/20">
@@ -230,7 +230,7 @@ export default function TestResults() {
             className="border-2 border-warning/30 overflow-hidden shadow-xl hover:scale-105 active:scale-95 transition-all"
             style={{ boxShadow: '0 15px 40px rgba(251, 146, 60, 0.2)' }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-warning/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-br from-warning/10 to-transparent pointer-events-none" />
             <CardHeader className="pb-3 relative z-10">
               <CardTitle className="text-sm font-bold text-muted-foreground flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-warning/20">
@@ -253,7 +253,7 @@ export default function TestResults() {
             className="border-2 border-primary/20 overflow-hidden shadow-xl"
             style={{ boxShadow: '0 15px 40px rgba(0, 123, 255, 0.15)' }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
             <CardHeader className="relative z-10">
               <CardTitle className="text-xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 Subject Performance
@@ -284,7 +284,7 @@ export default function TestResults() {
         )}
 
         {/* Actions */}
-        <div className="relative z-20 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="relative z-50 grid grid-cols-1 md:grid-cols-3 gap-4 pointer-events-auto">
           <Button
             onClick={() => navigate(`/answer-review?attempt=${attemptId}`)}
             size="lg"

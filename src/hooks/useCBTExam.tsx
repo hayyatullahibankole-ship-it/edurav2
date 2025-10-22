@@ -267,15 +267,24 @@ export const useCBTExam = (attemptId: string | null) => {
       if (!user) throw new Error('Not authenticated');
 
       // Prepare only answered questions to reduce writes and avoid null payloads
-      const answersToSubmit = questions.flatMap(question => {
+      const answersToSubmit = questions.flatMap((question) => {
         const displayIndex = answers[question.id];
         if (displayIndex === undefined) return [] as any[];
-        const originalIndex = question.originalIndexMap[displayIndex] ?? null;
-        return [{
-          attempt_id: attemptId,
-          question_id: question.id,
-          answer: originalIndex
-        }];
+
+        const originalIndex = question.originalIndexMap[displayIndex];
+        // Guard against invalid indices or NaN which can break JSON casts server-side
+        if (!Number.isInteger(originalIndex) || originalIndex < 0 || originalIndex >= question.options.length) {
+          return [] as any[];
+        }
+
+        return [
+          {
+            attempt_id: attemptId,
+            question_id: question.id,
+            // Store as a JSON number; validator supports numbers and strings
+            answer: originalIndex as any,
+          },
+        ];
       });
 
       // Submit answers if any were provided
