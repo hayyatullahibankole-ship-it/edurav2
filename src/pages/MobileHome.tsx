@@ -329,7 +329,7 @@ const MobileHome = () => {
                 </h3>
               </div>
               <div 
-                className="p-5 rounded-[24px] bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl relative overflow-hidden group animate-float"
+                className="p-5 rounded-[24px] bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl relative overflow-hidden group"
                 style={{ boxShadow: '0 15px 40px rgba(0, 123, 255, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.3)' }}
               >
                 <Trophy className="h-9 w-9 text-white relative z-10 drop-shadow-lg" strokeWidth={2.5} />
@@ -359,13 +359,13 @@ const MobileHome = () => {
                 </div>
               </div>
               
-              <div className="relative group animate-bounce-slow">
+              <div className="relative group">
                 <div 
                   className="p-5 rounded-[24px] bg-gradient-to-br from-warning/30 via-warning/20 to-warning/10 backdrop-blur-xl border-2 border-warning/40 shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300"
                   style={{ boxShadow: 'inset 0 2px 10px rgba(251, 146, 60, 0.3), 0 15px 40px rgba(251, 146, 60, 0.4)' }}
                 >
                   <div className="flex items-center justify-center gap-1 mb-1">
-                    <Flame className="h-7 w-7 text-warning animate-pulse drop-shadow-lg" strokeWidth={2.5} />
+                    <Flame className="h-7 w-7 text-warning drop-shadow-lg" strokeWidth={2.5} />
                     <p className="text-4xl font-black text-warning drop-shadow-sm">{streak.current}</p>
                   </div>
                   <p className="text-[10px] text-warning font-black uppercase tracking-wider text-center">Streak</p>
