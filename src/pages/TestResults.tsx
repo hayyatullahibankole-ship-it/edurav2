@@ -128,8 +128,8 @@ export default function TestResults() {
         className="relative overflow-hidden rounded-b-[32px] bg-gradient-to-br from-primary via-primary-glow to-secondary p-6 shadow-2xl animate-fade-in"
         style={{ boxShadow: '0 20px 60px rgba(0, 123, 255, 0.4)' }}
       >
-        <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/30 rounded-full blur-2xl animate-pulse" />
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/30 rounded-full blur-2xl animate-pulse pointer-events-none" />
         
         <div className="relative z-10 max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-2">

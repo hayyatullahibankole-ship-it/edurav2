@@ -287,13 +287,18 @@ export const useCBTExam = (attemptId: string | null) => {
         ];
       });
 
+      console.log('Submitting answers:', { attemptId, totalQuestions: questions.length, answered: answersToSubmit.length, sample: answersToSubmit.slice(0,3) });
+
       // Submit answers if any were provided
       if (answersToSubmit.length > 0) {
         const { error: answersError } = await supabase
           .from('attempt_answers')
           .upsert(answersToSubmit, { onConflict: 'attempt_id,question_id' });
 
-        if (answersError) throw answersError;
+         if (answersError) {
+            console.error('answers upsert error:', answersError);
+            throw answersError;
+         }
       }
 
       // Update attempt status to SUBMITTED

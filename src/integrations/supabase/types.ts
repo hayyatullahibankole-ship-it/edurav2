@@ -3316,7 +3316,15 @@ export type Database = {
       }
       recompute_results_for_attempt: {
         Args: { attempt_uuid: string }
-        Returns: string
+        Returns: {
+          correct: number
+          percentage: number
+          scaled_score: number
+          total: number
+          unanswered: number
+          updated: boolean
+          wrong: number
+        }[]
       }
       record_login_attempt: {
         Args: {
