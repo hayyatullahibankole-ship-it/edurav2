@@ -291,42 +291,60 @@ const response = await fetch(
     }
   };
 
-  if (!isOpen) {
+if (!isOpen) {
     return (
-      <div className={`fixed z-50 ${isMobile ? 'bottom-36 right-5' : 'bottom-6 right-6'} group/fab`}>
-        <Button
+      <div className={`fixed z-50 ${isMobile ? 'bottom-36 right-5' : 'bottom-8 right-8'} group/ai-fab`}>
+        {/* Main AI Button */}
+        <button
           onClick={() => setIsOpen(true)}
-          className="w-16 h-16 rounded-[24px] shadow-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary hover:scale-110 transition-all duration-500 p-0 relative group overflow-hidden"
-          style={{ boxShadow: '0 20px 60px rgba(var(--primary), 0.4)' }}
+          className="relative flex items-center gap-3 px-5 py-4 rounded-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 hover:shadow-2xl transition-all duration-500 group overflow-hidden animate-fade-in hover:scale-105 active:scale-95"
+          style={{ 
+            boxShadow: '0 8px 32px rgba(139, 92, 246, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+          }}
         >
-          {/* Animated background orbs */}
-          <div className="absolute inset-0 rounded-[24px] bg-primary/60 blur-2xl animate-pulse" />
-          <div className="absolute inset-0 rounded-[24px] bg-primary-glow/40 blur-xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+          {/* Animated gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
           
           {/* Shimmer effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
           
-          {/* Morphing Icon */}
-          <div className="relative w-full h-full flex items-center justify-center">
-            <Sparkles className="h-8 w-8 text-white drop-shadow-lg transition-all duration-500" strokeWidth={2.5} />
+          {/* Animated particles */}
+          <div className="absolute inset-0 overflow-hidden rounded-full">
+            <div className="absolute w-2 h-2 bg-white/60 rounded-full top-2 left-4 animate-ping" style={{ animationDuration: '3s' }} />
+            <div className="absolute w-1.5 h-1.5 bg-white/40 rounded-full top-6 right-8 animate-ping" style={{ animationDuration: '4s', animationDelay: '1s' }} />
+            <div className="absolute w-1 h-1 bg-white/50 rounded-full bottom-3 left-12 animate-ping" style={{ animationDuration: '3.5s', animationDelay: '0.5s' }} />
           </div>
           
-          {/* Large AI Badge */}
-          <div className="absolute -top-1 -right-1 px-2.5 py-1 bg-white text-primary text-xs font-black rounded-xl shadow-2xl border-2 border-primary/30 animate-pulse">
-            AI
+          {/* Icon with glow */}
+          <div className="relative z-10">
+            <div className="absolute -inset-2 bg-white/20 rounded-full blur-lg animate-pulse" />
+            <Sparkles className="relative h-6 w-6 text-white drop-shadow-lg" strokeWidth={2.5} />
           </div>
           
-          {/* Pulsing dot indicator */}
-          <span className="absolute bottom-2 right-2 h-2.5 w-2.5 bg-green-400 rounded-full animate-ping" />
-          <span className="absolute bottom-2 right-2 h-2.5 w-2.5 bg-green-400 rounded-full" />
-        </Button>
-        
-        {/* Tooltip on hover - Desktop only */}
-        {!isMobile && (
-          <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-0 group-hover/fab:opacity-100 transition-opacity duration-200">
-            <div className="bg-foreground text-background px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap shadow-xl">
-              Ask AI Assistant ✨
+          {/* AI Chat Text - Desktop only */}
+          {!isMobile && (
+            <div className="relative z-10 flex flex-col items-start">
+              <span className="text-white font-black text-sm leading-none mb-0.5">AI Chat</span>
+              <span className="text-white/80 text-[10px] font-semibold leading-none">Ask me anything</span>
             </div>
+          )}
+          
+          {/* Active status indicator */}
+          <div className="relative z-10 flex items-center gap-1.5">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50" />
+            <span className="text-[10px] text-white/90 font-bold uppercase tracking-wider">Online</span>
+          </div>
+          
+          {/* Rotating border */}
+          <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-spin" style={{ animationDuration: '3s' }} />
+          </div>
+        </button>
+        
+        {/* Mobile AI badge */}
+        {isMobile && (
+          <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full shadow-lg animate-bounce" style={{ animationDuration: '2s' }}>
+            <span className="text-[10px] font-black text-white">AI</span>
           </div>
         )}
       </div>
