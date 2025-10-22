@@ -293,7 +293,7 @@ const response = await fetch(
 
   if (!isOpen) {
     return (
-      <div className={`fixed z-50 ${isMobile ? 'bottom-36 right-5' : 'bottom-6 right-6'}`}>
+      <div className={`fixed z-50 ${isMobile ? 'bottom-36 right-5' : 'bottom-6 right-6'} group/fab`}>
         <Button
           onClick={() => setIsOpen(true)}
           className="w-16 h-16 rounded-[24px] shadow-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary hover:scale-110 transition-all duration-500 p-0 relative group overflow-hidden"
@@ -308,18 +308,27 @@ const response = await fetch(
           
           {/* Morphing Icon */}
           <div className="relative w-full h-full flex items-center justify-center">
-            <IconComponent className="h-7 w-7 text-white drop-shadow-lg transition-all duration-500" strokeWidth={2.5} />
+            <Sparkles className="h-8 w-8 text-white drop-shadow-lg transition-all duration-500" strokeWidth={2.5} />
           </div>
           
-          {/* AI Badge */}
-          <div className="absolute -top-2 -right-2 px-2 py-1 bg-white text-primary text-[10px] font-black rounded-xl shadow-xl border-2 border-primary/20 animate-pulse">
+          {/* Large AI Badge */}
+          <div className="absolute -top-1 -right-1 px-2.5 py-1 bg-white text-primary text-xs font-black rounded-xl shadow-2xl border-2 border-primary/30 animate-pulse">
             AI
           </div>
           
           {/* Pulsing dot indicator */}
-          <span className="absolute bottom-2 right-2 h-2 w-2 bg-white rounded-full animate-ping" />
-          <span className="absolute bottom-2 right-2 h-2 w-2 bg-white rounded-full" />
+          <span className="absolute bottom-2 right-2 h-2.5 w-2.5 bg-green-400 rounded-full animate-ping" />
+          <span className="absolute bottom-2 right-2 h-2.5 w-2.5 bg-green-400 rounded-full" />
         </Button>
+        
+        {/* Tooltip on hover - Desktop only */}
+        {!isMobile && (
+          <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-0 group-hover/fab:opacity-100 transition-opacity duration-200">
+            <div className="bg-foreground text-background px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap shadow-xl">
+              Ask AI Assistant ✨
+            </div>
+          </div>
+        )}
       </div>
     );
   }

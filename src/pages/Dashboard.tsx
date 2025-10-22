@@ -558,53 +558,49 @@ const Dashboard = () => {
                     </h2>
                   </div>
                   <div className={`grid ${isMobile ? 'grid-cols-1 gap-2' : 'md:grid-cols-2 lg:grid-cols-3 gap-4'}`}>
-                    {/* Study Hub Card - Desktop/Tablet Only */}
-                    {!isInstalledApp && (
-                      <Link to="/study-hub" className="group">
-                        <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-primary/5 to-secondary/5">
-                          <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl" />
-                          <CardContent className="relative p-5">
-                            <div className="flex items-center gap-4 mb-2">
-                              <div className="p-2.5 bg-gradient-to-br from-primary to-secondary rounded-xl shadow-md group-hover:scale-105 transition-transform">
-                                <GraduationCap className="h-6 w-6 text-white" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
-                                  Study Hub
-                                  <Badge className="bg-primary/20 text-primary border-primary/30 text-xs px-2 py-0.5">Popular</Badge>
-                                </h3>
-                                <p className="text-sm text-muted-foreground line-clamp-1">Lessons & tutorials</p>
-                              </div>
-                              <ChevronRight className="h-5 w-5 text-primary group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                    {/* Study Hub Card */}
+                    <Link to="/study-hub" className="group">
+                      <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-primary/5 to-secondary/5">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl" />
+                        <CardContent className="relative p-5">
+                          <div className="flex items-center gap-4 mb-2">
+                            <div className="p-2.5 bg-gradient-to-br from-primary to-secondary rounded-xl shadow-md group-hover:scale-105 transition-transform">
+                              <GraduationCap className="h-6 w-6 text-white" />
                             </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    )}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
+                                Study Hub
+                                <Badge className="bg-primary/20 text-primary border-primary/30 text-xs px-2 py-0.5">Popular</Badge>
+                              </h3>
+                              <p className="text-sm text-muted-foreground line-clamp-1">Lessons & tutorials</p>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-primary group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
 
-                    {/* Ask Tutor Card - Desktop/Tablet Only */}
-                    {!isInstalledApp && (
-                      <Link to="/forum" className="group">
-                        <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-success/5 to-accent/5">
-                          <div className="absolute top-0 right-0 w-20 h-20 bg-success/10 rounded-full blur-2xl" />
-                          <CardContent className="relative p-5">
-                            <div className="flex items-center gap-4 mb-2">
-                              <div className="p-2.5 bg-gradient-to-br from-success to-accent rounded-xl shadow-md group-hover:scale-105 transition-transform">
-                                <MessageSquare className="h-6 w-6 text-white" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
-                                  Ask Tutor
-                                  <Badge className="bg-success/20 text-success border-success/30 text-xs px-2 py-0.5">24/7</Badge>
-                                </h3>
-                                <p className="text-sm text-muted-foreground line-clamp-1">Get instant help</p>
-                              </div>
-                              <ChevronRight className="h-5 w-5 text-success group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                    {/* Ask Tutor Card */}
+                    <Link to="/forum" className="group">
+                      <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-success/5 to-accent/5">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-success/10 rounded-full blur-2xl" />
+                        <CardContent className="relative p-5">
+                          <div className="flex items-center gap-4 mb-2">
+                            <div className="p-2.5 bg-gradient-to-br from-success to-accent rounded-xl shadow-md group-hover:scale-105 transition-transform">
+                              <MessageSquare className="h-6 w-6 text-white" />
                             </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    )}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
+                                Ask Tutor
+                                <Badge className="bg-success/20 text-success border-success/30 text-xs px-2 py-0.5">24/7</Badge>
+                              </h3>
+                              <p className="text-sm text-muted-foreground line-clamp-1">Get instant help</p>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-success group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
 
                     {/* Challenge Arena Card */}
                     <Link to="/challenge-arena" className="group">
