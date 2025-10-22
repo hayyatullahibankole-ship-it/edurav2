@@ -15,7 +15,9 @@ import Dashboard from "./pages/Dashboard";
 import MobileSplash from "./pages/MobileSplash";
 import MobileOnboarding from "./pages/MobileOnboarding";
 import MobileHome from "./pages/MobileHome";
+import MobileWebLanding from "./pages/MobileWebLanding";
 import { useInstalledApp } from "./hooks/useInstalledApp";
+import { useIsMobile } from "./hooks/use-mobile";
 
 import AdminPortal from "./pages/AdminPortal";
 import AdminLogin from "./pages/AdminLogin";
@@ -53,6 +55,7 @@ const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const { isInstalledApp } = useInstalledApp();
+  const isMobile = useIsMobile();
   useOfflineSync(); // Enable offline sync
 
   // Initialize offline storage and cleanup on mount
@@ -61,6 +64,9 @@ const AppRoutes = () => {
       offlineStorage.cleanupExpiredData();
     });
   }, []);
+
+  // Check if user is on mobile web (not installed PWA)
+  const isMobileWeb = isMobile && !isInstalledApp;
 
   return (
     <>
@@ -79,7 +85,9 @@ const AppRoutes = () => {
       <Route 
         path="/" 
         element={
-          isInstalledApp ? <Navigate to="/mobile-splash" replace /> : <Layout><Home /></Layout>
+          isMobileWeb ? <MobileWebLanding /> : 
+          isInstalledApp ? <Navigate to="/mobile-splash" replace /> : 
+          <Layout><Home /></Layout>
         } 
       />
       
@@ -89,7 +97,9 @@ const AppRoutes = () => {
       <Route path="/auth" element={<Layout showNavbar={false}><Auth /></Layout>} />
       <Route path="/dashboard" element={
         <ProtectedRoute>
-          {isInstalledApp ? <MobileHome /> : <Layout showNavbar={false}><Dashboard /></Layout>}
+          {isMobileWeb ? <MobileWebLanding /> : 
+           isInstalledApp ? <MobileHome /> : 
+           <Layout showNavbar={false}><Dashboard /></Layout>}
         </ProtectedRoute>
       } />
             <Route path="/admin/login" element={<AdminLogin />} />
