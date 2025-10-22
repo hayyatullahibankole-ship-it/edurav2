@@ -367,4 +367,109 @@ All colors MUST be HSL for consistency across light/dark modes.
     background-size: 200% auto;
     animation: gradient 8s linear infinite;
   }
+
+  /* Blog Post Content Styles */
+  .blog-post-content {
+    line-height: 2 !important;
+  }
+  
+  .blog-post-content p {
+    margin-bottom: 2rem;
+    line-height: 2;
+    color: #374151;
+  }
+  
+  .blog-post-content h1,
+  .blog-post-content h2,
+  .blog-post-content h3,
+  .blog-post-content h4,
+  .blog-post-content h5,
+  .blog-post-content h6 {
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: bold;
+    color: #1a1a1a;
+    line-height: 1.4;
+  }
+  
+  .blog-post-content h1 {
+    font-size: 2rem;
+  }
+  
+  .blog-post-content h2 {
+    font-size: 1.75rem;
+  }
+  
+  .blog-post-content h3 {
+    font-size: 1.5rem;
+  }
+  
+  .blog-post-content ul,
+  .blog-post-content ol {
+    margin-bottom: 2rem;
+    padding-left: 2rem;
+    line-height: 2;
+  }
+  
+  .blog-post-content li {
+    margin-bottom: 0.75rem;
+    line-height: 2;
+  }
+  
+  .blog-post-content blockquote {
+    border-left: 4px solid #10b981;
+    padding-left: 1.5rem;
+    margin: 2rem 0;
+    font-style: italic;
+    color: #6b7280;
+    line-height: 2;
+  }
+  
+  .blog-post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 2rem 0;
+  }
+  
+  .blog-post-content a {
+    color: #10b981;
+    text-decoration: underline;
+  }
+  
+  .blog-post-content a:hover {
+    color: #059669;
+  }
+  
+  .blog-post-content strong {
+    font-weight: 700;
+    color: #1f2937;
+  }
+  
+  .blog-post-content em {
+    font-style: italic;
+  }
+  
+  .blog-post-content code {
+    background-color: #f3f4f6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-size: 0.9em;
+  }
+  
+  .blog-post-content pre {
+    background-color: #1f2937;
+    color: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 2rem 0;
+  }
+  
+  .blog-post-content pre code {
+    background-color: transparent;
+    padding: 0;
+    color: #f9fafb;
+  }
 }

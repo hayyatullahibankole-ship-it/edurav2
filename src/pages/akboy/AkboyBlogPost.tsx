@@ -18,12 +18,22 @@ export default function AkboyBlogPost() {
 
   const fetchPost = async () => {
     try {
-      const { data, error } = await supabase
+      // First try to fetch by slug
+      let query = supabase
         .from("blog_posts")
         .select("*")
-        .or(`slug.eq.${slug},id.eq.${slug}`)
-        .eq("is_published", true)
-        .single();
+        .eq("is_published", true);
+
+      // Check if slug looks like a UUID (has dashes in UUID format)
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug || "");
+      
+      if (isUUID) {
+        query = query.eq("id", slug);
+      } else {
+        query = query.eq("slug", slug);
+      }
+
+      const { data, error } = await query.maybeSingle();
 
       if (error) throw error;
       setPost(data);
@@ -156,7 +166,7 @@ export default function AkboyBlogPost() {
           {/* Post Content */}
           <div className="prose prose-lg max-w-none">
             <div 
-              className="text-gray-700 leading-relaxed space-y-6 font-lato text-lg"
+              className="text-gray-700 font-lato text-lg blog-post-content"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
           </div>
