@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Button } from "@/components/ui/button";
@@ -109,8 +110,42 @@ export default function AkboyBlogPost() {
     );
   }
 
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const ogImage = post.featured_image_url || 'https://zqapbmllkywsuywpfava.supabase.co/storage/v1/object/public/resources/og-default.png';
+  const ogDescription = post.excerpt || post.content?.substring(0, 160).replace(/<[^>]*>/g, '') || 'Read this article on AKBOY Blog';
+
   return (
     <AkboyLayout>
+      <Helmet>
+        {/* Primary Meta Tags */}
+        <title>{post.title} | AKBOY Blog</title>
+        <meta name="title" content={post.title} />
+        <meta name="description" content={ogDescription} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={currentUrl} />
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={ogDescription} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:site_name" content="AKBOY Creative Hub" />
+        {post.author && <meta property="article:author" content={post.author} />}
+        {post.published_at && <meta property="article:published_time" content={post.published_at} />}
+        {post.category && <meta property="article:section" content={post.category} />}
+        {post.tags && post.tags.map((tag: string) => (
+          <meta key={tag} property="article:tag" content={tag} />
+        ))}
+        
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={currentUrl} />
+        <meta property="twitter:title" content={post.title} />
+        <meta property="twitter:description" content={ogDescription} />
+        <meta property="twitter:image" content={ogImage} />
+      </Helmet>
+
       {/* Floating Back Button */}
       <Link to="/blog" className="fixed top-24 left-4 z-50 animate-fade-in">
         <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xl hover:shadow-emerald-500/50 transition-all hover:scale-105 rounded-full px-6 py-6">
