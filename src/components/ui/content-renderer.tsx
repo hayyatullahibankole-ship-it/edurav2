@@ -53,59 +53,61 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
   const formatContent = (text: string): string => {
     if (!text) return '';
 
-    // Split content into lines and process them
-    const lines = text.split('\n');
+    // If content already has HTML tags, process it differently
+    if (text.includes('<p>') || text.includes('<h1>') || text.includes('<h2>') || text.includes('<div>')) {
+      // Content already has HTML formatting, just render math
+      return renderMathInline(text);
+    }
+
+    // Split content by double line breaks to create paragraphs
+    const paragraphs = text.split(/\n\n+/);
     let result = '';
-    let currentParagraph: string[] = [];
-    let inNumberedList = false;
     
-    const flushParagraph = () => {
-      if (currentParagraph.length > 0) {
-        const content = currentParagraph.join('\n');
-        result += `<div class="mb-12 text-base leading-relaxed">${renderMathInline(content)}</div>`;
-        currentParagraph = [];
-      }
-    };
-    
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      
-      // Empty line - flush current paragraph
-      if (!line) {
-        if (inNumberedList) {
-          inNumberedList = false;
-        }
-        flushParagraph();
+    for (const para of paragraphs) {
+      const trimmedPara = para.trim();
+      if (!trimmedPara) continue;
+
+      // Check if it's a heading (starts with # or is short and uppercase)
+      if (trimmedPara.startsWith('#')) {
+        const headingText = trimmedPara.replace(/^#+\s*/, '');
+        result += `<h3 class="text-xl font-bold mb-4 mt-8">${renderMathInline(headingText)}</h3>`;
         continue;
       }
+
+      // Check for numbered list items
+      const lines = trimmedPara.split('\n');
+      const hasNumberedList = lines.some(line => /^\d+\.\s+/.test(line.trim()));
       
-      // Check if line starts with a number followed by period (numbered list item)
-      const numberedMatch = line.match(/^(\d+)\.\s+(.+)$/);
-      
-      if (numberedMatch) {
-        // Flush any existing paragraph before starting numbered list
-        flushParagraph();
-        
-        const [, num, content] = numberedMatch;
-        result += `<div class="flex gap-3 mb-6">
-          <span class="font-semibold text-primary min-w-[32px]">${num}.</span>
-          <div class="flex-1 leading-relaxed">${renderMathInline(content)}</div>
-        </div>`;
-        inNumberedList = true;
-      } else if (inNumberedList && line && !line.match(/^\d+\./)) {
-        // Continuation of previous numbered item (indented content)
-        result += `<div class="ml-11 mb-3 leading-relaxed">${renderMathInline(line)}</div>`;
-      } else {
-        // Regular paragraph line
-        if (inNumberedList) {
-          inNumberedList = false;
+      if (hasNumberedList) {
+        // Process as numbered list
+        let inList = false;
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          const numberedMatch = trimmedLine.match(/^(\d+)\.\s+(.+)$/);
+          
+          if (numberedMatch) {
+            const [, num, content] = numberedMatch;
+            result += `<div class="flex gap-3 mb-4">
+              <span class="font-semibold text-primary min-w-[32px]">${num}.</span>
+              <div class="flex-1 leading-relaxed">${renderMathInline(content)}</div>
+            </div>`;
+            inList = true;
+          } else if (trimmedLine && inList) {
+            // Continuation line
+            result += `<div class="ml-11 mb-2 leading-relaxed">${renderMathInline(trimmedLine)}</div>`;
+          }
         }
-        currentParagraph.push(line);
+      } else {
+        // Regular paragraph - preserve internal line breaks as <br>
+        const htmlContent = trimmedPara
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line)
+          .join('<br class="my-2">');
+        
+        result += `<p class="mb-6 text-base leading-relaxed">${renderMathInline(htmlContent)}</p>`;
       }
     }
-    
-    // Flush any remaining paragraph
-    flushParagraph();
     
     return result;
   };
