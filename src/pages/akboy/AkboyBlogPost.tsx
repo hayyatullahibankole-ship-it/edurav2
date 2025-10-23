@@ -6,6 +6,34 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ArrowLeft, Tag, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+// Function to format plain text content into proper HTML
+const formatBlogContent = (content: string): string => {
+  // If content already has HTML tags, return as is
+  if (content.includes('<p>') || content.includes('<h1>') || content.includes('<h2>')) {
+    return content;
+  }
+  
+  // Split by double line breaks to create paragraphs
+  const paragraphs = content.split(/\n\n+/);
+  
+  return paragraphs
+    .map(para => {
+      // Skip empty paragraphs
+      if (!para.trim()) return '';
+      
+      // Check if it looks like a heading (short line, possibly with # or all caps)
+      if (para.length < 60 && (para.startsWith('#') || para === para.toUpperCase())) {
+        const cleanPara = para.replace(/^#+\s*/, '');
+        return `<h2>${cleanPara}</h2>`;
+      }
+      
+      // Wrap in paragraph tags
+      return `<p>${para.replace(/\n/g, '<br>')}</p>`;
+    })
+    .filter(p => p)
+    .join('');
+};
+
 export default function AkboyBlogPost() {
   const { slug } = useParams();
   const [post, setPost] = useState<any>(null);
@@ -164,10 +192,10 @@ export default function AkboyBlogPost() {
           )}
 
           {/* Post Content */}
-          <div className="prose prose-lg max-w-none">
+          <div className="prose prose-lg prose-emerald max-w-none">
             <div 
-              className="text-gray-700 font-lato text-lg blog-post-content"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              className="blog-post-content space-y-6"
+              dangerouslySetInnerHTML={{ __html: formatBlogContent(post.content) }}
             />
           </div>
 
