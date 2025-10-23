@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Book, Calculator, Atom, Beaker, Globe2, BookOpen, TrendingUp, Briefcase, ArrowLeft, Sparkles } from 'lucide-react';
+import { Book, Calculator, Atom, Beaker, Globe2, BookOpen, TrendingUp, Briefcase, ArrowLeft, Sparkles, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import Layout from '@/components/Layout';
 import { SubjectButton } from '@/components/dashboard/SubjectButton';
@@ -265,54 +265,127 @@ if (isMobile) {
   // Desktop view
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-4 sm:py-8">
-        <div className="mb-6">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/dashboard')}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Button>
-        </div>
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">📚 Study Companion Hub</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Master topics organized by subject</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+        <div className="container mx-auto px-4 py-8">
+          {/* Header Section */}
+          <div className="mb-8">
+            <Button
+              variant="ghost"
+              onClick={selectedSubject ? handleBackToSubjects : () => navigate('/dashboard')}
+              className="mb-6 gap-2 hover:bg-primary/10"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {selectedSubject ? 'Back to Subjects' : 'Back to Dashboard'}
+            </Button>
+            
+            <div className="flex items-center gap-4 mb-3">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10">
+                <Book className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold">Study Companion Hub</h1>
+                <p className="text-muted-foreground mt-1">
+                  {selectedSubject ? 'Select a topic to begin your learning journey' : 'Choose a subject to explore topics'}
+                </p>
+              </div>
+            </div>
+          </div>
 
-        {subjects.length === 0 ? (
-          <Card className="animate-fade-in">
-            <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12 px-4">
-              <Book className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4" />
-              <p className="text-sm sm:text-base text-muted-foreground text-center">No subjects available yet</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {subjects.map((subject) => {
-              const iconData = subjectIcons[subject.name] || { icon: Book, gradient: 'from-gray-500 to-gray-600' };
-              const Icon = iconData.icon;
-              return (
-                <Card
-                  key={subject.id}
-                  className="hover:shadow-xl transition-all cursor-pointer animate-fade-in group"
-                  onClick={() => {
-                    setSelectedSubject(subject.id);
-                    fetchTopics(subject.id);
-                  }}
-                >
-                  <CardContent className="p-6 text-center">
-                    <div className={`w-20 h-20 mx-auto mb-4 rounded-3xl bg-gradient-to-br ${iconData.gradient} flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-110`}>
-                      <Icon className="h-10 w-10 text-white" strokeWidth={2.5} />
-                    </div>
-                    <h3 className="font-bold text-lg">{subject.name}</h3>
+          {/* Subject Selection */}
+          {!selectedSubject && (
+            <>
+              {subjects.length === 0 ? (
+                <Card className="animate-fade-in">
+                  <CardContent className="flex flex-col items-center justify-center py-16 px-4">
+                    <Book className="h-20 w-20 text-muted-foreground mb-4 opacity-30" />
+                    <p className="text-lg text-muted-foreground text-center">No subjects available yet</p>
                   </CardContent>
                 </Card>
-              );
-            })}
-          </div>
-        )}
+              ) : (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {subjects.map((subject) => {
+                    const iconData = subjectIcons[subject.name] || { icon: Book, gradient: 'from-gray-500 to-gray-600' };
+                    const Icon = iconData.icon;
+                    return (
+                      <Card
+                        key={subject.id}
+                        className="group hover:shadow-2xl transition-all duration-300 cursor-pointer animate-fade-in border-2 hover:border-primary/20 overflow-hidden"
+                        onClick={() => handleSubjectClick(subject.id)}
+                      >
+                        <CardContent className="p-8 text-center relative">
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <div className={`w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br ${iconData.gradient} flex items-center justify-center shadow-xl transform transition-all group-hover:scale-110 group-hover:rotate-3 relative z-10`}>
+                            <Icon className="h-12 w-12 text-white" strokeWidth={2.5} />
+                          </div>
+                          <h3 className="font-bold text-xl relative z-10">{subject.name}</h3>
+                          <p className="text-sm text-muted-foreground mt-2 opacity-0 group-hover:opacity-100 transition-opacity relative z-10">
+                            Click to explore topics
+                          </p>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Topics List */}
+          {selectedSubject && (
+            <div className="animate-fade-in">
+              {topics.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-16 px-4">
+                    <Book className="h-20 w-20 text-muted-foreground mb-4 opacity-30" />
+                    <p className="text-lg text-muted-foreground text-center">No topics available for this subject yet</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {topics.map((topic, index) => (
+                    <Card
+                      key={topic.id}
+                      className="group hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 hover:border-primary/30 overflow-hidden"
+                      onClick={() => navigate(`/study-hub/topic/${topic.id}`)}
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-full transform translate-x-8 -translate-y-8"></div>
+                      <CardContent className="p-6 relative">
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 group-hover:scale-110 transition-transform">
+                            <BookOpen className="h-6 w-6 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-bold text-xl mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                              {topic.title}
+                            </h3>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                                Level {topic.difficulty_level}
+                              </span>
+                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-secondary/50 text-secondary-foreground">
+                                {topic.exam_type}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed mb-4">
+                          {topic.description}
+                        </p>
+                        <div className="flex items-center justify-between pt-4 border-t">
+                          <span className="text-xs text-muted-foreground font-medium">
+                            {topic.subjects?.name}
+                          </span>
+                          <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </Layout>
   );

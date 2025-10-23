@@ -603,7 +603,7 @@ export default function AkboyHome() {
                 {blogPosts.length > 0 ? blogPosts.map((post) => (
                   <Link 
                     key={post.id} 
-                    to={`/akboy/blog/${post.slug || post.id}`}
+                    to={`/blog/${post.slug || post.id}`}
                   >
                     <Card className="group p-6 hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-emerald-200 bg-white hover:-translate-y-1 cursor-pointer">
                       <div className="flex gap-5">
