@@ -63,6 +63,22 @@ const Footer = () => {
                 <Youtube className="h-5 w-5" />
               </Button>
             </div>
+            
+            {/* Link to AKBOY */}
+            <div className="pt-4 mt-4 border-t border-border">
+              <Link 
+                to="/akboy"
+                className="group inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-all"
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="text-white font-bold text-xs">A</span>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">A product by</div>
+                  <div className="font-bold text-primary">AKBOY Creative Hub</div>
+                </div>
+              </Link>
+            </div>
           </div>
 
           {/* Quick Links */}
@@ -164,12 +180,6 @@ const Footer = () => {
             <div className="text-sm text-muted-foreground text-center md:text-right">
               © 2024 Edura. All rights reserved.
             </div>
-            <Link 
-              to="/akboy"
-              className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
-            >
-              A product of <span className="font-semibold">AKBOY Creative Hub</span>
-            </Link>
           </div>
         </div>
       </div>

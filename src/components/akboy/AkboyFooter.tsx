@@ -99,7 +99,28 @@ export function AkboyFooter() {
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Our Products */}
+          <div>
+            <h4 className="text-emerald-300 font-bold text-lg mb-6">Our Products</h4>
+            <ul className="space-y-4">
+              <li>
+                <Link 
+                  to="/" 
+                  className="group block bg-white/5 hover:bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:border-emerald-400/50 transition-all"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">E</span>
+                    </div>
+                    <h5 className="font-bold text-white group-hover:text-emerald-300 transition-colors">Edura CBT</h5>
+                  </div>
+                  <p className="text-xs text-white/70 leading-relaxed">
+                    JAMB & WAEC exam prep platform with thousands of practice questions
+                  </p>
+                </Link>
+              </li>
+            </ul>
+          </div>
           <div>
             <h4 className="text-emerald-300 font-bold text-lg mb-6">Get In Touch</h4>
             <ul className="space-y-4 text-sm">
