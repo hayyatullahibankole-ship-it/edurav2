@@ -160,8 +160,16 @@ const Footer = () => {
               </Link>
             ))}
           </div>
-          <div className="text-sm text-muted-foreground text-center md:text-right">
-            © 2024 Edura. All rights reserved.
+          <div className="flex flex-col items-center md:items-end space-y-2">
+            <div className="text-sm text-muted-foreground text-center md:text-right">
+              © 2024 Edura. All rights reserved.
+            </div>
+            <Link 
+              to="/akboy"
+              className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+            >
+              A product of <span className="font-semibold">AKBOY Creative Hub</span>
+            </Link>
           </div>
         </div>
       </div>
