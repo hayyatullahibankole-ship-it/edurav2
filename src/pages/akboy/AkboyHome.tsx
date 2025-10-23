@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpen, Code, Palette, Users, ArrowRight, CheckCircle2, Sparkles, Trophy, Target, Zap, Star } from "lucide-react";
+import { BookOpen, Code, Palette, Users, ArrowRight, CheckCircle2, Sparkles, Trophy, Target, Zap, Star, Calendar } from "lucide-react";
 import hero1 from "@/assets/akboy-hero-1.jpg";
 import hero2 from "@/assets/akboy-hero-2.jpg";
 import hero3 from "@/assets/akboy-hero-3.jpg";
@@ -174,6 +174,70 @@ export default function AkboyHome() {
         </div>
       </section>
 
+      {/* About Section */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-6 animate-fade-in">
+              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-100 rounded-full text-emerald-800 font-semibold">
+                <Sparkles className="w-4 h-4" />
+                About Us
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+                Where Creativity Meets Innovation
+              </h2>
+              <p className="text-xl text-muted-foreground leading-relaxed">
+                AKBOY Creative Hub is a dynamic collective of educators, designers, and developers 
+                passionate about transforming ideas into impactful solutions. Since our inception, 
+                we've been at the forefront of educational technology and creative design in Nigeria.
+              </p>
+              <div className="grid grid-cols-2 gap-6 pt-4">
+                <div className="space-y-2">
+                  <div className="text-4xl font-extrabold text-emerald-600">5+</div>
+                  <div className="text-sm text-muted-foreground font-medium">Years Experience</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-4xl font-extrabold text-emerald-600">200+</div>
+                  <div className="text-sm text-muted-foreground font-medium">Projects Completed</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-4xl font-extrabold text-emerald-600">50+</div>
+                  <div className="text-sm text-muted-foreground font-medium">Happy Clients</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-4xl font-extrabold text-emerald-600">15+</div>
+                  <div className="text-sm text-muted-foreground font-medium">Team Members</div>
+                </div>
+              </div>
+              <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8">
+                <Link to="/akboy/about">
+                  Learn More About Us
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Link>
+              </Button>
+            </div>
+            <div className="relative animate-fade-in">
+              <img 
+                src={hero2}
+                alt="AKBOY Team"
+                className="w-full rounded-3xl shadow-2xl"
+              />
+              <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-2xl border-2 border-emerald-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                    <Trophy className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-emerald-600">4.9★</div>
+                    <div className="text-xs text-muted-foreground">Client Rating</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Featured Project - Edura */}
       <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-50 via-white to-teal-50 overflow-hidden">
         {/* Decorative Elements */}
@@ -311,6 +375,167 @@ export default function AkboyHome() {
                 </div>
                 <div className="text-xs text-gray-600 font-semibold mt-1">User Rating</div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Portfolio Preview Section */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-emerald-50/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 animate-fade-in">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+              Our Latest Work
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Explore our diverse portfolio of creative projects and solutions
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 stagger-animation">
+            {[
+              {
+                title: "Edura CBT Platform",
+                category: "Web Development",
+                image: eduraMockup,
+                color: "from-blue-500 to-cyan-500"
+              },
+              {
+                title: "School Rebranding",
+                category: "Graphics Design",
+                image: hero3,
+                color: "from-purple-500 to-pink-500"
+              },
+              {
+                title: "Educational Campaign",
+                category: "Educational Consultancy",
+                image: hero4,
+                color: "from-emerald-500 to-teal-500"
+              }
+            ].map((project, index) => (
+              <Card 
+                key={index}
+                className="group overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 hover:border-emerald-200"
+              >
+                <div className="relative h-64 overflow-hidden">
+                  <img 
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${project.color} mb-2`}>
+                      {project.category}
+                    </span>
+                    <h3 className="text-xl font-bold text-white">{project.title}</h3>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8">
+              <Link to="/akboy/portfolio">
+                View Full Portfolio
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Events & Blog Combined Section */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 animate-fade-in">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+              Latest Updates & Insights
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Stay informed with our events, programs, and educational content
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12">
+            {/* Events Preview */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                  <Calendar className="w-6 h-6 text-emerald-600" />
+                  Upcoming Events
+                </h3>
+                <Link to="/akboy/events" className="text-emerald-600 hover:text-emerald-700 font-semibold text-sm flex items-center gap-1">
+                  View All
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+              {[
+                { title: "Web Development Workshop", date: "Jan 15, 2025", type: "Workshop" },
+                { title: "Design Thinking Bootcamp", date: "Jan 22, 2025", type: "Training" },
+                { title: "STEM Education Summit", date: "Feb 5, 2025", type: "Conference" }
+              ].map((event, index) => (
+                <Card 
+                  key={index}
+                  className="p-6 hover:shadow-lg transition-all border-l-4 border-emerald-500"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold text-emerald-700 bg-emerald-50 mb-2">
+                        {event.type}
+                      </span>
+                      <h4 className="font-bold text-lg text-foreground mb-2">{event.title}</h4>
+                      <p className="text-sm text-muted-foreground flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        {event.date}
+                      </p>
+                    </div>
+                    <Button size="sm" variant="outline" className="border-emerald-600 text-emerald-700 hover:bg-emerald-50">
+                      Register
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {/* Blog Preview */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                  <BookOpen className="w-6 h-6 text-emerald-600" />
+                  Latest Articles
+                </h3>
+                <Link to="/blog" className="text-emerald-600 hover:text-emerald-700 font-semibold text-sm flex items-center gap-1">
+                  Read More
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+              {[
+                { title: "The Future of EdTech in Nigeria", category: "Education", readTime: "5 min" },
+                { title: "Design Principles for Modern Websites", category: "Design", readTime: "8 min" },
+                { title: "Getting Started with React Development", category: "Technology", readTime: "10 min" }
+              ].map((post, index) => (
+                <Card 
+                  key={index}
+                  className="p-6 hover:shadow-lg transition-all group cursor-pointer"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                      <BookOpen className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold text-emerald-700 bg-emerald-50 mb-2">
+                        {post.category}
+                      </span>
+                      <h4 className="font-bold text-lg text-foreground mb-2 group-hover:text-emerald-600 transition-colors">
+                        {post.title}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">{post.readTime} read</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
