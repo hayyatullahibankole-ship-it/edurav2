@@ -275,9 +275,9 @@ export default function AkboyHome() {
             </div>
 
             {/* Phone Mockup */}
-            <div className="relative animate-fade-in h-[600px] lg:h-[700px] flex items-center justify-center">
+            <div className="relative animate-fade-in h-[700px] lg:h-[850px] flex items-center justify-center">
               {/* Main Phone */}
-              <div className="relative z-20 w-full max-w-lg hover:scale-105 transition-transform duration-500">
+              <div className="relative z-20 w-full max-w-xl lg:max-w-2xl hover:scale-105 transition-transform duration-500">
                 <img 
                   src={eduraMockup}
                   alt="Edura App Dashboard"

@@ -10,9 +10,9 @@ export function AkboyFooter() {
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0di00aC0ydjRoLTR2Mmg0djRoMnYtNGg0di0yaC00em0wLTMwVjBoLTJ2NGgtNHYyaDR2NGgyVjZoNFY0aC00ek02IDM0di00SDR2NEgwdjJoNHY0aDJ2LTRoNHYtMkg2ek02IDRWMEG0djRIMHYyaDR2NGgyVjZoNFY0SDZ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-5"></div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
-          <div className="space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             <div className="inline-block bg-white px-8 py-5 rounded-2xl shadow-xl">
               <img 
                 src={akboyLogo} 
@@ -72,55 +72,26 @@ export function AkboyFooter() {
             </ul>
           </div>
 
-          {/* Services */}
-          <div>
-            <h4 className="text-emerald-300 font-bold text-lg mb-6">Our Services</h4>
-            <ul className="space-y-3 text-sm text-white/80">
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
-                Educational Consultancy
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-teal-400 rounded-full"></div>
-                Tutorial Services
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                Graphics Design
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
-                Web Development
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-teal-400 rounded-full"></div>
-                Creative Training
-              </li>
-            </ul>
-          </div>
-
           {/* Our Products */}
           <div>
             <h4 className="text-emerald-300 font-bold text-lg mb-6">Our Products</h4>
-            <ul className="space-y-4">
-              <li>
-                <Link 
-                  to="/" 
-                  className="group block bg-white/5 hover:bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:border-emerald-400/50 transition-all"
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">E</span>
-                    </div>
-                    <h5 className="font-bold text-white group-hover:text-emerald-300 transition-colors">Edura CBT</h5>
-                  </div>
-                  <p className="text-xs text-white/70 leading-relaxed">
-                    JAMB & WAEC exam prep platform with thousands of practice questions
-                  </p>
-                </Link>
-              </li>
-            </ul>
+            <Link 
+              to="/" 
+              className="group block bg-white/5 hover:bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:border-emerald-400/50 transition-all"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">E</span>
+                </div>
+                <h5 className="font-bold text-white group-hover:text-emerald-300 transition-colors">Edura CBT</h5>
+              </div>
+              <p className="text-xs text-white/70 leading-relaxed">
+                JAMB & WAEC exam prep platform with thousands of practice questions
+              </p>
+            </Link>
           </div>
+          
+          {/* Contact Info */}
           <div>
             <h4 className="text-emerald-300 font-bold text-lg mb-6">Get In Touch</h4>
             <ul className="space-y-4 text-sm">
