@@ -23,13 +23,13 @@ export function AkboyNavbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-emerald-100 shadow-lg shadow-emerald-50/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-24 sm:h-28">
           {/* Logo */}
           <Link to="/akboy" className="flex items-center space-x-3 group">
             <img 
               src={akboyLogo} 
               alt="AKBOY Creative Hub" 
-              className="h-12 w-auto sm:h-14 transform group-hover:scale-105 transition-transform duration-300"
+              className="h-16 w-auto sm:h-20 transform group-hover:scale-105 transition-transform duration-300"
             />
           </Link>
 
