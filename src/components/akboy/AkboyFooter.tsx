@@ -13,11 +13,11 @@ export function AkboyFooter() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="space-y-6">
-            <div className="inline-block bg-white px-6 py-4 rounded-2xl shadow-xl">
+            <div className="inline-block bg-white px-8 py-5 rounded-2xl shadow-xl">
               <img 
                 src={akboyLogo} 
                 alt="AKBOY Creative Hub" 
-                className="h-14 w-auto"
+                className="h-20 w-auto"
               />
             </div>
             <p className="text-white/80 text-sm leading-relaxed">
