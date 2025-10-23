@@ -8,10 +8,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ReferralProgram = () => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [referralCode, setReferralCode] = useState('');
   const [referrals, setReferrals] = useState<any[]>([]);
   const [rewards, setRewards] = useState<any[]>([]);
@@ -137,168 +139,211 @@ const ReferralProgram = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Referral Program</h1>
-          <p className="text-muted-foreground">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-6xl">
+        {/* Header */}
+        <div className="mb-6 sm:mb-8 animate-fade-in">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Referral Program
+          </h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Invite friends and earn rewards for every successful referral!
           </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <p className="text-3xl font-bold">{stats.totalReferrals}</p>
-              <p className="text-sm text-muted-foreground">Total Referrals</p>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8 stagger-animation">
+          {/* Total Referrals */}
+          <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent backdrop-blur-sm border border-primary/10 p-4 sm:p-6 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/20 active:scale-95">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative z-10 text-center">
+              <Users className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-primary" />
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">{stats.totalReferrals}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">Total Referrals</p>
+            </div>
+          </div>
 
-          <Card>
-            <CardContent className="p-6 text-center">
-              <TrendingUp className="h-8 w-8 mx-auto mb-2 text-success" />
-              <p className="text-3xl font-bold">{stats.activeReferrals}</p>
-              <p className="text-sm text-muted-foreground">Active</p>
-            </CardContent>
-          </Card>
+          {/* Active Referrals */}
+          <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-500/10 via-green-500/5 to-transparent backdrop-blur-sm border border-green-500/10 p-4 sm:p-6 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-green-500/20 active:scale-95">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative z-10 text-center">
+              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-green-500" />
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">{stats.activeReferrals}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">Active</p>
+            </div>
+          </div>
 
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Gift className="h-8 w-8 mx-auto mb-2 text-warning" />
-              <p className="text-3xl font-bold">{stats.totalRewards}</p>
-              <p className="text-sm text-muted-foreground">Points Earned</p>
-            </CardContent>
-          </Card>
+          {/* Points Earned */}
+          <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent backdrop-blur-sm border border-amber-500/10 p-4 sm:p-6 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-500/20 active:scale-95">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative z-10 text-center">
+              <Gift className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-amber-500" />
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">{stats.totalRewards}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">Points Earned</p>
+            </div>
+          </div>
 
-          <Card>
-            <CardContent className="p-6 text-center">
-              <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-info" />
-              <p className="text-3xl font-bold">{stats.pendingRewards}</p>
-              <p className="text-sm text-muted-foreground">Pending</p>
-            </CardContent>
-          </Card>
+          {/* Pending */}
+          <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent backdrop-blur-sm border border-blue-500/10 p-4 sm:p-6 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20 active:scale-95">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative z-10 text-center">
+              <CheckCircle2 className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-blue-500" />
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">{stats.pendingRewards}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">Pending</p>
+            </div>
+          </div>
         </div>
 
-        {/* Referral Link */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Your Referral Link</CardTitle>
-            <CardDescription>Share this link to invite friends</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
+        {/* Referral Link Card */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-background to-primary/5 backdrop-blur-sm border border-primary/20 p-4 sm:p-6 mb-6 sm:mb-8 animate-fade-in shadow-xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50" />
+          
+          <div className="relative z-10">
+            <h2 className="text-xl sm:text-2xl font-bold mb-1">Your Referral Link</h2>
+            <p className="text-sm text-muted-foreground mb-4">Share this link to invite friends</p>
+            
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
               <Input
                 value={`${window.location.origin}/auth?ref=${referralCode}`}
                 readOnly
-                className="flex-1"
+                className="flex-1 bg-background/50 backdrop-blur-sm border-primary/20"
               />
-              <Button onClick={copyReferralLink}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy
-              </Button>
-              <Button onClick={shareReferral} variant="outline">
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={copyReferralLink}
+                  className="flex-1 sm:flex-none bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all duration-300"
+                >
+                  <Copy className="h-4 w-4 sm:mr-2" />
+                  {!isMobile && 'Copy'}
+                </Button>
+                <Button 
+                  onClick={shareReferral} 
+                  variant="outline"
+                  className="flex-1 sm:flex-none border-primary/30 hover:bg-primary/10 transition-all duration-300"
+                >
+                  <Share2 className="h-4 w-4 sm:mr-2" />
+                  {!isMobile && 'Share'}
+                </Button>
+              </div>
             </div>
 
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <p className="font-semibold mb-2">How it works:</p>
-              <ol className="space-y-2 text-sm">
-                <li className="flex items-start gap-2">
-                  <span className="font-bold text-primary">1.</span>
-                  <span>Share your unique referral link with friends</span>
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 to-transparent backdrop-blur-sm border border-primary/10 p-4">
+              <p className="font-semibold mb-3 text-sm sm:text-base">How it works:</p>
+              <ol className="space-y-3 text-sm">
+                <li className="flex items-start gap-3 group">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/60 text-primary-foreground flex items-center justify-center text-xs font-bold">1</span>
+                  <span className="group-hover:translate-x-1 transition-transform duration-200">Share your unique referral link with friends</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-bold text-primary">2.</span>
-                  <span>They sign up using your link</span>
+                <li className="flex items-start gap-3 group">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/60 text-primary-foreground flex items-center justify-center text-xs font-bold">2</span>
+                  <span className="group-hover:translate-x-1 transition-transform duration-200">They sign up using your link</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-bold text-primary">3.</span>
-                  <span>You both earn rewards when they subscribe!</span>
+                <li className="flex items-start gap-3 group">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/60 text-primary-foreground flex items-center justify-center text-xs font-bold">3</span>
+                  <span className="group-hover:translate-x-1 transition-transform duration-200">You both earn rewards when they subscribe!</span>
                 </li>
               </ol>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        {/* Referrals and Rewards Grid */}
+        <div className="grid md:grid-cols-2 gap-4 sm:gap-6 stagger-animation">
           {/* Referrals List */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Referrals ({referrals.length})</CardTitle>
-              <CardDescription>People who joined using your link</CardDescription>
-            </CardHeader>
-            <CardContent>
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-background via-background to-primary/5 backdrop-blur-sm border border-primary/10 shadow-xl">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-bold">Your Referrals</h2>
+                <Badge variant="secondary" className="text-xs sm:text-sm">{referrals.length}</Badge>
+              </div>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-4">People who joined using your link</p>
+              
               {loading ? (
-                <p className="text-center text-muted-foreground py-4">Loading...</p>
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+                  <p className="text-muted-foreground mt-2 text-sm">Loading...</p>
+                </div>
               ) : referrals.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No referrals yet</p>
-                  <p className="text-sm mt-2">Start sharing your link!</p>
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-8 w-8 text-primary/50" />
+                  </div>
+                  <p className="font-medium mb-1">No referrals yet</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Start sharing your link!</p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                  {referrals.map((referral) => (
-                    <div key={referral.id} className="p-3 bg-muted/50 rounded-lg">
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                  {referrals.map((referral, index) => (
+                    <div 
+                      key={referral.id} 
+                      className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 to-transparent backdrop-blur-sm border border-primary/10 p-3 sm:p-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-primary/20"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
                       <div className="flex items-center justify-between mb-2">
-                        <p className="font-medium">
+                        <p className="font-medium text-sm sm:text-base truncate flex-1 mr-2">
                           {referral.referred_user?.first_name || 'User'} {referral.referred_user?.last_name || ''}
                         </p>
                         {getStatusBadge(referral.status)}
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
                         <p>Joined: {new Date(referral.created_at).toLocaleDateString()}</p>
                         {referral.reward_points > 0 && (
-                          <p className="text-success">+{referral.reward_points} points</p>
+                          <p className="text-green-500 font-medium">+{referral.reward_points} points</p>
                         )}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Rewards */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Rewards ({rewards.length})</CardTitle>
-              <CardDescription>Your referral rewards</CardDescription>
-            </CardHeader>
-            <CardContent>
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-background via-background to-amber-500/5 backdrop-blur-sm border border-amber-500/10 shadow-xl">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-bold">Rewards</h2>
+                <Badge variant="secondary" className="text-xs sm:text-sm">{rewards.length}</Badge>
+              </div>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-4">Your referral rewards</p>
+              
               {rewards.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Gift className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No rewards yet</p>
-                  <p className="text-sm mt-2">Refer friends to earn rewards!</p>
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 flex items-center justify-center mx-auto mb-4">
+                    <Gift className="h-8 w-8 text-amber-500/50" />
+                  </div>
+                  <p className="font-medium mb-1">No rewards yet</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Refer friends to earn rewards!</p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                  {rewards.map((reward) => (
-                    <div key={reward.id} className="p-3 bg-muted/50 rounded-lg">
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                  {rewards.map((reward, index) => (
+                    <div 
+                      key={reward.id} 
+                      className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/5 to-transparent backdrop-blur-sm border border-amber-500/10 p-3 sm:p-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-amber-500/20"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Gift className="h-4 w-4 text-warning" />
-                          <p className="font-medium">{reward.reward_type}</p>
+                        <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
+                          <Gift className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                          <p className="font-medium text-sm sm:text-base truncate">{reward.reward_type}</p>
                         </div>
                         {reward.claimed ? (
-                          <Badge variant="secondary">Claimed</Badge>
+                          <Badge variant="secondary" className="text-xs flex-shrink-0">Claimed</Badge>
                         ) : (
-                          <Badge>Pending</Badge>
+                          <Badge className="text-xs flex-shrink-0">Pending</Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground mb-1">{reward.description}</p>
-                      <p className="text-lg font-bold text-primary">+{reward.reward_value} points</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">{reward.description}</p>
+                      <p className="text-base sm:text-lg font-bold bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">
+                        +{reward.reward_value} points
+                      </p>
                     </div>
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
