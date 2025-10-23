@@ -74,7 +74,7 @@ export default function AkboyHome() {
               />
             </div>
           ))}
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/95 via-teal-900/90 to-green-900/95"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/70 via-teal-900/65 to-green-900/70"></div>
           
           {/* Carousel Indicators */}
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-3 z-20">
