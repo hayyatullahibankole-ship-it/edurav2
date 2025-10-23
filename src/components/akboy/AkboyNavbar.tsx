@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Leaf } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import akboyLogo from "@/assets/akboy-logo.png";
 
 export function AkboyNavbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,18 +26,11 @@ export function AkboyNavbar() {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link to="/akboy" className="flex items-center space-x-3 group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl blur-md group-hover:blur-lg transition-all"></div>
-              <div className="relative w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-xl">
-                <Leaf className="w-7 h-7 text-white" />
-              </div>
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent leading-tight">
-                AKBOY Creative Hub
-              </h1>
-              <p className="text-xs text-gray-600">Innovation & Excellence</p>
-            </div>
+            <img 
+              src={akboyLogo} 
+              alt="AKBOY Creative Hub" 
+              className="h-12 w-auto sm:h-14 transform group-hover:scale-105 transition-transform duration-300"
+            />
           </Link>
 
           {/* Desktop Navigation */}

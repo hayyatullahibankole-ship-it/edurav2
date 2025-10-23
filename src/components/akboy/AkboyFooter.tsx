@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Linkedin, Twitter, Mail, Phone, MapPin, Leaf } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import akboyLogo from "@/assets/akboy-logo.png";
 
 export function AkboyFooter() {
   const currentYear = new Date().getFullYear();
@@ -12,18 +13,11 @@ export function AkboyFooter() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="space-y-6">
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl blur-md"></div>
-                <div className="relative w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-2xl">
-                  <Leaf className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold">AKBOY Hub</h3>
-                <p className="text-xs text-white/70">Creative Excellence</p>
-              </div>
-            </div>
+            <img 
+              src={akboyLogo} 
+              alt="AKBOY Creative Hub" 
+              className="h-12 w-auto"
+            />
             <p className="text-white/80 text-sm leading-relaxed">
               Empowering creativity and education through innovative solutions, cutting-edge design, and transformative technology.
             </p>
