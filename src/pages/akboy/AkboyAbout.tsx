@@ -64,9 +64,9 @@ export default function AkboyAbout() {
       {/* Vision & Mission */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-emerald-50/30 to-white">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12">
-            <Card className="p-10 hover:shadow-2xl transition-all duration-300 border-2 hover:border-emerald-300 group bg-white">
-              <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
+          <div className="grid md:grid-cols-2 gap-12 stagger-animation">
+            <Card className="p-10 hover:shadow-2xl transition-all duration-500 border-2 hover:border-emerald-300 group bg-white hover:-translate-y-2">
+              <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg">
                 <Eye className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-3xl font-bold text-foreground mb-4">Our Vision</h3>
@@ -76,8 +76,8 @@ export default function AkboyAbout() {
               </p>
             </Card>
 
-            <Card className="p-10 hover:shadow-2xl transition-all duration-300 border-2 hover:border-emerald-300 group bg-white">
-              <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
+            <Card className="p-10 hover:shadow-2xl transition-all duration-500 border-2 hover:border-emerald-300 group bg-white hover:-translate-y-2">
+              <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg">
                 <Target className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-3xl font-bold text-foreground mb-4">Our Mission</h3>
@@ -144,9 +144,9 @@ export default function AkboyAbout() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="p-8 hover:shadow-xl transition-all duration-300 border-2 hover:border-emerald-200 group">
-              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
+          <div className="grid md:grid-cols-3 gap-8 stagger-animation">
+            <Card className="p-8 hover:shadow-xl transition-all duration-500 border-2 hover:border-emerald-200 group hover:-translate-y-2">
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
                 <Palette className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-4">Creative Services</h3>
@@ -157,8 +157,8 @@ export default function AkboyAbout() {
               </ul>
             </Card>
 
-            <Card className="p-8 hover:shadow-xl transition-all duration-300 border-2 hover:border-emerald-200 group">
-              <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
+            <Card className="p-8 hover:shadow-xl transition-all duration-500 border-2 hover:border-emerald-200 group hover:-translate-y-2">
+              <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
                 <BookOpen className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-4">Education & Training</h3>
@@ -169,8 +169,8 @@ export default function AkboyAbout() {
               </ul>
             </Card>
 
-            <Card className="p-8 hover:shadow-xl transition-all duration-300 border-2 hover:border-emerald-200 group">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
+            <Card className="p-8 hover:shadow-xl transition-all duration-500 border-2 hover:border-emerald-200 group hover:-translate-y-2">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
                 <Code className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-4">Consultancy & Support</h3>

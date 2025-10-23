@@ -144,12 +144,11 @@ export default function AkboyHome() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 stagger-animation">
             {services.map((service, index) => (
               <Card 
                 key={index}
                 className="group p-8 hover:shadow-2xl transition-all duration-500 border-2 hover:border-emerald-200 hover:-translate-y-2 bg-white/80 backdrop-blur-sm"
-                style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${service.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                   <service.icon className="w-8 h-8 text-white" />
@@ -329,13 +328,13 @@ export default function AkboyHome() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 stagger-animation">
             {features.map((feature, index) => (
               <Card 
                 key={index}
-                className="text-center p-10 hover:shadow-xl transition-all duration-300 border-2 hover:border-emerald-200 bg-gradient-to-br from-white to-emerald-50/30"
+                className="text-center p-10 hover:shadow-xl transition-all duration-300 border-2 hover:border-emerald-200 bg-gradient-to-br from-white to-emerald-50/30 hover:-translate-y-1"
               >
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                   <feature.icon className="w-10 h-10 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-foreground mb-3">{feature.title}</h3>
@@ -358,7 +357,7 @@ export default function AkboyHome() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 stagger-animation">
             {[
               {
                 name: "Dr. Adewale Johnson",

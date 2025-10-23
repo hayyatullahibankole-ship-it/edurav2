@@ -368,6 +368,52 @@ All colors MUST be HSL for consistency across light/dark modes.
     animation: gradient 8s linear infinite;
   }
 
+  /* Stagger animation for children */
+  .stagger-animation > * {
+    animation: fade-in-up 0.6s ease-out backwards;
+  }
+  
+  .stagger-animation > *:nth-child(1) { animation-delay: 0.1s; }
+  .stagger-animation > *:nth-child(2) { animation-delay: 0.2s; }
+  .stagger-animation > *:nth-child(3) { animation-delay: 0.3s; }
+  .stagger-animation > *:nth-child(4) { animation-delay: 0.4s; }
+  .stagger-animation > *:nth-child(5) { animation-delay: 0.5s; }
+  .stagger-animation > *:nth-child(6) { animation-delay: 0.6s; }
+  .stagger-animation > *:nth-child(7) { animation-delay: 0.7s; }
+  .stagger-animation > *:nth-child(8) { animation-delay: 0.8s; }
+
+  /* Slide up on scroll */
+  .slide-up-scroll {
+    animation: slide-up 0.8s ease-out;
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Scale in animation */
+  .scale-in-animation {
+    animation: scale-in-smooth 0.5s ease-out;
+  }
+
+  @keyframes scale-in-smooth {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
   /* Blog Post Content Styles */
   .blog-post-content {
     line-height: 2 !important;
