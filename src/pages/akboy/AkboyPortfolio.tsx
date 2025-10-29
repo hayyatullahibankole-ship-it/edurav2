@@ -1,72 +1,83 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Sparkles } from "lucide-react";
 import portfolioHero from "@/assets/akboy-portfolio-hero.jpg";
-import eduraLogo from "@/assets/edura-logo.png";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface PortfolioItem {
+  id: string;
+  title: string;
+  category: string;
+  description: string | null;
+  tags: string[];
+  images: string[];
+  is_featured: boolean;
+  project_url: string | null;
+}
 
 export default function AkboyPortfolio() {
   const [filter, setFilter] = useState<string>("all");
+  const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const portfolio = [
-    {
-      id: 1,
-      title: "Edura CBT Platform",
-      category: "Web Development",
-      description: "Africa's most advanced educational platform with AI-powered learning and 10,000+ practice questions. Revolutionizing exam preparation for Nigerian students.",
-      tags: ["React", "AI", "Education", "Mobile-First"],
-      image: eduraLogo,
-      featured: true,
-      url: "https://edura.app"
-    },
-    {
-      id: 2,
-      title: "SchoolHub Management System",
-      category: "Web Development",
-      description: "Complete school management solution with student records, fee management, and parent portals.",
-      tags: ["React", "Node.js", "PostgreSQL"],
-      featured: false
-    },
-    {
-      id: 3,
-      title: "BrandCraft Logo Design",
-      category: "Graphics Design",
-      description: "Modern brand identity design for leading Nigerian tech startup including logo, color palette, and brand guidelines.",
-      tags: ["Branding", "Logo Design", "Identity"],
-      featured: true
-    },
-    {
-      id: 4,
-      title: "TechFest Website",
-      category: "Web Design",
-      description: "Event website with registration system, speaker profiles, and schedule management.",
-      tags: ["UI/UX", "Event", "Responsive"],
-      featured: false
-    },
-    {
-      id: 5,
-      title: "E-Commerce Platform",
-      category: "Web Development",
-      description: "Full-featured online store with payment integration, inventory management, and order tracking.",
-      tags: ["E-Commerce", "Payment", "React"],
-      featured: false
-    },
-    {
-      id: 6,
-      title: "Corporate Training Program",
-      category: "Education",
-      description: "3-month intensive training program for 50+ participants in web development and design.",
-      tags: ["Training", "Bootcamp", "Certificate"],
-      featured: true
+  useEffect(() => {
+    fetchPortfolio();
+  }, []);
+
+  const fetchPortfolio = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("akboy_portfolio")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true })
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      const formattedData = data?.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        category: item.category,
+        description: item.description,
+        tags: Array.isArray(item.tags) ? item.tags : [],
+        images: Array.isArray(item.images) ? item.images : [],
+        is_featured: item.is_featured,
+        project_url: item.project_url,
+      })) || [];
+
+      setPortfolio(formattedData);
+    } catch (error) {
+      console.error("Error fetching portfolio:", error);
+      toast.error("Failed to load portfolio");
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const categories = ["All", "Web Development", "Graphics Design", "Web Design", "Education"];
+  const categories = ["all", ...Array.from(new Set(portfolio.map(p => p.category)))].map(cat => 
+    cat === "all" ? "All" : cat
+  );
   const filteredPortfolio = filter === "All" || filter === "all"
     ? portfolio
     : portfolio.filter(p => p.category === filter);
+
+  if (loading) {
+    return (
+      <AkboyLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading portfolio...</p>
+          </div>
+        </div>
+      </AkboyLayout>
+    );
+  }
 
   return (
     <AkboyLayout>
@@ -129,15 +140,19 @@ export default function AkboyPortfolio() {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="relative h-64 bg-gradient-to-br from-emerald-100 to-teal-100 overflow-hidden">
-                  {project.image && (
+                  {project.images && project.images.length > 0 ? (
                     <img
-                      src={project.image}
+                      src={project.images[0]}
                       alt={project.title}
-                      className="w-full h-full object-contain p-8 group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Sparkles className="w-16 h-16 text-emerald-300" />
+                    </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  {project.featured && (
+                  {project.is_featured && (
                     <Badge className="absolute top-4 right-4 bg-yellow-500 text-yellow-900 font-bold shadow-lg">
                       <Sparkles className="w-3 h-3 mr-1" />
                       Featured
@@ -157,7 +172,7 @@ export default function AkboyPortfolio() {
                     {project.description}
                   </p>
 
-                  {project.tags && (
+                  {project.tags && project.tags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-6">
                       {project.tags.map((tag, i) => (
                         <Badge key={i} variant="secondary" className="text-xs bg-emerald-50 text-emerald-700">
@@ -167,12 +182,12 @@ export default function AkboyPortfolio() {
                     </div>
                   )}
 
-                  {project.url && (
+                  {project.project_url && (
                     <Button
                       asChild
                       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl transition-all"
                     >
-                      <a href={project.url} target="_blank" rel="noopener noreferrer">
+                      <a href={project.project_url} target="_blank" rel="noopener noreferrer">
                         View Project
                         <ExternalLink className="ml-2 w-4 h-4" />
                       </a>
