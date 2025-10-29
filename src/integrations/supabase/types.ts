@@ -451,7 +451,7 @@ export type Database = {
           device_fingerprint: string | null
           exam_id: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           proctoring_data: Json | null
           selected_subjects: Json | null
           started_at: string | null
@@ -467,7 +467,7 @@ export type Database = {
           device_fingerprint?: string | null
           exam_id?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           proctoring_data?: Json | null
           selected_subjects?: Json | null
           started_at?: string | null
@@ -483,7 +483,7 @@ export type Database = {
           device_fingerprint?: string | null
           exam_id?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           proctoring_data?: Json | null
           selected_subjects?: Json | null
           started_at?: string | null
@@ -518,7 +518,7 @@ export type Database = {
           created_at: string | null
           details: Json | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           target_id: string | null
           target_type: string | null
           user_agent: string | null
@@ -529,7 +529,7 @@ export type Database = {
           created_at?: string | null
           details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           target_id?: string | null
           target_type?: string | null
           user_agent?: string | null
@@ -540,7 +540,7 @@ export type Database = {
           created_at?: string | null
           details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           target_id?: string | null
           target_type?: string | null
           user_agent?: string | null
@@ -1257,21 +1257,21 @@ export type Database = {
           created_at: string
           email: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           success: boolean
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           success?: boolean
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           success?: boolean
         }
         Relationships: []
@@ -2963,7 +2963,7 @@ export type Database = {
           is_suspended: boolean | null
           is_verified: boolean | null
           last_login_at: string | null
-          last_login_ip: unknown | null
+          last_login_ip: unknown
           last_name: string | null
           phone: string | null
           profile_image_url: string | null
@@ -2986,7 +2986,7 @@ export type Database = {
           is_suspended?: boolean | null
           is_verified?: boolean | null
           last_login_at?: string | null
-          last_login_ip?: unknown | null
+          last_login_ip?: unknown
           last_name?: string | null
           phone?: string | null
           profile_image_url?: string | null
@@ -3009,7 +3009,7 @@ export type Database = {
           is_suspended?: boolean | null
           is_verified?: boolean | null
           last_login_at?: string | null
-          last_login_ip?: unknown | null
+          last_login_ip?: unknown
           last_name?: string | null
           phone?: string | null
           profile_image_url?: string | null
@@ -3183,12 +3183,9 @@ export type Database = {
         }
         Returns: string
       }
-      admin_delete_all_questions: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      admin_delete_all_questions: { Args: never; Returns: Json }
       apply_answer_normalization: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           failed_count: number
           updated_count: number
@@ -3198,18 +3195,9 @@ export type Database = {
         Args: { email_type: string; target_user_id: string }
         Returns: boolean
       }
-      can_view_full_pii: {
-        Args: { target_user_id: string }
-        Returns: boolean
-      }
-      check_admin_rate_limit: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      check_auth_rate_limit: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      can_view_full_pii: { Args: { target_user_id: string }; Returns: boolean }
+      check_admin_rate_limit: { Args: never; Returns: boolean }
+      check_auth_rate_limit: { Args: never; Returns: boolean }
       check_email_rate_limit: {
         Args: { recipient_email: string }
         Returns: boolean
@@ -3222,20 +3210,11 @@ export type Database = {
         }
         Returns: boolean
       }
-      check_user_lookup_rate_limit: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      clear_session_token: {
-        Args: { user_auth_id: string }
-        Returns: boolean
-      }
-      compute_exam_results: {
-        Args: { attempt_uuid: string }
-        Returns: string
-      }
+      check_user_lookup_rate_limit: { Args: never; Returns: boolean }
+      clear_session_token: { Args: { user_auth_id: string }; Returns: boolean }
+      compute_exam_results: { Args: { attempt_uuid: string }; Returns: string }
       convert_latex_mathbf_to_markdown: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           updated_count: number
         }[]
@@ -3246,43 +3225,36 @@ export type Database = {
           deleted: number
         }[]
       }
-      delete_question_safely: {
-        Args: { qid: string }
-        Returns: boolean
-      }
-      delete_user_completely: {
-        Args: { user_uuid: string }
-        Returns: boolean
-      }
+      delete_question_safely: { Args: { qid: string }; Returns: boolean }
+      delete_user_completely: { Args: { user_uuid: string }; Returns: boolean }
       delete_user_completely_by_app_id: {
         Args: { user_app_id: string }
         Returns: boolean
       }
-      expire_subscriptions: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      find_incomplete_questions: {
-        Args: Record<PropertyKey, never> | { target_subject?: string }
-        Returns: {
-          id: string
-          reason: string
-        }[]
-      }
+      expire_subscriptions: { Args: never; Returns: undefined }
+      find_incomplete_questions:
+        | {
+            Args: never
+            Returns: {
+              id: string
+              reason: string
+            }[]
+          }
+        | {
+            Args: { target_subject?: string }
+            Returns: {
+              id: string
+              reason: string
+            }[]
+          }
       fix_latex_questions: {
         Args: { target_subject?: string }
         Returns: {
           updated_count: number
         }[]
       }
-      generate_referral_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_unique_referral_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_referral_code: { Args: never; Returns: string }
+      generate_unique_referral_code: { Args: never; Returns: string }
       generate_weak_topic_recommendations: {
         Args: { p_user_id: string }
         Returns: {
@@ -3293,7 +3265,7 @@ export type Database = {
         }[]
       }
       get_admin_proctoring_data: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           device_fingerprint: string
           email: string
@@ -3442,7 +3414,7 @@ export type Database = {
         }[]
       }
       get_student_bookings: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           description: string
@@ -3462,7 +3434,7 @@ export type Database = {
         }[]
       }
       get_student_exam_progress: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           exam_id: string
@@ -3493,7 +3465,7 @@ export type Database = {
         }[]
       }
       get_subject_question_counts: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           question_count: number
           subject_id: string
@@ -3540,7 +3512,7 @@ export type Database = {
         }[]
       }
       get_users_masked: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           address: string
           auth_user_id: string
@@ -3569,14 +3541,8 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_account_locked: {
-        Args: { user_email: string }
-        Returns: boolean
-      }
-      is_admin: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
+      is_account_locked: { Args: { user_email: string }; Returns: boolean }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_school_admin: {
         Args: { target_school_id: string; user_auth_id: string }
         Returns: boolean
@@ -3610,16 +3576,10 @@ export type Database = {
         }
         Returns: undefined
       }
-      mask_email: {
-        Args: { email: string }
-        Returns: string
-      }
-      mask_phone: {
-        Args: { phone: string }
-        Returns: string
-      }
+      mask_email: { Args: { email: string }; Returns: string }
+      mask_phone: { Args: { phone: string }; Returns: string }
       monitor_security_events: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           event_count: number
           event_type: string
@@ -3628,7 +3588,7 @@ export type Database = {
         }[]
       }
       normalize_question_answers: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           new_format: number
           old_format: string
@@ -3682,10 +3642,7 @@ export type Database = {
         Args: { attempt_uuid: string }
         Returns: boolean
       }
-      update_user_streak: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
+      update_user_streak: { Args: { p_user_id: string }; Returns: Json }
       validate_admin_action: {
         Args: { action_type: string; target_data?: Json }
         Returns: boolean
