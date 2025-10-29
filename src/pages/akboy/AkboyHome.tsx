@@ -15,6 +15,7 @@ export default function AkboyHome() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [portfolio, setPortfolio] = useState<any[]>([]);
   const heroImages = [hero1, hero2, hero3, hero4];
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function AkboyHome() {
   useEffect(() => {
     fetchBlogPosts();
     fetchEvents();
+    fetchPortfolio();
   }, []);
 
   const fetchBlogPosts = async () => {
@@ -57,6 +59,22 @@ export default function AkboyHome() {
       setEvents(data || []);
     } catch (error) {
       console.error("Error fetching events:", error);
+    }
+  };
+
+  const fetchPortfolio = async () => {
+    try {
+      const { data } = await supabase
+        .from("akboy_portfolio")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true })
+        .order("created_at", { ascending: false })
+        .limit(3);
+      
+      setPortfolio(data || []);
+    } catch (error) {
+      console.error("Error fetching portfolio:", error);
     }
   };
   const services = [
@@ -431,46 +449,75 @@ export default function AkboyHome() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 stagger-animation">
-            {[
-              {
-                title: "Edura CBT Platform",
-                category: "Web Development",
-                image: eduraMockup,
-                color: "from-blue-500 to-cyan-500"
-              },
-              {
-                title: "School Rebranding",
-                category: "Graphics Design",
-                image: hero3,
-                color: "from-purple-500 to-pink-500"
-              },
-              {
-                title: "Educational Campaign",
-                category: "Educational Consultancy",
-                image: hero4,
-                color: "from-emerald-500 to-teal-500"
-              }
-            ].map((project, index) => (
+            {portfolio.length > 0 ? portfolio.map((project, index) => (
               <Card 
-                key={index}
+                key={project.id}
                 className="group overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 hover:border-emerald-200"
               >
                 <div className="relative h-64 overflow-hidden">
-                  <img 
-                    src={project.image}
-                    alt={project.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
+                  {project.images && project.images.length > 0 ? (
+                    <img 
+                      src={project.images[0]}
+                      alt={project.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                      <Sparkles className="w-16 h-16 text-emerald-300" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                   <div className="absolute bottom-4 left-4 right-4">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${project.color} mb-2`}>
+                    <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 mb-2">
                       {project.category}
                     </span>
                     <h3 className="text-xl font-bold text-white">{project.title}</h3>
                   </div>
                 </div>
               </Card>
-            ))}
+            )) : (
+              /* Fallback to original hardcoded data if no portfolio items */
+              [
+                {
+                  title: "Edura CBT Platform",
+                  category: "Web Development",
+                  image: eduraMockup,
+                  color: "from-blue-500 to-cyan-500"
+                },
+                {
+                  title: "School Rebranding",
+                  category: "Graphics Design",
+                  image: hero3,
+                  color: "from-purple-500 to-pink-500"
+                },
+                {
+                  title: "Educational Campaign",
+                  category: "Educational Consultancy",
+                  image: hero4,
+                  color: "from-emerald-500 to-teal-500"
+                }
+              ].map((project, index) => (
+                <Card 
+                  key={index}
+                  className="group overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 hover:border-emerald-200"
+                >
+                  <div className="relative h-64 overflow-hidden">
+                    <img 
+                      src={project.image}
+                      alt={project.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${project.color} mb-2`}>
+                        {project.category}
+                      </span>
+                      <h3 className="text-xl font-bold text-white">{project.title}</h3>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
           </div>
 
           <div className="text-center mt-12">
