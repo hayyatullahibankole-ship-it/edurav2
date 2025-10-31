@@ -32,9 +32,6 @@ const Navbar = () => {
             <Link to="/resources" className="text-foreground hover:text-primary transition-colors">
               Resources
             </Link>
-            <Link to="/books" className="text-foreground hover:text-primary transition-colors">
-              Books
-            </Link>
             {user && (
               <>
                 <Link to="/study-hub" className="text-foreground hover:text-primary transition-colors">
@@ -116,13 +113,6 @@ const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Resources
-              </Link>
-              <Link
-                to="/books"
-                className="block px-3 py-2 text-foreground hover:bg-muted rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Books
               </Link>
               {user && (
                 <>
