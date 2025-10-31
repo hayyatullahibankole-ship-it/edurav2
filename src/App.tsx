@@ -28,6 +28,7 @@ import Demo from "./pages/Demo";
 import DemoTest from "./pages/DemoTest";
 
 import Resources from "./pages/Resources";
+import Books from "./pages/Books";
 import Consultation from "./pages/Consultation";
 import Payment from "./pages/Payment";
 import NotFound from "./pages/NotFound";
@@ -146,6 +147,7 @@ const AppRoutes = () => {
             <Route path="/demo-test" element={<Layout showNavbar={false}><DemoTest /></Layout>} />
             
             <Route path="/resources" element={<Layout><Resources /></Layout>} />
+            <Route path="/books" element={<Layout><Books /></Layout>} />
             <Route path="/consultation" element={<Layout><Consultation /></Layout>} />
             <Route path="/payment" element={<Layout><Payment /></Layout>} />
             <Route path="/answer-review" element={
