@@ -1,0 +1,282 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { TrendingUp, Award, Users } from "lucide-react";
+
+interface Props {
+  schoolId: string;
+}
+
+interface PerformanceData {
+  passed: number;
+  failed: number;
+  totalTests: number;
+  averageScore: number;
+  studentPerformance: Array<{
+    name: string;
+    score: number;
+    tests: number;
+  }>;
+}
+
+export default function SchoolOverviewCharts({ schoolId }: Props) {
+  const [data, setData] = useState<PerformanceData>({
+    passed: 0,
+    failed: 0,
+    totalTests: 0,
+    averageScore: 0,
+    studentPerformance: []
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPerformanceData();
+  }, [schoolId]);
+
+  const fetchPerformanceData = async () => {
+    try {
+      // Get all students
+      const { data: students, error: studentsError } = await supabase
+        .from("school_students")
+        .select("id, full_name, user_id")
+        .eq("school_id", schoolId);
+
+      if (studentsError) throw studentsError;
+
+      if (!students || students.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      const studentUserIds = students.map(s => s.user_id);
+
+      // Get all submitted attempts
+      const { data: attempts, error: attemptsError } = await supabase
+        .from("attempts")
+        .select("id, user_id")
+        .in("user_id", studentUserIds)
+        .eq("status", "SUBMITTED");
+
+      if (attemptsError) throw attemptsError;
+
+      if (!attempts || attempts.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      // Get results for all attempts
+      const attemptIds = attempts.map(a => a.id);
+      const { data: results, error: resultsError } = await supabase
+        .from("results")
+        .select("attempt_id, percentage")
+        .in("attempt_id", attemptIds);
+
+      if (resultsError) throw resultsError;
+
+      // Calculate pass/fail (pass threshold: 50%)
+      const passThreshold = 50;
+      let passed = 0;
+      let failed = 0;
+      let totalScore = 0;
+
+      (results || []).forEach(result => {
+        if (result.percentage >= passThreshold) {
+          passed++;
+        } else {
+          failed++;
+        }
+        totalScore += result.percentage;
+      });
+
+      const totalTests = (results || []).length;
+      const averageScore = totalTests > 0 ? totalScore / totalTests : 0;
+
+      // Calculate per-student performance
+      const studentPerformance = students.map(student => {
+        const studentAttempts = attempts.filter(a => a.user_id === student.user_id);
+        const studentResults = (results || []).filter(r => 
+          studentAttempts.some(a => a.id === r.attempt_id)
+        );
+        
+        const avgScore = studentResults.length > 0
+          ? studentResults.reduce((sum, r) => sum + r.percentage, 0) / studentResults.length
+          : 0;
+
+        return {
+          name: student.full_name.split(' ')[0] || student.full_name, // First name only
+          score: Math.round(avgScore),
+          tests: studentResults.length
+        };
+      }).filter(s => s.tests > 0) // Only include students with tests
+        .sort((a, b) => b.score - a.score) // Sort by score descending
+        .slice(0, 10); // Top 10 students
+
+      setData({
+        passed,
+        failed,
+        totalTests,
+        averageScore,
+        studentPerformance
+      });
+    } catch (error) {
+      console.error("Error fetching performance data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pieData = [
+    { name: "Passed (≥50%)", value: data.passed, color: "#10b981" },
+    { name: "Failed (<50%)", value: data.failed, color: "#ef4444" }
+  ];
+
+  const COLORS = ["#10b981", "#ef4444"];
+
+  if (loading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="h-[300px] flex items-center justify-center">
+              <p className="text-muted-foreground">Loading charts...</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="h-[300px] flex items-center justify-center">
+              <p className="text-muted-foreground">Loading charts...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (data.totalTests === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Performance Analytics
+          </CardTitle>
+          <CardDescription>No test data available yet</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-12">
+            <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">Students haven't taken any tests yet</p>
+            <p className="text-sm text-muted-foreground mt-2">Charts will appear here once students complete tests</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Summary Stats */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Tests Taken</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{data.totalTests}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Average Score</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-blue-600">{data.averageScore.toFixed(1)}%</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Pass Rate</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-green-600">
+              {data.totalTests > 0 ? ((data.passed / data.totalTests) * 100).toFixed(1) : 0}%
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Pie Chart - Pass/Fail Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5" />
+              Success Rate
+            </CardTitle>
+            <CardDescription>Distribution of passing vs failing tests</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: number) => [`${value} tests`, "Count"]} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Bar Chart - Top Students */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Top Performers
+            </CardTitle>
+            <CardDescription>Average scores by student (Top 10)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {data.studentPerformance.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={data.studentPerformance} layout="horizontal">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" domain={[0, 100]} />
+                  <YAxis type="category" dataKey="name" width={80} />
+                  <Tooltip 
+                    formatter={(value: number, name: string) => {
+                      if (name === "score") return [`${value}%`, "Avg Score"];
+                      return [value, name];
+                    }}
+                  />
+                  <Bar dataKey="score" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center">
+                <p className="text-muted-foreground">No student performance data yet</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

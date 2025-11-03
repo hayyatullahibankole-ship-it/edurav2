@@ -12,6 +12,7 @@ import SchoolAvailableExams from "@/components/school/SchoolAvailableExams";
 import SchoolReports from "@/components/school/SchoolReports";
 import SchoolBilling from "@/components/school/SchoolBilling";
 import SchoolSettings from "@/components/school/SchoolSettings";
+import SchoolOverviewCharts from "@/components/school/SchoolOverviewCharts";
 
 export default function SchoolDashboard() {
   const navigate = useNavigate();
@@ -239,24 +240,28 @@ export default function SchoolDashboard() {
                 </CardContent>
               </Card>
             ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Welcome to Your School Dashboard</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Manage your students, monitor their performance, and access Edura's comprehensive CBT platform.
-                  </p>
-                  <div className="space-y-2">
-                    <p><strong>School Code:</strong> {schoolData?.school_code}</p>
-                    <p><strong>Email:</strong> {schoolData?.email}</p>
-                    <p><strong>Phone:</strong> {schoolData?.phone}</p>
-                    {subscriptionData && (
-                      <p><strong>Subscription Expires:</strong> {new Date(subscriptionData.end_date).toLocaleDateString()}</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Welcome to Your School Dashboard</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">
+                      Manage your students, monitor their performance, and access Edura's comprehensive CBT platform.
+                    </p>
+                    <div className="space-y-2">
+                      <p><strong>School Code:</strong> {schoolData?.school_code}</p>
+                      <p><strong>Email:</strong> {schoolData?.email}</p>
+                      <p><strong>Phone:</strong> {schoolData?.phone}</p>
+                      {subscriptionData && (
+                        <p><strong>Subscription Expires:</strong> {new Date(subscriptionData.end_date).toLocaleDateString()}</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <SchoolOverviewCharts schoolId={schoolData?.id} />
+              </>
             )}
           </TabsContent>
 
