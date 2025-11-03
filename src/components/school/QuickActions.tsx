@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserPlus, Download, Users, FileText } from "lucide-react";
+import { UserPlus, Download, Users, FileText, BookOpen } from "lucide-react";
 import { toast } from "sonner";
+import { generateSchoolManual } from "@/utils/schoolManualGenerator";
 
 interface QuickActionsProps {
   onAddStudent: () => void;
@@ -13,6 +14,15 @@ interface QuickActionsProps {
 export default function QuickActions({ onAddStudent, onViewReports, onViewStudents, schoolId }: QuickActionsProps) {
   const handleDownloadReport = () => {
     toast.info("Report download feature coming soon");
+  };
+
+  const handleDownloadManual = () => {
+    try {
+      generateSchoolManual();
+      toast.success("User manual downloaded successfully!");
+    } catch (error) {
+      toast.error("Failed to download manual. Please try again.");
+    }
   };
 
   return (
@@ -35,10 +45,10 @@ export default function QuickActions({ onAddStudent, onViewReports, onViewStuden
           <Button
             variant="outline"
             className="h-auto flex-col gap-2 p-4"
-            onClick={handleDownloadReport}
+            onClick={handleDownloadManual}
           >
-            <Download className="h-5 w-5" />
-            <span className="text-xs font-medium">Download Report</span>
+            <BookOpen className="h-5 w-5" />
+            <span className="text-xs font-medium">User Manual</span>
           </Button>
 
           <Button
