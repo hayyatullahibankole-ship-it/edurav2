@@ -93,8 +93,21 @@ export default function SchoolVerificationPending() {
           <Button onClick={sendMagicLink} disabled={sendingMagic} variant="secondary" className="w-full">
             {sendingMagic ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending...</>) : "Send magic login link"}
           </Button>
+          
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or</span>
+            </div>
+          </div>
+
+          <Button onClick={() => navigate("/school-login")} variant="default" className="w-full">
+            Go to School Login
+          </Button>
           <Button onClick={() => navigate("/auth")} variant="outline" className="w-full">
-            Back to Login
+            Back to Student Login
           </Button>
         </CardContent>
       </Card>

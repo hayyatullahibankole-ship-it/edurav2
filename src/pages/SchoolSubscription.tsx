@@ -145,7 +145,10 @@ export default function SchoolSubscription() {
   };
 
   const handlePayment = async () => {
-    console.log("Handle payment clicked. School data:", schoolData);
+    console.log("=== HANDLE PAYMENT CLICKED ===");
+    console.log("Current school data:", schoolData);
+    console.log("Student count:", studentCount);
+    console.log("User:", user);
     
     // Ensure we have a school record; if missing, try to create it inline
     if (!schoolData) {
