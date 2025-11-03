@@ -19,6 +19,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -53,11 +54,16 @@ export function DashboardSidebar({ onLogout }: DashboardSidebarProps) {
   };
 
   return (
-    <Sidebar className="border-r bg-sidebar">
+    <Sidebar className="border-r bg-sidebar" collapsible="icon">
       <SidebarContent className="bg-sidebar">
-        {/* Logo */}
-        <div className="p-6 flex items-center justify-center border-b border-sidebar-border bg-white">
-          <img src={eduraLogo} alt="Edura" className="h-16 w-auto" />
+        {/* Logo and Toggle */}
+        <div className="p-6 flex items-center justify-between border-b border-sidebar-border bg-white">
+          {state !== "collapsed" ? (
+            <img src={eduraLogo} alt="Edura" className="h-24 w-auto mx-auto" />
+          ) : (
+            <img src={eduraLogo} alt="Edura" className="h-10 w-auto mx-auto" />
+          )}
+          <SidebarTrigger className="ml-auto" />
         </div>
 
         {/* Navigation */}

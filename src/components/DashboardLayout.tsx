@@ -31,10 +31,10 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   // On desktop, show with sidebar
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-background">
         <DashboardSidebar onLogout={handleLogout} />
-        <main className="flex-1 flex flex-col min-h-screen bg-gradient-to-br from-background via-muted/30 to-background animate-fade-in">
+        <main className="flex-1 flex flex-col min-h-screen bg-gradient-to-br from-background via-muted/30 to-background animate-fade-in overflow-x-hidden">
           {children}
         </main>
       </div>

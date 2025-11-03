@@ -133,8 +133,8 @@ const Home = () => {
               </Link>
             </div>
             <div className="mt-8 text-center">
-              <Link to="/schools">
-                <Button size="lg" variant="ghost" className="border border-border/50 hover:bg-muted shadow-lg transition-all px-6 py-3">
+              <Link to="/school-landing">
+                <Button size="lg" variant="secondary" className="border-2 border-white/40 bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all px-6 py-3 font-semibold">
                   <Users className="mr-2 h-5 w-5" />
                   Register as a School
                 </Button>
