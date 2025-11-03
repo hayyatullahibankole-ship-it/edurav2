@@ -57,7 +57,7 @@ export function DashboardSidebar({ onLogout }: DashboardSidebarProps) {
       <SidebarContent className="bg-sidebar">
         {/* Logo */}
         <div className="p-6 flex items-center justify-center border-b border-sidebar-border bg-white">
-          <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
+          <img src={eduraLogo} alt="Edura" className="h-16 w-auto" />
         </div>
 
         {/* Navigation */}

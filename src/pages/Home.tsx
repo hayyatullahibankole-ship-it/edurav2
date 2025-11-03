@@ -82,7 +82,7 @@ const Home = () => {
         <div 
           className="absolute inset-0"
           style={{
-            backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(249, 250, 251, 0.88)), url(${heroImage})`,
+            backgroundImage: `linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(59, 130, 246, 0.85)), url(${heroImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
@@ -90,16 +90,16 @@ const Home = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/10" />
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto text-center">
-            <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-all px-6 py-2 text-sm font-medium">
+            <Badge className="mb-6 bg-white/20 text-white border-white/30 hover:bg-white/30 transition-all px-6 py-2 text-sm font-medium backdrop-blur-sm">
               ✨ Trusted by 50,000+ Students Nationwide
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight tracking-tight animate-fade-in-up text-foreground">
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight tracking-tight animate-fade-in-up text-white drop-shadow-lg">
               Master WAEC & JAMB 
-              <span className="block mt-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <span className="block mt-2 text-white">
                 with Smart CBT Practice
               </span>
             </h1>
-            <p className="text-xl md:text-2xl mb-10 text-foreground/80 max-w-3xl mx-auto leading-relaxed font-light">
+            <p className="text-xl md:text-2xl mb-10 text-white/95 max-w-3xl mx-auto leading-relaxed font-light drop-shadow-md">
               Access thousands of practice questions, detailed analytics, and expert guidance. 
               Join successful students who achieved their dream scores.
             </p>
