@@ -59,20 +59,9 @@ export default function SchoolSubscription() {
   }, [studentCount]);
 
   const calculatePrice = () => {
-    let price = 300;
-    
-    if (studentCount > 500) {
-      setPricePerStudent(0);
-      setTotalAmount(0);
-      return;
-    } else if (studentCount > 200) {
-      price = 200;
-    } else if (studentCount > 50) {
-      price = 250;
-    }
-
-    setPricePerStudent(price);
-    setTotalAmount(price * studentCount);
+    // Set pricing to zero for all school subscriptions
+    setPricePerStudent(0);
+    setTotalAmount(0);
   };
 
   const handlePayment = async () => {
@@ -94,37 +83,38 @@ export default function SchoolSubscription() {
     setLoading(true);
 
     try {
-      // Create subscription record
+      // Create and activate free subscription
+      const endDate = new Date();
+      endDate.setFullYear(endDate.getFullYear() + 1); // 1 year free subscription
+
       const { data: subscription, error: subError } = await (supabase as any)
         .from("school_subscriptions")
         .insert({
           school_id: schoolData.id,
           student_seats: studentCount,
-          price_per_student: pricePerStudent,
-          total_amount: totalAmount,
-          status: "pending",
+          price_per_student: 0,
+          total_amount: 0,
+          status: "ACTIVE",
           admin_user_id: user?.id,
+          start_date: new Date().toISOString(),
+          end_date: endDate.toISOString(),
+          auto_renew: false,
         })
         .select()
         .single();
 
       if (subError) throw subError;
 
-      // Initiate payment (simplified without callbacks for now)
-      const amountInKobo = totalAmount * 100;
+      toast.success("School subscription activated successfully!");
       
-      toast.info("Redirecting to payment...");
-      
-      // Store subscription ID for later verification
-      localStorage.setItem("pending_school_subscription", subscription.id);
-      
-      // Use basic paystack initialization
-      window.location.href = `/payment?amount=${amountInKobo}&email=${schoolData.email}&reference=school_sub_${subscription.id}`;
-
+      // Redirect to school dashboard
+      setTimeout(() => {
+        navigate("/school-dashboard");
+      }, 1500);
 
     } catch (error: any) {
-      console.error("Payment error:", error);
-      toast.error(error.message || "Failed to initiate payment");
+      console.error("Activation error:", error);
+      toast.error(error.message || "Failed to activate subscription");
     } finally {
       setLoading(false);
     }
@@ -176,29 +166,17 @@ export default function SchoolSubscription() {
 
             {/* Pricing Table */}
             <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-              <h3 className="font-semibold mb-3">Pricing Tiers</h3>
+              <h3 className="font-semibold mb-3">Pricing</h3>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>1 - 50 students</span>
-                  <span className="font-medium">₦300 per student</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>51 - 200 students</span>
-                  <span className="font-medium">₦250 per student</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>201 - 500 students</span>
-                  <span className="font-medium">₦200 per student</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>501+ students</span>
-                  <span className="font-medium text-primary">Contact Support</span>
+                <div className="flex justify-between items-center">
+                  <span>All students</span>
+                  <span className="font-medium text-primary">FREE</span>
                 </div>
               </div>
             </div>
 
             {/* Calculation Display */}
-            {studentCount > 0 && studentCount <= 500 && (
+            {studentCount > 0 && (
               <div className="bg-primary/10 rounded-lg p-6 space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Students:</span>
@@ -206,12 +184,12 @@ export default function SchoolSubscription() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Price per student:</span>
-                  <span className="font-semibold text-lg">₦{pricePerStudent.toLocaleString()}</span>
+                  <span className="font-semibold text-lg text-primary">FREE</span>
                 </div>
                 <div className="border-t pt-3">
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold">Total Amount:</span>
-                    <span className="text-2xl font-bold text-primary">₦{totalAmount.toLocaleString()}</span>
+                    <span className="text-2xl font-bold text-primary">FREE</span>
                   </div>
                 </div>
               </div>
@@ -228,19 +206,19 @@ export default function SchoolSubscription() {
 
             <Button
               onClick={handlePayment}
-              disabled={loading || studentCount < 1 || studentCount > 500}
+              disabled={loading || studentCount < 1}
               className="w-full"
               size="lg"
             >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
+                  Activating...
                 </>
               ) : (
                 <>
                   <CreditCard className="mr-2 h-4 w-4" />
-                  Proceed to Payment
+                  Activate Free Subscription
                 </>
               )}
             </Button>
