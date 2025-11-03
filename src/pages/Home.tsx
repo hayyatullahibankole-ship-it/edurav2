@@ -82,59 +82,59 @@ const Home = () => {
         <div 
           className="absolute inset-0"
           style={{
-            backgroundImage: `linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(16, 185, 129, 0.9)), url(${heroImage})`,
+            backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(249, 250, 251, 0.88)), url(${heroImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/10" />
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-5xl mx-auto text-center text-white">
-            <Badge className="mb-6 bg-white/20 text-white border-white/40 hover:bg-white/30 transition-all px-6 py-2 text-sm font-medium backdrop-blur-sm">
+          <div className="max-w-5xl mx-auto text-center">
+            <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-all px-6 py-2 text-sm font-medium">
               ✨ Trusted by 50,000+ Students Nationwide
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight tracking-tight animate-fade-in-up">
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight tracking-tight animate-fade-in-up text-foreground">
               Master WAEC & JAMB 
-              <span className="block mt-2 bg-gradient-to-r from-green-200 to-emerald-300 bg-clip-text text-transparent">
+              <span className="block mt-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 with Smart CBT Practice
               </span>
             </h1>
-            <p className="text-xl md:text-2xl mb-10 text-white/95 max-w-3xl mx-auto leading-relaxed font-light">
+            <p className="text-xl md:text-2xl mb-10 text-foreground/80 max-w-3xl mx-auto leading-relaxed font-light">
               Access thousands of practice questions, detailed analytics, and expert guidance. 
               Join successful students who achieved their dream scores.
             </p>
             <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
               {isMobileWeb ? (
                 <Link to="/install-app" className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg font-semibold">
+                  <Button size="lg" className="w-full sm:w-auto shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg font-semibold">
                     <Download className="mr-2 h-6 w-6" />
                     Install App
                   </Button>
                 </Link>
               ) : user ? (
                 <ScheduleTestModal defaultExamType="jamb">
-                  <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg font-semibold">
+                  <Button size="lg" className="w-full sm:w-auto shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg font-semibold">
                     Start JAMB Practice
                     <ArrowRight className="ml-2 h-6 w-6" />
                   </Button>
                 </ScheduleTestModal>
               ) : (
                 <Link to="/auth" className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg font-semibold">
+                  <Button size="lg" className="w-full sm:w-auto shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg font-semibold">
                     Start JAMB Practice
                     <ArrowRight className="ml-2 h-6 w-6" />
                   </Button>
                 </Link>
               )}
               <Link to="/demo" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto bg-white/10 backdrop-blur-sm text-white border-white/40 hover:bg-white/20 shadow-lg transition-all px-8 py-6 text-lg font-semibold">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 shadow-lg transition-all px-8 py-6 text-lg font-semibold">
                   View Demo
                 </Button>
               </Link>
             </div>
             <div className="mt-8 text-center">
               <Link to="/schools">
-                <Button size="lg" variant="ghost" className="bg-white/5 backdrop-blur-sm text-white border border-white/20 hover:bg-white/10 shadow-lg transition-all px-6 py-3">
+                <Button size="lg" variant="ghost" className="border border-border/50 hover:bg-muted shadow-lg transition-all px-6 py-3">
                   <Users className="mr-2 h-5 w-5" />
                   Register as a School
                 </Button>
