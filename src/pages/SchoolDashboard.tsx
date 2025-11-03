@@ -249,7 +249,7 @@ export default function SchoolDashboard() {
                         <CardDescription>Total Seats</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold tracking-tight">
+                        <div className="text-3xl font-bold tracking-tight break-words">
                           {subscriptionData?.student_seats || schoolData?.max_students || 0}
                         </div>
                         <p className="text-xs text-muted-foreground mt-2">
@@ -263,7 +263,7 @@ export default function SchoolDashboard() {
                         <CardDescription>Students Added</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold tracking-tight">
+                        <div className="text-3xl font-bold tracking-tight break-words">
                           {schoolData?.students_added || 0}
                         </div>
                         <p className="text-xs text-muted-foreground mt-2">
@@ -277,7 +277,7 @@ export default function SchoolDashboard() {
                         <CardDescription>Available Slots</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold tracking-tight">
+                        <div className="text-3xl font-bold tracking-tight break-words">
                           {remainingSlots}
                         </div>
                         <p className="text-xs text-muted-foreground mt-2">
@@ -291,11 +291,11 @@ export default function SchoolDashboard() {
                         <CardDescription>Subscription Status</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold tracking-tight capitalize">
+                        <div className="text-3xl font-bold tracking-tight capitalize break-words">
                           {subscriptionData?.status || 'Inactive'}
                         </div>
                         {subscriptionData?.end_date && (
-                          <p className="text-xs text-muted-foreground mt-2">
+                          <p className="text-xs text-muted-foreground mt-2 break-words">
                             Until {new Date(subscriptionData.end_date).toLocaleDateString()}
                           </p>
                         )}
@@ -310,21 +310,21 @@ export default function SchoolDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid gap-6 md:grid-cols-2">
-                        <div className="space-y-1">
+                        <div className="space-y-1 min-w-0">
                           <p className="text-sm text-muted-foreground">School Name</p>
-                          <p className="font-medium">{schoolData?.name}</p>
+                          <p className="font-medium break-words">{schoolData?.name}</p>
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-1 min-w-0">
                           <p className="text-sm text-muted-foreground">Email Address</p>
-                          <p className="font-medium">{schoolData?.email}</p>
+                          <p className="font-medium break-all text-sm">{schoolData?.email}</p>
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-1 min-w-0">
                           <p className="text-sm text-muted-foreground">Phone Number</p>
-                          <p className="font-medium">{schoolData?.phone}</p>
+                          <p className="font-medium break-words">{schoolData?.phone}</p>
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-1 min-w-0">
                           <p className="text-sm text-muted-foreground">School Code</p>
-                          <p className="font-medium font-mono">{schoolData?.school_code}</p>
+                          <p className="font-medium font-mono break-words">{schoolData?.school_code}</p>
                         </div>
                       </div>
                     </CardContent>
