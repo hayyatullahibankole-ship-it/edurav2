@@ -9,6 +9,7 @@ import { toast } from "sonner";
 export default function SchoolVerificationPending() {
   const navigate = useNavigate();
   const [sending, setSending] = useState(false);
+  const [sendingMagic, setSendingMagic] = useState(false);
 
   const resendVerification = async () => {
     try {
@@ -42,6 +43,35 @@ export default function SchoolVerificationPending() {
     }
   };
 
+  const sendMagicLink = async () => {
+    try {
+      setSendingMagic(true);
+      const pendingRaw = localStorage.getItem("pendingSchoolRegistration");
+      const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
+      const email = pending?.schoolEmail;
+
+      if (!email) {
+        toast.error("We couldn't find your registration email. Please register again.");
+        navigate("/school-registration");
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/school-subscription` },
+      });
+
+      if (error) throw error;
+
+      toast.success("Magic login link sent. Check your email.");
+    } catch (e: any) {
+      console.error("Send magic link failed", e);
+      toast.error(e.message || "Failed to send magic link");
+    } finally {
+      setSendingMagic(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
       <Card className="max-w-md w-full">
@@ -59,6 +89,9 @@ export default function SchoolVerificationPending() {
           </p>
           <Button onClick={resendVerification} disabled={sending} className="w-full">
             {sending ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Resending...</>) : "Resend verification email"}
+          </Button>
+          <Button onClick={sendMagicLink} disabled={sendingMagic} variant="secondary" className="w-full">
+            {sendingMagic ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending...</>) : "Send magic login link"}
           </Button>
           <Button onClick={() => navigate("/auth")} variant="outline" className="w-full">
             Back to Login
