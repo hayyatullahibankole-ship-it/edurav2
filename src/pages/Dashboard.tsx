@@ -47,6 +47,7 @@ import LoadingAnimation from "@/components/LoadingAnimation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
 import eduraLogo from "@/assets/edura-logo.png";
+import { AIAssistant } from "@/components/AIAssistant";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -893,6 +894,7 @@ const Dashboard = () => {
 
         </Tabs>
       </div>
+      <AIAssistant />
     </div>
   );
 };

@@ -35,6 +35,7 @@ import ComparisonAnalytics from "@/components/school/ComparisonAnalytics";
 import AlertsCenter from "@/components/school/AlertsCenter";
 import ExportTools from "@/components/school/ExportTools";
 import WelcomeManualModal from "@/components/school/WelcomeManualModal";
+import { AIAssistant } from "@/components/AIAssistant";
 
 const menuItems = [
   { id: "overview", title: "Overview", icon: LayoutDashboard },
@@ -418,6 +419,7 @@ export default function SchoolDashboard() {
           schoolName={schoolData.name}
         />
       )}
+      <AIAssistant />
     </SidebarProvider>
   );
 }

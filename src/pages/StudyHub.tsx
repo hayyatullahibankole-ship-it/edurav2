@@ -10,7 +10,6 @@ import Layout from '@/components/Layout';
 import { SubjectButton } from '@/components/dashboard/SubjectButton';
 import { useIsMobile } from '@/hooks/use-mobile';
 import WhatsAppButton from '@/components/WhatsAppButton';
-import { AIAssistant } from '@/components/AIAssistant';
 import MobileNav from '@/components/MobileNav';
 import { useInstalledApp } from '@/hooks/useInstalledApp';
 
@@ -257,7 +256,6 @@ if (isMobile) {
         else if (tab === 'profile') navigate('/dashboard?tab=profile');
       }} />}
       <WhatsAppButton />
-      <AIAssistant />
     </>
   );
 }
