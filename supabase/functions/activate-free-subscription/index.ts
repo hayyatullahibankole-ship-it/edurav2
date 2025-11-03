@@ -18,15 +18,14 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization") ?? "";
     const token = authHeader.replace("Bearer ", "");
 
-    // Authenticated client (to verify user)
-    const authClient = createClient(supabaseUrl, token);
-    const { data: userRes, error: userErr } = await authClient.auth.getUser();
+    // Admin client (bypasses RLS for DB ops)
+    const admin = createClient(supabaseUrl, serviceKey);
+
+    // Verify the caller using the JWT sent by supabase-js
+    const { data: userRes, error: userErr } = await admin.auth.getUser(token);
     if (userErr || !userRes?.user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-
-    // Admin client (bypass RLS)
-    const admin = createClient(supabaseUrl, serviceKey);
 
     const { student_seats = 50, school, pending } = await req.json().catch(() => ({}));
 
