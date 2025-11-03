@@ -17,7 +17,8 @@ import {
   Search,
   UserPlus,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  UserX
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -248,6 +249,151 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
     }
   };
 
+  const deleteFreeAccountsWithoutSubscription = async () => {
+    const confirmation = confirm(
+      'Are you sure you want to delete ALL free accounts that have never subscribed? This action cannot be undone and will permanently delete:\n\n' +
+      '- Users who have never had any paid subscription\n' +
+      '- All their data including attempts and progress\n\n' +
+      'This will NOT delete:\n' +
+      '- Users with active subscriptions\n' +
+      '- Users who had paid subscriptions (even if expired)\n' +
+      '- School students\n' +
+      '- Admin accounts'
+    );
+
+    if (!confirmation) return;
+
+    try {
+      setLoading(true);
+      
+      // Find users who have never had a paid subscription
+      const { data: freeUsers, error: fetchError } = await supabase
+        .from('users')
+        .select(`
+          id,
+          email,
+          first_name,
+          last_name,
+          subscriptions!inner(
+            id,
+            status,
+            subscription_plans!inner(
+              price,
+              resource_access_level
+            )
+          ),
+          user_roles!inner(role)
+        `);
+
+      if (fetchError) throw fetchError;
+
+      // Also get users with no subscriptions at all
+      const { data: noSubUsers, error: noSubError } = await supabase
+        .from('users')
+        .select('id, email, first_name, last_name, user_roles!inner(role)')
+        .not('id', 'in', `(SELECT user_id FROM subscriptions)`);
+
+      if (noSubError) throw noSubError;
+
+      // Filter to only free accounts (no paid subs ever, not admins, not school students)
+      const usersToDelete: string[] = [];
+      
+      // Check users with subscriptions - only delete if they've NEVER had a paid one
+      if (freeUsers) {
+        for (const user of freeUsers) {
+          const isAdmin = user.user_roles?.some((r: any) => 
+            ['admin', 'super_admin'].includes(r.role)
+          );
+          
+          if (isAdmin) continue;
+
+          const hasPaidSub = user.subscriptions?.some((sub: any) => 
+            sub.subscription_plans?.price > 0
+          );
+
+          if (!hasPaidSub) {
+            usersToDelete.push(user.id);
+          }
+        }
+      }
+
+      // Add users with no subscriptions (excluding admins)
+      if (noSubUsers) {
+        for (const user of noSubUsers) {
+          const isAdmin = user.user_roles?.some((r: any) => 
+            ['admin', 'super_admin'].includes(r.role)
+          );
+          
+          if (!isAdmin) {
+            usersToDelete.push(user.id);
+          }
+        }
+      }
+
+      // Check if they're school students
+      const { data: schoolStudents } = await supabase
+        .from('school_students')
+        .select('user_id')
+        .in('user_id', usersToDelete);
+
+      const schoolStudentIds = new Set(schoolStudents?.map(s => s.user_id) || []);
+      const finalUsersToDelete = usersToDelete.filter(id => !schoolStudentIds.has(id));
+
+      if (finalUsersToDelete.length === 0) {
+        toast({
+          title: "No Users to Delete",
+          description: "No free accounts without subscriptions found"
+        });
+        return;
+      }
+
+      const secondConfirmation = confirm(
+        `Found ${finalUsersToDelete.length} free accounts to delete. Continue?`
+      );
+
+      if (!secondConfirmation) return;
+
+      // Delete users one by one
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const userId of finalUsersToDelete) {
+        try {
+          const { data, error } = await supabase.rpc('delete_user_completely_by_app_id', {
+            user_app_id: userId
+          });
+
+          if (error || !data) {
+            console.error('Failed to delete user:', userId, error);
+            failCount++;
+          } else {
+            successCount++;
+          }
+        } catch (err) {
+          console.error('Error deleting user:', userId, err);
+          failCount++;
+        }
+      }
+
+      toast({
+        title: "Bulk Delete Complete",
+        description: `Successfully deleted ${successCount} users. ${failCount > 0 ? `Failed: ${failCount}` : ''}`
+      });
+
+      onRefresh();
+      
+    } catch (error) {
+      console.error('Error deleting free accounts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete free accounts",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -256,6 +402,15 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
           <p className="text-slate-400">Manage system users and permissions</p>
         </div>
         <div className="flex items-center space-x-3">
+          <Button 
+            variant="destructive" 
+            onClick={deleteFreeAccountsWithoutSubscription}
+            disabled={loading}
+          >
+            <UserX className="w-4 h-4 mr-2" />
+            Delete Free Accounts
+          </Button>
+          
           <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
             <DialogTrigger asChild>
               <Button className="bg-blue-600 hover:bg-blue-700">
