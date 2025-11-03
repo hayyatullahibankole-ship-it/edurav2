@@ -93,7 +93,7 @@ export default function SchoolDashboard() {
     );
   }
 
-  const remainingSlots = (schoolData?.student_limit || 0) - (schoolData?.students_added || 0);
+  const remainingSlots = (subscriptionData?.student_seats || schoolData?.max_students || 0) - (schoolData?.students_added || 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -117,7 +117,7 @@ export default function SchoolDashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{schoolData?.student_limit || 0}</div>
+              <div className="text-2xl font-bold">{subscriptionData?.student_seats || schoolData?.max_students || 0}</div>
             </CardContent>
           </Card>
 
@@ -147,7 +147,7 @@ export default function SchoolDashboard() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${subscriptionData?.status === 'active' ? 'text-green-600' : 'text-yellow-600'}`}>
+              <div className={`text-2xl font-bold ${subscriptionData?.status?.toUpperCase() === 'ACTIVE' ? 'text-green-600' : 'text-yellow-600'}`}>
                 {subscriptionData?.status || 'Inactive'}
               </div>
             </CardContent>

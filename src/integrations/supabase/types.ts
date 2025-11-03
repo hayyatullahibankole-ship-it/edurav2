@@ -1978,6 +1978,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           email: string
+          email_verified: boolean | null
           id: string
           is_active: boolean | null
           logo_url: string | null
@@ -1985,8 +1986,11 @@ export type Database = {
           name: string
           phone: string | null
           registration_number: string | null
+          school_code: string | null
           slug: string
           state: string | null
+          students_added: number | null
+          type: string | null
           updated_at: string | null
           website: string | null
         }
@@ -1998,6 +2002,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email: string
+          email_verified?: boolean | null
           id?: string
           is_active?: boolean | null
           logo_url?: string | null
@@ -2005,8 +2010,11 @@ export type Database = {
           name: string
           phone?: string | null
           registration_number?: string | null
+          school_code?: string | null
           slug: string
           state?: string | null
+          students_added?: number | null
+          type?: string | null
           updated_at?: string | null
           website?: string | null
         }
@@ -2018,6 +2026,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email?: string
+          email_verified?: boolean | null
           id?: string
           is_active?: boolean | null
           logo_url?: string | null
@@ -2025,8 +2034,11 @@ export type Database = {
           name?: string
           phone?: string | null
           registration_number?: string | null
+          school_code?: string | null
           slug?: string
           state?: string | null
+          students_added?: number | null
+          type?: string | null
           updated_at?: string | null
           website?: string | null
         }
