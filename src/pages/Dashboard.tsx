@@ -287,32 +287,34 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
+    <div className="min-h-screen bg-background">
       <OnboardingTour 
         isOpen={showOnboarding} 
         onComplete={() => setShowOnboarding(false)} 
       />
       
-      {/* Clean Modern Header */}
-      <div className="border-b bg-card/50 backdrop-blur-xl sticky top-0 z-50">
+      {/* Modern Clean Header */}
+      <header className="border-b bg-card sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            {/* Left: Logo and Welcome */}
+            {/* Logo and User Info */}
             <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-primary to-secondary p-2 rounded-xl shadow-lg">
+              <div className="bg-primary/10 p-2 rounded-lg">
                 <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
               </div>
-              <div className="hidden md:block">
-                <h1 className="text-lg font-bold text-foreground">
-                  Welcome, {userProfile?.first_name || user?.email?.split('@')[0]}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {stats.testsTaken > 0 ? `${stats.testsTaken} tests • ${stats.averageScore}% avg` : 'Start your learning journey'}
-                </p>
-              </div>
+              {!isMobile && (
+                <div>
+                  <h1 className="text-lg font-semibold text-foreground">
+                    {userProfile?.first_name || user?.email?.split('@')[0]}
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    {stats.testsTaken > 0 ? `${stats.testsTaken} tests completed` : 'Ready to start learning?'}
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Right: Actions */}
+            {/* Actions */}
             <div className="flex items-center gap-3">
               {!subscriptionLoading && (
                 <Badge variant={isPremium ? "default" : "secondary"} className="hidden md:flex">
@@ -328,7 +330,7 @@ const Dashboard = () => {
               )}
               <NotificationBell />
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size={isMobile ? "sm" : "default"}
                 onClick={handleLogout}
                 className="gap-2"
@@ -339,7 +341,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       <div className={`container mx-auto px-4 sm:px-6 lg:px-8 py-6 ${isInstalledApp ? 'pb-24' : ''}`}>
         <Tabs value={activeTab} onValueChange={(value) => {
@@ -357,37 +359,59 @@ const Dashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="dashboard" className="space-y-6">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatCard 
-                icon={Target}
-                label="Tests Taken"
-                value={loading ? "..." : stats.testsTaken}
-                subtext="Total attempts"
-                gradient="from-primary to-secondary"
-              />
-              <StatCard 
-                icon={TrendingUp}
-                label="Average Score"
-                value={loading ? "..." : `${stats.averageScore}%`}
-                subtext={stats.averageScore >= 70 ? "Great job!" : "Keep practicing"}
-                gradient="from-info to-primary"
-              />
-              <StatCard 
-                icon={Clock}
-                label="Study Time"
-                value={loading ? "..." : `${stats.studyHours}h`}
-                subtext="Time invested"
-                gradient="from-secondary to-accent"
-              />
-              <StatCard 
-                icon={Trophy}
-                label="Your Rank"
-                value={loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}
-                subtext={stats.totalStudents > 0 ? `of ${stats.totalStudents}` : "Start testing"}
-                gradient="from-warning to-primary"
-              />
+          <TabsContent value="dashboard" className="space-y-8">
+            {/* Stats Overview */}
+            <div>
+              <h2 className="text-2xl font-bold mb-6">Your Performance</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="border-border/50 hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <Target className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="text-3xl font-bold">{loading ? "..." : stats.testsTaken}</div>
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground">Tests Taken</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/50 hover:border-accent/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 bg-accent/10 rounded-lg">
+                        <TrendingUp className="h-5 w-5 text-accent" />
+                      </div>
+                      <div className="text-3xl font-bold">{loading ? "..." : `${stats.averageScore}%`}</div>
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground">Average Score</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/50 hover:border-secondary/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 bg-secondary/10 rounded-lg">
+                        <Clock className="h-5 w-5 text-secondary" />
+                      </div>
+                      <div className="text-3xl font-bold">{loading ? "..." : `${stats.studyHours}h`}</div>
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground">Study Time</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/50 hover:border-warning/50 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 bg-warning/10 rounded-lg">
+                        <Trophy className="h-5 w-5 text-warning" />
+                      </div>
+                      <div className="text-3xl font-bold">{loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "—"}</div>
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground">Your Rank</p>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-6">
@@ -395,42 +419,35 @@ const Dashboard = () => {
               <div className="lg:col-span-2 space-y-6">
                 {/* Quick Actions */}
                 {!isInstalledApp && (
-                  <Card className="border-0 shadow-lg">
+                  <Card>
                     <CardHeader>
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-xl">
-                          <Rocket className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <CardTitle>Quick Actions</CardTitle>
-                          <CardDescription>Start practicing for your exams</CardDescription>
-                        </div>
-                      </div>
+                      <CardTitle className="text-xl">Start Practice</CardTitle>
+                      <CardDescription>Choose your exam type</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="grid md:grid-cols-2 gap-3">
                         <ScheduleTestModal defaultExamType="jamb">
-                          <Button className="w-full h-20 text-base font-semibold">
-                            <Play className="h-5 w-5 mr-2" />
-                            JAMB Practice
+                          <Button size="lg" className="w-full h-auto py-4 flex-col gap-2">
+                            <Play className="h-5 w-5" />
+                            <span className="font-semibold">JAMB Practice</span>
                           </Button>
                         </ScheduleTestModal>
                         <ScheduleTestModal defaultExamType="waec">
-                          <Button variant="outline" className="w-full h-20 text-base font-semibold border-2">
-                            <Play className="h-5 w-5 mr-2" />
-                            WAEC Practice
+                          <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
+                            <Play className="h-5 w-5" />
+                            <span className="font-semibold">WAEC Practice</span>
                           </Button>
                         </ScheduleTestModal>
                         <ScheduleTestModal defaultExamType="neco">
-                          <Button variant="outline" className="w-full h-20 text-base font-semibold border-2">
-                            <Play className="h-5 w-5 mr-2" />
-                            NECO Practice
+                          <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
+                            <Play className="h-5 w-5" />
+                            <span className="font-semibold">NECO Practice</span>
                           </Button>
                         </ScheduleTestModal>
                         <ScheduleTestModal defaultExamType="post-utme">
-                          <Button variant="outline" className="w-full h-20 text-base font-semibold border-2">
-                            <Play className="h-5 w-5 mr-2" />
-                            POST-UTME
+                          <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
+                            <Play className="h-5 w-5" />
+                            <span className="font-semibold">POST-UTME</span>
                           </Button>
                         </ScheduleTestModal>
                       </div>
@@ -439,144 +456,129 @@ const Dashboard = () => {
                 )}
 
                 {/* Subscription Management - Mobile Only */}
-                {!isMobile && <div className="h-4" />}
-                
                 {isMobile && (
-                  <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 border border-primary/20 animate-fade-in">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-3xl" />
-                    
-                    <div className="relative z-10">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="p-2.5 bg-primary/20 rounded-xl">
-                          <Zap className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-base">Subscription</h3>
-                          <p className="text-xs text-muted-foreground">{isPremium ? 'Premium Active' : 'Free Plan'}</p>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-primary/10 rounded-lg">
+                            <Zap className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold">Subscription</h3>
+                            <p className="text-xs text-muted-foreground">{isPremium ? 'Premium Active' : 'Free Plan'}</p>
+                          </div>
                         </div>
                       </div>
                       
                       <Link to="/payment">
-                        <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary to-primary-glow text-white shadow-lg active:scale-[0.98] transition-all">
-                          <div className="flex items-center gap-2">
-                            <Sparkles className="h-5 w-5" />
-                            <span className="font-semibold">{isPremium ? 'Manage Plan' : 'Go Premium'}</span>
-                          </div>
-                          <ChevronRight className="h-5 w-5" />
-                        </div>
+                        <Button className="w-full" variant={isPremium ? "outline" : "default"}>
+                          {isPremium ? 'Manage Plan' : 'Go Premium'}
+                          <ChevronRight className="h-4 w-4 ml-2" />
+                        </Button>
                       </Link>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 )}
 
-                {/* Premium Features - Compact Row */}
+                {/* Premium Features */}
                 <div>
-                  <div className="mb-3">
-                    <h2 className={`${isMobile ? 'text-base' : 'text-xl'} font-bold flex items-center gap-2`}>
-                      <Rocket className="h-5 w-5 text-primary" />
-                      Premium Features
-                    </h2>
-                  </div>
-                  <div className={`grid ${isMobile ? 'grid-cols-1 gap-2' : 'md:grid-cols-2 lg:grid-cols-3 gap-4'}`}>
-                    {/* Study Hub Card */}
-                    <Link to="/study-hub" className="group">
-                      <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-primary/5 to-secondary/5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl" />
-                        <CardContent className="relative p-5">
-                          <div className="flex items-center gap-4 mb-2">
-                            <div className="p-2.5 bg-gradient-to-br from-primary to-secondary rounded-xl shadow-md group-hover:scale-105 transition-transform">
-                              <GraduationCap className="h-6 w-6 text-white" />
+                  <h2 className="text-2xl font-bold mb-6">Explore Features</h2>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Study Hub */}
+                    <Link to="/study-hub">
+                      <Card className="group hover:shadow-md transition-shadow cursor-pointer h-full">
+                        <CardContent className="p-5">
+                          <div className="flex items-start gap-4">
+                            <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                              <GraduationCap className="h-6 w-6 text-primary" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
+                              <h3 className="font-semibold mb-1 flex items-center gap-2">
                                 Study Hub
-                                <Badge className="bg-primary/20 text-primary border-primary/30 text-xs px-2 py-0.5">Popular</Badge>
+                                <Badge variant="secondary" className="text-xs">Popular</Badge>
                               </h3>
-                              <p className="text-sm text-muted-foreground line-clamp-1">Lessons & tutorials</p>
+                              <p className="text-sm text-muted-foreground">Lessons & tutorials</p>
                             </div>
-                            <ChevronRight className="h-5 w-5 text-primary group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                           </div>
                         </CardContent>
                       </Card>
                     </Link>
 
-                    {/* Ask Tutor Card */}
-                    <Link to="/forum" className="group">
-                      <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-success/5 to-accent/5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-success/10 rounded-full blur-2xl" />
-                        <CardContent className="relative p-5">
-                          <div className="flex items-center gap-4 mb-2">
-                            <div className="p-2.5 bg-gradient-to-br from-success to-accent rounded-xl shadow-md group-hover:scale-105 transition-transform">
-                              <MessageSquare className="h-6 w-6 text-white" />
+                    {/* Ask Tutor */}
+                    <Link to="/forum">
+                      <Card className="group hover:shadow-md transition-shadow cursor-pointer h-full">
+                        <CardContent className="p-5">
+                          <div className="flex items-start gap-4">
+                            <div className="p-2.5 bg-accent/10 rounded-lg group-hover:bg-accent/20 transition-colors">
+                              <MessageSquare className="h-6 w-6 text-accent" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
+                              <h3 className="font-semibold mb-1 flex items-center gap-2">
                                 Ask Tutor
-                                <Badge className="bg-success/20 text-success border-success/30 text-xs px-2 py-0.5">24/7</Badge>
+                                <Badge variant="secondary" className="text-xs">24/7</Badge>
                               </h3>
-                              <p className="text-sm text-muted-foreground line-clamp-1">Get instant help</p>
+                              <p className="text-sm text-muted-foreground">Get instant help</p>
                             </div>
-                            <ChevronRight className="h-5 w-5 text-success group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
                           </div>
                         </CardContent>
                       </Card>
                     </Link>
 
-                    {/* Challenge Arena Card */}
-                    <Link to="/challenge-arena" className="group">
-                      <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-warning/5 to-destructive/5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-warning/10 rounded-full blur-2xl" />
-                        <CardContent className="relative p-5">
-                          <div className="flex items-center gap-4 mb-2">
-                            <div className="p-2.5 bg-gradient-to-br from-warning to-destructive rounded-xl shadow-md group-hover:scale-105 transition-transform">
-                              <Sword className="h-6 w-6 text-white" />
+                    {/* Challenge Arena */}
+                    <Link to="/challenge-arena">
+                      <Card className="group hover:shadow-md transition-shadow cursor-pointer h-full">
+                        <CardContent className="p-5">
+                          <div className="flex items-start gap-4">
+                            <div className="p-2.5 bg-warning/10 rounded-lg group-hover:bg-warning/20 transition-colors">
+                              <Sword className="h-6 w-6 text-warning" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
+                              <h3 className="font-semibold mb-1 flex items-center gap-2">
                                 Challenge Arena
-                                <Badge className="bg-warning/20 text-warning border-warning/30 text-xs px-2 py-0.5">New</Badge>
+                                <Badge variant="secondary" className="text-xs">New</Badge>
                               </h3>
-                              <p className="text-sm text-muted-foreground line-clamp-1">Compete & win prizes</p>
+                              <p className="text-sm text-muted-foreground">Compete & win prizes</p>
                             </div>
-                            <ChevronRight className="h-5 w-5 text-warning group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-warning group-hover:translate-x-1 transition-all" />
                           </div>
                         </CardContent>
                       </Card>
                     </Link>
 
-                    {/* Resources Card */}
-                    <Link to="/resources" className="group">
-                      <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-info/5 to-secondary/5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-info/10 rounded-full blur-2xl" />
-                        <CardContent className="relative p-5">
-                          <div className="flex items-center gap-4 mb-2">
-                            <div className="p-2.5 bg-gradient-to-br from-info to-secondary rounded-xl shadow-md group-hover:scale-105 transition-transform">
-                              <FileText className="h-6 w-6 text-white" />
+                    {/* Resources */}
+                    <Link to="/resources">
+                      <Card className="group hover:shadow-md transition-shadow cursor-pointer h-full">
+                        <CardContent className="p-5">
+                          <div className="flex items-start gap-4">
+                            <div className="p-2.5 bg-secondary/10 rounded-lg group-hover:bg-secondary/20 transition-colors">
+                              <FileText className="h-6 w-6 text-secondary" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-lg mb-1">Study Resources</h3>
-                              <p className="text-sm text-muted-foreground line-clamp-1">Past questions & materials</p>
+                              <h3 className="font-semibold mb-1">Study Resources</h3>
+                              <p className="text-sm text-muted-foreground">Past questions & materials</p>
                             </div>
-                            <ChevronRight className="h-5 w-5 text-info group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-secondary group-hover:translate-x-1 transition-all" />
                           </div>
                         </CardContent>
                       </Card>
                     </Link>
 
-                    {/* Consultation Card */}
-                    <Link to="/consultation" className="group">
-                      <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-accent/5 to-primary/5">
-                        <div className="absolute top-0 right-0 w-20 h-20 bg-accent/10 rounded-full blur-2xl" />
-                        <CardContent className="relative p-5">
-                          <div className="flex items-center gap-4 mb-2">
-                            <div className="p-2.5 bg-gradient-to-br from-accent to-primary rounded-xl shadow-md group-hover:scale-105 transition-transform">
-                              <Calendar className="h-6 w-6 text-white" />
+                    {/* Consultation */}
+                    <Link to="/consultation">
+                      <Card className="group hover:shadow-md transition-shadow cursor-pointer h-full">
+                        <CardContent className="p-5">
+                          <div className="flex items-start gap-4">
+                            <div className="p-2.5 bg-info/10 rounded-lg group-hover:bg-info/20 transition-colors">
+                              <Calendar className="h-6 w-6 text-info" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-lg mb-1">Expert Consultation</h3>
-                              <p className="text-sm text-muted-foreground line-clamp-1">Book tutor sessions</p>
+                              <h3 className="font-semibold mb-1">Expert Consultation</h3>
+                              <p className="text-sm text-muted-foreground">Book tutor sessions</p>
                             </div>
-                            <ChevronRight className="h-5 w-5 text-accent group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-info group-hover:translate-x-1 transition-all" />
                           </div>
                         </CardContent>
                       </Card>
@@ -584,53 +586,60 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Recent Test Results - Mobile Optimized */}
+                {/* Recent Test Results */}
                 {isMobile ? (
-                  <div className="space-y-3 animate-fade-in">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h2 className="text-lg font-bold">Recent Tests</h2>
-                        <p className="text-xs text-muted-foreground">Your latest performance</p>
-                      </div>
-                    </div>
-                    
+                  <div>
+                    <h2 className="text-2xl font-bold mb-6">Recent Tests</h2>
                     {loading ? (
                       <div className="text-center text-muted-foreground py-8">Loading...</div>
                     ) : recentTests.length > 0 ? (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {recentTests.map((test: any, index: number) => (
-                          <MobileTestCard
-                            key={index}
-                            title={test.subject}
-                            score={test.score}
-                            date={test.date}
-                            icon={BookOpen}
-                            onClick={() => navigate(`/results?attempt=${test.attemptId}`)}
-                          />
+                          <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={() => navigate(`/results?attempt=${test.attemptId}`)}>
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-primary/10 rounded-lg">
+                                    <BookOpen className="h-5 w-5 text-primary" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold">{test.subject}</h4>
+                                    <p className="text-sm text-muted-foreground">{test.date}</p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-2xl font-bold">{test.score}%</div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center p-8 rounded-2xl bg-muted/50 border border-dashed border-border">
-                        <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                        <p className="text-sm text-muted-foreground">No tests yet</p>
-                        <p className="text-xs text-muted-foreground mt-1">Take your first test to see results!</p>
-                      </div>
+                      <Card>
+                        <CardContent className="p-8 text-center">
+                          <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-30" />
+                          <p className="text-muted-foreground">No tests yet</p>
+                          <p className="text-sm text-muted-foreground mt-1">Take your first test to see results</p>
+                        </CardContent>
+                      </Card>
                     )}
                   </div>
                 ) : (
                   <Card>
                     <CardHeader>
-                      <CardTitle>Recent Test Results</CardTitle>
-                      <CardDescription>Your latest performance overview</CardDescription>
+                      <CardTitle>Recent Tests</CardTitle>
+                      <CardDescription>Your latest performance</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         {loading ? (
-                          <div className="text-center text-muted-foreground">Loading...</div>
+                          <div className="text-center text-muted-foreground py-4">Loading...</div>
                         ) : recentTests.length > 0 ? (
                           recentTests.map((test: any, index: number) => (
-                            <Link key={index} to={`/results?attempt=${test.attemptId}`} className="block">
-                              <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                            <Link key={index} to={`/results?attempt=${test.attemptId}`}>
+                              <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                                 <div className="flex items-center gap-4">
                                   <div className="bg-primary/10 p-2 rounded-lg">
                                     <BookOpen className="h-5 w-5 text-primary" />
@@ -641,15 +650,15 @@ const Dashboard = () => {
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  <div className="text-lg font-bold text-accent">{test.score}%</div>
+                                  <div className="text-2xl font-bold">{test.score}%</div>
                                   <p className="text-sm text-muted-foreground">{test.duration}</p>
                                 </div>
                               </div>
                             </Link>
                           ))
                         ) : (
-                          <div className="text-center text-muted-foreground">
-                            No test results yet. Take your first test to see results here!
+                          <div className="text-center text-muted-foreground py-8">
+                            No test results yet. Take your first test!
                           </div>
                         )}
                       </div>
@@ -657,32 +666,34 @@ const Dashboard = () => {
                   </Card>
                 )}
 
-                {/* Subject Progress - Mobile Optimized */}
+                {/* Subject Progress */}
                 {isMobile ? (
-                  <div className="space-y-3 animate-fade-in">
-                    <div>
-                      <h2 className="text-lg font-bold">Subject Progress</h2>
-                      <p className="text-xs text-muted-foreground">Track your improvement</p>
-                    </div>
-                    
+                  <div>
+                    <h2 className="text-2xl font-bold mb-6">Subject Progress</h2>
                     {loading ? (
                       <div className="text-center text-muted-foreground py-8">Loading...</div>
                     ) : subjectProgress.length > 0 ? (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {subjectProgress.map((subject, index) => (
-                          <MobileSubjectCard
-                            key={index}
-                            subject={subject.subject}
-                            progress={subject.progress}
-                          />
+                          <Card key={index}>
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-semibold">{subject.subject}</h4>
+                                <span className="text-lg font-bold">{subject.progress}%</span>
+                              </div>
+                              <Progress value={subject.progress} className="h-2" />
+                            </CardContent>
+                          </Card>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center p-8 rounded-2xl bg-muted/50 border border-dashed border-border">
-                        <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                        <p className="text-sm text-muted-foreground">No progress data yet</p>
-                        <p className="text-xs text-muted-foreground mt-1">Complete tests to track your progress</p>
-                      </div>
+                      <Card>
+                        <CardContent className="p-8 text-center">
+                          <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-30" />
+                          <p className="text-muted-foreground">No progress data yet</p>
+                          <p className="text-sm text-muted-foreground mt-1">Complete tests to track your progress</p>
+                        </CardContent>
+                      </Card>
                     )}
                   </div>
                 ) : (
@@ -692,25 +703,25 @@ const Dashboard = () => {
                       <CardDescription>Track your improvement across subjects</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid gap-6">
-                        {loading ? (
-                          <div className="text-center text-muted-foreground">Loading...</div>
-                        ) : subjectProgress.length > 0 ? (
-                          <div className="grid gap-6">
-                            {subjectProgress.map((subject, index) => (
-                              <SubjectProgressCard
-                                key={index}
-                                subject={subject.subject}
-                                progress={subject.progress}
-                              />
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center text-muted-foreground">
-                            Complete some tests to track your subject progress!
-                          </div>
-                        )}
-                      </div>
+                      {loading ? (
+                        <div className="text-center text-muted-foreground py-4">Loading...</div>
+                      ) : subjectProgress.length > 0 ? (
+                        <div className="space-y-6">
+                          {subjectProgress.map((subject, index) => (
+                            <div key={index}>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium">{subject.subject}</span>
+                                <span className="text-lg font-bold">{subject.progress}%</span>
+                              </div>
+                              <Progress value={subject.progress} className="h-2" />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center text-muted-foreground py-8">
+                          Complete some tests to track your subject progress!
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 )}
