@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { 
   BookOpen, 
   Clock, 
@@ -24,7 +26,11 @@ import {
   Award,
   Rocket,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Search,
+  Bell,
+  Mail,
+  Settings2
 } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,6 +54,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
 import eduraLogo from "@/assets/edura-logo.png";
 import { AIAssistant } from "@/components/AIAssistant";
+import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -286,80 +294,71 @@ const Dashboard = () => {
     return <LoadingAnimation />;
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <OnboardingTour 
-        isOpen={showOnboarding} 
-        onComplete={() => setShowOnboarding(false)} 
-      />
-      
-      {/* Modern Clean Header */}
-      <header className="border-b bg-card sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo and User Info */}
-            <div className="flex items-center gap-4">
-              <div className="bg-primary/10 p-2 rounded-lg">
-                <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
-              </div>
-              {!isMobile && (
-                <div>
-                  <h1 className="text-lg font-semibold text-foreground">
-                    {userProfile?.first_name || user?.email?.split('@')[0]}
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    {stats.testsTaken > 0 ? `${stats.testsTaken} tests completed` : 'Ready to start learning?'}
-                  </p>
+  // If on mobile, show the old layout
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <OnboardingTour 
+          isOpen={showOnboarding} 
+          onComplete={() => setShowOnboarding(false)} 
+        />
+        
+        {/* Modern Clean Header */}
+        <header className="border-b bg-card sticky top-0 z-50 shadow-sm">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              {/* Logo and User Info */}
+              <div className="flex items-center gap-4">
+                <div className="bg-primary/10 p-2 rounded-lg">
+                  <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-3">
-              {!subscriptionLoading && (
-                <Badge variant={isPremium ? "default" : "secondary"} className="hidden md:flex">
-                  {isPremium ? (
-                    <>
-                      <Zap className="h-3 w-3 mr-1" />
-                      Premium
-                    </>
-                  ) : (
-                    'Free Plan'
-                  )}
-                </Badge>
-              )}
-              <NotificationBell />
-              <Button 
-                variant="ghost" 
-                size={isMobile ? "sm" : "default"}
-                onClick={handleLogout}
-                className="gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                {!isMobile && "Logout"}
-              </Button>
+              {/* Actions */}
+              <div className="flex items-center gap-3">
+                {!subscriptionLoading && (
+                  <Badge variant={isPremium ? "default" : "secondary"} className="hidden md:flex">
+                    {isPremium ? (
+                      <>
+                        <Zap className="h-3 w-3 mr-1" />
+                        Premium
+                      </>
+                    ) : (
+                      'Free Plan'
+                    )}
+                  </Badge>
+                )}
+                <NotificationBell />
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleLogout}
+                  className="gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div className={`container mx-auto px-4 sm:px-6 lg:px-8 py-6 ${isInstalledApp ? 'pb-24' : ''}`}>
-        <Tabs value={activeTab} onValueChange={(value) => {
-          console.log('Tab changed to:', value);
-          setActiveTab(value);
-        }}>
-          <TabsList className={`w-full md:w-auto mb-6 ${isInstalledApp ? 'hidden' : ''}`}>
-            <TabsTrigger value="dashboard" className="gap-2">
-              <Target className="h-4 w-4" />
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="profile" className="gap-2">
-              <User className="h-4 w-4" />
-              Profile
-            </TabsTrigger>
-          </TabsList>
+        <div className={`container mx-auto px-4 sm:px-6 lg:px-8 py-6 ${isInstalledApp ? 'pb-24' : ''}`}>
+          <Tabs value={activeTab} onValueChange={(value) => {
+            console.log('Tab changed to:', value);
+            setActiveTab(value);
+          }}>
+            <TabsList className={`w-full md:w-auto mb-6 ${isInstalledApp ? 'hidden' : ''}`}>
+              <TabsTrigger value="dashboard" className="gap-2">
+                <Target className="h-4 w-4" />
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="gap-2">
+                <User className="h-4 w-4" />
+                Profile
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="dashboard" className="space-y-8">
+            <TabsContent value="dashboard" className="space-y-8">
             {/* Stats Overview */}
             <div>
               <h2 className="text-2xl font-bold mb-6">Your Performance</h2>
@@ -826,6 +825,186 @@ const Dashboard = () => {
       </div>
       <AIAssistant />
     </div>
+    );
+  }
+
+  // Desktop Layout with Sidebar
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <OnboardingTour 
+          isOpen={showOnboarding} 
+          onComplete={() => setShowOnboarding(false)} 
+        />
+        
+        <DashboardSidebar onLogout={handleLogout} />
+        
+        <main className="flex-1 flex flex-col min-h-screen">
+          {/* Top Bar */}
+          <header className="border-b bg-primary/5 backdrop-blur-sm sticky top-0 z-50">
+            <div className="px-8 py-4">
+              <div className="flex items-center justify-between gap-4">
+                {/* Search Bar */}
+                <div className="flex-1 max-w-xl relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                  <Input
+                    placeholder="Search"
+                    className="pl-10 bg-primary border-primary text-primary-foreground placeholder:text-primary-foreground/70"
+                  />
+                </div>
+
+                {/* Right Actions */}
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="icon" className="text-muted-foreground">
+                    <ChevronRight className="h-5 w-5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground">
+                    <Mail className="h-5 w-5" />
+                  </Button>
+                  <NotificationBell />
+                  
+                  {/* User Profile */}
+                  <div className="flex items-center gap-3 pl-3 border-l">
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-foreground">
+                        {userProfile?.first_name || user?.email?.split('@')[0] || 'User'}
+                      </p>
+                      <Badge variant={isPremium ? "default" : "secondary"} className="text-xs">
+                        {isPremium ? 'Premium' : 'Free'}
+                      </Badge>
+                    </div>
+                    <Avatar>
+                      <AvatarImage src={userProfile?.avatar_url} />
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {(userProfile?.first_name?.[0] || user?.email?.[0] || 'U').toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <div className="flex-1 p-8 overflow-auto">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsContent value="dashboard" className="space-y-6 mt-0">
+                {/* Stats Cards Row */}
+                <div className="grid grid-cols-3 gap-6">
+                  {/* Card 1 */}
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Total Tests</p>
+                          <p className="text-3xl font-bold">{stats.testsTaken}</p>
+                          <p className="text-xs text-muted-foreground mt-1">Tests this Month</p>
+                        </div>
+                        <div className="p-3 bg-muted rounded-lg">
+                          <Target className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Card 2 */}
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Average Score</p>
+                          <p className="text-3xl font-bold">{stats.averageScore}%</p>
+                          <p className="text-xs text-muted-foreground mt-1">Tests this Month</p>
+                        </div>
+                        <div className="p-3 bg-muted rounded-lg">
+                          <TrendingUp className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Card 3 - Highlighted */}
+                  <Card className="bg-primary text-primary-foreground">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm opacity-90 mb-1">Study Hours</p>
+                          <p className="text-3xl font-bold">{stats.studyHours}h</p>
+                          <p className="text-xs opacity-80 mt-1">Total Study Time</p>
+                        </div>
+                        <div className="p-3 bg-primary-foreground/20 rounded-lg">
+                          <Clock className="h-6 w-6" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Quick Actions */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Start Practice</CardTitle>
+                    <CardDescription>Choose your exam type</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <ScheduleTestModal defaultExamType="jamb">
+                        <Button size="lg" className="w-full h-auto py-4 flex-col gap-2">
+                          <Play className="h-5 w-5" />
+                          <span className="font-semibold">JAMB Practice</span>
+                        </Button>
+                      </ScheduleTestModal>
+                      <ScheduleTestModal defaultExamType="waec">
+                        <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
+                          <Play className="h-5 w-5" />
+                          <span className="font-semibold">WAEC Practice</span>
+                        </Button>
+                      </ScheduleTestModal>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Tests */}
+                {recentTests.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Recent Tests</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {recentTests.map((test: any, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                          >
+                            <div>
+                              <p className="font-medium">{test.subject}</p>
+                              <p className="text-sm text-muted-foreground">{test.date}</p>
+                            </div>
+                            <Badge variant={test.score >= 70 ? "default" : "secondary"}>
+                              {test.score}%
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+
+              <TabsContent value="profile" className="mt-0">
+                <div className="space-y-6">
+                  <ProfileSettings />
+                  <AccountSettings />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </main>
+        
+        <AIAssistant />
+      </div>
+    </SidebarProvider>
   );
 };
 
