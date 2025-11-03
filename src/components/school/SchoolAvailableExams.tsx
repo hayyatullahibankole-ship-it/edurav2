@@ -2,27 +2,24 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, GraduationCap, AlertCircle } from "lucide-react";
+import { BookOpen, Clock, FileText, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function SchoolAvailableExams() {
   const [exams, setExams] = useState<any[]>([]);
-  const [subjects, setSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchData();
+    fetchExams();
   }, []);
 
-  const fetchData = async () => {
+  const fetchExams = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch published exams
-      const { data: examsData, error: examsError } = await supabase
+      const { data, error } = await supabase
         .from("exams")
         .select(`
           *,
@@ -34,44 +31,11 @@ export default function SchoolAvailableExams() {
         .eq("is_published", true)
         .order("created_at", { ascending: false });
 
-      if (examsError) throw examsError;
-
-      // Fetch available subjects for practice mode
-      const { data: subjectsData, error: subjectsError } = await supabase
-        .from("subjects")
-        .select("id, name, description")
-        .eq("is_active", true)
-        .order("name");
-
-      if (subjectsError) throw subjectsError;
-
-      // Get question counts for each subject
-      const { data: questionCounts, error: countsError } = await supabase
-        .from("questions")
-        .select("subject_id")
-        .eq("is_active", true);
-
-      if (countsError) throw countsError;
-
-      // Count questions per subject
-      const subjectQuestionCounts: Record<string, number> = {};
-      questionCounts?.forEach((q: any) => {
-        subjectQuestionCounts[q.subject_id] = (subjectQuestionCounts[q.subject_id] || 0) + 1;
-      });
-
-      // Add question counts to subjects
-      const subjectsWithCounts = (subjectsData || []).map((subject: any) => ({
-        id: subject.id,
-        name: subject.name,
-        description: subject.description,
-        question_count: subjectQuestionCounts[subject.id] || 0
-      }));
-
-      setExams(examsData || []);
-      setSubjects(subjectsWithCounts || []);
+      if (error) throw error;
+      setExams(data || []);
     } catch (error: any) {
-      console.error("Error fetching data:", error);
-      setError(error.message || "Failed to load exams and practice options");
+      console.error("Error fetching exams:", error);
+      setError(error.message || "Failed to load exams");
     } finally {
       setLoading(false);
     }
@@ -84,7 +48,7 @@ export default function SchoolAvailableExams() {
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-              <p className="text-sm text-muted-foreground">Loading available tests...</p>
+              <p className="text-sm text-muted-foreground">Loading available exams...</p>
             </div>
           </div>
         </CardContent>
@@ -94,6 +58,13 @@ export default function SchoolAvailableExams() {
 
   return (
     <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold mb-1">Available Practice Tests</h2>
+        <p className="text-sm text-muted-foreground">
+          WAEC, NECO, JAMB and other exam types available for students to practice
+        </p>
+      </div>
+
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -101,150 +72,88 @@ export default function SchoolAvailableExams() {
         </Alert>
       )}
 
-      <Tabs defaultValue="exams" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="exams">
-            <BookOpen className="h-4 w-4 mr-2" />
-            CBT Exams
-          </TabsTrigger>
-          <TabsTrigger value="practice">
-            <GraduationCap className="h-4 w-4 mr-2" />
-            Practice Mode
-          </TabsTrigger>
-        </TabsList>
+      {exams.length === 0 ? (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-12">
+              <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground font-medium">No practice tests available</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Contact the administrator to publish exam types
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {exams.map((exam) => (
+            <Card key={exam.id} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-base font-semibold break-words flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 flex-shrink-0 text-primary" />
+                      {exam.title}
+                    </CardTitle>
+                    {exam.description && (
+                      <CardDescription className="mt-2 text-xs break-words line-clamp-2">
+                        {exam.description}
+                      </CardDescription>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span className="text-xs">Duration</span>
+                    </div>
+                    <p className="text-sm font-semibold">{exam.duration_minutes} mins</p>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <FileText className="h-3.5 w-3.5" />
+                      <span className="text-xs">Questions</span>
+                    </div>
+                    <p className="text-sm font-semibold">{exam.total_questions}</p>
+                  </div>
+                </div>
 
-        <TabsContent value="exams" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Available CBT Exams</CardTitle>
-              <CardDescription>
-                Formal timed exams that students can take for assessment
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {exams.length === 0 ? (
-                <div className="text-center py-12">
-                  <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No published exams available</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Contact the administrator to publish exams
-                  </p>
-                </div>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {exams.map((exam) => (
-                    <Card key={exam.id}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="text-base font-semibold break-words">
-                              {exam.title}
-                            </CardTitle>
-                            {exam.description && (
-                              <CardDescription className="mt-1 break-words">
-                                {exam.description}
-                              </CardDescription>
-                            )}
-                          </div>
-                          <BookOpen className="h-5 w-5 text-primary ml-2 flex-shrink-0" />
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-2 gap-3 text-sm">
-                            <div>
-                              <p className="text-muted-foreground text-xs">Duration</p>
-                              <p className="font-medium">{exam.duration_minutes} min</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground text-xs">Questions</p>
-                              <p className="font-medium">{exam.total_questions}</p>
-                            </div>
-                          </div>
-                          
-                          {exam.exam_subjects && exam.exam_subjects.length > 0 && (
-                            <div>
-                              <p className="text-xs text-muted-foreground mb-2">Subjects:</p>
-                              <div className="flex flex-wrap gap-1">
-                                {exam.exam_subjects.map((subject: any, idx: number) => (
-                                  <Badge key={idx} variant="secondary" className="text-xs">
-                                    {subject.subject_name} ({subject.question_count}Q)
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                {exam.passing_score && (
+                  <div className="pt-2 border-t">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Passing Score</span>
+                      <Badge variant="outline" className="text-xs">
+                        {exam.passing_score}%
+                      </Badge>
+                    </div>
+                  </div>
+                )}
 
-        <TabsContent value="practice" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Practice Mode</CardTitle>
-              <CardDescription>
-                Students can practice individual subjects at their own pace
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {subjects.length === 0 ? (
-                <div className="text-center py-12">
-                  <GraduationCap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No subjects available for practice</p>
-                </div>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {subjects.map((subject) => (
-                    <Card key={subject.id}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="text-base font-semibold break-words">
-                              {subject.name}
-                            </CardTitle>
-                            {subject.description && (
-                              <CardDescription className="mt-1 text-xs break-words">
-                                {subject.description}
-                              </CardDescription>
-                            )}
-                          </div>
-                          <GraduationCap className="h-5 w-5 text-primary ml-2 flex-shrink-0" />
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">Available Questions</span>
-                            <Badge variant="outline" className="text-xs">
-                              {subject.question_count} questions
-                            </Badge>
-                          </div>
-                          {subject.question_count > 0 && (
-                            <p className="text-xs text-muted-foreground">
-                              Students can practice with custom question counts
-                            </p>
-                          )}
-                          {subject.question_count === 0 && (
-                            <p className="text-xs text-amber-600">
-                              No questions available yet
-                            </p>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                {exam.exam_subjects && exam.exam_subjects.length > 0 && (
+                  <div className="pt-2 border-t">
+                    <p className="text-xs text-muted-foreground mb-2">Subjects Covered:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {exam.exam_subjects.slice(0, 3).map((subject: any, idx: number) => (
+                        <Badge key={idx} variant="secondary" className="text-xs">
+                          {subject.subject_name}
+                        </Badge>
+                      ))}
+                      {exam.exam_subjects.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{exam.exam_subjects.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
