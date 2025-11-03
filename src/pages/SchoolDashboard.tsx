@@ -207,13 +207,20 @@ export default function SchoolDashboard() {
           <main className="flex-1 overflow-y-auto bg-muted/30">
             <div className="container max-w-7xl mx-auto p-8">
               {activeTab === "overview" && (
-                <div className="space-y-6">
+                <div className="space-y-8">
+                  {/* Alerts Center - Critical Info First */}
+                  <AlertsCenter 
+                    schoolId={schoolData?.id}
+                    subscriptionData={subscriptionData}
+                    schoolData={schoolData}
+                  />
+
                   {/* School Code Section */}
                   <Card>
-                    <CardHeader>
+                    <CardHeader className="pb-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <CardTitle>School Code</CardTitle>
+                          <CardTitle className="text-lg">School Code</CardTitle>
                           <CardDescription className="mt-1">
                             Share this code with students for registration
                           </CardDescription>
@@ -229,8 +236,8 @@ export default function SchoolDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center gap-3">
-                        <div className="flex-1 p-4 bg-muted rounded-lg">
-                          <p className="text-2xl font-mono font-bold tracking-wider">
+                        <div className="flex-1 p-3 bg-muted rounded-lg">
+                          <p className="text-xl font-mono font-bold tracking-wider">
                             {schoolData?.school_code}
                           </p>
                         </div>
@@ -249,59 +256,59 @@ export default function SchoolDashboard() {
                   </Card>
 
                   {/* Stats Grid */}
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Card>
-                      <CardHeader className="pb-3">
-                        <CardDescription>Total Seats</CardDescription>
+                      <CardHeader className="pb-2">
+                        <CardDescription className="text-xs">Total Seats</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold tracking-tight break-words">
+                        <div className="text-2xl font-bold">
                           {subscriptionData?.student_seats || schoolData?.max_students || 0}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-2">
+                        <p className="text-xs text-muted-foreground mt-1">
                           Maximum capacity
                         </p>
                       </CardContent>
                     </Card>
 
                     <Card>
-                      <CardHeader className="pb-3">
-                        <CardDescription>Students Added</CardDescription>
+                      <CardHeader className="pb-2">
+                        <CardDescription className="text-xs">Students Added</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold tracking-tight break-words">
+                        <div className="text-2xl font-bold">
                           {schoolData?.students_added || 0}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-2">
+                        <p className="text-xs text-muted-foreground mt-1">
                           Currently enrolled
                         </p>
                       </CardContent>
                     </Card>
 
                     <Card>
-                      <CardHeader className="pb-3">
-                        <CardDescription>Available Slots</CardDescription>
+                      <CardHeader className="pb-2">
+                        <CardDescription className="text-xs">Available Slots</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold tracking-tight break-words">
+                        <div className="text-2xl font-bold">
                           {remainingSlots}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-2">
+                        <p className="text-xs text-muted-foreground mt-1">
                           Remaining capacity
                         </p>
                       </CardContent>
                     </Card>
 
                     <Card>
-                      <CardHeader className="pb-3">
-                        <CardDescription>Subscription Status</CardDescription>
+                      <CardHeader className="pb-2">
+                        <CardDescription className="text-xs">Subscription</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold tracking-tight capitalize break-words">
+                        <div className="text-2xl font-bold capitalize">
                           {subscriptionData?.status || 'Inactive'}
                         </div>
                         {subscriptionData?.end_date && (
-                          <p className="text-xs text-muted-foreground mt-2 break-words">
+                          <p className="text-xs text-muted-foreground mt-1">
                             Until {new Date(subscriptionData.end_date).toLocaleDateString()}
                           </p>
                         )}
@@ -309,15 +316,8 @@ export default function SchoolDashboard() {
                     </Card>
                   </div>
 
-                  {/* Alerts Center - Full Width */}
-                  <AlertsCenter 
-                    schoolId={schoolData?.id}
-                    subscriptionData={subscriptionData}
-                    schoolData={schoolData}
-                  />
-
                   {/* Quick Actions + Engagement */}
-                  <div className="grid gap-6 lg:grid-cols-2">
+                  <div className="grid gap-4 lg:grid-cols-2">
                     <QuickActions 
                       onAddStudent={() => setActiveTab("students")}
                       schoolId={schoolData?.id}
@@ -325,18 +325,15 @@ export default function SchoolDashboard() {
                     <StudentEngagement schoolId={schoolData?.id} />
                   </div>
 
-                  {/* Performance Trends + Comparison Analytics */}
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    <PerformanceTrends schoolId={schoolData?.id} />
-                    <ComparisonAnalytics schoolId={schoolData?.id} />
-                  </div>
+                  {/* Performance Trends */}
+                  <PerformanceTrends schoolId={schoolData?.id} />
 
-                  {/* Charts + Activity/Leaderboard */}
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    <div className="space-y-6">
+                  {/* Charts + Top Performers + Activity */}
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <div>
                       {schoolData?.id && <SchoolOverviewCharts schoolId={schoolData.id} />}
                     </div>
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       <TopPerformers schoolId={schoolData?.id} />
                       <RealtimeActivityFeed schoolId={schoolData?.id} />
                     </div>
@@ -359,7 +356,13 @@ export default function SchoolDashboard() {
                     schoolId={schoolData.id}
                     schoolName={schoolData.name}
                   />
-                  <SchoolReports schoolId={schoolData.id} />
+                  
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    <ComparisonAnalytics schoolId={schoolData?.id} />
+                    <div>
+                      <SchoolReports schoolId={schoolData.id} />
+                    </div>
+                  </div>
                 </div>
               )}
 
