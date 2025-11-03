@@ -6,7 +6,7 @@ import MobileAuthForm from '@/components/MobileAuthForm';
 import { useInstalledApp } from '@/hooks/useInstalledApp';
 
 export default function Auth() {
-  const { user, loading, isAdmin, userRole } = useAuth();
+  const { user, loading, isAdmin, isSchoolAdmin, userRole } = useAuth();
   const navigate = useNavigate();
   const { isInstalledApp } = useInstalledApp();
 
@@ -15,11 +15,13 @@ export default function Auth() {
       // Redirect based on role
       if (isAdmin) {
         navigate('/admin', { replace: true });
+      } else if (isSchoolAdmin) {
+        navigate('/school-dashboard', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
       }
     }
-  }, [user, loading, userRole, isAdmin, navigate]);
+  }, [user, loading, userRole, isAdmin, isSchoolAdmin, navigate]);
 
   if (loading) {
     return (
@@ -33,7 +35,8 @@ export default function Auth() {
   }
 
   if (user && userRole !== null) {
-    return <Navigate to={isAdmin ? "/admin" : "/dashboard"} replace />;
+    const redirectTo = isAdmin ? "/admin" : (isSchoolAdmin ? "/school-dashboard" : "/dashboard");
+    return <Navigate to={redirectTo} replace />;
   }
 
   // Show mobile auth form only for installed apps (PWA or native)

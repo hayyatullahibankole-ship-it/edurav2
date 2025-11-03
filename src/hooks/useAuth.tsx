@@ -19,6 +19,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   userRole: string | null;
   isAdmin: boolean;
+  isSchoolAdmin: boolean;
   userProfile: any;
   validateCurrentSession: () => Promise<boolean>;
 }
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [isSchoolAdmin, setIsSchoolAdmin] = useState(false);
   const { toast } = useToast();
 
   // Validate current session token
@@ -153,15 +155,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (profileData) {
         setUserProfile(profileData);
         
+        // Check if user is a school admin
+        const { data: schoolData } = await supabase
+          .from('school_subscriptions' as any)
+          .select('id')
+          .eq('admin_user_id', userId)
+          .maybeSingle();
+        
+        const isSchool = !!schoolData;
+        setIsSchoolAdmin(isSchool);
+        
         // Determine role via secure RPC to avoid RLS issues
         const { data: isAdminFlag, error: roleError } = await supabase
           .rpc('is_admin', { _user_id: userId });
 
         if (!roleError && typeof isAdminFlag === 'boolean') {
-          setUserRole(isAdminFlag ? 'admin' : 'student');
+          setUserRole(isAdminFlag ? 'admin' : (isSchool ? 'school_admin' : 'student'));
         } else {
           console.warn('Role fetch error (RPC), defaulting to student:', roleError);
-          setUserRole('student');
+          setUserRole(isSchool ? 'school_admin' : 'student');
         }
       } else {
         // No profile found - this should be rare after our migration
@@ -211,6 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setUserProfile(null);
           setUserRole(null);
+          setIsSchoolAdmin(false);
           setLoading(false);
         }
       }
@@ -280,6 +293,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
     userRole,
     isAdmin,
+    isSchoolAdmin,
     userProfile,
     validateCurrentSession
   };
