@@ -17,8 +17,8 @@ export default function SchoolSubscription() {
   const [loading, setLoading] = useState(false);
   const [fetchingSchool, setFetchingSchool] = useState(true);
   const [studentCount, setStudentCount] = useState(50);
-  const [pricePerStudent, setPricePerStudent] = useState(300);
-  const [totalAmount, setTotalAmount] = useState(15000);
+  const [pricePerStudent, setPricePerStudent] = useState(1000);
+  const [totalAmount, setTotalAmount] = useState(1000);
   const [schoolData, setSchoolData] = useState<any>(null);
 
   useEffect(() => {
@@ -139,9 +139,39 @@ export default function SchoolSubscription() {
   }, [studentCount]);
 
   const calculatePrice = () => {
-    // Set pricing to zero for all school subscriptions
-    setPricePerStudent(0);
-    setTotalAmount(0);
+    if (studentCount <= 0) {
+      setPricePerStudent(0);
+      setTotalAmount(0);
+      return;
+    }
+
+    let calculatedTotal = 0;
+    let calculatedPerStudent = 0;
+
+    if (studentCount >= 1 && studentCount <= 50) {
+      // Fixed price of ₦1,000 for 1-50 students
+      calculatedTotal = 1000;
+      calculatedPerStudent = calculatedTotal / studentCount;
+    } else if (studentCount >= 51 && studentCount <= 100) {
+      // ₦900 per student
+      calculatedPerStudent = 900;
+      calculatedTotal = studentCount * 900;
+    } else if (studentCount >= 101 && studentCount <= 200) {
+      // ₦850 per student
+      calculatedPerStudent = 850;
+      calculatedTotal = studentCount * 850;
+    } else if (studentCount >= 201 && studentCount <= 250) {
+      // ₦800 per student
+      calculatedPerStudent = 800;
+      calculatedTotal = studentCount * 800;
+    } else {
+      // 251+ students - Contact support
+      calculatedTotal = 0;
+      calculatedPerStudent = 0;
+    }
+
+    setPricePerStudent(calculatedPerStudent);
+    setTotalAmount(calculatedTotal);
   };
 
   const handlePayment = async () => {
@@ -223,8 +253,9 @@ export default function SchoolSubscription() {
       }
     }
 
-    if (studentCount > 500) {
-      toast.error("For 501+ students, please contact support");
+    if (studentCount > 250) {
+      toast.error("For 250+ students, please contact support at +234 906 161 5303");
+      window.open("https://wa.me/2349061615303?text=Hello,%20I%20need%20a%20subscription%20for%20more%20than%20250%20students", "_blank");
       return;
     }
 
@@ -234,72 +265,41 @@ export default function SchoolSubscription() {
     }
 
     setLoading(true);
-    console.log("Starting subscription activation...");
+    console.log("Starting subscription payment...");
     console.log("School data being used:", schoolData);
+    console.log("Total amount:", totalAmount);
 
     try {
-      // Prefer edge function to avoid RLS issues
-      const { data: activateRes, error: activateErr } = await supabase.functions.invoke('activate-free-subscription', {
-        body: {
-          student_seats: studentCount,
-          school: schoolData || null,
-          pending: JSON.parse(localStorage.getItem('pendingSchoolRegistration') || 'null')
-        },
-      });
-      if (activateErr) {
-        console.warn('Edge activation failed, falling back to direct DB:', activateErr);
-      } else if (activateRes?.success) {
-        toast.success('School subscription activated successfully!');
-        setTimeout(() => navigate('/school-dashboard'), 1000);
+      if (!user?.email) {
+        toast.error("User email not found. Please log in again.");
         return;
       }
-      // Create and activate free subscription
-      const endDate = new Date();
-      endDate.setFullYear(endDate.getFullYear() + 1); // 1 year free subscription
 
-      console.log("Inserting subscription with data:", {
+      // Generate payment reference
+      const reference = `school_sub_${schoolData.id}_${Date.now()}`;
+
+      // Initialize Paystack payment with enhanced metadata
+      const paymentRef = await createSubscriptionPayment(
+        `School Subscription - ${studentCount} students`,
+        user.email,
+        totalAmount
+      );
+
+      // Store subscription details for verification
+      localStorage.setItem('pending_school_subscription', JSON.stringify({
         school_id: schoolData.id,
         student_seats: studentCount,
-        admin_user_id: schoolData.admin_user_id,
-      });
+        price_per_student: pricePerStudent,
+        total_amount: totalAmount,
+        reference: paymentRef || reference,
+        admin_auth_id: user.id
+      }));
 
-      const { data: subscription, error: subError } = await (supabase as any)
-        .from("school_subscriptions")
-        .insert({
-          school_id: schoolData.id,
-          student_seats: studentCount,
-          price_per_student: 0,
-          total_amount: 0,
-          status: "ACTIVE",
-          admin_user_id: user?.id, // FK references auth.users(id)
-          start_date: new Date().toISOString(),
-          end_date: endDate.toISOString(),
-          auto_renew: false,
-        })
-        .select()
-        .single();
-
-      console.log("Subscription insert result:", { subscription, subError });
-      if (subError) throw subError;
-
-      // Activate the school
-      const { error: activationError } = await supabase
-        .from('schools')
-        .update({ is_active: true })
-        .eq('id', schoolData.id);
-
-      if (activationError) throw activationError;
-
-      toast.success("School subscription activated successfully!");
-      
-      // Redirect to school dashboard
-      setTimeout(() => {
-        navigate("/school-dashboard");
-      }, 1500);
+      // Payment will open in modal, and redirect will happen after successful payment
 
     } catch (error: any) {
-      console.error("Activation error:", error);
-      toast.error(error.message || "Failed to activate subscription");
+      console.error("Payment initialization error:", error);
+      toast.error(error.message || "Failed to initialize payment");
     } finally {
       setLoading(false);
     }
@@ -330,8 +330,8 @@ export default function SchoolSubscription() {
         <Alert className="mb-6">
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Edura subscriptions are based on the number of students you want to register. 
-            The more students you add, the lower the cost per student.
+            School subscriptions are valid for 3 months. Choose the number of students you want to register.
+            The more students you add, the better the rate!
           </AlertDescription>
         </Alert>
 
@@ -362,65 +362,90 @@ export default function SchoolSubscription() {
 
             {/* Pricing Table */}
             <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-              <h3 className="font-semibold mb-3">Pricing</h3>
+              <h3 className="font-semibold mb-3">Pricing Tiers (3 Months)</h3>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-center">
-                  <span>All students</span>
-                  <span className="font-medium text-primary">FREE</span>
+                <div className="flex justify-between items-center py-1">
+                  <span>1-50 students</span>
+                  <span className="font-medium text-primary">₦1,000 total</span>
+                </div>
+                <div className="flex justify-between items-center py-1">
+                  <span>51-100 students</span>
+                  <span className="font-medium">₦900 per student</span>
+                </div>
+                <div className="flex justify-between items-center py-1">
+                  <span>101-200 students</span>
+                  <span className="font-medium">₦850 per student</span>
+                </div>
+                <div className="flex justify-between items-center py-1">
+                  <span>201-250 students</span>
+                  <span className="font-medium">₦800 per student</span>
+                </div>
+                <div className="flex justify-between items-center py-1">
+                  <span>250+ students</span>
+                  <span className="font-medium text-blue-600">Contact Support</span>
                 </div>
               </div>
             </div>
 
             {/* Calculation Display */}
-            {studentCount > 0 && (
+            {studentCount > 0 && studentCount <= 250 && (
               <div className="bg-primary/10 rounded-lg p-6 space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Students:</span>
                   <span className="font-semibold text-lg">{studentCount}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Price per student:</span>
-                  <span className="font-semibold text-lg text-primary">FREE</span>
+                  <span className="text-muted-foreground">
+                    {studentCount <= 50 ? "Total price:" : "Price per student:"}
+                  </span>
+                  <span className="font-semibold text-lg text-primary">
+                    ₦{pricePerStudent.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Duration:</span>
+                  <span className="font-semibold text-lg">3 Months</span>
                 </div>
                 <div className="border-t pt-3">
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold">Total Amount:</span>
-                    <span className="text-2xl font-bold text-primary">FREE</span>
+                    <span className="text-2xl font-bold text-primary">₦{totalAmount.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
             )}
 
-            {studentCount > 500 && (
+            {studentCount > 250 && (
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription>
-                  For subscriptions with 501+ students, please contact our support team for custom pricing and enterprise features.
+                  For subscriptions with 250+ students, please contact our support team at +234 906 161 5303 for custom pricing and enterprise features.
                 </AlertDescription>
               </Alert>
             )}
 
             <Button
               onClick={handlePayment}
-              disabled={loading || studentCount < 1}
+              disabled={loading || studentCount < 1 || studentCount > 250 || totalAmount === 0}
               className="w-full"
               size="lg"
             >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Activating...
+                  Processing...
                 </>
               ) : (
                 <>
                   <CreditCard className="mr-2 h-4 w-4" />
-                  Activate Free Subscription
+                  {studentCount > 250 ? "Contact Support" : `Subscribe - ₦${totalAmount.toLocaleString()}`}
                 </>
               )}
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
-              By continuing, you agree to our subscription terms and conditions
+              By continuing, you agree to our subscription terms. Payment is secure via Paystack.
+              Subscription is valid for 3 months from activation.
             </p>
           </CardContent>
         </Card>

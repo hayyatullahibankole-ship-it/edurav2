@@ -38,6 +38,15 @@ const PaymentSuccess = () => {
 
       setPaymentData(data);
       toast.success('Payment verified successfully!');
+      
+      // Check if this is a school subscription and auto-redirect after 2 seconds
+      const pendingSchoolSub = localStorage.getItem('pending_school_subscription');
+      if (pendingSchoolSub) {
+        setTimeout(() => {
+          localStorage.removeItem('pending_school_subscription');
+          navigate('/school-dashboard');
+        }, 2000);
+      }
     } catch (error) {
       console.error('Error verifying payment:', error);
       toast.error('Payment verification failed');
@@ -78,7 +87,15 @@ const PaymentSuccess = () => {
   };
 
   const handleBackToDashboard = () => {
-    navigate('/dashboard');
+    // Check if this is a school subscription
+    const pendingSchoolSub = localStorage.getItem('pending_school_subscription');
+    
+    if (pendingSchoolSub) {
+      localStorage.removeItem('pending_school_subscription');
+      navigate('/school-dashboard');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   if (verifying) {

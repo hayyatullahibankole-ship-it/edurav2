@@ -72,6 +72,7 @@ export const initializePaystackPayment = async (payment: PaystackPayment) => {
  * Create subscription payment
  */
 export const createSubscriptionPayment = async (planType: string, userEmail: string, amount: number) => {
+  // Initialize Paystack payment
   const reference = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
   try {
@@ -82,9 +83,14 @@ export const createSubscriptionPayment = async (planType: string, userEmail: str
       currency: "NGN",
       metadata: {
         plan_type: planType,
-        subscription: true
+        subscription: true,
+        student_seats: planType.includes('School') ? parseInt(planType.split('-')[1]) || 50 : undefined,
+        price_per_student: undefined,
+        admin_auth_id: undefined
       }
     });
+    
+    return reference;
   } catch (error) {
     console.error('Payment initialization failed:', error);
     throw error;

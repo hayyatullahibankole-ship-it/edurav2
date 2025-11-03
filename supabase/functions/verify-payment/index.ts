@@ -152,34 +152,106 @@ serve(async (req) => {
     if (transaction.metadata && transaction.metadata.subscription) {
       const planType = transaction.metadata.plan_type;
       
-      // Get the subscription plan
-      const { data: plan, error: planError } = await supabaseClient
-        .from('subscription_plans')
-        .select('id, duration_days')
-        .eq('name', planType)
-        .single();
+      // Check if this is a school subscription
+      if (planType && planType.includes('School Subscription')) {
+        // Get pending school subscription from metadata
+        const { data: schoolSubs } = await supabaseClient
+          .from('school_subscriptions')
+          .select('*')
+          .eq('payment_reference', reference)
+          .maybeSingle();
 
-      if (planError || !plan) {
-        console.error('Subscription plan not found:', planType);
+        if (!schoolSubs) {
+          // Try to get from pending data
+          console.log('Creating school subscription from payment...');
+          
+          // Find school from user
+          const { data: school } = await supabaseClient
+            .from('schools')
+            .select('*')
+            .eq('admin_user_id', userRecord?.id)
+            .maybeSingle();
+
+          if (school) {
+            // Calculate end date (3 months from now)
+            const endDate = new Date();
+            endDate.setMonth(endDate.getMonth() + 3);
+
+            // Create school subscription
+            const { error: subError } = await supabaseClient
+              .from('school_subscriptions')
+              .insert({
+                school_id: school.id,
+                student_seats: transaction.metadata.student_seats || 50,
+                price_per_student: transaction.metadata.price_per_student || 0,
+                total_amount: transaction.amount / 100,
+                status: 'ACTIVE',
+                admin_user_id: transaction.metadata.admin_auth_id || null,
+                start_date: new Date().toISOString(),
+                end_date: endDate.toISOString(),
+                payment_reference: reference,
+                auto_renew: false
+              });
+
+            if (subError) {
+              console.error('Error creating school subscription:', subError);
+            } else {
+              // Activate the school
+              await supabaseClient
+                .from('schools')
+                .update({ is_active: true })
+                .eq('id', school.id);
+              
+              console.log('School subscription activated successfully');
+            }
+          }
+        } else {
+          // Update existing subscription to ACTIVE
+          await supabaseClient
+            .from('school_subscriptions')
+            .update({ 
+              status: 'ACTIVE',
+              start_date: new Date().toISOString()
+            })
+            .eq('id', schoolSubs.id);
+
+          // Activate the school
+          await supabaseClient
+            .from('schools')
+            .update({ is_active: true })
+            .eq('id', schoolSubs.school_id);
+        }
       } else {
-        // Create or update subscription
-        const endDate = new Date();
-        endDate.setDate(endDate.getDate() + plan.duration_days);
+        // Regular user subscription
+        // Get the subscription plan
+        const { data: plan, error: planError } = await supabaseClient
+          .from('subscription_plans')
+          .select('id, duration_days')
+          .eq('name', planType)
+          .single();
 
-        const { error: subscriptionError } = await supabaseClient
-          .from('subscriptions')
-          .insert({
-            user_id: userRecord ? userRecord.id : null,
-            plan_id: plan.id,
-            status: 'ACTIVE',
-            start_date: new Date().toISOString(),
-            end_date: endDate.toISOString(),
-            payment_reference: reference,
-            auto_renew: false
-          });
+        if (planError || !plan) {
+          console.error('Subscription plan not found:', planType);
+        } else {
+          // Create or update subscription
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + plan.duration_days);
 
-        if (subscriptionError) {
-          console.error('Error creating subscription:', subscriptionError);
+          const { error: subscriptionError } = await supabaseClient
+            .from('subscriptions')
+            .insert({
+              user_id: userRecord ? userRecord.id : null,
+              plan_id: plan.id,
+              status: 'ACTIVE',
+              start_date: new Date().toISOString(),
+              end_date: endDate.toISOString(),
+              payment_reference: reference,
+              auto_renew: false
+            });
+
+          if (subscriptionError) {
+            console.error('Error creating subscription:', subscriptionError);
+          }
         }
       }
     }
