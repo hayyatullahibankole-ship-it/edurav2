@@ -15,6 +15,7 @@ export default function SchoolSubscription() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [fetchingSchool, setFetchingSchool] = useState(true);
   const [studentCount, setStudentCount] = useState(50);
   const [pricePerStudent, setPricePerStudent] = useState(300);
   const [totalAmount, setTotalAmount] = useState(15000);
@@ -31,26 +32,43 @@ export default function SchoolSubscription() {
   }, [user]);
 
   const fetchSchoolData = async () => {
+    setFetchingSchool(true);
     try {
-      const { data: userData } = await supabase
+      console.log("Fetching school data for user:", user?.id);
+      
+      const { data: userData, error: userError } = await supabase
         .from("users")
         .select("id")
         .eq("auth_user_id", user?.id)
         .single();
 
-      if (!userData) return;
+      console.log("User data:", userData, "Error:", userError);
 
-      const { data: school } = await supabase
+      if (!userData) {
+        toast.error("User profile not found. Please contact support.");
+        setFetchingSchool(false);
+        return;
+      }
+
+      const { data: school, error: schoolError } = await supabase
         .from("schools")
         .select("*")
         .eq("admin_user_id", userData.id)
         .single();
 
+      console.log("School data:", school, "Error:", schoolError);
+
       if (school) {
         setSchoolData(school);
+      } else {
+        toast.error("School not found. Please complete registration first.");
+        setTimeout(() => navigate("/school-registration"), 2000);
       }
     } catch (error) {
       console.error("Error fetching school data:", error);
+      toast.error("Failed to load school data");
+    } finally {
+      setFetchingSchool(false);
     }
   };
 
@@ -65,8 +83,10 @@ export default function SchoolSubscription() {
   };
 
   const handlePayment = async () => {
+    console.log("Handle payment clicked. School data:", schoolData);
+    
     if (!schoolData) {
-      toast.error("School data not found");
+      toast.error("School data not found. Please wait or refresh the page.");
       return;
     }
 
@@ -119,6 +139,17 @@ export default function SchoolSubscription() {
       setLoading(false);
     }
   };
+
+  if (fetchingSchool) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading school information...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12 px-4">
@@ -206,7 +237,7 @@ export default function SchoolSubscription() {
 
             <Button
               onClick={handlePayment}
-              disabled={loading || studentCount < 1}
+              disabled={loading || studentCount < 1 || !schoolData}
               className="w-full"
               size="lg"
             >
