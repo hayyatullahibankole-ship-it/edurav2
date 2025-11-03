@@ -1,273 +1,437 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { Loader2, School, ArrowLeft } from 'lucide-react';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
+import { z } from "zod";
+import { Loader2, School, Mail, Phone, MapPin, User, Lock, CheckCircle } from "lucide-react";
+
+const baseSchema = z.object({
+  schoolName: z.string().min(3, "School name must be at least 3 characters").max(200),
+  schoolEmail: z.string().email("Invalid email address"),
+  schoolPhone: z.string().min(10, "Phone number must be at least 10 digits").max(15),
+  schoolType: z.enum(["primary", "secondary", "tutorial_centre"]),
+  schoolAddress: z.string().max(500).optional(),
+  state: z.string().max(100).optional(),
+  adminFullName: z.string().min(3, "Full name required").max(100),
+  adminPosition: z.string().min(2, "Position required").max(100),
+  adminPhone: z.string().min(10).max(15),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+  agreeToTerms: z.boolean().refine((val) => val === true, "You must agree to terms"),
+});
+
+const schoolRegistrationSchema = baseSchema.refine(
+  (data) => data.password === data.confirmPassword,
+  {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  }
+);
 
 export default function SchoolRegistration() {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    country: 'Nigeria',
-    website: '',
-    registration_number: '',
-    description: ''
+    schoolName: "",
+    schoolEmail: "",
+    schoolPhone: "",
+    schoolType: "secondary" as const,
+    schoolAddress: "",
+    state: "",
+    adminFullName: "",
+    adminPosition: "",
+    adminPhone: "",
+    password: "",
+    confirmPassword: "",
+    agreeToTerms: false,
   });
+  const [errors, setErrors] = useState<any>({});
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Auto-generate slug from name
-    if (field === 'name') {
-      const slug = value.toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .substring(0, 50);
-      setFormData(prev => ({ ...prev, slug }));
+  const handleInputChange = (field: string, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev: any) => ({ ...prev, [field]: undefined }));
     }
+  };
+
+  const validateStep1 = () => {
+    try {
+      const step1Schema = z.object({
+        schoolName: baseSchema.shape.schoolName,
+        schoolEmail: baseSchema.shape.schoolEmail,
+        schoolPhone: baseSchema.shape.schoolPhone,
+        schoolType: baseSchema.shape.schoolType,
+      });
+      step1Schema.parse({
+        schoolName: formData.schoolName,
+        schoolEmail: formData.schoolEmail,
+        schoolPhone: formData.schoolPhone,
+        schoolType: formData.schoolType,
+      });
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldErrors: any = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) fieldErrors[err.path[0]] = err.message;
+        });
+        setErrors(fieldErrors);
+      }
+      return false;
+    }
+  };
+
+  const validateStep2 = () => {
+    try {
+      schoolRegistrationSchema.parse(formData);
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldErrors: any = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) fieldErrors[err.path[0]] = err.message;
+        });
+        setErrors(fieldErrors);
+      }
+      return false;
+    }
+  };
+
+  const handleNext = () => {
+    if (step === 1 && validateStep1()) {
+      setStep(2);
+    }
+  };
+
+  const handleBack = () => {
+    setStep(1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.slug) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please fill in all required fields',
-        variant: 'destructive'
-      });
+    if (!validateStep2()) {
+      toast.error("Please fix all errors before submitting");
       return;
     }
 
+    setLoading(true);
+
     try {
-      setLoading(true);
+      // Create auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.schoolEmail,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/school-subscription`,
+          data: {
+            full_name: formData.adminFullName,
+            role: "school_admin",
+          }
+        }
+      });
 
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/auth');
-        return;
-      }
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("Failed to create user");
 
-      // Get user's internal ID
-      const { data: userData } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_user_id', user.id)
+      // Create user record
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .insert({
+          auth_user_id: authData.user.id,
+          email: formData.schoolEmail,
+          full_name: formData.adminFullName,
+          phone_number: formData.adminPhone,
+        })
+        .select()
         .single();
 
-      if (!userData) {
-        throw new Error('User profile not found');
-      }
+      if (userError) throw userError;
 
-      // Create school
-      const { data: school, error: schoolError } = await supabase
-        .from('schools')
+      // Generate verification token
+      const verificationToken = crypto.randomUUID();
+
+      // Create school record (using any to bypass type issues temporarily)
+      const { data: schoolData, error: schoolError } = await (supabase as any)
+        .from("schools")
         .insert({
-          ...formData,
-          admin_user_id: userData.id
+          name: formData.schoolName,
+          email: formData.schoolEmail,
+          phone: formData.schoolPhone,
+          type: formData.schoolType,
+          address: formData.schoolAddress || null,
+          state: formData.state || null,
+          admin_user_id: userData.id,
+          is_active: false,
+          email_verified: false,
+          verification_token: verificationToken,
         })
         .select()
         .single();
 
       if (schoolError) throw schoolError;
 
-      toast({
-        title: 'School Registered!',
-        description: 'Your school has been successfully registered. You can now manage students and subscriptions.'
-      });
-
-      // Navigate to school dashboard
-      navigate(`/school-dashboard/${school.id}`);
+      toast.success("Registration successful! Please check your email to verify your account.");
+      
+      // Navigate to a pending verification page
+      navigate("/school-verification-pending");
 
     } catch (error: any) {
-      console.error('Registration error:', error);
-      toast({
-        title: 'Registration Failed',
-        description: error.message || 'Failed to register school',
-        variant: 'destructive'
-      });
+      console.error("Registration error:", error);
+      toast.error(error.message || "Failed to register school");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-3xl mx-auto space-y-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/dashboard')}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </Button>
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12 px-4">
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-8">
+          <School className="h-16 w-16 mx-auto mb-4 text-primary" />
+          <h1 className="text-4xl font-bold mb-2">School Registration</h1>
+          <p className="text-muted-foreground">
+            Join Edura's CBT Platform and empower your students
+          </p>
+        </div>
+
+        {/* Progress Steps */}
+        <div className="flex items-center justify-center mb-8 gap-4">
+          <div className={`flex items-center gap-2 ${step >= 1 ? "text-primary" : "text-muted-foreground"}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+              {step > 1 ? <CheckCircle className="h-5 w-5" /> : "1"}
+            </div>
+            <span className="font-medium">School Details</span>
+          </div>
+          <div className="h-px w-12 bg-border" />
+          <div className={`flex items-center gap-2 ${step >= 2 ? "text-primary" : "text-muted-foreground"}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 2 ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+              2
+            </div>
+            <span className="font-medium">Admin Details</span>
+          </div>
+        </div>
 
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-3">
-              <School className="h-8 w-8 text-primary" />
-              <div>
-                <CardTitle className="text-2xl">Register Your School</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Create an account for your school to manage students and training
-                </p>
-              </div>
-            </div>
+            <CardTitle>
+              {step === 1 ? "School Information" : "Admin Information"}
+            </CardTitle>
+            <CardDescription>
+              {step === 1 
+                ? "Enter your school's basic information" 
+                : "Create your admin account to manage the school"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <Label htmlFor="name">School Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="e.g., St. Mary's Secondary School"
-                    required
-                  />
-                </div>
+            <form onSubmit={handleSubmit}>
+              {step === 1 ? (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="schoolName">School Name *</Label>
+                    <div className="relative">
+                      <School className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="schoolName"
+                        className="pl-10"
+                        value={formData.schoolName}
+                        onChange={(e) => handleInputChange("schoolName", e.target.value)}
+                        placeholder="e.g., Kings College Lagos"
+                      />
+                    </div>
+                    {errors.schoolName && <p className="text-sm text-destructive mt-1">{errors.schoolName}</p>}
+                  </div>
 
-                <div className="md:col-span-2">
-                  <Label htmlFor="slug">School URL Slug *</Label>
-                  <Input
-                    id="slug"
-                    value={formData.slug}
-                    onChange={(e) => handleInputChange('slug', e.target.value)}
-                    placeholder="e.g., st-marys-secondary"
-                    required
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    This will be used in your school's URL
-                  </p>
-                </div>
+                  <div>
+                    <Label htmlFor="schoolEmail">School Email *</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="schoolEmail"
+                        type="email"
+                        className="pl-10"
+                        value={formData.schoolEmail}
+                        onChange={(e) => handleInputChange("schoolEmail", e.target.value)}
+                        placeholder="admin@school.edu.ng"
+                      />
+                    </div>
+                    {errors.schoolEmail && <p className="text-sm text-destructive mt-1">{errors.schoolEmail}</p>}
+                  </div>
 
-                <div>
-                  <Label htmlFor="email">School Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    placeholder="admin@school.com"
-                    required
-                  />
-                </div>
+                  <div>
+                    <Label htmlFor="schoolPhone">School Phone *</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="schoolPhone"
+                        type="tel"
+                        className="pl-10"
+                        value={formData.schoolPhone}
+                        onChange={(e) => handleInputChange("schoolPhone", e.target.value)}
+                        placeholder="08012345678"
+                      />
+                    </div>
+                    {errors.schoolPhone && <p className="text-sm text-destructive mt-1">{errors.schoolPhone}</p>}
+                  </div>
 
-                <div>
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder="+234 xxx xxx xxxx"
-                  />
-                </div>
+                  <div>
+                    <Label htmlFor="schoolType">School Type *</Label>
+                    <Select value={formData.schoolType} onValueChange={(value: any) => handleInputChange("schoolType", value)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="primary">Primary School</SelectItem>
+                        <SelectItem value="secondary">Secondary School</SelectItem>
+                        <SelectItem value="tutorial_centre">Tutorial Centre</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div className="md:col-span-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
-                    placeholder="School address"
-                  />
-                </div>
+                  <div>
+                    <Label htmlFor="state">State</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="state"
+                        className="pl-10"
+                        value={formData.state}
+                        onChange={(e) => handleInputChange("state", e.target.value)}
+                        placeholder="e.g., Lagos"
+                      />
+                    </div>
+                  </div>
 
-                <div>
-                  <Label htmlFor="city">City</Label>
-                  <Input
-                    id="city"
-                    value={formData.city}
-                    onChange={(e) => handleInputChange('city', e.target.value)}
-                    placeholder="e.g., Lagos"
-                  />
-                </div>
+                  <div>
+                    <Label htmlFor="schoolAddress">School Address</Label>
+                    <Textarea
+                      id="schoolAddress"
+                      value={formData.schoolAddress}
+                      onChange={(e) => handleInputChange("schoolAddress", e.target.value)}
+                      placeholder="Full address of the school"
+                      rows={3}
+                    />
+                  </div>
 
-                <div>
-                  <Label htmlFor="state">State</Label>
-                  <Input
-                    id="state"
-                    value={formData.state}
-                    onChange={(e) => handleInputChange('state', e.target.value)}
-                    placeholder="e.g., Lagos State"
-                  />
+                  <Button type="button" onClick={handleNext} className="w-full">
+                    Next Step
+                  </Button>
                 </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="adminFullName">Admin Full Name *</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="adminFullName"
+                        className="pl-10"
+                        value={formData.adminFullName}
+                        onChange={(e) => handleInputChange("adminFullName", e.target.value)}
+                        placeholder="John Doe"
+                      />
+                    </div>
+                    {errors.adminFullName && <p className="text-sm text-destructive mt-1">{errors.adminFullName}</p>}
+                  </div>
 
-                <div>
-                  <Label htmlFor="website">Website</Label>
-                  <Input
-                    id="website"
-                    type="url"
-                    value={formData.website}
-                    onChange={(e) => handleInputChange('website', e.target.value)}
-                    placeholder="https://school.com"
-                  />
+                  <div>
+                    <Label htmlFor="adminPosition">Position/Role *</Label>
+                    <Input
+                      id="adminPosition"
+                      value={formData.adminPosition}
+                      onChange={(e) => handleInputChange("adminPosition", e.target.value)}
+                      placeholder="e.g., Principal, IT Manager"
+                    />
+                    {errors.adminPosition && <p className="text-sm text-destructive mt-1">{errors.adminPosition}</p>}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="adminPhone">Admin Phone *</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="adminPhone"
+                        type="tel"
+                        className="pl-10"
+                        value={formData.adminPhone}
+                        onChange={(e) => handleInputChange("adminPhone", e.target.value)}
+                        placeholder="08012345678"
+                      />
+                    </div>
+                    {errors.adminPhone && <p className="text-sm text-destructive mt-1">{errors.adminPhone}</p>}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="password">Password *</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="password"
+                        type="password"
+                        className="pl-10"
+                        value={formData.password}
+                        onChange={(e) => handleInputChange("password", e.target.value)}
+                        placeholder="Min. 8 characters"
+                      />
+                    </div>
+                    {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        className="pl-10"
+                        value={formData.confirmPassword}
+                        onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                        placeholder="Re-enter password"
+                      />
+                    </div>
+                    {errors.confirmPassword && <p className="text-sm text-destructive mt-1">{errors.confirmPassword}</p>}
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <Checkbox
+                      id="agreeToTerms"
+                      checked={formData.agreeToTerms}
+                      onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked)}
+                    />
+                    <Label htmlFor="agreeToTerms" className="text-sm cursor-pointer">
+                      I agree to Edura's Terms and Conditions *
+                    </Label>
+                  </div>
+                  {errors.agreeToTerms && <p className="text-sm text-destructive">{errors.agreeToTerms}</p>}
+
+                  <div className="flex gap-3">
+                    <Button type="button" variant="outline" onClick={handleBack} className="flex-1">
+                      Back
+                    </Button>
+                    <Button type="submit" disabled={loading} className="flex-1">
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Registering...
+                        </>
+                      ) : (
+                        "Complete Registration"
+                      )}
+                    </Button>
+                  </div>
                 </div>
-
-                <div>
-                  <Label htmlFor="registration_number">Registration Number</Label>
-                  <Input
-                    id="registration_number"
-                    value={formData.registration_number}
-                    onChange={(e) => handleInputChange('registration_number', e.target.value)}
-                    placeholder="Official registration number"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    placeholder="Brief description of your school"
-                    rows={3}
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Registering...
-                    </>
-                  ) : (
-                    'Register School'
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/dashboard')}
-                  disabled={loading}
-                >
-                  Cancel
-                </Button>
-              </div>
+              )}
             </form>
           </CardContent>
         </Card>

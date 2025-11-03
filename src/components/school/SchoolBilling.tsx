@@ -25,24 +25,25 @@ export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) 
 
   const fetchBillingData = async () => {
     try {
-      const [subsData, paymentsData] = await Promise.all([
-        supabase
-          .from("school_subscriptions")
-          .select("*")
-          .eq("school_id", schoolId)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("school_payments")
-          .select("*")
-          .eq("school_id", schoolId)
-          .order("created_at", { ascending: false }),
-      ]);
+      // Fetch subscriptions (using any to bypass type issues temporarily)
+      const { data: subsData, error: subsError } = await (supabase as any)
+        .from("school_subscriptions")
+        .select("*")
+        .eq("school_id", schoolId)
+        .order("created_at", { ascending: false });
 
-      if (subsData.error) throw subsData.error;
-      if (paymentsData.error) throw paymentsData.error;
+      if (subsError) throw subsError;
+      setSubscriptions(subsData || []);
 
-      setSubscriptions(subsData.data || []);
-      setPayments(paymentsData.data || []);
+      // Fetch payments (using any to bypass type issues temporarily)
+      const { data: paymentsData, error: paymentsError } = await (supabase as any)
+        .from("school_payments")
+        .select("*")
+        .eq("school_id", schoolId)
+        .order("created_at", { ascending: false });
+
+      if (paymentsError) throw paymentsError;
+      setPayments(paymentsData || []);
     } catch (error) {
       console.error("Error fetching billing data:", error);
       toast.error("Failed to load billing data");
