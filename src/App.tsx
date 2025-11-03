@@ -58,6 +58,7 @@ import SchoolLogin from "./pages/SchoolLogin";
 import SchoolSubscription from "./pages/SchoolSubscription";
 import SchoolDashboard from "./pages/SchoolDashboard";
 import SchoolVerificationPending from "./pages/SchoolVerificationPending";
+import SchoolLanding from "./pages/SchoolLanding";
 import OfflineExams from "./pages/OfflineExams";
 import StudyPlanner from "./pages/StudyPlanner";
 import ReferralProgram from "./pages/ReferralProgram";
@@ -200,6 +201,7 @@ const AppRoutes = () => {
                 <ChallengeDetail />
               </ProtectedRoute>
             } />
+            <Route path="/schools" element={<Layout><SchoolLanding /></Layout>} />
             <Route path="/school-login" element={<Layout><SchoolLogin /></Layout>} />
             <Route path="/school-registration" element={<Layout><SchoolRegistration /></Layout>} />
             <Route path="/school-subscription" element={
