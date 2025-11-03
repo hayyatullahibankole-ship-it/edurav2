@@ -140,7 +140,9 @@ export default function SchoolRegistration() {
         options: {
           emailRedirectTo: `${window.location.origin}/school-subscription`,
           data: {
-            full_name: formData.adminFullName,
+            first_name: formData.adminFullName.split(' ')[0],
+            last_name: formData.adminFullName.split(' ').slice(1).join(' ') || formData.adminFullName,
+            phone: formData.adminPhone,
             role: "school_admin",
           }
         }
