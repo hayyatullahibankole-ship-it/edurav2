@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Loader2, School, Mail, Lock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,12 +19,15 @@ const loginSchema = z.object({
 export default function SchoolLogin() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { toast: toastHook } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [errors, setErrors] = useState<any>({});
+  const [lastErrorCode, setLastErrorCode] = useState<string | null>(null);
+  const [lastErrorMessage, setLastErrorMessage] = useState<string | null>(null);
 
   // If already logged in, redirect
   if (!authLoading && user) {
@@ -71,9 +75,46 @@ export default function SchoolLogin() {
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      toast.error(error.message || "Failed to login. Please check your credentials.");
+      const code = error?.code || null;
+      setLastErrorCode(code);
+      setLastErrorMessage(error?.message || null);
+      if (code === "email_not_confirmed") {
+        toastHook({
+          variant: "destructive",
+          title: "Email not confirmed",
+          description: "Please check your inbox or resend the verification email below.",
+        });
+      } else {
+        toastHook({
+          variant: "destructive",
+          title: "Login failed",
+          description: error?.message || "Invalid credentials",
+        });
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!formData.email) {
+      toastHook({
+        variant: "destructive",
+        title: "Enter your email",
+        description: "Provide the school email and try again.",
+      });
+      return;
+    }
+    try {
+      const { error } = await supabase.auth.resend({ type: "signup", email: formData.email });
+      if (error) throw error;
+      toast.success("Verification email sent");
+    } catch (err: any) {
+      toastHook({
+        variant: "destructive",
+        title: "Couldn't send verification email",
+        description: err?.message || "Please try again later.",
+      });
     }
   };
 
@@ -140,8 +181,17 @@ export default function SchoolLogin() {
                 )}
               </Button>
 
+              {lastErrorCode === 'email_not_confirmed' && (
+                <div className="text-center text-sm text-muted-foreground">
+                  Email not confirmed. {""}
+                  <Button variant="link" type="button" onClick={handleResendVerification}>
+                    Resend verification email
+                  </Button>
+                </div>
+              )}
+
               <div className="text-center text-sm text-muted-foreground">
-                Don't have a school account?{" "}
+                Don't have a school account? {""}
                 <Link to="/school-registration" className="text-primary hover:underline">
                   Register here
                 </Link>
