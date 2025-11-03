@@ -3219,6 +3219,10 @@ export type Database = {
           updated_count: number
         }[]
       }
+      decrement_students_added: {
+        Args: { school_id_param: string }
+        Returns: undefined
+      }
       delete_incomplete_questions: {
         Args: { target_subject?: string }
         Returns: {
@@ -3540,6 +3544,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_students_added: {
+        Args: { school_id_param: string }
+        Returns: undefined
       }
       is_account_locked: { Args: { user_email: string }; Returns: boolean }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
