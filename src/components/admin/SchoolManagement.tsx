@@ -273,8 +273,8 @@ export default function SchoolManagement() {
                       </div>
                       {subscription && (
                         <div className="mt-2 text-sm text-slate-300">
-                          <span className="text-slate-400">Plan:</span> {subscription.subscription_plans.name} - 
-                          Valid until {new Date(subscription.end_date || '').toLocaleDateString()}
+                          <span className="text-slate-400">Plan:</span> {subscription.subscription_plans?.name ?? 'Unknown'} - 
+                          {subscription.end_date ? `Valid until ${new Date(subscription.end_date).toLocaleDateString()}` : 'No expiry'}
                         </div>
                       )}
                     </div>
