@@ -240,10 +240,10 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
                 <TableRow key={student.id}>
                   <TableCell className="font-medium">{student.full_name}</TableCell>
                   <TableCell className="font-mono text-sm">
-                    {student.student_username}@{schoolCode}.edu.ng
+                    {student.users?.email || `${student.student_username}@${schoolCode}.edu.ng`}
                   </TableCell>
                   <TableCell className="font-mono">{student.student_password_hash}</TableCell>
-                  <TableCell>{student.class_level || "-"}</TableCell>
+                  <TableCell>{student.class_level || '-'}</TableCell>
                   <TableCell>
                     <Badge variant={student.is_active ? "default" : "secondary"}>
                       {student.is_active ? "Active" : "Inactive"}

@@ -147,8 +147,10 @@ export default function AuthForm() {
           password: formData.password
         });
 
+        const email = loginData.email.trim().toLowerCase();
+
         const { data, error } = await supabase.auth.signInWithPassword({
-          email: loginData.email,
+          email,
           password: loginData.password
         });
 
