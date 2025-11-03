@@ -72,6 +72,7 @@ export default function ResourceManagement() {
     description: '',
     file: null as File | null,
     file_type: '',
+    category: 'past-questions' as 'past-questions' | 'syllabus' | 'books',
     subject_id: '',
     access_level: 'free' as 'free' | 'premium',
     tags: [] as string[],
@@ -217,9 +218,9 @@ export default function ResourceManagement() {
         file_url: fileUrl,
         file_type: fileType,
         file_size_bytes: fileSize,
-        subject_id: newResource.subject_id,
+        subject_id: newResource.subject_id || null,
         access_level: newResource.access_level,
-        tags: newResource.tags,
+        tags: [...newResource.tags, newResource.category],
         is_active: true,
         download_count: 0,
         view_count: 0
@@ -256,6 +257,7 @@ export default function ResourceManagement() {
       description: '',
       file: null,
       file_type: '',
+      category: 'past-questions',
       subject_id: '',
       access_level: 'free',
       tags: [],
@@ -737,17 +739,15 @@ data-testid="resource-management-container">
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="subject">Subject</Label>
-                    <Select value={newResource.subject_id} onValueChange={(value) => setNewResource({...newResource, subject_id: value})}>
+                    <Label htmlFor="category">Category</Label>
+                    <Select value={newResource.category} onValueChange={(value: any) => setNewResource({...newResource, category: value})}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select subject" />
+                        <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {subjects.map(subject => (
-                          <SelectItem key={subject.id} value={subject.id}>
-                            {subject.name}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="past-questions">Past Questions</SelectItem>
+                        <SelectItem value="syllabus">Syllabus</SelectItem>
+                        <SelectItem value="books">Books</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
