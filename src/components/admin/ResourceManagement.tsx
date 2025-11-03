@@ -81,6 +81,7 @@ export default function ResourceManagement() {
   });
 
   const [bulkFiles, setBulkFiles] = useState<FileList | null>(null);
+  const [bulkCategory, setBulkCategory] = useState<'past-questions' | 'syllabus' | 'books'>('past-questions');
   const [brokenResources, setBrokenResources] = useState<Resource[]>([]);
   const [isFixingResources, setIsFixingResources] = useState(false);
 
@@ -297,9 +298,9 @@ export default function ResourceManagement() {
             file_url: urlData.publicUrl,
             file_type: file.type,
             file_size_bytes: file.size,
-            subject_id: subjects[0]?.id || '', // Default to first subject
+            subject_id: subjects[0]?.id || null, // Default to first subject
             access_level: 'free',
-            tags: [],
+            tags: [bulkCategory],
             is_active: true,
             download_count: 0,
             view_count: 0
@@ -324,6 +325,7 @@ export default function ResourceManagement() {
 
       setIsBulkUploadOpen(false);
       setBulkFiles(null);
+      setBulkCategory('past-questions');
       fetchData();
 
     } catch (error) {
@@ -609,6 +611,20 @@ data-testid="resource-management-container">
                 <DialogTitle>Bulk Upload Resources</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
+                <div>
+                  <Label htmlFor="bulkCategory">Category</Label>
+                  <Select value={bulkCategory} onValueChange={(value: any) => setBulkCategory(value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="past-questions">Past Questions</SelectItem>
+                      <SelectItem value="syllabus">Syllabus</SelectItem>
+                      <SelectItem value="books">Books</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div>
                   <Label htmlFor="bulkFiles">Select Multiple Files</Label>
                   <Input
