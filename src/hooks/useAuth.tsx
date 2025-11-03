@@ -155,17 +155,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (profileData) {
         setUserProfile(profileData);
         
-        // Check if user is a school admin by joining through users table
+        // Check if user is a school admin using the users.id (not auth_user_id)
         const { data: schoolData } = await supabase
           .from('schools' as any)
           .select('id')
-          .eq('admin_user_id', userId)
+          .eq('admin_user_id', profileData.id)
           .maybeSingle();
         
         const isSchool = !!schoolData;
         setIsSchoolAdmin(isSchool);
         
-        console.log("School admin check - userId:", userId, "isSchool:", isSchool, "schoolData:", schoolData);
+        console.log("School admin check - profileData.id:", profileData.id, "isSchool:", isSchool, "schoolData:", schoolData);
         
         // Determine role via secure RPC to avoid RLS issues
         const { data: isAdminFlag, error: roleError } = await supabase
