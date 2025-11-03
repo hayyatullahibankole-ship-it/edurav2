@@ -168,46 +168,6 @@ export default function SchoolLanding() {
         </div>
       </section>
 
-      {/* Features Section with Image */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
-              <Zap className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-primary">Powerful Features</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold">Complete WAEC, JAMB & NECO Preparation</h2>
-            <p className="text-lg text-muted-foreground">
-              Everything your students need to excel in their examinations
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
-            <div className="grid sm:grid-cols-2 gap-6">
-              {features.map((feature, index) => (
-                <Card key={index} className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group">
-                  <CardContent className="p-6 space-y-3">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                      <feature.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <h3 className="font-bold text-lg">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <div className="relative">
-              <img 
-                src={dashboardPreview} 
-                alt="School dashboard preview" 
-                className="rounded-2xl shadow-2xl border-4 border-primary/10 w-full"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Pricing Section */}
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
@@ -304,6 +264,46 @@ export default function SchoolLanding() {
                   Contact Sales
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section with Image */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
+              <Zap className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">Powerful Features</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold">Complete WAEC, JAMB & NECO Preparation</h2>
+            <p className="text-lg text-muted-foreground">
+              Everything your students need to excel in their examinations
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
+            <div className="grid sm:grid-cols-2 gap-6">
+              {features.map((feature, index) => (
+                <Card key={index} className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group">
+                  <CardContent className="p-6 space-y-3">
+                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <feature.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-lg">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className="relative">
+              <img 
+                src={dashboardPreview} 
+                alt="School dashboard preview" 
+                className="rounded-2xl shadow-2xl border-4 border-primary/10 w-full"
+              />
             </div>
           </div>
         </div>
