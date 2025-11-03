@@ -34,6 +34,7 @@ import TopPerformers from "@/components/school/TopPerformers";
 import ComparisonAnalytics from "@/components/school/ComparisonAnalytics";
 import AlertsCenter from "@/components/school/AlertsCenter";
 import ExportTools from "@/components/school/ExportTools";
+import WelcomeManualModal from "@/components/school/WelcomeManualModal";
 
 const menuItems = [
   { id: "overview", title: "Overview", icon: LayoutDashboard },
@@ -89,6 +90,7 @@ export default function SchoolDashboard() {
   const [schoolData, setSchoolData] = useState<any>(null);
   const [subscriptionData, setSubscriptionData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -99,6 +101,13 @@ export default function SchoolDashboard() {
 
     fetchSchoolData();
   }, [user]);
+
+  const handleCloseWelcomeModal = () => {
+    if (schoolData?.id) {
+      localStorage.setItem(`school_welcome_${schoolData.id}`, 'true');
+    }
+    setShowWelcomeModal(false);
+  };
 
   const fetchSchoolData = async () => {
     try {
@@ -148,6 +157,12 @@ export default function SchoolDashboard() {
       
       const subscription = subscriptions && subscriptions.length > 0 ? subscriptions[0] : null;
       setSubscriptionData(subscription);
+
+      // Check if this is a new school and show welcome modal
+      const hasSeenWelcome = localStorage.getItem(`school_welcome_${school.id}`);
+      if (!hasSeenWelcome) {
+        setShowWelcomeModal(true);
+      }
 
     } catch (error: any) {
       console.error("Error fetching school data:", error);
@@ -394,6 +409,15 @@ export default function SchoolDashboard() {
           </main>
         </div>
       </div>
+
+      {/* Welcome Modal for New Schools */}
+      {schoolData && (
+        <WelcomeManualModal
+          open={showWelcomeModal}
+          onClose={handleCloseWelcomeModal}
+          schoolName={schoolData.name}
+        />
+      )}
     </SidebarProvider>
   );
 }
