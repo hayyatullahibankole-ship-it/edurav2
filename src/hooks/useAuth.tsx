@@ -169,11 +169,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (profileData) {
         setUserProfile(profileData);
         
-        // Check user role from the user_roles table
+        // Check user role from the user_roles table using the public.users.id
         const { data: roleData } = await supabase
           .from('user_roles')
           .select('role')
-          .eq('user_id', userId)
+          .eq('user_id', profileData.id)
           .maybeSingle();
         
         let roleFromDB = roleData?.role as string | undefined;
