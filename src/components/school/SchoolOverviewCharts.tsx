@@ -259,80 +259,46 @@ const totalPie = pieData.reduce((sum, item) => sum + (Number(item.value) || 0), 
         </Card>
       </div>
 
-      {/* Charts */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Pie Chart - Pass/Fail Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Success Rate</CardTitle>
-            <CardDescription>Distribution of passing vs failing tests</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {totalPie > 0 ? (
-              <ChartErrorBoundary>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, value, percent }) => {
-                        const pct = Number.isFinite(percent) ? (percent * 100).toFixed(0) : "0";
-                        return `${name}: ${value} (${pct}%)`;
-                      }}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value: number) => [`${value} tests`, "Count"]} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </ChartErrorBoundary>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center">
-                <p className="text-muted-foreground">No test results yet</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Bar Chart - Top Students */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Top Performers</CardTitle>
-            <CardDescription>Average scores by student (Top 10)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {validStudentPerformance.length > 0 ? (
-              <ChartErrorBoundary>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={validStudentPerformance} layout="horizontal">
-                    <XAxis type="number" domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} allowDecimals={false} />
-                    <YAxis type="category" dataKey="name" width={80} />
-                    <Tooltip 
-                      formatter={(value: number, name: string) => {
-                        if (name === "score") return [`${value}%`, "Avg Score"];
-                        return [value, name];
-                      }}
-                    />
-                    <Bar dataKey="score" fill="#3b82f6" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartErrorBoundary>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center">
-                <p className="text-muted-foreground">No student performance data yet</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      {/* Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base font-semibold">Success Rate</CardTitle>
+          <CardDescription>Distribution of passing vs failing tests</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {totalPie > 0 ? (
+            <ChartErrorBoundary>
+              <ResponsiveContainer width="100%" height={350}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value, percent }) => {
+                      const pct = Number.isFinite(percent) ? (percent * 100).toFixed(0) : "0";
+                      return `${name}: ${value} (${pct}%)`;
+                    }}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => [`${value} tests`, "Count"]} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartErrorBoundary>
+          ) : (
+            <div className="h-[350px] flex items-center justify-center">
+              <p className="text-muted-foreground">No test results yet</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

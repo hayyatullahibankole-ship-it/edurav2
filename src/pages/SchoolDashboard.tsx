@@ -22,7 +22,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import SchoolStudentsManager from "@/components/school/SchoolStudentsManager";
-import SchoolAvailableExams from "@/components/school/SchoolAvailableExams";
 import SchoolReports from "@/components/school/SchoolReports";
 import SchoolBilling from "@/components/school/SchoolBilling";
 import SchoolSettings from "@/components/school/SchoolSettings";
@@ -31,7 +30,6 @@ import SchoolOverviewCharts from "@/components/school/SchoolOverviewCharts";
 const menuItems = [
   { id: "overview", title: "Overview", icon: LayoutDashboard },
   { id: "students", title: "Students", icon: Users },
-  { id: "exams", title: "Exams", icon: BookOpen },
   { id: "reports", title: "Reports", icon: TrendingUp },
   { id: "billing", title: "Billing", icon: DollarSign },
   { id: "settings", title: "Settings", icon: Settings },
@@ -343,8 +341,6 @@ export default function SchoolDashboard() {
                   onStudentsUpdate={fetchSchoolData}
                 />
               )}
-
-              {activeTab === "exams" && <SchoolAvailableExams />}
               
               {activeTab === "reports" && schoolData && (
                 <SchoolReports schoolId={schoolData.id} />
