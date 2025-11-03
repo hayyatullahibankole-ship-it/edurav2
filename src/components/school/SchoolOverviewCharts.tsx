@@ -74,13 +74,18 @@ export default function SchoolOverviewCharts({ schoolId }: Props) {
 
       if (resultsError) throw resultsError;
 
+      // Filter out results with null/undefined percentages
+      const validResults = (results || []).filter(r => 
+        r.percentage !== null && r.percentage !== undefined && !isNaN(r.percentage)
+      );
+
       // Calculate pass/fail (pass threshold: 50%)
       const passThreshold = 50;
       let passed = 0;
       let failed = 0;
       let totalScore = 0;
 
-      (results || []).forEach(result => {
+      validResults.forEach(result => {
         if (result.percentage >= passThreshold) {
           passed++;
         } else {
@@ -89,18 +94,18 @@ export default function SchoolOverviewCharts({ schoolId }: Props) {
         totalScore += result.percentage;
       });
 
-      const totalTests = (results || []).length;
+      const totalTests = validResults.length;
       const averageScore = totalTests > 0 ? totalScore / totalTests : 0;
 
       // Calculate per-student performance
       const studentPerformance = students.map(student => {
         const studentAttempts = attempts.filter(a => a.user_id === student.user_id);
-        const studentResults = (results || []).filter(r => 
+        const studentResults = validResults.filter(r => 
           studentAttempts.some(a => a.id === r.attempt_id)
         );
         
         const avgScore = studentResults.length > 0
-          ? studentResults.reduce((sum, r) => sum + r.percentage, 0) / studentResults.length
+          ? studentResults.reduce((sum, r) => sum + (r.percentage || 0), 0) / studentResults.length
           : 0;
 
         return {
@@ -127,11 +132,16 @@ export default function SchoolOverviewCharts({ schoolId }: Props) {
   };
 
   const pieData = [
-    { name: "Passed (≥50%)", value: data.passed, color: "#10b981" },
-    { name: "Failed (<50%)", value: data.failed, color: "#ef4444" }
-  ];
+    { name: "Passed (≥50%)", value: data.passed || 0, color: "#10b981" },
+    { name: "Failed (<50%)", value: data.failed || 0, color: "#ef4444" }
+  ].filter(item => !isNaN(item.value) && item.value >= 0);
 
   const COLORS = ["#10b981", "#ef4444"];
+
+  // Ensure student performance data has valid scores
+  const validStudentPerformance = data.studentPerformance.filter(s => 
+    !isNaN(s.score) && s.score >= 0 && s.score <= 100
+  );
 
   if (loading) {
     return (
@@ -193,7 +203,9 @@ export default function SchoolOverviewCharts({ schoolId }: Props) {
             <CardTitle className="text-sm font-medium text-muted-foreground">Average Score</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-600">{data.averageScore.toFixed(1)}%</div>
+            <div className="text-3xl font-bold text-blue-600">
+              {isNaN(data.averageScore) ? "0.0" : data.averageScore.toFixed(1)}%
+            </div>
           </CardContent>
         </Card>
         
@@ -203,7 +215,7 @@ export default function SchoolOverviewCharts({ schoolId }: Props) {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-green-600">
-              {data.totalTests > 0 ? ((data.passed / data.totalTests) * 100).toFixed(1) : 0}%
+              {data.totalTests > 0 && !isNaN(data.passed) ? ((data.passed / data.totalTests) * 100).toFixed(1) : "0.0"}%
             </div>
           </CardContent>
         </Card>
@@ -254,9 +266,9 @@ export default function SchoolOverviewCharts({ schoolId }: Props) {
             <CardDescription>Average scores by student (Top 10)</CardDescription>
           </CardHeader>
           <CardContent>
-            {data.studentPerformance.length > 0 ? (
+            {validStudentPerformance.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={data.studentPerformance} layout="horizontal">
+                <BarChart data={validStudentPerformance} layout="horizontal">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" domain={[0, 100]} />
                   <YAxis type="category" dataKey="name" width={80} />
