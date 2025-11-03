@@ -31,6 +31,9 @@ import PerformanceTrends from "@/components/school/PerformanceTrends";
 import StudentEngagement from "@/components/school/StudentEngagement";
 import QuickActions from "@/components/school/QuickActions";
 import TopPerformers from "@/components/school/TopPerformers";
+import ComparisonAnalytics from "@/components/school/ComparisonAnalytics";
+import AlertsCenter from "@/components/school/AlertsCenter";
+import ExportTools from "@/components/school/ExportTools";
 
 const menuItems = [
   { id: "overview", title: "Overview", icon: LayoutDashboard },
@@ -306,6 +309,13 @@ export default function SchoolDashboard() {
                     </Card>
                   </div>
 
+                  {/* Alerts Center - Full Width */}
+                  <AlertsCenter 
+                    schoolId={schoolData?.id}
+                    subscriptionData={subscriptionData}
+                    schoolData={schoolData}
+                  />
+
                   {/* Quick Actions + Engagement */}
                   <div className="grid gap-6 lg:grid-cols-2">
                     <QuickActions 
@@ -315,8 +325,11 @@ export default function SchoolDashboard() {
                     <StudentEngagement schoolId={schoolData?.id} />
                   </div>
 
-                  {/* Performance Trends - Full Width */}
-                  <PerformanceTrends schoolId={schoolData?.id} />
+                  {/* Performance Trends + Comparison Analytics */}
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    <PerformanceTrends schoolId={schoolData?.id} />
+                    <ComparisonAnalytics schoolId={schoolData?.id} />
+                  </div>
 
                   {/* Charts + Activity/Leaderboard */}
                   <div className="grid gap-6 lg:grid-cols-2">
@@ -341,7 +354,13 @@ export default function SchoolDashboard() {
               )}
               
               {activeTab === "reports" && schoolData && (
-                <SchoolReports schoolId={schoolData.id} />
+                <div className="space-y-6">
+                  <ExportTools 
+                    schoolId={schoolData.id}
+                    schoolName={schoolData.name}
+                  />
+                  <SchoolReports schoolId={schoolData.id} />
+                </div>
               )}
 
               {activeTab === "billing" && schoolData && (
