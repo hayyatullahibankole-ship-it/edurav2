@@ -95,26 +95,44 @@ serve(async (req) => {
       );
     }
 
-    // Create users record
+    // Wait briefly for trigger to complete, then fetch the user record
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    let finalUserId: string;
+    
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
-      .insert({
-        auth_user_id: newAuthUser.user.id,
-        email: email,
-        first_name: fullName.split(' ')[0],
-        last_name: fullName.split(' ').slice(1).join(' ') || fullName.split(' ')[0],
-      })
       .select()
+      .eq('auth_user_id', newAuthUser.user.id)
       .single();
 
     if (userError || !userData) {
-      console.error('Error creating user record:', userError);
-      // Cleanup: delete auth user
-      await supabaseAdmin.auth.admin.deleteUser(newAuthUser.user.id);
-      return new Response(
-        JSON.stringify({ error: 'Failed to create user record' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      console.error('Error fetching user record:', userError);
+      // If user record doesn't exist, create it manually
+      const { data: createdUser, error: createError } = await supabaseAdmin
+        .from('users')
+        .insert({
+          auth_user_id: newAuthUser.user.id,
+          email: email,
+          first_name: fullName.split(' ')[0],
+          last_name: fullName.split(' ').slice(1).join(' ') || fullName.split(' ')[0],
+        })
+        .select()
+        .single();
+      
+      if (createError || !createdUser) {
+        console.error('Error creating user record:', createError);
+        // Cleanup: delete auth user
+        await supabaseAdmin.auth.admin.deleteUser(newAuthUser.user.id);
+        return new Response(
+          JSON.stringify({ error: 'Failed to create user record' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      finalUserId = createdUser.id;
+    } else {
+      finalUserId = userData.id;
     }
 
     // Create school_students record
@@ -122,7 +140,7 @@ serve(async (req) => {
       .from('school_students')
       .insert({
         school_id: schoolId,
-        user_id: userData.id,
+        user_id: finalUserId,
         student_username: username,
         student_password_hash: password,
         full_name: fullName,
@@ -133,7 +151,7 @@ serve(async (req) => {
     if (studentError) {
       console.error('Error creating school student record:', studentError);
       // Cleanup: delete user and auth user
-      await supabaseAdmin.from('users').delete().eq('id', userData.id);
+      await supabaseAdmin.from('users').delete().eq('id', finalUserId);
       await supabaseAdmin.auth.admin.deleteUser(newAuthUser.user.id);
       return new Response(
         JSON.stringify({ error: 'Failed to create student record' }),
@@ -175,7 +193,7 @@ serve(async (req) => {
           email,
         },
         student: {
-          id: userData.id,
+          id: finalUserId,
           fullName,
           classLevel,
         }
