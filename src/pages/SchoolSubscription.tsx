@@ -117,8 +117,8 @@ export default function SchoolSubscription() {
 
         if (createError) {
           console.error('Failed to create school (no pending data):', createError);
-          toast.error('Could not create school. Please complete registration again.');
-          setTimeout(() => navigate('/school-registration'), 2000);
+          toast.error('Could not create school automatically. Please complete the short registration form to proceed.');
+          // Stay on this page so user can retry after registration
         } else {
           // The trigger will automatically assign the school_admin role
           setSchoolData(newSchool);
