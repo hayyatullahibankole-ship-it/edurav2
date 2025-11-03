@@ -3228,6 +3228,15 @@ export type Database = {
           updated_count: number
         }[]
       }
+      create_test_school_account: {
+        Args: {
+          p_admin_name?: string
+          p_email?: string
+          p_password?: string
+          p_school_name?: string
+        }
+        Returns: Json
+      }
       decrement_students_added: {
         Args: { school_id_param: string }
         Returns: undefined
