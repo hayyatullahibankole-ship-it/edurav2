@@ -81,44 +81,49 @@ export default function SchoolSubscription() {
       if (school) {
         setSchoolData(school);
       } else {
-        // Attempt to create school from pending registration data
+        // Attempt to create school from pending registration data or sensible defaults
         const pendingRaw = localStorage.getItem('pendingSchoolRegistration');
-        if (pendingRaw) {
-          const pending = JSON.parse(pendingRaw);
-          const slug = (pending.schoolName || 'my-school')
-            .toLowerCase()
-            .trim()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '');
+        const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
 
-          const { data: newSchool, error: createError } = await supabase
-            .from('schools')
-            .insert({
-              name: pending.schoolName,
-              slug,
-              email: pending.schoolEmail || user?.email,
-              phone: pending.schoolPhone || null,
-              address: pending.schoolAddress || null,
-              state: pending.state || null,
-              admin_user_id: profileId,
-              is_active: false,
-            })
-            .select('*')
-            .single();
+        // Build fallback details if pending is missing
+        const fallbackName = (() => {
+          const fullName = (user as any)?.user_metadata?.full_name as string | undefined;
+          if (pending?.schoolName) return pending.schoolName;
+          if (fullName) return `${fullName.split(' ')[0]}'s School`;
+          if (user?.email) return `${user.email.split('@')[0]} School`;
+          return 'My School';
+        })();
 
-          if (createError) {
-            console.error('Failed to create school from pending data:', createError);
-            toast.error('Could not create school. Please complete registration again.');
-            setTimeout(() => navigate('/school-registration'), 2000);
-          } else {
-            // The trigger will automatically assign the school_admin role
-            setSchoolData(newSchool);
-            localStorage.removeItem('pendingSchoolRegistration');
-            toast.success('School created. You can now activate your subscription.');
-          }
+        const slug = (pending?.schoolName || fallbackName)
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+
+        const { data: newSchool, error: createError } = await supabase
+          .from('schools')
+          .insert({
+            name: pending?.schoolName || fallbackName,
+            slug,
+            email: pending?.schoolEmail || user?.email,
+            phone: pending?.schoolPhone || null,
+            address: pending?.schoolAddress || null,
+            state: pending?.state || null,
+            admin_user_id: profileId,
+            is_active: false,
+          })
+          .select('*')
+          .single();
+
+        if (createError) {
+          console.error('Failed to create school (no pending data):', createError);
+          toast.error('Could not create school. Please complete registration again.');
+          setTimeout(() => navigate('/school-registration'), 2000);
         } else {
-          toast.error("School not found. Please complete registration first.");
-          setTimeout(() => navigate("/school-registration"), 2000);
+          // The trigger will automatically assign the school_admin role
+          setSchoolData(newSchool);
+          localStorage.removeItem('pendingSchoolRegistration');
+          toast.success('School created. You can now activate your subscription.');
         }
       }
     } catch (error) {
