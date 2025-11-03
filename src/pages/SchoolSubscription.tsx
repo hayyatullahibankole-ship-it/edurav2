@@ -149,9 +149,9 @@ export default function SchoolSubscription() {
     let calculatedPerStudent = 0;
 
     if (studentCount >= 1 && studentCount <= 50) {
-      // Fixed price of ₦1,000 for 1-50 students
-      calculatedTotal = 1000;
-      calculatedPerStudent = calculatedTotal / studentCount;
+      // ₦1,000 per student
+      calculatedPerStudent = 1000;
+      calculatedTotal = studentCount * 1000;
     } else if (studentCount >= 51 && studentCount <= 100) {
       // ₦900 per student
       calculatedPerStudent = 900;
@@ -366,7 +366,7 @@ export default function SchoolSubscription() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between items-center py-1">
                   <span>1-50 students</span>
-                  <span className="font-medium text-primary">₦1,000 total</span>
+                  <span className="font-medium text-primary">₦1,000 per student</span>
                 </div>
                 <div className="flex justify-between items-center py-1">
                   <span>51-100 students</span>
