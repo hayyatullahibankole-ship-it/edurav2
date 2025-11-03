@@ -3515,6 +3515,20 @@ export type Database = {
           subject_id: string
         }[]
       }
+      get_user_effective_subscription: {
+        Args: { target_user_id: string }
+        Returns: {
+          end_date: string
+          id: string
+          plan_id: string
+          plan_name: string
+          price: number
+          resource_access_level: string
+          source: string
+          start_date: string
+          status: string
+        }[]
+      }
       get_user_role: {
         Args: { _auth_user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]

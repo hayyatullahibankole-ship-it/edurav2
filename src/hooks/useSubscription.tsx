@@ -59,22 +59,11 @@ export function useSubscription() {
       try {
         setLoading(true);
         
-        // Get all active subscriptions (may include multiple entries)
+        // Use the new function that checks both school and personal subscriptions
         const { data, error } = await supabase
-          .from('subscriptions')
-          .select(`
-            *,
-            subscription_plans (
-              name,
-              price,
-              resource_access_level,
-              features
-            )
-          `)
-          .eq('user_id', userProfile.id)
-          .eq('status', 'ACTIVE')
-          .gte('end_date', new Date().toISOString())
-          .order('end_date', { ascending: false });
+          .rpc('get_user_effective_subscription', {
+            target_user_id: userProfile.id
+          });
 
         if (error) {
           console.error('Error fetching subscription:', error);
@@ -92,23 +81,39 @@ export function useSubscription() {
               features: ['Basic practice tests']
             }
           });
+        } else if (data && data.length > 0) {
+          // Transform the RPC result to match SubscriptionData format
+          const effectiveSub = data[0];
+          setSubscription({
+            id: effectiveSub.id,
+            status: effectiveSub.status,
+            plan_id: effectiveSub.plan_id,
+            start_date: effectiveSub.start_date,
+            end_date: effectiveSub.end_date,
+            subscription_plans: {
+              name: effectiveSub.plan_name,
+              price: effectiveSub.price,
+              resource_access_level: effectiveSub.resource_access_level,
+              features: effectiveSub.source === 'school' 
+                ? ['School Premium Access', 'All WAEC, JAMB & NECO questions', 'Unlimited practice tests', 'Detailed analytics']
+                : ['Premium access']
+            }
+          });
         } else {
-          // Choose the best subscription (highest level or highest price)
-          const subs = (data || []) as SubscriptionData[];
-          const rank: Record<string, number> = { basic: 1, premium: 2, enterprise: 3 };
-          const best = subs
-            .sort((a, b) => {
-              const aLevel = rank[(a.subscription_plans?.resource_access_level || 'basic').toLowerCase()] || 0;
-              const bLevel = rank[(b.subscription_plans?.resource_access_level || 'basic').toLowerCase()] || 0;
-              if (aLevel !== bLevel) return bLevel - aLevel;
-              const aPrice = a.subscription_plans?.price || 0;
-              const bPrice = b.subscription_plans?.price || 0;
-              if (aPrice !== bPrice) return bPrice - aPrice;
-              const aEnd = a.end_date ? new Date(a.end_date).getTime() : 0;
-              const bEnd = b.end_date ? new Date(b.end_date).getTime() : 0;
-              return bEnd - aEnd;
-            })[0] || null;
-          setSubscription(best);
+          // No subscription found - user has basic/free access
+          setSubscription({
+            id: 'free',
+            status: 'ACTIVE',
+            plan_id: 'free',
+            start_date: new Date().toISOString(),
+            end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+            subscription_plans: {
+              name: 'Free Access',
+              price: 0,
+              resource_access_level: 'basic',
+              features: ['Limited practice tests']
+            }
+          });
         }
       } catch (error) {
         console.error('Error fetching subscription:', error);
