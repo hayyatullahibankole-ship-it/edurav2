@@ -47,9 +47,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     const localToken = getSessionToken();
     if (!localToken) {
-      console.warn('No local session token found');
-      await signOut();
-      return false;
+      console.warn('No local session token found - creating one now');
+      const newToken = generateSessionToken();
+      storeSessionToken(newToken);
+      try {
+        await setSessionToken(user.id, newToken);
+      } catch (e) {
+        console.warn('Failed to persist session token; continuing', e);
+      }
+      return true;
     }
 
     try {
