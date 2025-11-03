@@ -39,7 +39,7 @@ export default function SchoolDashboard() {
         .from("users")
         .select("id")
         .eq("auth_user_id", user?.id)
-        .single();
+        .maybeSingle();
 
       if (!userData) {
         toast.error("User not found");
@@ -51,9 +51,17 @@ export default function SchoolDashboard() {
         .from("schools")
         .select("*")
         .eq("admin_user_id", userData.id)
-        .single();
+        .maybeSingle();
 
       if (schoolError) throw schoolError;
+
+      if (!school) {
+        setSchoolData(null);
+        setSubscriptionData(null);
+        toast.error("No school account found. Please complete registration.");
+        navigate("/school-registration");
+        return;
+      }
 
       if (!school.is_active) {
         toast.error("School account is not active. Please complete subscription.");
@@ -172,47 +180,61 @@ export default function SchoolDashboard() {
               <LayoutDashboard className="h-4 w-4 mr-2" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="students">
+            <TabsTrigger value="students" disabled={!schoolData}>
               <Users className="h-4 w-4 mr-2" />
               Students
             </TabsTrigger>
-            <TabsTrigger value="exams">
+            <TabsTrigger value="exams" disabled={!schoolData}>
               <BookOpen className="h-4 w-4 mr-2" />
               Available Exams
             </TabsTrigger>
-            <TabsTrigger value="reports">
+            <TabsTrigger value="reports" disabled={!schoolData}>
               <TrendingUp className="h-4 w-4 mr-2" />
               Reports
             </TabsTrigger>
-            <TabsTrigger value="billing">
+            <TabsTrigger value="billing" disabled={!schoolData}>
               <DollarSign className="h-4 w-4 mr-2" />
               Billing
             </TabsTrigger>
-            <TabsTrigger value="settings">
+            <TabsTrigger value="settings" disabled={!schoolData}>
               <Settings className="h-4 w-4 mr-2" />
               Settings
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Welcome to Your School Dashboard</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Manage your students, monitor their performance, and access Edura's comprehensive CBT platform.
-                </p>
-                <div className="space-y-2">
-                  <p><strong>School Code:</strong> {schoolData?.school_code}</p>
-                  <p><strong>Email:</strong> {schoolData?.email}</p>
-                  <p><strong>Phone:</strong> {schoolData?.phone}</p>
-                  {subscriptionData && (
-                    <p><strong>Subscription Expires:</strong> {new Date(subscriptionData.end_date).toLocaleDateString()}</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            {!schoolData ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>No school account found</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground mb-4">
+                    Complete your school registration to get started.
+                  </p>
+                  <Button onClick={() => navigate('/school-registration')}>Finish Registration</Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Welcome to Your School Dashboard</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground mb-4">
+                    Manage your students, monitor their performance, and access Edura's comprehensive CBT platform.
+                  </p>
+                  <div className="space-y-2">
+                    <p><strong>School Code:</strong> {schoolData?.school_code}</p>
+                    <p><strong>Email:</strong> {schoolData?.email}</p>
+                    <p><strong>Phone:</strong> {schoolData?.phone}</p>
+                    {subscriptionData && (
+                      <p><strong>Subscription Expires:</strong> {new Date(subscriptionData.end_date).toLocaleDateString()}</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="students">
