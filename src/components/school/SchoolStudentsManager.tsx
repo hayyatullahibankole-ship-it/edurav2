@@ -66,58 +66,26 @@ export default function SchoolStudentsManager({ schoolId, remainingSlots, onStud
 
     setLoading(true);
     try {
-      const { username, password } = generateCredentials(newStudent.fullName);
-
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: `${username}@${schoolId}.edu.ng`,
-        password: password,
-        options: {
-          data: {
-            full_name: newStudent.fullName,
-            role: "school_student",
-            school_id: schoolId,
-          }
+      // Call Edge Function to create student
+      const { data, error } = await supabase.functions.invoke('create-school-student', {
+        body: {
+          schoolId,
+          fullName: newStudent.fullName,
+          classLevel: newStudent.classLevel || null,
         }
       });
 
-      if (authError) throw authError;
+      if (error) throw error;
 
-      // Create user record
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .insert({
-          auth_user_id: authData.user!.id,
-          email: `${username}@${schoolId}.edu.ng`,
-          full_name: newStudent.fullName,
-        })
-        .select()
-        .single();
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
-      if (userError) throw userError;
+      const { username, password } = data.credentials;
 
-      // Create school student record
-      const { error: studentError } = await supabase
-        .from("school_students")
-        .insert({
-          school_id: schoolId,
-          user_id: userData.id,
-          student_username: username,
-          student_password_hash: password, // In production, this should be hashed
-          full_name: newStudent.fullName,
-          class_level: newStudent.classLevel,
-        });
-
-      if (studentError) throw studentError;
-
-      // Update school students count
-      const { error: updateError } = await supabase.rpc("increment_students_added", {
-        school_id_param: schoolId
+      toast.success(`Student added successfully! Username: ${username}, Password: ${password}`, {
+        duration: 8000,
       });
-
-      if (updateError) console.error("Error updating count:", updateError);
-
-      toast.success(`Student added successfully! Username: ${username}, Password: ${password}`);
       setIsAddModalOpen(false);
       setNewStudent({ fullName: "", classLevel: "" });
       fetchStudents();

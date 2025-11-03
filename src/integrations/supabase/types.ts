@@ -1854,30 +1854,39 @@ export type Database = {
           class_level: string | null
           created_at: string | null
           enrollment_date: string | null
+          full_name: string | null
           id: string
           is_active: boolean | null
           school_id: string
           student_id: string | null
+          student_password_hash: string | null
+          student_username: string | null
           user_id: string
         }
         Insert: {
           class_level?: string | null
           created_at?: string | null
           enrollment_date?: string | null
+          full_name?: string | null
           id?: string
           is_active?: boolean | null
           school_id: string
           student_id?: string | null
+          student_password_hash?: string | null
+          student_username?: string | null
           user_id: string
         }
         Update: {
           class_level?: string | null
           created_at?: string | null
           enrollment_date?: string | null
+          full_name?: string | null
           id?: string
           is_active?: boolean | null
           school_id?: string
           student_id?: string | null
+          student_password_hash?: string | null
+          student_username?: string | null
           user_id?: string
         }
         Relationships: [
