@@ -109,7 +109,7 @@ export default function SchoolOverviewCharts({ schoolId }: Props) {
           : 0;
 
         return {
-          name: student.full_name.split(' ')[0] || student.full_name, // First name only
+          name: (student.full_name?.split(' ')[0] || student.full_name || 'Student'), // First name or fallback
           score: Math.round(avgScore),
           tests: studentResults.length
         };
@@ -136,12 +136,15 @@ export default function SchoolOverviewCharts({ schoolId }: Props) {
     { name: "Failed (<50%)", value: data.failed || 0, color: "#ef4444" }
   ].filter(item => !isNaN(item.value) && item.value >= 0);
 
-  const COLORS = ["#10b981", "#ef4444"];
+const COLORS = ["#10b981", "#ef4444"];
 
-  // Ensure student performance data has valid scores
-  const validStudentPerformance = data.studentPerformance.filter(s => 
-    !isNaN(s.score) && s.score >= 0 && s.score <= 100
-  );
+// Ensure student performance data has valid scores
+const validStudentPerformance = data.studentPerformance.filter(s => 
+  !isNaN(s.score) && s.score >= 0 && s.score <= 100
+);
+
+// Total count used to safely render the pie chart
+const totalPie = pieData.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
 
   if (loading) {
     return (
@@ -233,26 +236,35 @@ export default function SchoolOverviewCharts({ schoolId }: Props) {
             <CardDescription>Distribution of passing vs failing tests</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => [`${value} tests`, "Count"]} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            {totalPie > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value, percent }) => {
+                      const pct = Number.isFinite(percent) ? (percent * 100).toFixed(0) : "0";
+                      return `${name}: ${value} (${pct}%)`;
+                    }}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => [`${value} tests`, "Count"]} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center">
+                <p className="text-muted-foreground">No test results yet</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -269,8 +281,7 @@ export default function SchoolOverviewCharts({ schoolId }: Props) {
             {validStudentPerformance.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={validStudentPerformance} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" domain={[0, 100]} />
+                  <XAxis type="number" domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} allowDecimals={false} />
                   <YAxis type="category" dataKey="name" width={80} />
                   <Tooltip 
                     formatter={(value: number, name: string) => {
