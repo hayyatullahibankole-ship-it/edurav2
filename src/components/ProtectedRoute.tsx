@@ -16,15 +16,18 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
 
   // Check if user is on exam page - disable validation during exams
   const isOnExamPage = location.pathname === '/exam' || location.pathname.includes('/exam');
+  
+  // Check if user is admin or school admin - disable validation for these roles
+  const isAdminUser = userRole === 'admin' || userRole === 'school_admin';
 
-  // Validate session on mount and periodically (but not during exams)
+  // Validate session on mount and periodically (but not during exams or for admins)
   useEffect(() => {
     let intervalId: NodeJS.Timeout | undefined;
     let sessionTimeoutId: ReturnType<typeof setTimeout> | undefined;
     let roleTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const checkSession = async () => {
-      if (user && !isOnExamPage) {
+      if (user && !isOnExamPage && !isAdminUser) {
         const isValid = await validateCurrentSession();
         setSessionValid(isValid);
         if (!isValid) {
@@ -35,12 +38,12 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     };
 
     if (user && !loading) {
-      if (!isOnExamPage) {
+      if (!isOnExamPage && !isAdminUser) {
         checkSession();
         // Then check every 30 minutes (very infrequent to avoid interrupting long sessions)
         intervalId = setInterval(checkSession, 30 * 60 * 1000);
       } else {
-        // During exam, mark session as valid without checking
+        // During exam or for admin users, mark session as valid without checking
         setSessionValid(true);
       }
     } else if (!user && !loading) {

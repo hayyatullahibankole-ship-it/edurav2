@@ -39,6 +39,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const validateCurrentSession = async (): Promise<boolean> => {
     if (!user) return false;
     
+    // Skip validation for admin and school_admin users
+    if (userRole === 'admin' || userRole === 'school_admin') {
+      console.log('Skipping session validation for admin/school_admin');
+      return true;
+    }
+    
     // If offline, skip validation and trust cached session
     if (!navigator.onLine) {
       console.log('Offline mode - skipping session validation');
