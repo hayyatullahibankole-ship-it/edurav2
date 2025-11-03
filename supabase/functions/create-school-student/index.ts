@@ -228,9 +228,9 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         credentials: {
-          username,
-          password,
           email,
+          password,
+          username,
         },
         student: {
           id: finalUserId,

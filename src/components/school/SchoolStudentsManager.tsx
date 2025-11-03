@@ -82,11 +82,24 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
         throw new Error(data.error);
       }
 
-      const { username, password } = data.credentials;
+      const { email, password } = data.credentials;
 
-      toast.success(`Student added successfully! Username: ${username}, Password: ${password}`, {
-        duration: 8000,
-      });
+      // Show credentials in a custom dialog
+      toast.success(
+        <div className="space-y-2">
+          <p className="font-semibold">Student added successfully!</p>
+          <div className="space-y-1 text-sm">
+            <p><strong>Email:</strong> {email}</p>
+            <p><strong>Password:</strong> {password}</p>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Share these credentials with the student. They'll use the email to login.
+          </p>
+        </div>,
+        {
+          duration: 10000,
+        }
+      );
       setIsAddModalOpen(false);
       setNewStudent({ fullName: "", classLevel: "" });
       fetchStudents();
@@ -129,8 +142,13 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
 
   const exportCredentials = () => {
     const csv = [
-      ["Full Name", "Username", "Password", "Class Level"],
-      ...students.map(s => [s.full_name, s.student_username, s.student_password_hash, s.class_level || ""])
+      ["Full Name", "Email", "Password", "Class Level"],
+      ...students.map(s => [
+        s.full_name, 
+        `${s.student_username}@${schoolCode}.edu.ng`,
+        s.student_password_hash, 
+        s.class_level || ""
+      ])
     ].map(row => row.join(",")).join("\n");
 
     const blob = new Blob([csv], { type: "text/csv" });
@@ -210,7 +228,7 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
             <TableHeader>
               <TableRow>
                 <TableHead>Full Name</TableHead>
-                <TableHead>Username</TableHead>
+                <TableHead>Student Email</TableHead>
                 <TableHead>Password</TableHead>
                 <TableHead>Class</TableHead>
                 <TableHead>Status</TableHead>
@@ -221,7 +239,9 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
               {students.map((student) => (
                 <TableRow key={student.id}>
                   <TableCell className="font-medium">{student.full_name}</TableCell>
-                  <TableCell>{student.student_username}</TableCell>
+                  <TableCell className="font-mono text-sm">
+                    {student.student_username}@{schoolCode}.edu.ng
+                  </TableCell>
                   <TableCell className="font-mono">{student.student_password_hash}</TableCell>
                   <TableCell>{student.class_level || "-"}</TableCell>
                   <TableCell>
