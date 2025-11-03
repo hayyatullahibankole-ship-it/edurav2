@@ -187,7 +187,7 @@ export default function SchoolRegistration() {
           address: formData.schoolAddress || null,
           state: formData.state || null,
           admin_user_id: userData.id,
-          is_active: true,
+          is_active: false, // Will be activated after subscription
         })
         .select()
         .single();

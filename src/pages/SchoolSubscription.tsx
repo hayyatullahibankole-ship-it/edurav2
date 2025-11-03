@@ -125,6 +125,14 @@ export default function SchoolSubscription() {
 
       if (subError) throw subError;
 
+      // Activate the school
+      const { error: activationError } = await supabase
+        .from('schools')
+        .update({ is_active: true })
+        .eq('id', schoolData.id);
+
+      if (activationError) throw activationError;
+
       toast.success("School subscription activated successfully!");
       
       // Redirect to school dashboard

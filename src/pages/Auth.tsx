@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import AuthForm from '@/components/AuthForm';
 import MobileAuthForm from '@/components/MobileAuthForm';
 import { useInstalledApp } from '@/hooks/useInstalledApp';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Auth() {
   const { user, loading, isAdmin, isSchoolAdmin, userRole } = useAuth();
@@ -11,16 +12,32 @@ export default function Auth() {
   const { isInstalledApp } = useInstalledApp();
 
   useEffect(() => {
-    if (user && !loading && userRole !== null) {
-      // Redirect based on role
-      if (isAdmin) {
-        navigate('/admin', { replace: true });
-      } else if (isSchoolAdmin) {
-        navigate('/school-dashboard', { replace: true });
-      } else {
-        navigate('/dashboard', { replace: true });
+    const checkSchoolStatus = async () => {
+      if (user && !loading && userRole !== null) {
+        // Redirect based on role
+        if (isAdmin) {
+          navigate('/admin', { replace: true });
+        } else if (isSchoolAdmin) {
+          // Check if school has active subscription
+          const { data: schoolData } = await supabase
+            .from('schools')
+            .select('is_active')
+            .eq('admin_user_id', user.id)
+            .maybeSingle();
+          
+          if (schoolData && !schoolData.is_active) {
+            // School exists but not active, redirect to subscription
+            navigate('/school-subscription', { replace: true });
+          } else {
+            navigate('/school-dashboard', { replace: true });
+          }
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       }
-    }
+    };
+    
+    checkSchoolStatus();
   }, [user, loading, userRole, isAdmin, isSchoolAdmin, navigate]);
 
   if (loading) {
