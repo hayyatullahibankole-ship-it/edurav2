@@ -64,26 +64,36 @@ export default function SchoolManagement() {
     try {
       setLoading(true);
       
-      const [schoolsResp, subscriptionsResp] = await Promise.all([
-        supabase
-          .from('schools')
-          .select('*')
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('school_subscriptions')
-          .select('*, subscription_plans(name, price, currency)')
-          .eq('status', 'ACTIVE')
-      ]);
+      // Fetch schools
+      const schoolsResp = await supabase
+        .from('schools')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (schoolsResp.error) throw schoolsResp.error;
       
       setSchools(schoolsResp.data || []);
 
+      // Fetch subscriptions with plan details
+      const subscriptionsResp = await supabase
+        .from('school_subscriptions')
+        .select(`
+          *,
+          subscription_plans (
+            name,
+            price,
+            currency
+          )
+        `)
+        .eq('status', 'ACTIVE');
+
       // Index subscriptions by school_id
       const subsMap: Record<string, SchoolSubscription> = {};
-      subscriptionsResp.data?.forEach((sub: any) => {
-        subsMap[sub.school_id] = sub;
-      });
+      if (subscriptionsResp.data) {
+        subscriptionsResp.data.forEach((sub: any) => {
+          subsMap[sub.school_id] = sub;
+        });
+      }
       setSchoolSubscriptions(subsMap);
 
     } catch (error) {
