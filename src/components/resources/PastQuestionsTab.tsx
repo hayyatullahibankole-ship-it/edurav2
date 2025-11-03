@@ -38,7 +38,6 @@ export const PastQuestionsTab = () => {
         .from('resources')
         .select('*')
         .eq('is_active', true)
-        .contains('tags', '["past-questions"]')
         .order('created_at', { ascending: false });
 
       if (!canAccessPremium && !isAdmin) {
@@ -51,10 +50,10 @@ export const PastQuestionsTab = () => {
       setSubjects(subjectsResp.data || []);
       setResources(resourcesData || []);
     } catch (error: any) {
-      console.error('Error fetching past questions:', error);
+      console.error('Error fetching resources:', error);
       toast({
         title: "Error",
-        description: "Failed to load past questions",
+        description: "Failed to load resources",
         variant: "destructive"
       });
     } finally {
@@ -93,7 +92,7 @@ export const PastQuestionsTab = () => {
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
           <Input
-            placeholder="Search past questions..."
+            placeholder="Search resources..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -115,13 +114,13 @@ export const PastQuestionsTab = () => {
       {loading ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="mt-4 text-muted-foreground">Loading past questions...</p>
+          <p className="mt-4 text-muted-foreground">Loading resources...</p>
         </div>
       ) : filteredResources.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent>
             <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-xl font-semibold mb-2">No past questions found</h3>
+            <h3 className="text-xl font-semibold mb-2">No resources found</h3>
             <p className="text-muted-foreground">Try adjusting your search or filters</p>
           </CardContent>
         </Card>
@@ -202,9 +201,9 @@ export const PastQuestionsTab = () => {
         <Card className="mt-12 bg-gradient-to-r from-primary/10 via-primary/5 to-background border-primary/20">
           <CardContent className="p-8 text-center">
             <Star className="h-12 w-12 mx-auto mb-4 text-primary" />
-            <h3 className="text-2xl font-bold mb-2">Unlock Premium Past Questions</h3>
+            <h3 className="text-2xl font-bold mb-2">Unlock Premium Resources</h3>
             <p className="text-muted-foreground mb-6">
-              Get access to exclusive past questions from previous years
+              Get access to exclusive study materials, past questions, books, and syllabus
             </p>
             <Button size="lg" asChild>
               <a href="/payment">Upgrade Now</a>
