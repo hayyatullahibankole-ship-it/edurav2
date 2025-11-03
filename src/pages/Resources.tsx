@@ -3,18 +3,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { FileText, BookOpen, FileSpreadsheet, ArrowRight } from "lucide-react";
 import Layout from "@/components/Layout";
-import { AllResourcesTab } from "@/components/resources/AllResourcesTab";
+import { PastQuestionsTab } from "@/components/resources/PastQuestionsTab";
+import { SyllabusTab } from "@/components/resources/SyllabusTab";
+import { BooksTab } from "@/components/resources/BooksTab";
 
 const Resources = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const categories = [
     {
-      id: "all",
-      title: "All Resources",
-      description: "Browse all study materials including past questions, textbooks, syllabus documents, and more",
+      id: "past-questions",
+      title: "Past Questions",
+      description: "Access previous exam questions to practice and prepare effectively for your upcoming tests",
       icon: FileText,
-      color: "text-primary"
+      color: "text-blue-500"
+    },
+    {
+      id: "syllabus",
+      title: "Syllabus",
+      description: "Download official syllabus documents to understand exam structure and topics coverage",
+      icon: FileSpreadsheet,
+      color: "text-green-500"
+    },
+    {
+      id: "books",
+      title: "Books & Textbooks",
+      description: "Browse recommended textbooks, study guides, and reference materials for comprehensive learning",
+      icon: BookOpen,
+      color: "text-purple-500"
     }
   ];
 
@@ -44,10 +60,12 @@ const Resources = () => {
               >
                 ← Back to Categories
               </Button>
-              <AllResourcesTab />
+              {selectedCategory === "past-questions" && <PastQuestionsTab />}
+              {selectedCategory === "syllabus" && <SyllabusTab />}
+              {selectedCategory === "books" && <BooksTab />}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-6 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {categories.map((category) => {
                 const Icon = category.icon;
                 return (
