@@ -3493,6 +3493,10 @@ export type Database = {
           subject_id: string
         }[]
       }
+      get_user_role: {
+        Args: { _auth_user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       get_user_safe_data: {
         Args: { target_user_id: string }
         Returns: {

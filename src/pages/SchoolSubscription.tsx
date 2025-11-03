@@ -111,6 +111,7 @@ export default function SchoolSubscription() {
             toast.error('Could not create school. Please complete registration again.');
             setTimeout(() => navigate('/school-registration'), 2000);
           } else {
+            // The trigger will automatically assign the school_admin role
             setSchoolData(newSchool);
             localStorage.removeItem('pendingSchoolRegistration');
             toast.success('School created. You can now activate your subscription.');

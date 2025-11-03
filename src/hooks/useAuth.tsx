@@ -17,7 +17,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  userRole: string | null;
+  userRole: 'admin' | 'school_admin' | 'user' | 'student' | null;
   isAdmin: boolean;
   isSchoolAdmin: boolean;
   userProfile: any;
@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<'admin' | 'school_admin' | 'user' | 'student' | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isSchoolAdmin, setIsSchoolAdmin] = useState(false);
   const { toast } = useToast();
@@ -155,28 +155,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (profileData) {
         setUserProfile(profileData);
         
-        // Check if user is a school admin using the users.id (not auth_user_id)
-        const { data: schoolData } = await supabase
-          .from('schools' as any)
-          .select('id')
-          .eq('admin_user_id', profileData.id)
+        // Check user role from the user_roles table
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
           .maybeSingle();
         
-        const isSchool = !!schoolData;
-        setIsSchoolAdmin(isSchool);
+        const roleFromDB = roleData?.role as string | undefined;
         
-        console.log("School admin check - profileData.id:", profileData.id, "isSchool:", isSchool, "schoolData:", schoolData);
-        
-        // Determine role via secure RPC to avoid RLS issues
-        const { data: isAdminFlag, error: roleError } = await supabase
-          .rpc('is_admin', { _user_id: userId });
-
-        if (!roleError && typeof isAdminFlag === 'boolean') {
-          setUserRole(isAdminFlag ? 'admin' : (isSchool ? 'school_admin' : 'student'));
+        // Map database role to application role
+        let appRole: 'admin' | 'school_admin' | 'user' | 'student' = 'student';
+        if (roleFromDB === 'admin') {
+          appRole = 'admin';
+        } else if (roleFromDB === 'school_admin') {
+          appRole = 'school_admin';
         } else {
-          console.warn('Role fetch error (RPC), defaulting to student:', roleError);
-          setUserRole(isSchool ? 'school_admin' : 'student');
+          appRole = 'student';
         }
+        
+        setIsSchoolAdmin(appRole === 'school_admin');
+        setUserRole(appRole);
+        
+        console.log("Role check - userId:", userId, "role:", roleFromDB, "appRole:", appRole);
       } else {
         // No profile found - this should be rare after our migration
         console.warn('No user profile found for authenticated user:', userId);
@@ -286,7 +287,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const isAdmin = userRole === 'admin' || userRole === 'super_admin';
+  const isAdmin = userRole === 'admin';
 
   const value = {
     user,
