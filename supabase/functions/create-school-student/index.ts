@@ -182,6 +182,45 @@ serve(async (req) => {
       // Non-critical, continue
     }
 
+    // Get school subscription end date to match student subscription
+    const { data: schoolSub } = await supabaseAdmin
+      .from('school_subscriptions')
+      .select('end_date')
+      .eq('school_id', schoolId)
+      .eq('status', 'ACTIVE')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    // Get pro plan ID
+    const { data: proPlan } = await supabaseAdmin
+      .from('subscription_plans')
+      .select('id')
+      .eq('name', 'Pro')
+      .single();
+
+    // Create active pro subscription for the student
+    if (proPlan) {
+      const { error: subError } = await supabaseAdmin
+        .from('subscriptions')
+        .insert({
+          user_id: finalUserId,
+          plan_id: proPlan.id,
+          status: 'ACTIVE',
+          start_date: new Date().toISOString(),
+          end_date: schoolSub?.end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // Match school sub or 1 year
+          amount: 0, // Free for school students
+          auto_renew: false
+        });
+
+      if (subError) {
+        console.error('Error creating student subscription:', subError);
+        // Non-critical, continue
+      } else {
+        console.log(`Pro subscription created for student: ${username}`);
+      }
+    }
+
     console.log(`Student created successfully: ${username}`);
 
     return new Response(
