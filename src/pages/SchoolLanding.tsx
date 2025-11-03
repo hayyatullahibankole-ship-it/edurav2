@@ -24,42 +24,42 @@ export default function SchoolLanding() {
   const navigate = useNavigate();
 
   const stats = [
-    { number: "500+", label: "Schools" },
-    { number: "50,000+", label: "Students" },
-    { number: "98%", label: "Success Rate" },
-    { number: "24/7", label: "Support" }
+    { number: "500+", label: "Schools Registered" },
+    { number: "50,000+", label: "Students Practicing" },
+    { number: "98%", label: "JAMB Pass Rate" },
+    { number: "10,000+", label: "Practice Questions" }
   ];
 
   const features = [
     {
       icon: Users,
       title: "Student Management",
-      description: "Effortlessly manage student accounts and track individual progress"
+      description: "Track each student's WAEC, JAMB & NECO preparation progress"
     },
     {
       icon: BarChart3,
       title: "Real-time Analytics",
-      description: "Get instant insights with comprehensive performance dashboards"
+      description: "Monitor performance across all subjects and exam types"
     },
     {
       icon: Target,
-      title: "Exam Scheduling",
-      description: "Schedule and control exams with flexible timing options"
+      title: "CBT Practice Tests",
+      description: "Access 10,000+ authentic WAEC, JAMB & NECO questions"
     },
     {
       icon: FileText,
       title: "Detailed Reports",
-      description: "Generate and export comprehensive performance reports"
+      description: "Export comprehensive exam performance and readiness reports"
     },
     {
       icon: Bell,
-      title: "Instant Alerts",
-      description: "Stay updated with real-time notifications and activity feeds"
+      title: "Progress Tracking",
+      description: "Get instant alerts on student performance and weak areas"
     },
     {
       icon: Shield,
       title: "Secure Platform",
-      description: "Enterprise-grade security protecting your data"
+      description: "Enterprise-grade security for all student data and results"
     }
   ];
 
@@ -80,16 +80,16 @@ export default function SchoolLanding() {
             <div className="space-y-8 animate-fade-in">
               <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full border border-primary/20">
                 <School className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold text-primary">For Schools & Institutions</span>
+                <span className="text-sm font-semibold text-primary">WAEC • JAMB • NECO CBT Practice</span>
               </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                Empower Your School with
-                <span className="text-primary block mt-2">Smart CBT Management</span>
+                Prepare Your Students for
+                <span className="text-primary block mt-2">WAEC, JAMB & NECO Success</span>
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                Comprehensive student management, real-time analytics, and exam control—all in one powerful platform designed for modern schools.
+                Complete CBT practice platform with thousands of past questions, real-time analytics, and comprehensive exam management for WAEC, JAMB, and NECO preparations.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -176,9 +176,9 @@ export default function SchoolLanding() {
               <Zap className="h-4 w-4 text-primary" />
               <span className="text-sm font-semibold text-primary">Powerful Features</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold">Everything You Need to Succeed</h2>
+            <h2 className="text-3xl md:text-4xl font-bold">Complete WAEC, JAMB & NECO Preparation</h2>
             <p className="text-lg text-muted-foreground">
-              Comprehensive tools designed specifically for school management
+              Everything your students need to excel in their examinations
             </p>
           </div>
 
@@ -259,17 +259,17 @@ export default function SchoolLanding() {
                     <div>
                       <h3 className="text-2xl font-bold mb-2">3-Month Subscription</h3>
                       <p className="text-muted-foreground">
-                        Complete term access with all premium features included
+                        Complete term access for WAEC, JAMB & NECO preparation
                       </p>
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "Unlimited exam access",
-                        "Real-time analytics",
+                        "10,000+ WAEC/JAMB/NECO questions",
+                        "Real-time performance analytics",
                         "Bulk student management",
                         "Export reports (PDF/Excel)",
-                        "Priority 24/7 support",
-                        "Regular platform updates"
+                        "Subject-specific practice",
+                        "Priority 24/7 support"
                       ].map((benefit, i) => (
                         <div key={i} className="flex items-center gap-2">
                           <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
@@ -315,10 +315,10 @@ export default function SchoolLanding() {
         <div className="container mx-auto px-4 relative">
           <div className="max-w-3xl mx-auto text-center space-y-8">
             <h2 className="text-3xl md:text-4xl font-bold">
-              Transform Your School's Learning Experience Today
+              Give Your Students the Best WAEC, JAMB & NECO Preparation
             </h2>
             <p className="text-xl text-white/90">
-              Join hundreds of schools already achieving better results with our platform
+              Join hundreds of schools achieving outstanding exam results with our CBT platform
             </p>
             <Button 
               size="lg" 
