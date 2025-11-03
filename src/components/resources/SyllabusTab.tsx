@@ -38,7 +38,6 @@ export const SyllabusTab = () => {
         .from('resources')
         .select('*')
         .eq('is_active', true)
-        .contains('tags', '["syllabus"]')
         .order('created_at', { ascending: false });
 
       if (!canAccessPremium && !isAdmin) {
@@ -48,8 +47,15 @@ export const SyllabusTab = () => {
       const { data: resourcesData, error: resourcesError } = await query;
       if (resourcesError) throw resourcesError;
 
+      // Filter resources that contain "syllabus" in title or description
+      const syllabusResources = (resourcesData || []).filter(resource => {
+        const title = resource.title?.toLowerCase() || '';
+        const description = resource.description?.toLowerCase() || '';
+        return title.includes('syllabus') || description.includes('syllabus');
+      });
+
       setSubjects(subjectsResp.data || []);
-      setResources(resourcesData || []);
+      setResources(syllabusResources);
     } catch (error: any) {
       console.error('Error fetching syllabus:', error);
       toast({

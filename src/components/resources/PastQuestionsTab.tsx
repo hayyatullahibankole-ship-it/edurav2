@@ -47,8 +47,15 @@ export const PastQuestionsTab = () => {
       const { data: resourcesData, error: resourcesError } = await query;
       if (resourcesError) throw resourcesError;
 
+      // Filter out resources that contain "syllabus" in title or description
+      const pastQuestionsResources = (resourcesData || []).filter(resource => {
+        const title = resource.title?.toLowerCase() || '';
+        const description = resource.description?.toLowerCase() || '';
+        return !title.includes('syllabus') && !description.includes('syllabus');
+      });
+
       setSubjects(subjectsResp.data || []);
-      setResources(resourcesData || []);
+      setResources(pastQuestionsResources);
     } catch (error: any) {
       console.error('Error fetching resources:', error);
       toast({
