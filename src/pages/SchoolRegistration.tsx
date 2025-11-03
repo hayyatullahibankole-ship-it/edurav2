@@ -144,55 +144,19 @@ export default function SchoolRegistration() {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create user");
 
-      // Ensure user profile exists or create it
-      let userData: any = null;
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('*')
-        .eq('auth_user_id', authData.user.id)
-        .maybeSingle();
-
-      if (existingUser) {
-        userData = existingUser;
-      } else {
-        const { data: insertedUser, error: userInsertError } = await supabase
-          .from('users')
-          .insert({
-            auth_user_id: authData.user.id,
-            email: formData.schoolEmail,
-            first_name: formData.adminFullName.split(' ')[0] || formData.adminFullName,
-            last_name: formData.adminFullName.split(' ').slice(1).join(' ') || '',
-            phone: formData.adminPhone,
-          })
-          .select()
-          .single();
-        if (userInsertError) throw userInsertError;
-        userData = insertedUser;
-      }
-
-      // Create school record (align with schema: slug is required, remove non-existent fields)
-      const slug = formData.schoolName
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-
-      const { data: schoolData, error: schoolError } = await supabase
-        .from('schools')
-        .insert({
-          name: formData.schoolName,
-          slug,
-          email: formData.schoolEmail,
-          phone: formData.schoolPhone,
-          address: formData.schoolAddress || null,
+      // Persist registration data locally for post-verification creation
+      localStorage.setItem(
+        'pendingSchoolRegistration',
+        JSON.stringify({
+          schoolName: formData.schoolName,
+          schoolEmail: formData.schoolEmail,
+          schoolPhone: formData.schoolPhone,
+          schoolAddress: formData.schoolAddress || null,
           state: formData.state || null,
-          admin_user_id: userData.id,
-          is_active: false, // Will be activated after subscription
+          adminFullName: formData.adminFullName,
+          adminPhone: formData.adminPhone,
         })
-        .select()
-        .single();
-
-      if (schoolError) throw schoolError;
+      );
 
       toast.success("Registration successful! Please check your email to verify your account.");
       

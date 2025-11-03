@@ -36,33 +36,89 @@ export default function SchoolSubscription() {
     try {
       console.log("Fetching school data for user:", user?.id);
       
-      const { data: userData, error: userError } = await supabase
+      // Ensure user profile exists or create it
+      let profileId: string | null = null;
+      const { data: existingProfile } = await supabase
         .from("users")
         .select("id")
         .eq("auth_user_id", user?.id)
-        .single();
+        .maybeSingle();
 
-      console.log("User data:", userData, "Error:", userError);
+      if (existingProfile) {
+        profileId = existingProfile.id;
+      } else {
+        const pendingRaw = localStorage.getItem('pendingSchoolRegistration');
+        const pending = pendingRaw ? JSON.parse(pendingRaw) : {};
+        const fullName = (user as any)?.user_metadata?.full_name || pending.adminFullName || (user?.email?.split('@')[0] ?? 'School Admin');
+        const firstName = fullName.split(' ')[0] || fullName;
+        const lastName = fullName.split(' ').slice(1).join(' ') || '';
 
-      if (!userData) {
-        toast.error("User profile not found. Please contact support.");
-        setFetchingSchool(false);
-        return;
+        const { data: insertedProfile, error: userInsertError } = await supabase
+          .from('users')
+          .insert({
+            auth_user_id: user?.id,
+            email: user?.email,
+            first_name: firstName,
+            last_name: lastName,
+            phone: pending.adminPhone || null,
+          })
+          .select('id')
+          .single();
+        
+        if (userInsertError) throw userInsertError;
+        profileId = insertedProfile.id;
       }
 
+      // Try fetch school for this profile
       const { data: school, error: schoolError } = await supabase
         .from("schools")
         .select("*")
-        .eq("admin_user_id", userData.id)
-        .single();
+        .eq("admin_user_id", profileId)
+        .maybeSingle();
 
       console.log("School data:", school, "Error:", schoolError);
 
       if (school) {
         setSchoolData(school);
       } else {
-        toast.error("School not found. Please complete registration first.");
-        setTimeout(() => navigate("/school-registration"), 2000);
+        // Attempt to create school from pending registration data
+        const pendingRaw = localStorage.getItem('pendingSchoolRegistration');
+        if (pendingRaw) {
+          const pending = JSON.parse(pendingRaw);
+          const slug = (pending.schoolName || 'my-school')
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+
+          const { data: newSchool, error: createError } = await supabase
+            .from('schools')
+            .insert({
+              name: pending.schoolName,
+              slug,
+              email: pending.schoolEmail || user?.email,
+              phone: pending.schoolPhone || null,
+              address: pending.schoolAddress || null,
+              state: pending.state || null,
+              admin_user_id: profileId,
+              is_active: false,
+            })
+            .select('*')
+            .single();
+
+          if (createError) {
+            console.error('Failed to create school from pending data:', createError);
+            toast.error('Could not create school. Please complete registration again.');
+            setTimeout(() => navigate('/school-registration'), 2000);
+          } else {
+            setSchoolData(newSchool);
+            localStorage.removeItem('pendingSchoolRegistration');
+            toast.success('School created. You can now activate your subscription.');
+          }
+        } else {
+          toast.error("School not found. Please complete registration first.");
+          setTimeout(() => navigate("/school-registration"), 2000);
+        }
       }
     } catch (error) {
       console.error("Error fetching school data:", error);
