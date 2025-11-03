@@ -65,6 +65,7 @@ export default function ResourceManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   const [newResource, setNewResource] = useState({
     title: '',
@@ -490,7 +491,22 @@ export default function ResourceManagement() {
     const matchesSubject = selectedSubject === 'all' || resource.subject_id === selectedSubject;
     const matchesType = selectedType === 'all' || resource.file_type?.startsWith(selectedType);
     
-    return matchesSearch && matchesSubject && matchesType;
+    // Category filter logic
+    let matchesCategory = true;
+    if (selectedCategory !== 'all') {
+      const title = resource.title?.toLowerCase() || '';
+      const description = resource.description?.toLowerCase() || '';
+      
+      if (selectedCategory === 'syllabus') {
+        matchesCategory = title.includes('syllabus') || description.includes('syllabus');
+      } else if (selectedCategory === 'books') {
+        matchesCategory = resource.file_type?.includes('pdf') || resource.file_type?.includes('book');
+      } else if (selectedCategory === 'past-questions') {
+        matchesCategory = !title.includes('syllabus') && !description.includes('syllabus');
+      }
+    }
+    
+    return matchesSearch && matchesSubject && matchesType && matchesCategory;
   });
 
   const workingResources = filteredResources.filter(resource => 
@@ -863,6 +879,17 @@ data-testid="resource-management-container">
                 />
               </div>
             </div>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="past-questions">Past Questions</SelectItem>
+                <SelectItem value="syllabus">Syllabus</SelectItem>
+                <SelectItem value="books">Books</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={selectedSubject} onValueChange={setSelectedSubject}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="All Subjects" />
