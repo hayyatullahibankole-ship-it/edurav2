@@ -27,13 +27,11 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     let roleTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const checkSession = async () => {
-      if (user && !isOnExamPage && !isAdminUser) {
+      if (user && !isOnExamPage && !isAdminUser && userRole !== null) {
         const isValid = await validateCurrentSession();
         setSessionValid(isValid);
-        if (!isValid) {
-          // Navigation is handled in validateCurrentSession
-          return;
-        }
+      } else {
+        setSessionValid(true);
       }
     };
 

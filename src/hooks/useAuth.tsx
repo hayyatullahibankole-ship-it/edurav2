@@ -39,6 +39,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const validateCurrentSession = async (): Promise<boolean> => {
     if (!user) return false;
     
+    // Defer validation until role is loaded to prevent premature logout
+    if (userRole === null) {
+      console.log('Role not loaded yet - skipping session validation temporarily');
+      return true;
+    }
+    
     // Skip validation for admin and school_admin users
     if (userRole === 'admin' || userRole === 'school_admin') {
       console.log('Skipping session validation for admin/school_admin');
@@ -68,26 +74,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const isValid = await validateSessionToken(user.id, localToken);
       
       if (!isValid) {
-        console.warn('Session token invalid - logging out');
-        toast({
-          title: "Session Expired",
-          description: "You've been logged out because your account was accessed from another device.",
-          variant: "destructive",
-        });
-        await signOut();
-        return false;
+        console.warn('Session token invalid - auto-refreshing token, no logout');
+        try {
+          const newToken = generateSessionToken();
+          storeSessionToken(newToken);
+          await setSessionToken(user.id, newToken);
+          return true;
+        } catch (e) {
+          console.warn('Token refresh failed, proceeding without logout', e);
+          return true;
+        }
       }
 
       return true;
     } catch (error) {
-      // If validation fails due to network error, assume session is valid offline
-      console.warn('Session validation failed, checking if offline:', error);
-      if (!navigator.onLine) {
-        return true;
-      }
-      // If online but validation failed for other reasons, log out
-      await signOut();
-      return false;
+      console.warn('Session validation error - proceeding without logout:', error);
+      return true;
     }
   };
 
