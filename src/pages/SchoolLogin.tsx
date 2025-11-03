@@ -70,7 +70,34 @@ export default function SchoolLogin() {
       if (error) throw error;
 
       if (data.user) {
-        toast.success("Login successful!");
+        // Check for pending school registration
+        const pendingRegistration = localStorage.getItem('pendingSchoolRegistration');
+        
+        if (pendingRegistration) {
+          try {
+            const schoolData = JSON.parse(pendingRegistration);
+            
+            // Call edge function to create school
+            const { data: schoolResult, error: schoolError } = await supabase.functions.invoke(
+              'create-school-from-pending',
+              { body: { schoolData } }
+            );
+            
+            if (schoolError) {
+              console.error("School creation error:", schoolError);
+              toast.error("Failed to create school record. Please contact support.");
+            } else {
+              // Clear pending registration
+              localStorage.removeItem('pendingSchoolRegistration');
+              toast.success("School account created successfully!");
+            }
+          } catch (err) {
+            console.error("Error processing pending registration:", err);
+          }
+        } else {
+          toast.success("Login successful!");
+        }
+        
         navigate("/school-dashboard");
       }
     } catch (error: any) {

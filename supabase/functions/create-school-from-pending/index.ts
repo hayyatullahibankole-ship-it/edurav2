@@ -1,0 +1,92 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Get user from JWT
+    const authHeader = req.headers.get("Authorization")!;
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+
+    if (userError || !user) {
+      throw new Error("Unauthorized");
+    }
+
+    // Get registration data from request body
+    const { schoolData } = await req.json();
+
+    if (!schoolData) {
+      throw new Error("School data is required");
+    }
+
+    // Get the user record from users table
+    const { data: userData, error: userFetchError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .single();
+
+    if (userFetchError || !userData) {
+      throw new Error("User record not found");
+    }
+
+    // Generate a unique school code
+    const schoolCode = `SCH-${Date.now().toString().slice(-8)}`;
+
+    // Create school record
+    const { data: school, error: schoolError } = await supabase
+      .from("schools")
+      .insert({
+        name: schoolData.schoolName,
+        email: schoolData.schoolEmail,
+        phone: schoolData.schoolPhone,
+        address: schoolData.schoolAddress || null,
+        state: schoolData.state || null,
+        school_code: schoolCode,
+        type: schoolData.schoolType || 'secondary',
+        admin_user_id: userData.id,
+        max_students: 50, // Default
+        students_added: 0,
+        is_active: false, // Will be activated after subscription
+        email_verified: true,
+      })
+      .select()
+      .single();
+
+    if (schoolError) {
+      console.error("School creation error:", schoolError);
+      throw new Error(`Failed to create school: ${schoolError.message}`);
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        school,
+        message: "School created successfully",
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: any) {
+    console.error("Error in create-school-from-pending:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+});
