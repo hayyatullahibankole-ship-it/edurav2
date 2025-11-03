@@ -180,6 +180,12 @@ export default function SchoolRegistration() {
           <p className="text-muted-foreground">
             Join Edura's CBT Platform and empower your students
           </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Already have an account?{" "}
+            <a href="/school-login" className="text-primary hover:underline font-medium">
+              Login here
+            </a>
+          </p>
         </div>
 
         {/* Progress Steps */}

@@ -54,6 +54,7 @@ import ChallengeArena from "./pages/ChallengeArena";
 import ChallengeDetail from "./pages/ChallengeDetail";
 import ChallengeResults from "./pages/ChallengeResults";
 import SchoolRegistration from "./pages/SchoolRegistration";
+import SchoolLogin from "./pages/SchoolLogin";
 import SchoolSubscription from "./pages/SchoolSubscription";
 import SchoolDashboard from "./pages/SchoolDashboard";
 import SchoolVerificationPending from "./pages/SchoolVerificationPending";
@@ -199,6 +200,7 @@ const AppRoutes = () => {
                 <ChallengeDetail />
               </ProtectedRoute>
             } />
+            <Route path="/school-login" element={<Layout><SchoolLogin /></Layout>} />
             <Route path="/school-registration" element={<Layout><SchoolRegistration /></Layout>} />
             <Route path="/school-subscription" element={
               <ProtectedRoute>
