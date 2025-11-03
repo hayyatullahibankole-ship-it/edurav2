@@ -287,231 +287,150 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
       <OnboardingTour 
         isOpen={showOnboarding} 
         onComplete={() => setShowOnboarding(false)} 
       />
-      {/* Hero Header with Animated Gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent animate-gradient-shift bg-[length:200%_200%]">
-        {/* Animated Background Pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20" />
-        
-        {/* Floating Orbs */}
-        <div className="absolute top-10 left-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-10 right-20 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
-        
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className={`${isMobile ? 'w-full' : 'text-center md:text-left'} animate-fade-in-up`}>
-              {/* Edura Logo + Badge */}
-              <div className="flex items-center gap-3 mb-3 justify-center md:justify-start">
-                <div className="bg-white p-2.5 rounded-xl shadow-lg">
-                  <img src={eduraLogo} alt="Edura" className="h-10 w-auto" />
-                </div>
-                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm hover:bg-white/30 transition-all cursor-default">
-                  {subscriptionLoading ? (
-                    <span className="animate-pulse">Loading...</span>
-                  ) : (
-                    isPremium ? (
-                      <span className="flex items-center gap-1.5">
-                        <Zap className="h-3.5 w-3.5 animate-pulse" />
-                        Premium
-                      </span>
-                    ) : (
-                      'Free'
-                    )
-                  )}
-                </Badge>
-                {/* Move notification and logout to top right on mobile */}
-                {isMobile && (
-                  <div className="flex items-center gap-2 ml-auto">
-                    <NotificationBell />
-                    <Button 
-                      size="sm"
-                      variant="secondary" 
-                      onClick={handleLogout}
-                      className="flex items-center gap-1 shadow-lg"
-                    >
-                      <LogOut className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                )}
+      
+      {/* Clean Modern Header */}
+      <div className="border-b bg-card/50 backdrop-blur-xl sticky top-0 z-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* Left: Logo and Welcome */}
+            <div className="flex items-center gap-4">
+              <div className="bg-gradient-to-br from-primary to-secondary p-2 rounded-xl shadow-lg">
+                <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
               </div>
-              {/* Welcome Section with Stats */}
-              <div className={`${isMobile ? 'flex items-center justify-between gap-3' : ''}`}>
-                <div>
-                  <h1 className="text-2xl md:text-4xl font-bold text-white mb-1 drop-shadow-lg animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                    Welcome back, {userProfile?.first_name || user?.email?.split('@')[0]}! 👋
-                  </h1>
-                  <p className="text-white/90 text-sm md:text-lg animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                    {stats.averageScore > 0 ? `${stats.averageScore}% average` : 'Ready to ace your exams?'} • {stats.testsTaken} {stats.testsTaken === 1 ? 'test' : 'tests'} completed
-                  </p>
-                </div>
-                {isMobile && stats.averageScore > 0 && (
-                  <div className="flex-shrink-0 text-center bg-white/20 backdrop-blur-sm rounded-2xl p-3 border border-white/30">
-                    <div className="text-2xl font-bold text-white">{stats.averageScore}%</div>
-                    <div className="text-xs text-white/80">Success</div>
-                  </div>
-                )}
+              <div className="hidden md:block">
+                <h1 className="text-lg font-bold text-foreground">
+                  Welcome, {userProfile?.first_name || user?.email?.split('@')[0]}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {stats.testsTaken > 0 ? `${stats.testsTaken} tests • ${stats.averageScore}% avg` : 'Start your learning journey'}
+                </p>
               </div>
             </div>
-            {/* Desktop notifications and logout */}
-            {!isMobile && (
-              <div className="flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                <NotificationBell />
-                <Button 
-                  variant="secondary" 
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all hover-lift"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </Button>
-              </div>
-            )}
+
+            {/* Right: Actions */}
+            <div className="flex items-center gap-3">
+              {!subscriptionLoading && (
+                <Badge variant={isPremium ? "default" : "secondary"} className="hidden md:flex">
+                  {isPremium ? (
+                    <>
+                      <Zap className="h-3 w-3 mr-1" />
+                      Premium
+                    </>
+                  ) : (
+                    'Free Plan'
+                  )}
+                </Badge>
+              )}
+              <NotificationBell />
+              <Button 
+                variant="outline" 
+                size={isMobile ? "sm" : "default"}
+                onClick={handleLogout}
+                className="gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                {!isMobile && "Logout"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className={`container mx-auto px-4 sm:px-6 lg:px-8 py-4 ${isInstalledApp ? 'pb-24' : ''}`}>
+      <div className={`container mx-auto px-4 sm:px-6 lg:px-8 py-6 ${isInstalledApp ? 'pb-24' : ''}`}>
         <Tabs value={activeTab} onValueChange={(value) => {
           console.log('Tab changed to:', value);
           setActiveTab(value);
         }}>
-          <TabsList className={`grid w-full grid-cols-2 relative z-50 ${isInstalledApp ? 'hidden' : ''}`}>
-            <TabsTrigger value="dashboard" className="pointer-events-auto cursor-pointer">
-              <Target className="h-4 w-4 mr-2" />
+          <TabsList className={`w-full md:w-auto mb-6 ${isInstalledApp ? 'hidden' : ''}`}>
+            <TabsTrigger value="dashboard" className="gap-2">
+              <Target className="h-4 w-4" />
               Dashboard
             </TabsTrigger>
-            <TabsTrigger value="profile" className="pointer-events-auto cursor-pointer">
-              <User className="h-4 w-4 mr-2" />
+            <TabsTrigger value="profile" className="gap-2">
+              <User className="h-4 w-4" />
               Profile
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="dashboard" className="mt-4 space-y-4">
-            {/* Quick Stats - Mobile vs Desktop */}
-            {isInstalledApp ? (
-              <div className="grid grid-cols-2 gap-3 animate-fade-in">
-                <MobileStatCard 
-                  icon={Target}
-                  label="Tests Taken"
-                  value={loading ? "..." : stats.testsTaken}
-                  gradient="from-primary to-primary-glow"
-                  delay="0s"
-                />
-                <MobileStatCard 
-                  icon={TrendingUp}
-                  label="Avg Score"
-                  value={loading ? "..." : `${stats.averageScore}%`}
-                  gradient="from-success to-success-glow"
-                  delay="0.05s"
-                />
-                <MobileStatCard 
-                  icon={Clock}
-                  label="Study Hours"
-                  value={loading ? "..." : `${stats.studyHours}h`}
-                  gradient="from-info to-secondary"
-                  delay="0.1s"
-                />
-                <MobileStatCard 
-                  icon={Trophy}
-                  label="Your Rank"
-                  value={loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}
-                  gradient="from-primary via-primary-glow to-success"
-                  delay="0.15s"
-                />
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-                <div className="animate-fade-in-up" style={{ animationDelay: '0s' }}>
-                  <StatCard 
-                    icon={Target}
-                    label="Tests Taken"
-                    value={loading ? "..." : stats.testsTaken}
-                    subtext="Total attempts"
-                    gradient="from-primary to-primary-glow"
-                    iconColor="text-primary"
-                  />
-                </div>
-                <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                  <StatCard 
-                    icon={TrendingUp}
-                    label="Average Score"
-                    value={loading ? "..." : `${stats.averageScore}%`}
-                    subtext="Across all tests"
-                    gradient="from-success to-success-glow"
-                    iconColor="text-success"
-                  />
-                </div>
-                <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                  <StatCard 
-                    icon={Clock}
-                    label="Study Hours"
-                    value={loading ? "..." : `${stats.studyHours}h`}
-                    subtext="Time invested"
-                    gradient="from-info to-secondary"
-                    iconColor="text-info"
-                  />
-                </div>
-                <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                  <StatCard 
-                    icon={Trophy}
-                    label="Rank"
-                    value={loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}
-                    subtext={`Out of ${stats.totalStudents} students`}
-                    gradient="from-warning to-warning"
-                    iconColor="text-warning"
-                  />
-                </div>
-              </div>
-            )}
+          <TabsContent value="dashboard" className="space-y-6">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard 
+                icon={Target}
+                label="Tests Taken"
+                value={loading ? "..." : stats.testsTaken}
+                subtext="Total attempts"
+                gradient="from-primary to-secondary"
+              />
+              <StatCard 
+                icon={TrendingUp}
+                label="Average Score"
+                value={loading ? "..." : `${stats.averageScore}%`}
+                subtext={stats.averageScore >= 70 ? "Great job!" : "Keep practicing"}
+                gradient="from-info to-primary"
+              />
+              <StatCard 
+                icon={Clock}
+                label="Study Time"
+                value={loading ? "..." : `${stats.studyHours}h`}
+                subtext="Time invested"
+                gradient="from-secondary to-accent"
+              />
+              <StatCard 
+                icon={Trophy}
+                label="Your Rank"
+                value={loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "N/A"}
+                subtext={stats.totalStudents > 0 ? `of ${stats.totalStudents}` : "Start testing"}
+                gradient="from-warning to-primary"
+              />
+            </div>
 
-            <div className="grid lg:grid-cols-3 gap-4">
+            <div className="grid lg:grid-cols-3 gap-6">
               {/* Main Content */}
-              <div className="lg:col-span-2 space-y-4">
-                {/* Quick Actions - Desktop Only (Mobile has nav FAB) */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Quick Actions */}
                 {!isInstalledApp && (
-                  /* Desktop Quick Actions */
-                  <Card className="border-0 shadow-xl backdrop-blur-sm bg-gradient-to-br from-card to-muted/30 overflow-hidden hover-lift">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
-                    <CardHeader className="relative">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 bg-primary/10 rounded-lg">
+                  <Card className="border-0 shadow-lg">
+                    <CardHeader>
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-xl">
                           <Rocket className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <CardTitle className="text-2xl">Quick Actions</CardTitle>
-                          <CardDescription>Jump back into your studies</CardDescription>
+                          <CardTitle>Quick Actions</CardTitle>
+                          <CardDescription>Start practicing for your exams</CardDescription>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="relative">
-                      <div className="grid md:grid-cols-2 gap-4">
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-3">
                         <ScheduleTestModal defaultExamType="jamb">
-                          <Button className="w-full h-24 flex-col gap-2 text-lg font-semibold group relative overflow-hidden shadow-lg active:scale-95 transition-all">
-                            <div className="absolute inset-0 bg-gradient-to-r from-primary-glow to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <Play className="h-7 w-7 relative z-10 group-hover:scale-110 transition-transform" />
-                            <span className="relative z-10">JAMB Practice</span>
+                          <Button className="w-full h-20 text-base font-semibold">
+                            <Play className="h-5 w-5 mr-2" />
+                            JAMB Practice
                           </Button>
                         </ScheduleTestModal>
                         <ScheduleTestModal defaultExamType="waec">
-                          <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all">
-                            <Play className="h-7 w-7" />
+                          <Button variant="outline" className="w-full h-20 text-base font-semibold border-2">
+                            <Play className="h-5 w-5 mr-2" />
                             WAEC Practice
                           </Button>
                         </ScheduleTestModal>
                         <ScheduleTestModal defaultExamType="neco">
-                          <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all">
-                            <Play className="h-7 w-7" />
+                          <Button variant="outline" className="w-full h-20 text-base font-semibold border-2">
+                            <Play className="h-5 w-5 mr-2" />
                             NECO Practice
                           </Button>
                         </ScheduleTestModal>
                         <ScheduleTestModal defaultExamType="post-utme">
-                          <Button variant="outline" className="w-full h-24 flex-col gap-2 text-lg font-semibold hover:bg-muted hover-lift border-2 shadow-md active:scale-95 transition-all">
-                            <Play className="h-7 w-7" />
-                            Post-UTME
+                          <Button variant="outline" className="w-full h-20 text-base font-semibold border-2">
+                            <Play className="h-5 w-5 mr-2" />
+                            POST-UTME
                           </Button>
                         </ScheduleTestModal>
                       </div>
