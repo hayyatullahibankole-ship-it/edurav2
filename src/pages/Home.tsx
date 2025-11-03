@@ -78,60 +78,63 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-24 md:py-32 overflow-hidden">
         <div 
-          className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10"
+          className="absolute inset-0"
           style={{
-            backgroundImage: `linear-gradient(rgba(30, 64, 175, 0.8), rgba(5, 150, 105, 0.8)), url(${heroImage})`,
+            backgroundImage: `linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(16, 185, 129, 0.9)), url(${heroImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
         />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/20" />
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <Badge className="mb-4 bg-white/20 text-white border-white/30">
-              🎓 Trusted by 50,000+ Students
+          <div className="max-w-5xl mx-auto text-center text-white">
+            <Badge className="mb-6 bg-white/20 text-white border-white/40 hover:bg-white/30 transition-all px-6 py-2 text-sm font-medium backdrop-blur-sm">
+              ✨ Trusted by 50,000+ Students Nationwide
             </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Master WAEC & JAMB with 
-              <span className="block text-accent"> Smart CBT Practice</span>
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight tracking-tight animate-fade-in-up">
+              Master WAEC & JAMB 
+              <span className="block mt-2 bg-gradient-to-r from-green-200 to-emerald-300 bg-clip-text text-transparent">
+                with Smart CBT Practice
+              </span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl mb-10 text-white/95 max-w-3xl mx-auto leading-relaxed font-light">
               Access thousands of practice questions, detailed analytics, and expert guidance. 
               Join successful students who achieved their dream scores.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
               {isMobileWeb ? (
-                <Link to="/install-app">
-                  <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
-                    <Download className="mr-2 h-5 w-5" />
+                <Link to="/install-app" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg font-semibold">
+                    <Download className="mr-2 h-6 w-6" />
                     Install App
                   </Button>
                 </Link>
               ) : user ? (
                 <ScheduleTestModal defaultExamType="jamb">
-                  <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
+                  <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg font-semibold">
                     Start JAMB Practice
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <ArrowRight className="ml-2 h-6 w-6" />
                   </Button>
                 </ScheduleTestModal>
               ) : (
-                <Link to="/auth">
-                  <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
+                <Link to="/auth" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg font-semibold">
                     Start JAMB Practice
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <ArrowRight className="ml-2 h-6 w-6" />
                   </Button>
                 </Link>
               )}
-              <Link to="/demo">
-                <Button size="lg" variant="outline" className="bg-card text-foreground border-primary-foreground hover:bg-card/90">
+              <Link to="/demo" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto bg-white/10 backdrop-blur-sm text-white border-white/40 hover:bg-white/20 shadow-lg transition-all px-8 py-6 text-lg font-semibold">
                   View Demo
                 </Button>
               </Link>
             </div>
-            <div className="mt-6 text-center">
+            <div className="mt-8 text-center">
               <Link to="/schools">
-                <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/30 hover:bg-white/20">
+                <Button size="lg" variant="ghost" className="bg-white/5 backdrop-blur-sm text-white border border-white/20 hover:bg-white/10 shadow-lg transition-all px-6 py-3">
                   <Users className="mr-2 h-5 w-5" />
                   Register as a School
                 </Button>
@@ -142,24 +145,27 @@ const Home = () => {
       </section>
 
       {/* Quick Practice Section */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-20 md:py-24 bg-gradient-to-b from-background via-muted/30 to-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <div className="text-center mb-16">
+            <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-sm font-medium">
+              Start Practicing Now
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Choose Your Exam Practice
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Practice with authentic JAMB and WAEC exam conditions and timing
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="text-center hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50">
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <Card className="group text-center hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/60 hover:scale-105 bg-gradient-to-br from-card to-primary/5">
               <CardHeader className="pb-6">
-                <div className="mx-auto bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center text-primary mb-4">
-                  <Target className="h-8 w-8" />
+                <div className="mx-auto bg-gradient-to-br from-primary to-primary/80 w-20 h-20 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform">
+                  <Target className="h-10 w-10" />
                 </div>
-                <CardTitle className="text-2xl mb-2">JAMB Practice</CardTitle>
+                <CardTitle className="text-3xl mb-3 font-bold">JAMB Practice</CardTitle>
                 <CardDescription className="text-base">
                   Practice with 180 questions (English + 3 subjects) in 120 minutes - official JAMB format
                 </CardDescription>
@@ -204,12 +210,12 @@ const Home = () => {
               </CardContent>
             </Card>
 
-            <Card className="text-center hover:shadow-xl transition-all duration-300 border-2 hover:border-accent/50">
+            <Card className="group text-center hover:shadow-2xl transition-all duration-500 border-2 hover:border-accent/60 hover:scale-105 bg-gradient-to-br from-card to-accent/5">
               <CardHeader className="pb-6">
-                <div className="mx-auto bg-accent/10 w-16 h-16 rounded-full flex items-center justify-center text-accent mb-4">
-                  <BookOpen className="h-8 w-8" />
+                <div className="mx-auto bg-gradient-to-br from-accent to-accent/80 w-20 h-20 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform">
+                  <BookOpen className="h-10 w-10" />
                 </div>
-                <CardTitle className="text-2xl mb-2">WAEC Practice</CardTitle>
+                <CardTitle className="text-3xl mb-3 font-bold">WAEC Practice</CardTitle>
                 <CardDescription className="text-base">
                   Subject-based practice with 50-60 questions per paper - authentic WAEC experience
                 </CardDescription>
@@ -258,28 +264,31 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-background">
+      <section className="py-24 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <div className="text-center mb-20">
+            <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-sm font-medium">
+              Powerful Features
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Everything You Need to Excel
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Comprehensive tools and resources designed specifically for WAEC and JAMB success
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {features.map((feature, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="mx-auto bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center text-primary mb-4">
+              <Card key={index} className="group text-center hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 hover:border-primary/30 bg-gradient-to-br from-card to-muted/20">
+                <CardHeader className="pb-4">
+                  <div className="mx-auto bg-gradient-to-br from-primary/10 to-accent/10 w-16 h-16 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform shadow-sm">
                     {feature.icon}
                   </div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                  <CardTitle className="text-xl font-bold mb-2">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-base">
+                  <CardDescription className="text-base leading-relaxed">
                     {feature.description}
                   </CardDescription>
                 </CardContent>
@@ -290,25 +299,28 @@ const Home = () => {
       </section>
 
       {/* Subjects Section */}
-      <section className="py-20">
+      <section className="py-24 bg-gradient-to-b from-muted/20 to-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-sm font-medium">
+              All Subjects Covered
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Practice All WAEC & JAMB Subjects
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Complete coverage of all examination subjects with up-to-date question banks
             </p>
           </div>
           
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-4 max-w-5xl mx-auto">
             {subjects.map((subject, index) => (
               <Badge 
                 key={index} 
                 variant="secondary" 
-                className="px-4 py-2 text-sm hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer"
+                className="px-6 py-3 text-base font-medium hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-lg"
               >
-                <BookOpen className="w-4 h-4 mr-2" />
+                <BookOpen className="w-5 h-5 mr-2" />
                 {subject}
               </Badge>
             ))}
@@ -317,40 +329,49 @@ const Home = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 bg-card">
+      <section className="py-24 bg-gradient-to-br from-primary/5 via-background to-accent/5">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-20">
+              <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-sm font-medium">
+                Why Students Love Us
+              </Badge>
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Why Choose Edura?
               </h2>
-              <p className="text-xl text-muted-foreground">
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Join thousands of students who achieved their target scores with our platform
               </p>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
                 {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <div className="bg-accent/10 p-2 rounded-full">
-                      <CheckCircle className="h-5 w-5 text-accent" />
+                  <div key={index} className="flex items-center gap-5 group hover:translate-x-2 transition-transform">
+                    <div className="bg-gradient-to-br from-accent/20 to-primary/20 p-3 rounded-xl group-hover:scale-110 transition-transform shadow-sm">
+                      <CheckCircle className="h-6 w-6 text-accent" />
                     </div>
-                    <span className="text-lg">{benefit}</span>
+                    <span className="text-lg font-medium">{benefit}</span>
                   </div>
                 ))}
               </div>
               
-              <Card className="p-8">
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-primary mb-2">92%</div>
-                  <p className="text-muted-foreground mb-4">Average Score Improvement</p>
+              <Card className="p-10 bg-gradient-to-br from-primary/5 to-accent/5 border-2 shadow-2xl">
+                <div className="text-center space-y-8">
+                  <div className="space-y-2">
+                    <div className="text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">92%</div>
+                    <p className="text-muted-foreground text-lg font-medium">Average Score Improvement</p>
+                  </div>
                   
-                  <div className="text-3xl font-bold text-accent mb-2">50,000+</div>
-                  <p className="text-muted-foreground mb-4">Students Registered</p>
+                  <div className="space-y-2">
+                    <div className="text-5xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">50,000+</div>
+                    <p className="text-muted-foreground text-lg font-medium">Students Registered</p>
+                  </div>
                   
-                  <div className="text-3xl font-bold text-warning mb-2">98%</div>
-                  <p className="text-muted-foreground">Success Rate</p>
+                  <div className="space-y-2">
+                    <div className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">98%</div>
+                    <p className="text-muted-foreground text-lg font-medium">Success Rate</p>
+                  </div>
                 </div>
               </Card>
             </div>
@@ -359,33 +380,35 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center text-primary-foreground">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+      <section className="relative py-24 md:py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent" />
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center text-white">
+            <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight">
               Ready to Ace Your Exams?
             </h2>
-            <p className="text-xl mb-8 opacity-90">
+            <p className="text-xl md:text-2xl mb-12 opacity-95 leading-relaxed font-light max-w-2xl mx-auto">
               Start your journey to exam success today. Free trial available - no credit card required.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to={isMobileWeb ? "/install-app" : "/auth"}>
-                <Button size="lg" variant="secondary">
+            <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
+              <Link to={isMobileWeb ? "/install-app" : "/auth"} className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-2xl hover:shadow-3xl transition-all px-10 py-6 text-lg font-semibold">
                   {isMobileWeb ? (
                     <>
-                      <Download className="mr-2 h-5 w-5" />
+                      <Download className="mr-2 h-6 w-6" />
                       Install App
                     </>
                   ) : (
                     <>
                       Start Free Trial
-                      <ArrowRight className="ml-2 h-5 w-5" />
+                      <ArrowRight className="ml-2 h-6 w-6" />
                     </>
                   )}
                 </Button>
               </Link>
-              <Link to="/payment">
-                <Button size="lg" variant="outline" className="bg-card text-foreground border-primary-foreground hover:bg-card/90">
+              <Link to="/payment" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto bg-white/10 backdrop-blur-sm text-white border-white/40 hover:bg-white/20 shadow-lg transition-all px-10 py-6 text-lg font-semibold">
                   View Pricing
                 </Button>
               </Link>

@@ -166,7 +166,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
     // JAMB-specific validation
     if (testConfig.examType === 'jamb') {
       const englishSubject = subjects.find(s => 
-        s.name?.toLowerCase().includes('english') && testConfig.subjects.includes(s.id)
+        s.name?.toLowerCase() === 'english language' && testConfig.subjects.includes(s.id)
       );
       
       if (!englishSubject) {
@@ -193,7 +193,7 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
       const availableCount = availableQuestions[subjectId] || 0;
       const subjectName = subjects.find(s => s.id === subjectId)?.name || '';
       const requiredCount = testConfig.examType === 'jamb'
-        ? (subjectName.toLowerCase().includes('english') ? 60 : 40)
+        ? (subjectName.toLowerCase() === 'english language' ? 60 : 40)
         : testConfig.questionCount;
       return availableCount < requiredCount;
     });
@@ -392,10 +392,10 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
             {subjects.map((subject) => {
               const questionCount = availableQuestions[subject.id] || 0;
               const requiredCount = testConfig.examType === 'jamb'
-                ? (subject.name?.toLowerCase().includes('english') ? 60 : 40)
+                ? (subject.name?.toLowerCase() === 'english language' ? 60 : 40)
                 : testConfig.questionCount;
               const hasEnoughQuestions = questionCount >= requiredCount;
-              const isEnglish = subject.name?.toLowerCase().includes('english');
+              const isEnglish = subject.name?.toLowerCase() === 'english language';
               const isJambMode = testConfig.examType === 'jamb';
               
               return (
