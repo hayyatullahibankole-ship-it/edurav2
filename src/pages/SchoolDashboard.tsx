@@ -193,7 +193,7 @@ export default function SchoolDashboard() {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    window.open("https://wa.me/2349061615303?text=Hello,%20I%20need%20support%20with%20my%20school%20account", "_blank");
+                    window.open("https://wa.me/2347050757085?text=Hello,%20I%20need%20support%20with%20my%20school%20account", "_blank");
                   }}
                 >
                   <HelpCircle className="h-4 w-4 mr-2" />

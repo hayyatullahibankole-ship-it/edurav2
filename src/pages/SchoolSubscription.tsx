@@ -254,8 +254,8 @@ export default function SchoolSubscription() {
     }
 
     if (studentCount > 250) {
-      toast.error("For 250+ students, please contact support at +234 906 161 5303");
-      window.open("https://wa.me/2349061615303?text=Hello,%20I%20need%20a%20subscription%20for%20more%20than%20250%20students", "_blank");
+      toast.error("For 250+ students, please contact support at +234 705 075 7085");
+      window.open("https://wa.me/2347050757085?text=Hello,%20I%20need%20a%20subscription%20for%20more%20than%20250%20students", "_blank");
       return;
     }
 

@@ -259,7 +259,7 @@ export default function SchoolLanding() {
                   size="lg" 
                   variant="outline"
                   className="text-lg px-10"
-                  onClick={() => window.open("https://wa.me/2349061615303?text=Hello,%20I%20want%20to%20learn%20more%20about%20school%20pricing", "_blank")}
+                  onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20want%20to%20learn%20more%20about%20school%20pricing", "_blank")}
                 >
                   Contact Sales
                 </Button>
@@ -356,7 +356,7 @@ export default function SchoolLanding() {
                   <p className="text-sm font-medium mb-2">Need help getting started?</p>
                   <Button 
                     variant="outline"
-                    onClick={() => window.open("https://wa.me/2349061615303?text=Hello,%20I%20need%20help%20setting%20up%20my%20school%20account", "_blank")}
+                    onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20need%20help%20setting%20up%20my%20school%20account", "_blank")}
                   >
                     Contact Support
                   </Button>
