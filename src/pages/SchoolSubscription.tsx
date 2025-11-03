@@ -238,6 +238,21 @@ export default function SchoolSubscription() {
     console.log("School data being used:", schoolData);
 
     try {
+      // Prefer edge function to avoid RLS issues
+      const { data: activateRes, error: activateErr } = await supabase.functions.invoke('activate-free-subscription', {
+        body: {
+          student_seats: studentCount,
+          school: schoolData || null,
+          pending: JSON.parse(localStorage.getItem('pendingSchoolRegistration') || 'null')
+        },
+      });
+      if (activateErr) {
+        console.warn('Edge activation failed, falling back to direct DB:', activateErr);
+      } else if (activateRes?.success) {
+        toast.success('School subscription activated successfully!');
+        setTimeout(() => navigate('/school-dashboard'), 1000);
+        return;
+      }
       // Create and activate free subscription
       const endDate = new Date();
       endDate.setFullYear(endDate.getFullYear() + 1); // 1 year free subscription
