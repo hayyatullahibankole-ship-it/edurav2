@@ -128,6 +128,29 @@ export default function SchoolDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* School Code Banner */}
+        <Card className="mb-8 border-primary bg-primary/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">School Code (Share with Students)</h3>
+                <p className="text-3xl font-bold text-primary">{schoolData?.school_code}</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Students will use this code in their email: username@{schoolData?.school_code}.edu.ng
+                </p>
+              </div>
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText(schoolData?.school_code || '');
+                  toast.success('School code copied to clipboard!');
+                }}
+              >
+                Copy Code
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Stats Overview */}
         <div className="grid gap-4 md:grid-cols-4 mb-8">
           <Card>
@@ -239,7 +262,8 @@ export default function SchoolDashboard() {
 
           <TabsContent value="students">
             <SchoolStudentsManager 
-              schoolId={schoolData?.id} 
+              schoolId={schoolData?.id}
+              schoolCode={schoolData?.school_code}
               remainingSlots={remainingSlots}
               onStudentsUpdate={fetchSchoolData}
             />

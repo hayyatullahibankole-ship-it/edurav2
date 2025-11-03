@@ -1995,7 +1995,7 @@ export type Database = {
           name: string
           phone: string | null
           registration_number: string | null
-          school_code: string | null
+          school_code: string
           slug: string
           state: string | null
           students_added: number | null
@@ -2019,7 +2019,7 @@ export type Database = {
           name: string
           phone?: string | null
           registration_number?: string | null
-          school_code?: string | null
+          school_code: string
           slug: string
           state?: string | null
           students_added?: number | null
@@ -2043,7 +2043,7 @@ export type Database = {
           name?: string
           phone?: string | null
           registration_number?: string | null
-          school_code?: string | null
+          school_code?: string
           slug?: string
           state?: string | null
           students_added?: number | null
@@ -3297,6 +3297,7 @@ export type Database = {
         }[]
       }
       generate_referral_code: { Args: never; Returns: string }
+      generate_school_code: { Args: { school_name: string }; Returns: string }
       generate_unique_referral_code: { Args: never; Returns: string }
       generate_weak_topic_recommendations: {
         Args: { p_user_id: string }

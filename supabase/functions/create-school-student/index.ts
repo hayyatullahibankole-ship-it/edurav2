@@ -36,20 +36,20 @@ serve(async (req) => {
     }
 
     // Get request body
-    const { schoolId, fullName, classLevel } = await req.json();
+    const { schoolCode, fullName, classLevel } = await req.json();
 
-    if (!schoolId || !fullName) {
+    if (!schoolCode || !fullName) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Verify the requesting user is the school admin
+    // Find school by code
     const { data: school, error: schoolError } = await supabaseAdmin
       .from('schools')
-      .select('admin_user_id, users!schools_admin_user_id_fkey(auth_user_id)')
-      .eq('id', schoolId)
+      .select('id, school_code, admin_user_id, users!schools_admin_user_id_fkey(auth_user_id)')
+      .eq('school_code', schoolCode)
       .single();
 
     if (schoolError || !school) {
@@ -58,6 +58,8 @@ serve(async (req) => {
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const schoolId = school.id;
 
     // Check if the requesting user is the school admin
     const schoolAdminAuthId = (school as any).users?.auth_user_id;
@@ -68,12 +70,11 @@ serve(async (req) => {
       );
     }
 
-    // Generate credentials
     const cleanName = fullName.toLowerCase().replace(/\s+/g, "");
     const randomNum = Math.floor(1000 + Math.random() * 9000);
     const username = `${cleanName}${randomNum}`;
     const password = `edura${randomNum}`;
-    const email = `${username}@${schoolId}.edu.ng`;
+    const email = `${username}@${schoolCode}.edu.ng`;
 
     // Create auth user (bypass email verification)
     const { data: newAuthUser, error: createAuthError } = await supabaseAdmin.auth.admin.createUser({

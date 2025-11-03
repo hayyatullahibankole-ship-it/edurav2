@@ -100,7 +100,7 @@ export default function SchoolSubscription() {
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)/g, '');
 
-        const { data: newSchool, error: createError } = await supabase
+        const { data: newSchool, error: createError } = await (supabase as any)
           .from('schools')
           .insert({
             name: pending?.schoolName || fallbackName,
@@ -196,7 +196,7 @@ export default function SchoolSubscription() {
         })();
         const slug = (pending?.schoolName || fallbackName).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-        const { data: newSchool, error: createError } = await supabase
+        const { data: newSchool, error: createError } = await (supabase as any)
           .from('schools')
           .insert({
             name: pending?.schoolName || fallbackName,

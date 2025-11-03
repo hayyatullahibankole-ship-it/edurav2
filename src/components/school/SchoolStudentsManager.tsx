@@ -12,11 +12,12 @@ import { Badge } from "@/components/ui/badge";
 
 interface Props {
   schoolId: string;
+  schoolCode: string;
   remainingSlots: number;
   onStudentsUpdate: () => void;
 }
 
-export default function SchoolStudentsManager({ schoolId, remainingSlots, onStudentsUpdate }: Props) {
+export default function SchoolStudentsManager({ schoolId, schoolCode, remainingSlots, onStudentsUpdate }: Props) {
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -69,7 +70,7 @@ export default function SchoolStudentsManager({ schoolId, remainingSlots, onStud
       // Call Edge Function to create student
       const { data, error } = await supabase.functions.invoke('create-school-student', {
         body: {
-          schoolId,
+          schoolCode,
           fullName: newStudent.fullName,
           classLevel: newStudent.classLevel || null,
         }
