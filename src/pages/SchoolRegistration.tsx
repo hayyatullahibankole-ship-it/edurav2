@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Loader2, School, Mail, Phone, MapPin, User, Lock, CheckCircle } from "lucide-react";
 
@@ -37,6 +38,7 @@ const schoolRegistrationSchema = baseSchema.refine(
 
 export default function SchoolRegistration() {
   const navigate = useNavigate();
+  const { toast: toastHook } = useToast();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -167,7 +169,20 @@ export default function SchoolRegistration() {
 
     } catch (error: any) {
       console.error("Registration error:", error);
-      toast.error(error.message || "Failed to register school");
+      
+      // Display detailed error message
+      const errorMessage = error?.message || "Failed to register school";
+      
+      toast.error(errorMessage, {
+        duration: 6000,
+        description: "Please check your email address and try again, or contact support."
+      });
+      
+      toastHook({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: errorMessage,
+      });
     } finally {
       setLoading(false);
     }
