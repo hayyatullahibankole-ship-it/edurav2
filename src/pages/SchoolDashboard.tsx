@@ -26,6 +26,11 @@ import SchoolReports from "@/components/school/SchoolReports";
 import SchoolBilling from "@/components/school/SchoolBilling";
 import SchoolSettings from "@/components/school/SchoolSettings";
 import SchoolOverviewCharts from "@/components/school/SchoolOverviewCharts";
+import RealtimeActivityFeed from "@/components/school/RealtimeActivityFeed";
+import PerformanceTrends from "@/components/school/PerformanceTrends";
+import StudentEngagement from "@/components/school/StudentEngagement";
+import QuickActions from "@/components/school/QuickActions";
+import TopPerformers from "@/components/school/TopPerformers";
 
 const menuItems = [
   { id: "overview", title: "Overview", icon: LayoutDashboard },
@@ -199,7 +204,7 @@ export default function SchoolDashboard() {
           <main className="flex-1 overflow-y-auto bg-muted/30">
             <div className="container max-w-7xl mx-auto p-8">
               {activeTab === "overview" && (
-                <div className="space-y-8">
+                <div className="space-y-6">
                   {/* School Code Section */}
                   <Card>
                     <CardHeader>
@@ -301,35 +306,28 @@ export default function SchoolDashboard() {
                     </Card>
                   </div>
 
-                  {/* School Details */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>School Information</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <div className="space-y-1 min-w-0">
-                          <p className="text-sm text-muted-foreground">School Name</p>
-                          <p className="font-medium break-words">{schoolData?.name}</p>
-                        </div>
-                        <div className="space-y-1 min-w-0">
-                          <p className="text-sm text-muted-foreground">Email Address</p>
-                          <p className="font-medium break-all text-sm">{schoolData?.email}</p>
-                        </div>
-                        <div className="space-y-1 min-w-0">
-                          <p className="text-sm text-muted-foreground">Phone Number</p>
-                          <p className="font-medium break-words">{schoolData?.phone}</p>
-                        </div>
-                        <div className="space-y-1 min-w-0">
-                          <p className="text-sm text-muted-foreground">School Code</p>
-                          <p className="font-medium font-mono break-words">{schoolData?.school_code}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {/* Quick Actions + Engagement */}
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    <QuickActions 
+                      onAddStudent={() => setActiveTab("students")}
+                      schoolId={schoolData?.id}
+                    />
+                    <StudentEngagement schoolId={schoolData?.id} />
+                  </div>
 
-                  {/* Performance Charts */}
-                  {schoolData?.id && <SchoolOverviewCharts schoolId={schoolData.id} />}
+                  {/* Performance Trends - Full Width */}
+                  <PerformanceTrends schoolId={schoolData?.id} />
+
+                  {/* Charts + Activity/Leaderboard */}
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    <div className="space-y-6">
+                      {schoolData?.id && <SchoolOverviewCharts schoolId={schoolData.id} />}
+                    </div>
+                    <div className="space-y-6">
+                      <TopPerformers schoolId={schoolData?.id} />
+                      <RealtimeActivityFeed schoolId={schoolData?.id} />
+                    </div>
+                  </div>
                 </div>
               )}
 
