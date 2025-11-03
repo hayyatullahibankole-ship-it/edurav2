@@ -87,11 +87,28 @@ export default function SchoolManagement() {
         `)
         .eq('status', 'ACTIVE');
 
-      // Index subscriptions by school_id
+      // Fetch actual student counts for each school
+      const studentCountsResp = await supabase
+        .from('school_students')
+        .select('school_id');
+
+      // Count students per school
+      const studentCounts: Record<string, number> = {};
+      if (studentCountsResp.data) {
+        studentCountsResp.data.forEach((student: any) => {
+          studentCounts[student.school_id] = (studentCounts[student.school_id] || 0) + 1;
+        });
+      }
+
+      // Index subscriptions by school_id and add actual student count
       const subsMap: Record<string, SchoolSubscription> = {};
       if (subscriptionsResp.data) {
         subscriptionsResp.data.forEach((sub: any) => {
-          subsMap[sub.school_id] = sub;
+          const schoolId = sub.school_id;
+          subsMap[schoolId] = {
+            ...sub,
+            used_seats: studentCounts[schoolId] || 0
+          };
         });
       }
       setSchoolSubscriptions(subsMap);
