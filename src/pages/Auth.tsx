@@ -7,7 +7,7 @@ import { useInstalledApp } from '@/hooks/useInstalledApp';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function Auth() {
-  const { user, loading, isAdmin, isSchoolAdmin, userRole } = useAuth();
+  const { user, loading, isAdmin, isSchoolAdmin, userRole, userProfile } = useAuth();
   const navigate = useNavigate();
   const { isInstalledApp } = useInstalledApp();
 
@@ -22,11 +22,11 @@ export default function Auth() {
           const { data: schoolData } = await supabase
             .from('schools')
             .select('is_active')
-            .eq('admin_user_id', user.id)
+            .eq('admin_user_id', userProfile?.id as string)
             .maybeSingle();
           
-          if (schoolData && !schoolData.is_active) {
-            // School exists but not active, redirect to subscription
+          if (!schoolData || !schoolData.is_active) {
+            // School missing or not active, go complete subscription
             navigate('/school-subscription', { replace: true });
           } else {
             navigate('/school-dashboard', { replace: true });

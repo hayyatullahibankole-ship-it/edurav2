@@ -174,9 +174,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq('user_id', userId)
           .maybeSingle();
         
-        const roleFromDB = roleData?.role as string | undefined;
+        let roleFromDB = roleData?.role as string | undefined;
+
+        // Fallback: if no role record, infer school_admin from schools ownership
+        if (!roleFromDB) {
+          const { data: ownedSchool } = await supabase
+            .from('schools')
+            .select('id')
+            .eq('admin_user_id', profileData.id)
+            .maybeSingle();
+          if (ownedSchool) {
+            roleFromDB = 'school_admin';
+          }
+        }
         
-        // Map database role to application role
+        // Map database/inferred role to application role
         let appRole: 'admin' | 'school_admin' | 'user' | 'student' = 'student';
         if (roleFromDB === 'admin') {
           appRole = 'admin';
