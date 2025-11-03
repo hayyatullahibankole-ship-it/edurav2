@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Component, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
@@ -18,6 +18,29 @@ interface PerformanceData {
     score: number;
     tests: number;
   }>;
+}
+
+class ChartErrorBoundary extends Component<{ children: ReactNode; fallback?: ReactNode }, { hasError: boolean }> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: any) {
+    console.error("Chart render error:", error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className="h-[300px] flex items-center justify-center">
+          <p className="text-muted-foreground">Unable to render chart</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 export default function SchoolOverviewCharts({ schoolId }: Props) {
@@ -74,10 +97,13 @@ export default function SchoolOverviewCharts({ schoolId }: Props) {
 
       if (resultsError) throw resultsError;
 
-      // Filter out results with null/undefined percentages
-      const validResults = (results || []).filter(r => 
-        r.percentage !== null && r.percentage !== undefined && !isNaN(r.percentage)
-      );
+      // Normalize and filter results to ensure numeric percentages
+      const numericResults = (results || []).map(r => ({
+        ...r,
+        percentage: Number(r.percentage)
+      }));
+
+      const validResults = numericResults.filter(r => Number.isFinite(r.percentage));
 
       // Calculate pass/fail (pass threshold: 50%)
       const passThreshold = 50;
@@ -237,29 +263,31 @@ const totalPie = pieData.reduce((sum, item) => sum + (Number(item.value) || 0), 
           </CardHeader>
           <CardContent>
             {totalPie > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value, percent }) => {
-                      const pct = Number.isFinite(percent) ? (percent * 100).toFixed(0) : "0";
-                      return `${name}: ${value} (${pct}%)`;
-                    }}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: number) => [`${value} tests`, "Count"]} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              <ChartErrorBoundary>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, value, percent }) => {
+                        const pct = Number.isFinite(percent) ? (percent * 100).toFixed(0) : "0";
+                        return `${name}: ${value} (${pct}%)`;
+                      }}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => [`${value} tests`, "Count"]} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </ChartErrorBoundary>
             ) : (
               <div className="h-[300px] flex items-center justify-center">
                 <p className="text-muted-foreground">No test results yet</p>
@@ -279,19 +307,21 @@ const totalPie = pieData.reduce((sum, item) => sum + (Number(item.value) || 0), 
           </CardHeader>
           <CardContent>
             {validStudentPerformance.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={validStudentPerformance} layout="horizontal">
-                  <XAxis type="number" domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" width={80} />
-                  <Tooltip 
-                    formatter={(value: number, name: string) => {
-                      if (name === "score") return [`${value}%`, "Avg Score"];
-                      return [value, name];
-                    }}
-                  />
-                  <Bar dataKey="score" fill="#3b82f6" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <ChartErrorBoundary>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={validStudentPerformance} layout="horizontal">
+                    <XAxis type="number" domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} allowDecimals={false} />
+                    <YAxis type="category" dataKey="name" width={80} />
+                    <Tooltip 
+                      formatter={(value: number, name: string) => {
+                        if (name === "score") return [`${value}%`, "Avg Score"];
+                        return [value, name];
+                      }}
+                    />
+                    <Bar dataKey="score" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartErrorBoundary>
             ) : (
               <div className="h-[300px] flex items-center justify-center">
                 <p className="text-muted-foreground">No student performance data yet</p>
