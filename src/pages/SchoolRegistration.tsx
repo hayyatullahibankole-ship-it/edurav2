@@ -144,14 +144,15 @@ export default function SchoolRegistration() {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create user");
 
-      // Create user record
+      // Create user record with correct column names
       const { data: userData, error: userError } = await supabase
         .from("users")
         .insert({
           auth_user_id: authData.user.id,
           email: formData.schoolEmail,
-          full_name: formData.adminFullName,
-          phone_number: formData.adminPhone,
+          first_name: formData.adminFullName.split(' ')[0] || formData.adminFullName,
+          last_name: formData.adminFullName.split(' ').slice(1).join(' ') || '',
+          phone: formData.adminPhone,
         })
         .select()
         .single();
