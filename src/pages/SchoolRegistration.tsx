@@ -128,8 +128,11 @@ export default function SchoolRegistration() {
     setLoading(true);
 
     try {
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Ensure no active session interferes with sign up
+      try { await supabase.auth.signOut(); } catch {}
+
+      // Create auth user (may require email confirmation; user/session can be null)
+      const { error: authError } = await supabase.auth.signUp({
         email: formData.schoolEmail,
         password: formData.password,
         options: {
@@ -142,7 +145,6 @@ export default function SchoolRegistration() {
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error("Failed to create user");
 
       // Persist registration data locally for post-verification creation
       localStorage.setItem(
