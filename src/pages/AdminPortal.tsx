@@ -52,6 +52,7 @@ import BlogManager from '@/components/admin/BlogManager';
 import CustomerCommunications from '@/components/admin/CustomerCommunications';
 import StudyHubManager from '@/components/admin/StudyHubManager';
 import ForumManager from '@/components/admin/ForumManager';
+import SchoolManagement from '@/components/admin/SchoolManagement';
 import ChallengeManager from '@/components/admin/ChallengeManager';
 import { AkboyServicesManager } from '@/components/admin/AkboyServicesManager';
 import { AkboyPortfolioManager } from '@/components/admin/AkboyPortfolioManager';
@@ -271,6 +272,15 @@ export default function AdminPortal() {
                 <DollarSign className="w-4 h-4 mr-2 lg:mr-3" />
                 <span className="hidden sm:inline">Pricing Management</span>
                 <span className="sm:hidden">Pricing</span>
+              </Button>
+              <Button
+                variant={activeSection === 'schools' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+                onClick={() => setActiveSection('schools')}
+              >
+                <Users className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">School Management</span>
+                <span className="sm:hidden">Schools</span>
               </Button>
               <Button
                 variant={activeSection === 'blog' ? 'secondary' : 'ghost'}
@@ -551,9 +561,9 @@ export default function AdminPortal() {
           
           {activeSection === 'analytics' && <AnalyticsHub />}
           
-          {activeSection === 'pricing' && <PricingManager />}
-          
-          {activeSection === 'blog' && <BlogManager />}
+{activeSection === 'pricing' && <PricingManager />}
+{activeSection === 'schools' && <SchoolManagement />}
+{activeSection === 'blog' && <BlogManager />}
           
           {activeSection === 'communications' && <CustomerCommunications users={users} />}
           

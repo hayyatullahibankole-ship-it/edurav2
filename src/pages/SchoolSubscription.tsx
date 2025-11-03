@@ -177,7 +177,7 @@ export default function SchoolSubscription() {
           price_per_student: 0,
           total_amount: 0,
           status: "ACTIVE",
-          admin_user_id: user?.id,
+          admin_user_id: schoolData.admin_user_id,
           start_date: new Date().toISOString(),
           end_date: endDate.toISOString(),
           auto_renew: false,
