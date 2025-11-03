@@ -3,9 +3,11 @@ import {
   LayoutDashboard,
   User,
   FolderOpen,
-  Bell,
   MessageSquare,
-  HelpCircle,
+  Sword,
+  Calendar,
+  BookOpen,
+  Users,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -24,11 +26,13 @@ import eduraLogo from "@/assets/edura-logo.png";
 
 const navItems = [
   { title: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { title: "Profile", path: "/dashboard?tab=profile", icon: User },
+  { title: "Study Hub", path: "/study-hub", icon: BookOpen },
+  { title: "Challenge Arena", path: "/challenge-arena", icon: Sword },
+  { title: "Study Planner", path: "/study-planner", icon: Calendar },
   { title: "Resources", path: "/resources", icon: FolderOpen },
-  { title: "Notifications", path: "/dashboard#notifications", icon: Bell },
   { title: "Forum", path: "/forum", icon: MessageSquare },
-  { title: "Help Center", path: "/dashboard#help", icon: HelpCircle },
+  { title: "Referral Program", path: "/referral-program", icon: Users },
+  { title: "Profile", path: "/dashboard?tab=profile", icon: User },
   { title: "Settings", path: "/dashboard?tab=profile", icon: Settings },
 ];
 
@@ -52,8 +56,8 @@ export function DashboardSidebar({ onLogout }: DashboardSidebarProps) {
     <Sidebar className="border-r bg-sidebar">
       <SidebarContent className="bg-sidebar">
         {/* Logo */}
-        <div className="p-6 flex items-center justify-center border-b border-sidebar-border">
-          <img src={eduraLogo} alt="LOGO" className="h-8 w-auto" />
+        <div className="p-6 flex items-center justify-center border-b border-sidebar-border bg-white">
+          <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
         </div>
 
         {/* Navigation */}

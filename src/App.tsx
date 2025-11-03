@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
+import { DashboardLayout } from "./components/DashboardLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { OfflineIndicator } from "./components/OfflineIndicator";
@@ -151,7 +152,11 @@ const AppRoutes = () => {
             <Route path="/demo" element={<Layout><Demo /></Layout>} />
             <Route path="/demo-test" element={<Layout showNavbar={false}><DemoTest /></Layout>} />
             
-            <Route path="/resources" element={<Layout><Resources /></Layout>} />
+            <Route path="/resources" element={
+              <ProtectedRoute>
+                <DashboardLayout><Resources /></DashboardLayout>
+              </ProtectedRoute>
+            } />
             
             <Route path="/consultation" element={<Layout><Consultation /></Layout>} />
             <Route path="/payment" element={<Layout><Payment /></Layout>} />
@@ -163,42 +168,42 @@ const AppRoutes = () => {
             <Route path="/payment-success" element={<Layout showNavbar={false}><PaymentSuccess /></Layout>} />
             <Route path="/study-hub" element={
               <ProtectedRoute>
-                <StudyHub />
+                <DashboardLayout><StudyHub /></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/study-hub/topic/:topicId" element={
               <ProtectedRoute>
-                <StudyTopic />
+                <DashboardLayout><StudyTopic /></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/study-hub/lesson/:lessonId" element={
               <ProtectedRoute>
-                <LessonView />
+                <DashboardLayout><LessonView /></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/forum" element={
               <ProtectedRoute>
-                <Forum />
+                <DashboardLayout><Forum /></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/forum/new" element={
               <ProtectedRoute>
-                <ForumNewPost />
+                <DashboardLayout><ForumNewPost /></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/forum/post/:postId" element={
               <ProtectedRoute>
-                <ForumPost />
+                <DashboardLayout><ForumPost /></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/challenge-arena" element={
               <ProtectedRoute>
-                <ChallengeArena />
+                <DashboardLayout><ChallengeArena /></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/challenge/:challengeId" element={
               <ProtectedRoute>
-                <ChallengeDetail />
+                <DashboardLayout><ChallengeDetail /></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/schools" element={<Layout><SchoolLanding /></Layout>} />
@@ -222,17 +227,17 @@ const AppRoutes = () => {
             } />
             <Route path="/study-planner" element={
               <ProtectedRoute>
-                <Layout><StudyPlanner /></Layout>
+                <DashboardLayout><StudyPlanner /></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/referral-program" element={
               <ProtectedRoute>
-                <Layout><ReferralProgram /></Layout>
+                <DashboardLayout><ReferralProgram /></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/performance-report" element={
               <ProtectedRoute>
-                <Layout><PerformanceReport /></Layout>
+                <DashboardLayout><PerformanceReport /></DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/study-hub/lesson/:lessonId/quiz" element={
