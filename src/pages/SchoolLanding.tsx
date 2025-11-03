@@ -269,8 +269,106 @@ export default function SchoolLanding() {
         </div>
       </section>
 
-      {/* Features Section with Image */}
+      {/* How It Works Section */}
       <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">Simple Process</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold">How It Works</h2>
+            <p className="text-lg text-muted-foreground">
+              Get your school up and running in 4 simple steps
+            </p>
+          </div>
+
+          <div className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {/* Step 1 */}
+              <Card className="border-2 relative overflow-hidden group hover:border-primary/50 transition-all">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-[3rem] flex items-start justify-end p-3">
+                  <span className="text-2xl font-bold text-primary">1</span>
+                </div>
+                <CardContent className="p-6 space-y-4 pt-8">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <School className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-bold text-lg">Register Your School</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Fill out the registration form with your school details. Get instant approval.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Step 2 */}
+              <Card className="border-2 relative overflow-hidden group hover:border-primary/50 transition-all">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-[3rem] flex items-start justify-end p-3">
+                  <span className="text-2xl font-bold text-primary">2</span>
+                </div>
+                <CardContent className="p-6 space-y-4 pt-8">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <Award className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-bold text-lg">Choose Your Plan</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Select a plan based on your student count. Make payment securely online.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Step 3 */}
+              <Card className="border-2 relative overflow-hidden group hover:border-primary/50 transition-all">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-[3rem] flex items-start justify-end p-3">
+                  <span className="text-2xl font-bold text-primary">3</span>
+                </div>
+                <CardContent className="p-6 space-y-4 pt-8">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-bold text-lg">Add Students</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Upload student list via Excel or add them individually from your dashboard.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Step 4 */}
+              <Card className="border-2 relative overflow-hidden group hover:border-primary/50 transition-all">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-[3rem] flex items-start justify-end p-3">
+                  <span className="text-2xl font-bold text-primary">4</span>
+                </div>
+                <CardContent className="p-6 space-y-4 pt-8">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <BarChart3 className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-bold text-lg">Monitor Progress</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Track student practice, view reports, and monitor exam readiness in real-time.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="mt-12 text-center">
+              <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5 inline-block">
+                <CardContent className="p-6">
+                  <p className="text-sm font-medium mb-2">Need help getting started?</p>
+                  <Button 
+                    variant="outline"
+                    onClick={() => window.open("https://wa.me/2349061615303?text=Hello,%20I%20need%20help%20setting%20up%20my%20school%20account", "_blank")}
+                  >
+                    Contact Support
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section with Image */}
+      <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
