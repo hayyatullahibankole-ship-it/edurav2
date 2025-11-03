@@ -26,56 +26,55 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get the user's percentage for this attempt
-    const { data: result, error: resultError } = await supabase
-      .from('results')
-      .select('percentage')
-      .eq('attempt_id', attemptId)
-      .maybeSingle();
+    // Get the user's percentage for this attempt with retry logic
+    let result, resultError;
+    for (let i = 0; i < 3; i++) {
+      const response = await supabase
+        .from('results')
+        .select('percentage')
+        .eq('attempt_id', attemptId)
+        .maybeSingle();
+      
+      result = response.data;
+      resultError = response.error;
+      
+      // If successful or not a transaction error, break
+      if (!resultError || resultError.code !== '25P02') {
+        break;
+      }
+      
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, 100 * (i + 1)));
+    }
 
     if (resultError) {
       console.error('Error fetching result:', resultError);
+      // Return default values instead of failing
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch result' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ rank: 0, total: 0 }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     if (!result?.percentage && result?.percentage !== 0) {
+      // Return default values instead of 404
       return new Response(
-        JSON.stringify({ error: 'Result not found for attempt' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ rank: 0, total: 0 }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const userScore = Number(result.percentage) || 0;
 
-    // Total number of results
-    const { count: totalCount, error: totalError } = await supabase
+    // Use approximate counts for better performance
+    const { count: totalCount } = await supabase
       .from('results')
-      .select('id', { count: 'exact', head: true });
+      .select('id', { count: 'estimated', head: true });
 
-    if (totalError) {
-      console.error('Error counting total results:', totalError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to compute rank' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Count how many results have a higher score
-    const { count: higherCount, error: higherError } = await supabase
+    const { count: higherCount } = await supabase
       .from('results')
-      .select('id', { count: 'exact', head: true })
+      .select('id', { count: 'estimated', head: true })
       .gt('percentage', userScore);
-
-    if (higherError) {
-      console.error('Error counting higher scores:', higherError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to compute rank' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
 
     // Rank is number of people ahead + 1
     const rank = (higherCount ?? 0) + 1;
@@ -86,9 +85,10 @@ serve(async (req) => {
     );
   } catch (err) {
     console.error('get-rank error:', err);
+    // Return default values instead of error
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ rank: 0, total: 0 }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

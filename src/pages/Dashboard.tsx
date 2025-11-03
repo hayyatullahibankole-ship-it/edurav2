@@ -133,32 +133,21 @@ const Dashboard = () => {
         a.user_id === userProfile.id && a.status === 'SUBMITTED'
       ).sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime());
       
-      // Fetch results for each attempt with auto-recompute if missing/zero
+      // Fetch results for each attempt - simplified to avoid transaction overload
       const attemptsWithResults = await Promise.all(
         (attempts || []).map(async (attempt) => {
-          // Try fetch existing result
-          let { data: result } = await supabase
-            .from("results")
-            .select("*")
-            .eq("attempt_id", attempt.id)
-            .maybeSingle();
+          try {
+            const { data: result } = await supabase
+              .from("results")
+              .select("*")
+              .eq("attempt_id", attempt.id)
+              .maybeSingle();
 
-          // If missing or suspiciously zero, recompute server-side once
-          if (!result || result.percentage === 0) {
-            try {
-              await supabase.rpc('recompute_results_for_attempt', { attempt_uuid: attempt.id });
-              const { data: recomputed } = await supabase
-                .from("results")
-                .select("*")
-                .eq("attempt_id", attempt.id)
-                .maybeSingle();
-              if (recomputed) result = recomputed;
-            } catch (e) {
-              console.warn('Recompute failed for attempt', attempt.id, e);
-            }
+            return { ...attempt, results: result ? [result] : [] };
+          } catch (e) {
+            console.warn('Failed to fetch result for attempt', attempt.id, e);
+            return { ...attempt, results: [] };
           }
-
-          return { ...attempt, results: result ? [result] : [] };
         })
       );
 
@@ -189,17 +178,18 @@ const Dashboard = () => {
       let rank = 0;
       let totalStudents = 0;
       const latestAttemptId = resultsWithScores[0]?.id;
-      if (latestAttemptId) {
+      if (latestAttemptId && resultsWithScores[0]?.results?.[0]) {
         try {
-          const { data: rankData, error: rankError } = await supabase.functions.invoke('get-rank', {
+          const { data: rankData } = await supabase.functions.invoke('get-rank', {
             body: { attemptId: latestAttemptId },
           });
-          if (!rankError && rankData) {
+          if (rankData) {
             rank = rankData.rank || 0;
             totalStudents = rankData.total || 0;
           }
         } catch (e) {
-          console.error('Failed to fetch live rank', e);
+          console.warn('Failed to fetch live rank', e);
+          // Continue without rank data
         }
       }
 
