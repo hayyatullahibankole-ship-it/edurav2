@@ -651,11 +651,20 @@ export default function AuthForm() {
                     }}
                     className="text-primary hover:underline font-medium"
                   >
-                    Sign in instead
-                  </button>
-                </p>
-              )}
+                  Sign in instead
+                </button>
+              </p>
+            )}
+            
+            <div className="mt-4 pt-4 border-t border-border text-center">
+              <p className="text-sm text-muted-foreground">
+                Are you a school administrator?{' '}
+                <Link to="/school-login" className="text-primary hover:underline font-medium">
+                  Login as School
+                </Link>
+              </p>
             </div>
+          </div>
           </CardContent>
         </Card>
       </div>
