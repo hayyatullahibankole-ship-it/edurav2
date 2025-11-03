@@ -74,7 +74,7 @@ export default function SchoolReports({ schoolId }: Props) {
           exam_id,
           user_id,
           status,
-          exams!inner(title, type)
+          exams(title, type)
         `)
         .in("user_id", studentUserIds)
         .eq("status", "SUBMITTED")
@@ -125,7 +125,7 @@ export default function SchoolReports({ schoolId }: Props) {
         (student.attempts || []).map(attempt => [
           student.full_name,
           student.class_level || "-",
-          attempt.exams?.title || "Unknown",
+          attempt.exams?.title || "Practice Test",
           attempt.results?.percentage?.toFixed(1) || "-",
           attempt.results?.correct_answers || "-",
           attempt.results?.wrong_answers || "-",
@@ -254,11 +254,11 @@ export default function SchoolReports({ schoolId }: Props) {
                                 return (
                                   <TableRow key={attempt.id}>
                                     <TableCell className="font-medium">
-                                      {attempt.exams?.title || "Unknown Test"}
+                                      {attempt.exams?.title || "Practice Test"}
                                     </TableCell>
                                     <TableCell>
                                       <Badge variant="outline">
-                                        {attempt.exams?.type || "N/A"}
+                                        {attempt.exams?.type || "PRACTICE"}
                                       </Badge>
                                     </TableCell>
                                     <TableCell>
