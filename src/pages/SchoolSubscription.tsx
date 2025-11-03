@@ -94,15 +94,16 @@ export default function SchoolSubscription() {
     setLoading(true);
 
     try {
-      // Create subscription record (temporarily using any to bypass type issues)
+      // Create subscription record
       const { data: subscription, error: subError } = await (supabase as any)
         .from("school_subscriptions")
         .insert({
           school_id: schoolData.id,
-          student_slots: studentCount,
+          student_seats: studentCount,
           price_per_student: pricePerStudent,
           total_amount: totalAmount,
           status: "pending",
+          admin_user_id: user?.id,
         })
         .select()
         .single();

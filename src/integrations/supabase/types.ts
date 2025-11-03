@@ -1899,47 +1899,56 @@ export type Database = {
       }
       school_subscriptions: {
         Row: {
+          admin_user_id: string | null
           auto_renew: boolean | null
           created_at: string | null
           end_date: string | null
           features: Json | null
           id: string
           payment_reference: string | null
-          plan_id: string
+          plan_id: string | null
+          price_per_student: number | null
           school_id: string
           start_date: string | null
           status: Database["public"]["Enums"]["subscription_status"] | null
           student_seats: number | null
+          total_amount: number | null
           updated_at: string | null
           used_seats: number | null
         }
         Insert: {
+          admin_user_id?: string | null
           auto_renew?: boolean | null
           created_at?: string | null
           end_date?: string | null
           features?: Json | null
           id?: string
           payment_reference?: string | null
-          plan_id: string
+          plan_id?: string | null
+          price_per_student?: number | null
           school_id: string
           start_date?: string | null
           status?: Database["public"]["Enums"]["subscription_status"] | null
           student_seats?: number | null
+          total_amount?: number | null
           updated_at?: string | null
           used_seats?: number | null
         }
         Update: {
+          admin_user_id?: string | null
           auto_renew?: boolean | null
           created_at?: string | null
           end_date?: string | null
           features?: Json | null
           id?: string
           payment_reference?: string | null
-          plan_id?: string
+          plan_id?: string | null
+          price_per_student?: number | null
           school_id?: string
           start_date?: string | null
           status?: Database["public"]["Enums"]["subscription_status"] | null
           student_seats?: number | null
+          total_amount?: number | null
           updated_at?: string | null
           used_seats?: number | null
         }
