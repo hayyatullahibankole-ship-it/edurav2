@@ -216,77 +216,55 @@ const totalPie = pieData.reduce((sum, item) => sum + (Number(item.value) || 0), 
 
   return (
     <div className="space-y-6">
-      {/* Performance Overview Title */}
-      <div className="flex items-center gap-2">
-        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-          <TrendingUp className="h-5 w-5 text-primary" />
-        </div>
-        <h2 className="text-2xl font-bold">Performance Analytics</h2>
+      {/* Section Header */}
+      <div>
+        <h2 className="text-xl font-semibold mb-1">Performance Analytics</h2>
+        <p className="text-sm text-muted-foreground">Overview of student test results and performance</p>
       </div>
 
       {/* Summary Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <div className="h-6 w-6 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Award className="h-3 w-3 text-blue-500" />
-              </div>
-              Total Tests Taken
-            </CardTitle>
+            <CardDescription className="text-xs">Total Tests Taken</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{data.totalTests}</div>
-            <p className="text-xs text-muted-foreground mt-1">Completed assessments</p>
+            <div className="text-3xl font-bold tracking-tight">{data.totalTests}</div>
+            <p className="text-xs text-muted-foreground mt-2">Completed assessments</p>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500">
+        <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <div className="h-6 w-6 rounded-full bg-purple-500/10 flex items-center justify-center">
-                <TrendingUp className="h-3 w-3 text-purple-500" />
-              </div>
-              Average Score
-            </CardTitle>
+            <CardDescription className="text-xs">Average Score</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-purple-600">
+            <div className="text-3xl font-bold tracking-tight">
               {isNaN(data.averageScore) ? "0.0" : data.averageScore.toFixed(1)}%
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Overall performance</p>
+            <p className="text-xs text-muted-foreground mt-2">Overall performance</p>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
+        <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <div className="h-6 w-6 rounded-full bg-green-500/10 flex items-center justify-center">
-                <Award className="h-3 w-3 text-green-500" />
-              </div>
-              Pass Rate
-            </CardTitle>
+            <CardDescription className="text-xs">Pass Rate</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">
+            <div className="text-3xl font-bold tracking-tight">
               {data.totalTests > 0 && !isNaN(data.passed) ? ((data.passed / data.totalTests) * 100).toFixed(1) : "0.0"}%
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Students passing (≥50%)</p>
+            <p className="text-xs text-muted-foreground mt-2">Students passing (≥50%)</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         {/* Pie Chart - Pass/Fail Distribution */}
-        <Card className="hover:shadow-lg transition-shadow duration-200">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                <Award className="h-5 w-5 text-green-500" />
-              </div>
-              Success Rate
-            </CardTitle>
+            <CardTitle className="text-base font-semibold">Success Rate</CardTitle>
             <CardDescription>Distribution of passing vs failing tests</CardDescription>
           </CardHeader>
           <CardContent>
@@ -325,14 +303,9 @@ const totalPie = pieData.reduce((sum, item) => sum + (Number(item.value) || 0), 
         </Card>
 
         {/* Bar Chart - Top Students */}
-        <Card className="hover:shadow-lg transition-shadow duration-200">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-blue-500" />
-              </div>
-              Top Performers
-            </CardTitle>
+            <CardTitle className="text-base font-semibold">Top Performers</CardTitle>
             <CardDescription>Average scores by student (Top 10)</CardDescription>
           </CardHeader>
           <CardContent>

@@ -4,18 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { 
   Users, BookOpen, TrendingUp, DollarSign, LayoutDashboard, Settings, 
-  LogOut, Copy, CheckCircle2, XCircle, GraduationCap
+  LogOut, Copy, Building2
 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -32,7 +31,7 @@ import SchoolOverviewCharts from "@/components/school/SchoolOverviewCharts";
 const menuItems = [
   { id: "overview", title: "Overview", icon: LayoutDashboard },
   { id: "students", title: "Students", icon: Users },
-  { id: "exams", title: "Available Exams", icon: BookOpen },
+  { id: "exams", title: "Exams", icon: BookOpen },
   { id: "reports", title: "Reports", icon: TrendingUp },
   { id: "billing", title: "Billing", icon: DollarSign },
   { id: "settings", title: "Settings", icon: Settings },
@@ -40,32 +39,31 @@ const menuItems = [
 
 function SchoolSidebar({ activeTab, setActiveTab, schoolData }: any) {
   return (
-    <Sidebar className="border-r">
-      <div className="p-4 border-b">
+    <Sidebar className="border-r bg-card">
+      <div className="p-6 border-b">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <GraduationCap className="h-6 w-6 text-primary" />
+          <div className="h-10 w-10 rounded-md bg-primary flex items-center justify-center">
+            <Building2 className="h-5 w-5 text-primary-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="font-semibold text-sm truncate">{schoolData?.name}</h2>
+            <h2 className="font-semibold text-base truncate">{schoolData?.name}</h2>
             <p className="text-xs text-muted-foreground truncate">{schoolData?.school_code}</p>
           </div>
         </div>
       </div>
       
-      <SidebarContent>
+      <SidebarContent className="p-4">
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton
                     onClick={() => setActiveTab(item.id)}
                     isActive={activeTab === item.id}
-                    className="w-full"
+                    className="w-full justify-start"
                   >
-                    <item.icon className="h-4 w-4 mr-3" />
+                    <item.icon className="h-4 w-4" />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -155,10 +153,10 @@ export default function SchoolDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
+          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -169,24 +167,24 @@ export default function SchoolDashboard() {
 
   return (
     <SidebarProvider defaultOpen>
-      <div className="min-h-screen w-full flex bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="min-h-screen w-full flex">
         <SchoolSidebar activeTab={activeTab} setActiveTab={setActiveTab} schoolData={schoolData} />
         
-        <div className="flex-1 flex flex-col w-full overflow-hidden">
+        <div className="flex-1 flex flex-col w-full">
           {/* Header */}
-          <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
-            <div className="h-full px-6 flex items-center justify-between">
+          <header className="h-16 border-b bg-background sticky top-0 z-40">
+            <div className="h-full px-8 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <SidebarTrigger />
-                <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                    {menuItems.find(item => item.id === activeTab)?.title}
-                  </h1>
-                </div>
+                <Separator orientation="vertical" className="h-6" />
+                <h1 className="text-lg font-semibold">
+                  {menuItems.find(item => item.id === activeTab)?.title}
+                </h1>
               </div>
               
               <Button
-                variant="outline"
+                variant="ghost"
+                size="sm"
                 onClick={async () => {
                   await supabase.auth.signOut();
                   toast.success("Logged out successfully");
@@ -194,113 +192,110 @@ export default function SchoolDashboard() {
                 }}
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                Sign Out
               </Button>
             </div>
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
+          <main className="flex-1 overflow-y-auto bg-muted/30">
+            <div className="container max-w-7xl mx-auto p-8">
               {activeTab === "overview" && (
-                <>
-                  {/* School Code Banner */}
-                  <Card className="border-primary/50 bg-gradient-to-r from-primary/10 via-primary/5 to-background">
-                    <CardContent className="pt-6">
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium text-muted-foreground">School Code</p>
-                          <div className="flex items-center gap-3">
-                            <p className="text-3xl font-bold text-primary">{schoolData?.school_code}</p>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                navigator.clipboard.writeText(schoolData?.school_code || '');
-                                toast.success('Copied!');
-                              }}
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
+                <div className="space-y-8">
+                  {/* School Code Section */}
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle>School Code</CardTitle>
+                          <CardDescription className="mt-1">
                             Share this code with students for registration
+                          </CardDescription>
+                        </div>
+                        <div className={`px-3 py-1 rounded-md text-xs font-medium ${
+                          isSubscriptionActive 
+                            ? 'bg-green-50 text-green-700 border border-green-200' 
+                            : 'bg-amber-50 text-amber-700 border border-amber-200'
+                        }`}>
+                          {isSubscriptionActive ? 'Active' : 'Inactive'}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 p-4 bg-muted rounded-lg">
+                          <p className="text-2xl font-mono font-bold tracking-wider">
+                            {schoolData?.school_code}
                           </p>
                         </div>
-                        <Badge 
-                          variant={isSubscriptionActive ? "default" : "secondary"}
-                          className="h-fit"
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            navigator.clipboard.writeText(schoolData?.school_code || '');
+                            toast.success('School code copied to clipboard');
+                          }}
                         >
-                          {isSubscriptionActive ? (
-                            <>
-                              <CheckCircle2 className="h-3 w-3 mr-1" />
-                              Active Subscription
-                            </>
-                          ) : (
-                            <>
-                              <XCircle className="h-3 w-3 mr-1" />
-                              Inactive
-                            </>
-                          )}
-                        </Badge>
+                          <Copy className="h-4 w-4" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
 
                   {/* Stats Grid */}
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card className="hover:shadow-lg transition-shadow duration-200">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Seats</CardTitle>
-                        <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
-                          <Users className="h-4 w-4 text-blue-500" />
-                        </div>
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardDescription>Total Seats</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{subscriptionData?.student_seats || schoolData?.max_students || 0}</div>
-                        <p className="text-xs text-muted-foreground mt-1">Maximum capacity</p>
+                        <div className="text-3xl font-bold tracking-tight">
+                          {subscriptionData?.student_seats || schoolData?.max_students || 0}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Maximum capacity
+                        </p>
                       </CardContent>
                     </Card>
 
-                    <Card className="hover:shadow-lg transition-shadow duration-200">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Students Added</CardTitle>
-                        <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
-                          <Users className="h-4 w-4 text-green-500" />
-                        </div>
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardDescription>Students Added</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{schoolData?.students_added || 0}</div>
-                        <p className="text-xs text-muted-foreground mt-1">Active students</p>
+                        <div className="text-3xl font-bold tracking-tight">
+                          {schoolData?.students_added || 0}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Currently enrolled
+                        </p>
                       </CardContent>
                     </Card>
 
-                    <Card className="hover:shadow-lg transition-shadow duration-200">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Available Slots</CardTitle>
-                        <div className="h-8 w-8 rounded-full bg-purple-500/10 flex items-center justify-center">
-                          <Users className="h-4 w-4 text-purple-500" />
-                        </div>
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardDescription>Available Slots</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{remainingSlots}</div>
-                        <p className="text-xs text-muted-foreground mt-1">Remaining capacity</p>
+                        <div className="text-3xl font-bold tracking-tight">
+                          {remainingSlots}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Remaining capacity
+                        </p>
                       </CardContent>
                     </Card>
 
-                    <Card className="hover:shadow-lg transition-shadow duration-200">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Subscription</CardTitle>
-                        <div className={`h-8 w-8 rounded-full ${isSubscriptionActive ? 'bg-green-500/10' : 'bg-orange-500/10'} flex items-center justify-center`}>
-                          <DollarSign className={`h-4 w-4 ${isSubscriptionActive ? 'text-green-500' : 'text-orange-500'}`} />
-                        </div>
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardDescription>Subscription Status</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className={`text-2xl font-bold ${isSubscriptionActive ? 'text-green-600' : 'text-orange-600'}`}>
+                        <div className="text-3xl font-bold tracking-tight capitalize">
                           {subscriptionData?.status || 'Inactive'}
                         </div>
                         {subscriptionData?.end_date && (
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-xs text-muted-foreground mt-2">
                             Until {new Date(subscriptionData.end_date).toLocaleDateString()}
                           </p>
                         )}
@@ -308,29 +303,28 @@ export default function SchoolDashboard() {
                     </Card>
                   </div>
 
-                  {/* School Info Card */}
+                  {/* School Details */}
                   <Card>
                     <CardHeader>
                       <CardTitle>School Information</CardTitle>
-                      <CardDescription>Manage your students and monitor their performance</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid gap-3 md:grid-cols-2">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">School Name</p>
-                          <p className="text-base font-medium">{schoolData?.name}</p>
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">School Name</p>
+                          <p className="font-medium">{schoolData?.name}</p>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">Email</p>
-                          <p className="text-base font-medium">{schoolData?.email}</p>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">Email Address</p>
+                          <p className="font-medium">{schoolData?.email}</p>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">Phone</p>
-                          <p className="text-base font-medium">{schoolData?.phone}</p>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">Phone Number</p>
+                          <p className="font-medium">{schoolData?.phone}</p>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">School Code</p>
-                          <p className="text-base font-medium">{schoolData?.school_code}</p>
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">School Code</p>
+                          <p className="font-medium font-mono">{schoolData?.school_code}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -338,7 +332,7 @@ export default function SchoolDashboard() {
 
                   {/* Performance Charts */}
                   {schoolData?.id && <SchoolOverviewCharts schoolId={schoolData.id} />}
-                </>
+                </div>
               )}
 
               {activeTab === "students" && schoolData && (
