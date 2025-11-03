@@ -234,11 +234,19 @@ export default function SchoolSubscription() {
     }
 
     setLoading(true);
+    console.log("Starting subscription activation...");
+    console.log("School data being used:", schoolData);
 
     try {
       // Create and activate free subscription
       const endDate = new Date();
       endDate.setFullYear(endDate.getFullYear() + 1); // 1 year free subscription
+
+      console.log("Inserting subscription with data:", {
+        school_id: schoolData.id,
+        student_seats: studentCount,
+        admin_user_id: schoolData.admin_user_id,
+      });
 
       const { data: subscription, error: subError } = await (supabase as any)
         .from("school_subscriptions")
@@ -256,6 +264,7 @@ export default function SchoolSubscription() {
         .select()
         .single();
 
+      console.log("Subscription insert result:", { subscription, subError });
       if (subError) throw subError;
 
       // Activate the school
