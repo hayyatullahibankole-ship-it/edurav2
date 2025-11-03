@@ -38,7 +38,7 @@ export const SyllabusTab = () => {
         .from('resources')
         .select('*')
         .eq('is_active', true)
-        .contains('tags', ['syllabus'])
+        .contains('tags', '["syllabus"]')
         .order('created_at', { ascending: false });
 
       if (!canAccessPremium && !isAdmin) {

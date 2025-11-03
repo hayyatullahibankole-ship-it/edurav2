@@ -38,7 +38,7 @@ export const PastQuestionsTab = () => {
         .from('resources')
         .select('*')
         .eq('is_active', true)
-        .contains('tags', ['past-questions'])
+        .contains('tags', '["past-questions"]')
         .order('created_at', { ascending: false });
 
       if (!canAccessPremium && !isAdmin) {
