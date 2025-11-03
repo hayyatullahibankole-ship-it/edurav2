@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Users, BookOpen, TrendingUp, DollarSign, LayoutDashboard, Settings } from "lucide-react";
 import SchoolStudentsManager from "@/components/school/SchoolStudentsManager";
@@ -104,6 +105,16 @@ export default function SchoolDashboard() {
               <h1 className="text-3xl font-bold">{schoolData?.name}</h1>
               <p className="text-muted-foreground">School Code: {schoolData?.school_code}</p>
             </div>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                toast.success("Logged out successfully");
+                navigate("/school-login");
+              }}
+            >
+              Logout
+            </Button>
           </div>
         </div>
       </div>
