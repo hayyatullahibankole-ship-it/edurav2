@@ -147,9 +147,77 @@ export default function SchoolSubscription() {
   const handlePayment = async () => {
     console.log("Handle payment clicked. School data:", schoolData);
     
+    // Ensure we have a school record; if missing, try to create it inline
     if (!schoolData) {
-      toast.error("School data not found. Please wait or refresh the page.");
-      return;
+      try {
+        const pendingRaw = localStorage.getItem('pendingSchoolRegistration');
+        const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
+
+        // Ensure profile exists
+        let profileId: string | null = null;
+        const { data: existingProfile } = await supabase
+          .from("users")
+          .select("id")
+          .eq("auth_user_id", user?.id)
+          .maybeSingle();
+        if (existingProfile) profileId = existingProfile.id;
+        else {
+          const fullName = (user as any)?.user_metadata?.full_name || pending?.adminFullName || (user?.email?.split('@')[0] ?? 'School Admin');
+          const firstName = fullName.split(' ')[0] || fullName;
+          const lastName = fullName.split(' ').slice(1).join(' ') || '';
+          const { data: insertedProfile } = await supabase
+            .from('users')
+            .insert({
+              auth_user_id: user?.id,
+              email: user?.email,
+              first_name: firstName,
+              last_name: lastName,
+              phone: pending?.adminPhone || null,
+            })
+            .select('id')
+            .single();
+          profileId = insertedProfile?.id ?? null;
+        }
+
+        if (!profileId) {
+          toast.error('Could not create admin profile. Please try again.');
+          return;
+        }
+
+        const fallbackName = (() => {
+          const fullName = (user as any)?.user_metadata?.full_name as string | undefined;
+          if (pending?.schoolName) return pending.schoolName;
+          if (fullName) return `${fullName.split(' ')[0]}'s School`;
+          if (user?.email) return `${user.email.split('@')[0]} School`;
+          return 'My School';
+        })();
+        const slug = (pending?.schoolName || fallbackName).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+        const { data: newSchool, error: createError } = await supabase
+          .from('schools')
+          .insert({
+            name: pending?.schoolName || fallbackName,
+            slug,
+            email: pending?.schoolEmail || user?.email,
+            phone: pending?.schoolPhone || null,
+            address: pending?.schoolAddress || null,
+            state: pending?.state || null,
+            admin_user_id: profileId,
+            is_active: false,
+          })
+          .select('*')
+          .single();
+
+        if (createError || !newSchool) {
+          toast.error('Could not create school automatically. Please complete the school registration.');
+          return;
+        }
+        setSchoolData(newSchool);
+      } catch (e) {
+        console.error('Inline school creation failed', e);
+        toast.error('Failed to prepare school data');
+        return;
+      }
     }
 
     if (studentCount > 500) {
@@ -307,7 +375,7 @@ export default function SchoolSubscription() {
 
             <Button
               onClick={handlePayment}
-              disabled={loading || studentCount < 1 || !schoolData}
+              disabled={loading || studentCount < 1}
               className="w-full"
               size="lg"
             >
