@@ -200,26 +200,48 @@ serve(async (req) => {
       .eq('name', 'Pro')
       .single();
 
-    // Create active pro subscription for the student
+    // Update existing Basic subscription to Pro (instead of creating new)
     if (proPlan) {
-      const { error: subError } = await supabaseAdmin
+      const subscriptionEndDate = schoolSub?.end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+      
+      // First try to update existing subscription
+      const { error: updateError } = await supabaseAdmin
         .from('subscriptions')
-        .insert({
-          user_id: finalUserId,
+        .update({
           plan_id: proPlan.id,
           status: 'ACTIVE',
-          start_date: new Date().toISOString(),
-          end_date: schoolSub?.end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // Match school sub or 1 year
+          end_date: subscriptionEndDate,
           amount: 0, // Free for school students
-          auto_renew: false
-        });
+          auto_renew: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', finalUserId);
 
-      if (subError) {
-        console.error('Error creating student subscription:', subError);
-        // Non-critical, continue
+      if (updateError) {
+        console.error('Error updating student subscription, trying insert:', updateError);
+        // If update fails, try insert as fallback
+        const { error: insertError } = await supabaseAdmin
+          .from('subscriptions')
+          .insert({
+            user_id: finalUserId,
+            plan_id: proPlan.id,
+            status: 'ACTIVE',
+            start_date: new Date().toISOString(),
+            end_date: subscriptionEndDate,
+            amount: 0,
+            auto_renew: false
+          });
+        
+        if (insertError) {
+          console.error('Error inserting student subscription:', insertError);
+        } else {
+          console.log(`Pro subscription created for student: ${username}`);
+        }
       } else {
-        console.log(`Pro subscription created for student: ${username}`);
+        console.log(`Subscription upgraded to Pro for student: ${username}`);
       }
+    } else {
+      console.error('Pro plan not found in database');
     }
 
     console.log(`Student created successfully: ${username}`);
