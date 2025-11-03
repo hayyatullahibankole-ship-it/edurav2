@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { 
   Users, BookOpen, TrendingUp, DollarSign, LayoutDashboard, Settings, 
-  LogOut, Copy, Building2
+  LogOut, Copy, Building2, HelpCircle
 } from "lucide-react";
 import {
   Sidebar,
@@ -188,18 +188,30 @@ export default function SchoolDashboard() {
                 </h1>
               </div>
               
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                  toast.success("Logged out successfully");
-                  navigate("/school-login");
-                }}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    window.open("https://wa.me/2349061615303?text=Hello,%20I%20need%20support%20with%20my%20school%20account", "_blank");
+                  }}
+                >
+                  <HelpCircle className="h-4 w-4 mr-2" />
+                  Support
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    toast.success("Logged out successfully");
+                    navigate("/school-login");
+                  }}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
             </div>
           </header>
 
@@ -320,6 +332,8 @@ export default function SchoolDashboard() {
                   <div className="grid gap-4 lg:grid-cols-2">
                     <QuickActions 
                       onAddStudent={() => setActiveTab("students")}
+                      onViewReports={() => setActiveTab("reports")}
+                      onViewStudents={() => setActiveTab("students")}
                       schoolId={schoolData?.id}
                     />
                     <StudentEngagement schoolId={schoolData?.id} />

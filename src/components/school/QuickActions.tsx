@@ -1,24 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserPlus, Download, Bell, FileText, Mail } from "lucide-react";
+import { UserPlus, Download, Users, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 interface QuickActionsProps {
   onAddStudent: () => void;
+  onViewReports: () => void;
+  onViewStudents: () => void;
   schoolId: string;
 }
 
-export default function QuickActions({ onAddStudent, schoolId }: QuickActionsProps) {
+export default function QuickActions({ onAddStudent, onViewReports, onViewStudents, schoolId }: QuickActionsProps) {
   const handleDownloadReport = () => {
     toast.info("Report download feature coming soon");
-  };
-
-  const handleSendAnnouncement = () => {
-    toast.info("Announcement feature coming soon");
-  };
-
-  const handleViewReports = () => {
-    toast.info("Navigate to Reports tab for detailed analytics");
   };
 
   return (
@@ -50,16 +44,16 @@ export default function QuickActions({ onAddStudent, schoolId }: QuickActionsPro
           <Button
             variant="outline"
             className="h-auto flex-col gap-2 p-4"
-            onClick={handleSendAnnouncement}
+            onClick={onViewStudents}
           >
-            <Bell className="h-5 w-5" />
-            <span className="text-xs font-medium">Send Alert</span>
+            <Users className="h-5 w-5" />
+            <span className="text-xs font-medium">View Students</span>
           </Button>
 
           <Button
             variant="outline"
             className="h-auto flex-col gap-2 p-4"
-            onClick={handleViewReports}
+            onClick={onViewReports}
           >
             <FileText className="h-5 w-5" />
             <span className="text-xs font-medium">View Reports</span>
