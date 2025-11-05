@@ -34,12 +34,18 @@ export default function SchoolExamManager({ schoolId }: SchoolExamManagerProps) 
     instructions: '',
     is_published: false,
     selectedSubjects: [] as string[],
+    questionSelectionMode: 'edura' as 'edura' | 'custom' | 'mixed',
     questionsPerSubject: 10,
+    selectedQuestions: [] as string[],
     assignToAll: true,
     selectedStudents: [] as string[],
     startDate: '',
     endDate: '',
   });
+
+  const [availableQuestions, setAvailableQuestions] = useState<any[]>([]);
+  const [showQuestionSelector, setShowQuestionSelector] = useState(false);
+  const [currentSubjectForQuestions, setCurrentSubjectForQuestions] = useState<string | null>(null);
 
   useEffect(() => {
     if (schoolId) {
@@ -202,12 +208,17 @@ export default function SchoolExamManager({ schoolId }: SchoolExamManagerProps) 
       instructions: '',
       is_published: false,
       selectedSubjects: [],
+      questionSelectionMode: 'edura',
       questionsPerSubject: 10,
+      selectedQuestions: [],
       assignToAll: true,
       selectedStudents: [],
       startDate: '',
       endDate: '',
     });
+    setAvailableQuestions([]);
+    setShowQuestionSelector(false);
+    setCurrentSubjectForQuestions(null);
   };
 
   const toggleSubject = (subjectId: string) => {

@@ -35,7 +35,7 @@ import ComparisonAnalytics from "@/components/school/ComparisonAnalytics";
 import AlertsCenter from "@/components/school/AlertsCenter";
 import ExportTools from "@/components/school/ExportTools";
 import WelcomeManualModal from "@/components/school/WelcomeManualModal";
-import SchoolExamManager from "@/components/school/SchoolExamManager";
+import SchoolExamManager from "@/components/school/SchoolExamManagerEnhanced";
 import SchoolQuestionManager from "@/components/school/SchoolQuestionManager";
 import { AIAssistant } from "@/components/AIAssistant";
 
