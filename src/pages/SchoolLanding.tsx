@@ -18,14 +18,48 @@ import {
   GraduationCap,
   Brain,
   Globe,
-  Sparkles
+  Sparkles,
+  Home,
+  LayoutDashboard
 } from "lucide-react";
 import Footer from "@/components/Footer";
 import schoolHero from "@/assets/school-hero.jpg";
 import dashboardPreview from "@/assets/school-dashboard-preview.jpg";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function SchoolLanding() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [isSchoolAdmin, setIsSchoolAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkSchoolAdmin = async () => {
+      if (!user) {
+        setIsSchoolAdmin(false);
+        return;
+      }
+
+      const { data: userData } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+
+      if (!userData) return;
+
+      const { data: school } = await supabase
+        .from("schools")
+        .select("id")
+        .eq("admin_user_id", userData.id)
+        .maybeSingle();
+
+      setIsSchoolAdmin(!!school);
+    };
+
+    checkSchoolAdmin();
+  }, [user]);
 
   const stats = [
     { number: "500+", label: "Schools Registered", icon: School },
@@ -85,17 +119,37 @@ export default function SchoolLanding() {
               <span className="text-xl font-bold">Edura Schools</span>
             </div>
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost"
-                onClick={() => navigate("/school-login")}
-              >
-                Sign In
-              </Button>
-              <Button 
-                onClick={() => navigate("/school-registration")}
-              >
-                Get Started
-              </Button>
+              {isSchoolAdmin ? (
+                <>
+                  <Button 
+                    variant="ghost"
+                    onClick={() => navigate("/")}
+                  >
+                    <Home className="h-4 w-4 mr-2" />
+                    Edura Home
+                  </Button>
+                  <Button 
+                    onClick={() => navigate("/school-dashboard")}
+                  >
+                    <LayoutDashboard className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button 
+                    variant="ghost"
+                    onClick={() => navigate("/school-login")}
+                  >
+                    Sign In
+                  </Button>
+                  <Button 
+                    onClick={() => navigate("/school-registration")}
+                  >
+                    Get Started
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>

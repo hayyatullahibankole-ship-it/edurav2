@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Menu, X, Download } from "lucide-react";
-import { useState } from "react";
+import { GraduationCap, Menu, X, Download, LayoutDashboard } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import eduraLogo from "@/assets/edura-logo.png";
 import NotificationBell from "@/components/NotificationBell";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,6 +15,34 @@ const Navbar = () => {
   const { isInstalledApp } = useInstalledApp();
   const isMobile = useIsMobile();
   const isMobileWeb = isMobile && !isInstalledApp;
+  const [isSchoolAdmin, setIsSchoolAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkSchoolAdmin = async () => {
+      if (!user) {
+        setIsSchoolAdmin(false);
+        return;
+      }
+
+      const { data: userData } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+
+      if (!userData) return;
+
+      const { data: school } = await supabase
+        .from("schools")
+        .select("id")
+        .eq("admin_user_id", userData.id)
+        .maybeSingle();
+
+      setIsSchoolAdmin(!!school);
+    };
+
+    checkSchoolAdmin();
+  }, [user]);
 
   return (
     <nav className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
@@ -54,6 +83,14 @@ const Navbar = () => {
           {user ? (
             <div className="hidden md:flex items-center space-x-2">
               <NotificationBell />
+              {isSchoolAdmin && (
+                <Link to="/school-dashboard">
+                  <Button variant="outline">
+                    <LayoutDashboard className="h-4 w-4 mr-2" />
+                    School Dashboard
+                  </Button>
+                </Link>
+              )}
               <Link to={isMobileWeb ? "/install-app" : "/dashboard"}>
                 <Button variant="ghost">
                   {isMobileWeb ? (
@@ -149,6 +186,14 @@ const Navbar = () => {
               <div className="px-3 py-2 space-y-2">
                 {user ? (
                   <>
+                    {isSchoolAdmin && (
+                      <Link to="/school-dashboard" onClick={() => setIsMenuOpen(false)}>
+                        <Button variant="outline" className="w-full">
+                          <LayoutDashboard className="h-4 w-4 mr-2" />
+                          School Dashboard
+                        </Button>
+                      </Link>
+                    )}
                     <Link to={isMobileWeb ? "/install-app" : "/dashboard"} onClick={() => setIsMenuOpen(false)}>
                       <Button variant="ghost" className="w-full">
                         {isMobileWeb ? (
