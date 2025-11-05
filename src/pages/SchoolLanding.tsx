@@ -14,7 +14,11 @@ import {
   Target,
   Bell,
   FileText,
-  Zap
+  Zap,
+  GraduationCap,
+  Brain,
+  Globe,
+  Sparkles
 } from "lucide-react";
 import Footer from "@/components/Footer";
 import schoolHero from "@/assets/school-hero.jpg";
@@ -24,184 +28,235 @@ export default function SchoolLanding() {
   const navigate = useNavigate();
 
   const stats = [
-    { number: "500+", label: "Schools Registered" },
-    { number: "50,000+", label: "Students Practicing" },
-    { number: "98%", label: "JAMB Pass Rate" },
-    { number: "10,000+", label: "Practice Questions" }
+    { number: "500+", label: "Schools Registered", icon: School },
+    { number: "50,000+", label: "Students Practicing", icon: Users },
+    { number: "98%", label: "JAMB Pass Rate", icon: TrendingUp },
+    { number: "10,000+", label: "Practice Questions", icon: FileText }
   ];
 
   const features = [
     {
       icon: Users,
       title: "Student Management",
-      description: "Track each student's WAEC, JAMB & NECO preparation progress"
+      description: "Track each student's WAEC, JAMB & NECO preparation progress with comprehensive dashboards"
     },
     {
       icon: BarChart3,
       title: "Real-time Analytics",
-      description: "Monitor performance across all subjects and exam types"
+      description: "Monitor performance across all subjects with advanced analytics and insights"
     },
     {
       icon: Target,
       title: "CBT Practice Tests",
-      description: "Access 10,000+ authentic WAEC, JAMB & NECO questions"
+      description: "Access 10,000+ authentic WAEC, JAMB & NECO questions with instant feedback"
     },
     {
       icon: FileText,
       title: "Detailed Reports",
-      description: "Export comprehensive exam performance and readiness reports"
+      description: "Generate and export comprehensive exam performance reports in multiple formats"
     },
     {
-      icon: Bell,
-      title: "Progress Tracking",
-      description: "Get instant alerts on student performance and weak areas"
+      icon: Brain,
+      title: "Smart Learning Paths",
+      description: "AI-powered recommendations to help students focus on weak areas"
     },
     {
       icon: Shield,
-      title: "Secure Platform",
-      description: "Enterprise-grade security for all student data and results"
+      title: "Enterprise Security",
+      description: "Bank-grade security for all student data, results, and school information"
     }
   ];
 
   const pricingTiers = [
-    { students: "1-50", price: "₦1,000" },
-    { students: "51-100", price: "₦900" },
-    { students: "101-200", price: "₦850" },
-    { students: "201-250", price: "₦800" },
+    { students: "1-50", price: "₦1,000", highlight: false },
+    { students: "51-100", price: "₦900", highlight: false },
+    { students: "101-200", price: "₦850", highlight: true },
+    { students: "201-250", price: "₦800", highlight: false },
   ];
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section - Compact & Professional */}
-      <section className="relative py-16 md:py-24 bg-gradient-to-br from-primary/5 via-background to-secondary/5 overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      {/* Hero Section - Modern & Professional */}
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-primary/5 to-secondary/5">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Left Content */}
             <div className="space-y-8 animate-fade-in">
-              <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full border border-primary/20">
-                <School className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold text-primary">WAEC • JAMB • NECO CBT Practice</span>
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-2.5 rounded-full border border-primary/30">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  WAEC • JAMB • NECO Excellence
+                </span>
               </div>
               
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                Prepare Your Students for
-                <span className="text-primary block mt-2">WAEC, JAMB & NECO Success</span>
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
+                Transform Your
+                <span className="block mt-2 bg-gradient-to-r from-primary via-primary-hover to-secondary bg-clip-text text-transparent">
+                  School's Success
+                </span>
               </h1>
               
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                Complete CBT practice platform with thousands of past questions, real-time analytics, and comprehensive exam management for WAEC, JAMB, and NECO preparations.
+              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
+                Empower your students with Nigeria's most comprehensive CBT practice platform. 
+                <span className="block mt-2 font-medium text-foreground">
+                  10,000+ questions. Real-time analytics. Proven results.
+                </span>
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button 
                   size="lg" 
-                  className="text-lg px-8 shadow-lg hover:shadow-xl transition-all"
+                  className="text-lg px-10 h-14 shadow-lg hover:shadow-xl transition-all bg-gradient-to-r from-primary to-primary-hover"
                   onClick={() => navigate("/school-registration")}
                 >
-                  Get Started Free
+                  Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="text-lg px-8"
+                  className="text-lg px-10 h-14 border-2 hover:bg-accent"
                   onClick={() => navigate("/school-login")}
                 >
                   Sign In
                 </Button>
               </div>
 
-              <div className="flex flex-wrap gap-6 pt-4">
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <span className="text-muted-foreground">3-Month Plans</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <span className="text-muted-foreground">Flexible Pricing</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <span className="text-muted-foreground">Priority Support</span>
-                </div>
+              <div className="flex flex-wrap gap-8 pt-4">
+                {[
+                  { icon: CheckCircle2, text: "3-Month Access" },
+                  { icon: Globe, text: "Cloud-Based Platform" },
+                  { icon: Award, text: "24/7 Support" }
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <item.icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium">{item.text}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Right Image */}
-            <div className="relative lg:block animate-scale-in">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-primary/10">
-                <img 
-                  src={schoolHero} 
-                  alt="Students using CBT platform" 
-                  className="w-full h-auto object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-              </div>
-              {/* Floating Stats Card */}
-              <div className="absolute -bottom-6 -left-6 bg-card border shadow-xl rounded-xl p-4 animate-fade-in">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Users className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">50,000+</div>
-                    <div className="text-sm text-muted-foreground">Active Students</div>
-                  </div>
+            {/* Right Visual */}
+            <div className="relative animate-fade-in animation-delay-200">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl blur-2xl transform rotate-6" />
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-primary/20 backdrop-blur-sm">
+                  <img 
+                    src={schoolHero} 
+                    alt="Students excelling with CBT practice platform" 
+                    className="w-full h-auto object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                 </div>
               </div>
+
+              {/* Floating Achievement Card */}
+              <Card className="absolute -bottom-8 -left-8 bg-card/95 backdrop-blur-sm border-2 shadow-2xl max-w-xs animate-float">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center">
+                      <TrendingUp className="h-8 w-8 text-primary" />
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">98%</div>
+                      <div className="text-sm text-muted-foreground font-medium">Pass Rate</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-12 border-y bg-muted/30">
+      {/* Stats Section - Enhanced */}
+      <section className="py-20 relative bg-gradient-to-b from-muted/30 to-background">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center space-y-2">
-                <div className="text-3xl md:text-4xl font-bold text-primary">{stat.number}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
+              <Card key={index} className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group">
+                <CardContent className="p-8 text-center space-y-4">
+                  <div className="w-14 h-14 mx-auto bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <stat.icon className="h-7 w-7 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      {stat.number}
+                    </div>
+                    <div className="text-sm text-muted-foreground font-medium mt-2">{stat.label}</div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="py-20 bg-muted/30">
+      {/* Pricing Section - Premium Design */}
+      <section className="py-24 relative bg-gradient-to-b from-background via-muted/20 to-background">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
+          <div className="text-center mb-20 space-y-6 max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-2.5 rounded-full border border-primary/30">
               <Award className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-primary">Simple Pricing</span>
+              <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Flexible Pricing
+              </span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold">Affordable Plans for Every School</h2>
-            <p className="text-lg text-muted-foreground">
-              Transparent pricing based on student count. The more students, the better the rate!
+            <h2 className="text-4xl md:text-5xl font-bold">
+              Investment in
+              <span className="block mt-2 bg-gradient-to-r from-primary via-primary-hover to-secondary bg-clip-text text-transparent">
+                Academic Excellence
+              </span>
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Scale pricing designed to grow with your institution. Better rates for larger student bodies.
             </p>
           </div>
 
-          <div className="max-w-5xl mx-auto">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
               {pricingTiers.map((tier, index) => (
                 <Card 
                   key={index}
-                  className="border-2 hover:border-primary hover:shadow-xl transition-all duration-300 group cursor-pointer"
+                  className={`relative border-2 transition-all duration-300 group cursor-pointer overflow-hidden ${
+                    tier.highlight 
+                      ? 'border-primary shadow-xl scale-105' 
+                      : 'hover:border-primary/50 hover:shadow-lg'
+                  }`}
                 >
-                  <CardContent className="p-8 text-center space-y-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto group-hover:bg-primary/20 transition-colors">
-                      <Users className="h-6 w-6 text-primary" />
+                  {tier.highlight && (
+                    <div className="absolute top-0 right-0 bg-gradient-to-r from-primary to-secondary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-lg">
+                      POPULAR
+                    </div>
+                  )}
+                  <CardContent className="p-8 text-center space-y-6">
+                    <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center transition-all ${
+                      tier.highlight 
+                        ? 'bg-gradient-to-br from-primary/20 to-secondary/20' 
+                        : 'bg-gradient-to-br from-muted to-muted/50 group-hover:from-primary/10 group-hover:to-secondary/10'
+                    }`}>
+                      <Users className="h-8 w-8 text-primary" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-muted-foreground mb-2">
+                      <div className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
                         {tier.students} students
                       </div>
-                      <div className="text-3xl font-bold text-primary">
-                        {tier.price}
+                      <div className="flex items-start justify-center gap-1 mb-2">
+                        <span className="text-2xl font-bold text-primary mt-1">₦</span>
+                        <span className="text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                          {tier.price.replace('₦', '')}
+                        </span>
                       </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        per student
+                      <div className="text-sm text-muted-foreground font-medium">
+                        per student / term
                       </div>
                     </div>
                   </CardContent>
@@ -209,31 +264,34 @@ export default function SchoolLanding() {
               ))}
             </div>
 
-            <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5 shadow-lg">
-              <CardContent className="p-8">
-                <div className="flex flex-col md:flex-row items-start gap-6">
-                  <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Clock className="h-7 w-7 text-primary" />
+            <Card className="border-2 border-primary/30 bg-gradient-to-br from-card via-primary/5 to-secondary/5 shadow-2xl overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-primary-hover to-secondary" />
+              <CardContent className="p-10">
+                <div className="flex flex-col lg:flex-row items-start gap-8">
+                  <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <Clock className="h-10 w-10 text-primary" />
                   </div>
-                  <div className="space-y-4 flex-1">
+                  <div className="space-y-6 flex-1">
                     <div>
-                      <h3 className="text-2xl font-bold mb-2">3-Month Subscription</h3>
-                      <p className="text-muted-foreground">
-                        Complete term access for WAEC, JAMB & NECO preparation
+                      <h3 className="text-3xl font-bold mb-3">Complete 3-Month Term Access</h3>
+                      <p className="text-lg text-muted-foreground">
+                        Everything your school needs for comprehensive WAEC, JAMB & NECO preparation
                       </p>
                     </div>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {[
-                        "10,000+ WAEC/JAMB/NECO questions",
-                        "Real-time performance analytics",
-                        "Bulk student management",
-                        "Export reports (PDF/Excel)",
-                        "Subject-specific practice",
-                        "Priority 24/7 support"
+                        { icon: Target, text: "10,000+ WAEC/JAMB/NECO questions" },
+                        { icon: BarChart3, text: "Real-time performance analytics" },
+                        { icon: Users, text: "Unlimited student management" },
+                        { icon: FileText, text: "Export reports (PDF/Excel)" },
+                        { icon: Brain, text: "AI-powered weak area detection" },
+                        { icon: Shield, text: "Priority 24/7 support" }
                       ].map((benefit, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
-                          <span className="text-sm">{benefit}</span>
+                        <div key={i} className="flex items-start gap-3 group">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                            <benefit.icon className="h-4 w-4 text-primary" />
+                          </div>
+                          <span className="text-sm font-medium leading-tight">{benefit.text}</span>
                         </div>
                       ))}
                     </div>
@@ -242,26 +300,33 @@ export default function SchoolLanding() {
               </CardContent>
             </Card>
 
-            <div className="text-center mt-12 space-y-6">
-              <p className="text-muted-foreground">
-                Need more than 250 students? <span className="font-semibold text-foreground">Contact us for custom enterprise pricing</span>
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="text-center mt-16 space-y-8">
+              <div className="max-w-2xl mx-auto">
+                <p className="text-lg text-muted-foreground mb-2">
+                  Need more than 250 students?
+                </p>
+                <p className="text-xl font-semibold">
+                  <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    Contact us for custom enterprise solutions
+                  </span>
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-5 justify-center">
                 <Button 
                   size="lg" 
-                  className="text-lg px-10 shadow-lg hover:shadow-xl"
+                  className="text-lg px-12 h-14 shadow-xl hover:shadow-2xl bg-gradient-to-r from-primary to-primary-hover"
                   onClick={() => navigate("/school-registration")}
                 >
-                  Start Registration
+                  Get Started Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="text-lg px-10"
+                  className="text-lg px-12 h-14 border-2 hover:bg-accent"
                   onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20want%20to%20learn%20more%20about%20school%20pricing", "_blank")}
                 >
-                  Contact Sales
+                  Talk to Sales
                 </Button>
               </div>
             </div>
@@ -269,96 +334,111 @@ export default function SchoolLanding() {
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-primary">Simple Process</span>
+      {/* How It Works Section - Enhanced */}
+      <section className="py-24 relative bg-gradient-to-b from-background via-muted/10 to-background overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 overflow-hidden opacity-40">
+          <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-20 space-y-6 max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-2.5 rounded-full border border-primary/30">
+              <Zap className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Quick Setup Process
+              </span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold">How It Works</h2>
-            <p className="text-lg text-muted-foreground">
-              Get your school up and running in 4 simple steps
+            <h2 className="text-4xl md:text-5xl font-bold">
+              Get Started in
+              <span className="block mt-2 bg-gradient-to-r from-primary via-primary-hover to-secondary bg-clip-text text-transparent">
+                Four Simple Steps
+              </span>
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Your school can be fully operational in less than 30 minutes
             </p>
           </div>
 
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {/* Step 1 */}
-              <Card className="border-2 relative overflow-hidden group hover:border-primary/50 transition-all">
-                <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-[3rem] flex items-start justify-end p-3">
-                  <span className="text-2xl font-bold text-primary">1</span>
-                </div>
-                <CardContent className="p-6 space-y-4 pt-8">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <School className="h-6 w-6 text-primary" />
+              {[
+                {
+                  step: "01",
+                  icon: School,
+                  title: "Register Your School",
+                  description: "Complete our simple registration form. Instant approval within minutes.",
+                  color: "from-blue-500/20 to-blue-600/20"
+                },
+                {
+                  step: "02",
+                  icon: Award,
+                  title: "Choose Your Plan",
+                  description: "Select the perfect plan for your student count. Secure online payment.",
+                  color: "from-purple-500/20 to-purple-600/20"
+                },
+                {
+                  step: "03",
+                  icon: Users,
+                  title: "Add Students",
+                  description: "Bulk upload via Excel or add students individually. Simple onboarding.",
+                  color: "from-pink-500/20 to-pink-600/20"
+                },
+                {
+                  step: "04",
+                  icon: BarChart3,
+                  title: "Monitor & Excel",
+                  description: "Track progress, analyze performance, and guide students to success.",
+                  color: "from-green-500/20 to-green-600/20"
+                }
+              ].map((item, index) => (
+                <Card 
+                  key={index} 
+                  className="relative border-2 hover:border-primary/50 transition-all duration-500 group overflow-hidden hover:shadow-xl"
+                >
+                  {/* Step number badge */}
+                  <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-3xl font-bold text-primary/30 group-hover:text-primary/50 transition-colors">
+                      {item.step}
+                    </span>
                   </div>
-                  <h3 className="font-bold text-lg">Register Your School</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Fill out the registration form with your school details. Get instant approval.
-                  </p>
-                </CardContent>
-              </Card>
 
-              {/* Step 2 */}
-              <Card className="border-2 relative overflow-hidden group hover:border-primary/50 transition-all">
-                <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-[3rem] flex items-start justify-end p-3">
-                  <span className="text-2xl font-bold text-primary">2</span>
-                </div>
-                <CardContent className="p-6 space-y-4 pt-8">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Award className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-bold text-lg">Choose Your Plan</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Select a plan based on your student count. Make payment securely online.
-                  </p>
-                </CardContent>
-              </Card>
+                  <CardContent className="p-8 space-y-5 relative z-10">
+                    <div className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg`}>
+                      <item.icon className="h-8 w-8 text-primary" />
+                    </div>
+                    <div className="space-y-3">
+                      <h3 className="font-bold text-xl">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+                  </CardContent>
 
-              {/* Step 3 */}
-              <Card className="border-2 relative overflow-hidden group hover:border-primary/50 transition-all">
-                <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-[3rem] flex items-start justify-end p-3">
-                  <span className="text-2xl font-bold text-primary">3</span>
-                </div>
-                <CardContent className="p-6 space-y-4 pt-8">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Users className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-bold text-lg">Add Students</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Upload student list via Excel or add them individually from your dashboard.
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Step 4 */}
-              <Card className="border-2 relative overflow-hidden group hover:border-primary/50 transition-all">
-                <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-[3rem] flex items-start justify-end p-3">
-                  <span className="text-2xl font-bold text-primary">4</span>
-                </div>
-                <CardContent className="p-6 space-y-4 pt-8">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <BarChart3 className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-bold text-lg">Monitor Progress</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Track student practice, view reports, and monitor exam readiness in real-time.
-                  </p>
-                </CardContent>
-              </Card>
+                  {/* Connector line (hidden on last item) */}
+                  {index < 3 && (
+                    <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gradient-to-r from-primary/30 to-transparent" />
+                  )}
+                </Card>
+              ))}
             </div>
 
-            <div className="mt-12 text-center">
-              <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5 inline-block">
-                <CardContent className="p-6">
-                  <p className="text-sm font-medium mb-2">Need help getting started?</p>
+            <div className="mt-16 text-center">
+              <Card className="border-2 border-primary/30 bg-gradient-to-br from-card via-primary/5 to-secondary/5 inline-block max-w-md shadow-xl">
+                <CardContent className="p-8 space-y-4">
+                  <div className="w-12 h-12 mx-auto bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center">
+                    <Bell className="h-6 w-6 text-primary" />
+                  </div>
+                  <p className="text-lg font-semibold">Need assistance getting started?</p>
+                  <p className="text-sm text-muted-foreground">Our team is ready to help you set up your school account</p>
                   <Button 
+                    size="lg"
                     variant="outline"
+                    className="border-2 hover:bg-accent"
                     onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20need%20help%20setting%20up%20my%20school%20account", "_blank")}
                   >
-                    Contact Support
+                    Contact Support Team
                   </Button>
                 </CardContent>
               </Card>
@@ -367,66 +447,169 @@ export default function SchoolLanding() {
         </div>
       </section>
 
-      {/* Features Section with Image */}
-      <section className="py-20 bg-muted/30">
+      {/* Features Section - Premium Design */}
+      <section className="py-24 relative bg-gradient-to-b from-background via-primary/5 to-background">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
-              <Zap className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-primary">Powerful Features</span>
+          <div className="text-center mb-20 space-y-6 max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-2.5 rounded-full border border-primary/30">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Comprehensive Platform
+              </span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold">Complete WAEC, JAMB & NECO Preparation</h2>
-            <p className="text-lg text-muted-foreground">
-              Everything your students need to excel in their examinations
+            <h2 className="text-4xl md:text-5xl font-bold">
+              Everything You Need for
+              <span className="block mt-2 bg-gradient-to-r from-primary via-primary-hover to-secondary bg-clip-text text-transparent">
+                Exam Success
+              </span>
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              A complete ecosystem designed to maximize student performance and school results
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
-            <div className="grid sm:grid-cols-2 gap-6">
+          <div className="grid lg:grid-cols-2 gap-16 items-center mb-20">
+            <div className="grid sm:grid-cols-2 gap-6 order-2 lg:order-1">
               {features.map((feature, index) => (
-                <Card key={index} className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group">
-                  <CardContent className="p-6 space-y-3">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                      <feature.icon className="h-6 w-6 text-primary" />
+                <Card 
+                  key={index} 
+                  className="border-2 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl group relative overflow-hidden"
+                >
+                  {/* Subtle gradient overlay on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-secondary/0 group-hover:from-primary/5 group-hover:to-secondary/5 transition-all duration-500" />
+                  
+                  <CardContent className="p-7 space-y-4 relative z-10">
+                    <div className="w-14 h-14 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                      <feature.icon className="h-7 w-7 text-primary" />
                     </div>
-                    <h3 className="font-bold text-lg">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    <div>
+                      <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
+                        {feature.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            <div className="relative">
-              <img 
-                src={dashboardPreview} 
-                alt="School dashboard preview" 
-                className="rounded-2xl shadow-2xl border-4 border-primary/10 w-full"
-              />
+            {/* Dashboard Preview Image */}
+            <div className="relative order-1 lg:order-2">
+              <div className="relative">
+                {/* Glow effect */}
+                <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-2xl opacity-50" />
+                
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl border-2 border-primary/20">
+                  <img 
+                    src={dashboardPreview} 
+                    alt="Comprehensive school dashboard showing student analytics and performance metrics" 
+                    className="w-full h-auto object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                </div>
+
+                {/* Floating badges */}
+                <div className="absolute -top-8 -left-8 bg-gradient-to-br from-primary to-primary-hover text-primary-foreground px-6 py-4 rounded-2xl shadow-2xl animate-float">
+                  <div className="flex items-center gap-3">
+                    <BarChart3 className="h-7 w-7" />
+                    <div>
+                      <div className="text-xs font-medium opacity-90">Real-time</div>
+                      <div className="font-bold text-lg">Analytics</div>
+                    </div>
+                  </div>
+                </div>
+
+                <Card className="absolute -bottom-6 -right-6 bg-card/95 backdrop-blur-sm border-2 shadow-2xl max-w-xs animate-float animation-delay-500">
+                  <CardContent className="p-5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl flex items-center justify-center">
+                        <CheckCircle2 className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">Student Progress</div>
+                        <div className="text-xl font-bold text-green-600">+45%</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-20 bg-gradient-to-br from-primary to-secondary text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-pattern opacity-10" />
-        <div className="container mx-auto px-4 relative">
-          <div className="max-w-3xl mx-auto text-center space-y-8">
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Give Your Students the Best WAEC, JAMB & NECO Preparation
-            </h2>
-            <p className="text-xl text-white/90">
-              Join hundreds of schools achieving outstanding exam results with our CBT platform
-            </p>
-            <Button 
-              size="lg" 
-              className="text-lg px-12 bg-white text-primary hover:bg-white/90 shadow-2xl"
-              onClick={() => navigate("/school-registration")}
-            >
-              Get Started Now
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
+      {/* Final CTA - Premium Design */}
+      <section className="py-24 relative bg-gradient-to-b from-background via-muted/20 to-background overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse animation-delay-1000" />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <Card className="border-2 border-primary/30 shadow-2xl max-w-5xl mx-auto overflow-hidden bg-gradient-to-br from-card via-primary/5 to-secondary/5">
+            {/* Top accent bar */}
+            <div className="h-2 bg-gradient-to-r from-primary via-primary-hover to-secondary" />
+            
+            <CardContent className="p-12 md:p-16 text-center space-y-10">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-2.5 rounded-full border border-primary/30">
+                  <GraduationCap className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    Start Your Free Trial Today
+                  </span>
+                </div>
+
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                  Ready to Transform
+                  <span className="block mt-2 bg-gradient-to-r from-primary via-primary-hover to-secondary bg-clip-text text-transparent">
+                    Your Students' Results?
+                  </span>
+                </h2>
+                
+                <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                  Join <span className="font-bold text-primary">500+ schools</span> already using Edura to prepare their students for 
+                  <span className="font-semibold text-foreground"> WAEC, JAMB, and NECO success</span>.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-5 justify-center pt-6">
+                <Button 
+                  size="lg" 
+                  className="text-xl px-14 h-16 shadow-xl hover:shadow-2xl bg-gradient-to-r from-primary to-primary-hover transition-all"
+                  onClick={() => navigate("/school-registration")}
+                >
+                  Get Started Free
+                  <ArrowRight className="ml-2 h-6 w-6" />
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="text-xl px-14 h-16 border-2 hover:bg-accent transition-all"
+                  onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20want%20to%20schedule%20a%20demo", "_blank")}
+                >
+                  Schedule a Demo
+                </Button>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-8 pt-12 max-w-3xl mx-auto">
+                {[
+                  { icon: CheckCircle2, text: "No credit card required" },
+                  { icon: Zap, text: "Instant account setup" },
+                  { icon: Shield, text: "24/7 support included" }
+                ].map((item, i) => (
+                  <div key={i} className="flex flex-col items-center gap-3 group">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <item.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium text-muted-foreground">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
