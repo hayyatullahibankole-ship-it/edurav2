@@ -102,7 +102,7 @@ export default function SchoolLanding() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-primary/5 to-secondary/5">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0">
           <img 
@@ -110,8 +110,12 @@ export default function SchoolLanding() {
             alt="Students learning in modern classroom" 
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/60" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/98 via-background/90 to-primary/20" />
         </div>
+
+        {/* Decorative Elements */}
+        <div className="absolute top-20 right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
 
         <div className="container mx-auto px-4 py-24 relative z-10">
           <div className="max-w-7xl mx-auto">
@@ -119,10 +123,16 @@ export default function SchoolLanding() {
               {/* Left Content */}
               <div className="space-y-8">
                 <div className="space-y-6">
+                  {/* Badge */}
+                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/30">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                    <span className="text-sm font-semibold text-primary">Trusted by 500+ Schools Nationwide</span>
+                  </div>
+
                   <h1 className="text-5xl md:text-6xl xl:text-7xl font-bold leading-tight">
                     Transforming
-                    <span className="block text-primary">Exam Preparation</span>
-                    <span className="block">For Nigerian Schools</span>
+                    <span className="block text-gradient-animate mt-2">Exam Preparation</span>
+                    <span className="block mt-2">For Nigerian Schools</span>
                   </h1>
                   
                   <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
@@ -134,7 +144,7 @@ export default function SchoolLanding() {
                   <Button 
                     size="lg" 
                     onClick={() => navigate("/school-registration")}
-                    className="h-14 px-8 text-lg font-semibold"
+                    className="h-14 px-8 text-lg font-semibold bg-gradient-to-r from-primary to-secondary hover:shadow-glow transition-all"
                   >
                     Get Started Free
                     <ArrowRight className="ml-2 w-5 h-5" />
@@ -143,7 +153,7 @@ export default function SchoolLanding() {
                     size="lg" 
                     variant="outline"
                     onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20want%20to%20schedule%20a%20demo", "_blank")}
-                    className="h-14 px-8 text-lg font-semibold border-2"
+                    className="h-14 px-8 text-lg font-semibold border-2 border-primary/30 hover:bg-primary/5 hover:border-primary"
                   >
                     Book a Demo
                   </Button>
@@ -151,11 +161,15 @@ export default function SchoolLanding() {
                 
                 <div className="flex items-center gap-6 pt-4">
                   <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                      <CheckCircle2 className="h-3 w-3 text-primary" />
+                    </div>
                     <span>Free 14-day trial</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                      <CheckCircle2 className="h-3 w-3 text-primary" />
+                    </div>
                     <span>No credit card required</span>
                   </div>
                 </div>
@@ -164,29 +178,29 @@ export default function SchoolLanding() {
               {/* Right Content - Feature Cards */}
               <div className="grid grid-cols-1 gap-4">
                 {/* Top Card */}
-                <Card className="bg-card/95 backdrop-blur-sm border-2 hover:border-primary/50 transition-all">
+                <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 hover:border-primary/50 hover:shadow-xl transition-all group">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                         <BarChart3 className="h-7 w-7 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg mb-2">Real-Time Analytics</h3>
+                        <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">Real-Time Analytics</h3>
                         <p className="text-sm text-muted-foreground">Track every student's progress with comprehensive performance dashboards and instant insights.</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Middle Card */}
-                <Card className="bg-card/95 backdrop-blur-sm border-2 hover:border-primary/50 transition-all">
+                {/* Middle Card - Highlighted */}
+                <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 backdrop-blur-sm border-2 border-primary hover:border-primary hover:shadow-glow transition-all group">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Target className="h-7 w-7 text-primary" />
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg">
+                        <Target className="h-7 w-7 text-white" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg mb-2">10,000+ Practice Questions</h3>
+                        <h3 className="font-bold text-lg mb-2 text-primary">10,000+ Practice Questions</h3>
                         <p className="text-sm text-muted-foreground">Access authentic WAEC, JAMB & NECO questions with detailed explanations and instant feedback.</p>
                       </div>
                     </div>
@@ -194,14 +208,14 @@ export default function SchoolLanding() {
                 </Card>
 
                 {/* Bottom Card */}
-                <Card className="bg-card/95 backdrop-blur-sm border-2 hover:border-primary/50 transition-all">
+                <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 hover:border-primary/50 hover:shadow-xl transition-all group">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                         <Shield className="h-7 w-7 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg mb-2">Enterprise Security</h3>
+                        <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">Enterprise Security</h3>
                         <p className="text-sm text-muted-foreground">Bank-grade encryption protecting all student data, results, and school information.</p>
                       </div>
                     </div>
