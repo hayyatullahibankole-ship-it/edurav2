@@ -91,8 +91,22 @@ export const useCBTExam = (attemptId: string | null) => {
 
         // Fetch questions using secure RPCs
         let questionsData: any[] = [];
+        const proctorData = attemptData.proctoring_data as any;
 
-        if (attemptData.exam_id) {
+        // Check if questions were pre-selected (stored in proctoring_data)
+        if (proctorData?.question_ids && Array.isArray(proctorData.question_ids)) {
+          // School exam or pre-selected questions - fetch specific questions
+          const { data: specificQs, error: specificError } = await supabase
+            .rpc('get_exam_questions_secure', { 
+              exam_question_ids: proctorData.question_ids 
+            });
+          
+          if (specificError) {
+            console.error('Specific questions RPC error:', specificError);
+            throw new Error(`Failed to load exam questions: ${specificError.message}`);
+          }
+          questionsData = specificQs || [];
+        } else if (attemptData.exam_id) {
           // Standard exam - use exam blueprint
           const { data: examQs, error: examError } = await supabase
             .rpc('get_random_questions_for_exam', { 
@@ -107,7 +121,6 @@ export const useCBTExam = (attemptId: string | null) => {
         } else {
           // Practice mode - use selected subjects
           const subjects = attemptData.selected_subjects as any;
-          const proctorData = attemptData.proctoring_data as any;
           const examType = proctorData?.exam_type;
           console.log('Selected subjects raw:', subjects, 'exam type:', examType);
           

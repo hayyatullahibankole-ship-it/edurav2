@@ -1,12 +1,15 @@
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { useCBTExam } from '@/hooks/useCBTExam';
 import { CleanCBTInterface } from '@/components/CleanCBTInterface';
 import { Loader2 } from 'lucide-react';
 
 const CBTExam = () => {
   const [searchParams] = useSearchParams();
+  const { attemptId: pathAttemptId } = useParams();
   const navigate = useNavigate();
-  const attemptId = searchParams.get('attempt');
+  
+  // Support both query param (?attempt=...) and path param (/exam/:attemptId)
+  const attemptId = pathAttemptId || searchParams.get('attempt');
 
   const {
     questions,

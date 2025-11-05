@@ -149,6 +149,11 @@ const AppRoutes = () => {
                 <Layout showNavbar={false}><CBTExam /></Layout>
               </ProtectedRoute>
             } />
+            <Route path="/exam/:attemptId" element={
+              <ProtectedRoute>
+                <Layout showNavbar={false}><CBTExam /></Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/demo" element={<Layout><Demo /></Layout>} />
             <Route path="/demo-test" element={<Layout showNavbar={false}><DemoTest /></Layout>} />
             
