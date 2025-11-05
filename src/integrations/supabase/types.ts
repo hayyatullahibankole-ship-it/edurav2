@@ -948,6 +948,7 @@ export type Database = {
           is_published: boolean | null
           passing_score: number | null
           requires_subscription: boolean | null
+          school_id: string | null
           subscription_level: string | null
           title: string
           total_questions: number | null
@@ -964,6 +965,7 @@ export type Database = {
           is_published?: boolean | null
           passing_score?: number | null
           requires_subscription?: boolean | null
+          school_id?: string | null
           subscription_level?: string | null
           title: string
           total_questions?: number | null
@@ -980,6 +982,7 @@ export type Database = {
           is_published?: boolean | null
           passing_score?: number | null
           requires_subscription?: boolean | null
+          school_id?: string | null
           subscription_level?: string | null
           title?: string
           total_questions?: number | null
@@ -992,6 +995,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exams_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
             referencedColumns: ["id"]
           },
         ]
@@ -1803,6 +1813,74 @@ export type Database = {
           permissions?: Json | null
         }
         Relationships: []
+      }
+      school_exam_assignments: {
+        Row: {
+          assigned_to_all: boolean | null
+          created_at: string | null
+          created_by: string | null
+          end_date: string | null
+          exam_id: string
+          id: string
+          is_active: boolean | null
+          school_id: string
+          start_date: string | null
+          student_id: string | null
+        }
+        Insert: {
+          assigned_to_all?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          end_date?: string | null
+          exam_id: string
+          id?: string
+          is_active?: boolean | null
+          school_id: string
+          start_date?: string | null
+          student_id?: string | null
+        }
+        Update: {
+          assigned_to_all?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          end_date?: string | null
+          exam_id?: string
+          id?: string
+          is_active?: boolean | null
+          school_id?: string
+          start_date?: string | null
+          student_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_exam_assignments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_exam_assignments_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_exam_assignments_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_exam_assignments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       school_staff: {
         Row: {

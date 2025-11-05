@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Clock, FileText, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { BookOpen, Clock, FileText, AlertCircle, Play, Calendar } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function SchoolAvailableExams() {
   const [exams, setExams] = useState<any[]>([]);
@@ -14,30 +17,157 @@ export default function SchoolAvailableExams() {
     fetchExams();
   }, []);
 
+  const navigate = useNavigate();
+
   const fetchExams = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const { data, error } = await supabase
-        .from("exams")
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single();
+
+      if (!userData) return;
+
+      // Fetch assigned school exams
+      const { data: assignments } = await supabase
+        .from('school_exam_assignments')
         .select(`
           *,
-          exam_subjects(
-            subject_name,
-            question_count
+          exams (
+            id,
+            title,
+            description,
+            type,
+            duration_minutes,
+            total_questions,
+            is_published,
+            exam_subjects (
+              subject_id,
+              subject_name,
+              question_count
+            )
           )
         `)
-        .eq("is_published", true)
-        .order("created_at", { ascending: false });
+        .or(`student_id.eq.${userData.id},assigned_to_all.eq.true`)
+        .eq('is_active', true);
 
-      if (error) throw error;
-      setExams(data || []);
+      if (assignments) {
+        // Filter for published exams and check dates
+        const now = new Date();
+        const availableExams = assignments
+          .filter(a => {
+            const exam = a.exams;
+            if (!exam || !exam.is_published) return false;
+            
+            // Check start date
+            if (a.start_date && new Date(a.start_date) > now) return false;
+            
+            // Check end date
+            if (a.end_date && new Date(a.end_date) < now) return false;
+            
+            return true;
+          })
+          .map(a => ({
+            ...a.exams,
+            assignment: a
+          }));
+
+        setExams(availableExams);
+      }
     } catch (error: any) {
       console.error("Error fetching exams:", error);
       setError(error.message || "Failed to load exams");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const startExam = async (examId: string) => {
+    try {
+      // Get user data
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single();
+
+      if (!userData) return;
+
+      // Fetch exam details with subjects
+      const { data: exam } = await supabase
+        .from('exams')
+        .select(`
+          *,
+          exam_subjects (
+            subject_id,
+            question_count,
+            subject_name
+          )
+        `)
+        .eq('id', examId)
+        .single();
+
+      if (!exam) {
+        toast.error('Exam not found');
+        return;
+      }
+
+      // Get random questions for each subject
+      const allQuestions: any[] = [];
+      
+      for (const examSubject of exam.exam_subjects) {
+        const { data: questions } = await supabase
+          .rpc('get_random_questions_for_subjects', {
+            subject_ids: [examSubject.subject_id],
+            per_subject_count: examSubject.question_count
+          });
+
+        if (questions) {
+          allQuestions.push(...questions);
+        }
+      }
+
+      if (allQuestions.length === 0) {
+        toast.error('No questions available for this exam');
+        return;
+      }
+
+      // Create attempt
+      const { data: attempt, error: attemptError } = await supabase
+        .from('attempts')
+        .insert({
+          user_id: userData.id,
+          exam_id: examId,
+          status: 'STARTED',
+          time_remaining_seconds: exam.duration_minutes * 60,
+          proctoring_data: {
+            exam_type: exam.type,
+            total_questions: allQuestions.length,
+            question_ids: allQuestions.map(q => q.id)
+          }
+        })
+        .select()
+        .single();
+
+      if (attemptError) throw attemptError;
+
+      // Navigate to exam interface
+      navigate(`/exam/${attempt.id}`);
+      
+    } catch (error: any) {
+      console.error('Error starting exam:', error);
+      toast.error(error.message || 'Failed to start exam');
     }
   };
 
@@ -59,9 +189,9 @@ export default function SchoolAvailableExams() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-1">Available Practice Tests</h2>
+        <h2 className="text-xl font-semibold mb-1">School Assigned Exams</h2>
         <p className="text-sm text-muted-foreground">
-          WAEC, NECO, JAMB and other exam types available for students to practice
+          Exams assigned to you by your school
         </p>
       </div>
 
@@ -77,75 +207,68 @@ export default function SchoolAvailableExams() {
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground font-medium">No practice tests available</p>
+              <p className="text-muted-foreground font-medium">No exams assigned</p>
               <p className="text-sm text-muted-foreground mt-2">
-                Contact the administrator to publish exam types
+                Your school hasn't assigned any exams yet
               </p>
             </div>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4">
           {exams.map((exam) => (
             <Card key={exam.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-base font-semibold break-words flex items-center gap-2">
-                      <BookOpen className="h-4 w-4 flex-shrink-0 text-primary" />
-                      {exam.title}
-                    </CardTitle>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <CardTitle className="text-lg">{exam.title}</CardTitle>
+                      <Badge variant="outline">{exam.type}</Badge>
+                    </div>
                     {exam.description && (
-                      <CardDescription className="mt-2 text-xs break-words line-clamp-2">
-                        {exam.description}
-                      </CardDescription>
+                      <CardDescription className="mt-2">{exam.description}</CardDescription>
                     )}
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span className="text-xs">Duration</span>
-                    </div>
-                    <p className="text-sm font-semibold">{exam.duration_minutes} mins</p>
+              <CardContent>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                    <span className="flex items-center">
+                      <Clock className="w-4 h-4 mr-2" />
+                      {exam.duration_minutes} minutes
+                    </span>
+                    <span className="flex items-center">
+                      <FileText className="w-4 h-4 mr-2" />
+                      {exam.total_questions} questions
+                    </span>
+                    <span className="flex items-center">
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      {exam.exam_subjects?.length || 0} subjects
+                    </span>
+                    {exam.assignment?.end_date && (
+                      <span className="flex items-center">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Due: {new Date(exam.assignment.end_date).toLocaleDateString()}
+                      </span>
+                    )}
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <FileText className="h-3.5 w-3.5" />
-                      <span className="text-xs">Questions</span>
-                    </div>
-                    <p className="text-sm font-semibold">{exam.total_questions}</p>
-                  </div>
+                  
+                  <Button onClick={() => startExam(exam.id)}>
+                    <Play className="w-4 h-4 mr-2" />
+                    Start Exam
+                  </Button>
                 </div>
 
-                {exam.passing_score && (
-                  <div className="pt-2 border-t">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Passing Score</span>
-                      <Badge variant="outline" className="text-xs">
-                        {exam.passing_score}%
-                      </Badge>
-                    </div>
-                  </div>
-                )}
-
                 {exam.exam_subjects && exam.exam_subjects.length > 0 && (
-                  <div className="pt-2 border-t">
-                    <p className="text-xs text-muted-foreground mb-2">Subjects Covered:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {exam.exam_subjects.slice(0, 3).map((subject: any, idx: number) => (
-                        <Badge key={idx} variant="secondary" className="text-xs">
-                          {subject.subject_name}
+                  <div className="pt-4 border-t">
+                    <p className="text-sm font-medium mb-2">Subjects:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {exam.exam_subjects.map((subject: any, index: number) => (
+                        <Badge key={index} variant="secondary">
+                          {subject.subject_name} ({subject.question_count} questions)
                         </Badge>
                       ))}
-                      {exam.exam_subjects.length > 3 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{exam.exam_subjects.length - 3} more
-                        </Badge>
-                      )}
                     </div>
                   </div>
                 )}

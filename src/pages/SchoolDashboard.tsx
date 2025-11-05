@@ -35,11 +35,13 @@ import ComparisonAnalytics from "@/components/school/ComparisonAnalytics";
 import AlertsCenter from "@/components/school/AlertsCenter";
 import ExportTools from "@/components/school/ExportTools";
 import WelcomeManualModal from "@/components/school/WelcomeManualModal";
+import SchoolExamManager from "@/components/school/SchoolExamManager";
 import { AIAssistant } from "@/components/AIAssistant";
 
 const menuItems = [
   { id: "overview", title: "Overview", icon: LayoutDashboard },
   { id: "students", title: "Students", icon: Users },
+  { id: "exams", title: "Exams", icon: BookOpen },
   { id: "reports", title: "Reports", icon: TrendingUp },
   { id: "billing", title: "Billing", icon: DollarSign },
   { id: "settings", title: "Settings", icon: Settings },
@@ -378,6 +380,10 @@ export default function SchoolDashboard() {
                   remainingSlots={remainingSlots}
                   onStudentsUpdate={fetchSchoolData}
                 />
+              )}
+
+              {activeTab === "exams" && schoolData && (
+                <SchoolExamManager schoolId={schoolData.id} />
               )}
               
               {activeTab === "reports" && schoolData && (
