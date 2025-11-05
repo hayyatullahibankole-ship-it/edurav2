@@ -101,101 +101,126 @@ export default function SchoolLanding() {
         </div>
       </nav>
 
-      {/* Hero Section - Professional & Clean */}
-      <section className="relative py-20 md:py-32 overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
-            {/* Left Content */}
-            <div className="space-y-8">
-              <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-muted/50">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-sm font-medium">Trusted by 500+ Schools</span>
+      {/* Hero Section */}
+      <section className="relative min-h-[85vh] flex items-center bg-gradient-to-b from-background to-muted/20">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+              {/* Left Content - Takes 6 columns */}
+              <div className="lg:col-span-6 space-y-8">
+                <div className="space-y-6">
+                  {/* Badge */}
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/5">
+                    <Shield className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium">Trusted by 500+ Schools Nationwide</span>
+                  </div>
+                  
+                  {/* Main Heading */}
+                  <h1 className="text-5xl md:text-6xl xl:text-7xl font-bold leading-[1.08] tracking-tight">
+                    Smart Exam
+                    <span className="block mt-1">Management</span>
+                    <span className="block mt-1 text-primary">for Modern Schools</span>
+                  </h1>
+                  
+                  {/* Subheading */}
+                  <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-xl">
+                    Comprehensive CBT platform for WAEC, JAMB & NECO preparation. Track student progress, analyze performance, and drive better exam outcomes.
+                  </p>
                 </div>
                 
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
-                  Prepare Students for
-                  <span className="block text-primary mt-2">Exam Excellence</span>
-                </h1>
+                {/* CTA Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button 
+                    size="lg" 
+                    onClick={() => navigate("/school-registration")}
+                    className="h-14 px-8 text-base font-semibold"
+                  >
+                    Start Free Trial
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20want%20to%20schedule%20a%20demo", "_blank")}
+                    className="h-14 px-8 text-base font-semibold"
+                  >
+                    Schedule Demo
+                  </Button>
+                </div>
                 
-                <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl">
-                  Complete CBT practice platform for WAEC, JAMB, and NECO. Track progress, analyze performance, and achieve better results with comprehensive exam management.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  size="lg" 
-                  className="h-12 px-8 text-base"
-                  onClick={() => navigate("/school-registration")}
-                >
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="h-12 px-8 text-base"
-                  onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20want%20to%20schedule%20a%20demo", "_blank")}
-                >
-                  Schedule Demo
-                </Button>
-              </div>
-
-              <div className="flex items-center gap-8 pt-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>No credit card</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Setup in minutes</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>24/7 support</span>
+                {/* Trust Indicators */}
+                <div className="flex flex-wrap items-center gap-6 pt-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>No credit card required</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>5-minute setup</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>24/7 support</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Right Visual - Dashboard Preview */}
-            <div className="relative">
-              <div className="relative rounded-lg overflow-hidden border shadow-2xl bg-card">
-                <img 
-                  src={dashboardPreview} 
-                  alt="School dashboard showing student analytics and exam management" 
-                  className="w-full h-auto"
-                />
-              </div>
-
-              {/* Floating Stats */}
-              <Card className="absolute -bottom-6 -left-6 shadow-xl border-2 w-56">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm text-muted-foreground">Pass Rate</div>
-                      <div className="text-3xl font-bold text-primary">98%</div>
-                    </div>
-                    <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                      <TrendingUp className="h-6 w-6 text-green-600" />
+              {/* Right Content - Takes 6 columns */}
+              <div className="lg:col-span-6 relative">
+                {/* Main Dashboard Image */}
+                <div className="relative">
+                  <div className="relative rounded-xl overflow-hidden shadow-2xl border border-border/50 bg-card">
+                    <div className="aspect-[4/3] relative">
+                      <img 
+                        src={dashboardPreview} 
+                        alt="Edura school dashboard interface showing student analytics" 
+                        className="w-full h-full object-cover"
+                      />
+                      {/* Subtle gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-accent/5" />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="absolute -top-6 -right-6 shadow-xl border-2 w-56">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm text-muted-foreground">Students</div>
-                      <div className="text-3xl font-bold">50K+</div>
-                    </div>
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Users className="h-6 w-6 text-primary" />
+                  
+                  {/* Floating Stat Card - Top Left */}
+                  <div className="absolute -top-4 -left-4 bg-background border border-border rounded-lg p-4 shadow-xl hidden md:block">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <TrendingUp className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground">Pass Rate</div>
+                        <div className="text-2xl font-bold">98%</div>
+                      </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  
+                  {/* Floating Stat Card - Bottom Right */}
+                  <div className="absolute -bottom-4 -right-4 bg-background border border-border rounded-lg p-4 shadow-xl hidden md:block">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                        <Users className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground">Active Students</div>
+                        <div className="text-2xl font-bold">50K+</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Floating Stat Card - Middle Right */}
+                  <div className="absolute top-1/2 -translate-y-1/2 -right-6 bg-background border border-border rounded-lg p-3 shadow-xl hidden lg:block">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                        <Award className="w-4 h-4 text-accent" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground">Excellence</div>
+                        <div className="text-xl font-bold">A+</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
