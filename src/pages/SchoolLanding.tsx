@@ -76,98 +76,122 @@ export default function SchoolLanding() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section - Modern & Professional */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-primary/5 to-secondary/5">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse delay-1000" />
+      {/* Navbar */}
+      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="h-8 w-8 text-primary" />
+              <span className="text-xl font-bold">Edura Schools</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost"
+                onClick={() => navigate("/school-login")}
+              >
+                Sign In
+              </Button>
+              <Button 
+                onClick={() => navigate("/school-registration")}
+              >
+                Get Started
+              </Button>
+            </div>
+          </div>
         </div>
+      </nav>
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+      {/* Hero Section - Professional & Clean */}
+      <section className="relative py-20 md:py-32 overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
             {/* Left Content */}
-            <div className="space-y-8 animate-fade-in">
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-2.5 rounded-full border border-primary/30">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  WAEC • JAMB • NECO Excellence
-                </span>
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-muted/50">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-sm font-medium">Trusted by 500+ Schools</span>
+                </div>
+                
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
+                  Prepare Students for
+                  <span className="block text-primary mt-2">Exam Excellence</span>
+                </h1>
+                
+                <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl">
+                  Complete CBT practice platform for WAEC, JAMB, and NECO. Track progress, analyze performance, and achieve better results with comprehensive exam management.
+                </p>
               </div>
-              
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                Transform Your
-                <span className="block mt-2 bg-gradient-to-r from-primary via-primary-hover to-secondary bg-clip-text text-transparent">
-                  School's Success
-                </span>
-              </h1>
-              
-              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
-                Empower your students with Nigeria's most comprehensive CBT practice platform. 
-                <span className="block mt-2 font-medium text-foreground">
-                  10,000+ questions. Real-time analytics. Proven results.
-                </span>
-              </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   size="lg" 
-                  className="text-lg px-10 h-14 shadow-lg hover:shadow-xl transition-all bg-gradient-to-r from-primary to-primary-hover"
+                  className="h-12 px-8 text-base"
                   onClick={() => navigate("/school-registration")}
                 >
                   Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="text-lg px-10 h-14 border-2 hover:bg-accent"
-                  onClick={() => navigate("/school-login")}
+                  className="h-12 px-8 text-base"
+                  onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20want%20to%20schedule%20a%20demo", "_blank")}
                 >
-                  Sign In
+                  Schedule Demo
                 </Button>
               </div>
 
-              <div className="flex flex-wrap gap-8 pt-4">
-                {[
-                  { icon: CheckCircle2, text: "3-Month Access" },
-                  { icon: Globe, text: "Cloud-Based Platform" },
-                  { icon: Award, text: "24/7 Support" }
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <item.icon className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium">{item.text}</span>
-                  </div>
-                ))}
+              <div className="flex items-center gap-8 pt-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span>No credit card</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span>Setup in minutes</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span>24/7 support</span>
+                </div>
               </div>
             </div>
 
-            {/* Right Visual */}
-            <div className="relative animate-fade-in animation-delay-200">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl blur-2xl transform rotate-6" />
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-primary/20 backdrop-blur-sm">
-                  <img 
-                    src={schoolHero} 
-                    alt="Students excelling with CBT practice platform" 
-                    className="w-full h-auto object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                </div>
+            {/* Right Visual - Dashboard Preview */}
+            <div className="relative">
+              <div className="relative rounded-lg overflow-hidden border shadow-2xl bg-card">
+                <img 
+                  src={dashboardPreview} 
+                  alt="School dashboard showing student analytics and exam management" 
+                  className="w-full h-auto"
+                />
               </div>
 
-              {/* Floating Achievement Card */}
-              <Card className="absolute -bottom-8 -left-8 bg-card/95 backdrop-blur-sm border-2 shadow-2xl max-w-xs animate-float">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center">
-                      <TrendingUp className="h-8 w-8 text-primary" />
-                    </div>
+              {/* Floating Stats */}
+              <Card className="absolute -bottom-6 -left-6 shadow-xl border-2 w-56">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">98%</div>
-                      <div className="text-sm text-muted-foreground font-medium">Pass Rate</div>
+                      <div className="text-sm text-muted-foreground">Pass Rate</div>
+                      <div className="text-3xl font-bold text-primary">98%</div>
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                      <TrendingUp className="h-6 w-6 text-green-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="absolute -top-6 -right-6 shadow-xl border-2 w-56">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm text-muted-foreground">Students</div>
+                      <div className="text-3xl font-bold">50K+</div>
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Users className="h-6 w-6 text-primary" />
                     </div>
                   </div>
                 </CardContent>
@@ -177,24 +201,15 @@ export default function SchoolLanding() {
         </div>
       </section>
 
-      {/* Stats Section - Enhanced */}
-      <section className="py-20 relative bg-gradient-to-b from-muted/30 to-background">
+      {/* Trust Bar */}
+      <section className="py-12 border-y bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 max-w-5xl mx-auto">
             {stats.map((stat, index) => (
-              <Card key={index} className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-14 h-14 mx-auto bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <stat.icon className="h-7 w-7 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                      {stat.number}
-                    </div>
-                    <div className="text-sm text-muted-foreground font-medium mt-2">{stat.label}</div>
-                  </div>
-                </CardContent>
-              </Card>
+              <div key={index} className="text-center space-y-2">
+                <div className="text-4xl font-bold">{stat.number}</div>
+                <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
+              </div>
             ))}
           </div>
         </div>
