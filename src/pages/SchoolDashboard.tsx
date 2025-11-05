@@ -36,13 +36,11 @@ import AlertsCenter from "@/components/school/AlertsCenter";
 import ExportTools from "@/components/school/ExportTools";
 import WelcomeManualModal from "@/components/school/WelcomeManualModal";
 import SchoolExamManager from "@/components/school/SchoolExamManagerEnhanced";
-import SchoolQuestionManager from "@/components/school/SchoolQuestionManager";
 import { AIAssistant } from "@/components/AIAssistant";
 
 const menuItems = [
   { id: "overview", title: "Overview", icon: LayoutDashboard },
   { id: "students", title: "Students", icon: Users },
-  { id: "questions", title: "Question Bank", icon: HelpCircle },
   { id: "exams", title: "Exams", icon: BookOpen },
   { id: "reports", title: "Reports", icon: TrendingUp },
   { id: "billing", title: "Billing", icon: DollarSign },
@@ -382,10 +380,6 @@ export default function SchoolDashboard() {
                   remainingSlots={remainingSlots}
                   onStudentsUpdate={fetchSchoolData}
                 />
-              )}
-
-              {activeTab === "questions" && schoolData && (
-                <SchoolQuestionManager schoolId={schoolData.id} />
               )}
 
               {activeTab === "exams" && schoolData && (
