@@ -56,6 +56,7 @@ import eduraLogo from "@/assets/edura-logo.png";
 import { AIAssistant } from "@/components/AIAssistant";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import SchoolAvailableExams from "@/components/school/SchoolAvailableExams";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -573,6 +574,11 @@ const Dashboard = () => {
                       </Card>
                     </Link>
                   </div>
+                </div>
+
+                {/* School Assigned Exams - Only show if student is part of a school */}
+                <div className="mb-8">
+                  <SchoolAvailableExams />
                 </div>
 
                 {/* Recent Test Results */}
