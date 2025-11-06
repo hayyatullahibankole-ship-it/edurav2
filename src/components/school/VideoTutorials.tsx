@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlayCircle, Download, Clock, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { tutorialVideos } from "@/config/tutorialVideos";
 
 interface VideoTutorial {
   id: string;
@@ -13,93 +14,7 @@ interface VideoTutorial {
   thumbnail?: string;
 }
 
-const tutorialCategories = {
-  gettingStarted: [
-    {
-      id: "intro",
-      title: "Welcome to Edura Schools",
-      description: "Learn the basics of your school dashboard and available features",
-      duration: "5:30",
-      videoUrl: "",
-    },
-    {
-      id: "setup",
-      title: "Initial Setup & Configuration",
-      description: "Set up your school profile, preferences, and subscription details",
-      duration: "8:15",
-      videoUrl: "",
-    },
-  ],
-  students: [
-    {
-      id: "add-students",
-      title: "Adding Students to Your School",
-      description: "Learn how to create student accounts individually or in bulk",
-      duration: "6:45",
-      videoUrl: "",
-    },
-    {
-      id: "manage-students",
-      title: "Managing Student Accounts",
-      description: "Edit student information, reset passwords, and manage access",
-      duration: "7:20",
-      videoUrl: "",
-    },
-    {
-      id: "student-progress",
-      title: "Tracking Student Progress",
-      description: "Monitor individual and class performance using analytics tools",
-      duration: "9:10",
-      videoUrl: "",
-    },
-  ],
-  exams: [
-    {
-      id: "create-exam",
-      title: "Creating Custom Exams",
-      description: "Design and schedule custom exams for your students",
-      duration: "10:30",
-      videoUrl: "",
-    },
-    {
-      id: "assign-exam",
-      title: "Assigning Exams to Students",
-      description: "Learn how to assign exams to specific classes or individuals",
-      duration: "5:50",
-      videoUrl: "",
-    },
-    {
-      id: "monitor-exam",
-      title: "Monitoring Active Exams",
-      description: "Track real-time exam progress and manage ongoing assessments",
-      duration: "7:40",
-      videoUrl: "",
-    },
-  ],
-  reports: [
-    {
-      id: "analytics",
-      title: "Understanding Analytics Dashboard",
-      description: "Explore the analytics dashboard and key performance metrics",
-      duration: "11:20",
-      videoUrl: "",
-    },
-    {
-      id: "export-reports",
-      title: "Generating & Exporting Reports",
-      description: "Create detailed reports and export data for analysis",
-      duration: "8:00",
-      videoUrl: "",
-    },
-    {
-      id: "performance-insights",
-      title: "Performance Insights & Trends",
-      description: "Identify weak topics, track improvements, and spot trends",
-      duration: "9:45",
-      videoUrl: "",
-    },
-  ],
-};
+const tutorialCategories = tutorialVideos;
 
 interface VideoCardProps {
   video: VideoTutorial;
