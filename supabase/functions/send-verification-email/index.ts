@@ -69,15 +69,46 @@ serve(async (req) => {
 
     console.log(`Sending ${email_action_type} email to ${user.email}`);
 
-    // Render email template
-    const html = await renderAsync(
-      React.createElement(VerificationEmail, {
-        token_hash,
-        email_action_type,
-        redirect_to: redirect_to || `${Deno.env.get("SUPABASE_URL")}/`,
-        supabase_url: Deno.env.get("SUPABASE_URL") ?? "",
-      })
-    );
+    // Render email template with safe fallback
+    let html: string;
+    const supaUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const redirect = redirect_to || `${supaUrl}/`;
+    const verificationUrl = `${supaUrl}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect}`;
+    try {
+      html = await renderAsync(
+        React.createElement(VerificationEmail, {
+          token_hash,
+          email_action_type,
+          redirect_to: redirect,
+          supabase_url: supaUrl,
+        })
+      );
+    } catch (renderErr) {
+      console.error("Template render failed, using fallback HTML:", renderErr);
+      html = `
+        <html>
+          <body style="font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;background:#f6f9fc;padding:24px">
+            <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;padding:24px;border:1px solid #e6ebf1">
+              <h1 style="margin-top:0">${email_action_type === "recovery" ? "Reset your Edura password" : email_action_type === "email_change" ? "Confirm your new email" : "Verify your Edura account"}</h1>
+              <p>${email_action_type === "recovery"
+                ? "We received a request to reset your password. Click the button below to continue."
+                : email_action_type === "email_change"
+                ? "Click the button below to confirm your new email address."
+                : "Click the button below to verify your email and activate your account."}
+              </p>
+              <p style="text-align:center;margin:24px 0">
+                <a href="${verificationUrl}" style="background:#6366f1;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">
+                  ${email_action_type === "recovery" ? "Reset Password" : email_action_type === "email_change" ? "Confirm Email" : "Verify Email"}
+                </a>
+              </p>
+              <p>Or copy and paste this link into your browser:</p>
+              <p style="word-break:break-all;color:#6366f1">${verificationUrl}</p>
+              <hr style="border:none;border-top:1px solid #e6ebf1;margin:24px 0" />
+              <p style="color:#6b7280;font-size:14px">If you did not request this, you can safely ignore this email.</p>
+            </div>
+          </body>
+        </html>`;
+    }
 
     // Determine subject based on action type
     let subject = "Verify your Edura account";
