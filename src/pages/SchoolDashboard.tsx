@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { 
   Users, BookOpen, TrendingUp, DollarSign, LayoutDashboard, Settings, 
-  LogOut, Copy, Building2, HelpCircle
+  LogOut, Copy, Building2, HelpCircle, Video
 } from "lucide-react";
 import {
   Sidebar,
@@ -37,12 +37,14 @@ import ExportTools from "@/components/school/ExportTools";
 import WelcomeManualModal from "@/components/school/WelcomeManualModal";
 import SchoolExamManager from "@/components/school/SchoolExamManagerEnhanced";
 import { AIAssistant } from "@/components/AIAssistant";
+import VideoTutorials from "@/components/school/VideoTutorials";
 
 const menuItems = [
   { id: "overview", title: "Overview", icon: LayoutDashboard },
   { id: "students", title: "Students", icon: Users },
   { id: "exams", title: "Exams", icon: BookOpen },
   { id: "reports", title: "Reports", icon: TrendingUp },
+  { id: "tutorials", title: "Video Tutorials", icon: Video },
   { id: "billing", title: "Billing", icon: DollarSign },
   { id: "settings", title: "Settings", icon: Settings },
 ];
@@ -400,6 +402,10 @@ export default function SchoolDashboard() {
                     </div>
                   </div>
                 </div>
+              )}
+
+              {activeTab === "tutorials" && (
+                <VideoTutorials />
               )}
 
               {activeTab === "billing" && schoolData && (
