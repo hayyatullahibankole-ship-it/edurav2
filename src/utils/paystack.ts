@@ -50,7 +50,10 @@ const getPaystackPublicKey = async (): Promise<string> => {
 /**
  * Initialize Paystack payment
  */
-export const initializePaystackPayment = async (payment: PaystackPayment) => {
+export const initializePaystackPayment = async (
+  payment: PaystackPayment,
+  onSuccess?: (reference: string) => void
+) => {
   try {
     // Validate input
     const validatedData = PaystackPaymentSchema.parse(payment);
@@ -71,7 +74,14 @@ export const initializePaystackPayment = async (payment: PaystackPayment) => {
       ref: validatedData.reference,
       metadata: validatedData.metadata,
       callback: function(response: any) {
-        window.location.href = `/payment-success?reference=${response.reference}`;
+        // Use callback instead of window.location for SPA navigation
+        if (onSuccess) {
+          onSuccess(response.reference);
+        } else {
+          // Fallback: use pushState instead of full reload
+          window.history.pushState({}, '', `/payment-success?reference=${response.reference}`);
+          window.dispatchEvent(new PopStateEvent('popstate'));
+        }
       },
       onClose: function() {
         // User closed payment dialog
@@ -98,7 +108,8 @@ export const createSubscriptionPayment = async (
     price_per_student?: number;
     school_id?: string;
     admin_auth_id?: string;
-  }
+  },
+  onSuccess?: (reference: string) => void
 ) => {
   // Initialize Paystack payment
   const reference = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -114,7 +125,7 @@ export const createSubscriptionPayment = async (
         subscription: true,
         ...metadata
       }
-    });
+    }, onSuccess);
     
     return reference;
   } catch (error) {

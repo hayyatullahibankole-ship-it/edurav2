@@ -22,14 +22,17 @@ export default function SchoolSubscription() {
   const [schoolData, setSchoolData] = useState<any>(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!user?.id) {
       toast.error("Please log in to continue");
       navigate("/auth");
       return;
     }
 
-    fetchSchoolData();
-  }, [user]);
+    // Only fetch if we don't have school data yet
+    if (!schoolData) {
+      fetchSchoolData();
+    }
+  }, [user?.id]); // Only re-run when user ID actually changes
 
   // Load Paystack inline script so the subscribe button can open the payment modal
   useEffect(() => {
@@ -308,6 +311,10 @@ export default function SchoolSubscription() {
           price_per_student: pricePerStudent,
           school_id: schoolData.id,
           admin_auth_id: user.id
+        },
+        (reference) => {
+          // Use React Router for SPA navigation instead of full reload
+          navigate(`/payment-success?reference=${reference}`);
         }
       );
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,8 @@ const SubjectProgressCard: React.FC<SubjectProgressCardProps> = ({
   recommendedAction,
   studyResources = []
 }) => {
+  const navigate = useNavigate();
+  
   const getDefaultResources = (subjectName: string) => {
     const subjectLower = subjectName.toLowerCase();
     
@@ -118,7 +121,7 @@ const SubjectProgressCard: React.FC<SubjectProgressCardProps> = ({
       window.open(resource.url, '_blank');
     } else {
       // Navigate to resources page with filter
-      window.location.href = `/resources?subject=${encodeURIComponent(subject)}`;
+      navigate(`/resources?subject=${encodeURIComponent(subject)}`);
     }
   };
 
