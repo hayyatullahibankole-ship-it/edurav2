@@ -10,6 +10,8 @@ import {
   Users,
   Settings,
   LogOut,
+  BarChart3,
+  HeadphonesIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -33,6 +35,8 @@ const navItems = [
   { title: "Study Planner", path: "/study-planner", icon: Calendar },
   { title: "Resources", path: "/resources", icon: FolderOpen },
   { title: "Forum", path: "/forum", icon: MessageSquare },
+  { title: "Analytics", path: "/performance-report", icon: BarChart3 },
+  { title: "Consultation", path: "/consultation", icon: HeadphonesIcon },
   { title: "Referral Program", path: "/referral-program", icon: Users },
   { title: "Profile", path: "/dashboard?tab=profile", icon: User },
   { title: "Settings", path: "/dashboard?tab=profile", icon: Settings },
