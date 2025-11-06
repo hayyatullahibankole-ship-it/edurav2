@@ -3374,6 +3374,7 @@ export type Database = {
           updated_count: number
         }[]
       }
+      generate_professional_school_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       generate_school_code: { Args: { school_name: string }; Returns: string }
       generate_unique_referral_code: { Args: never; Returns: string }

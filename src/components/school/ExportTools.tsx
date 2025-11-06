@@ -41,6 +41,13 @@ export default function ExportTools({ schoolId, schoolName }: ExportToolsProps) 
     const textX = data.schoolLogo ? 50 : 14;
     doc.setFontSize(20);
     doc.text(schoolName, textX, headerY);
+    
+    // Add school code if available
+    if (data.schoolInfo?.school_code) {
+      doc.setFontSize(10);
+      doc.text(`School Code: ${data.schoolInfo.school_code}`, textX, headerY + 6);
+    }
+    
     doc.setFontSize(12);
     doc.text(`${reportType.toUpperCase()} REPORT`, textX, headerY + 10);
     doc.setFontSize(10);
@@ -48,6 +55,20 @@ export default function ExportTools({ schoolId, schoolName }: ExportToolsProps) 
     
     if (startDate && endDate) {
       doc.text(`Period: ${formatDate(startDate, "PP")} - ${formatDate(endDate, "PP")}`, textX, headerY + 23);
+    }
+    
+    // Add contact information footer
+    if (data.schoolInfo) {
+      const footerY = doc.internal.pageSize.height - 15;
+      doc.setFontSize(8);
+      const contactInfo = [];
+      if (data.schoolInfo.email) contactInfo.push(`Email: ${data.schoolInfo.email}`);
+      if (data.schoolInfo.phone) contactInfo.push(`Phone: ${data.schoolInfo.phone}`);
+      if (data.schoolInfo.address) contactInfo.push(`Address: ${data.schoolInfo.address}`);
+      
+      if (contactInfo.length > 0) {
+        doc.text(contactInfo.join(" | "), 14, footerY);
+      }
     }
 
     // Summary Statistics
@@ -96,6 +117,7 @@ export default function ExportTools({ schoolId, schoolName }: ExportToolsProps) 
     const rows = [
       ["School Report"],
       ["School Name", schoolName],
+      ["School Code", data.schoolInfo?.school_code || "N/A"],
       ["Report Type", reportType],
       ["Generated", formatDate(new Date(), "PPP")],
       [],
@@ -130,7 +152,7 @@ export default function ExportTools({ schoolId, schoolName }: ExportToolsProps) 
       // Fetch school data including logo
       const { data: schoolInfo } = await supabase
         .from("schools")
-        .select("logo_url, name, address, email, phone")
+        .select("logo_url, name, address, email, phone, school_code")
         .eq("id", schoolId)
         .single();
 

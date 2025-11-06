@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,7 @@ export default function SchoolSettings({ schoolData, onUpdate }: Props) {
     country: schoolData?.country || "Nigeria",
     logo_url: schoolData?.logo_url || "",
     website: schoolData?.website || "",
-    registration_number: schoolData?.registration_number || "",
+    school_code: schoolData?.school_code || "",
     description: schoolData?.description || "",
     type: schoolData?.type || "",
   });
@@ -35,6 +35,26 @@ export default function SchoolSettings({ schoolData, onUpdate }: Props) {
     newPassword: "",
     confirmPassword: "",
   });
+
+  // Sync form data when schoolData changes
+  useEffect(() => {
+    if (schoolData) {
+      setFormData({
+        name: schoolData.name || "",
+        email: schoolData.email || "",
+        phone: schoolData.phone || "",
+        address: schoolData.address || "",
+        city: schoolData.city || "",
+        state: schoolData.state || "",
+        country: schoolData.country || "Nigeria",
+        logo_url: schoolData.logo_url ? `${schoolData.logo_url}?t=${Date.now()}` : "",
+        website: schoolData.website || "",
+        school_code: schoolData.school_code || "",
+        description: schoolData.description || "",
+        type: schoolData.type || "",
+      });
+    }
+  }, [schoolData]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -73,10 +93,12 @@ export default function SchoolSettings({ schoolData, onUpdate }: Props) {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
+      // Get public URL with cache busting parameter
       const { data: urlData } = supabase.storage
         .from("school-logos")
         .getPublicUrl(fileName);
+
+      const logoUrlWithCache = `${urlData.publicUrl}?t=${Date.now()}`;
 
       // Update database
       const { error: updateError } = await supabase
@@ -86,7 +108,7 @@ export default function SchoolSettings({ schoolData, onUpdate }: Props) {
 
       if (updateError) throw updateError;
 
-      setFormData((prev) => ({ ...prev, logo_url: urlData.publicUrl }));
+      setFormData((prev) => ({ ...prev, logo_url: logoUrlWithCache }));
       toast.success("Logo uploaded successfully");
       onUpdate();
     } catch (error: any) {
@@ -139,7 +161,6 @@ export default function SchoolSettings({ schoolData, onUpdate }: Props) {
           state: formData.state,
           country: formData.country,
           website: formData.website,
-          registration_number: formData.registration_number,
           description: formData.description,
           type: formData.type,
         })
@@ -205,7 +226,11 @@ export default function SchoolSettings({ schoolData, onUpdate }: Props) {
             <div className="flex items-center gap-4">
               <Avatar className="h-24 w-24 border-2">
                 {formData.logo_url ? (
-                  <AvatarImage src={formData.logo_url} alt={formData.name} />
+                  <AvatarImage 
+                    src={`${formData.logo_url}${formData.logo_url.includes('?') ? '&' : '?'}t=${Date.now()}`} 
+                    alt={formData.name}
+                    key={formData.logo_url}
+                  />
                 ) : (
                   <AvatarFallback className="text-2xl">
                     {formData.name.substring(0, 2).toUpperCase()}
@@ -279,13 +304,17 @@ export default function SchoolSettings({ schoolData, onUpdate }: Props) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="registration_number">Registration Number</Label>
+              <Label htmlFor="school_code">School Code (Auto-generated)</Label>
               <Input
-                id="registration_number"
-                value={formData.registration_number}
-                onChange={(e) => handleInputChange("registration_number", e.target.value)}
-                placeholder="Official registration number"
+                id="school_code"
+                value={formData.school_code}
+                disabled
+                className="bg-muted cursor-not-allowed"
+                placeholder="Auto-generated school code"
               />
+              <p className="text-xs text-muted-foreground">
+                This unique code is automatically generated and appears on all reports
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="website">Website</Label>
