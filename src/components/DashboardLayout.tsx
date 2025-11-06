@@ -17,9 +17,12 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const handleLogout = async () => {
     try {
       await signOut();
+      // Clear any cached data
+      window.sessionStorage.clear();
       navigate("/auth", { replace: true });
     } catch (error) {
       console.error("Error during logout:", error);
+      // Force navigation even on error
       navigate("/auth", { replace: true });
     }
   };

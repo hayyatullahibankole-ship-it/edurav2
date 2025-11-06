@@ -273,10 +273,27 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
+      // Show loading toast
+      toast({
+        title: "Logging out...",
+        description: "Please wait",
+      });
+      
       await signOut();
+      
+      // Clear any cached data
+      window.sessionStorage.clear();
+      
+      // Navigate to auth page
       navigate("/auth", { replace: true });
+      
+      toast({
+        title: "Logged out successfully",
+        description: "See you next time!",
+      });
     } catch (error) {
       console.error("Error during logout:", error);
+      // Force navigation even on error
       navigate("/auth", { replace: true });
     }
   };

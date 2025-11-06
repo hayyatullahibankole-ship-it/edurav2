@@ -274,7 +274,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const currentUser = user;
       const currentSession = session;
       
-      // Clear session token from database first
+      // Sign out from Supabase first
+      if (currentSession) {
+        const { error } = await supabase.auth.signOut();
+        
+        // Ignore "Auth session missing" error as it's expected during logout
+        if (error && error.message !== 'Auth session missing!') {
+          console.error('Error signing out from Supabase:', error);
+        }
+      }
+      
+      // Clear session token from database
       if (currentUser) {
         try {
           await clearSessionTokenInDB(currentUser.id);
@@ -287,21 +297,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Clear local session token
       clearSessionToken();
       
-      // Clear all local state first
+      // Clear all local state
       setUser(null);
       setSession(null);
       setUserProfile(null);
       setUserRole(null);
+      setIsSchoolAdmin(false);
       
-      // Only attempt Supabase signout if we actually have a session
-      if (currentSession) {
-        const { error } = await supabase.auth.signOut();
-        
-        // Ignore "Auth session missing" error as it's expected during logout
-        if (error && error.message !== 'Auth session missing!') {
-          console.error('Error signing out:', error);
-        }
-      }
     } catch (error) {
       console.error('Error during signOut:', error);
       // Even if there's an error, ensure local state is cleared
@@ -310,6 +312,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(null);
       setUserProfile(null);
       setUserRole(null);
+      setIsSchoolAdmin(false);
     }
   };
 
