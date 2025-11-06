@@ -44,20 +44,55 @@ const PaymentSuccess = () => {
       setPaymentData(data);
       toast.success('Payment verified successfully! Your subscription is now active.');
       
-      // Check if this is a school subscription and auto-redirect after 3 seconds
-      const pendingSchoolSub = localStorage.getItem('pending_school_subscription');
-      if (pendingSchoolSub) {
-        toast.success('Redirecting to school dashboard...');
-        setTimeout(() => {
-          localStorage.removeItem('pending_school_subscription');
-          navigate('/school-dashboard');
-        }, 3000);
-      }
+      // Send receipt email
+      sendReceiptEmail(data);
     } catch (error) {
       console.error('Error verifying payment:', error);
       toast.error('Payment verification failed. Please contact support with reference: ' + reference);
     } finally {
       setVerifying(false);
+    }
+  };
+
+  const sendReceiptEmail = async (paymentData: any) => {
+    try {
+      // Get user details
+      const { data: userData } = await supabase
+        .from('users')
+        .select('first_name, last_name, email')
+        .eq('auth_user_id', user?.id)
+        .single();
+
+      // Check if this is a school subscription
+      const pendingSchoolSub = localStorage.getItem('pending_school_subscription');
+      const isSchoolSub = !!pendingSchoolSub;
+      
+      let studentSeats = 0;
+      if (isSchoolSub && pendingSchoolSub) {
+        try {
+          const subData = JSON.parse(pendingSchoolSub);
+          studentSeats = subData.student_seats || 0;
+        } catch {}
+      }
+
+      await supabase.functions.invoke('send-receipt-email', {
+        body: {
+          userId: user?.id,
+          email: userData?.email || user?.email,
+          firstName: userData?.first_name,
+          reference: reference,
+          amount: paymentData?.amount || 0,
+          currency: paymentData?.currency || 'NGN',
+          planName: paymentData?.plan_name,
+          isSchoolSubscription: isSchoolSub,
+          studentSeats: studentSeats
+        }
+      });
+
+      toast.success('Receipt sent to your email!');
+    } catch (error) {
+      console.error('Error sending receipt email:', error);
+      // Don't show error to user, receipt email is secondary
     }
   };
 
