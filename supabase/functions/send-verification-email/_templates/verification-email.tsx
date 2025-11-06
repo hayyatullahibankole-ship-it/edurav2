@@ -27,24 +27,60 @@ export const VerificationEmail = ({
 }: VerificationEmailProps) => {
   const verificationUrl = `${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}`;
 
+  // Dynamic content based on email action type
+  const getContent = () => {
+    switch (email_action_type) {
+      case 'recovery':
+        return {
+          preview: 'Reset your Edura password',
+          heading: 'Password Reset Request 🔐',
+          mainText: 'We received a request to reset your password for your Edura account.',
+          instruction: 'Click the button below to reset your password. This link will expire in 1 hour for security reasons.',
+          buttonText: 'Reset Password',
+          disclaimer: 'If you didn\'t request a password reset, you can safely ignore this email. Your password will remain unchanged.',
+          showFeatures: false,
+        };
+      case 'email_change':
+        return {
+          preview: 'Confirm your new email address',
+          heading: 'Verify Your New Email Address 📧',
+          mainText: 'You recently requested to change your email address for your Edura account.',
+          instruction: 'To complete this change and confirm your new email address, please click the button below:',
+          buttonText: 'Confirm New Email',
+          disclaimer: 'If you didn\'t request this email change, please contact our support team immediately to secure your account.',
+          showFeatures: false,
+        };
+      default: // signup/verification
+        return {
+          preview: 'Verify your Edura account',
+          heading: 'Welcome to Edura! 🎓',
+          mainText: 'Thank you for registering with Edura - your complete exam preparation platform.',
+          instruction: 'To complete your registration and start accessing thousands of past questions, study materials, and practice exams, please verify your email address by clicking the button below:',
+          buttonText: 'Verify Email Address',
+          disclaimer: 'If you didn\'t create an account with Edura, you can safely ignore this email.',
+          showFeatures: true,
+        };
+    }
+  };
+
+  const content = getContent();
+
   return (
     <Html>
       <Head />
-      <Preview>Verify your Edura account</Preview>
+      <Preview>{content.preview}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Heading style={h1}>Welcome to Edura! 🎓</Heading>
+            <Heading style={h1}>{content.heading}</Heading>
           </Section>
           
           <Text style={text}>
-            Thank you for registering with Edura - your complete exam preparation platform.
+            {content.mainText}
           </Text>
           
           <Text style={text}>
-            To complete your registration and start accessing thousands of past questions, 
-            study materials, and practice exams, please verify your email address by clicking 
-            the button below:
+            {content.instruction}
           </Text>
           
           <Section style={buttonContainer}>
@@ -53,7 +89,7 @@ export const VerificationEmail = ({
               target="_blank"
               style={button}
             >
-              Verify Email Address
+              {content.buttonText}
             </Link>
           </Section>
           
@@ -65,17 +101,19 @@ export const VerificationEmail = ({
             {verificationUrl}
           </Text>
           
-          <Section style={featuresSection}>
-            <Text style={featuresTitle}>What you'll get with Edura:</Text>
-            <Text style={featureItem}>✓ Unlimited access to JAMB, WAEC, and NECO past questions</Text>
-            <Text style={featureItem}>✓ AI-powered study assistant for personalized learning</Text>
-            <Text style={featureItem}>✓ Detailed performance analytics and progress tracking</Text>
-            <Text style={featureItem}>✓ Offline mode for studying anywhere, anytime</Text>
-            <Text style={featureItem}>✓ Interactive CBT practice with real exam conditions</Text>
-          </Section>
+          {content.showFeatures && (
+            <Section style={featuresSection}>
+              <Text style={featuresTitle}>What you'll get with Edura:</Text>
+              <Text style={featureItem}>✓ Unlimited access to JAMB, WAEC, and NECO past questions</Text>
+              <Text style={featureItem}>✓ AI-powered study assistant for personalized learning</Text>
+              <Text style={featureItem}>✓ Detailed performance analytics and progress tracking</Text>
+              <Text style={featureItem}>✓ Offline mode for studying anywhere, anytime</Text>
+              <Text style={featureItem}>✓ Interactive CBT practice with real exam conditions</Text>
+            </Section>
+          )}
           
           <Text style={footerText}>
-            If you didn't create an account with Edura, you can safely ignore this email.
+            {content.disclaimer}
           </Text>
           
           <Text style={footer}>
