@@ -168,6 +168,36 @@ export default function SchoolLogin() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      toastHook({
+        variant: "destructive",
+        title: "Email required",
+        description: "Please enter your email address first",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+        redirectTo: `${window.location.origin}/school-login`,
+      });
+
+      if (error) throw error;
+
+      toastHook({
+        title: "Check your email",
+        description: "We've sent you a password reset link",
+      });
+    } catch (error: any) {
+      toastHook({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to send reset email",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
@@ -218,6 +248,17 @@ export default function SchoolLogin() {
                   />
                 </div>
                 {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={handleForgotPassword}
+                  className="text-sm p-0 h-auto"
+                >
+                  Forgot Password?
+                </Button>
               </div>
 
               <Button type="submit" disabled={loading} className="w-full">
