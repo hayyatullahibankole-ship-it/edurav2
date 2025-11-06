@@ -2041,6 +2041,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "school_subscriptions_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "school_subscriptions_plan_id_fkey"
             columns: ["plan_id"]
             isOneToOne: false
