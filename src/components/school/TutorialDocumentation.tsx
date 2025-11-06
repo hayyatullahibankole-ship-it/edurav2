@@ -114,43 +114,41 @@ export default function TutorialDocumentation() {
                       Follow these steps to configure your school:
                     </p>
                     <div className="space-y-4">
-                      <div>
+                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <Badge>Step 1</Badge>
                           <p className="font-medium text-sm">Complete School Profile</p>
                         </div>
                         <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-4">
-                          <li>Navigate to Settings → School Profile</li>
+                          <li>Navigate to Settings tab in your dashboard</li>
                           <li>Enter school name, address, and contact details</li>
-                          <li>Upload school logo (appears on reports)</li>
-                          <li>Set school colors for branding</li>
-                          <li>Configure academic year and term dates</li>
+                          <li>Upload school logo (will appear on reports)</li>
+                          <li>Add optional website and registration number</li>
+                          <li>Save your changes</li>
                         </ul>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <Badge>Step 2</Badge>
-                          <p className="font-medium text-sm">Configure Exam Preferences</p>
+                          <p className="font-medium text-sm">Review Subscription Plan</p>
                         </div>
                         <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-4">
-                          <li>Go to Settings → Exam Preferences</li>
-                          <li>Set default exam duration</li>
-                          <li>Configure passing marks threshold</li>
-                          <li>Enable calculator access if needed</li>
-                          <li>Turn on anti-cheat features</li>
-                          <li>Set when students can view results</li>
+                          <li>Go to Billing tab</li>
+                          <li>Check your current subscription status</li>
+                          <li>Verify student count limits</li>
+                          <li>Upgrade plan if needed for more students</li>
                         </ul>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <Badge>Step 3</Badge>
-                          <p className="font-medium text-sm">Review Subscription</p>
+                          <p className="font-medium text-sm">Start Adding Students</p>
                         </div>
                         <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-4">
-                          <li>Check Settings → Billing</li>
-                          <li>Verify student count limits</li>
-                          <li>Upgrade if you need more capacity</li>
-                          <li>Set up payment method for auto-renewal</li>
+                          <li>Go to Students tab</li>
+                          <li>Click "Add Student" to add individually</li>
+                          <li>Or use "Bulk Upload" for multiple students</li>
+                          <li>Students can immediately log in and take exams</li>
                         </ul>
                       </div>
                     </div>
@@ -158,7 +156,7 @@ export default function TutorialDocumentation() {
                       <AlertCircle className="h-4 w-4" />
                       <AlertTitle>Important</AlertTitle>
                       <AlertDescription>
-                        Your school logo and colors will appear on all generated student reports and certificates
+                        Your school logo will appear on all generated student reports
                       </AlertDescription>
                     </Alert>
                   </AccordionContent>
@@ -519,40 +517,30 @@ export default function TutorialDocumentation() {
                 </AccordionItem>
 
                 <AccordionItem value="exam-settings">
-                  <AccordionTrigger>Advanced Exam Settings</AccordionTrigger>
+                  <AccordionTrigger>Exam Creation & Assignment</AccordionTrigger>
                   <AccordionContent className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Create and assign exams to your students:
+                    </p>
                     <div className="space-y-3">
                       <div>
-                        <p className="font-medium text-sm mb-2">Question Randomization</p>
+                        <p className="font-medium text-sm mb-2">Creating Exams</p>
                         <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-4">
-                          <li><strong>Randomize Question Order:</strong> Each student sees questions in different order</li>
-                          <li><strong>Randomize Option Order:</strong> A, B, C, D options appear in different order</li>
-                          <li><strong>Benefits:</strong> Prevents copying from neighbors in physical classrooms</li>
+                          <li>Navigate to Exams tab</li>
+                          <li>Click "Create New Exam"</li>
+                          <li>Enter exam title and select subjects</li>
+                          <li>Set duration and question count</li>
+                          <li>Questions are automatically selected from the database</li>
+                          <li>Publish exam when ready</li>
                         </ul>
                       </div>
                       <div>
-                        <p className="font-medium text-sm mb-2">Calculator Access</p>
+                        <p className="font-medium text-sm mb-2">Assigning to Students</p>
                         <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-4">
-                          <li>Enable for math, physics, chemistry exams</li>
-                          <li>Built-in scientific calculator</li>
-                          <li>Students cannot leave exam to use external calculator</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm mb-2">Result Visibility</p>
-                        <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-4">
-                          <li><strong>Immediate:</strong> Students see results right after submission</li>
-                          <li><strong>After Deadline:</strong> Results shown when all students complete</li>
-                          <li><strong>Manual Release:</strong> You control when to reveal results</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm mb-2">Anti-Cheat Features</p>
-                        <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-4">
-                          <li>Tab switch detection</li>
-                          <li>Copy-paste prevention</li>
-                          <li>Right-click disable</li>
-                          <li>Auto-submit on suspicious activity (optional)</li>
+                          <li>Select published exam</li>
+                          <li>Choose students or assign to all</li>
+                          <li>Set optional start and end dates</li>
+                          <li>Students will see exam on their dashboards</li>
                         </ul>
                       </div>
                     </div>

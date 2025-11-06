@@ -27,16 +27,27 @@ export default function ExportTools({ schoolId, schoolName }: ExportToolsProps) 
   const generatePDFReport = async (data: any) => {
     const doc = new jsPDF();
     
+    // Add school logo if available
+    if (data.schoolLogo) {
+      try {
+        doc.addImage(data.schoolLogo, 'PNG', 14, 10, 30, 30);
+      } catch (error) {
+        console.error("Error adding logo to PDF:", error);
+      }
+    }
+    
     // Header
+    const headerY = data.schoolLogo ? 15 : 20;
+    const textX = data.schoolLogo ? 50 : 14;
     doc.setFontSize(20);
-    doc.text(schoolName, 14, 20);
+    doc.text(schoolName, textX, headerY);
     doc.setFontSize(12);
-    doc.text(`${reportType.toUpperCase()} REPORT`, 14, 30);
+    doc.text(`${reportType.toUpperCase()} REPORT`, textX, headerY + 10);
     doc.setFontSize(10);
-    doc.text(`Generated: ${formatDate(new Date(), "PPP")}`, 14, 37);
+    doc.text(`Generated: ${formatDate(new Date(), "PPP")}`, textX, headerY + 17);
     
     if (startDate && endDate) {
-      doc.text(`Period: ${formatDate(startDate, "PP")} - ${formatDate(endDate, "PP")}`, 14, 43);
+      doc.text(`Period: ${formatDate(startDate, "PP")} - ${formatDate(endDate, "PP")}`, textX, headerY + 23);
     }
 
     // Summary Statistics
@@ -116,6 +127,29 @@ export default function ExportTools({ schoolId, schoolName }: ExportToolsProps) 
 
   const fetchReportData = async () => {
     try {
+      // Fetch school data including logo
+      const { data: schoolInfo } = await supabase
+        .from("schools")
+        .select("logo_url, name, address, email, phone")
+        .eq("id", schoolId)
+        .single();
+
+      let schoolLogoData = null;
+      if (schoolInfo?.logo_url) {
+        try {
+          // Fetch logo as base64 for PDF embedding
+          const response = await fetch(schoolInfo.logo_url);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          schoolLogoData = await new Promise((resolve) => {
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          });
+        } catch (error) {
+          console.error("Error loading school logo:", error);
+        }
+      }
+
       // Fetch school students with basic user info
       const { data: schoolStudents } = await supabase
         .from("school_students")
@@ -124,6 +158,8 @@ export default function ExportTools({ schoolId, schoolName }: ExportToolsProps) 
 
       if (!schoolStudents || schoolStudents.length === 0) {
         return {
+          schoolLogo: schoolLogoData,
+          schoolInfo,
           totalStudents: 0,
           activeStudents: 0,
           totalTests: 0,
@@ -178,6 +214,8 @@ export default function ExportTools({ schoolId, schoolName }: ExportToolsProps) 
         : 0;
 
       return {
+        schoolLogo: schoolLogoData,
+        schoolInfo,
         totalStudents: schoolStudents.length,
         activeStudents,
         totalTests,
