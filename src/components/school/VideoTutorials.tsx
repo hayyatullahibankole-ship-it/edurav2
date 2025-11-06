@@ -20,14 +20,14 @@ const tutorialCategories = {
       title: "Welcome to Edura Schools",
       description: "Learn the basics of your school dashboard and available features",
       duration: "5:30",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      videoUrl: "",
     },
     {
       id: "setup",
       title: "Initial Setup & Configuration",
       description: "Set up your school profile, preferences, and subscription details",
       duration: "8:15",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      videoUrl: "",
     },
   ],
   students: [
@@ -36,21 +36,21 @@ const tutorialCategories = {
       title: "Adding Students to Your School",
       description: "Learn how to create student accounts individually or in bulk",
       duration: "6:45",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      videoUrl: "",
     },
     {
       id: "manage-students",
       title: "Managing Student Accounts",
       description: "Edit student information, reset passwords, and manage access",
       duration: "7:20",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      videoUrl: "",
     },
     {
       id: "student-progress",
       title: "Tracking Student Progress",
       description: "Monitor individual and class performance using analytics tools",
       duration: "9:10",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      videoUrl: "",
     },
   ],
   exams: [
@@ -59,21 +59,21 @@ const tutorialCategories = {
       title: "Creating Custom Exams",
       description: "Design and schedule custom exams for your students",
       duration: "10:30",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      videoUrl: "",
     },
     {
       id: "assign-exam",
       title: "Assigning Exams to Students",
       description: "Learn how to assign exams to specific classes or individuals",
       duration: "5:50",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      videoUrl: "",
     },
     {
       id: "monitor-exam",
       title: "Monitoring Active Exams",
       description: "Track real-time exam progress and manage ongoing assessments",
       duration: "7:40",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      videoUrl: "",
     },
   ],
   reports: [
@@ -82,21 +82,21 @@ const tutorialCategories = {
       title: "Understanding Analytics Dashboard",
       description: "Explore the analytics dashboard and key performance metrics",
       duration: "11:20",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      videoUrl: "",
     },
     {
       id: "export-reports",
       title: "Generating & Exporting Reports",
       description: "Create detailed reports and export data for analysis",
       duration: "8:00",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      videoUrl: "",
     },
     {
       id: "performance-insights",
       title: "Performance Insights & Trends",
       description: "Identify weak topics, track improvements, and spot trends",
       duration: "9:45",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      videoUrl: "",
     },
   ],
 };
@@ -109,14 +109,26 @@ function VideoCard({ video }: VideoCardProps) {
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <CardHeader className="p-0">
-        <div className="relative aspect-video bg-muted">
-          <iframe
-            src={video.videoUrl}
-            title={video.title}
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+        <div className="relative aspect-video bg-muted flex items-center justify-center">
+          {video.videoUrl ? (
+            <iframe
+              src={video.videoUrl}
+              title={video.title}
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-3 p-8 text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <PlayCircle className="h-8 w-8 text-primary" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Video Coming Soon</p>
+                <p className="text-xs text-muted-foreground">This tutorial will be available shortly</p>
+              </div>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="p-4 space-y-2">
