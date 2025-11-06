@@ -117,7 +117,16 @@ export default function MobileAuthForm() {
           if (error.message.includes('Invalid login credentials')) {
             throw new Error('Invalid email or password');
           }
+          if (error.message.includes('Email not confirmed')) {
+            throw new Error('Please verify your email first. Check your inbox for the verification link.');
+          }
           throw error;
+        }
+
+        // Check if user's email is verified
+        if (data.user && !data.user.email_confirmed_at) {
+          await supabase.auth.signOut();
+          throw new Error('Please verify your email address before signing in. Check your inbox for the verification link.');
         }
 
         if (data.user) {
@@ -152,42 +161,35 @@ export default function MobileAuthForm() {
           throw error;
         }
 
+        // Don't auto-login - wait for email verification
         if (signUpData.user) {
-          const newSessionToken = generateSessionToken();
-          storeSessionToken(newSessionToken);
-          await setSessionToken(signUpData.user.id, newSessionToken);
-
-          // Process referral if code exists
+          // Store referral code for processing after verification
           if (referralCode) {
             try {
-              const { data: userProfile } = await supabase
-                .from('users')
-                .select('id')
-                .eq('auth_user_id', signUpData.user.id)
-                .single();
-
-              if (userProfile?.id) {
-                const { data: referralProcessed } = await supabase.rpc('process_referral_signup', {
-                  new_user_id: userProfile.id,
-                  referral_code_param: referralCode
-                });
-
-                if (referralProcessed) {
-                  toast({
-                    title: "Referral bonus earned!",
-                    description: "You've received welcome points!",
-                  });
-                }
-              }
+              localStorage.setItem('pending_referral', JSON.stringify({
+                code: referralCode,
+                userId: signUpData.user.id,
+                email: signupData.email
+              }));
             } catch (refError) {
-              console.error('Referral processing error:', refError);
+              console.error('Referral storage error:', refError);
             }
           }
         }
 
         toast({
-          title: "Account created!",
+          title: "Account created! 🎉",
           description: "Check your email to verify your account",
+          duration: 8000,
+        });
+
+        // Clear form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          password: '',
+          confirmPassword: ''
         });
 
         setIsLogin(true);

@@ -14,6 +14,41 @@ export default function Auth() {
   useEffect(() => {
     const checkSchoolStatus = async () => {
       if (user && !loading && userRole !== null) {
+        // Process pending referral if exists
+        try {
+          const pendingReferral = localStorage.getItem('pending_referral');
+          if (pendingReferral) {
+            const referralData = JSON.parse(pendingReferral);
+            
+            // Check if this is the user who just verified
+            if (referralData.userId === user.id) {
+              const { data: userProfile } = await supabase
+                .from('users')
+                .select('id')
+                .eq('auth_user_id', user.id)
+                .maybeSingle();
+
+              if (userProfile?.id) {
+                const { data: referralProcessed } = await supabase.rpc('process_referral_signup', {
+                  new_user_id: userProfile.id,
+                  referral_code_param: referralData.code
+                });
+
+                if (referralProcessed) {
+                  // Show success toast would go here but we're in useEffect
+                  console.log('Referral processed successfully');
+                }
+              }
+              
+              // Clear the pending referral
+              localStorage.removeItem('pending_referral');
+            }
+          }
+        } catch (error) {
+          console.error('Error processing pending referral:', error);
+          localStorage.removeItem('pending_referral');
+        }
+
         // Redirect based on role
         if (isAdmin) {
           navigate('/admin', { replace: true });
@@ -38,7 +73,7 @@ export default function Auth() {
     };
     
     checkSchoolStatus();
-  }, [user, loading, userRole, isAdmin, isSchoolAdmin, navigate]);
+  }, [user, loading, userRole, isAdmin, isSchoolAdmin, navigate, userProfile]);
 
   if (loading) {
     return (

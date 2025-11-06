@@ -168,7 +168,17 @@ export default function AuthForm() {
           if (error.message.includes('Invalid login credentials')) {
             throw new Error('Invalid email or password. Please check your credentials and try again.');
           }
+          if (error.message.includes('Email not confirmed')) {
+            throw new Error('Please verify your email address first. Check your inbox for the verification link we sent you.');
+          }
           throw error;
+        }
+
+        // Check if user's email is verified
+        if (data.user && !data.user.email_confirmed_at) {
+          // Sign out the user
+          await supabase.auth.signOut();
+          throw new Error('Please verify your email address before signing in. Check your inbox for the verification link.');
         }
 
         if (data.user) {
@@ -220,15 +230,9 @@ export default function AuthForm() {
           throw new Error(`Account creation failed: ${error.message}`);
         }
 
-        // Generate and store session token for new user
+        // Don't auto-login - wait for email verification
         if (signUpData.user) {
-          const newSessionToken = generateSessionToken();
-          storeSessionToken(newSessionToken);
-          
-          // Update session token in database
-          await setSessionToken(signUpData.user.id, newSessionToken);
-
-          // Send welcome email
+          // Send welcome email (only if signup succeeded)
           try {
             await supabase.functions.invoke('send-welcome-email', {
               body: {
@@ -243,38 +247,38 @@ export default function AuthForm() {
             // Don't block signup if email fails
           }
 
-          // Process referral if code exists
+          // Store referral code for processing after verification
           if (referralCode) {
             try {
-              const { data: userProfile } = await supabase
-                .from('users')
-                .select('id')
-                .eq('auth_user_id', signUpData.user.id)
-                .single();
-
-              if (userProfile?.id) {
-                const { data: referralProcessed } = await supabase.rpc('process_referral_signup', {
-                  new_user_id: userProfile.id,
-                  referral_code_param: referralCode
-                });
-
-                if (referralProcessed) {
-                  toast({
-                    title: "Referral bonus earned!",
-                    description: "You've received welcome points for joining with a referral code.",
-                  });
-                }
-              }
+              // Store referral code in local storage to process after email verification
+              localStorage.setItem('pending_referral', JSON.stringify({
+                code: referralCode,
+                userId: signUpData.user.id,
+                email: signupData.email
+              }));
             } catch (refError) {
-              console.error('Referral processing error:', refError);
-              // Don't block signup if referral processing fails
+              console.error('Referral storage error:', refError);
             }
           }
         }
 
         toast({
-          title: "Account created successfully!",
-          description: "Please check your email and click the verification link to activate your account.",
+          title: "Account created successfully! 🎉",
+          description: "Please check your email inbox and click the verification link to activate your account. The email should arrive within a few minutes.",
+          duration: 8000,
+        });
+
+        // Clear the form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '+234',
+          examType: '',
+          currentClass: '',
+          password: '',
+          confirmPassword: '',
+          agreedToTerms: false
         });
 
         setIsLogin(true);

@@ -133,7 +133,7 @@ export default function SchoolRegistration() {
       // Ensure no active session interferes with sign up
       try { await supabase.auth.signOut(); } catch {}
 
-      // Create auth user with auto-confirm for schools (no email verification delay)
+      // Create auth user with email verification required
       const { data: signupData, error: authError } = await supabase.auth.signUp({
         email: formData.schoolEmail,
         password: formData.password,
@@ -150,8 +150,8 @@ export default function SchoolRegistration() {
 
       if (authError) throw authError;
 
-      // If user was created and session exists, proceed to login them immediately
-      if (signupData.user && signupData.session) {
+      // Store registration data for school creation after email verification
+      if (signupData.user) {
         // Send welcome email
         try {
           await supabase.functions.invoke('send-welcome-email', {
@@ -167,7 +167,6 @@ export default function SchoolRegistration() {
           // Don't block registration if email fails
         }
 
-        // Store registration data for school creation
         localStorage.setItem(
           'pendingSchoolRegistration',
           JSON.stringify({
@@ -180,27 +179,11 @@ export default function SchoolRegistration() {
             adminPhone: formData.adminPhone,
           })
         );
-
-        toast.success("Registration successful! Redirecting to subscription...");
-        navigate("/school-subscription");
-        return;
       }
 
-      // If we reach here, email confirmation is required
-      localStorage.setItem(
-        'pendingSchoolRegistration',
-        JSON.stringify({
-          schoolName: formData.schoolName,
-          schoolEmail: formData.schoolEmail,
-          schoolPhone: formData.schoolPhone,
-          schoolAddress: formData.schoolAddress || null,
-          state: formData.state || null,
-          adminFullName: formData.adminFullName,
-          adminPhone: formData.adminPhone,
-        })
-      );
-
-      toast.success("Registration successful! Please check your email to verify your account.");
+      toast.success("Registration successful! Please check your email to verify your account before proceeding.", {
+        duration: 8000,
+      });
       navigate("/school-verification-pending");
 
     } catch (error: any) {
