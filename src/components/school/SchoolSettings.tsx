@@ -85,11 +85,15 @@ export default function SchoolSettings({ schoolData, onUpdate }: Props) {
 
     setUploading(true);
     try {
-      // Delete old logo if exists
+      // Delete old logo if exists (strip cache params)
       if (formData.logo_url) {
-        const oldPath = formData.logo_url.split("/object/public/school-logos/")[1];
+        const cleanUrl = formData.logo_url.split("?")[0];
+        const oldPath = cleanUrl.split("/object/public/school-logos/")[1];
         if (oldPath) {
-          await supabase.storage.from("school-logos").remove([oldPath]);
+          const { error: removeError } = await supabase.storage.from("school-logos").remove([oldPath]);
+          if (removeError) {
+            console.warn("Could not delete previous logo:", removeError.message);
+          }
         }
       }
 
@@ -136,9 +140,15 @@ export default function SchoolSettings({ schoolData, onUpdate }: Props) {
 
     setUploading(true);
     try {
-      // Delete from storage
-      const path = formData.logo_url.split("/").slice(-2).join("/");
-      await supabase.storage.from("school-logos").remove([path]);
+      // Delete from storage (strip cache params)
+      const cleanUrl = formData.logo_url.split("?")[0];
+      const path = cleanUrl.split("/object/public/school-logos/")[1];
+      if (path) {
+        const { error: removeError } = await supabase.storage.from("school-logos").remove([path]);
+        if (removeError) {
+          throw removeError;
+        }
+      }
 
       // Update database
       const { error } = await supabase
