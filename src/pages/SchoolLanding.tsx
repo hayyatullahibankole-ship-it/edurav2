@@ -78,6 +78,37 @@ export default function SchoolLanding() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header Navigation */}
+      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="h-8 w-8 text-primary" />
+              <span className="text-xl font-bold">Edura Schools</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost"
+                onClick={() => navigate("/")}
+              >
+                <Home className="h-4 w-4 mr-2" />
+                Edura Home
+              </Button>
+              <Button 
+                variant="ghost"
+                onClick={() => navigate("/school-login")}
+              >
+                Sign In
+              </Button>
+              <Button 
+                onClick={() => navigate("/school-registration")}
+              >
+                Get Started
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
 
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-primary/5 to-secondary/5">
