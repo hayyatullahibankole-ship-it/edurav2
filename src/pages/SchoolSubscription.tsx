@@ -282,7 +282,13 @@ export default function SchoolSubscription() {
       const paymentRef = await createSubscriptionPayment(
         `School Subscription - ${studentCount} students`,
         user.email,
-        totalAmount
+        totalAmount,
+        {
+          student_seats: studentCount,
+          price_per_student: pricePerStudent,
+          school_id: schoolData.id,
+          admin_auth_id: user.id
+        }
       );
 
       // Store subscription details for verification

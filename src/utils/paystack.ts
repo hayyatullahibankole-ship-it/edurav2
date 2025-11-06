@@ -71,7 +71,17 @@ export const initializePaystackPayment = async (payment: PaystackPayment) => {
 /**
  * Create subscription payment
  */
-export const createSubscriptionPayment = async (planType: string, userEmail: string, amount: number) => {
+export const createSubscriptionPayment = async (
+  planType: string, 
+  userEmail: string, 
+  amount: number,
+  metadata?: {
+    student_seats?: number;
+    price_per_student?: number;
+    school_id?: string;
+    admin_auth_id?: string;
+  }
+) => {
   // Initialize Paystack payment
   const reference = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
@@ -84,9 +94,7 @@ export const createSubscriptionPayment = async (planType: string, userEmail: str
       metadata: {
         plan_type: planType,
         subscription: true,
-        student_seats: planType.includes('School') ? parseInt(planType.split('-')[1]) || 50 : undefined,
-        price_per_student: undefined,
-        admin_auth_id: undefined
+        ...metadata
       }
     });
     
