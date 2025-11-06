@@ -50,6 +50,7 @@ import SystemConfig from '@/components/admin/SystemConfig';
 import PricingManager from '@/components/admin/PricingManager';
 import BlogManager from '@/components/admin/BlogManager';
 import CustomerCommunications from '@/components/admin/CustomerCommunications';
+import WelcomeEmailSender from '@/components/admin/WelcomeEmailSender';
 import StudyHubManager from '@/components/admin/StudyHubManager';
 import ForumManager from '@/components/admin/ForumManager';
 import SchoolManagement from '@/components/admin/SchoolManagement';
@@ -565,7 +566,12 @@ export default function AdminPortal() {
 {activeSection === 'schools' && <SchoolManagement />}
 {activeSection === 'blog' && <BlogManager />}
           
-          {activeSection === 'communications' && <CustomerCommunications users={users} />}
+          {activeSection === 'communications' && (
+            <div className="space-y-6">
+              <WelcomeEmailSender />
+              <CustomerCommunications users={users} />
+            </div>
+          )}
           
           {activeSection === 'study-hub' && <StudyHubManager />}
           
