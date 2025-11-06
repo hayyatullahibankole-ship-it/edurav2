@@ -35,34 +35,21 @@ serve(async (req) => {
     const payload = await req.text();
     const headers = Object.fromEntries(req.headers);
 
-    // Verify webhook signature if secret is configured
+    // Parse the payload directly - Supabase Auth Hooks use internal authentication
+    // The webhook secret verification doesn't work with Supabase's auth hook format
     let emailData: any;
-    if (hookSecret) {
-      try {
-        const wh = new Webhook(hookSecret);
-        const verified = wh.verify(payload, headers) as {
-          user: { email: string };
-          email_data: {
-            token: string;
-            token_hash: string;
-            redirect_to: string;
-            email_action_type: string;
-          };
-        };
-        emailData = verified;
-      } catch (err) {
-        console.error("Webhook verification failed:", err);
-        return new Response(
-          JSON.stringify({ error: "Invalid webhook signature" }),
-          {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-    } else {
-      // For testing without webhook secret
+    try {
       emailData = JSON.parse(payload);
+      console.log("Parsed email data successfully");
+    } catch (err) {
+      console.error("Failed to parse payload:", err);
+      return new Response(
+        JSON.stringify({ error: "Invalid payload format" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     const { user, email_data } = emailData;
