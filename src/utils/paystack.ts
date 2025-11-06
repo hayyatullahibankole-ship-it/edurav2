@@ -13,20 +13,38 @@ const PaystackPaymentSchema = z.object({
 
 export type PaystackPayment = z.infer<typeof PaystackPaymentSchema>;
 
-// Function to get Paystack public key from database
+// Function to get Paystack public key from database (env-aware)
 const getPaystackPublicKey = async (): Promise<string> => {
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const isStaging = hostname.includes('lovableproject.com') || hostname.includes('localhost') || hostname.includes('127.0.0.1');
+  const keyName = isStaging ? 'paystack_public_key_test' : 'paystack_public_key';
+
+  // Try environment-specific key first
   const { data, error } = await supabase
     .from('system_settings')
     .select('value')
-    .eq('key', 'paystack_public_key')
+    .eq('key', keyName)
     .eq('is_public', true)
-    .single();
-    
-  if (error || !data) {
-    throw new Error('Payment system configuration error. Please contact support.');
+    .maybeSingle();
+
+  if (data?.value) return data.value as string;
+
+  // Fallbacks
+  if (isStaging) {
+    // If test key missing, fallback to live so flow can continue, but warn
+    const { data: live } = await supabase
+      .from('system_settings')
+      .select('value')
+      .eq('key', 'paystack_public_key')
+      .eq('is_public', true)
+      .maybeSingle();
+    if (live?.value) {
+      console.warn('[Paystack] Using LIVE key on staging. Add system_settings key "paystack_public_key_test" for safer testing.');
+      return live.value as string;
+    }
   }
-  
-  return data.value;
+
+  throw new Error('Paystack key not configured. Please set system_settings "paystack_public_key" (and optional "paystack_public_key_test" for staging).');
 };
 
 /**
