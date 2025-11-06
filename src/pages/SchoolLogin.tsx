@@ -70,67 +70,82 @@ export default function SchoolLogin() {
       if (error) throw error;
 
       if (data.user) {
-        // Get user record from database
-        const { data: userData } = await supabase
+        // Get or create user record from database
+        let { data: userData } = await supabase
           .from("users")
           .select("id")
           .eq("auth_user_id", data.user.id)
           .single();
 
-        if (userData) {
-          // Check if school record exists and get is_active status
-          const { data: existingSchool } = await supabase
-            .from("schools")
-            .select("id, is_active")
-            .eq("admin_user_id", userData.id)
+        // If user profile doesn't exist, create it
+        if (!userData) {
+          const { data: newUser, error: userError } = await supabase
+            .from("users")
+            .insert({
+              auth_user_id: data.user.id,
+              email: data.user.email,
+              full_name: data.user.user_metadata?.full_name || "School Admin",
+            })
+            .select()
             .single();
 
-          if (!existingSchool) {
-            // Check for pending registration data
-            const pendingData = localStorage.getItem('pendingSchoolRegistration');
-            
-            // Create school record directly (using any to bypass type issues)
-            const { data: newSchool, error: schoolError } = await (supabase as any)
-              .from("schools")
-              .insert({
-                name: pendingData ? JSON.parse(pendingData).schoolName : "Akboy Hub",
-                email: formData.email,
-                phone: pendingData ? JSON.parse(pendingData).schoolPhone : "08011288901",
-                address: pendingData ? JSON.parse(pendingData).schoolAddress : "Lagos",
-                state: pendingData ? JSON.parse(pendingData).state : "Lagos",
-                school_code: `SCH-${Date.now().toString().slice(-8)}`,
-                type: "secondary",
-                admin_user_id: userData.id,
-                max_students: 50,
-                students_added: 0,
-                is_active: false,
-                email_verified: true,
-              })
-              .select()
-              .single();
-
-            if (schoolError) {
-              console.error("School creation error:", schoolError);
-              toast.error("School record created. Please complete subscription to activate.");
-            } else {
-              localStorage.removeItem('pendingSchoolRegistration');
-              toast.success("School account created! Please complete subscription.");
-            }
-            // Redirect to subscription page since school is not active
-            navigate("/school-subscription");
+          if (userError) {
+            console.error("Error creating user profile:", userError);
+            toast.error("Error creating user profile. Please contact support.");
             return;
           }
-
-          // Check if school subscription is active
-          if (!existingSchool.is_active) {
-            toast.info("Please complete your school subscription to continue.");
-            navigate("/school-subscription");
-            return;
-          }
-
-          toast.success("Login successful!");
+          userData = newUser;
         }
-        
+
+        // Check if school record exists and get is_active status
+        const { data: existingSchool } = await supabase
+          .from("schools")
+          .select("id, is_active")
+          .eq("admin_user_id", userData.id)
+          .single();
+
+        if (!existingSchool) {
+          // Check for pending registration data
+          const pendingData = localStorage.getItem('pendingSchoolRegistration');
+          
+          // Create school record
+          const { error: schoolError } = await (supabase as any)
+            .from("schools")
+            .insert({
+              name: pendingData ? JSON.parse(pendingData).schoolName : "My School",
+              email: formData.email,
+              phone: pendingData ? JSON.parse(pendingData).schoolPhone : "",
+              address: pendingData ? JSON.parse(pendingData).schoolAddress : "",
+              state: pendingData ? JSON.parse(pendingData).state : "",
+              school_code: `SCH-${Date.now().toString().slice(-8)}`,
+              type: "secondary",
+              admin_user_id: userData.id,
+              max_students: 50,
+              students_added: 0,
+              is_active: false,
+              email_verified: true,
+            })
+            .select()
+            .single();
+
+          if (schoolError) {
+            console.error("School creation error:", schoolError);
+          }
+          
+          localStorage.removeItem('pendingSchoolRegistration');
+          toast.info("Please complete your school subscription to continue.");
+          navigate("/school-subscription");
+          return;
+        }
+
+        // Check if school subscription is active
+        if (!existingSchool.is_active) {
+          toast.info("Please complete your school subscription to continue.");
+          navigate("/school-subscription");
+          return;
+        }
+
+        toast.success("Login successful!");
         navigate("/school-dashboard");
       }
     } catch (error: any) {
