@@ -10,7 +10,7 @@ import { Loader2, Users, CreditCard, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
 import { createSubscriptionPayment } from "@/utils/paystack";
-
+import { verifyPaymentManually } from "@/utils/manualPaymentVerification";
 export default function SchoolSubscription() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -20,7 +20,9 @@ export default function SchoolSubscription() {
   const [pricePerStudent, setPricePerStudent] = useState(1000);
   const [totalAmount, setTotalAmount] = useState(1000);
   const [schoolData, setSchoolData] = useState<any>(null);
-
+  const [verifying, setVerifying] = useState(false);
+  const [verifyRef, setVerifyRef] = useState("");
+  const [lastRef, setLastRef] = useState<string | null>(null);
   useEffect(() => {
     if (!user?.id) {
       toast.error("Please log in to continue");
@@ -52,6 +54,20 @@ export default function SchoolSubscription() {
         el && el.parentElement?.removeChild(el);
       }
     };
+  }, []);
+
+  // Prefill last payment reference if available
+  useEffect(() => {
+    try {
+      const pending = localStorage.getItem('pending_school_subscription');
+      if (pending) {
+        const parsed = JSON.parse(pending);
+        if (parsed?.reference) {
+          setLastRef(parsed.reference);
+          setVerifyRef(parsed.reference);
+        }
+      }
+    } catch {}
   }, []);
 
   const fetchSchoolData = async () => {
@@ -338,6 +354,31 @@ export default function SchoolSubscription() {
     }
   };
 
+  const handleManualVerify = async () => {
+    const ref = verifyRef || lastRef || "";
+    if (!ref) {
+      toast.error("Enter your Paystack reference to verify");
+      return;
+    }
+    setVerifying(true);
+    try {
+      const result = await verifyPaymentManually(ref);
+      if ((result as any)?.success) {
+        toast.success("Payment verified. Redirecting to dashboard...");
+        setTimeout(() => {
+          navigate("/school-dashboard");
+        }, 1200);
+      } else {
+        toast.error("Verification failed. Please try again or contact support.");
+      }
+    } catch (e: any) {
+      console.error("Manual verification error", e);
+      toast.error(e?.message || "Could not verify payment");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   if (fetchingSchool) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center">
@@ -475,6 +516,30 @@ export default function SchoolSubscription() {
                 </>
               )}
             </Button>
+
+            <div className="space-y-3">
+              <div className="text-center text-sm text-muted-foreground">Already paid?</div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter Paystack reference"
+                  value={verifyRef}
+                  onChange={(e) => setVerifyRef(e.target.value)}
+                />
+                <Button variant="outline" onClick={handleManualVerify} disabled={verifying || !verifyRef}>
+                  {verifying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Verify payment
+                </Button>
+              </div>
+              {lastRef && (
+                <button
+                  type="button"
+                  className="text-xs underline text-primary"
+                  onClick={() => setVerifyRef(lastRef)}
+                >
+                  Use last payment reference
+                </button>
+              )}
+            </div>
 
             <p className="text-xs text-center text-muted-foreground">
               By continuing, you agree to our subscription terms. Payment is secure via Paystack.
