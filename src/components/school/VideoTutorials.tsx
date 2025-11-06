@@ -1,9 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlayCircle, Download, Clock, BookOpen } from "lucide-react";
+import { PlayCircle, Download, Clock, BookOpen, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tutorialVideos } from "@/config/tutorialVideos";
+import TutorialDocumentation from "./TutorialDocumentation";
+import { useState } from "react";
 
 interface VideoTutorial {
   id: string;
@@ -63,6 +65,8 @@ function VideoCard({ video }: VideoCardProps) {
 }
 
 export default function VideoTutorials() {
+  const [viewMode, setViewMode] = useState<"videos" | "docs">("videos");
+
   const handleDownloadManual = () => {
     // This would trigger the download of a comprehensive PDF manual
     window.open("/school-manual.pdf", "_blank");
@@ -73,16 +77,59 @@ export default function VideoTutorials() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Video Tutorials</h2>
+          <h2 className="text-2xl font-bold">Help & Tutorials</h2>
           <p className="text-muted-foreground mt-1">
             Step-by-step guides to help you master the Edura platform
           </p>
         </div>
-        <Button onClick={handleDownloadManual} variant="outline" size="lg">
-          <Download className="h-4 w-4 mr-2" />
-          Download Manual (PDF)
+        <div className="flex gap-2">
+          <Button onClick={handleDownloadManual} variant="outline" size="lg">
+            <Download className="h-4 w-4 mr-2" />
+            Download Manual (PDF)
+          </Button>
+        </div>
+      </div>
+
+      {/* View Mode Toggle */}
+      <div className="flex gap-2 p-1 bg-muted rounded-lg w-fit">
+        <Button
+          variant={viewMode === "videos" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setViewMode("videos")}
+          className="gap-2"
+        >
+          <PlayCircle className="h-4 w-4" />
+          Video Tutorials
+        </Button>
+        <Button
+          variant={viewMode === "docs" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setViewMode("docs")}
+          className="gap-2"
+        >
+          <FileText className="h-4 w-4" />
+          Written Guides
         </Button>
       </div>
+
+      {viewMode === "docs" ? (
+        <TutorialDocumentation />
+      ) : (
+        <>
+          {/* Alert about documentation */}
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3">
+                <FileText className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-sm">Prefer reading?</p>
+                  <p className="text-sm text-muted-foreground">
+                    Switch to Written Guides above for comprehensive step-by-step documentation
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
       {/* Quick Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
@@ -189,34 +236,39 @@ export default function VideoTutorials() {
         </TabsContent>
       </Tabs>
 
-      {/* Additional Resources */}
-      <Card className="bg-primary/5 border-primary/20">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            Need More Help?
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Can't find what you're looking for? We're here to help!
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20need%20help%20with%20Edura%20Schools", "_blank")}
-            >
-              Contact Support
-            </Button>
-            <Button variant="outline">
-              View Documentation
-            </Button>
-            <Button variant="outline">
-              Schedule a Demo
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          {/* Additional Resources */}
+          <Card className="bg-primary/5 border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                Need More Help?
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Can't find what you're looking for? We're here to help!
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20need%20help%20with%20Edura%20Schools", "_blank")}
+                >
+                  Contact Support
+                </Button>
+                <Button variant="outline" onClick={() => setViewMode("docs")}>
+                  View Documentation
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => window.open("https://wa.me/2347050757085?text=I'd%20like%20to%20schedule%20a%20demo", "_blank")}
+                >
+                  Schedule a Demo
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }
