@@ -154,40 +154,56 @@ serve(async (req) => {
       
       // Check if this is a school subscription
       if (planType && planType.includes('School Subscription')) {
-        // Get pending school subscription from metadata
-        const { data: schoolSubs } = await supabaseClient
-          .from('school_subscriptions')
+        console.log('Processing school subscription activation...');
+        console.log('Transaction metadata:', transaction.metadata);
+        
+        // Find school from user - userRecord.id is the profile ID
+        const { data: school, error: schoolError } = await supabaseClient
+          .from('schools')
           .select('*')
-          .eq('payment_reference', reference)
+          .eq('admin_user_id', userRecord?.id)
           .maybeSingle();
 
-        if (!schoolSubs) {
-          // Try to get from pending data
-          console.log('Creating school subscription from payment...');
-          
-          // Find school from user
-          const { data: school } = await supabaseClient
-            .from('schools')
-            .select('*')
-            .eq('admin_user_id', userRecord?.id)
+        console.log('Found school:', school, 'Error:', schoolError);
+
+        if (school) {
+          // Calculate end date (3 months from now)
+          const startDate = new Date();
+          const endDate = new Date();
+          endDate.setMonth(endDate.getMonth() + 3);
+
+          // Check if subscription already exists for this school
+          const { data: existingSub } = await supabaseClient
+            .from('school_subscriptions')
+            .select('id, status')
+            .eq('school_id', school.id)
+            .eq('payment_reference', reference)
             .maybeSingle();
 
-          if (school) {
-            // Calculate end date (3 months from now)
-            const endDate = new Date();
-            endDate.setMonth(endDate.getMonth() + 3);
-
-            // Create school subscription
+          if (existingSub) {
+            console.log('Updating existing subscription:', existingSub.id);
+            // Update existing subscription
+            await supabaseClient
+              .from('school_subscriptions')
+              .update({ 
+                status: 'ACTIVE',
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString()
+              })
+              .eq('id', existingSub.id);
+          } else {
+            console.log('Creating new school subscription...');
+            // Create new school subscription - use profile ID not auth ID
             const { error: subError } = await supabaseClient
               .from('school_subscriptions')
               .insert({
                 school_id: school.id,
                 student_seats: transaction.metadata.student_seats || 50,
-                price_per_student: transaction.metadata.price_per_student || 0,
+                price_per_student: transaction.metadata.price_per_student || 1000,
                 total_amount: transaction.amount / 100,
                 status: 'ACTIVE',
-                admin_user_id: transaction.metadata.admin_auth_id || null,
-                start_date: new Date().toISOString(),
+                admin_user_id: userRecord?.id, // Use profile ID, not auth ID
+                start_date: startDate.toISOString(),
                 end_date: endDate.toISOString(),
                 payment_reference: reference,
                 auto_renew: false
@@ -196,30 +212,26 @@ serve(async (req) => {
             if (subError) {
               console.error('Error creating school subscription:', subError);
             } else {
-              // Activate the school
-              await supabaseClient
-                .from('schools')
-                .update({ is_active: true })
-                .eq('id', school.id);
-              
-              console.log('School subscription activated successfully');
+              console.log('School subscription created successfully');
             }
           }
-        } else {
-          // Update existing subscription to ACTIVE
-          await supabaseClient
-            .from('school_subscriptions')
-            .update({ 
-              status: 'ACTIVE',
-              start_date: new Date().toISOString()
-            })
-            .eq('id', schoolSubs.id);
 
-          // Activate the school
-          await supabaseClient
+          // Activate the school regardless of subscription creation result
+          const { error: activateError } = await supabaseClient
             .from('schools')
-            .update({ is_active: true })
-            .eq('id', schoolSubs.school_id);
+            .update({ 
+              is_active: true,
+              max_students: transaction.metadata.student_seats || school.max_students
+            })
+            .eq('id', school.id);
+          
+          if (activateError) {
+            console.error('Error activating school:', activateError);
+          } else {
+            console.log('School activated successfully:', school.id);
+          }
+        } else {
+          console.error('School not found for user:', userRecord?.id);
         }
       } else {
         // Regular user subscription

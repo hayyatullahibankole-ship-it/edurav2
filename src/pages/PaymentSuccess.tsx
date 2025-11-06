@@ -25,31 +25,37 @@ const PaymentSuccess = () => {
     try {
       setVerifying(true);
       
+      console.log('Verifying payment for reference:', reference);
+      console.log('User ID:', user?.id);
+      
       // Call Supabase edge function to verify payment
       const { data, error } = await supabase.functions.invoke('verify-payment', {
         body: { reference, userId: user?.id }
       });
 
+      console.log('Verification response:', data, 'Error:', error);
+
       if (error) {
         console.error('Payment verification error:', error);
-        toast.error('Failed to verify payment');
+        toast.error('Failed to verify payment. Please contact support with reference: ' + reference);
         return;
       }
 
       setPaymentData(data);
-      toast.success('Payment verified successfully!');
+      toast.success('Payment verified successfully! Your subscription is now active.');
       
-      // Check if this is a school subscription and auto-redirect after 2 seconds
+      // Check if this is a school subscription and auto-redirect after 3 seconds
       const pendingSchoolSub = localStorage.getItem('pending_school_subscription');
       if (pendingSchoolSub) {
+        toast.success('Redirecting to school dashboard...');
         setTimeout(() => {
           localStorage.removeItem('pending_school_subscription');
           navigate('/school-dashboard');
-        }, 2000);
+        }, 3000);
       }
     } catch (error) {
       console.error('Error verifying payment:', error);
-      toast.error('Payment verification failed');
+      toast.error('Payment verification failed. Please contact support with reference: ' + reference);
     } finally {
       setVerifying(false);
     }
@@ -192,6 +198,14 @@ const PaymentSuccess = () => {
 
           <div className="border-t p-6">
             <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={verifyPayment}
+                variant="outline"
+                className="flex-1"
+                disabled={verifying}
+              >
+                {verifying ? 'Verifying...' : 'Verify Payment Again'}
+              </Button>
               <Button
                 onClick={handlePrint}
                 variant="outline"
