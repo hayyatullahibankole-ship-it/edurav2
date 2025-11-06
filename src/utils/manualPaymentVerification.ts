@@ -12,11 +12,22 @@ export const verifyPaymentManually = async (reference: string) => {
       throw new Error('User not authenticated');
     }
 
+    // Try to include schoolId from pending local data to ensure correct activation
+    let schoolId: string | undefined;
+    try {
+      const pending = localStorage.getItem('pending_school_subscription');
+      if (pending) {
+        const parsed = JSON.parse(pending);
+        if (parsed?.school_id) schoolId = parsed.school_id;
+      }
+    } catch {}
+
     // Call the verify-payment edge function
     const { data, error } = await supabase.functions.invoke('verify-payment', {
       body: { 
         reference,
-        userId: currentUser.user.id
+        userId: currentUser.user.id,
+        schoolId
       }
     });
 

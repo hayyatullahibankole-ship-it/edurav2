@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { reference, userId } = await req.json();
+    const { reference, userId, schoolId } = await req.json();
     
     console.log('Payment verification request for:', reference, 'userId:', userId);
 
@@ -157,12 +157,31 @@ serve(async (req) => {
         console.log('Processing school subscription activation...');
         console.log('Transaction metadata:', transaction.metadata);
         
-        // Find school from user - userRecord.id is the profile ID
-        const { data: school, error: schoolError } = await supabaseClient
-          .from('schools')
-          .select('*')
-          .eq('admin_user_id', userRecord?.id)
-          .maybeSingle();
+        // Prefer explicit school_id from metadata/body; fallback to admin profile mapping
+        const metaSchoolId = transaction?.metadata?.school_id as string | undefined;
+        let school: any = null;
+        let schoolError: any = null;
+
+        if (metaSchoolId || schoolId) {
+          const targetId = metaSchoolId || schoolId;
+          console.log('Looking up school by provided id:', targetId);
+          const res = await supabaseClient
+            .from('schools')
+            .select('*')
+            .eq('id', targetId)
+            .maybeSingle();
+          school = res.data;
+          schoolError = res.error;
+        } else {
+          console.log('Looking up school by admin_user_id (profile id):', userRecord?.id);
+          const res = await supabaseClient
+            .from('schools')
+            .select('*')
+            .eq('admin_user_id', userRecord?.id)
+            .maybeSingle();
+          school = res.data;
+          schoolError = res.error;
+        }
 
         console.log('Found school:', school, 'Error:', schoolError);
 
