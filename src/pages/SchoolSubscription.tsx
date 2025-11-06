@@ -31,6 +31,26 @@ export default function SchoolSubscription() {
     fetchSchoolData();
   }, [user]);
 
+  // Load Paystack inline script so the subscribe button can open the payment modal
+  useEffect(() => {
+    let appended = false;
+    const src = 'https://js.paystack.co/v1/inline.js';
+    const existing = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement | null;
+    if (!existing) {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      document.body.appendChild(script);
+      appended = true;
+    }
+    return () => {
+      if (appended) {
+        const el = document.querySelector(`script[src="${src}"]`);
+        el && el.parentElement?.removeChild(el);
+      }
+    };
+  }, []);
+
   const fetchSchoolData = async () => {
     setFetchingSchool(true);
     try {
