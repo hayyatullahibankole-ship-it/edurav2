@@ -228,6 +228,21 @@ export default function AuthForm() {
           // Update session token in database
           await setSessionToken(signUpData.user.id, newSessionToken);
 
+          // Send welcome email
+          try {
+            await supabase.functions.invoke('send-welcome-email', {
+              body: {
+                userId: signUpData.user.id,
+                email: signupData.email,
+                firstName: signupData.firstName,
+                lastName: signupData.lastName
+              }
+            });
+          } catch (emailError) {
+            console.error('Welcome email error:', emailError);
+            // Don't block signup if email fails
+          }
+
           // Process referral if code exists
           if (referralCode) {
             try {

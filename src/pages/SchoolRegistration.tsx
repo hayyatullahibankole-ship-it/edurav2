@@ -152,6 +152,21 @@ export default function SchoolRegistration() {
 
       // If user was created and session exists, proceed to login them immediately
       if (signupData.user && signupData.session) {
+        // Send welcome email
+        try {
+          await supabase.functions.invoke('send-welcome-email', {
+            body: {
+              userId: signupData.user.id,
+              email: formData.schoolEmail,
+              firstName: formData.adminFullName.split(' ')[0],
+              lastName: formData.adminFullName.split(' ').slice(1).join(' ') || formData.adminFullName
+            }
+          });
+        } catch (emailError) {
+          console.error('Welcome email error:', emailError);
+          // Don't block registration if email fails
+        }
+
         // Store registration data for school creation
         localStorage.setItem(
           'pendingSchoolRegistration',

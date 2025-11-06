@@ -246,6 +246,27 @@ serve(async (req) => {
 
     console.log(`Student created successfully: ${username}`);
 
+    // Send welcome email to the student
+    try {
+      const welcomeEmailResponse = await supabaseAdmin.functions.invoke('send-welcome-email', {
+        body: {
+          userId: finalUserId,
+          email: email,
+          firstName: fullName.split(' ')[0],
+          lastName: fullName.split(' ').slice(1).join(' ') || fullName
+        }
+      });
+
+      if (welcomeEmailResponse.error) {
+        console.error('Failed to send welcome email:', welcomeEmailResponse.error);
+      } else {
+        console.log('Welcome email sent successfully to:', email);
+      }
+    } catch (emailError) {
+      console.error('Welcome email error:', emailError);
+      // Don't block student creation if email fails
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
