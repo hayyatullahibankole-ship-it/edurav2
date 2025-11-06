@@ -403,7 +403,7 @@ export default function AdminPortal() {
               )}
 
               {/* System Metrics */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
                 <Card className="bg-slate-800 border-slate-700">
                   <CardContent className="p-4 sm:p-6">
                     <div className="flex items-center justify-between">
@@ -419,42 +419,42 @@ export default function AdminPortal() {
                 </Card>
 
                 <Card className="bg-slate-800 border-slate-700">
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-slate-400">Active Exams</p>
-                        <p className="text-3xl font-bold text-green-400">{stats.activeExams}</p>
+                        <p className="text-xs sm:text-sm text-slate-400">Active Exams</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-green-400">{stats.activeExams}</p>
                       </div>
-                      <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                        <BookOpen className="w-6 h-6 text-green-400" />
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                        <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card className="bg-slate-800 border-slate-700">
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-slate-400">Total Attempts</p>
-                        <p className="text-3xl font-bold text-purple-400">{stats.totalAttempts}</p>
+                        <p className="text-xs sm:text-sm text-slate-400">Total Attempts</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-purple-400">{stats.totalAttempts}</p>
                       </div>
-                      <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
-                        <Activity className="w-6 h-6 text-purple-400" />
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+                        <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card className="bg-slate-800 border-slate-700">
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-slate-400">Security Alerts</p>
-                        <p className="text-3xl font-bold text-red-400">{stats.suspiciousActivities}</p>
+                        <p className="text-xs sm:text-sm text-slate-400">Security Alerts</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-red-400">{stats.suspiciousActivities}</p>
                       </div>
-                      <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
-                        <AlertTriangle className="w-6 h-6 text-red-400" />
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+                        <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />
                       </div>
                     </div>
                   </CardContent>

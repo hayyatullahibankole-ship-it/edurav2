@@ -541,18 +541,18 @@ export default function AdminDashboard() {
         )}
 
         {/* Enhanced Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
           <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200 dark:from-blue-950/50 dark:to-blue-900/25 dark:border-blue-800">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Users</p>
-                  <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">{dashboardStats.totalUsers}</p>
+            <CardContent className="p-4 md:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">Total Users</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-blue-900 dark:text-blue-100">{dashboardStats.totalUsers}</p>
                   <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">+12% from last month</p>
                 </div>
-                <div className="relative">
-                  <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-                    <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div className="relative flex-shrink-0">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                    <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
               </div>
@@ -560,18 +560,18 @@ export default function AdminDashboard() {
           </Card>
           
           <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 to-green-100/50 border-green-200 dark:from-green-950/50 dark:to-green-900/25 dark:border-green-800">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Revenue</p>
-                  <p className="text-3xl font-bold text-green-900 dark:text-green-100">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">Total Revenue</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-green-900 dark:text-green-100 break-words">
                     ₦{dashboardStats.totalRevenue.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                   <p className="text-xs text-green-600 dark:text-green-400 mt-1">{dashboardStats.activeSubscriptions} active subs</p>
                 </div>
-                <div className="relative">
-                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                    <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div className="relative flex-shrink-0">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                    <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
                   </div>
                 </div>
               </div>
@@ -579,16 +579,16 @@ export default function AdminDashboard() {
           </Card>
           
           <Card className="relative overflow-hidden bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200 dark:from-purple-950/50 dark:to-purple-900/25 dark:border-purple-800">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Total Exams</p>
-                  <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">{dashboardStats.totalExams}</p>
+            <CardContent className="p-4 md:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-purple-700 dark:text-purple-300">Total Exams</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-purple-900 dark:text-purple-100">{dashboardStats.totalExams}</p>
                   <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">+5 new this week</p>
                 </div>
-                <div className="relative">
-                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
-                    <Trophy className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                <div className="relative flex-shrink-0">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+                    <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 dark:text-purple-400" />
                   </div>
                 </div>
               </div>
@@ -596,20 +596,20 @@ export default function AdminDashboard() {
           </Card>
           
           <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200 dark:from-orange-950/50 dark:to-orange-900/25 dark:border-orange-800">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Security Alerts</p>
-                  <p className="text-3xl font-bold text-orange-900 dark:text-orange-100">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-orange-700 dark:text-orange-300">Security Alerts</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-orange-900 dark:text-orange-100">
                     {dashboardStats.suspiciousActivities.length}
                   </p>
                   <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
                     {dashboardStats.suspiciousActivities.length === 0 ? 'All clear' : 'Needs attention'}
                   </p>
                 </div>
-                <div className="relative">
-                  <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
-                    <AlertTriangle className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                <div className="relative flex-shrink-0">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
+                    <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600 dark:text-orange-400" />
                   </div>
                 </div>
               </div>
@@ -618,34 +618,36 @@ export default function AdminDashboard() {
         </div>
 
         {/* Enhanced Admin Interface */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 md:space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <TabsList className="grid grid-cols-4 lg:grid-cols-11 w-full lg:w-auto bg-card border overflow-x-auto">
-              <TabsTrigger value="overview" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Overview</TabsTrigger>
-              <TabsTrigger value="users" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Users</TabsTrigger>
-              <TabsTrigger value="exams" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Exams</TabsTrigger>
-              <TabsTrigger value="questions" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Questions</TabsTrigger>
-              <TabsTrigger value="resources" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Resources</TabsTrigger>
-              <TabsTrigger value="subscriptions" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Subscriptions</TabsTrigger>
-              <TabsTrigger value="referrals" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Referrals</TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Analytics</TabsTrigger>
-              <TabsTrigger value="notifications" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Notifications</TabsTrigger>
-              <TabsTrigger value="security" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Security</TabsTrigger>
-              <TabsTrigger value="monitor" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium">Monitor</TabsTrigger>
-            </TabsList>
+            <div className="w-full overflow-x-auto">
+              <TabsList className="inline-flex w-auto min-w-full lg:min-w-0 bg-card border">
+                <TabsTrigger value="overview" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Overview</TabsTrigger>
+                <TabsTrigger value="users" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Users</TabsTrigger>
+                <TabsTrigger value="exams" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Exams</TabsTrigger>
+                <TabsTrigger value="questions" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Questions</TabsTrigger>
+                <TabsTrigger value="resources" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Resources</TabsTrigger>
+                <TabsTrigger value="subscriptions" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Subscriptions</TabsTrigger>
+                <TabsTrigger value="referrals" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Referrals</TabsTrigger>
+                <TabsTrigger value="analytics" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Analytics</TabsTrigger>
+                <TabsTrigger value="notifications" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Notifications</TabsTrigger>
+                <TabsTrigger value="security" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Security</TabsTrigger>
+                <TabsTrigger value="monitor" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Monitor</TabsTrigger>
+              </TabsList>
+            </div>
 
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleExportData}>
-                <Filter className="w-4 h-4 mr-2" />
-                Filter
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button variant="outline" size="sm" onClick={handleExportData} className="text-xs sm:text-sm">
+                <Filter className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Filter</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleExportData}>
-                <Download className="w-4 h-4 mr-2" />
-                Export
+              <Button variant="outline" size="sm" onClick={handleExportData} className="text-xs sm:text-sm">
+                <Download className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Export</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleFixMathNotation} disabled={loading}>
-                <Calculator className="w-4 h-4 mr-2" />
-                Fix Math
+              <Button variant="outline" size="sm" onClick={handleFixMathNotation} disabled={loading} className="text-xs sm:text-sm">
+                <Calculator className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Fix Math</span>
               </Button>
             </div>
           </div>
