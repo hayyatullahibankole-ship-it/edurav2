@@ -395,8 +395,8 @@ const Dashboard = () => {
             <TabsContent value="dashboard" className="space-y-8">
             {/* Stats Overview */}
             <div>
-              <h2 className="text-2xl font-bold mb-6">Your Performance</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Your Performance</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <Card className="border-border/50 hover:border-primary/50 transition-colors">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-3">
@@ -447,18 +447,18 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
               {/* Main Content */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-4 md:space-y-6">
                 {/* Quick Actions */}
                 {!isInstalledApp && (
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-xl">Start Practice</CardTitle>
+                      <CardTitle className="text-lg md:text-xl">Start Practice</CardTitle>
                       <CardDescription>Choose your exam type</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <ScheduleTestModal defaultExamType="jamb">
                           <Button size="lg" className="w-full h-auto py-4 flex-col gap-2">
                             <Play className="h-5 w-5" />
@@ -517,7 +517,7 @@ const Dashboard = () => {
                 {/* Premium Features */}
                 <div>
                   <h2 className="text-2xl font-bold mb-6">Explore Features</h2>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     {/* Study Hub */}
                     <Link to="/study-hub">
                       <Card className="group hover:shadow-md transition-shadow cursor-pointer h-full">

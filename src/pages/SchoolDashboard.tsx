@@ -298,7 +298,7 @@ export default function SchoolDashboard() {
                   </Card>
 
                   {/* Stats Grid */}
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                     <Card>
                       <CardHeader className="pb-2">
                         <CardDescription className="text-xs">Total Seats</CardDescription>
@@ -359,7 +359,7 @@ export default function SchoolDashboard() {
                   </div>
 
                   {/* Quick Actions + Engagement */}
-                  <div className="grid gap-4 lg:grid-cols-2">
+                  <div className="grid gap-3 md:gap-4 grid-cols-1 lg:grid-cols-2">
                     <QuickActions 
                       onAddStudent={() => setActiveTab("students")}
                       onViewReports={() => setActiveTab("reports")}
@@ -373,7 +373,7 @@ export default function SchoolDashboard() {
                   <PerformanceTrends schoolId={schoolData?.id} />
 
                   {/* Charts + Top Performers + Activity */}
-                  <div className="grid gap-4 lg:grid-cols-2">
+                  <div className="grid gap-3 md:gap-4 grid-cols-1 lg:grid-cols-2">
                     <div>
                       {schoolData?.id && <SchoolOverviewCharts schoolId={schoolData.id} />}
                     </div>
@@ -405,7 +405,7 @@ export default function SchoolDashboard() {
                     schoolName={schoolData.name}
                   />
                   
-                  <div className="grid gap-6 lg:grid-cols-2">
+                  <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
                     <ComparisonAnalytics schoolId={schoolData?.id} />
                     <div>
                       <SchoolReports schoolId={schoolData.id} />
