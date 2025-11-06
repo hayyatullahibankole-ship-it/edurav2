@@ -101,7 +101,7 @@ export const VerificationEmail = ({
             {verificationUrl}
           </Text>
           
-          {content.showFeatures && (
+          {content.showFeatures ? (
             <Section style={featuresSection}>
               <Text style={featuresTitle}>What you'll get with Edura:</Text>
               <Text style={featureItem}>✓ Unlimited access to JAMB, WAEC, and NECO past questions</Text>
@@ -110,7 +110,7 @@ export const VerificationEmail = ({
               <Text style={featureItem}>✓ Offline mode for studying anywhere, anytime</Text>
               <Text style={featureItem}>✓ Interactive CBT practice with real exam conditions</Text>
             </Section>
-          )}
+          ) : null}
           
           <Text style={footerText}>
             {content.disclaimer}
