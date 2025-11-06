@@ -133,8 +133,8 @@ export default function SchoolRegistration() {
       // Ensure no active session interferes with sign up
       try { await supabase.auth.signOut(); } catch {}
 
-      // Create auth user (may require email confirmation; user/session can be null)
-      const { error: authError } = await supabase.auth.signUp({
+      // Create auth user with auto-confirm for schools (no email verification delay)
+      const { data: signupData, error: authError } = await supabase.auth.signUp({
         email: formData.schoolEmail,
         password: formData.password,
         options: {
@@ -150,7 +150,28 @@ export default function SchoolRegistration() {
 
       if (authError) throw authError;
 
-      // Persist registration data locally for post-verification creation
+      // If user was created and session exists, proceed to login them immediately
+      if (signupData.user && signupData.session) {
+        // Store registration data for school creation
+        localStorage.setItem(
+          'pendingSchoolRegistration',
+          JSON.stringify({
+            schoolName: formData.schoolName,
+            schoolEmail: formData.schoolEmail,
+            schoolPhone: formData.schoolPhone,
+            schoolAddress: formData.schoolAddress || null,
+            state: formData.state || null,
+            adminFullName: formData.adminFullName,
+            adminPhone: formData.adminPhone,
+          })
+        );
+
+        toast.success("Registration successful! Redirecting to subscription...");
+        navigate("/school-subscription");
+        return;
+      }
+
+      // If we reach here, email confirmation is required
       localStorage.setItem(
         'pendingSchoolRegistration',
         JSON.stringify({
@@ -165,8 +186,6 @@ export default function SchoolRegistration() {
       );
 
       toast.success("Registration successful! Please check your email to verify your account.");
-      
-      // Navigate to a pending verification page
       navigate("/school-verification-pending");
 
     } catch (error: any) {
