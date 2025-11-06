@@ -17,6 +17,7 @@ interface Props {
 export default function SchoolSettings({ schoolData, onUpdate }: Props) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: schoolData?.name || "",
     email: schoolData?.email || "",
@@ -64,6 +65,12 @@ export default function SchoolSettings({ schoolData, onUpdate }: Props) {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Show instant preview
+    try {
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewUrl(objectUrl);
+    } catch {}
+
     // Validate file type
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
@@ -80,40 +87,45 @@ export default function SchoolSettings({ schoolData, onUpdate }: Props) {
     try {
       // Delete old logo if exists
       if (formData.logo_url) {
-        const oldPath = formData.logo_url.split("/").slice(-2).join("/");
-        await supabase.storage.from("school-logos").remove([oldPath]);
+        const oldPath = formData.logo_url.split("/object/public/school-logos/")[1];
+        if (oldPath) {
+          await supabase.storage.from("school-logos").remove([oldPath]);
+        }
       }
 
       // Upload new logo
       const fileExt = file.name.split(".").pop();
-      const fileName = `${schoolData.id}/logo.${fileExt}`;
-      const { error: uploadError, data } = await supabase.storage
+      const fileName = `${schoolData.id}/logo.${fileExt?.toLowerCase()}`;
+      const { error: uploadError } = await supabase.storage
         .from("school-logos")
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file, { upsert: true, cacheControl: '3600' });
 
       if (uploadError) throw uploadError;
 
-      // Get public URL with cache busting parameter
+      // Get public URL
       const { data: urlData } = supabase.storage
         .from("school-logos")
         .getPublicUrl(fileName);
 
-      const logoUrlWithCache = `${urlData.publicUrl}?t=${Date.now()}`;
+      const logoUrl = urlData.publicUrl;
+      const logoUrlWithCache = `${logoUrl}?t=${Date.now()}`;
 
       // Update database
       const { error: updateError } = await supabase
         .from("schools")
-        .update({ logo_url: urlData.publicUrl })
+        .update({ logo_url: logoUrl })
         .eq("id", schoolData.id);
 
       if (updateError) throw updateError;
 
-      setFormData((prev) => ({ ...prev, logo_url: logoUrlWithCache }));
+      setFormData((prev) => ({ ...prev, logo_url: logoUrl }));
+      setPreviewUrl(logoUrlWithCache);
       toast.success("Logo uploaded successfully");
       onUpdate();
     } catch (error: any) {
       console.error("Error uploading logo:", error);
-      toast.error("Failed to upload logo");
+      toast.error(error?.message || "Failed to upload logo");
+      setPreviewUrl(null);
     } finally {
       setUploading(false);
     }
@@ -225,11 +237,11 @@ export default function SchoolSettings({ schoolData, onUpdate }: Props) {
             <Label>School Logo</Label>
             <div className="flex items-center gap-4">
               <Avatar className="h-24 w-24 border-2">
-                {formData.logo_url ? (
+                {previewUrl || formData.logo_url ? (
                   <AvatarImage 
-                    src={`${formData.logo_url}${formData.logo_url.includes('?') ? '&' : '?'}t=${Date.now()}`} 
+                    src={(previewUrl || formData.logo_url) as string}
                     alt={formData.name}
-                    key={formData.logo_url}
+                    key={previewUrl || formData.logo_url}
                   />
                 ) : (
                   <AvatarFallback className="text-2xl">
