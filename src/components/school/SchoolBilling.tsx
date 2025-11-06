@@ -25,8 +25,8 @@ export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) 
 
   const fetchBillingData = async () => {
     try {
-      // Fetch subscriptions (using any to bypass type issues temporarily)
-      const { data: subsData, error: subsError } = await (supabase as any)
+      // Fetch subscriptions
+      const { data: subsData, error: subsError } = await supabase
         .from("school_subscriptions")
         .select("*")
         .eq("school_id", schoolId)
@@ -35,15 +35,21 @@ export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) 
       if (subsError) throw subsError;
       setSubscriptions(subsData || []);
 
-      // Fetch payments (using any to bypass type issues temporarily)
-      const { data: paymentsData, error: paymentsError } = await (supabase as any)
-        .from("school_payments")
-        .select("*")
-        .eq("school_id", schoolId)
-        .order("created_at", { ascending: false });
+      // Fetch payments from transactions table using payment_reference from subscriptions
+      const paymentRefs = subsData?.map(s => s.payment_reference).filter(Boolean) || [];
+      
+      if (paymentRefs.length > 0) {
+        const { data: paymentsData, error: paymentsError } = await supabase
+          .from("transactions")
+          .select("*")
+          .in("gateway_reference", paymentRefs)
+          .order("created_at", { ascending: false });
 
-      if (paymentsError) throw paymentsError;
-      setPayments(paymentsData || []);
+        if (paymentsError) throw paymentsError;
+        setPayments(paymentsData || []);
+      } else {
+        setPayments([]);
+      }
     } catch (error) {
       console.error("Error fetching billing data:", error);
       toast.error("Failed to load billing data");
@@ -77,7 +83,7 @@ export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) 
               <span className="text-muted-foreground">Student Slots:</span>
               <span className="font-semibold">{currentStudentLimit}</span>
             </div>
-            {subscriptions.length > 0 && subscriptions[0].status === 'active' && (
+            {subscriptions.length > 0 && subscriptions[0].status === 'ACTIVE' && (
               <>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Price per Student:</span>
@@ -109,44 +115,65 @@ export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) 
               <p className="text-muted-foreground">No payments yet</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Reference</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payments.map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell>
-                      {new Date(payment.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {payment.payment_reference}
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      ₦{Number(payment.amount).toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          payment.status === "success"
-                            ? "default"
-                            : payment.status === "pending"
-                            ? "secondary"
-                            : "destructive"
-                        }
-                      >
-                        {payment.status}
-                      </Badge>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="whitespace-nowrap">Date & Time</TableHead>
+                    <TableHead className="whitespace-nowrap">Reference</TableHead>
+                    <TableHead className="whitespace-nowrap">Amount</TableHead>
+                    <TableHead className="whitespace-nowrap">Payment Method</TableHead>
+                    <TableHead className="whitespace-nowrap">Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {payments.map((payment) => (
+                    <TableRow key={payment.id}>
+                      <TableCell className="whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span className="font-medium">
+                            {new Date(payment.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(payment.created_at).toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs sm:text-sm">
+                        {payment.gateway_reference}
+                      </TableCell>
+                      <TableCell className="font-semibold whitespace-nowrap">
+                        {payment.currency === 'NGN' ? '₦' : payment.currency}
+                        {Number(payment.amount).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="capitalize">
+                        {payment.payment_method || payment.gateway}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            payment.status === "SUCCESS"
+                              ? "default"
+                              : payment.status === "PENDING"
+                              ? "secondary"
+                              : "destructive"
+                          }
+                        >
+                          {payment.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
