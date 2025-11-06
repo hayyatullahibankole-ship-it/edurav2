@@ -89,6 +89,7 @@ const Dashboard = () => {
   const [subjectProgress, setSubjectProgress] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [schoolInfo, setSchoolInfo] = useState<any>(null);
 
   useEffect(() => {
     if (userProfile?.id) {
@@ -126,6 +127,17 @@ const Dashboard = () => {
     
     setLoading(true);
     try {
+      // Check if student belongs to a school
+      const { data: schoolStudent } = await supabase
+        .from('school_students')
+        .select('school_id, schools(name, logo_url, school_code)')
+        .eq('user_id', userProfile.id)
+        .maybeSingle();
+      
+      if (schoolStudent?.schools) {
+        setSchoolInfo(schoolStudent.schools);
+      }
+
       // Fetch user's attempts using secure RPC function
       const { data: allAttempts, error: attemptsError } = await supabase
         .rpc('get_student_exam_progress');
@@ -317,9 +329,27 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               {/* Logo and User Info */}
               <div className="flex items-center gap-4">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
-                </div>
+                {schoolInfo?.logo_url ? (
+                  <Avatar className="h-10 w-10 border-2">
+                    <AvatarImage 
+                      src={`${schoolInfo.logo_url}?t=${Date.now()}`} 
+                      alt={schoolInfo.name}
+                    />
+                    <AvatarFallback>
+                      <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
+                    </AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <div className="bg-primary/10 p-2 rounded-lg">
+                    <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
+                  </div>
+                )}
+                {schoolInfo && (
+                  <div className="hidden md:block">
+                    <p className="text-xs font-medium text-muted-foreground">{schoolInfo.name}</p>
+                    <p className="text-xs text-muted-foreground">{schoolInfo.school_code}</p>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
@@ -850,7 +880,7 @@ const Dashboard = () => {
           onComplete={() => setShowOnboarding(false)} 
         />
         
-        <DashboardSidebar onLogout={handleLogout} />
+        <DashboardSidebar onLogout={handleLogout} schoolInfo={schoolInfo} />
         
         <main className="flex-1 flex flex-col min-h-screen">
           {/* Top Bar */}

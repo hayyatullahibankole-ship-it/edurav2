@@ -10,6 +10,7 @@ import {
   Users, BookOpen, TrendingUp, DollarSign, LayoutDashboard, Settings, 
   LogOut, Copy, Building2, HelpCircle, Video
 } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Sidebar,
   SidebarContent,
@@ -54,9 +55,18 @@ function SchoolSidebar({ activeTab, setActiveTab, schoolData }: any) {
     <Sidebar className="border-r bg-card">
       <div className="p-6 border-b">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-md bg-primary flex items-center justify-center">
-            <Building2 className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <Avatar className="h-10 w-10 border-2">
+            {schoolData?.logo_url ? (
+              <AvatarImage 
+                src={`${schoolData.logo_url}?t=${Date.now()}`} 
+                alt={schoolData?.name}
+              />
+            ) : (
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                <Building2 className="h-5 w-5" />
+              </AvatarFallback>
+            )}
+          </Avatar>
           <div className="flex-1 min-w-0">
             <h2 className="font-semibold text-base truncate">{schoolData?.name}</h2>
             <p className="text-xs text-muted-foreground truncate">{schoolData?.school_code}</p>

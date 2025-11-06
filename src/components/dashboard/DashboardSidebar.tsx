@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import eduraLogo from "@/assets/edura-logo.png";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
   { title: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
@@ -39,9 +40,14 @@ const navItems = [
 
 interface DashboardSidebarProps {
   onLogout: () => void;
+  schoolInfo?: {
+    name: string;
+    logo_url: string;
+    school_code: string;
+  } | null;
 }
 
-export function DashboardSidebar({ onLogout }: DashboardSidebarProps) {
+export function DashboardSidebar({ onLogout, schoolInfo }: DashboardSidebarProps) {
   const { state } = useSidebar();
   const location = useLocation();
 
@@ -58,10 +64,32 @@ export function DashboardSidebar({ onLogout }: DashboardSidebarProps) {
       <SidebarContent className="bg-sidebar">
         {/* Logo and Toggle */}
         <div className="p-6 flex items-center justify-between border-b border-sidebar-border bg-white">
-          {state !== "collapsed" ? (
-            <img src={eduraLogo} alt="Edura" className="h-24 w-auto mx-auto" />
+          {schoolInfo?.logo_url ? (
+            <div className="flex items-center gap-3 flex-1">
+              <Avatar className="h-12 w-12 border-2">
+                <AvatarImage 
+                  src={`${schoolInfo.logo_url}?t=${Date.now()}`} 
+                  alt={schoolInfo.name}
+                />
+                <AvatarFallback>
+                  <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
+                </AvatarFallback>
+              </Avatar>
+              {state !== "collapsed" && (
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm truncate">{schoolInfo.name}</p>
+                  <p className="text-xs text-muted-foreground">{schoolInfo.school_code}</p>
+                </div>
+              )}
+            </div>
           ) : (
-            <img src={eduraLogo} alt="Edura" className="h-10 w-auto mx-auto" />
+            <>
+              {state !== "collapsed" ? (
+                <img src={eduraLogo} alt="Edura" className="h-24 w-auto mx-auto" />
+              ) : (
+                <img src={eduraLogo} alt="Edura" className="h-10 w-auto mx-auto" />
+              )}
+            </>
           )}
           <SidebarTrigger className="ml-auto" />
         </div>
