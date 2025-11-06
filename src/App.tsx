@@ -214,7 +214,7 @@ const AppRoutes = () => {
             <Route path="/schools" element={<Layout><SchoolLanding /></Layout>} />
             <Route path="/school-landing" element={<Layout><SchoolLanding /></Layout>} />
             <Route path="/school-login" element={<Layout><SchoolLogin /></Layout>} />
-            <Route path="/school-registration" element={<Layout><SchoolRegistration /></Layout>} />
+            <Route path="/school-registration" element={<Layout showNavbar={false}><SchoolRegistration /></Layout>} />
             <Route path="/school-subscription" element={
               <ProtectedRoute>
                 <SchoolSubscription />

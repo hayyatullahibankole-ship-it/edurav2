@@ -146,23 +146,19 @@ const Dashboard = () => {
         a.user_id === userProfile.id && a.status === 'SUBMITTED'
       ).sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime());
       
-      // Fetch results for each attempt - simplified to avoid transaction overload
-      const attemptsWithResults = await Promise.all(
-        (attempts || []).map(async (attempt) => {
-          try {
-            const { data: result } = await supabase
-              .from("results")
-              .select("*")
-              .eq("attempt_id", attempt.id)
-              .maybeSingle();
-
-            return { ...attempt, results: result ? [result] : [] };
-          } catch (e) {
-            console.warn('Failed to fetch result for attempt', attempt.id, e);
-            return { ...attempt, results: [] };
-          }
-        })
-      );
+      // Fetch all results at once instead of one by one for better performance
+      const attemptIds = (attempts || []).map(a => a.id);
+      const { data: allResults } = await supabase
+        .from("results")
+        .select("*")
+        .in("attempt_id", attemptIds);
+      
+      // Map results to attempts
+      const resultsMap = new Map(allResults?.map(r => [r.attempt_id, r]) || []);
+      const attemptsWithResults = (attempts || []).map(attempt => ({
+        ...attempt,
+        results: resultsMap.has(attempt.id) ? [resultsMap.get(attempt.id)] : []
+      }));
 
       if (attemptsError) {
         console.error('Error fetching attempts:', attemptsError);
