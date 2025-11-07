@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { MathRenderer } from '@/components/ui/math-renderer';
-import { Clock, ChevronLeft, ChevronRight, Check, Lock, Crown } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, Check, Lock, Crown, Calculator as CalculatorIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CBTQuestion, CBTAnswers } from '@/hooks/useCBTExam';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Link } from 'react-router-dom';
+import Calculator from '@/components/Calculator';
 
 interface CleanCBTInterfaceProps {
   questions: CBTQuestion[];
@@ -33,6 +34,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
   const [timeLeft, setTimeLeft] = useState(duration * 60);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
   const { canAccessPremium, loading: subscriptionLoading } = useSubscription();
 
   const currentQuestion = questions[currentIndex];
@@ -112,6 +114,16 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
                   {formatTime(timeLeft)}
                 </span>
               </div>
+              
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowCalculator(true)}
+                className="bg-white/20 backdrop-blur-xl text-white hover:bg-white/30 font-black rounded-xl h-10 sm:h-11 px-3 sm:px-4 shadow-xl hover:scale-105 active:scale-95 transition-all border-2 border-white/30"
+                style={{ boxShadow: '0 8px 24px rgba(255, 255, 255, 0.3)' }}
+              >
+                <CalculatorIcon className="h-5 w-5" />
+              </Button>
               
               <Button
                 variant="secondary"
@@ -447,6 +459,9 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
           </Card>
         </div>
       )}
+
+      {/* Calculator */}
+      <Calculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} />
     </div>
   );
 };
