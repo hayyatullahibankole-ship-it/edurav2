@@ -38,18 +38,32 @@ export const BooksTab = () => {
         .from('resources')
         .select('*')
         .eq('is_active', true)
-        .in('file_type', ['pdf', 'book'])
         .order('created_at', { ascending: false });
 
       if (!canAccessPremium && !isAdmin) {
         query = query.eq('access_level', 'free');
       }
 
-      const { data: booksData, error: booksError } = await query;
-      if (booksError) throw booksError;
+      const { data: resourcesData, error: resourcesError } = await query;
+      if (resourcesError) throw resourcesError;
+
+      // Filter to include books, PDFs, and syllabus/blueprint resources
+      const booksAndSyllabus = (resourcesData || []).filter(resource => {
+        const fileType = resource.file_type?.toLowerCase() || '';
+        const title = resource.title?.toLowerCase() || '';
+        const description = resource.description?.toLowerCase() || '';
+        
+        // Include if it's a book/pdf type OR contains syllabus/blueprint keywords
+        return fileType === 'pdf' || 
+               fileType === 'book' || 
+               title.includes('syllabus') || 
+               title.includes('blueprint') ||
+               description.includes('syllabus') || 
+               description.includes('blueprint');
+      });
 
       setSubjects(subjectsResp.data || []);
-      setBooks(booksData || []);
+      setBooks(booksAndSyllabus);
     } catch (error: any) {
       console.error('Error fetching books:', error);
       toast({
