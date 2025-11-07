@@ -43,6 +43,7 @@ import SecurityConfig from '@/components/admin/SecurityConfig';
 import SecurityManager from '@/components/admin/SecurityManager';
 import SecurityMonitor from '@/components/admin/SecurityMonitor';
 import SecurityAlertsBanner from '@/components/admin/SecurityAlertsBanner';
+import SystemConfig from '@/components/admin/SystemConfig';
 import QuestionManagement from '@/components/admin/QuestionManagement';
 import ResourceManagement from '@/components/admin/ResourceManagement';
 import AnalyticsHub from '@/components/admin/AnalyticsHub';
@@ -633,6 +634,7 @@ export default function AdminDashboard() {
                 <TabsTrigger value="notifications" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Notifications</TabsTrigger>
                 <TabsTrigger value="security" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Security</TabsTrigger>
                 <TabsTrigger value="monitor" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Monitor</TabsTrigger>
+                <TabsTrigger value="settings" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Settings</TabsTrigger>
               </TabsList>
             </div>
 
@@ -758,11 +760,26 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
-            <SecurityManager />
+            <Tabs defaultValue="monitor" className="space-y-6">
+              <TabsList className="bg-card border">
+                <TabsTrigger value="monitor">Security Monitor</TabsTrigger>
+                <TabsTrigger value="config">Security Config</TabsTrigger>
+              </TabsList>
+              <TabsContent value="monitor">
+                <SecurityManager />
+              </TabsContent>
+              <TabsContent value="config">
+                <SecurityConfig />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="monitor" className="space-y-6">
             <SecurityMonitor />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <SystemConfig />
           </TabsContent>
         </Tabs>
       </div>
