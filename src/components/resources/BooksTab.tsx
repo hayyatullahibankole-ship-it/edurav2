@@ -47,23 +47,21 @@ export const BooksTab = () => {
       const { data: resourcesData, error: resourcesError } = await query;
       if (resourcesError) throw resourcesError;
 
-      // Filter to include books, PDFs, and syllabus/blueprint resources
-      const booksAndSyllabus = (resourcesData || []).filter(resource => {
+      // Filter to include books, PDFs, and blueprint resources (not general syllabus)
+      const booksAndBlueprint = (resourcesData || []).filter(resource => {
         const fileType = resource.file_type?.toLowerCase() || '';
         const title = resource.title?.toLowerCase() || '';
         const description = resource.description?.toLowerCase() || '';
         
-        // Include if it's a book/pdf type OR contains syllabus/blueprint keywords
+        // Include if it's a book/pdf type OR contains blueprint keyword
         return fileType === 'pdf' || 
                fileType === 'book' || 
-               title.includes('syllabus') || 
                title.includes('blueprint') ||
-               description.includes('syllabus') || 
                description.includes('blueprint');
       });
 
       setSubjects(subjectsResp.data || []);
-      setBooks(booksAndSyllabus);
+      setBooks(booksAndBlueprint);
     } catch (error: any) {
       console.error('Error fetching books:', error);
       toast({
