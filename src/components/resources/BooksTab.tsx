@@ -53,8 +53,8 @@ export const BooksTab = () => {
         const title = resource.title?.toLowerCase() || '';
         const description = resource.description?.toLowerCase() || '';
         
-        // Include if it's a book/pdf type OR contains blueprint keyword
-        return fileType === 'pdf' || 
+        // Include if it's a book/pdf type (including MIME types) OR contains blueprint keyword
+        return fileType.includes('pdf') || 
                fileType === 'book' || 
                title.includes('blueprint') ||
                description.includes('blueprint');
