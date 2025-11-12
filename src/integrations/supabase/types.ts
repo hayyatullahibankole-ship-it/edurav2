@@ -2677,6 +2677,54 @@ export type Database = {
         }
         Relationships: []
       }
+      team_applications: {
+        Row: {
+          availability: string[]
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          optional_notes: string | null
+          preferred_role: string
+          skills_experience: string
+          status: string
+          terms_agreed: boolean
+          updated_at: string
+          whatsapp_number: string
+          why_join: string
+        }
+        Insert: {
+          availability: string[]
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          optional_notes?: string | null
+          preferred_role: string
+          skills_experience: string
+          status?: string
+          terms_agreed?: boolean
+          updated_at?: string
+          whatsapp_number: string
+          why_join: string
+        }
+        Update: {
+          availability?: string[]
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          optional_notes?: string | null
+          preferred_role?: string
+          skills_experience?: string
+          status?: string
+          terms_agreed?: boolean
+          updated_at?: string
+          whatsapp_number?: string
+          why_join?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
