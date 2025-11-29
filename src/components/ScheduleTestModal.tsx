@@ -88,6 +88,18 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
         supabase.rpc('get_subject_question_counts')
       ]);
 
+      // Check for errors in subjects fetch
+      if (subjectsResp.error) {
+        console.error('Error fetching subjects:', subjectsResp.error);
+        throw new Error('Failed to load subjects: ' + subjectsResp.error.message);
+      }
+
+      // Check for errors in question counts fetch
+      if (questionCountsResp.error) {
+        console.error('Error fetching question counts:', questionCountsResp.error);
+        throw new Error('Failed to load question counts: ' + questionCountsResp.error.message);
+      }
+
       if (subjectsResp.data) {
         setSubjects(subjectsResp.data);
         
@@ -95,15 +107,18 @@ const ScheduleTestModal: React.FC<ScheduleTestModalProps> = ({ children, default
         const questionCounts: { [key: string]: number } = {};
         if (questionCountsResp.data) {
           questionCountsResp.data.forEach((item: any) => {
-            questionCounts[item.subject_id] = item.question_count;
+            questionCounts[item.subject_id] = item.question_count || 0;
           });
         }
+        
+        console.log('Available questions:', questionCounts);
         setAvailableQuestions(questionCounts);
       }
     } catch (error) {
+      console.error('Error in fetchSubjectsAndQuestions:', error);
       toast({
         title: "Error",
-        description: "Failed to load available subjects",
+        description: error instanceof Error ? error.message : "Failed to load available subjects",
         variant: "destructive"
       });
     } finally {
