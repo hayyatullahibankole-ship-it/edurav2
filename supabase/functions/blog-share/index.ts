@@ -40,13 +40,17 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
     const slug = url.searchParams.get("slug")?.trim();
-    const target = url.searchParams.get("target")?.trim() || ""; // canonical/og:url
+    const target = url.searchParams.get("target")?.trim() || "";
+    const userAgent = req.headers.get("user-agent") || "";
 
     if (!slug) {
       return new Response("Missing slug", { status: 400, headers: corsHeaders });
     }
 
-    console.log("[blog-share] fetching post for:", slug);
+    console.log("[blog-share] fetching post for:", slug, "UA:", userAgent);
+
+    // Check if this is a social media crawler (needs OG tags) or a real user (needs redirect)
+    const isCrawler = /bot|crawl|spider|facebook|twitter|whatsapp|telegram|linkedin|slack|discord/i.test(userAgent);
 
     // Fetch post by slug or id, only if published
     let query = supabase
@@ -63,25 +67,35 @@ serve(async (req) => {
       console.error("[blog-share] DB error:", error);
     }
 
-    // Detect platform from target URL or referer
-    const referer = req.headers.get("referer") || "";
-    const isAkboy = target?.includes("akboy") || referer.includes("akboy");
+    // Detect platform from target URL
+    const isAkboy = target?.includes("akboy");
     
     const siteName = isAkboy ? "AKBOY Creative Hub" : "Edura";
     const defaultDescription = isAkboy 
       ? "Latest insights on design, education and technology from AKBOY." 
       : "Latest admission news, updates and study tips from Edura.";
-    const defaultOgImage = isAkboy ? DEFAULT_OG_IMAGE_AKBOY : DEFAULT_OG_IMAGE_EDURA;
     const baseDomain = isAkboy ? "https://akboy.space" : "https://edura.app";
+    
+    // Always use platform logo for consistent branding
+    const ogImage = isAkboy ? DEFAULT_OG_IMAGE_AKBOY : DEFAULT_OG_IMAGE_EDURA;
     
     const title = post?.title ? `${post.title} | ${siteName} Blog` : `${siteName} Blog`;
     const description = post?.excerpt || defaultDescription;
-    const image = (post?.featured_image_url && post.featured_image_url.startsWith("http"))
-      ? post.featured_image_url
-      : defaultOgImage;
-
     const pageUrl = target || (post?.slug ? `${baseDomain}/blog/${post.slug}` : `${baseDomain}/blog`);
 
+    // If real user (not crawler), redirect immediately
+    if (!isCrawler && target) {
+      console.log("[blog-share] Redirecting user to:", pageUrl);
+      return new Response(null, {
+        status: 302,
+        headers: {
+          ...corsHeaders,
+          "Location": pageUrl,
+        },
+      });
+    }
+
+    // For crawlers, return HTML with OG meta tags
     const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -94,23 +108,22 @@ serve(async (req) => {
   <meta property="og:site_name" content="${escapeHtml(siteName)}" />
   <meta property="og:title" content="${escapeHtml(title)}" />
   <meta property="og:description" content="${escapeHtml(description)}" />
-  <meta property="og:image" content="${escapeHtml(image)}" />
+  <meta property="og:image" content="${escapeHtml(ogImage)}" />
   <meta property="og:url" content="${escapeHtml(pageUrl)}" />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${escapeHtml(title)}" />
   <meta name="twitter:description" content="${escapeHtml(description)}" />
-  <meta name="twitter:image" content="${escapeHtml(image)}" />
-  ${target ? `<link rel="canonical" href="${escapeHtml(pageUrl)}" />` : ""}
-  ${target ? `<meta http-equiv="refresh" content="0; url=${escapeHtml(pageUrl)}" />` : ""}
+  <meta name="twitter:image" content="${escapeHtml(ogImage)}" />
+  <link rel="canonical" href="${escapeHtml(pageUrl)}" />
+  <meta http-equiv="refresh" content="0; url=${escapeHtml(pageUrl)}" />
   <meta name="robots" content="index, follow" />
-  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;padding:24px;color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center}</style>
-  ${target ? `<script>window.location.replace("${escapeHtml(pageUrl)}");</script>` : ""}
+  <style>body{font-family:system-ui;padding:24px;text-align:center}</style>
 </head>
 <body>
   <h1>${escapeHtml(post?.title || `${siteName} Blog`)}</h1>
-  <p>Redirecting to the article...</p>
-  <p><a href="${escapeHtml(pageUrl)}">Click here if not redirected</a></p>
+  <p>Redirecting...</p>
+  <p><a href="${escapeHtml(pageUrl)}">Click here</a></p>
 </body>
 </html>`;
 
