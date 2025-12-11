@@ -3,12 +3,16 @@ import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Palette, Code, Users, ArrowRight, CheckCircle2 } from "lucide-react";
+import { useDomainDetection } from "@/hooks/useDomainDetection";
 import educationService from "@/assets/education-service.jpg";
 import designService from "@/assets/design-service.jpg";
 import webDevService from "@/assets/web-dev-service.jpg";
 import trainingService from "@/assets/training-service.jpg";
 
 export default function AkboyServices() {
+  const { isAkboy } = useDomainDetection();
+  const basePath = isAkboy ? "" : "/akboy";
+  
   const services = [
     {
       id: 1,
@@ -193,7 +197,7 @@ export default function AkboyServices() {
                       asChild 
                       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl transition-all"
                     >
-                      <Link to="/akboy/contact">
+                      <Link to={`${basePath}/contact`}>
                         Get Started
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Link>
@@ -224,7 +228,7 @@ export default function AkboyServices() {
             size="lg" 
             className="bg-white text-emerald-900 hover:bg-emerald-50 px-10 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all h-auto"
           >
-            <Link to="/akboy/contact">
+            <Link to={`${basePath}/contact`}>
               Contact Us Today
               <ArrowRight className="ml-2 w-5 h-5" />
             </Link>

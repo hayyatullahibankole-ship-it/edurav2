@@ -1,11 +1,16 @@
+import { Link } from "react-router-dom";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users, Clock, ArrowRight } from "lucide-react";
+import { useDomainDetection } from "@/hooks/useDomainDetection";
 import eventsHero from "@/assets/akboy-events-hero.jpg";
 
 export default function AkboyEvents() {
+  const { isAkboy } = useDomainDetection();
+  const basePath = isAkboy ? "" : "/akboy";
+  
   const upcomingEvents = [
     {
       id: 1,
@@ -194,7 +199,7 @@ export default function AkboyEvents() {
             size="lg"
             className="bg-white text-emerald-900 hover:bg-emerald-50 text-lg px-10 py-6 h-auto font-bold shadow-2xl hover:scale-105 transition-all rounded-2xl"
           >
-            <a href="/akboy/contact">Partner With Us</a>
+            <Link to={`${basePath}/contact`}>Partner With Us</Link>
           </Button>
         </div>
       </section>
