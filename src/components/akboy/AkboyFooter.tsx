@@ -1,9 +1,14 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Linkedin, Twitter, Mail, Phone, MapPin } from "lucide-react";
 import akboyLogo from "@/assets/akboy-logo.png";
+import { useDomainDetection } from "@/hooks/useDomainDetection";
 
 export function AkboyFooter() {
   const currentYear = new Date().getFullYear();
+  const { isAkboy } = useDomainDetection();
+  
+  // Use root paths on Akboy domain, prefixed paths on Edura domain
+  const basePath = isAkboy ? "" : "/akboy";
 
   return (
     <footer className="bg-gradient-to-br from-emerald-900 via-teal-900 to-green-900 text-white relative overflow-hidden">
@@ -63,12 +68,12 @@ export function AkboyFooter() {
           <div>
             <h4 className="text-emerald-300 font-bold text-lg mb-6">Quick Links</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link to="/akboy/about" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">About Us</Link></li>
-              <li><Link to="/akboy/services" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">Our Services</Link></li>
-              <li><Link to="/akboy/portfolio" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">Portfolio</Link></li>
-              <li><Link to="/akboy/events" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">Events & Programs</Link></li>
+              <li><Link to={`${basePath}/about`} className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">About Us</Link></li>
+              <li><Link to={`${basePath}/services`} className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">Our Services</Link></li>
+              <li><Link to={`${basePath}/portfolio`} className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">Portfolio</Link></li>
+              <li><Link to={`${basePath}/events`} className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">Events & Programs</Link></li>
               <li><Link to="/blog" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">Blog</Link></li>
-              <li><Link to="/akboy/contact" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">Contact Us</Link></li>
+              <li><Link to={`${basePath}/contact`} className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">Contact Us</Link></li>
             </ul>
           </div>
 
