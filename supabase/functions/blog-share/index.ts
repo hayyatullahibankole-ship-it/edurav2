@@ -12,9 +12,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Default fallback OG image (absolute URL)
-const DEFAULT_OG_IMAGE =
+// Default fallback OG images
+const DEFAULT_OG_IMAGE_EDURA =
   "https://storage.googleapis.com/gpt-engineer-file-uploads/C2jPY39C9WbPmlBUAbXZbDdi8p83/social-images/social-1759746865681-edura%20logo.jpg";
+const DEFAULT_OG_IMAGE_AKBOY =
+  "https://zqapbmllkywsuywpfava.supabase.co/storage/v1/object/public/resources/akboy-logo.png";
 
 function isUUID(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
@@ -61,13 +63,24 @@ serve(async (req) => {
       console.error("[blog-share] DB error:", error);
     }
 
-    const title = post?.title ? `${post.title} - Edura Blog` : "Edura Blog";
-    const description = post?.excerpt || "Latest admission news, updates and study tips from Edura.";
+    // Detect platform from target URL or referer
+    const referer = req.headers.get("referer") || "";
+    const isAkboy = target?.includes("akboy") || referer.includes("akboy");
+    
+    const siteName = isAkboy ? "AKBOY Creative Hub" : "Edura";
+    const defaultDescription = isAkboy 
+      ? "Latest insights on design, education and technology from AKBOY." 
+      : "Latest admission news, updates and study tips from Edura.";
+    const defaultOgImage = isAkboy ? DEFAULT_OG_IMAGE_AKBOY : DEFAULT_OG_IMAGE_EDURA;
+    const baseDomain = isAkboy ? "https://akboy.space" : "https://edura.app";
+    
+    const title = post?.title ? `${post.title} | ${siteName} Blog` : `${siteName} Blog`;
+    const description = post?.excerpt || defaultDescription;
     const image = (post?.featured_image_url && post.featured_image_url.startsWith("http"))
       ? post.featured_image_url
-      : DEFAULT_OG_IMAGE;
+      : defaultOgImage;
 
-    const pageUrl = target || (post?.slug ? `https://edura.app/blog/${post.slug}` : "https://edura.app/blog");
+    const pageUrl = target || (post?.slug ? `${baseDomain}/blog/${post.slug}` : `${baseDomain}/blog`);
 
     const html = `<!doctype html>
 <html lang="en">
@@ -78,7 +91,7 @@ serve(async (req) => {
   <meta name="description" content="${escapeHtml(description)}" />
 
   <meta property="og:type" content="article" />
-  <meta property="og:site_name" content="Edura" />
+  <meta property="og:site_name" content="${escapeHtml(siteName)}" />
   <meta property="og:title" content="${escapeHtml(title)}" />
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:image" content="${escapeHtml(image)}" />
