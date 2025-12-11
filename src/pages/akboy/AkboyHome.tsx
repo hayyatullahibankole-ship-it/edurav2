@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BookOpen, Code, Palette, Users, ArrowRight, CheckCircle2, Sparkles, Trophy, Target, Zap, Star, Calendar, Clock, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useDomainDetection } from "@/hooks/useDomainDetection";
 import hero1 from "@/assets/akboy-hero-1.jpg";
 import hero2 from "@/assets/akboy-hero-2.jpg";
 import hero3 from "@/assets/akboy-hero-3.jpg";
@@ -17,6 +18,10 @@ export default function AkboyHome() {
   const [events, setEvents] = useState<any[]>([]);
   const [portfolio, setPortfolio] = useState<any[]>([]);
   const heroImages = [hero1, hero2, hero3, hero4];
+  const { isAkboy } = useDomainDetection();
+  
+  // Use root paths on Akboy domain, prefixed paths on Edura domain
+  const basePath = isAkboy ? "" : "/akboy";
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -166,7 +171,7 @@ export default function AkboyHome() {
                 size="lg" 
                 className="bg-white text-emerald-900 hover:bg-emerald-50 text-lg px-8 py-6 h-auto font-semibold shadow-xl hover:shadow-2xl transition-all"
               >
-                <Link to="/akboy/services">
+                <Link to={`${basePath}/services`}>
                   Explore Our Services
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
@@ -177,7 +182,7 @@ export default function AkboyHome() {
                 variant="outline" 
                 className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-emerald-900 text-lg px-8 py-6 h-auto font-semibold"
               >
-                <Link to="/akboy/contact">Contact Us</Link>
+                <Link to={`${basePath}/contact`}>Contact Us</Link>
               </Button>
             </div>
           </div>
@@ -221,7 +226,7 @@ export default function AkboyHome() {
 
           <div className="text-center mt-12">
             <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-8">
-              <Link to="/akboy/services">
+              <Link to={`${basePath}/services`}>
                 View All Services
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
@@ -266,7 +271,7 @@ export default function AkboyHome() {
                 </div>
               </div>
               <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8">
-                <Link to="/akboy/about">
+                <Link to={`${basePath}/about`}>
                   Learn More About Us
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
@@ -522,7 +527,7 @@ export default function AkboyHome() {
 
           <div className="text-center mt-12">
             <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8">
-              <Link to="/akboy/portfolio">
+              <Link to={`${basePath}/portfolio`}>
                 View Full Portfolio
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
@@ -562,7 +567,7 @@ export default function AkboyHome() {
                   </div>
                 </div>
                 <Link 
-                  to="/akboy/events" 
+                  to={`${basePath}/events`} 
                   className="group inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-bold text-sm transition-all hover:gap-3"
                 >
                   View All
@@ -638,7 +643,7 @@ export default function AkboyHome() {
                   </div>
                 </div>
                 <Link 
-                  to="/akboy/blog" 
+                  to="/blog" 
                   className="group inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-bold text-sm transition-all hover:gap-3"
                 >
                   Read More
@@ -819,7 +824,7 @@ export default function AkboyHome() {
               size="lg" 
               className="bg-white text-emerald-900 hover:bg-emerald-50 text-lg px-8 py-6 h-auto font-semibold shadow-xl"
             >
-              <Link to="/akboy/contact">
+              <Link to={`${basePath}/contact`}>
                 Get Started Today
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
@@ -830,7 +835,7 @@ export default function AkboyHome() {
               variant="outline" 
               className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-emerald-900 text-lg px-8 py-6 h-auto font-semibold"
             >
-              <Link to="/akboy/portfolio">View Our Work</Link>
+              <Link to={`${basePath}/portfolio`}>View Our Work</Link>
             </Button>
           </div>
         </div>

@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Sparkles } from "lucide-react";
+import { useDomainDetection } from "@/hooks/useDomainDetection";
 import portfolioHero from "@/assets/akboy-portfolio-hero.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -20,6 +22,10 @@ interface PortfolioItem {
 }
 
 export default function AkboyPortfolio() {
+  const { isAkboy } = useDomainDetection();
+  const basePath = isAkboy ? "" : "/akboy";
+  
+  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [filter, setFilter] = useState<string>("all");
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -218,7 +224,7 @@ export default function AkboyPortfolio() {
             size="lg"
             className="bg-white text-emerald-900 hover:bg-emerald-50 text-lg px-10 py-6 h-auto font-bold shadow-2xl hover:scale-105 transition-all rounded-2xl"
           >
-            <a href="/akboy/contact">Get Started Today</a>
+            <Link to={`${basePath}/contact`}>Get Started Today</Link>
           </Button>
         </div>
       </section>
