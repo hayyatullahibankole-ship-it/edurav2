@@ -36,23 +36,29 @@ const formatBlogContent = (content: string): string => {
 };
 
 // Social share utilities
-const getShareUrl = (platform: string, url: string, title: string, description: string) => {
+const getShareUrl = (platform: string, url: string, title: string, description: string, edgeFunctionUrl?: string) => {
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
   const encodedDescription = encodeURIComponent(description);
   const encodedText = encodeURIComponent(`${title}\n\n${description}\n\n`);
+  
+  // For WhatsApp, use the edge function URL for proper OG preview
+  const shareLink = edgeFunctionUrl || url;
+  const encodedShareLink = encodeURIComponent(shareLink);
+  const whatsappText = encodeURIComponent(`${title}\n\n${description}\n\n${shareLink}`);
 
   switch (platform) {
     case 'whatsapp':
-      return `https://wa.me/?text=${encodedText}${encodedUrl}`;
+      // Use intent:// for Android to trigger app chooser when multiple WhatsApp apps exist
+      return `https://wa.me/?text=${whatsappText}`;
     case 'facebook':
-      return `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedTitle}`;
+      return `https://www.facebook.com/sharer/sharer.php?u=${encodedShareLink}&quote=${encodedTitle}`;
     case 'twitter':
-      return `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+      return `https://twitter.com/intent/tweet?url=${encodedShareLink}&text=${encodedTitle}`;
     case 'linkedin':
-      return `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+      return `https://www.linkedin.com/sharing/share-offsite/?url=${encodedShareLink}`;
     case 'telegram':
-      return `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`;
+      return `https://t.me/share/url?url=${encodedShareLink}&text=${encodedText}`;
     default:
       return '';
   }
@@ -111,7 +117,11 @@ export default function AkboyBlogPost() {
     const title = post.title;
     const description = post.excerpt || post.content?.substring(0, 160).replace(/<[^>]*>/g, '') || '';
     
-    const shareUrl = getShareUrl(platform, url, title, description);
+    // Build edge function URL for proper OG preview with blog featured image
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://zqapbmllkywsuywpfava.supabase.co';
+    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/blog-share?slug=${encodeURIComponent(slug || '')}&target=${encodeURIComponent(url)}`;
+    
+    const shareUrl = getShareUrl(platform, url, title, description, edgeFunctionUrl);
     window.open(shareUrl, '_blank', 'width=600,height=400');
   };
 
