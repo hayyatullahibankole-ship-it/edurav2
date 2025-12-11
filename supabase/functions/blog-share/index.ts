@@ -104,12 +104,13 @@ serve(async (req) => {
   ${target ? `<link rel="canonical" href="${escapeHtml(pageUrl)}" />` : ""}
   ${target ? `<meta http-equiv="refresh" content="0; url=${escapeHtml(pageUrl)}" />` : ""}
   <meta name="robots" content="index, follow" />
-  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;padding:24px;color:#111}</style>
+  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;padding:24px;color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center}</style>
+  ${target ? `<script>window.location.replace("${escapeHtml(pageUrl)}");</script>` : ""}
 </head>
 <body>
-  <h1>${escapeHtml(title)}</h1>
-  <p>Sharing preview is ready. ${target ? "Redirecting to the article…" : ""}</p>
-  <p><a href="${escapeHtml(pageUrl)}">Go to article</a></p>
+  <h1>${escapeHtml(post?.title || `${siteName} Blog`)}</h1>
+  <p>Redirecting to the article...</p>
+  <p><a href="${escapeHtml(pageUrl)}">Click here if not redirected</a></p>
 </body>
 </html>`;
 
