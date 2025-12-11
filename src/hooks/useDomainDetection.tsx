@@ -10,10 +10,9 @@ interface DomainConfig {
 
 // Configure your domains here
 const AKBOY_DOMAINS = [
-  'akboy.com',
-  'www.akboy.com',
+  'akboy.space',
+  'www.akboy.space',
   'akboy.lovable.app',
-  // Add your Akboy domain when connected
 ];
 
 const EDURA_DOMAINS = [
