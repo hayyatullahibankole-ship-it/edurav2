@@ -3,19 +3,24 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import akboyLogo from "@/assets/akboy-logo.png";
+import { useDomainDetection } from "@/hooks/useDomainDetection";
 
 export function AkboyNavbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { isAkboy } = useDomainDetection();
+
+  // Use root paths on Akboy domain, prefixed paths on Edura domain
+  const basePath = isAkboy ? "" : "/akboy";
 
   const navLinks = [
-    { name: "Home", path: "/akboy" },
-    { name: "About", path: "/akboy/about" },
-    { name: "Services", path: "/akboy/services" },
-    { name: "Portfolio", path: "/akboy/portfolio" },
-    { name: "Events", path: "/akboy/events" },
+    { name: "Home", path: basePath || "/" },
+    { name: "About", path: `${basePath}/about` },
+    { name: "Services", path: `${basePath}/services` },
+    { name: "Portfolio", path: `${basePath}/portfolio` },
+    { name: "Events", path: `${basePath}/events` },
     { name: "Blog", path: "/blog" },
-    { name: "Contact", path: "/akboy/contact" },
+    { name: "Contact", path: `${basePath}/contact` },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -25,7 +30,7 @@ export function AkboyNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20 sm:h-22">
           {/* Logo */}
-          <Link to="/akboy" className="flex items-center space-x-3 group">
+          <Link to={basePath || "/"} className="flex items-center space-x-3 group">
             <img 
               src={akboyLogo} 
               alt="AKBOY Creative Hub" 
@@ -56,7 +61,7 @@ export function AkboyNavbar() {
               asChild
               className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:scale-105 transition-all rounded-xl"
             >
-              <Link to="/akboy/contact">Get Started</Link>
+              <Link to={`${basePath}/contact`}>Get Started</Link>
             </Button>
           </div>
 
@@ -91,7 +96,7 @@ export function AkboyNavbar() {
                 asChild
                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold shadow-lg mt-4 rounded-xl"
               >
-                <Link to="/akboy/contact" onClick={() => setIsOpen(false)}>
+                <Link to={`${basePath}/contact`} onClick={() => setIsOpen(false)}>
                   Get Started
                 </Link>
               </Button>
