@@ -17,6 +17,7 @@ export function AkboyNavbar() {
     { name: "Home", path: basePath || "/" },
     { name: "About", path: `${basePath}/about` },
     { name: "Services", path: `${basePath}/services` },
+    { name: "Register", path: `${basePath}/register` },
     { name: "Portfolio", path: `${basePath}/portfolio` },
     { name: "Events", path: `${basePath}/events` },
     { name: "Blog", path: "/blog" },

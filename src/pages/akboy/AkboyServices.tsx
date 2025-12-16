@@ -29,7 +29,8 @@ export default function AkboyServices() {
         "Learning management solutions"
       ],
       pricing_info: "Custom packages available based on institutional needs",
-      image: educationService
+      image: educationService,
+      linkType: "contact"
     },
     {
       id: 2,
@@ -38,15 +39,15 @@ export default function AkboyServices() {
       short_description: "Personalized learning with expert tutors across various subjects",
       full_description: "We provide high-quality tutorial services for students at all levels. Our experienced tutors offer one-on-one and group sessions tailored to individual learning needs, ensuring academic excellence and confidence building.",
       features: [
-        "One-on-one personalized tutoring",
-        "Small group learning sessions",
-        "Exam preparation (JAMB, WAEC, NECO)",
-        "Subject-specific expertise",
-        "Progress tracking and reporting",
-        "Flexible scheduling options"
+        "JAMB & WAEC Exam Tutorials",
+        "Graphics Design (Canva-Based)",
+        "Web Design / Website Basics",
+        "Quran Memorization & Tajweed"
       ],
-      pricing_info: "Starting from ₦5,000 per session. Packages available",
-      image: educationService
+      pricing_info: "Starting from ₦10,000. Online & Physical options available",
+      image: educationService,
+      linkType: "register",
+      registerSlug: ""
     },
     {
       id: 3,
@@ -63,7 +64,8 @@ export default function AkboyServices() {
         "Print and digital design"
       ],
       pricing_info: "Logo design from ₦30,000. Full branding packages available",
-      image: designService
+      image: designService,
+      linkType: "contact"
     },
     {
       id: 4,
@@ -80,7 +82,8 @@ export default function AkboyServices() {
         "SEO-friendly structure"
       ],
       pricing_info: "Starting from ₦150,000 for basic websites",
-      image: webDevService
+      image: webDevService,
+      linkType: "contact"
     },
     {
       id: 5,
@@ -97,7 +100,8 @@ export default function AkboyServices() {
         "Maintenance and support"
       ],
       pricing_info: "Projects from ₦250,000. Contact for custom quotes",
-      image: webDevService
+      image: webDevService,
+      linkType: "contact"
     },
     {
       id: 6,
@@ -114,7 +118,9 @@ export default function AkboyServices() {
         "Industry-recognized certificates"
       ],
       pricing_info: "Training programs from ₦50,000. Group discounts available",
-      image: trainingService
+      image: trainingService,
+      linkType: "register",
+      registerSlug: ""
     }
   ];
 
@@ -197,8 +203,10 @@ export default function AkboyServices() {
                       asChild 
                       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl transition-all"
                     >
-                      <Link to={`${basePath}/contact`}>
-                        Get Started
+                      <Link to={service.linkType === 'register' 
+                        ? `${basePath}/register${service.registerSlug ? `?tutorial=${service.registerSlug}` : ''}` 
+                        : `${basePath}/contact`}>
+                        {service.linkType === 'register' ? 'Register Now' : 'Get Started'}
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Link>
                     </Button>
