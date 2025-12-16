@@ -70,7 +70,12 @@ const AkboyRoutes = () => {
       <Route path="/portfolio" element={<AkboyPortfolio />} />
       <Route path="/events" element={<AkboyEvents />} />
       <Route path="/contact" element={<AkboyContact />} />
+
+      {/* Registration aliases */}
       <Route path="/register" element={<AkboyTutorialRegistration />} />
+      <Route path="/tutorial-registration" element={<AkboyTutorialRegistration />} />
+      <Route path="/tutorials/register" element={<AkboyTutorialRegistration />} />
+
       <Route path="/blog" element={<AkboyBlog />} />
       <Route path="/blog/:slug" element={<AkboyBlogPost />} />
       <Route path="/privacy" element={<Privacy />} />
@@ -270,8 +275,12 @@ const EduraRoutes = () => {
       <Route path="/akboy/portfolio" element={<AkboyPortfolio />} />
       <Route path="/akboy/events" element={<AkboyEvents />} />
       <Route path="/akboy/contact" element={<AkboyContact />} />
+
+      {/* Registration aliases */}
       <Route path="/akboy/register" element={<AkboyTutorialRegistration />} />
-      
+      <Route path="/akboy/tutorial-registration" element={<AkboyTutorialRegistration />} />
+      <Route path="/akboy/tutorials/register" element={<AkboyTutorialRegistration />} />
+
       <Route path="*" element={<Layout><NotFound /></Layout>} />
     </Routes>
   );
