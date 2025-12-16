@@ -329,10 +329,14 @@ export default function AkboyTutorialRegistration() {
       console.error('Registration error:', error);
 
       const isTimeout = error instanceof Error && /timed out/i.test(error.message);
+      const technical = error instanceof Error ? error.message : '';
+
       toast.error(
         isTimeout
           ? 'Network timeout while submitting. Please check your internet and try again.'
-          : 'Failed to submit registration. Please try again.'
+          : technical
+            ? `Failed to submit registration: ${technical}`
+            : 'Failed to submit registration. Please try again.'
       );
     } finally {
       setSubmitting(false);
