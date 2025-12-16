@@ -86,6 +86,26 @@ const withTimeout = async <T,>(
   }
 };
 
+const createUuidV4 = (): string => {
+  const c = globalThis.crypto as Crypto | undefined;
+  const randomUUID = (c as any)?.randomUUID as (() => string) | undefined;
+  if (randomUUID) return randomUUID();
+
+  if (!c?.getRandomValues) {
+    throw new Error('Secure random generator not available');
+  }
+
+  const bytes = new Uint8Array(16);
+  c.getRandomValues(bytes);
+
+  // RFC4122 v4
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+  const hex = [...bytes].map((b) => b.toString(16).padStart(2, '0'));
+  return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10, 16).join('')}`;
+};
+
 export default function AkboyTutorialRegistration() {
   const [searchParams] = useSearchParams();
   const { isAkboy } = useDomainDetection();
@@ -263,10 +283,13 @@ export default function AkboyTutorialRegistration() {
         }
       }
 
+      const registrationId = createUuidV4();
+
       const insertTask = (async () => {
         return await supabase
           .from('akboy_tutorial_registrations')
           .insert({
+            id: registrationId,
             tutorial_id: data.tutorial_id,
             full_name: data.full_name,
             phone: data.phone,
@@ -283,21 +306,19 @@ export default function AkboyTutorialRegistration() {
             guardian_phone: data.guardian_phone,
             referral_source: data.referral_source || null,
             special_requests: data.special_requests || null,
-          })
-          .select('id')
-          .single();
+          });
       })();
 
-      const { data: registration, error } = await withTimeout(
+      const { error: insertError } = await withTimeout(
         insertTask,
         30_000,
         'Registration submission'
       );
 
-      if (error) throw error;
+      if (insertError) throw insertError;
 
       setSubmissionData({
-        registrationId: registration.id,
+        registrationId,
         tutorialName: selectedTutorial.name,
         price: price,
         whatsappLink: selectedTutorial.whatsapp_group_link,
