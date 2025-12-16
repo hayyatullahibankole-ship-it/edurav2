@@ -52,6 +52,8 @@ interface Tutorial {
 }
 
 const tutorialIcons: Record<string, typeof BookOpen> = {
+  'exam-prep': BookOpen,
+  'akboy-exam-prep-academy': BookOpen,
   'jamb-waec': BookOpen,
   'graphics-design': Palette,
   'web-design': Globe,
