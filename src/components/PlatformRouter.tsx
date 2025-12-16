@@ -289,12 +289,17 @@ const EduraRoutes = () => {
 // Main Platform Router
 export const PlatformRouter = () => {
   const { isAkboy } = useDomainDetection();
-  
-  // If accessing from Akboy domain, show Akboy routes
-  if (isAkboy) {
+
+  // In preview/development we access Akboy pages under the /akboy prefix.
+  // In that case we must keep EduraRoutes mounted so /akboy/* routes resolve.
+  const isAkboyPrefixedPath = window.location.pathname.startsWith('/akboy');
+
+  // If accessing from the Akboy domain, show Akboy routes
+  if (isAkboy && !isAkboyPrefixedPath) {
     return <AkboyRoutes />;
   }
-  
-  // Default to Edura routes
+
+  // Default to Edura routes (also contains /akboy/* routes for preview)
   return <EduraRoutes />;
 };
+

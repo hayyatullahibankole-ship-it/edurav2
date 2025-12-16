@@ -88,8 +88,11 @@ const withTimeout = async <T,>(
 
 const createUuidV4 = (): string => {
   const c = globalThis.crypto as Crypto | undefined;
-  const randomUUID = (c as any)?.randomUUID as (() => string) | undefined;
-  if (randomUUID) return randomUUID();
+
+  // Prefer native generator when available (must keep method bound to crypto)
+  if (typeof c?.randomUUID === 'function') {
+    return c.randomUUID();
+  }
 
   if (!c?.getRandomValues) {
     throw new Error('Secure random generator not available');
