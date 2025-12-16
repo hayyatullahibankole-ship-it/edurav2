@@ -60,6 +60,25 @@ const tutorialIcons: Record<string, typeof BookOpen> = {
   'quran-memorization': BookOpenCheck,
 };
 
+const withTimeout = async <T,>(
+  promise: Promise<T>,
+  ms: number,
+  label: string
+): Promise<T> => {
+  let timeoutId: number | undefined;
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      reject(new Error(`${label} timed out`));
+    }, ms);
+  });
+
+  try {
+    return await Promise.race([Promise.resolve(promise), timeoutPromise]);
+  } finally {
+    if (timeoutId) window.clearTimeout(timeoutId);
+  }
+};
+
 export default function AkboyTutorialRegistration() {
   const [searchParams] = useSearchParams();
   const { isAkboy } = useDomainDetection();
@@ -149,21 +168,23 @@ export default function AkboyTutorialRegistration() {
   const uploadFile = async (file: File, folder: string): Promise<string | null> => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-    
-    const { error } = await supabase.storage
-      .from('tutorial-uploads')
-      .upload(fileName, file);
+
+    const { error } = await supabase.storage.from('tutorial-uploads').upload(fileName, file);
 
     if (error) {
       console.error('Upload error:', error);
       return null;
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('tutorial-uploads')
-      .getPublicUrl(fileName);
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('tutorial-uploads').getPublicUrl(fileName);
 
     return publicUrl;
+  };
+
+  const onInvalid = () => {
+    toast.error('Please complete all required fields highlighted in red.');
   };
 
   const onSubmit = async (data: RegistrationForm) => {
@@ -175,17 +196,24 @@ export default function AkboyTutorialRegistration() {
     setSubmitting(true);
 
     try {
-      let studentPhotoUrl = null;
-      let paymentProofUrl = null;
+      let studentPhotoUrl: string | null = null;
+      let paymentProofUrl: string | null = null;
 
       // Upload student photo
       if (studentPhoto) {
         setUploadingPhoto(true);
-        studentPhotoUrl = await uploadFile(studentPhoto, 'photos');
-        setUploadingPhoto(false);
+        try {
+          studentPhotoUrl = await withTimeout(
+            uploadFile(studentPhoto, 'photos'),
+            60_000,
+            'Student photo upload'
+          );
+        } finally {
+          setUploadingPhoto(false);
+        }
+
         if (!studentPhotoUrl) {
           toast.error('Failed to upload student photo');
-          setSubmitting(false);
           return;
         }
       }
@@ -193,37 +221,52 @@ export default function AkboyTutorialRegistration() {
       // Upload payment proof
       if (paymentProof) {
         setUploadingProof(true);
-        paymentProofUrl = await uploadFile(paymentProof, 'payments');
-        setUploadingProof(false);
+        try {
+          paymentProofUrl = await withTimeout(
+            uploadFile(paymentProof, 'payments'),
+            60_000,
+            'Payment proof upload'
+          );
+        } finally {
+          setUploadingProof(false);
+        }
+
         if (!paymentProofUrl) {
           toast.error('Failed to upload payment proof');
-          setSubmitting(false);
           return;
         }
       }
 
-      const { data: registration, error } = await supabase
-        .from('akboy_tutorial_registrations')
-        .insert({
-          tutorial_id: data.tutorial_id,
-          full_name: data.full_name,
-          phone: data.phone,
-          email: data.email || null,
-          gender: data.gender,
-          academic_level: data.academic_level,
-          student_photo_url: studentPhotoUrl,
-          tutorial_name: selectedTutorial.name,
-          mode_of_learning: data.mode_of_learning,
-          tutorial_type: data.tutorial_type,
-          price: price,
-          payment_proof_url: paymentProofUrl,
-          guardian_name: data.guardian_name,
-          guardian_phone: data.guardian_phone,
-          referral_source: data.referral_source || null,
-          special_requests: data.special_requests || null,
-        })
-        .select('id')
-        .single();
+      const insertTask = (async () => {
+        return await supabase
+          .from('akboy_tutorial_registrations')
+          .insert({
+            tutorial_id: data.tutorial_id,
+            full_name: data.full_name,
+            phone: data.phone,
+            email: data.email || null,
+            gender: data.gender,
+            academic_level: data.academic_level,
+            student_photo_url: studentPhotoUrl,
+            tutorial_name: selectedTutorial.name,
+            mode_of_learning: data.mode_of_learning,
+            tutorial_type: data.tutorial_type,
+            price: price,
+            payment_proof_url: paymentProofUrl,
+            guardian_name: data.guardian_name,
+            guardian_phone: data.guardian_phone,
+            referral_source: data.referral_source || null,
+            special_requests: data.special_requests || null,
+          })
+          .select('id')
+          .single();
+      })();
+
+      const { data: registration, error } = await withTimeout(
+        insertTask,
+        30_000,
+        'Registration submission'
+      );
 
       if (error) throw error;
 
@@ -237,7 +280,13 @@ export default function AkboyTutorialRegistration() {
       toast.success('Registration submitted successfully!');
     } catch (error) {
       console.error('Registration error:', error);
-      toast.error('Failed to submit registration. Please try again.');
+
+      const isTimeout = error instanceof Error && /timed out/i.test(error.message);
+      toast.error(
+        isTimeout
+          ? 'Network timeout while submitting. Please check your internet and try again.'
+          : 'Failed to submit registration. Please try again.'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -423,7 +472,7 @@ export default function AkboyTutorialRegistration() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-8">
                   {/* Section A: Student Info */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
@@ -497,14 +546,12 @@ export default function AkboyTutorialRegistration() {
                             <SelectValue placeholder="Select level" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="primary">Primary School</SelectItem>
-                            <SelectItem value="jss1">JSS 1</SelectItem>
-                            <SelectItem value="jss2">JSS 2</SelectItem>
-                            <SelectItem value="jss3">JSS 3</SelectItem>
-                            <SelectItem value="ss1">SS 1</SelectItem>
-                            <SelectItem value="ss2">SS 2</SelectItem>
-                            <SelectItem value="ss3">SS 3</SelectItem>
-                            <SelectItem value="awaiting_admission">Awaiting Admission</SelectItem>
+                            <SelectItem value="sss1">SSS 1</SelectItem>
+                            <SelectItem value="sss2">SSS 2</SelectItem>
+                            <SelectItem value="sss3">SSS 3</SelectItem>
+                            <SelectItem value="jamb_candidate">JAMB Candidate</SelectItem>
+                            <SelectItem value="waec_candidate">WAEC Candidate</SelectItem>
+                            <SelectItem value="neco_candidate">NECO Candidate</SelectItem>
                             <SelectItem value="undergraduate">Undergraduate</SelectItem>
                             <SelectItem value="graduate">Graduate</SelectItem>
                             <SelectItem value="working">Working Class</SelectItem>
