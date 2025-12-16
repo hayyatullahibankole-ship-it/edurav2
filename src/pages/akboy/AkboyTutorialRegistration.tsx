@@ -470,7 +470,7 @@ export default function AkboyTutorialRegistration() {
                         <Label>Gender *</Label>
                         <Select 
                           value={form.watch('gender')} 
-                          onValueChange={(value) => form.setValue('gender', value)}
+                          onValueChange={(value) => form.setValue('gender', value, { shouldValidate: true })}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select gender" />
@@ -489,18 +489,23 @@ export default function AkboyTutorialRegistration() {
                         <Label>Academic Level / Status *</Label>
                         <Select 
                           value={form.watch('academic_level')} 
-                          onValueChange={(value) => form.setValue('academic_level', value)}
+                          onValueChange={(value) => form.setValue('academic_level', value, { shouldValidate: true })}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select level" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="ss2">SS2</SelectItem>
-                            <SelectItem value="ss3">SS3</SelectItem>
-                            <SelectItem value="jamb_repeater">JAMB Repeater</SelectItem>
-                            <SelectItem value="waec_private">WAEC Private</SelectItem>
+                            <SelectItem value="primary">Primary School</SelectItem>
+                            <SelectItem value="jss1">JSS 1</SelectItem>
+                            <SelectItem value="jss2">JSS 2</SelectItem>
+                            <SelectItem value="jss3">JSS 3</SelectItem>
+                            <SelectItem value="ss1">SS 1</SelectItem>
+                            <SelectItem value="ss2">SS 2</SelectItem>
+                            <SelectItem value="ss3">SS 3</SelectItem>
+                            <SelectItem value="awaiting_admission">Awaiting Admission</SelectItem>
+                            <SelectItem value="undergraduate">Undergraduate</SelectItem>
                             <SelectItem value="graduate">Graduate</SelectItem>
-                            <SelectItem value="working_professional">Working Professional</SelectItem>
+                            <SelectItem value="working">Working Class</SelectItem>
                             <SelectItem value="other">Other</SelectItem>
                           </SelectContent>
                         </Select>
@@ -542,7 +547,7 @@ export default function AkboyTutorialRegistration() {
                       <Label>Selected Tutorial *</Label>
                       <Select 
                         value={form.watch('tutorial_id')} 
-                        onValueChange={(value) => form.setValue('tutorial_id', value)}
+                        onValueChange={(value) => form.setValue('tutorial_id', value, { shouldValidate: true })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select a tutorial" />
@@ -565,7 +570,7 @@ export default function AkboyTutorialRegistration() {
                         <Label>Mode of Learning *</Label>
                         <Select 
                           value={form.watch('mode_of_learning')} 
-                          onValueChange={(value) => form.setValue('mode_of_learning', value)}
+                          onValueChange={(value) => form.setValue('mode_of_learning', value, { shouldValidate: true })}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select mode" />
@@ -584,7 +589,7 @@ export default function AkboyTutorialRegistration() {
                         <Label>Tutorial Type *</Label>
                         <Select 
                           value={form.watch('tutorial_type')} 
-                          onValueChange={(value) => form.setValue('tutorial_type', value)}
+                          onValueChange={(value) => form.setValue('tutorial_type', value, { shouldValidate: true })}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select type" />
@@ -602,12 +607,25 @@ export default function AkboyTutorialRegistration() {
 
                     {/* Price Display */}
                     {price > 0 && (
-                      <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-lg">
+                      <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-lg space-y-4">
                         <div className="flex justify-between items-center">
                           <span className="text-gray-700">Tutorial Fee:</span>
                           <span className="text-2xl font-bold text-emerald-600">
                             ₦{price.toLocaleString()}
                           </span>
+                        </div>
+                        
+                        {/* Payment Account Details */}
+                        <div className="border-t border-emerald-200 pt-4">
+                          <h4 className="font-semibold text-gray-800 mb-2">Payment Account Details</h4>
+                          <div className="bg-white p-3 rounded border border-emerald-100 space-y-1 text-sm">
+                            <p><span className="text-gray-600">Bank:</span> <span className="font-medium">Opay</span></p>
+                            <p><span className="text-gray-600">Account Number:</span> <span className="font-medium font-mono">7043871023</span></p>
+                            <p><span className="text-gray-600">Account Name:</span> <span className="font-medium">AKBOY CREATIVE HUB</span></p>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Please transfer the exact amount and upload proof of payment below.
+                          </p>
                         </div>
                       </div>
                     )}
@@ -715,7 +733,7 @@ export default function AkboyTutorialRegistration() {
                       <Checkbox 
                         id="agreement"
                         checked={form.watch('agreement')}
-                        onCheckedChange={(checked) => form.setValue('agreement', checked as boolean)}
+                        onCheckedChange={(checked) => form.setValue('agreement', checked as boolean, { shouldValidate: true })}
                       />
                       <Label htmlFor="agreement" className="text-sm text-gray-600 leading-relaxed cursor-pointer">
                         I confirm that the information provided is correct. I understand my registration will only 
