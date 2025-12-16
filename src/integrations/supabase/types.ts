@@ -289,6 +289,30 @@ export type Database = {
         }
         Relationships: []
       }
+      akboy_settings: {
+        Row: {
+          description: string | null
+          id: string
+          key: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       akboy_stats: {
         Row: {
           display_order: number | null
@@ -491,6 +515,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           display_order: number | null
+          flyer_url: string | null
           id: string
           is_active: boolean | null
           name: string
@@ -506,6 +531,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          flyer_url?: string | null
           id?: string
           is_active?: boolean | null
           name: string
@@ -521,6 +547,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          flyer_url?: string | null
           id?: string
           is_active?: boolean | null
           name?: string

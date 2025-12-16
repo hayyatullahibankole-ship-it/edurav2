@@ -49,6 +49,13 @@ interface Tutorial {
   physical_group_price: number;
   physical_private_price: number;
   whatsapp_group_link: string | null;
+  flyer_url: string | null;
+}
+
+interface PaymentAccount {
+  bank_name: string;
+  account_number: string;
+  account_name: string;
 }
 
 const tutorialIcons: Record<string, typeof BookOpen> = {
@@ -91,6 +98,7 @@ export default function AkboyTutorialRegistration() {
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadingProof, setUploadingProof] = useState(false);
+  const [paymentAccount, setPaymentAccount] = useState<PaymentAccount | null>(null);
   const [submissionData, setSubmissionData] = useState<{
     registrationId: string;
     tutorialName: string;
@@ -136,6 +144,7 @@ export default function AkboyTutorialRegistration() {
 
   useEffect(() => {
     fetchTutorials();
+    fetchPaymentAccount();
   }, []);
 
   useEffect(() => {
@@ -162,6 +171,23 @@ export default function AkboyTutorialRegistration() {
       toast.error('Failed to load tutorials');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPaymentAccount = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('akboy_settings')
+        .select('value')
+        .eq('key', 'payment_account')
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      if (data?.value) {
+        setPaymentAccount(data.value as unknown as PaymentAccount);
+      }
+    } catch (error) {
+      console.error('Error fetching payment account:', error);
     }
   };
 
@@ -427,9 +453,18 @@ export default function AkboyTutorialRegistration() {
                   return (
                     <Card 
                       key={tutorial.id} 
-                      className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-emerald-300"
+                      className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-emerald-300 overflow-hidden"
                       onClick={() => form.setValue('tutorial_id', tutorial.id)}
                     >
+                      {tutorial.flyer_url && (
+                        <div className="h-40 overflow-hidden">
+                          <img 
+                            src={tutorial.flyer_url} 
+                            alt={tutorial.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
                           <div className="p-3 bg-emerald-100 rounded-lg">
@@ -463,6 +498,20 @@ export default function AkboyTutorialRegistration() {
         {selectedTutorialId && (
           <div className="max-w-3xl mx-auto">
             <Card className="shadow-lg">
+              {/* Tutorial Flyer Banner */}
+              {selectedTutorial?.flyer_url && (
+                <div className="relative h-48 md:h-64 overflow-hidden rounded-t-lg">
+                  <img 
+                    src={selectedTutorial.flyer_url} 
+                    alt={selectedTutorial.name} 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/80 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <h2 className="text-white text-xl md:text-2xl font-bold">{selectedTutorial.name}</h2>
+                  </div>
+                </div>
+              )}
               <CardHeader className="bg-emerald-50 border-b">
                 <CardTitle className="text-xl text-emerald-800">
                   AKBOY Creative Hub – Tutorial Registration Form
@@ -665,17 +714,19 @@ export default function AkboyTutorialRegistration() {
                         </div>
                         
                         {/* Payment Account Details */}
-                        <div className="border-t border-emerald-200 pt-4">
-                          <h4 className="font-semibold text-gray-800 mb-2">Payment Account Details</h4>
-                          <div className="bg-white p-3 rounded border border-emerald-100 space-y-1 text-sm">
-                            <p><span className="text-gray-600">Bank:</span> <span className="font-medium">Opay</span></p>
-                            <p><span className="text-gray-600">Account Number:</span> <span className="font-medium font-mono">7043871023</span></p>
-                            <p><span className="text-gray-600">Account Name:</span> <span className="font-medium">AKBOY CREATIVE HUB</span></p>
+                        {paymentAccount && (
+                          <div className="border-t border-emerald-200 pt-4">
+                            <h4 className="font-semibold text-gray-800 mb-2">Payment Account Details</h4>
+                            <div className="bg-white p-3 rounded border border-emerald-100 space-y-1 text-sm">
+                              <p><span className="text-gray-600">Bank:</span> <span className="font-medium">{paymentAccount.bank_name}</span></p>
+                              <p><span className="text-gray-600">Account Number:</span> <span className="font-medium font-mono">{paymentAccount.account_number}</span></p>
+                              <p><span className="text-gray-600">Account Name:</span> <span className="font-medium">{paymentAccount.account_name}</span></p>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">
+                              Please transfer the exact amount and upload proof of payment below.
+                            </p>
                           </div>
-                          <p className="text-xs text-gray-500 mt-2">
-                            Please transfer the exact amount and upload proof of payment below.
-                          </p>
-                        </div>
+                        )}
                       </div>
                     )}
 
