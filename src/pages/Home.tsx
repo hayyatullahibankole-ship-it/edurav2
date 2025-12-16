@@ -18,7 +18,6 @@ import heroImage from "@/assets/hero-students.jpg";
 import BlogSection from "@/components/BlogSection";
 import Footer from "@/components/Footer";
 import ScheduleTestModal from "@/components/ScheduleTestModal";
-import TeamEnrollment from "@/components/TeamEnrollment";
 import { useAuth } from "@/hooks/useAuth";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -379,9 +378,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* Team Enrollment Section */}
-      <TeamEnrollment />
 
       {/* CTA Section */}
       <section className="relative py-24 md:py-32 overflow-hidden">
