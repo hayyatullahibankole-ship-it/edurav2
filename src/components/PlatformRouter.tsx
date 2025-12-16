@@ -58,6 +58,7 @@ import AkboyAbout from "@/pages/akboy/AkboyAbout";
 import AkboyServices from "@/pages/akboy/AkboyServices";
 import AkboyPortfolio from "@/pages/akboy/AkboyPortfolio";
 import AkboyEvents from "@/pages/akboy/AkboyEvents";
+import AkboyTutorialRegistration from "@/pages/akboy/AkboyTutorialRegistration";
 
 // Akboy Routes Component
 const AkboyRoutes = () => {
@@ -69,6 +70,7 @@ const AkboyRoutes = () => {
       <Route path="/portfolio" element={<AkboyPortfolio />} />
       <Route path="/events" element={<AkboyEvents />} />
       <Route path="/contact" element={<AkboyContact />} />
+      <Route path="/register" element={<AkboyTutorialRegistration />} />
       <Route path="/blog" element={<AkboyBlog />} />
       <Route path="/blog/:slug" element={<AkboyBlogPost />} />
       <Route path="/privacy" element={<Privacy />} />
@@ -268,6 +270,7 @@ const EduraRoutes = () => {
       <Route path="/akboy/portfolio" element={<AkboyPortfolio />} />
       <Route path="/akboy/events" element={<AkboyEvents />} />
       <Route path="/akboy/contact" element={<AkboyContact />} />
+      <Route path="/akboy/register" element={<AkboyTutorialRegistration />} />
       
       <Route path="*" element={<Layout><NotFound /></Layout>} />
     </Routes>

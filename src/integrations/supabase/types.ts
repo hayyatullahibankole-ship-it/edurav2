@@ -397,6 +397,143 @@ export type Database = {
         }
         Relationships: []
       }
+      akboy_tutorial_registrations: {
+        Row: {
+          academic_level: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string
+          gender: string | null
+          guardian_name: string | null
+          guardian_phone: string | null
+          id: string
+          mode_of_learning: string
+          notes: string | null
+          payment_proof_url: string | null
+          payment_verified: boolean | null
+          payment_verified_at: string | null
+          payment_verified_by: string | null
+          phone: string
+          price: number
+          referral_source: string | null
+          special_requests: string | null
+          status: string | null
+          student_photo_url: string | null
+          tutorial_id: string | null
+          tutorial_name: string
+          tutorial_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          academic_level?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name: string
+          gender?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          id?: string
+          mode_of_learning: string
+          notes?: string | null
+          payment_proof_url?: string | null
+          payment_verified?: boolean | null
+          payment_verified_at?: string | null
+          payment_verified_by?: string | null
+          phone: string
+          price: number
+          referral_source?: string | null
+          special_requests?: string | null
+          status?: string | null
+          student_photo_url?: string | null
+          tutorial_id?: string | null
+          tutorial_name: string
+          tutorial_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          academic_level?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string
+          gender?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          id?: string
+          mode_of_learning?: string
+          notes?: string | null
+          payment_proof_url?: string | null
+          payment_verified?: boolean | null
+          payment_verified_at?: string | null
+          payment_verified_by?: string | null
+          phone?: string
+          price?: number
+          referral_source?: string | null
+          special_requests?: string | null
+          status?: string | null
+          student_photo_url?: string | null
+          tutorial_id?: string | null
+          tutorial_name?: string
+          tutorial_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "akboy_tutorial_registrations_tutorial_id_fkey"
+            columns: ["tutorial_id"]
+            isOneToOne: false
+            referencedRelation: "akboy_tutorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      akboy_tutorials: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          online_group_price: number | null
+          online_private_price: number | null
+          physical_group_price: number | null
+          physical_private_price: number | null
+          slug: string
+          updated_at: string | null
+          whatsapp_group_link: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          online_group_price?: number | null
+          online_private_price?: number | null
+          physical_group_price?: number | null
+          physical_private_price?: number | null
+          slug: string
+          updated_at?: string | null
+          whatsapp_group_link?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          online_group_price?: number | null
+          online_private_price?: number | null
+          physical_group_price?: number | null
+          physical_private_price?: number | null
+          slug?: string
+          updated_at?: string | null
+          whatsapp_group_link?: string | null
+        }
+        Relationships: []
+      }
       attempt_answers: {
         Row: {
           answer: Json | null
