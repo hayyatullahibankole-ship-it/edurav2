@@ -81,11 +81,14 @@ export function CouponManager() {
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + newCoupon.expiry_days);
 
+      const { data: userData } = await supabase.auth.getUser();
+      
       const { error } = await supabase.from('promo_coupons').insert({
         code: newCoupon.code.toUpperCase().trim(),
         usage_limit: newCoupon.usage_limit,
         expiry_date: expiryDate.toISOString().split('T')[0],
-        description: newCoupon.description || null
+        description: newCoupon.description || null,
+        created_by: userData.user?.id
       });
 
       if (error) {
