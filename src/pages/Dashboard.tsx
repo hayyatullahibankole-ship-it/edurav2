@@ -57,10 +57,12 @@ import { AIAssistant } from "@/components/AIAssistant";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SchoolAvailableExams from "@/components/school/SchoolAvailableExams";
+import { PromoCodeActivation } from "@/components/dashboard/PromoCodeActivation";
+import { FreeAccessBanner } from "@/components/dashboard/FreeAccessBanner";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
-  const { subscription, loading: subscriptionLoading, isPremium } = useSubscription();
+  const { subscription, loading: subscriptionLoading, isPremium, hasFreePromoAccess, freeAccessExpiry, freeAccessExpired } = useSubscription();
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab") || "dashboard";
   const [activeTab, setActiveTab] = useState(tabFromUrl);
@@ -392,7 +394,20 @@ const Dashboard = () => {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="dashboard" className="space-y-8">
+            <TabsContent value="dashboard" className="space-y-6">
+            {/* Free Access Banner */}
+            {hasFreePromoAccess && freeAccessExpiry && (
+              <FreeAccessBanner expiryDate={freeAccessExpiry} />
+            )}
+            {freeAccessExpired && freeAccessExpiry && (
+              <FreeAccessBanner expiryDate={freeAccessExpiry} isExpired />
+            )}
+            
+            {/* Promo Code Activation - only show if no premium/free access */}
+            {!isPremium && !hasFreePromoAccess && !subscriptionLoading && (
+              <PromoCodeActivation onSuccess={() => window.location.reload()} />
+            )}
+            
             {/* Stats Overview */}
             <div>
               <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Your Performance</h2>
@@ -922,6 +937,19 @@ const Dashboard = () => {
           <div className="flex-1 p-8 overflow-auto bg-gradient-to-br from-background via-muted/30 to-background">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsContent value="dashboard" className="space-y-6 mt-0 animate-fade-in">
+                {/* Free Access Banner */}
+                {hasFreePromoAccess && freeAccessExpiry && (
+                  <FreeAccessBanner expiryDate={freeAccessExpiry} />
+                )}
+                {freeAccessExpired && freeAccessExpiry && (
+                  <FreeAccessBanner expiryDate={freeAccessExpiry} isExpired />
+                )}
+                
+                {/* Promo Code Activation - only show if no premium/free access */}
+                {!isPremium && !hasFreePromoAccess && !subscriptionLoading && (
+                  <PromoCodeActivation onSuccess={() => window.location.reload()} />
+                )}
+                
                 {/* Stats Cards Row */}
                 <div className="grid grid-cols-3 gap-6">
                   {/* Card 1 */}
