@@ -52,7 +52,7 @@ import ExamControl from '@/components/admin/ExamControl';
 import PricingManager from '@/components/admin/PricingManager';
 import NotificationManager from '@/components/admin/NotificationManager';
 import ReferralManager from '@/components/admin/ReferralManager';
-
+import { CouponManager } from '@/components/admin/CouponManager';
 
 export default function AdminDashboard() {
   const { user, isAdmin, signOut, loading: authLoading } = useAuth();
@@ -629,6 +629,7 @@ export default function AdminDashboard() {
                 <TabsTrigger value="questions" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Questions</TabsTrigger>
                 <TabsTrigger value="resources" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Resources</TabsTrigger>
                 <TabsTrigger value="subscriptions" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Subscriptions</TabsTrigger>
+                <TabsTrigger value="promos" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Promos</TabsTrigger>
                 <TabsTrigger value="referrals" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Referrals</TabsTrigger>
                 <TabsTrigger value="analytics" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Analytics</TabsTrigger>
                 <TabsTrigger value="notifications" className="text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-medium whitespace-nowrap">Notifications</TabsTrigger>
@@ -745,6 +746,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="subscriptions" className="space-y-6">
             <PricingManager />
+          </TabsContent>
+
+          <TabsContent value="promos" className="space-y-6">
+            <CouponManager />
           </TabsContent>
 
           <TabsContent value="referrals" className="space-y-6">

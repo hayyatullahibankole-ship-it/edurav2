@@ -962,6 +962,42 @@ export type Database = {
           },
         ]
       }
+      coupon_redemptions: {
+        Row: {
+          coupon_id: string
+          id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          coupon_id: string
+          id?: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string
+          id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_redemptions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "promo_coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_redemptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_delivery_log: {
         Row: {
           created_at: string
@@ -1573,6 +1609,50 @@ export type Database = {
           sort_order?: number | null
         }
         Relationships: []
+      }
+      promo_coupons: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expiry_date: string
+          id: string
+          is_active: boolean
+          usage_limit: number
+          used_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expiry_date: string
+          id?: string
+          is_active?: boolean
+          usage_limit?: number
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expiry_date?: string
+          id?: string
+          is_active?: boolean
+          usage_limit?: number
+          used_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_coupons_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       questions: {
         Row: {
@@ -3286,6 +3366,8 @@ export type Database = {
           device_fingerprint: string | null
           email: string
           first_name: string | null
+          free_access_expiry_date: string | null
+          free_practice_access: boolean | null
           id: string
           is_suspended: boolean | null
           is_verified: boolean | null
@@ -3309,6 +3391,8 @@ export type Database = {
           device_fingerprint?: string | null
           email: string
           first_name?: string | null
+          free_access_expiry_date?: string | null
+          free_practice_access?: boolean | null
           id?: string
           is_suspended?: boolean | null
           is_verified?: boolean | null
@@ -3332,6 +3416,8 @@ export type Database = {
           device_fingerprint?: string | null
           email?: string
           first_name?: string | null
+          free_access_expiry_date?: string | null
+          free_practice_access?: boolean | null
           id?: string
           is_suspended?: boolean | null
           is_verified?: boolean | null
@@ -4006,6 +4092,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      redeem_promo_coupon: { Args: { coupon_code: string }; Returns: Json }
       send_immediate_result_notification: {
         Args: { attempt_uuid: string }
         Returns: boolean
