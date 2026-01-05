@@ -81,14 +81,26 @@ export function CouponManager() {
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + newCoupon.expiry_days);
 
-      const { data: userData } = await supabase.auth.getUser();
-      
+      const { data: authData } = await supabase.auth.getUser();
+      const authUserId = authData.user?.id;
+
+      let createdBy: string | null = null;
+      if (authUserId) {
+        const { data: appUser } = await supabase
+          .from('users')
+          .select('id')
+          .eq('auth_user_id', authUserId)
+          .maybeSingle();
+
+        createdBy = appUser?.id ?? null;
+      }
+
       const { error } = await supabase.from('promo_coupons').insert({
         code: newCoupon.code.toUpperCase().trim(),
         usage_limit: newCoupon.usage_limit,
         expiry_date: expiryDate.toISOString().split('T')[0],
         description: newCoupon.description || null,
-        created_by: userData.user?.id
+        created_by: createdBy
       });
 
       if (error) {
@@ -106,7 +118,11 @@ export function CouponManager() {
       fetchCoupons();
     } catch (err) {
       console.error('Error creating coupon:', err);
-      toast.error('Failed to create coupon');
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as any).message)
+          : 'Failed to create coupon';
+      toast.error(message);
     } finally {
       setCreating(false);
     }
