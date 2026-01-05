@@ -98,6 +98,36 @@ export function useSubscription() {
         } else if (data && data.length > 0) {
           // Transform the RPC result to match SubscriptionData format
           const effectiveSub = data[0];
+          const effectiveAccessLevel = String(effectiveSub.resource_access_level || '').toLowerCase();
+          const effectivePlanName = String(effectiveSub.plan_name || '').toLowerCase();
+          const effectiveLooksPremium =
+            effectiveAccessLevel === 'premium' ||
+            effectiveAccessLevel === 'enterprise' ||
+            effectivePlanName.includes('premium') ||
+            effectivePlanName.includes('enterprise') ||
+            (typeof effectiveSub.price === 'number' && effectiveSub.price > 0);
+
+          // If user has a valid promo/free access window, it should upgrade them even if
+          // their "effective" subscription is otherwise basic.
+          if (freeAccessValid && !effectiveLooksPremium) {
+            setSubscription({
+              id: 'free-promo',
+              status: 'ACTIVE',
+              plan_id: 'free-promo',
+              start_date: new Date().toISOString(),
+              end_date: freeAccessExpiry,
+              subscription_plans: {
+                name: 'Complimentary Access',
+                price: 0,
+                resource_access_level: 'premium',
+                features: ['1-month complimentary access', 'All CBT practice content'],
+              },
+              isFreeAccess: true,
+              freeAccessExpiry,
+            });
+            return;
+          }
+
           setSubscription({
             id: effectiveSub.id,
             status: effectiveSub.status,
@@ -108,12 +138,13 @@ export function useSubscription() {
               name: effectiveSub.plan_name,
               price: effectiveSub.price,
               resource_access_level: effectiveSub.resource_access_level,
-              features: effectiveSub.source === 'school' 
-                ? ['School Premium Access', 'All WAEC, JAMB & NECO questions', 'Unlimited practice tests', 'Detailed analytics']
-                : ['Premium access']
+              features:
+                effectiveSub.source === 'school'
+                  ? ['School Premium Access', 'All WAEC, JAMB & NECO questions', 'Unlimited practice tests', 'Detailed analytics']
+                  : ['Premium access'],
             },
             isFreeAccess: false,
-            freeAccessExpiry: null
+            freeAccessExpiry: null,
           });
         } else if (freeAccessValid) {
           // No paid subscription but has valid free access
