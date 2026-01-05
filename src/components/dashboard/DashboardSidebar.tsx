@@ -127,15 +127,19 @@ export function DashboardSidebar({ onLogout, schoolInfo }: DashboardSidebarProps
         </SidebarGroup>
 
         {/* Logout Button */}
-        <div className="mt-auto p-4">
+        <div className="mt-auto p-4 border-t border-sidebar-border">
           <Button
-            onClick={onLogout}
-            variant="default"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onLogout();
+            }}
+            variant="destructive"
             className="w-full gap-2"
             size={state === "collapsed" ? "icon" : "default"}
           >
             <LogOut className="h-5 w-5" />
-            {state !== "collapsed" && <span>LOGOUT</span>}
+            {state !== "collapsed" && <span>Logout</span>}
           </Button>
         </div>
       </SidebarContent>
