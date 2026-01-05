@@ -3984,6 +3984,7 @@ export type Database = {
           updated_at: string
         }[]
       }
+      has_premium_access: { Args: { _auth_user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
