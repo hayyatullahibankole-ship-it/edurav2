@@ -33,30 +33,11 @@ export function useSubscription() {
         return;
       }
 
-      if (!userProfile) {
-        // Wait until profile is loaded, but add timeout
+      // Wait for the public.users profile to load (required for all access checks)
+      if (!userProfile?.id) {
+        setSubscription(null);
         setLoading(true);
-        
-        // Set a fallback timeout to prevent infinite loading
-        const timeoutId = setTimeout(() => {
-          console.warn('Subscription loading timed out, user may not have profile');
-          setSubscription({
-            id: 'fallback',
-            status: 'ACTIVE',
-            plan_id: 'basic',
-            start_date: new Date().toISOString(),
-            end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-            subscription_plans: {
-              name: 'Basic Access',
-              price: 0,
-              resource_access_level: 'basic',
-              features: ['Basic practice tests']
-            }
-          });
-          setLoading(false);
-        }, 8000); // 8 second timeout
-        
-        return () => clearTimeout(timeoutId);
+        return;
       }
 
       try {
@@ -189,9 +170,8 @@ export function useSubscription() {
         setLoading(false);
       }
     };
-
     fetchSubscription();
-  }, [user, userProfile]);
+  }, [user?.id, userProfile?.id]);
 
   // Normalize subscription state - fix the premium detection logic
   const active = subscription?.status === 'ACTIVE';
