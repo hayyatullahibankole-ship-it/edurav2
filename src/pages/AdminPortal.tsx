@@ -8,12 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription as AlertDialogDesc, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { 
-  Shield, 
-  Users, 
-  BookOpen, 
-  Settings, 
-  BarChart3, 
+import {
+  Shield,
+  Users,
+  BookOpen,
+  Settings,
+  BarChart3,
   AlertTriangle,
   LogOut,
   Search,
@@ -31,6 +31,7 @@ import {
   Zap,
   FileText,
   DollarSign,
+  Gift,
   Newspaper,
   MessageCircle,
   GraduationCap,
@@ -57,6 +58,7 @@ import StudyHubManager from '@/components/admin/StudyHubManager';
 import ForumManager from '@/components/admin/ForumManager';
 import SchoolManagement from '@/components/admin/SchoolManagement';
 import ChallengeManager from '@/components/admin/ChallengeManager';
+import { CouponManager } from '@/components/admin/CouponManager';
 import { AkboyServicesManager } from '@/components/admin/AkboyServicesManager';
 import { AkboyPortfolioManager } from '@/components/admin/AkboyPortfolioManager';
 import { AkboyEventsManager } from '@/components/admin/AkboyEventsManager';
@@ -277,6 +279,15 @@ export default function AdminPortal() {
                 <DollarSign className="w-4 h-4 mr-2 lg:mr-3" />
                 <span className="hidden sm:inline">Pricing Management</span>
                 <span className="sm:hidden">Pricing</span>
+              </Button>
+              <Button
+                variant={activeSection === 'promos' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+                onClick={() => setActiveSection('promos')}
+              >
+                <Gift className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Promo Codes</span>
+                <span className="sm:hidden">Promos</span>
               </Button>
               <Button
                 variant={activeSection === 'schools' ? 'secondary' : 'ghost'}
@@ -581,28 +592,29 @@ export default function AdminPortal() {
           {activeSection === 'resources' && <ResourceManagement />}
           
           {activeSection === 'security' && <SecurityCenter suspiciousActivities={recentActivities} />}
-          
+
           {activeSection === 'analytics' && <AnalyticsHub />}
-          
-{activeSection === 'pricing' && <PricingManager />}
-{activeSection === 'schools' && <SchoolManagement />}
-{activeSection === 'blog' && <BlogManager />}
-          
+
+          {activeSection === 'pricing' && <PricingManager />}
+          {activeSection === 'promos' && <CouponManager />}
+          {activeSection === 'schools' && <SchoolManagement />}
+          {activeSection === 'blog' && <BlogManager />}
+
           {activeSection === 'communications' && (
             <div className="space-y-6">
               <WelcomeEmailSender />
               <CustomerCommunications users={users} />
             </div>
           )}
-          
+
           {activeSection === 'study-hub' && <StudyHubManager />}
-          
+
           {activeSection === 'forum' && <ForumManager />}
-          
+
           {activeSection === 'challenges' && <ChallengeManager />}
-          
+
           {activeSection === 'settings' && <SystemConfig />}
-          
+
           {activeSection === 'akboy-services' && <AkboyServicesManager />}
           {activeSection === 'akboy-portfolio' && <AkboyPortfolioManager />}
           {activeSection === 'akboy-events' && <AkboyEventsManager />}
@@ -611,7 +623,7 @@ export default function AdminPortal() {
           {activeSection === 'akboy-registrations' && <AkboyRegistrationsManager />}
 
           {/* Other sections can be implemented similarly */}
-          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools'].includes(activeSection) && (
+          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'promos', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools'].includes(activeSection) && (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
