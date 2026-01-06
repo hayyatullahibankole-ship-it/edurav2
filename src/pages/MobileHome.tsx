@@ -29,7 +29,8 @@ import {
   GraduationCap,
   Calendar,
   Video,
-  Gift
+  Gift,
+  Loader2
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -59,6 +60,7 @@ const MobileHome = () => {
   const [dailyGoal, setDailyGoal] = useState({ answered: 0, target: 20 });
   const [showProfileSheet, setShowProfileSheet] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const motivationalQuotes = [
     "Success is the sum of small efforts repeated daily.",
@@ -77,8 +79,18 @@ const MobileHome = () => {
   }, [userProfile]);
 
   const handleLogout = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    
+    // Immediate haptic feedback
+    if (Capacitor.isNativePlatform()) {
+      Haptics.impact({ style: ImpactStyle.Medium });
+    }
+    playTapSound();
+    
+    // Navigate first for instant visual feedback, then sign out
+    navigate('/auth', { replace: true });
     await signOut();
-    navigate('/auth');
   };
 
   const fetchStats = async () => {
@@ -279,9 +291,14 @@ const MobileHome = () => {
                 variant="ghost"
                 size="icon"
                 onClick={handleLogout}
+                disabled={loggingOut}
                 className="rounded-2xl hover:bg-white/20 w-11 h-11 group text-white hover:text-white active:scale-95 transition-all shadow-lg backdrop-blur-sm"
               >
-                <LogOut className="h-5 w-5 group-hover:scale-110 group-hover:rotate-12 transition-all" />
+                {loggingOut ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <LogOut className="h-5 w-5 group-hover:scale-110 group-hover:rotate-12 transition-all" />
+                )}
               </Button>
             </div>
           </div>
