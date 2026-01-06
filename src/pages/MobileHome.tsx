@@ -409,6 +409,11 @@ const MobileHome = () => {
           </div>
         </div>
 
+        {/* Promo Code Activation - Right after daily goal for visibility */}
+        {!isPremium && !hasFreePromoAccess && !subscriptionLoading && (
+          <MobilePromoCodeActivation onSuccess={() => window.location.reload()} />
+        )}
+
         {/* Subjects - Modern Grid */}
         <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <div className="mb-5">
@@ -579,10 +584,6 @@ const MobileHome = () => {
           </div>
         </div>
 
-        {/* Promo Code Activation - Eye-catching for mobile */}
-        {!isPremium && !hasFreePromoAccess && !subscriptionLoading && (
-          <MobilePromoCodeActivation onSuccess={() => window.location.reload()} />
-        )}
 
         {/* Premium CTA - Eye-catching */}
         {!isPremium && (
