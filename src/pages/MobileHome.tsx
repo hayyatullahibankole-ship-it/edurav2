@@ -41,10 +41,11 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import NotificationBell from '@/components/NotificationBell';
 import { AIAssistant } from '@/components/AIAssistant';
+import { MobilePromoCodeActivation } from '@/components/dashboard/MobilePromoCodeActivation';
 
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
-  const { isPremium } = useSubscription();
+  const { isPremium, hasFreePromoAccess, loading: subscriptionLoading } = useSubscription();
   usePushNotifications();
   const navigate = useNavigate();
   
@@ -577,6 +578,11 @@ const MobileHome = () => {
             </div>
           </div>
         </div>
+
+        {/* Promo Code Activation - Eye-catching for mobile */}
+        {!isPremium && !hasFreePromoAccess && !subscriptionLoading && (
+          <MobilePromoCodeActivation onSuccess={() => window.location.reload()} />
+        )}
 
         {/* Premium CTA - Eye-catching */}
         {!isPremium && (
