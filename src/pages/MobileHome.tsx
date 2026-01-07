@@ -43,10 +43,13 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import NotificationBell from '@/components/NotificationBell';
 import { AIAssistant } from '@/components/AIAssistant';
 import { MobilePromoCodeActivation } from '@/components/dashboard/MobilePromoCodeActivation';
+import { usePWAFeatureCheck } from '@/components/PWAFeatureGuard';
+import { usePWAAccess } from '@/hooks/usePWAAccess';
 
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
   const { isPremium, hasFreePromoAccess, loading: subscriptionLoading } = useSubscription();
+  const { checkFeatureAccess, InstallModal } = usePWAFeatureCheck();
   usePushNotifications();
   const navigate = useNavigate();
   
@@ -227,16 +230,36 @@ const MobileHome = () => {
     }
   };
 
+  // PWA-restricted features mapping
+  const pwaRestrictedPaths: Record<string, { feature: 'full-cbt-exam' | 'performance-analytics' | 'offline-practice' | 'progress-tracking' | 'weak-topic-analysis', displayName: string }> = {
+    '/performance-report': { feature: 'performance-analytics', displayName: 'Performance Analytics' },
+    '/offline-exams': { feature: 'offline-practice', displayName: 'Offline Practice' },
+  };
+
   const handleNavigation = async (path: string) => {
     if (Capacitor.isNativePlatform()) {
       await Haptics.impact({ style: ImpactStyle.Light });
     }
     playTapSound();
+    
+    // Check if this path requires PWA
+    const restriction = pwaRestrictedPaths[path];
+    if (restriction) {
+      const hasAccess = checkFeatureAccess(
+        restriction.feature,
+        restriction.displayName,
+        () => {} // Just close modal if they dismiss
+      );
+      if (!hasAccess) return; // Modal will be shown
+    }
+    
     navigate(path);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 pb-24 overflow-hidden relative">
+    <>
+      <InstallModal />
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 pb-24 overflow-hidden relative">
       {/* Enhanced Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 -right-20 w-80 h-80 bg-gradient-to-br from-primary/20 to-primary-glow/20 rounded-full blur-3xl animate-float" />
@@ -668,6 +691,7 @@ const MobileHome = () => {
       {/* AI Assistant */}
       <AIAssistant />
     </div>
+    </>
   );
 };
 
