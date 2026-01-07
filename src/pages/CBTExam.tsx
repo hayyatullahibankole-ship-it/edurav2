@@ -2,16 +2,11 @@ import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { useCBTExam } from '@/hooks/useCBTExam';
 import { CleanCBTInterface } from '@/components/CleanCBTInterface';
 import { Loader2 } from 'lucide-react';
-import { usePWAFeatureCheck } from '@/components/PWAFeatureGuard';
-import { useEffect } from 'react';
 
 const CBTExam = () => {
   const [searchParams] = useSearchParams();
   const { attemptId: pathAttemptId } = useParams();
   const navigate = useNavigate();
-  
-  // PWA check for full CBT exams
-  const { checkFeatureAccess, InstallModal } = usePWAFeatureCheck();
   
   // Support both query param (?attempt=...) and path param (/exam/:attemptId)
   const attemptId = pathAttemptId || searchParams.get('attempt');
@@ -25,22 +20,6 @@ const CBTExam = () => {
     submitExam,
     examDuration
   } = useCBTExam(attemptId);
-
-  // Check PWA access when attempting a full CBT exam
-  useEffect(() => {
-    if (attemptId) {
-      const hasAccess = checkFeatureAccess(
-        'full-cbt-exam',
-        'Full CBT Exams',
-        () => navigate('/demo-test') // Fallback to demo
-      );
-      
-      if (!hasAccess) {
-        // Modal will be shown, don't proceed
-        return;
-      }
-    }
-  }, [attemptId]);
 
   if (!attemptId) {
     navigate('/dashboard');
@@ -78,18 +57,15 @@ const CBTExam = () => {
   }
 
   return (
-    <>
-      <InstallModal />
-      <CleanCBTInterface
-        questions={questions}
-        answers={answers}
-        onAnswerSelect={selectAnswer}
-        onSubmit={submitExam}
-        duration={examDuration}
-        examTitle="CBT Practice Exam"
-        submitting={submitting}
-      />
-    </>
+    <CleanCBTInterface
+      questions={questions}
+      answers={answers}
+      onAnswerSelect={selectAnswer}
+      onSubmit={submitExam}
+      duration={examDuration}
+      examTitle="CBT Practice Exam"
+      submitting={submitting}
+    />
   );
 };
 

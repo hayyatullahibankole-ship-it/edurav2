@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { 
   BookOpen, 
   Trophy, 
@@ -12,35 +11,25 @@ import {
   Sparkles,
   Target,
   Newspaper,
-  DollarSign,
-  HelpCircle,
-  GraduationCap,
-  Play,
-  Lock,
-  Smartphone
+  DollarSign
 } from 'lucide-react';
 import { PWAInstallPrompt } from '@/components/PWAInstallPrompt';
 
 export default function MobileWebLanding() {
   const navigate = useNavigate();
 
-  const easyAccessFeatures = [
-    { icon: Play, title: "Demo CBT", description: "Try 5-10 questions free", path: "/demo-test", available: true },
-    { icon: BookOpen, title: "Study Hub", description: "Browse study materials", path: "/study-hub", available: true },
-    { icon: DollarSign, title: "Pricing", description: "View subscription plans", path: "/payment", available: true },
-    { icon: HelpCircle, title: "How It Works", description: "Learn about EduRa", path: "/#how-it-works", available: true },
-  ];
-
-  const pwaOnlyFeatures = [
-    { icon: Trophy, title: "Full CBT Exams", description: "Complete timed exams" },
-    { icon: Target, title: "Performance Tracking", description: "Detailed analytics" },
-    { icon: Zap, title: "Offline Practice", description: "Study anywhere" },
-    { icon: GraduationCap, title: "Progress Reports", description: "Weak topic analysis" },
+  const features = [
+    { icon: BookOpen, title: "Practice Tests", description: "Thousands of questions" },
+    { icon: Trophy, title: "Track Progress", description: "Monitor your improvement" },
+    { icon: Zap, title: "Offline Mode", description: "Study anywhere, anytime" },
+    { icon: Target, title: "Personalized", description: "Tailored to your needs" }
   ];
 
   const quickLinks = [
-    { icon: Newspaper, title: "Blog & Tips", path: "/blog", description: "Study tips & news" },
-    { icon: BookOpen, title: "Resources", path: "/resources", description: "Books & materials" },
+    { icon: Newspaper, title: "Blog", path: "/blog" },
+    { icon: BookOpen, title: "Resources", path: "/resources" },
+    { icon: Trophy, title: "Demo Test", path: "/demo-test" },
+    { icon: DollarSign, title: "Pricing", path: "/payment" }
   ];
 
   return (
@@ -52,178 +41,136 @@ export default function MobileWebLanding() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 p-4 space-y-6 max-w-lg mx-auto pb-24">
+      <div className="relative z-10 p-4 md:p-6 space-y-6 max-w-4xl mx-auto pb-24">
         {/* Hero Section */}
         <div 
-          className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-primary via-primary-glow to-secondary p-6 shadow-2xl text-center animate-fade-in"
+          className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-primary via-primary-glow to-secondary p-8 shadow-2xl text-center animate-fade-in"
           style={{ boxShadow: '0 25px 70px rgba(0, 123, 255, 0.4)' }}
         >
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/30 rounded-full blur-2xl animate-pulse" />
           
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 mb-3 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-xl border border-white/30">
-              <Sparkles className="h-3.5 w-3.5 text-white" />
-              <span className="text-white font-bold text-xs">EDURA CBT Platform</span>
+            <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/20 backdrop-blur-xl border border-white/30">
+              <Sparkles className="h-4 w-4 text-white" />
+              <span className="text-white font-bold text-sm">Welcome to EduRa</span>
             </div>
             
-            <h1 className="text-3xl font-black text-white mb-2 drop-shadow-lg">
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-lg">
               Master Your Exams
             </h1>
-            <p className="text-white/90 text-sm font-semibold mb-5 max-w-sm mx-auto">
-              Practice with real exam questions and track your progress to exam success.
+            <p className="text-white/90 text-lg font-semibold mb-6 max-w-lg mx-auto">
+              Practice with thousands of questions, track your progress, and ace your exams with confidence.
             </p>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button
                 onClick={() => navigate('/demo-test')}
                 size="lg"
-                className="w-full h-12 text-base font-bold bg-white text-primary hover:bg-white/90 active:scale-95 transition-all shadow-xl"
+                className="h-14 text-base font-bold bg-white text-primary hover:bg-white/90 hover:scale-105 active:scale-95 transition-all shadow-2xl"
               >
-                <Play className="h-5 w-5 mr-2" strokeWidth={2.5} />
-                Try Free Demo
+                <Trophy className="h-5 w-5 mr-2" strokeWidth={2.5} />
+                Try Demo Test
               </Button>
               <Button
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/payment')}
                 size="lg"
                 variant="outline"
-                className="w-full h-12 text-base font-bold border-2 border-white text-white hover:bg-white/10 active:scale-95 transition-all"
+                className="h-14 text-base font-bold border-2 border-white text-white hover:bg-white/10 hover:scale-105 active:scale-95 transition-all"
               >
-                Sign In / Sign Up
+                View Pricing
                 <ArrowRight className="h-5 w-5 ml-2" strokeWidth={2.5} />
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Easy Access Features */}
-        <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-black">Quick Access</h2>
-            <Badge variant="secondary" className="font-semibold">No Install Required</Badge>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            {easyAccessFeatures.map((feature, index) => (
-              <Card 
-                key={index}
-                onClick={() => navigate(feature.path)}
-                className="border border-border/50 overflow-hidden shadow-lg hover:shadow-xl active:scale-95 transition-all cursor-pointer"
-              >
-                <CardContent className="p-4">
-                  <div className="p-2.5 rounded-xl bg-primary/10 w-fit mb-3">
-                    <feature.icon className="h-5 w-5 text-primary" strokeWidth={2.5} />
-                  </div>
-                  <h3 className="font-bold text-sm mb-0.5">{feature.title}</h3>
-                  <p className="text-xs text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
         {/* PWA Install Prompt */}
         <PWAInstallPrompt />
 
+        {/* Features Grid */}
+        <div className="grid grid-cols-2 gap-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          {features.map((feature, index) => (
+            <Card 
+              key={index}
+              className="border-2 border-primary/20 overflow-hidden shadow-xl hover:scale-105 active:scale-95 transition-all"
+              style={{ boxShadow: '0 15px 40px rgba(0, 123, 255, 0.15)' }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+              <CardContent className="p-6 text-center relative z-10">
+                <div 
+                  className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl mb-4"
+                  style={{ boxShadow: '0 10px 30px rgba(0, 123, 255, 0.4)' }}
+                >
+                  <feature.icon className="h-6 w-6 text-white" strokeWidth={2.5} />
+                </div>
+                <h3 className="font-black mb-1">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground font-semibold">{feature.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
         {/* Quick Links */}
-        <div className="space-y-2 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className="space-y-3 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <h2 className="text-2xl font-black mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Explore More
+          </h2>
           {quickLinks.map((link, index) => (
             <Card
               key={index}
               onClick={() => navigate(link.path)}
-              className="border border-border/50 overflow-hidden shadow-md hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer"
+              className="border-2 border-primary/20 overflow-hidden shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
-              <CardContent className="p-4">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
+              <CardContent className="p-4 relative z-10">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-secondary/10">
-                      <link.icon className="h-5 w-5 text-secondary" strokeWidth={2.5} />
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20">
+                      <link.icon className="h-5 w-5 text-primary" strokeWidth={2.5} />
                     </div>
-                    <div>
-                      <span className="font-bold text-sm">{link.title}</span>
-                      <p className="text-xs text-muted-foreground">{link.description}</p>
-                    </div>
+                    <span className="font-black text-lg">{link.title}</span>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" strokeWidth={2.5} />
+                  <ArrowRight className="h-5 w-5 text-muted-foreground" strokeWidth={2.5} />
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* PWA-Only Features Teaser */}
-        <Card 
-          className="border-2 border-primary/30 overflow-hidden shadow-xl animate-fade-in"
-          style={{ animationDelay: '0.3s' }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
-          <CardContent className="p-5 relative z-10">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Smartphone className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-bold text-sm">Install for Full Access</h3>
-                <p className="text-xs text-muted-foreground">Unlock all premium features</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              {pwaOnlyFeatures.map((feature, index) => (
-                <div 
-                  key={index}
-                  className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/50"
-                >
-                  <feature.icon className="h-4 w-4 text-muted-foreground" strokeWidth={2} />
-                  <span className="text-xs font-medium text-muted-foreground">{feature.title}</span>
-                </div>
-              ))}
-            </div>
-
-            <Button
-              onClick={() => navigate('/install-app')}
-              className="w-full h-11 font-bold gap-2"
-            >
-              <Download className="h-4 w-4" strokeWidth={2.5} />
-              Install EDURA App
-            </Button>
-          </CardContent>
-        </Card>
-
         {/* CTA Section */}
         <Card 
-          className="border-2 border-success/30 overflow-hidden shadow-xl animate-fade-in"
-          style={{ animationDelay: '0.4s' }}
+          className="border-2 border-success/30 overflow-hidden shadow-2xl animate-fade-in"
+          style={{ 
+            animationDelay: '0.3s',
+            boxShadow: '0 20px 60px rgba(16, 185, 129, 0.3)' 
+          }}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-success/10 to-transparent" />
-          <CardContent className="p-5 text-center relative z-10">
-            <div className="inline-flex items-center gap-2 mb-3 px-3 py-1.5 rounded-full bg-success/20 border border-success/30">
-              <CheckCircle className="h-3.5 w-3.5 text-success" strokeWidth={2.5} />
-              <span className="text-success font-bold text-xs">Join 10,000+ Students</span>
+          <CardContent className="p-8 text-center relative z-10">
+            <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-success/20 backdrop-blur-xl border border-success/30">
+              <CheckCircle className="h-4 w-4 text-success" strokeWidth={2.5} />
+              <span className="text-success font-bold text-sm">Get Started Today</span>
             </div>
             
-            <h3 className="text-lg font-black mb-1">Ready to Start?</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Create your free account and begin your exam preparation journey.
+            <h3 className="text-2xl font-black mb-2">
+              Ready to Excel?
+            </h3>
+            <p className="text-muted-foreground font-semibold mb-6">
+              Join thousands of students achieving their academic goals with EduRa.
             </p>
             
             <Button
               onClick={() => navigate('/auth')}
               size="lg"
-              className="w-full h-12 font-bold bg-gradient-to-r from-success to-success/80 hover:shadow-lg active:scale-95 transition-all"
+              className="h-14 text-base font-bold bg-gradient-to-r from-success via-success to-success/80 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all shadow-xl"
+              style={{ boxShadow: '0 10px 30px rgba(16, 185, 129, 0.4)' }}
             >
-              Create Free Account
-              <ArrowRight className="h-5 w-5 ml-2" strokeWidth={2.5} />
+              <Download className="h-5 w-5 mr-2" strokeWidth={2.5} />
+              Sign Up & Install App
             </Button>
           </CardContent>
         </Card>
-
-        {/* Footer Links */}
-        <div className="flex justify-center gap-6 text-xs text-muted-foreground pt-4">
-          <button onClick={() => navigate('/terms')} className="hover:text-foreground">Terms</button>
-          <button onClick={() => navigate('/privacy')} className="hover:text-foreground">Privacy</button>
-          <button onClick={() => navigate('/payment')} className="hover:text-foreground">Pricing</button>
-        </div>
       </div>
     </div>
   );

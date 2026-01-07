@@ -2,14 +2,12 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { usePWAAccess } from "@/hooks/usePWAAccess";
 import ProtectedRoute from "./ProtectedRoute";
 import Layout from "./Layout";
 import { DashboardLayout } from "./DashboardLayout";
 
 // Edura Pages
 import Home from "@/pages/Home";
-import MobileWebLanding from "@/pages/MobileWebLanding";
 import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import MobileSplash from "@/pages/MobileSplash";
@@ -90,8 +88,6 @@ const AkboyRoutes = () => {
 // Edura Routes Component
 const EduraRoutes = () => {
   const { isInstalledApp } = useInstalledApp();
-  const isMobile = useIsMobile();
-  const { isMobileBrowser } = usePWAAccess();
   
   return (
     <Routes>
@@ -104,15 +100,11 @@ const EduraRoutes = () => {
         </ProtectedRoute>
       } />
 
-      {/* Mobile Web Landing for browser users */}
-      <Route path="/mobile-web" element={<MobileWebLanding />} />
-
-      {/* Root route - smart routing based on platform */}
+      {/* Root route */}
       <Route 
         path="/" 
         element={
           isInstalledApp ? <Navigate to="/mobile-splash" replace /> : 
-          (isMobile && isMobileBrowser) ? <MobileWebLanding /> :
           <Layout><Home /></Layout>
         } 
       />
