@@ -65,21 +65,21 @@ export default function MobileWebLanding() {
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button
-                onClick={() => navigate('/demo-test')}
+                onClick={() => navigate('/auth')}
                 size="lg"
                 className="h-14 text-base font-bold bg-white text-primary hover:bg-white/90 hover:scale-105 active:scale-95 transition-all shadow-2xl"
               >
-                <Trophy className="h-5 w-5 mr-2" strokeWidth={2.5} />
-                Try Demo Test
+                <ArrowRight className="h-5 w-5 mr-2" strokeWidth={2.5} />
+                Get Started
               </Button>
               <Button
-                onClick={() => navigate('/payment')}
+                onClick={() => navigate('/demo-test')}
                 size="lg"
                 variant="outline"
                 className="h-14 text-base font-bold border-2 border-white text-white hover:bg-white/10 hover:scale-105 active:scale-95 transition-all"
               >
-                View Pricing
-                <ArrowRight className="h-5 w-5 ml-2" strokeWidth={2.5} />
+                <Trophy className="h-5 w-5 mr-2" strokeWidth={2.5} />
+                Try Demo
               </Button>
             </div>
           </div>
