@@ -43,10 +43,13 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import NotificationBell from '@/components/NotificationBell';
 import { AIAssistant } from '@/components/AIAssistant';
 import { MobilePromoCodeActivation } from '@/components/dashboard/MobilePromoCodeActivation';
+import { useInstalledApp } from '@/hooks/useInstalledApp';
+import { InstallRequiredModal } from '@/components/InstallRequiredModal';
 
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
   const { isPremium, hasFreePromoAccess, loading: subscriptionLoading } = useSubscription();
+  const { isInstalledApp } = useInstalledApp();
   usePushNotifications();
   const navigate = useNavigate();
   
@@ -61,6 +64,12 @@ const MobileHome = () => {
   const [showProfileSheet, setShowProfileSheet] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loggingOut, setLoggingOut] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [blockedFeatureName, setBlockedFeatureName] = useState('');
+
+  // Features that require app installation
+  const premiumFeatures = ['/study-planner', '/challenge-arena', '/performance-report', '/consultation', '/cbt-exam', '/practice'];
+  const isMobileBrowser = !isInstalledApp && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const motivationalQuotes = [
     "Success is the sum of small efforts repeated daily.",
@@ -227,11 +236,19 @@ const MobileHome = () => {
     }
   };
 
-  const handleNavigation = async (path: string) => {
+  const handleNavigation = async (path: string, featureLabel?: string) => {
     if (Capacitor.isNativePlatform()) {
       await Haptics.impact({ style: ImpactStyle.Light });
     }
     playTapSound();
+    
+    // Check if this is a premium feature and user is on mobile browser (not installed app)
+    if (isMobileBrowser && premiumFeatures.some(p => path.startsWith(p))) {
+      setBlockedFeatureName(featureLabel || 'this feature');
+      setShowInstallModal(true);
+      return;
+    }
+    
     navigate(path);
   };
 
@@ -491,7 +508,7 @@ const MobileHome = () => {
             ].map((action, index) => (
               <button
                 key={action.label}
-                onClick={() => handleNavigation(action.path)}
+                onClick={() => handleNavigation(action.path, action.label)}
                 className="group relative"
                 style={{ animationDelay: `${0.05 * index}s` }}
               >
@@ -667,6 +684,13 @@ const MobileHome = () => {
 
       {/* AI Assistant */}
       <AIAssistant />
+
+      {/* Install Required Modal for mobile browser users */}
+      <InstallRequiredModal 
+        open={showInstallModal} 
+        onOpenChange={setShowInstallModal}
+        featureName={blockedFeatureName}
+      />
     </div>
   );
 };

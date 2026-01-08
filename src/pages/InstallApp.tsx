@@ -1,29 +1,48 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Smartphone, CheckCircle } from 'lucide-react';
+import { Download, Smartphone, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+// Global prompt storage to persist across component remounts
+let globalDeferredPrompt: BeforeInstallPromptEvent | null = null;
+
 export default function InstallApp() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(globalDeferredPrompt);
   const [showManualInstructions, setShowManualInstructions] = useState(false);
+  const [installing, setInstalling] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    // Detect iOS
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    setIsIOS(iOS);
+    
+    // iOS doesn't support beforeinstallprompt, show manual instructions immediately
+    if (iOS) {
+      setShowManualInstructions(true);
+      return;
+    }
+
     const handler = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      const promptEvent = e as BeforeInstallPromptEvent;
+      globalDeferredPrompt = promptEvent;
+      setDeferredPrompt(promptEvent);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
 
-    // Show manual instructions after 2 seconds if no prompt is available
+    // Show manual instructions after 3 seconds if no prompt is available
     const timer = setTimeout(() => {
-      setShowManualInstructions(true);
-    }, 2000);
+      if (!globalDeferredPrompt) {
+        setShowManualInstructions(true);
+      }
+    }, 3000);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
@@ -31,17 +50,39 @@ export default function InstallApp() {
     };
   }, []);
 
-  const handleInstall = async () => {
-    if (!deferredPrompt) {
+  const handleInstall = useCallback(async () => {
+    const prompt = deferredPrompt || globalDeferredPrompt;
+    
+    if (!prompt) {
       setShowManualInstructions(true);
       return;
     }
 
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+    setInstalling(true);
     
-    if (outcome === 'accepted') {
-      setDeferredPrompt(null);
+    try {
+      await prompt.prompt();
+      const { outcome } = await prompt.userChoice;
+      
+      if (outcome === 'accepted') {
+        globalDeferredPrompt = null;
+        setDeferredPrompt(null);
+      }
+    } catch (error) {
+      console.error('Install prompt error:', error);
+      setShowManualInstructions(true);
+    }
+    
+    setInstalling(false);
+  }, [deferredPrompt]);
+
+  const retryInstall = () => {
+    // Try to trigger the prompt again
+    if (globalDeferredPrompt) {
+      setDeferredPrompt(globalDeferredPrompt);
+      handleInstall();
+    } else {
+      setShowManualInstructions(true);
     }
   };
 
@@ -78,14 +119,33 @@ export default function InstallApp() {
             </p>
 
             {/* Install Button */}
-            <Button
-              onClick={handleInstall}
-              size="lg"
-              className="bg-white text-primary hover:bg-white/90 font-black text-lg px-8 py-6 h-auto shadow-2xl hover:scale-105 active:scale-95 transition-all"
-            >
-              <Download className="h-6 w-6 mr-2" strokeWidth={2.5} />
-              Install App Now
-            </Button>
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={handleInstall}
+                disabled={installing}
+                size="lg"
+                className="bg-white text-primary hover:bg-white/90 font-black text-lg px-8 py-6 h-auto shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-70"
+              >
+                {installing ? (
+                  <Loader2 className="h-6 w-6 mr-2 animate-spin" strokeWidth={2.5} />
+                ) : (
+                  <Download className="h-6 w-6 mr-2" strokeWidth={2.5} />
+                )}
+                {installing ? 'Installing...' : 'Install App Now'}
+              </Button>
+              
+              {!deferredPrompt && !isIOS && (
+                <Button
+                  onClick={retryInstall}
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/80 hover:text-white hover:bg-white/10"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry Installation
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
