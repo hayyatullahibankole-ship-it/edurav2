@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import InstallAppGate from "@/components/InstallAppGate";
 import {
   BookOpen,
   Clock,
@@ -98,7 +97,6 @@ const Dashboard = () => {
   const [recentTests, setRecentTests] = useState([]);
   const [subjectProgress, setSubjectProgress] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showInstallGate, setShowInstallGate] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [schoolInfo, setSchoolInfo] = useState<any>(null);
 
@@ -315,12 +313,6 @@ const Dashboard = () => {
       navigate("/auth", { replace: true });
     }
   };
-  const handlePracticeClick = () => {
-    if (isMobile && !isInstalledApp) {
-      setShowInstallGate(true);
-      return;
-    }
-  };
 
   if (loading) {
     return <LoadingAnimation />;
@@ -478,30 +470,22 @@ const Dashboard = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <ScheduleTestModal defaultExamType="jamb">
-                            <Button size="lg" className="w-full h-auto py-4 flex-col gap-2">
-                              <Play className="h-5 w-5" />
-                              <span className="font-semibold">JAMB Practice</span>
-                            </Button>
-                          </ScheduleTestModal>
-                          <ScheduleTestModal defaultExamType="waec">
-                            <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-                              <Play className="h-5 w-5" />
-                              <span className="font-semibold">WAEC Practice</span>
-                            </Button>
-                          </ScheduleTestModal>
-                          <ScheduleTestModal defaultExamType="neco">
-                            <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-                              <Play className="h-5 w-5" />
-                              <span className="font-semibold">NECO Practice</span>
-                            </Button>
-                          </ScheduleTestModal>
-                          <ScheduleTestModal defaultExamType="post-utme">
-                            <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-                              <Play className="h-5 w-5" />
-                              <span className="font-semibold">POST-UTME</span>
-                            </Button>
-                          </ScheduleTestModal>
+                          <Button size="lg" className="w-full h-auto py-4 flex-col gap-2" onClick={handlePracticeClick}>
+                            <Play className="h-5 w-5" />
+                            <span className="font-semibold">JAMB Practice</span>
+                          </Button>
+                          <Button size="lg" className="w-full h-auto py-4 flex-col gap-2" onClick={handlePracticeClick}>
+                            <Play className="h-5 w-5" />
+                            <span className="font-semibold">WAEC Practice</span>
+                          </Button>
+                          <Button size="lg" className="w-full h-auto py-4 flex-col gap-2" onClick={handlePracticeClick}>
+                            <Play className="h-5 w-5" />
+                            <span className="font-semibold">NECO Practice</span>
+                          </Button>
+                          <Button size="lg" className="w-full h-auto py-4 flex-col gap-2" onClick={handlePracticeClick}>
+                            <Play className="h-5 w-5" />
+                            <span className="font-semibold">POST UTME</span>
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
