@@ -3,40 +3,39 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Facebook, 
-  Twitter, 
-  Instagram, 
-  Youtube,
-  Mail,
-  Phone,
-  MapPin,
-  BookOpen
-} from 'lucide-react';
-
+import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin, BookOpen } from 'lucide-react';
 const Footer = () => {
-  const quickLinks = [
-    { label: 'Home', href: '/' },
-    { label: 'Practice Tests', href: '/demo' },
-    { label: 'Resources', href: '/resources' },
-    { label: 'Consultation', href: '/consultation' },
-    { label: 'Pricing', href: '/payment' }
-  ];
-
-  const subjects = [
-    'Mathematics', 'English', 'Physics', 'Chemistry', 
-    'Biology', 'Economics', 'Geography', 'Government'
-  ];
-
-  const legalLinks = [
-    { label: 'Privacy Policy', href: '/privacy' },
-    { label: 'Terms of Service', href: '/terms' },
-    { label: 'Contact Us', href: '/contact' },
-    { label: 'FAQ', href: '/faq' }
-  ];
-
-  return (
-    <footer className="bg-card border-t">
+  const quickLinks = [{
+    label: 'Home',
+    href: '/'
+  }, {
+    label: 'Practice Tests',
+    href: '/demo'
+  }, {
+    label: 'Resources',
+    href: '/resources'
+  }, {
+    label: 'Consultation',
+    href: '/consultation'
+  }, {
+    label: 'Pricing',
+    href: '/payment'
+  }];
+  const subjects = ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'Economics', 'Geography', 'Government'];
+  const legalLinks = [{
+    label: 'Privacy Policy',
+    href: '/privacy'
+  }, {
+    label: 'Terms of Service',
+    href: '/terms'
+  }, {
+    label: 'Contact Us',
+    href: '/contact'
+  }, {
+    label: 'FAQ',
+    href: '/faq'
+  }];
+  return <footer className="bg-card border-t">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Section */}
@@ -66,10 +65,7 @@ const Footer = () => {
             
             {/* Link to AKBOY */}
             <div className="pt-4 mt-4 border-t border-border">
-              <Link 
-                to="/akboy"
-                className="group inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-all"
-              >
+              <Link to="/akboy" className="group inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-all">
                 <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                   <span className="text-white font-bold text-xs">A</span>
                 </div>
@@ -85,15 +81,9 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Quick Links</h3>
             <div className="space-y-2">
-              {quickLinks.map((link, index) => (
-                <Link 
-                  key={index}
-                  to={link.href}
-                  className="block text-muted-foreground hover:text-primary transition-colors"
-                >
+              {quickLinks.map((link, index) => <Link key={index} to={link.href} className="block text-muted-foreground hover:text-primary transition-colors">
                   {link.label}
-                </Link>
-              ))}
+                </Link>)}
             </div>
           </div>
 
@@ -101,14 +91,9 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Popular Subjects</h3>
             <div className="space-y-2">
-              {subjects.map((subject, index) => (
-                <div 
-                  key={index}
-                  className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-                >
+              {subjects.map((subject, index) => <div key={index} className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">
                   {subject}
-                </div>
-              ))}
+                </div>)}
             </div>
           </div>
 
@@ -133,27 +118,21 @@ const Footer = () => {
             <div className="space-y-2">
               <h4 className="font-medium">Newsletter</h4>
               <div className="flex space-x-2">
-                <Input 
-                  placeholder="Enter your email" 
-                  className="flex-1"
-                />
-                <Button 
-                  size="sm"
-                  onClick={() => {
-                    const email = (document.querySelector('input[placeholder="Enter your email"]') as HTMLInputElement)?.value;
-                    if (email) {
-                      // Simple validation
-                      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                        alert('Thank you for subscribing! You will receive updates about exam prep tips and new features.');
-                        (document.querySelector('input[placeholder="Enter your email"]') as HTMLInputElement).value = '';
-                      } else {
-                        alert('Please enter a valid email address.');
-                      }
-                    } else {
-                      alert('Please enter your email address.');
-                    }
-                  }}
-                >
+                <Input placeholder="Enter your email" className="flex-1" />
+                <Button size="sm" onClick={() => {
+                const email = (document.querySelector('input[placeholder="Enter your email"]') as HTMLInputElement)?.value;
+                if (email) {
+                  // Simple validation
+                  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    alert('Thank you for subscribing! You will receive updates about exam prep tips and new features.');
+                    (document.querySelector('input[placeholder="Enter your email"]') as HTMLInputElement).value = '';
+                  } else {
+                    alert('Please enter a valid email address.');
+                  }
+                } else {
+                  alert('Please enter your email address.');
+                }
+              }}>
                   Subscribe
                 </Button>
               </div>
@@ -166,25 +145,15 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="flex flex-wrap justify-center md:justify-start space-x-6">
-            {legalLinks.map((link, index) => (
-              <Link 
-                key={index}
-                to={link.href}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
+            {legalLinks.map((link, index) => <Link key={index} to={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 {link.label}
-              </Link>
-            ))}
+              </Link>)}
           </div>
           <div className="flex flex-col items-center md:items-end space-y-2">
-            <div className="text-sm text-muted-foreground text-center md:text-right">
-              © 2024 Edura. All rights reserved.
-            </div>
+            <div className="text-sm text-muted-foreground text-center md:text-right">© 2025 Edura. All rights reserved.</div>
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
