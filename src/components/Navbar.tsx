@@ -24,7 +24,11 @@ const Navbar = () => {
         return;
       }
 
-      const { data: userData } = await supabase.from("users").select("id").eq("auth_user_id", user.id).maybeSingle();
+      const { data: userData } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
 
       if (!userData) return;
 
@@ -95,7 +99,7 @@ const Navbar = () => {
                       Install App
                     </>
                   ) : (
-                    "Dashboard"
+                    'Dashboard'
                   )}
                 </Button>
               </Link>
@@ -110,7 +114,7 @@ const Navbar = () => {
                       Install App
                     </>
                   ) : (
-                    "Get Started"
+                    'Get Started'
                   )}
                 </Button>
               </Link>
@@ -119,7 +123,11 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
@@ -194,7 +202,7 @@ const Navbar = () => {
                             Install App
                           </>
                         ) : (
-                          "Dashboard"
+                          'Dashboard'
                         )}
                       </Button>
                     </Link>
@@ -206,10 +214,10 @@ const Navbar = () => {
                         {isMobileWeb ? (
                           <>
                             <Download className="h-4 w-4 mr-2" />
-                            Sign Up
+                            Install App
                           </>
                         ) : (
-                          "Get Started"
+                          'Get Started'
                         )}
                       </Button>
                     </Link>
