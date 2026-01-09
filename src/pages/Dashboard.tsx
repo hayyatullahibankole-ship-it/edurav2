@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import InstallAppGate from "@/components/InstallAppGate";
 import {
   BookOpen,
   Clock,
@@ -97,6 +98,7 @@ const Dashboard = () => {
   const [recentTests, setRecentTests] = useState([]);
   const [subjectProgress, setSubjectProgress] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showInstallGate, setShowInstallGate] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [schoolInfo, setSchoolInfo] = useState<any>(null);
 
@@ -311,6 +313,12 @@ const Dashboard = () => {
       console.error("Error during logout:", error);
       // Force navigation even on error
       navigate("/auth", { replace: true });
+    }
+  };
+  const handlePracticeClick = () => {
+    if (isMobile && !isInstalledApp) {
+      setShowInstallGate(true);
+      return;
     }
   };
 
