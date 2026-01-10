@@ -70,7 +70,10 @@ const MobileHome = () => {
   // Features that require app installation
   const premiumFeatures = ['/study-planner', '/challenge-arena', '/performance-report', '/consultation', '/cbt-exam', '/practice'];
   const isMobileBrowser =
-  !isInstalledApp && !Capacitor.isNativePlatform();
+  !isInstalledApp &&
+  typeof navigator !== 'undefined' &&
+  typeof navigator.userAgent === 'string' &&
+  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const motivationalQuotes = [
     "Success is the sum of small efforts repeated daily.",
@@ -81,12 +84,21 @@ const MobileHome = () => {
   ];
 
   useEffect(() => {
-    if (userProfile?.id) {
-      fetchStats();
-      fetchStreak();
-      fetchDailyGoal();
-    }
-  }, [userProfile]);
+    if (!userProfile?.id) return;
+  
+    (async () => {
+      try {
+        await Promise.all([
+          fetchStats(),
+          fetchStreak(),
+          fetchDailyGoal()
+        ]);
+      } catch (err) {
+        console.error('Dashboard load error:', err);
+      }
+    })();
+  }, [userProfile?.id]);
+  
 
   const handleLogout = async () => {
     if (loggingOut) return;
