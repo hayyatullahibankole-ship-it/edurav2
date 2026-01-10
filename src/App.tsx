@@ -2,7 +2,7 @@ import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { useOfflineSync } from "./hooks/useOfflineSync";
@@ -40,9 +40,9 @@ const App = () => (
         {/* sonner toast system (used across many pages) */}
         <SonnerToaster />
 
-        <BrowserRouter>
+        <HashRouter>
           <AppRoutes />
-        </BrowserRouter>
+        </HashRouter>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
