@@ -69,7 +69,8 @@ const MobileHome = () => {
 
   // Features that require app installation
   const premiumFeatures = ['/study-planner', '/challenge-arena', '/performance-report', '/consultation', '/cbt-exam', '/practice'];
-  const isMobileBrowser = !isInstalledApp && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isMobileBrowser =
+  !isInstalledApp && !Capacitor.isNativePlatform();
 
   const motivationalQuotes = [
     "Success is the sum of small efforts repeated daily.",
