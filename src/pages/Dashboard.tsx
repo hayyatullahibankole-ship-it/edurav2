@@ -59,6 +59,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SchoolAvailableExams from "@/components/school/SchoolAvailableExams";
 import { PromoCodeActivation } from "@/components/dashboard/PromoCodeActivation";
 import { FreeAccessBanner } from "@/components/dashboard/FreeAccessBanner";
+import { InstallRequiredModal } from "@/components/InstallRequiredModal";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -99,6 +100,11 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [schoolInfo, setSchoolInfo] = useState<any>(null);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [blockedFeatureName, setBlockedFeatureName] = useState('');
+
+  // Check if user is on mobile browser (not installed app)
+  const isMobileBrowser = isMobile && !isInstalledApp;
 
   useEffect(() => {
     if (userProfile?.id) {
@@ -470,30 +476,84 @@ const Dashboard = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <ScheduleTestModal defaultExamType="jamb">
-                            <Button size="lg" className="w-full h-auto py-4 flex-col gap-2">
-                              <Play className="h-5 w-5" />
-                              <span className="font-semibold">JAMB Practice</span>
-                            </Button>
-                          </ScheduleTestModal>
-                          <ScheduleTestModal defaultExamType="waec">
-                            <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-                              <Play className="h-5 w-5" />
-                              <span className="font-semibold">WAEC Practice</span>
-                            </Button>
-                          </ScheduleTestModal>
-                          <ScheduleTestModal defaultExamType="neco">
-                            <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-                              <Play className="h-5 w-5" />
-                              <span className="font-semibold">NECO Practice</span>
-                            </Button>
-                          </ScheduleTestModal>
-                          <ScheduleTestModal defaultExamType="post-utme">
-                            <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-                              <Play className="h-5 w-5" />
-                              <span className="font-semibold">POST-UTME</span>
-                            </Button>
-                          </ScheduleTestModal>
+                          {isMobileBrowser ? (
+                            <>
+                              <Button 
+                                size="lg" 
+                                className="w-full h-auto py-4 flex-col gap-2"
+                                onClick={() => {
+                                  setBlockedFeatureName('JAMB CBT Practice');
+                                  setShowInstallModal(true);
+                                }}
+                              >
+                                <Play className="h-5 w-5" />
+                                <span className="font-semibold">JAMB Practice</span>
+                              </Button>
+                              <Button 
+                                size="lg" 
+                                variant="outline" 
+                                className="w-full h-auto py-4 flex-col gap-2"
+                                onClick={() => {
+                                  setBlockedFeatureName('WAEC CBT Practice');
+                                  setShowInstallModal(true);
+                                }}
+                              >
+                                <Play className="h-5 w-5" />
+                                <span className="font-semibold">WAEC Practice</span>
+                              </Button>
+                              <Button 
+                                size="lg" 
+                                variant="outline" 
+                                className="w-full h-auto py-4 flex-col gap-2"
+                                onClick={() => {
+                                  setBlockedFeatureName('NECO CBT Practice');
+                                  setShowInstallModal(true);
+                                }}
+                              >
+                                <Play className="h-5 w-5" />
+                                <span className="font-semibold">NECO Practice</span>
+                              </Button>
+                              <Button 
+                                size="lg" 
+                                variant="outline" 
+                                className="w-full h-auto py-4 flex-col gap-2"
+                                onClick={() => {
+                                  setBlockedFeatureName('Post-UTME CBT Practice');
+                                  setShowInstallModal(true);
+                                }}
+                              >
+                                <Play className="h-5 w-5" />
+                                <span className="font-semibold">POST-UTME</span>
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <ScheduleTestModal defaultExamType="jamb">
+                                <Button size="lg" className="w-full h-auto py-4 flex-col gap-2">
+                                  <Play className="h-5 w-5" />
+                                  <span className="font-semibold">JAMB Practice</span>
+                                </Button>
+                              </ScheduleTestModal>
+                              <ScheduleTestModal defaultExamType="waec">
+                                <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
+                                  <Play className="h-5 w-5" />
+                                  <span className="font-semibold">WAEC Practice</span>
+                                </Button>
+                              </ScheduleTestModal>
+                              <ScheduleTestModal defaultExamType="neco">
+                                <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
+                                  <Play className="h-5 w-5" />
+                                  <span className="font-semibold">NECO Practice</span>
+                                </Button>
+                              </ScheduleTestModal>
+                              <ScheduleTestModal defaultExamType="post-utme">
+                                <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
+                                  <Play className="h-5 w-5" />
+                                  <span className="font-semibold">POST-UTME</span>
+                                </Button>
+                              </ScheduleTestModal>
+                            </>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -796,12 +856,25 @@ const Dashboard = () => {
                       <CardDescription>Jump into practice mode</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <ScheduleTestModal>
-                        <Button className="w-full">
+                      {isMobileBrowser ? (
+                        <Button 
+                          className="w-full"
+                          onClick={() => {
+                            setBlockedFeatureName('CBT Practice');
+                            setShowInstallModal(true);
+                          }}
+                        >
                           <Play className="h-4 w-4 mr-2" />
                           Start Test
                         </Button>
-                      </ScheduleTestModal>
+                      ) : (
+                        <ScheduleTestModal>
+                          <Button className="w-full">
+                            <Play className="h-4 w-4 mr-2" />
+                            Start Test
+                          </Button>
+                        </ScheduleTestModal>
+                      )}
                     </CardContent>
                   </Card>
 
@@ -883,6 +956,13 @@ const Dashboard = () => {
           </Tabs>
         </div>
         <AIAssistant />
+        
+        {/* Install Required Modal for mobile browser users */}
+        <InstallRequiredModal 
+          open={showInstallModal} 
+          onOpenChange={setShowInstallModal}
+          featureName={blockedFeatureName}
+        />
       </div>
     );
   }
