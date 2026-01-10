@@ -145,10 +145,10 @@ const Home = () => {
                     Score out of 400
                   </div>
                 </div>
-                {isMobileWeb ? <Link to="/install-app">
+                {isMobileWeb ? <Link to="/auth">
                     <Button className="w-full" size="lg">
-                      <Download className="mr-2 h-5 w-5" />
-                      Install App
+                      <ArrowRight className="mr-2 h-5 w-5" />
+                      Practice Now
                     </Button>
                   </Link> : user ? <ScheduleTestModal defaultExamType="jamb">
                     <Button className="w-full" size="lg">
@@ -189,10 +189,10 @@ const Home = () => {
                     A1-F9 grading system
                   </div>
                 </div>
-                {isMobileWeb ? <Link to="/install-app">
+                {isMobileWeb ? <Link to="/auth">
                     <Button className="w-full" size="lg" variant="secondary">
-                      <Download className="mr-2 h-5 w-5" />
-                      Install App
+                      <ArrowRight className="mr-2 h-5 w-5" />
+                      Practice Now
                     </Button>
                   </Link> : user ? <ScheduleTestModal defaultExamType="waec">
                     <Button className="w-full" size="lg" variant="secondary">
@@ -332,14 +332,19 @@ const Home = () => {
               Start your journey to exam success today. Free trial available - no credit card required.
             </p>
             <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
-              <Link to={isMobileWeb ? "/install-app" : "/auth"} className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-2xl hover:shadow-3xl transition-all px-10 py-6 text-lg font-semibold">Install App{isMobileWeb ? <>
-                      <ArrowRight className="mr-2 h-6 w-6" />
-                      Install App
-                    </> : <>
+              <Link to="/auth" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-2xl hover:shadow-3xl transition-all px-10 py-6 text-lg font-semibold">
+                  {isMobileWeb ? (
+                    <>
+                      Practice Now
+                      <ArrowRight className="ml-2 h-6 w-6" />
+                    </>
+                  ) : (
+                    <>
                       Start Free Trial
                       <ArrowRight className="ml-2 h-6 w-6" />
-                    </>}
+                    </>
+                  )}
                 </Button>
               </Link>
               <Link to="/payment" className="w-full sm:w-auto">
