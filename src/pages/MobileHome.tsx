@@ -50,7 +50,7 @@ const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
   const { isPremium, hasFreePromoAccess, loading: subscriptionLoading } = useSubscription();
   const { isInstalledApp } = useInstalledApp();
-  usePushNotifications();
+  //usePushNotifications();
   const navigate = useNavigate();
   
   const [stats, setStats] = useState({
