@@ -1,13 +1,9 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.ee95bfa9a22942b6ac9d0a6c28cde3a7',
-  appName: 'eduracbt',
+  appId: 'app.edura.cbt',
+  appName: 'Edura CBT',
   webDir: 'dist',
-  server: {
-    url: 'https://ee95bfa9-a229-42b6-ac9d-0a6c28cde3a7.lovableproject.com?forceHideBadge=true',
-    cleartext: true
-  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
@@ -16,9 +12,6 @@ const config: CapacitorConfig = {
       androidSplashResourceName: "splash",
       androidScaleType: "CENTER_CROP",
       showSpinner: false,
-      androidSpinnerStyle: "large",
-      iosSpinnerStyle: "small",
-      spinnerColor: "#ffffff",
       splashFullScreen: true,
       splashImmersive: true,
     },
