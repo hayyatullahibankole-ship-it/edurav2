@@ -132,7 +132,7 @@ export default function InstallApp() {
               </Button>
 
               <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white font-black">
-                <a href="https://www.apkshare.co/eB5Sau7CGYzrRFI" download>
+                <a href="https://dashboard.ionicframework.com/#" download>
                   Download Android APP
                 </a>
               </Button>
