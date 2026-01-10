@@ -56,7 +56,7 @@ export const InstallRequiredModal = ({
       setInstalling(false);
     } else {
       // No prompt available, navigate to install page with instructions
-      navigate('/install');
+      navigate('/install-app');
       onOpenChange(false);
     }
   };

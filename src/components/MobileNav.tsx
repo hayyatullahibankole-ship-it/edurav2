@@ -1,5 +1,5 @@
-import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles, Sword, MessageSquare, Library } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles, Sword, MessageSquare, Library, Download, Smartphone, Wifi, Bell } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -14,6 +14,8 @@ import { Card } from "@/components/ui/card";
 import ScheduleTestModal from "./ScheduleTestModal";
 import { useState } from "react";
 import { playTapSound, playPopSound, playWhooshSound } from "@/utils/sounds";
+import { useInstalledApp } from "@/hooks/useInstalledApp";
+import { InstallRequiredModal } from "./InstallRequiredModal";
 
 interface MobileNavProps {
   activeTab: string;
@@ -75,6 +77,21 @@ const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, o
 
 const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
   const [testsSheetOpen, setTestsSheetOpen] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const { isInstalledApp } = useInstalledApp();
+  const navigate = useNavigate();
+  
+  const isMobileBrowser = !isInstalledApp && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  const handleTestsClick = () => {
+    if (isMobileBrowser) {
+      setShowInstallModal(true);
+      playPopSound();
+    } else {
+      setTestsSheetOpen(true);
+      playWhooshSound();
+    }
+  };
 
   return (
     <>
@@ -125,24 +142,22 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
 
               {/* Center - Tests FAB */}
               <div className="flex-1 flex justify-center -mt-8">
-                <Sheet open={testsSheetOpen} onOpenChange={(open) => {
-                  setTestsSheetOpen(open);
-                  if (open) playWhooshSound();
-                }}>
-                  <SheetTrigger asChild>
-                    <button 
-                      onClick={() => playPopSound()}
-                      className="relative transition-all duration-300 active:scale-90"
-                    >
-                      {/* Glow effect */}
-                      <div className="absolute inset-0 bg-primary/30 rounded-full blur-xl" />
-                      
-                      {/* Main FAB */}
-                      <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl flex items-center justify-center border-4 border-white">
-                        <BookOpen className="h-7 w-7 text-white" />
-                      </div>
-                    </button>
-                  </SheetTrigger>
+                {/* FAB Button - shows modal for mobile browser, sheet for installed app */}
+                <button 
+                  onClick={handleTestsClick}
+                  className="relative transition-all duration-300 active:scale-90"
+                >
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 bg-primary/30 rounded-full blur-xl" />
+                  
+                  {/* Main FAB */}
+                  <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl flex items-center justify-center border-4 border-white">
+                    <BookOpen className="h-7 w-7 text-white" />
+                  </div>
+                </button>
+
+                {/* Tests Sheet - only for installed app */}
+                <Sheet open={testsSheetOpen} onOpenChange={setTestsSheetOpen}>
                   
                   <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl p-0 border-t-4 border-primary">
                     {/* Header with Gradient */}
@@ -253,6 +268,13 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
           </div>
         </div>
       </div>
+
+      {/* Install Required Modal for mobile browser users */}
+      <InstallRequiredModal 
+        open={showInstallModal} 
+        onOpenChange={setShowInstallModal}
+        featureName="CBT Practice"
+      />
     </>
   );
 };
