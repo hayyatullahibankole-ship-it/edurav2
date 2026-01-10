@@ -128,12 +128,12 @@ export default function InstallApp() {
                 ) : (
                   <Download className="h-6 w-6 mr-2" strokeWidth={2.5} />
                 )}
-                {installing ? "Installing..." : "Install From Web"}
+                {installing ? "Installing..." : "Install App Now"}
               </Button>
 
               <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white font-black">
-                <a href="https://urfile.in/tQKlu3Mu" download>
-                  Download Android APP
+                <a href="https://github.com/Akboy1/edura-96598/releases/download/v1.0.0/edura.apk" download>
+                  Download Android APK
                 </a>
               </Button>
 
