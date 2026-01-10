@@ -131,6 +131,12 @@ export default function InstallApp() {
                 {installing ? "Installing..." : "Install App Now"}
               </Button>
 
+              <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white font-black">
+                <a href="https://github.com/Akboy1/edura-96598/releases/download/v1.0.0/edura.apk" download>
+                  Download Android APK
+                </a>
+              </Button>
+
               {!deferredPrompt && !isIOS && (
                 <Button
                   onClick={retryInstall}
