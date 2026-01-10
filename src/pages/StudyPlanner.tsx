@@ -1,18 +1,20 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Calendar as CalendarIcon, Plus, Clock, Target, CheckCircle2, Circle } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import MobileNav from "@/components/MobileNav";
+import { useNavigate } from "react-router-dom";
+import { Calendar } from "@/components/ui/calendar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Calendar as CalendarIcon, Plus, Clock, Target, CheckCircle2, Circle } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 interface StudySession {
   id: string;
@@ -35,14 +37,14 @@ const StudyPlanner = () => {
   const [goals, setGoals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    subject_id: '',
-    session_date: format(new Date(), 'yyyy-MM-dd'),
-    start_time: '09:00',
-    end_time: '10:00',
+    title: "",
+    description: "",
+    subject_id: "",
+    session_date: format(new Date(), "yyyy-MM-dd"),
+    start_time: "09:00",
+    end_time: "10:00",
   });
 
   useEffect(() => {
@@ -54,23 +56,23 @@ const StudyPlanner = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+
       const [sessionsRes, subjectsRes, goalsRes] = await Promise.all([
         supabase
-          .from('study_sessions')
-          .select('*, subjects(name)')
-          .eq('user_id', userProfile?.id)
-          .gte('session_date', format(date || new Date(), 'yyyy-MM-dd'))
-          .order('session_date', { ascending: true }),
-        
-        supabase.from('subjects').select('*').limit(10),
-        
+          .from("study_sessions")
+          .select("*, subjects(name)")
+          .eq("user_id", userProfile?.id)
+          .gte("session_date", format(date || new Date(), "yyyy-MM-dd"))
+          .order("session_date", { ascending: true }),
+
+        supabase.from("subjects").select("*").limit(10),
+
         supabase
-          .from('study_goals')
-          .select('*')
-          .eq('user_id', userProfile?.id)
-          .eq('is_completed', false)
-          .order('target_date', { ascending: true }),
+          .from("study_goals")
+          .select("*")
+          .eq("user_id", userProfile?.id)
+          .eq("is_completed", false)
+          .order("target_date", { ascending: true }),
       ]);
 
       if (sessionsRes.error) throw sessionsRes.error;
@@ -81,7 +83,7 @@ const StudyPlanner = () => {
       setSubjects(subjectsRes.data || []);
       setGoals(goalsRes.data || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
@@ -91,36 +93,38 @@ const StudyPlanner = () => {
     e.preventDefault();
 
     try {
-      const { error } = await supabase.from('study_sessions').insert([{
-        user_id: userProfile?.id,
-        ...formData,
-      }]);
+      const { error } = await supabase.from("study_sessions").insert([
+        {
+          user_id: userProfile?.id,
+          ...formData,
+        },
+      ]);
 
       if (error) throw error;
 
       toast({
-        title: 'Session Created!',
-        description: 'Your study session has been scheduled.',
+        title: "Session Created!",
+        description: "Your study session has been scheduled.",
       });
 
       setIsDialogOpen(false);
       fetchData();
-      
+
       // Reset form
       setFormData({
-        title: '',
-        description: '',
-        subject_id: '',
-        session_date: format(new Date(), 'yyyy-MM-dd'),
-        start_time: '09:00',
-        end_time: '10:00',
+        title: "",
+        description: "",
+        subject_id: "",
+        session_date: format(new Date(), "yyyy-MM-dd"),
+        start_time: "09:00",
+        end_time: "10:00",
       });
     } catch (error) {
-      console.error('Error creating session:', error);
+      console.error("Error creating session:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to create study session.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to create study session.",
+        variant: "destructive",
       });
     }
   };
@@ -128,37 +132,33 @@ const StudyPlanner = () => {
   const handleCompleteSession = async (sessionId: string) => {
     try {
       const { error } = await supabase
-        .from('study_sessions')
-        .update({ 
-          status: 'completed',
-          completed_at: new Date().toISOString()
+        .from("study_sessions")
+        .update({
+          status: "completed",
+          completed_at: new Date().toISOString(),
         })
-        .eq('id', sessionId);
+        .eq("id", sessionId);
 
       if (error) throw error;
 
       toast({
-        title: 'Session Completed! 🎉',
-        description: 'Great job on completing your study session!',
+        title: "Session Completed! 🎉",
+        description: "Great job on completing your study session!",
       });
 
       fetchData();
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     }
   };
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, any> = {
-      scheduled: 'default',
-      completed: 'success',
-      missed: 'destructive',
+      scheduled: "default",
+      completed: "success",
+      missed: "destructive",
     };
-    return (
-      <Badge variant={variants[status] || 'secondary'}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || "secondary"}>{status.charAt(0).toUpperCase() + status.slice(1)}</Badge>;
   };
 
   return (
@@ -169,7 +169,7 @@ const StudyPlanner = () => {
             <h1 className="text-4xl font-bold mb-2">Study Planner</h1>
             <p className="text-muted-foreground">Organize your study schedule and track your goals</p>
           </div>
-          
+
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size="lg">
@@ -187,16 +187,16 @@ const StudyPlanner = () => {
                   <Input
                     required
                     value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder="e.g., Mathematics Review"
                   />
                 </div>
-                
+
                 <div>
                   <Label>Subject</Label>
                   <Select
                     value={formData.subject_id}
-                    onValueChange={(value) => setFormData({...formData, subject_id: value})}
+                    onValueChange={(value) => setFormData({ ...formData, subject_id: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select subject" />
@@ -217,7 +217,7 @@ const StudyPlanner = () => {
                     type="date"
                     required
                     value={formData.session_date}
-                    onChange={(e) => setFormData({...formData, session_date: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, session_date: e.target.value })}
                   />
                 </div>
 
@@ -228,7 +228,7 @@ const StudyPlanner = () => {
                       type="time"
                       required
                       value={formData.start_time}
-                      onChange={(e) => setFormData({...formData, start_time: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
                     />
                   </div>
                   <div>
@@ -237,7 +237,7 @@ const StudyPlanner = () => {
                       type="time"
                       required
                       value={formData.end_time}
-                      onChange={(e) => setFormData({...formData, end_time: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
                     />
                   </div>
                 </div>
@@ -246,7 +246,7 @@ const StudyPlanner = () => {
                   <Label>Description (Optional)</Label>
                   <Textarea
                     value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Add notes about what you'll study"
                     rows={3}
                   />
@@ -270,12 +270,7 @@ const StudyPlanner = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="rounded-md border"
-              />
+              <Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border" />
             </CardContent>
           </Card>
 
@@ -307,24 +302,18 @@ const StudyPlanner = () => {
                               {getStatusBadge(session.status)}
                             </div>
                             {session.subjects && (
-                              <p className="text-sm text-muted-foreground mb-2">
-                                {session.subjects.name}
-                              </p>
+                              <p className="text-sm text-muted-foreground mb-2">{session.subjects.name}</p>
                             )}
                             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              <span>📅 {format(new Date(session.session_date), 'MMM dd, yyyy')}</span>
-                              <span>⏰ {session.start_time} - {session.end_time}</span>
+                              <span>📅 {format(new Date(session.session_date), "MMM dd, yyyy")}</span>
+                              <span>
+                                ⏰ {session.start_time} - {session.end_time}
+                              </span>
                             </div>
-                            {session.description && (
-                              <p className="text-sm mt-2">{session.description}</p>
-                            )}
+                            {session.description && <p className="text-sm mt-2">{session.description}</p>}
                           </div>
-                          {session.status === 'scheduled' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleCompleteSession(session.id)}
-                            >
+                          {session.status === "scheduled" && (
+                            <Button size="sm" variant="outline" onClick={() => handleCompleteSession(session.id)}>
                               <CheckCircle2 className="h-4 w-4 mr-2" />
                               Complete
                             </Button>
@@ -357,11 +346,13 @@ const StudyPlanner = () => {
                         <div className="flex-1">
                           <p className="font-medium">{goal.title}</p>
                           <p className="text-sm text-muted-foreground">
-                            Due: {format(new Date(goal.target_date), 'MMM dd, yyyy')}
+                            Due: {format(new Date(goal.target_date), "MMM dd, yyyy")}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-semibold">{goal.current_value}/{goal.target_value}</p>
+                          <p className="text-sm font-semibold">
+                            {goal.current_value}/{goal.target_value}
+                          </p>
                           <p className="text-xs text-muted-foreground">{goal.goal_type}</p>
                         </div>
                       </div>
@@ -373,6 +364,25 @@ const StudyPlanner = () => {
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+export default StudyPlanner;
+
+const StudyPlanner = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen pb-24">
+      {/* YOUR EXISTING STUDY PLANNER UI */}
+
+      <MobileNav
+        activeTab="planner"
+        onTabChange={(tab) => {
+          if (tab === "dashboard") navigate("/dashboard");
+        }}
+      />
     </div>
   );
 };
