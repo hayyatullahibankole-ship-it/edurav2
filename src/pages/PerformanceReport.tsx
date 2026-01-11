@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PrintableReport } from '@/components/reports/PrintableReport';
-import { FileText, TrendingUp } from 'lucide-react';
+import { FileText, TrendingUp, ArrowLeft, Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -125,95 +127,121 @@ const PerformanceReport = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-center text-muted-foreground py-12">Loading report...</p>
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <p className="text-center text-muted-foreground py-12">Loading report...</p>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   if (!reportData) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <Card>
-            <CardContent className="p-12 text-center">
-              <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-2xl font-bold mb-2">No Data Available</h2>
-              <p className="text-muted-foreground mb-4">
-                Complete some tests to generate your performance report
-              </p>
-              <Button onClick={() => window.location.href = '/demo-test'}>
-                Start Practice Test
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Back Navigation */}
+            <div className="flex items-center gap-2 mb-6">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/dashboard">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Dashboard
+                </Link>
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+            <Card>
+              <CardContent className="p-12 text-center">
+                <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <h2 className="text-2xl font-bold mb-2">No Data Available</h2>
+                <p className="text-muted-foreground mb-4">
+                  Complete some tests to generate your performance report
+                </p>
+                <Button onClick={() => window.location.href = '/demo-test'}>
+                  Start Practice Test
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   if (!showReport) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-3xl">Performance Report Preview</CardTitle>
-              <CardDescription>
-                Review your academic performance summary
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-4 bg-primary/10 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Total Tests</p>
-                  <p className="text-3xl font-bold text-primary">{reportData.totalTests}</p>
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Back Navigation */}
+            <div className="flex items-center gap-2 mb-6">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/dashboard">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Dashboard
+                </Link>
+              </Button>
+            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-3xl">Performance Report Preview</CardTitle>
+                <CardDescription>
+                  Review your academic performance summary
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-primary/10 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Total Tests</p>
+                    <p className="text-3xl font-bold text-primary">{reportData.totalTests}</p>
+                  </div>
+                  <div className="p-4 bg-success/10 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Average Score</p>
+                    <p className="text-3xl font-bold text-success">{reportData.averageScore}%</p>
+                  </div>
                 </div>
-                <div className="p-4 bg-success/10 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Average Score</p>
-                  <p className="text-3xl font-bold text-success">{reportData.averageScore}%</p>
+
+                <div className="flex gap-3">
+                  <Button size="lg" onClick={() => setShowReport(true)} className="flex-1">
+                    <FileText className="h-4 w-4 mr-2" />
+                    View Full Report
+                  </Button>
                 </div>
-              </div>
 
-              <div className="flex gap-3">
-                <Button size="lg" onClick={() => setShowReport(true)} className="flex-1">
-                  <FileText className="h-4 w-4 mr-2" />
-                  View Full Report
-                </Button>
-              </div>
-
-              <div className="p-4 bg-info/10 rounded-lg text-sm">
-                <p className="font-semibold mb-2">📊 Your report includes:</p>
-                <ul className="space-y-1 ml-4">
-                  <li>• Complete performance overview</li>
-                  <li>• Subject-wise breakdown</li>
-                  <li>• Recent test results</li>
-                  <li>• Ranking and achievements</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="p-4 bg-info/10 rounded-lg text-sm">
+                  <p className="font-semibold mb-2">📊 Your report includes:</p>
+                  <ul className="space-y-1 ml-4">
+                    <li>• Complete performance overview</li>
+                    <li>• Subject-wise breakdown</li>
+                    <li>• Recent test results</li>
+                    <li>• Ranking and achievements</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <Button 
-          variant="outline" 
-          onClick={() => setShowReport(false)}
-          className="mb-4"
-        >
-          ← Back to Preview
-        </Button>
-        
-        <PrintableReport data={reportData} />
+    <Layout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowReport(false)}
+            className="mb-4"
+          >
+            ← Back to Preview
+          </Button>
+          
+          <PrintableReport data={reportData} />
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

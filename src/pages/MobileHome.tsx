@@ -117,55 +117,61 @@ const MobileHome = () => {
 
   const fetchStats = async () => {
     try {
-      const { data: attempts } = await supabase
-        .rpc('get_student_exam_progress');
-      
-      const userAttempts = attempts?.filter(a => 
-        a.user_id === userProfile?.id && a.status === 'SUBMITTED'
-      ) || [];
+      // Get attempts with results in a single query using join
+      const { data: attemptsWithResults, error } = await supabase
+        .from('attempts')
+        .select(`
+          id,
+          user_id,
+          exam_id,
+          status,
+          submitted_at,
+          results(id, percentage, time_taken_minutes, attempt_id),
+          exams(title, type)
+        `)
+        .eq('user_id', userProfile?.id)
+        .eq('status', 'SUBMITTED')
+        .order('submitted_at', { ascending: false })
+        .limit(50); // Limit to prevent loading too many
 
-      const attemptsWithResults = await Promise.all(
-        userAttempts.map(async (attempt) => {
-          const { data: result } = await supabase
-            .from("results")
-            .select("*")
-            .eq("attempt_id", attempt.id)
-            .maybeSingle();
-          return { ...attempt, results: result ? [result] : [] };
-        })
+      if (error) throw error;
+
+      const validAttempts = attemptsWithResults || [];
+      // Filter to only attempts that have results (results is an array from the join)
+      const resultsWithScores = validAttempts.filter(a => 
+        a.results && Array.isArray(a.results) && a.results.length > 0
       );
 
-      const testsTaken = attemptsWithResults.length;
-      const resultsWithScores = attemptsWithResults.filter(a => a.results?.length > 0);
+      const testsTaken = resultsWithScores.length;
       const averageScore = resultsWithScores.length > 0
-        ? Math.round(resultsWithScores.reduce((sum, a) => sum + (a.results[0]?.percentage || 0), 0) / resultsWithScores.length)
+        ? Math.round(resultsWithScores.reduce((sum, a) => {
+            const result = Array.isArray(a.results) ? a.results[0] : a.results;
+            return sum + (result?.percentage || 0);
+          }, 0) / resultsWithScores.length)
         : 0;
       const studyHours = Math.round(
-        resultsWithScores.reduce((sum, a) => sum + (a.results[0]?.time_taken_minutes || 0), 0) / 60
+        resultsWithScores.reduce((sum, a) => {
+          const result = Array.isArray(a.results) ? a.results[0] : a.results;
+          return sum + (result?.time_taken_minutes || 0);
+        }, 0) / 60
       );
 
       setStats({ testsTaken, averageScore, studyHours });
 
-      // Fetch recent results
-      const recentWithExam = await Promise.all(
-        attemptsWithResults
-          .filter(a => a.results?.length > 0)
-          .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
-          .slice(0, 3)
-          .map(async (attempt) => {
-            const { data: exam } = await supabase
-              .from('exams')
-              .select('title, type')
-              .eq('id', attempt.exam_id)
-              .single();
-            return {
-              ...attempt.results[0],
-              examTitle: exam?.title || 'Test',
-              examType: exam?.type || 'JAMB',
-              submittedAt: attempt.submitted_at
-            };
-          })
-      );
+      // Format recent results (already sorted, just take first 3)
+      const recentWithExam = resultsWithScores.slice(0, 3).map((attempt) => {
+        const result = Array.isArray(attempt.results) ? attempt.results[0] : attempt.results;
+        const exam = attempt.exams as any;
+        return {
+          id: result?.id,
+          percentage: result?.percentage || 0,
+          attempt_id: result?.attempt_id,
+          examTitle: exam?.title || 'Practice Test',
+          examType: exam?.type || 'JAMB',
+          submittedAt: attempt.submitted_at
+        };
+      });
+      
       setRecentResults(recentWithExam);
     } catch (error) {
       console.error('Error fetching stats:', error);

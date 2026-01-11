@@ -8,7 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Calendar as CalendarIcon, Plus, Clock, Target, CheckCircle2, Circle } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, Clock, Target, CheckCircle2, Circle, ArrowLeft, Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -162,25 +164,36 @@ const StudyPlanner = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Study Planner</h1>
-            <p className="text-muted-foreground">Organize your study schedule and track your goals</p>
+    <Layout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Back Navigation */}
+          <div className="flex items-center gap-2 mb-6">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/dashboard">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Link>
+            </Button>
           </div>
+
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Study Planner</h1>
+              <p className="text-muted-foreground">Organize your study schedule and track your goals</p>
+            </div>
           
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="lg">
-                <Plus className="h-4 w-4 mr-2" />
-                Schedule Session
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Schedule Study Session</DialogTitle>
-              </DialogHeader>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="lg">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Schedule Session
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Schedule Study Session</DialogTitle>
+                </DialogHeader>
               <form onSubmit={handleCreateSession} className="space-y-4">
                 <div>
                   <Label>Title</Label>
@@ -261,7 +274,6 @@ const StudyPlanner = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {/* Calendar */}
           <Card className="md:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -374,6 +386,7 @@ const StudyPlanner = () => {
         </div>
       </div>
     </div>
+    </Layout>
   );
 };
 
