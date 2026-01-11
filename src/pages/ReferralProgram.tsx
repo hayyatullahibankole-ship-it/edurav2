@@ -3,7 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Share2, Copy, Users, Gift, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Share2, Copy, Users, Gift, TrendingUp, CheckCircle2, ArrowLeft, Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -139,17 +141,28 @@ const ReferralProgram = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-6xl">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8 animate-fade-in">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Referral Program
-          </h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            Invite friends and earn rewards for every successful referral!
-          </p>
-        </div>
+    <Layout>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+        <div className="container mx-auto px-4 py-6 sm:py-8 max-w-6xl">
+          {/* Back Navigation */}
+          <div className="flex items-center gap-2 mb-4">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/dashboard">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Link>
+            </Button>
+          </div>
+
+          {/* Header */}
+          <div className="mb-6 sm:mb-8 animate-fade-in">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Referral Program
+            </h1>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Invite friends and earn rewards for every successful referral!
+            </p>
+          </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8 stagger-animation">
@@ -345,8 +358,9 @@ const ReferralProgram = () => {
             </div>
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

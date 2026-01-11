@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, BookOpen, FileSpreadsheet, ArrowRight } from "lucide-react";
+import { FileText, BookOpen, FileSpreadsheet, ArrowRight, ArrowLeft, Home } from "lucide-react";
+import { Link } from "react-router-dom";
+import Layout from "@/components/Layout";
 import { PastQuestionsTab } from "@/components/resources/PastQuestionsTab";
 import { SyllabusTab } from "@/components/resources/SyllabusTab";
 import { BooksTab } from "@/components/resources/BooksTab";
@@ -34,23 +36,34 @@ const Resources = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-2xl mb-4">
-            <BookOpen className="h-8 w-8 text-primary" />
+    <Layout>
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+        <div className="container mx-auto px-4 py-8">
+          {/* Back Navigation */}
+          <div className="flex items-center gap-2 mb-6">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/dashboard">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Link>
+            </Button>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Study <span className="text-primary">Resources</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Access comprehensive study materials to boost your exam preparation
-          </p>
-        </div>
 
-        {selectedCategory ? (
-          <div>
+          {/* Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-2xl mb-4">
+              <BookOpen className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Study <span className="text-primary">Resources</span>
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Access comprehensive study materials to boost your exam preparation
+            </p>
+          </div>
+
+          {selectedCategory ? (
+            <div>
             <Button 
               variant="ghost" 
               onClick={() => setSelectedCategory(null)}
@@ -94,9 +107,10 @@ const Resources = () => {
               );
             })}
           </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
