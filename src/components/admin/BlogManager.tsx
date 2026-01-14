@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { NewsAggregator } from './NewsAggregator';
 
 interface BlogPost {
   id: string;
@@ -333,6 +334,9 @@ const BlogManager = () => {
 
   return (
     <div className="space-y-6">
+      {/* News Aggregator Section */}
+      <NewsAggregator />
+      
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">Blog Management</h2>
