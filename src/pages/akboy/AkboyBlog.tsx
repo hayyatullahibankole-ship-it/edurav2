@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,13 +7,27 @@ import { Button } from "@/components/ui/button";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Search, Calendar, ArrowRight, Tag } from "lucide-react";
 
+interface BlogPost {
+  id: string;
+  title: string;
+  slug?: string;
+  excerpt?: string;
+  content?: string;
+  featured_image_url?: string;
+  category?: string;
+  tags?: unknown;
+  created_at?: string;
+  read_time?: number;
+}
+
 export default function AkboyBlog() {
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const categories = ["All", "Education", "Design", "Technology", "Tips", "News"];
+  const categories = ["All", "Education", "Design", "Technology", "Tips", "News", "updates"];
 
   useEffect(() => {
     fetchPosts();
@@ -22,26 +35,43 @@ export default function AkboyBlog() {
 
   const fetchPosts = async () => {
     try {
-      const response = await supabase
+      setError(null);
+      const { data, error: fetchError } = await supabase
         .from("blog_posts")
-        .select("*")
+        .select("id, title, slug, excerpt, content, featured_image_url, category, tags, created_at")
         .eq("is_published", true)
         .order("created_at", { ascending: false });
 
-      if (response.error) throw response.error;
-      const data: any[] = response.data || [];
-      setPosts(data);
-    } catch (error) {
-      console.error("Error fetching blog posts:", error);
+      if (fetchError) throw fetchError;
+      setPosts(data || []);
+    } catch (err) {
+      console.error("Error fetching blog posts:", err);
+      setError("Failed to load blog posts. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  // Safely parse tags - handle both array and JSON string formats
+  const parseTags = (tags: unknown): string[] => {
+    if (!tags) return [];
+    if (Array.isArray(tags)) return tags.filter((t): t is string => typeof t === "string");
+    if (typeof tags === "string") {
+      try {
+        const parsed = JSON.parse(tags);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
   const filteredPosts = posts.filter((post) => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || post.category === selectedCategory;
+    const matchesCategory = selectedCategory === "All" || 
+                           post.category?.toLowerCase() === selectedCategory.toLowerCase();
     return matchesSearch && matchesCategory;
   });
 
@@ -110,6 +140,15 @@ export default function AkboyBlog() {
               <div className="animate-spin w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto"></div>
               <p className="mt-6 text-gray-600 text-lg font-lato">Loading articles...</p>
             </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <div className="text-6xl mb-6">⚠️</div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3 font-poppins">Something went wrong</h3>
+              <p className="text-gray-600 text-lg font-lato mb-6">{error}</p>
+              <Button onClick={fetchPosts} className="bg-emerald-600 hover:bg-emerald-700">
+                Try Again
+              </Button>
+            </div>
           ) : filteredPosts.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-6xl mb-6">📭</div>
@@ -168,16 +207,19 @@ export default function AkboyBlog() {
                     <p className="text-gray-600 mb-5 line-clamp-3 font-lato leading-relaxed flex-grow">
                       {post.excerpt || post.content?.substring(0, 150) + "..."}
                     </p>
-                    {post.tags && post.tags.length > 0 && (
-                      <div className="flex gap-2 mb-5 flex-wrap">
-                        {post.tags.slice(0, 3).map((tag: string) => (
-                          <span key={tag} className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full font-medium">
-                            <Tag className="w-3 h-3" />
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    {(() => {
+                      const tagList = parseTags(post.tags);
+                      return tagList.length > 0 && (
+                        <div className="flex gap-2 mb-5 flex-wrap">
+                          {tagList.slice(0, 3).map((tag: string) => (
+                            <span key={tag} className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full font-medium">
+                              <Tag className="w-3 h-3" />
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      );
+                    })()}
                     <Link 
                       to={`/blog/${post.slug || post.id}`}
                       className="inline-flex items-center gap-2 text-emerald-600 font-bold group-hover:gap-4 transition-all font-poppins text-sm uppercase tracking-wide mt-auto"

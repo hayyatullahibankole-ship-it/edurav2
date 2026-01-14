@@ -275,6 +275,8 @@ const EduraRoutes = () => {
       <Route path="/akboy/portfolio" element={<AkboyPortfolio />} />
       <Route path="/akboy/events" element={<AkboyEvents />} />
       <Route path="/akboy/contact" element={<AkboyContact />} />
+      <Route path="/akboy/blog" element={<AkboyBlog />} />
+      <Route path="/akboy/blog/:slug" element={<AkboyBlogPost />} />
 
       {/* Registration aliases */}
       <Route path="/akboy/register" element={<AkboyTutorialRegistration />} />
