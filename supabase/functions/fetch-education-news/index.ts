@@ -65,26 +65,58 @@ interface NewsItem {
   imageUrl: string | null;
 }
 
-// Extract image from RSS content
+// Category-based default images (using Unsplash for reliable education images)
+const CATEGORY_IMAGES: Record<string, string> = {
+  'Admissions': 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&h=630&fit=crop',
+  'Schools & Admissions': 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&h=630&fit=crop',
+  'Education News': 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop',
+  'Institutions': 'https://images.unsplash.com/photo-1562774053-701939374585?w=1200&h=630&fit=crop',
+  'Schools': 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1200&h=630&fit=crop',
+  'default': 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1200&h=630&fit=crop'
+};
+
+// Extract image from RSS content with multiple fallback patterns
 function extractImage(content: string): string | null {
-  // Try media:content or media:thumbnail
+  if (!content) return null;
+  
+  // Try media:content or media:thumbnail (common in RSS)
   const mediaMatch = content.match(/<media:content[^>]*url=["']([^"']+)["']/i) ||
                      content.match(/<media:thumbnail[^>]*url=["']([^"']+)["']/i);
   if (mediaMatch) return mediaMatch[1];
   
-  // Try enclosure (common for images)
-  const enclosureMatch = content.match(/<enclosure[^>]*url=["']([^"']+\.(jpg|jpeg|png|gif|webp)[^"']*)["']/i);
+  // Try enclosure with image type
+  const enclosureMatch = content.match(/<enclosure[^>]*url=["']([^"']+)["'][^>]*type=["']image/i) ||
+                         content.match(/<enclosure[^>]*type=["']image[^>]*url=["']([^"']+)["']/i);
   if (enclosureMatch) return enclosureMatch[1];
   
-  // Try img tag in content
-  const imgMatch = content.match(/<img[^>]*src=["']([^"']+)["']/i);
-  if (imgMatch) return imgMatch[1];
+  // Try enclosure with image extension
+  const enclosureExtMatch = content.match(/<enclosure[^>]*url=["']([^"']+\.(jpg|jpeg|png|gif|webp)[^"']*)["']/i);
+  if (enclosureExtMatch) return enclosureExtMatch[1];
   
-  // Try og:image or featured image patterns
+  // Try img tag in content (get the first one)
+  const imgMatch = content.match(/<img[^>]*src=["']([^"']+)["']/i);
+  if (imgMatch && !imgMatch[1].includes('emoji') && !imgMatch[1].includes('icon')) {
+    return imgMatch[1];
+  }
+  
+  // Try image tag
+  const imageTagMatch = content.match(/<image>[\s\S]*?<url>([^<]+)<\/url>/i);
+  if (imageTagMatch) return imageTagMatch[1].trim();
+  
+  // Try wp:featuredmedia or featured image patterns
   const featuredMatch = content.match(/featured[_-]?image[^>]*["']([^"']+\.(jpg|jpeg|png|gif|webp)[^"']*)["']/i);
   if (featuredMatch) return featuredMatch[1];
   
+  // Try data-src (lazy loaded images)
+  const dataSrcMatch = content.match(/data-src=["']([^"']+\.(jpg|jpeg|png|gif|webp)[^"']*)["']/i);
+  if (dataSrcMatch) return dataSrcMatch[1];
+  
   return null;
+}
+
+// Get default image for category
+function getDefaultImage(category: string): string {
+  return CATEGORY_IMAGES[category] || CATEGORY_IMAGES['default'];
 }
 
 // Parse RSS XML to extract news items
@@ -116,6 +148,10 @@ function parseRSSFeed(xml: string, source: typeof NEWS_SOURCES[0]): NewsItem[] {
       const excerpt = plainText.substring(0, 300) + (plainText.length > 300 ? '...' : '');
       const cleanTitle = cleanHTML(title);
       
+      // Extract image from item, content, or use category default
+      const extractedImage = extractImage(itemContent) || extractImage(fullContent || '') || extractImage(description || '');
+      const imageUrl = extractedImage || getDefaultImage(source.category);
+      
       // Only include if content is substantial AND education-related
       if (plainText.length > 200 && isEducationRelated(cleanTitle, plainText)) {
         items.push({
@@ -132,7 +168,7 @@ function parseRSSFeed(xml: string, source: typeof NEWS_SOURCES[0]): NewsItem[] {
     }
   }
   
-  return items.slice(0, 8); // Increase to 8 items per source
+  return items.slice(0, 8);
 }
 
 function extractTag(content: string, tagName: string): string | null {
