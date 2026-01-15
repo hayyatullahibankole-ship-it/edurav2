@@ -5,45 +5,54 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Nigerian education news RSS feeds and sources - expanded for more coverage
+// Nigerian education-focused RSS feeds only
 const NEWS_SOURCES = [
   {
-    name: 'Education News Nigeria',
-    url: 'https://dailypost.ng/category/education/feed/',
-    category: 'University News',
+    name: 'Campus Info',
+    url: 'https://campusinfo.com.ng/feed/',
+    category: 'Admissions',
     isRSS: true
   },
   {
     name: 'Nigerian Scholars',
     url: 'https://nigerianscholars.com/feed/',
-    category: 'Scholarships',
+    category: 'Schools & Admissions',
     isRSS: true
   },
   {
-    name: 'Vanguard Education',
-    url: 'https://www.vanguardngr.com/category/education/feed/',
+    name: 'MySchoolGist',
+    url: 'https://myschool.ng/news/feed/',
     category: 'Education News',
     isRSS: true
   },
   {
-    name: 'Premium Times Education',
-    url: 'https://www.premiumtimesng.com/news/more-news/feed',
-    category: 'Education News',
+    name: 'EduCeleb',
+    url: 'https://educeleb.com/feed/',
+    category: 'Institutions',
     isRSS: true
   },
   {
-    name: 'The Guardian Education',
-    url: 'https://guardian.ng/category/features/education/feed/',
-    category: 'Education Features',
-    isRSS: true
-  },
-  {
-    name: 'Punch Education',
-    url: 'https://punchng.com/topics/education/feed/',
-    category: 'Education News',
+    name: 'School News NG',
+    url: 'https://schoolnewsng.com/feed/',
+    category: 'Schools',
     isRSS: true
   }
 ];
+
+// Keywords to filter education-related content only
+const EDUCATION_KEYWORDS = [
+  'jamb', 'utme', 'waec', 'neco', 'admission', 'university', 'polytechnic',
+  'college', 'school', 'student', 'education', 'academic', 'lecture',
+  'faculty', 'department', 'semester', 'matriculation', 'convocation',
+  'scholarship', 'bursary', 'post-utme', 'screening', 'cut-off', 'aggregate',
+  'registration', 'portal', 'result', 'exam', 'degree', 'diploma', 'certificate',
+  'nuc', 'tetfund', 'asuu', 'nasu', 'vice-chancellor', 'provost', 'rector'
+];
+
+function isEducationRelated(title: string, content: string): boolean {
+  const text = (title + ' ' + content).toLowerCase();
+  return EDUCATION_KEYWORDS.some(keyword => text.includes(keyword));
+}
 
 interface NewsItem {
   title: string;
@@ -105,11 +114,12 @@ function parseRSSFeed(xml: string, source: typeof NEWS_SOURCES[0]): NewsItem[] {
       const cleanedContent = cleanContentHTML(rawContent);
       const plainText = cleanHTML(rawContent);
       const excerpt = plainText.substring(0, 300) + (plainText.length > 300 ? '...' : '');
+      const cleanTitle = cleanHTML(title);
       
-      // Only include if content is substantial (more than 200 chars)
-      if (plainText.length > 200) {
+      // Only include if content is substantial AND education-related
+      if (plainText.length > 200 && isEducationRelated(cleanTitle, plainText)) {
         items.push({
-          title: cleanHTML(title),
+          title: cleanTitle,
           content: cleanedContent,
           excerpt,
           source: source.name,
