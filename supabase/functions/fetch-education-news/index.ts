@@ -5,18 +5,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Nigerian education news RSS feeds and sources
+// Nigerian education news RSS feeds and sources - expanded for more coverage
 const NEWS_SOURCES = [
   {
-    name: 'JAMB News',
-    url: 'https://www.jamb.gov.ng',
-    category: 'JAMB/Admissions',
-    keywords: ['JAMB', 'UTME', 'admission', 'registration', 'result', 'cut-off']
-  },
-  {
-    name: 'MySchoolGist',
-    url: 'https://www.myschool.ng/news/rss',
-    category: 'Education News',
+    name: 'Education News Nigeria',
+    url: 'https://dailypost.ng/category/education/feed/',
+    category: 'University News',
     isRSS: true
   },
   {
@@ -26,9 +20,27 @@ const NEWS_SOURCES = [
     isRSS: true
   },
   {
-    name: 'Education News Nigeria',
-    url: 'https://dailypost.ng/category/education/feed/',
-    category: 'University News',
+    name: 'Vanguard Education',
+    url: 'https://www.vanguardngr.com/category/education/feed/',
+    category: 'Education News',
+    isRSS: true
+  },
+  {
+    name: 'Premium Times Education',
+    url: 'https://www.premiumtimesng.com/news/more-news/feed',
+    category: 'Education News',
+    isRSS: true
+  },
+  {
+    name: 'The Guardian Education',
+    url: 'https://guardian.ng/category/features/education/feed/',
+    category: 'Education Features',
+    isRSS: true
+  },
+  {
+    name: 'Punch Education',
+    url: 'https://punchng.com/topics/education/feed/',
+    category: 'Education News',
     isRSS: true
   }
 ];
@@ -41,6 +53,29 @@ interface NewsItem {
   category: string;
   sourceUrl: string;
   publishedAt: string;
+  imageUrl: string | null;
+}
+
+// Extract image from RSS content
+function extractImage(content: string): string | null {
+  // Try media:content or media:thumbnail
+  const mediaMatch = content.match(/<media:content[^>]*url=["']([^"']+)["']/i) ||
+                     content.match(/<media:thumbnail[^>]*url=["']([^"']+)["']/i);
+  if (mediaMatch) return mediaMatch[1];
+  
+  // Try enclosure (common for images)
+  const enclosureMatch = content.match(/<enclosure[^>]*url=["']([^"']+\.(jpg|jpeg|png|gif|webp)[^"']*)["']/i);
+  if (enclosureMatch) return enclosureMatch[1];
+  
+  // Try img tag in content
+  const imgMatch = content.match(/<img[^>]*src=["']([^"']+)["']/i);
+  if (imgMatch) return imgMatch[1];
+  
+  // Try og:image or featured image patterns
+  const featuredMatch = content.match(/featured[_-]?image[^>]*["']([^"']+\.(jpg|jpeg|png|gif|webp)[^"']*)["']/i);
+  if (featuredMatch) return featuredMatch[1];
+  
+  return null;
 }
 
 // Parse RSS XML to extract news items
@@ -55,28 +90,39 @@ function parseRSSFeed(xml: string, source: typeof NEWS_SOURCES[0]): NewsItem[] {
     const itemContent = match[1];
     
     const title = extractTag(itemContent, 'title');
-    const description = extractTag(itemContent, 'description') || extractTag(itemContent, 'content:encoded');
+    // Prefer content:encoded for full content, fallback to description
+    const fullContent = extractTag(itemContent, 'content:encoded');
+    const description = extractTag(itemContent, 'description');
     const link = extractTag(itemContent, 'link');
     const pubDate = extractTag(itemContent, 'pubDate');
+    const imageUrl = extractImage(itemContent) || extractImage(fullContent || '') || extractImage(description || '');
     
-    if (title && description) {
-      // Clean HTML from description
-      const cleanContent = cleanHTML(description);
-      const excerpt = cleanContent.substring(0, 300) + (cleanContent.length > 300 ? '...' : '');
+    // Use the longer content
+    const rawContent = fullContent || description;
+    
+    if (title && rawContent) {
+      // Keep HTML structure but clean dangerous elements
+      const cleanedContent = cleanContentHTML(rawContent);
+      const plainText = cleanHTML(rawContent);
+      const excerpt = plainText.substring(0, 300) + (plainText.length > 300 ? '...' : '');
       
-      items.push({
-        title: cleanHTML(title),
-        content: cleanContent,
-        excerpt,
-        source: source.name,
-        category: source.category,
-        sourceUrl: link || source.url,
-        publishedAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString()
-      });
+      // Only include if content is substantial (more than 200 chars)
+      if (plainText.length > 200) {
+        items.push({
+          title: cleanHTML(title),
+          content: cleanedContent,
+          excerpt,
+          source: source.name,
+          category: source.category,
+          sourceUrl: link || source.url,
+          publishedAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
+          imageUrl
+        });
+      }
     }
   }
   
-  return items.slice(0, 5); // Limit to 5 items per source
+  return items.slice(0, 8); // Increase to 8 items per source
 }
 
 function extractTag(content: string, tagName: string): string | null {
@@ -100,7 +146,35 @@ function cleanHTML(html: string): string {
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/&#8230;/g, '...')
+    .replace(/&#8217;/g, "'")
+    .replace(/&#8216;/g, "'")
+    .replace(/&#8220;/g, '"')
+    .replace(/&#8221;/g, '"')
     .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Clean HTML but preserve structure for blog display
+function cleanContentHTML(html: string): string {
+  return html
+    // Remove script/style tags completely
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    // Remove dangerous attributes
+    .replace(/\s(onclick|onerror|onload|onmouseover)=["'][^"']*["']/gi, '')
+    // Decode HTML entities
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#8230;/g, '...')
+    .replace(/&#8217;/g, "'")
+    .replace(/&#8216;/g, "'")
+    .replace(/&#8220;/g, '"')
+    .replace(/&#8221;/g, '"')
     .trim();
 }
 
@@ -188,15 +262,26 @@ Deno.serve(async (req) => {
     let createdCount = 0;
     const errors: string[] = [];
     
-    for (const article of newArticles.slice(0, 10)) { // Limit to 10 per run
+    for (const article of newArticles.slice(0, 15)) { // Increase to 15 per run
       const slug = generateSlug(article.title) + '-' + Date.now().toString(36);
       
-      // Format content with source attribution
-      const formattedContent = `${article.content}\n\n---\n\n*Source: [${article.source}](${article.sourceUrl})*\n\n*Published: ${new Date(article.publishedAt).toLocaleDateString('en-NG', { 
+      // Format content with proper HTML structure and source attribution
+      const formattedContent = `
+<article>
+${article.content}
+
+<hr/>
+
+<p><em>Source: <a href="${article.sourceUrl}" target="_blank" rel="noopener noreferrer">${article.source}</a></em></p>
+<p><em>Originally Published: ${new Date(article.publishedAt).toLocaleDateString('en-NG', { 
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 
-      })}*`;
+      })}</em></p>
+</article>`;
+      
+      // Create tags as a proper array
+      const tagsArray = [article.category, 'Nigeria', 'Education', article.source];
       
       const { error } = await supabase
         .from('blog_posts')
@@ -206,8 +291,9 @@ Deno.serve(async (req) => {
           content: formattedContent,
           excerpt: article.excerpt,
           category: article.category,
-          tags: JSON.stringify([article.category, 'Nigeria', 'Education', article.source]),
-          is_published: true, // Auto-publish
+          tags: tagsArray, // Store as array, not JSON string
+          featured_image_url: article.imageUrl, // Include image if available
+          is_published: true,
           is_featured: false,
           published_at: article.publishedAt,
           view_count: 0

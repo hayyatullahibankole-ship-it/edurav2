@@ -64,10 +64,26 @@ const getShareUrl = (platform: string, url: string, title: string, description: 
   }
 };
 
+// Safe tag parsing helper
+const parseTags = (tags: any): string[] => {
+  if (!tags) return [];
+  if (Array.isArray(tags)) return tags.filter(t => typeof t === 'string');
+  if (typeof tags === 'string') {
+    try {
+      const parsed = JSON.parse(tags);
+      return Array.isArray(parsed) ? parsed.filter(t => typeof t === 'string') : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
 export default function AkboyBlogPost() {
   const { slug } = useParams();
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -76,6 +92,7 @@ export default function AkboyBlogPost() {
 
   const fetchPost = async () => {
     try {
+      setError(null);
       // First try to fetch by slug
       let query = supabase
         .from("blog_posts")
@@ -91,12 +108,13 @@ export default function AkboyBlogPost() {
         query = query.eq("slug", slug);
       }
 
-      const { data, error } = await query.maybeSingle();
+      const { data, error: fetchError } = await query.maybeSingle();
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
       setPost(data);
-    } catch (error) {
-      console.error("Error fetching blog post:", error);
+    } catch (err) {
+      console.error("Error fetching blog post:", err);
+      setError("Failed to load blog post. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -157,6 +175,7 @@ export default function AkboyBlogPost() {
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
   const ogImage = post.featured_image_url || 'https://zqapbmllkywsuywpfava.supabase.co/storage/v1/object/public/resources/og-default.png';
   const ogDescription = post.excerpt || post.content?.substring(0, 160).replace(/<[^>]*>/g, '') || 'Read this article on AKBOY Blog';
+  const postTags = parseTags(post.tags);
 
   return (
     <AkboyLayout>
@@ -178,7 +197,7 @@ export default function AkboyBlogPost() {
         {post.author && <meta property="article:author" content={post.author} />}
         {post.published_at && <meta property="article:published_time" content={post.published_at} />}
         {post.category && <meta property="article:section" content={post.category} />}
-        {post.tags && post.tags.map((tag: string) => (
+        {postTags.map((tag: string) => (
           <meta key={tag} property="article:tag" content={tag} />
         ))}
         
@@ -256,9 +275,9 @@ export default function AkboyBlogPost() {
       <article className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
           {/* Tags */}
-          {post.tags && post.tags.length > 0 && (
+          {postTags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-8">
-              {post.tags.map((tag: string) => (
+              {postTags.map((tag: string) => (
                 <span
                   key={tag}
                   className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium"
