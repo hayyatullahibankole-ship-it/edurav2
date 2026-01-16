@@ -5,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Nigerian education-focused RSS feeds only
+// Nigerian education-focused RSS feeds - only those with good content and images
 const NEWS_SOURCES = [
   {
     name: 'Campus Info',
@@ -29,12 +29,6 @@ const NEWS_SOURCES = [
     name: 'EduCeleb',
     url: 'https://educeleb.com/feed/',
     category: 'Institutions',
-    isRSS: true
-  },
-  {
-    name: 'School News NG',
-    url: 'https://schoolnewsng.com/feed/',
-    category: 'Schools',
     isRSS: true
   }
 ];
@@ -65,58 +59,82 @@ interface NewsItem {
   imageUrl: string | null;
 }
 
-// Category-based default images (using Unsplash for reliable education images)
-const CATEGORY_IMAGES: Record<string, string> = {
-  'Admissions': 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&h=630&fit=crop',
-  'Schools & Admissions': 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&h=630&fit=crop',
-  'Education News': 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop',
-  'Institutions': 'https://images.unsplash.com/photo-1562774053-701939374585?w=1200&h=630&fit=crop',
-  'Schools': 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1200&h=630&fit=crop',
-  'default': 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1200&h=630&fit=crop'
-};
-
-// Extract image from RSS content with multiple fallback patterns
+// Extract image from RSS content with aggressive pattern matching
 function extractImage(content: string): string | null {
   if (!content) return null;
   
   // Try media:content or media:thumbnail (common in RSS)
   const mediaMatch = content.match(/<media:content[^>]*url=["']([^"']+)["']/i) ||
                      content.match(/<media:thumbnail[^>]*url=["']([^"']+)["']/i);
-  if (mediaMatch) return mediaMatch[1];
+  if (mediaMatch && isValidImageUrl(mediaMatch[1])) return mediaMatch[1];
   
   // Try enclosure with image type
   const enclosureMatch = content.match(/<enclosure[^>]*url=["']([^"']+)["'][^>]*type=["']image/i) ||
                          content.match(/<enclosure[^>]*type=["']image[^>]*url=["']([^"']+)["']/i);
-  if (enclosureMatch) return enclosureMatch[1];
+  if (enclosureMatch && isValidImageUrl(enclosureMatch[1])) return enclosureMatch[1];
   
   // Try enclosure with image extension
   const enclosureExtMatch = content.match(/<enclosure[^>]*url=["']([^"']+\.(jpg|jpeg|png|gif|webp)[^"']*)["']/i);
-  if (enclosureExtMatch) return enclosureExtMatch[1];
+  if (enclosureExtMatch && isValidImageUrl(enclosureExtMatch[1])) return enclosureExtMatch[1];
   
-  // Try img tag in content (get the first one)
-  const imgMatch = content.match(/<img[^>]*src=["']([^"']+)["']/i);
-  if (imgMatch && !imgMatch[1].includes('emoji') && !imgMatch[1].includes('icon')) {
-    return imgMatch[1];
+  // Try all img tags in content and find a good one
+  const imgMatches = content.matchAll(/<img[^>]*src=["']([^"']+)["'][^>]*>/gi);
+  for (const match of imgMatches) {
+    const url = match[1];
+    if (isValidImageUrl(url)) {
+      return url;
+    }
   }
   
-  // Try image tag
+  // Try image tag (RSS 2.0)
   const imageTagMatch = content.match(/<image>[\s\S]*?<url>([^<]+)<\/url>/i);
-  if (imageTagMatch) return imageTagMatch[1].trim();
+  if (imageTagMatch && isValidImageUrl(imageTagMatch[1].trim())) return imageTagMatch[1].trim();
   
   // Try wp:featuredmedia or featured image patterns
   const featuredMatch = content.match(/featured[_-]?image[^>]*["']([^"']+\.(jpg|jpeg|png|gif|webp)[^"']*)["']/i);
-  if (featuredMatch) return featuredMatch[1];
+  if (featuredMatch && isValidImageUrl(featuredMatch[1])) return featuredMatch[1];
   
   // Try data-src (lazy loaded images)
   const dataSrcMatch = content.match(/data-src=["']([^"']+\.(jpg|jpeg|png|gif|webp)[^"']*)["']/i);
-  if (dataSrcMatch) return dataSrcMatch[1];
+  if (dataSrcMatch && isValidImageUrl(dataSrcMatch[1])) return dataSrcMatch[1];
+  
+  // Try srcset
+  const srcsetMatch = content.match(/srcset=["']([^"']+\.(jpg|jpeg|png|gif|webp)[^\s"']*)[\s"']/i);
+  if (srcsetMatch && isValidImageUrl(srcsetMatch[1])) return srcsetMatch[1];
+  
+  // Try og:image meta-like patterns
+  const ogMatch = content.match(/og:image[^>]*content=["']([^"']+)["']/i);
+  if (ogMatch && isValidImageUrl(ogMatch[1])) return ogMatch[1];
   
   return null;
 }
 
-// Get default image for category
-function getDefaultImage(category: string): string {
-  return CATEGORY_IMAGES[category] || CATEGORY_IMAGES['default'];
+// Validate that the URL is a proper image and not an icon/emoji
+function isValidImageUrl(url: string): boolean {
+  if (!url) return false;
+  
+  const lowerUrl = url.toLowerCase();
+  
+  // Must start with http
+  if (!lowerUrl.startsWith('http')) return false;
+  
+  // Exclude common non-content images
+  const excludePatterns = [
+    'emoji', 'icon', 'avatar', 'logo', 'favicon', 'badge',
+    'gravatar', 'placeholder', 'default', 'loading', 'spinner',
+    'pixel', 'tracking', 'spacer', '1x1', 'blank',
+    'wp-includes', 'plugins', 'themes/flavor/images'  // WordPress system images
+  ];
+  
+  for (const pattern of excludePatterns) {
+    if (lowerUrl.includes(pattern)) return false;
+  }
+  
+  // Should be an actual image file or image service
+  const hasImageExtension = /\.(jpg|jpeg|png|gif|webp|bmp)/i.test(url);
+  const isImageService = /unsplash|cloudinary|imgix|wp-content\/uploads/i.test(url);
+  
+  return hasImageExtension || isImageService;
 }
 
 // Parse RSS XML to extract news items
@@ -136,7 +154,6 @@ function parseRSSFeed(xml: string, source: typeof NEWS_SOURCES[0]): NewsItem[] {
     const description = extractTag(itemContent, 'description');
     const link = extractTag(itemContent, 'link');
     const pubDate = extractTag(itemContent, 'pubDate');
-    const imageUrl = extractImage(itemContent) || extractImage(fullContent || '') || extractImage(description || '');
     
     // Use the longer content
     const rawContent = fullContent || description;
@@ -148,12 +165,14 @@ function parseRSSFeed(xml: string, source: typeof NEWS_SOURCES[0]): NewsItem[] {
       const excerpt = plainText.substring(0, 300) + (plainText.length > 300 ? '...' : '');
       const cleanTitle = cleanHTML(title);
       
-      // Extract image from item, content, or use category default
-      const extractedImage = extractImage(itemContent) || extractImage(fullContent || '') || extractImage(description || '');
-      const imageUrl = extractedImage || getDefaultImage(source.category);
+      // Extract image from item, content - NO FALLBACK to generic images
+      const extractedImage = extractImage(itemContent) || 
+                             extractImage(fullContent || '') || 
+                             extractImage(description || '');
       
       // Only include if content is substantial AND education-related
-      if (plainText.length > 200 && isEducationRelated(cleanTitle, plainText)) {
+      // Also check content length more strictly to ensure full articles
+      if (plainText.length > 300 && isEducationRelated(cleanTitle, plainText)) {
         items.push({
           title: cleanTitle,
           content: cleanedContent,
@@ -162,7 +181,7 @@ function parseRSSFeed(xml: string, source: typeof NEWS_SOURCES[0]): NewsItem[] {
           category: source.category,
           sourceUrl: link || source.url,
           publishedAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
-          imageUrl
+          imageUrl: extractedImage  // Only use actual extracted image, null if none found
         });
       }
     }
@@ -308,7 +327,7 @@ Deno.serve(async (req) => {
     let createdCount = 0;
     const errors: string[] = [];
     
-    for (const article of newArticles.slice(0, 15)) { // Increase to 15 per run
+    for (const article of newArticles.slice(0, 15)) {
       const slug = generateSlug(article.title) + '-' + Date.now().toString(36);
       
       // Format content with proper HTML structure and source attribution
@@ -337,8 +356,8 @@ ${article.content}
           content: formattedContent,
           excerpt: article.excerpt,
           category: article.category,
-          tags: tagsArray, // Store as array, not JSON string
-          featured_image_url: article.imageUrl, // Include image if available
+          tags: tagsArray,
+          featured_image_url: article.imageUrl, // Only actual images, null if none
           is_published: true,
           is_featured: false,
           published_at: article.publishedAt,
@@ -350,7 +369,7 @@ ${article.content}
         errors.push(article.title);
       } else {
         createdCount++;
-        console.log(`Created post: ${article.title}`);
+        console.log(`Created post: ${article.title} | Image: ${article.imageUrl ? 'Yes' : 'No'}`);
       }
     }
     

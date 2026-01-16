@@ -17,7 +17,9 @@ import {
   Search,
   UserPlus,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  CheckCircle,
+  Mail
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -248,6 +250,44 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
     }
   };
 
+  const verifyUserEmail = async (userId: string, currentStatus: boolean) => {
+    if (currentStatus) {
+      toast({
+        title: "Already Verified",
+        description: "This user's email is already verified"
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const { error } = await supabase
+        .from('users')
+        .update({ is_verified: true })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "User email verified successfully"
+      });
+
+      onRefresh();
+      
+    } catch (error) {
+      console.error('Error verifying user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to verify user email", 
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -406,6 +446,12 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
                       Suspended
                     </Badge>
                   )}
+                  {!user.is_verified && (
+                    <Badge className="bg-yellow-600 text-white">
+                      <Mail className="w-3 h-3 mr-1" />
+                      Unverified
+                    </Badge>
+                  )}
                   
                   <Button variant="ghost" size="sm" onClick={() => {
                     setSelectedUser(user);
@@ -424,6 +470,19 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
+                  
+                  {!user.is_verified && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => verifyUserEmail(user.id, user.is_verified)}
+                      disabled={loading}
+                      className="text-green-400 hover:text-green-300"
+                      title="Manually verify email"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                    </Button>
+                  )}
                   
                   <Button
                     variant="ghost"
@@ -575,7 +634,20 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
                 </div>
               )}
 
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-between items-center pt-4">
+                {!selectedUser.is_verified && (
+                  <Button 
+                    onClick={() => {
+                      verifyUserEmail(selectedUser.id, selectedUser.is_verified);
+                      setIsViewModalOpen(false);
+                    }} 
+                    disabled={loading}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Verify Email Manually
+                  </Button>
+                )}
                 <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>
                   Close
                 </Button>
