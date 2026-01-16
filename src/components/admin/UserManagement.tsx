@@ -30,7 +30,7 @@ interface UserManagementProps {
   onRefresh: () => void;
 }
 
-export default function UserManagement({ users, onRefresh }: UserManagementProps) {
+export default function UserManagement({ users: initialUsers, onRefresh }: UserManagementProps) {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -38,7 +38,12 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+  const [localUsers, setLocalUsers] = useState<any[]>(initialUsers);
+
+  // Sync local users with prop changes (from real-time updates)
+  React.useEffect(() => {
+    setLocalUsers(initialUsers);
+  }, [initialUsers]);
   const [newUser, setNewUser] = useState({
     email: '',
     firstName: '',
@@ -53,7 +58,7 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
       const headers = ['Email', 'First Name', 'Last Name', 'Phone', 'Country', 'Created At', 'Last Login', 'Is Suspended'];
       const csvContent = [
         headers.join(','),
-        ...users.map(user => [
+        ...localUsers.map(user => [
           user.email || '',
           user.first_name || '',
           user.last_name || '',
@@ -89,7 +94,7 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
     }
   };
 
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = localUsers.filter(user => 
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -181,8 +186,11 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
   const handleDeleteUser = async (userId: string) => {
     if (!confirm('Are you sure you want to delete this user? This will permanently delete all their data including exam attempts, results, and subscriptions.')) return;
     
+    // Optimistic update - remove from UI immediately
+    const userToDelete = localUsers.find(u => u.id === userId);
+    setLocalUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+
     try {
-      setLoading(true);
       console.log('Starting delete for user:', userId);
       
       // Call the database function to delete user by app ID
@@ -206,24 +214,30 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
         description: "User and all associated data deleted permanently"
       });
 
+      // Background refresh to ensure sync
       onRefresh();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting user:', error);
+      // Revert optimistic update
+      if (userToDelete) {
+        setLocalUsers(prevUsers => [...prevUsers, userToDelete]);
+      }
       toast({
         title: "Error", 
         description: `Failed to delete user: ${error.message || 'Unknown error'}`,
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const toggleUserSuspension = async (userId: string, currentStatus: boolean) => {
+    // Optimistic update
+    setLocalUsers(prevUsers => prevUsers.map(user => 
+      user.id === userId ? { ...user, is_suspended: !currentStatus } : user
+    ));
+
     try {
-      setLoading(true);
-      
       const { error } = await supabase
         .from('users')
         .update({ is_suspended: !currentStatus })
@@ -236,17 +250,20 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
         description: `User ${!currentStatus ? 'suspended' : 'activated'} successfully`
       });
 
+      // Background refresh to ensure sync
       onRefresh();
       
     } catch (error) {
       console.error('Error toggling user suspension:', error);
+      // Revert optimistic update
+      setLocalUsers(prevUsers => prevUsers.map(user => 
+        user.id === userId ? { ...user, is_suspended: currentStatus } : user
+      ));
       toast({
         title: "Error",
         description: "Failed to update user status", 
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -259,9 +276,12 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
       return;
     }
 
+    // Optimistic update
+    setLocalUsers(prevUsers => prevUsers.map(user => 
+      user.id === userId ? { ...user, is_verified: true } : user
+    ));
+
     try {
-      setLoading(true);
-      
       const { error } = await supabase
         .from('users')
         .update({ is_verified: true })
@@ -274,17 +294,20 @@ export default function UserManagement({ users, onRefresh }: UserManagementProps
         description: "User email verified successfully"
       });
 
+      // Background refresh to ensure sync
       onRefresh();
       
     } catch (error) {
       console.error('Error verifying user:', error);
+      // Revert optimistic update
+      setLocalUsers(prevUsers => prevUsers.map(user => 
+        user.id === userId ? { ...user, is_verified: false } : user
+      ));
       toast({
         title: "Error",
         description: "Failed to verify user email", 
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
 
