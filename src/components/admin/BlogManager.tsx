@@ -246,6 +246,9 @@ const BlogManager = () => {
   const handleDelete = async (postId: string) => {
     if (!confirm('Are you sure you want to delete this blog post?')) return;
 
+    // Optimistic update - remove from UI immediately
+    setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+
     try {
       const { error } = await supabase
         .from('blog_posts')
@@ -258,9 +261,10 @@ const BlogManager = () => {
         title: "Success",
         description: "Blog post deleted successfully",
       });
-      fetchPosts();
     } catch (error) {
       console.error('Error deleting post:', error);
+      // Revert optimistic update on error
+      fetchPosts();
       toast({
         title: "Error",
         description: "Failed to delete blog post",
@@ -270,6 +274,18 @@ const BlogManager = () => {
   };
 
   const togglePostStatus = async (postId: string, field: 'is_published' | 'is_featured', currentValue: boolean) => {
+    // Optimistic update
+    setPosts(prevPosts => prevPosts.map(post => {
+      if (post.id === postId) {
+        const updates: Partial<BlogPost> = { [field]: !currentValue };
+        if (field === 'is_published') {
+          updates.published_at = !currentValue ? new Date().toISOString() : undefined;
+        }
+        return { ...post, ...updates };
+      }
+      return post;
+    }));
+
     try {
       const updateData: any = { [field]: !currentValue };
       
@@ -290,9 +306,10 @@ const BlogManager = () => {
         title: "Success",
         description: `Post ${field === 'is_published' ? 'publication' : 'featured'} status updated`,
       });
-      fetchPosts();
     } catch (error) {
       console.error('Error updating post:', error);
+      // Revert optimistic update on error
+      fetchPosts();
       toast({
         title: "Error",
         description: "Failed to update post status",
@@ -335,7 +352,7 @@ const BlogManager = () => {
   return (
     <div className="space-y-6">
       {/* News Aggregator Section */}
-      <NewsAggregator />
+      <NewsAggregator onNewsAdded={fetchPosts} />
       
       <div className="flex items-center justify-between">
         <div>

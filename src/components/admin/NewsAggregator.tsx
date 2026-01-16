@@ -7,12 +7,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Newspaper, RefreshCw, Rss, CheckCircle, AlertCircle } from 'lucide-react';
 
 const NEWS_SOURCES = [
-  { name: 'MySchool.ng', category: 'Education News', status: 'active' },
-  { name: 'Nigerian Scholars', category: 'Scholarships', status: 'active' },
-  { name: 'DailyPost Education', category: 'University News', status: 'active' },
+  { name: 'Campus Info', category: 'Admissions', status: 'active' },
+  { name: 'Nigerian Scholars', category: 'Schools & Admissions', status: 'active' },
+  { name: 'MySchoolGist', category: 'Education News', status: 'active' },
+  { name: 'EduCeleb', category: 'Institutions', status: 'active' },
 ];
 
-export const NewsAggregator = () => {
+interface NewsAggregatorProps {
+  onNewsAdded?: () => void;
+}
+
+export const NewsAggregator = ({ onNewsAdded }: NewsAggregatorProps) => {
   const { toast } = useToast();
   const [isFetching, setIsFetching] = useState(false);
   const [lastResult, setLastResult] = useState<{
@@ -37,6 +42,11 @@ export const NewsAggregator = () => {
           title: 'News Fetched Successfully',
           description: data.message,
         });
+        
+        // Trigger refresh of blog posts list
+        if (onNewsAdded && data.created > 0) {
+          onNewsAdded();
+        }
       } else {
         toast({
           title: 'Fetch Failed',
