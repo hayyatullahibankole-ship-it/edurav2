@@ -284,19 +284,17 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
     ));
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('users')
         .update({ is_verified: true })
-        .eq('id', userId)
-        .select()
-        .single();
+        .eq('id', userId);
 
       if (error) {
         console.error('Supabase error:', error);
         throw error;
       }
 
-      console.log('User verified successfully:', data);
+      console.log('User verified successfully');
 
       toast({
         title: "Success",
