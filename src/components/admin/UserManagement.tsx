@@ -267,59 +267,53 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
     }
   };
 
-  const verifyUserEmail = async (userId: string, currentStatus: boolean) => {
+  const verifyUserEmail = async (userId: string, currentStatus: boolean): Promise<boolean> => {
     if (currentStatus) {
       toast({
         title: "Already Verified",
-        description: "This user's email is already verified"
+        description: "This user's email is already verified",
       });
-      return;
+      return false;
     }
 
     setLoading(true);
-    
+
     // Optimistic update
-    setLocalUsers(prevUsers => prevUsers.map(user => 
-      user.id === userId ? { ...user, is_verified: true } : user
-    ));
+    setLocalUsers((prevUsers) =>
+      prevUsers.map((user) => (user.id === userId ? { ...user, is_verified: true } : user)),
+    );
 
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({ is_verified: true })
-        .eq('id', userId);
+      const { data, error } = await supabase.functions.invoke('admin-verify-user', {
+        body: { userId },
+      });
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      console.log('User verified successfully');
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Verification failed');
 
       toast({
         title: "Success",
-        description: "User email verified successfully"
+        description: "User email verified successfully",
       });
 
-      // Update selected user if in modal
       if (selectedUser?.id === userId) {
         setSelectedUser({ ...selectedUser, is_verified: true });
       }
 
-      // Background refresh to ensure sync
       onRefresh();
-      
+      return true;
     } catch (error: any) {
-      console.error('Error verifying user:', error);
       // Revert optimistic update
-      setLocalUsers(prevUsers => prevUsers.map(user => 
-        user.id === userId ? { ...user, is_verified: currentStatus } : user
-      ));
+      setLocalUsers((prevUsers) =>
+        prevUsers.map((user) => (user.id === userId ? { ...user, is_verified: currentStatus } : user)),
+      );
+
       toast({
         title: "Error",
-        description: `Failed to verify user email: ${error.message || 'Unknown error'}`, 
-        variant: "destructive"
+        description: `Failed to verify user email: ${error?.message || 'Unknown error'}`,
+        variant: "destructive",
       });
+      return false;
     } finally {
       setLoading(false);
     }
@@ -673,11 +667,11 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
 
               <div className="flex justify-between items-center pt-4">
                 {!selectedUser.is_verified && (
-                  <Button 
-                    onClick={() => {
-                      verifyUserEmail(selectedUser.id, selectedUser.is_verified);
-                      setIsViewModalOpen(false);
-                    }} 
+                    <Button 
+                      onClick={async () => {
+                        await verifyUserEmail(selectedUser.id, selectedUser.is_verified);
+                        setIsViewModalOpen(false);
+                      }}
                     disabled={loading}
                     className="bg-green-600 hover:bg-green-700"
                   >
