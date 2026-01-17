@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Nigerian education-focused RSS feeds - verified working sources with good content
+// Nigerian education-focused RSS feeds - verified working sources
 const NEWS_SOURCES = [
   {
     name: "Campus Info",
@@ -14,33 +14,21 @@ const NEWS_SOURCES = [
     isRSS: true,
   },
   {
-    name: "JAMB News",
-    url: "https://jambportal.org/feed/",
-    category: "JAMB Updates",
-    isRSS: true,
-  },
-  {
-    name: "Education News NG",
-    url: "https://www.educationnews.com.ng/feed/",
+    name: "Premium Times Education",
+    url: "https://www.premiumtimesng.com/category/news/more-news/education/feed",
     category: "Education News",
     isRSS: true,
   },
   {
-    name: "Campus Times",
-    url: "https://campustimes.ng/feed/",
-    category: "Campus News",
-    isRSS: true,
-  },
-  {
-    name: "Nigerian Tribune Education",
-    url: "https://tribuneonlineng.com/category/education/feed/",
+    name: "Vanguard Education",
+    url: "https://www.vanguardngr.com/category/education/feed/",
     category: "Education News",
     isRSS: true,
   },
   {
-    name: "NG Scholarships",
-    url: "https://ngscholarships.com/feed/",
-    category: "Scholarships",
+    name: "Punch Education",
+    url: "https://punchng.com/topics/education/feed/",
+    category: "Education News",
     isRSS: true,
   },
 ];
@@ -318,12 +306,19 @@ async function fetchRSSNews(source: (typeof NEWS_SOURCES)[0]): Promise<NewsItem[
   try {
     console.log(`Fetching from ${source.name}: ${source.url}`);
 
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     const response = await fetch(source.url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; AkboyNewsBot/1.0)",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         Accept: "application/rss+xml, application/xml, text/xml, */*",
       },
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       console.error(`Failed to fetch ${source.name}: ${response.status}`);
@@ -333,7 +328,11 @@ async function fetchRSSNews(source: (typeof NEWS_SOURCES)[0]): Promise<NewsItem[
     const xml = await response.text();
     return parseRSSFeed(xml, source);
   } catch (error) {
-    console.error(`Error fetching ${source.name}:`, error);
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error(`Timeout fetching ${source.name}`);
+    } else {
+      console.error(`Error fetching ${source.name}:`, error);
+    }
     return [];
   }
 }
