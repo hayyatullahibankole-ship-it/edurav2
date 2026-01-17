@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Nigerian education-focused RSS feeds - only those with good content and images
+// Nigerian education-focused RSS feeds - verified working sources with good content
 const NEWS_SOURCES = [
   {
     name: "Campus Info",
@@ -14,15 +14,33 @@ const NEWS_SOURCES = [
     isRSS: true,
   },
   {
-    name: "Nigerian Scholars",
-    url: "https://nigerianscholars.com/feed/",
-    category: "Schools & Admissions",
+    name: "JAMB News",
+    url: "https://jambportal.org/feed/",
+    category: "JAMB Updates",
     isRSS: true,
   },
   {
-    name: "MySchoolGist",
-    url: "https://myschool.ng/news/feed/",
+    name: "Education News NG",
+    url: "https://www.educationnews.com.ng/feed/",
     category: "Education News",
+    isRSS: true,
+  },
+  {
+    name: "Campus Times",
+    url: "https://campustimes.ng/feed/",
+    category: "Campus News",
+    isRSS: true,
+  },
+  {
+    name: "Nigerian Tribune Education",
+    url: "https://tribuneonlineng.com/category/education/feed/",
+    category: "Education News",
+    isRSS: true,
+  },
+  {
+    name: "NG Scholarships",
+    url: "https://ngscholarships.com/feed/",
+    category: "Scholarships",
     isRSS: true,
   },
 ];

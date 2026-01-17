@@ -276,38 +276,54 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
       return;
     }
 
+    setLoading(true);
+    
     // Optimistic update
     setLocalUsers(prevUsers => prevUsers.map(user => 
       user.id === userId ? { ...user, is_verified: true } : user
     ));
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('users')
         .update({ is_verified: true })
-        .eq('id', userId);
+        .eq('id', userId)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('User verified successfully:', data);
 
       toast({
         title: "Success",
         description: "User email verified successfully"
       });
 
+      // Update selected user if in modal
+      if (selectedUser?.id === userId) {
+        setSelectedUser({ ...selectedUser, is_verified: true });
+      }
+
       // Background refresh to ensure sync
       onRefresh();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error verifying user:', error);
       // Revert optimistic update
       setLocalUsers(prevUsers => prevUsers.map(user => 
-        user.id === userId ? { ...user, is_verified: false } : user
+        user.id === userId ? { ...user, is_verified: currentStatus } : user
       ));
       toast({
         title: "Error",
-        description: "Failed to verify user email", 
+        description: `Failed to verify user email: ${error.message || 'Unknown error'}`, 
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
