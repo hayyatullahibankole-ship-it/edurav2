@@ -267,7 +267,20 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
     }
   };
 
-  const verifyUserEmail = async (userId: string, currentStatus: boolean): Promise<boolean> => {
+  const verifyUserEmail = async (user: any): Promise<boolean> => {
+    const userId = user?.id as string | undefined;
+    const authUserId = user?.auth_user_id as string | undefined;
+    const currentStatus = !!user?.is_verified;
+
+    if (!userId) {
+      toast({
+        title: "Error",
+        description: "Missing user record id",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     if (currentStatus) {
       toast({
         title: "Already Verified",
@@ -276,16 +289,26 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
       return false;
     }
 
+    // IMPORTANT: Auth verification must use auth.users.id
+    if (!authUserId) {
+      toast({
+        title: "Cannot verify",
+        description: "This user is missing an auth account link (auth_user_id).",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     setLoading(true);
 
     // Optimistic update
     setLocalUsers((prevUsers) =>
-      prevUsers.map((user) => (user.id === userId ? { ...user, is_verified: true } : user)),
+      prevUsers.map((u) => (u.id === userId ? { ...u, is_verified: true } : u)),
     );
 
     try {
       const { data, error } = await supabase.functions.invoke('admin-verify-user', {
-        body: { userId },
+        body: { authUserId },
       });
 
       if (error) throw error;
@@ -305,7 +328,7 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
     } catch (error: any) {
       // Revert optimistic update
       setLocalUsers((prevUsers) =>
-        prevUsers.map((user) => (user.id === userId ? { ...user, is_verified: currentStatus } : user)),
+        prevUsers.map((u) => (u.id === userId ? { ...u, is_verified: currentStatus } : u)),
       );
 
       toast({
@@ -506,7 +529,7 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => verifyUserEmail(user.id, user.is_verified)}
+                      onClick={() => verifyUserEmail(user)}
                       disabled={loading}
                       className="text-green-400 hover:text-green-300"
                       title="Manually verify email"
@@ -669,7 +692,7 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
                 {!selectedUser.is_verified && (
                     <Button 
                       onClick={async () => {
-                        await verifyUserEmail(selectedUser.id, selectedUser.is_verified);
+                        await verifyUserEmail(selectedUser);
                         setIsViewModalOpen(false);
                       }}
                     disabled={loading}
