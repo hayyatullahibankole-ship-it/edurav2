@@ -62,19 +62,35 @@ Deno.serve(async (req) => {
 
     // Privileged write (service role)
     const serviceClient = createClient(supabaseUrl, serviceRoleKey);
+    
+    // Update the public.users table
     const { error: updateErr } = await serviceClient
       .from("users")
       .update({ is_verified: true })
       .eq("id", body.userId);
 
     if (updateErr) {
-      console.error("Failed to verify user:", updateErr);
+      console.error("Failed to verify user in public.users:", updateErr);
       return new Response(JSON.stringify({ success: false, error: updateErr.message }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    // CRITICAL: Also update auth.users email_confirmed_at to allow login
+    const { error: authErr } = await serviceClient.auth.admin.updateUserById(body.userId, {
+      email_confirm: true,
+    });
+
+    if (authErr) {
+      console.error("Failed to confirm email in auth.users:", authErr);
+      return new Response(JSON.stringify({ success: false, error: authErr.message }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log("Successfully verified user:", body.userId);
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
