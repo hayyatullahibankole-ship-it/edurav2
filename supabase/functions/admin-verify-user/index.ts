@@ -2,6 +2,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
 
 type Body = {
+  /** Supabase Auth user id (auth.users.id) */
+  authUserId?: string;
+  /** Backwards compatible alias (treated as authUserId) */
   userId?: string;
 };
 
@@ -31,8 +34,10 @@ Deno.serve(async (req) => {
     }
 
     const body = (await req.json().catch(() => ({}))) as Body;
-    if (!body.userId) {
-      return new Response(JSON.stringify({ success: false, error: "Missing userId" }), {
+    const authUserId = body.authUserId || body.userId;
+
+    if (!authUserId) {
+      return new Response(JSON.stringify({ success: false, error: "Missing authUserId" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -62,12 +67,13 @@ Deno.serve(async (req) => {
 
     // Privileged write (service role)
     const serviceClient = createClient(supabaseUrl, serviceRoleKey);
-    
-    // Update the public.users table
-    const { error: updateErr } = await serviceClient
+
+    // Update the public.users table (match by auth_user_id)
+    const { data: updatedProfiles, error: updateErr } = await serviceClient
       .from("users")
       .update({ is_verified: true })
-      .eq("id", body.userId);
+      .eq("auth_user_id", authUserId)
+      .select("id");
 
     if (updateErr) {
       console.error("Failed to verify user in public.users:", updateErr);
@@ -77,8 +83,15 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (!updatedProfiles || updatedProfiles.length === 0) {
+      return new Response(JSON.stringify({ success: false, error: "User profile not found for authUserId" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // CRITICAL: Also update auth.users email_confirmed_at to allow login
-    const { error: authErr } = await serviceClient.auth.admin.updateUserById(body.userId, {
+    const { error: authErr } = await serviceClient.auth.admin.updateUserById(authUserId, {
       email_confirm: true,
     });
 
@@ -90,7 +103,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log("Successfully verified user:", body.userId);
+    console.log(
+      "Successfully verified auth user:",
+      authUserId,
+      "profile_id:",
+      updatedProfiles[0]?.id,
+    );
+
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
