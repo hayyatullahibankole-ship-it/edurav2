@@ -270,7 +270,7 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
   const verifyUserEmail = async (user: any): Promise<boolean> => {
     const userId = user?.id as string | undefined;
     const authUserId = user?.auth_user_id as string | undefined;
-    const currentStatus = !!user?.is_verified;
+    const alreadyVerifiedInApp = !!user?.is_verified;
 
     if (!userId) {
       toast({
@@ -281,15 +281,9 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
       return false;
     }
 
-    if (currentStatus) {
-      toast({
-        title: "Already Verified",
-        description: "This user's email is already verified",
-      });
-      return false;
-    }
-
     // IMPORTANT: Auth verification must use auth.users.id
+    // Note: Some older records may have is_verified=true but still have unconfirmed auth email.
+    // In that case we still allow running this action to sync auth confirmation.
     if (!authUserId) {
       toast({
         title: "Cannot verify",
@@ -315,8 +309,10 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
       if (!data?.success) throw new Error(data?.error || 'Verification failed');
 
       toast({
-        title: "Success",
-        description: "User email verified successfully",
+        title: alreadyVerifiedInApp ? "Synced" : "Success",
+        description: alreadyVerifiedInApp
+          ? "Supabase Auth email confirmation synced successfully."
+          : "User email verified successfully",
       });
 
       if (selectedUser?.id === userId) {
@@ -326,9 +322,11 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
       onRefresh();
       return true;
     } catch (error: any) {
-      // Revert optimistic update
+      // Revert optimistic update only if they weren't already verified
       setLocalUsers((prevUsers) =>
-        prevUsers.map((u) => (u.id === userId ? { ...u, is_verified: currentStatus } : u)),
+        prevUsers.map((u) =>
+          u.id === userId ? { ...u, is_verified: alreadyVerifiedInApp } : u,
+        ),
       );
 
       toast({
@@ -689,19 +687,17 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
               )}
 
               <div className="flex justify-between items-center pt-4">
-                {!selectedUser.is_verified && (
-                    <Button 
-                      onClick={async () => {
-                        await verifyUserEmail(selectedUser);
-                        setIsViewModalOpen(false);
-                      }}
-                    disabled={loading}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Verify Email Manually
-                  </Button>
-                )}
+                <Button 
+                  onClick={async () => {
+                    await verifyUserEmail(selectedUser);
+                    setIsViewModalOpen(false);
+                  }}
+                  disabled={loading}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {selectedUser.is_verified ? 'Sync Auth Verification' : 'Verify Email Manually'}
+                </Button>
                 <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>
                   Close
                 </Button>
