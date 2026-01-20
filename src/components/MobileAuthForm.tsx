@@ -117,17 +117,13 @@ export default function MobileAuthForm() {
           if (error.message.includes('Invalid login credentials')) {
             throw new Error('Invalid email or password');
           }
-          if (error.message.includes('Email not confirmed')) {
+          if ((error as any)?.code === 'email_not_confirmed' || error.message.includes('Email not confirmed')) {
             throw new Error('Please verify your email first. Check your inbox for the verification link.');
           }
           throw error;
         }
 
-        // Check if user's email is verified
-        if (data.user && !data.user.email_confirmed_at) {
-          await supabase.auth.signOut();
-          throw new Error('Please verify your email address before signing in. Check your inbox for the verification link.');
-        }
+        // Note: Avoid checking `data.user.email_confirmed_at` here; it may be omitted in the response.
 
         if (data.user) {
           const newSessionToken = generateSessionToken();
