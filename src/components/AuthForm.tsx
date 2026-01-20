@@ -168,18 +168,16 @@ export default function AuthForm() {
           if (error.message.includes('Invalid login credentials')) {
             throw new Error('Invalid email or password. Please check your credentials and try again.');
           }
-          if (error.message.includes('Email not confirmed')) {
+          // Supabase returns code "email_not_confirmed" when confirmation is required
+          if ((error as any)?.code === 'email_not_confirmed' || error.message.includes('Email not confirmed')) {
             throw new Error('Please verify your email address first. Check your inbox for the verification link we sent you.');
           }
           throw error;
         }
 
-        // Check if user's email is verified
-        if (data.user && !data.user.email_confirmed_at) {
-          // Sign out the user
-          await supabase.auth.signOut();
-          throw new Error('Please verify your email address before signing in. Check your inbox for the verification link.');
-        }
+        // Note: Avoid client-side checks like `data.user.email_confirmed_at` here.
+        // Supabase may omit that field from the sign-in response, which can cause false negatives.
+        // If sign-in succeeds, we treat the user as allowed to proceed.
 
         if (data.user) {
           // Generate and store new session token (invalidates other sessions)
