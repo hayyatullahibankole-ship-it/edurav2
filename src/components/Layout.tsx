@@ -2,22 +2,26 @@ import { ReactNode, useEffect } from "react";
 import Navbar from "./Navbar";
 import WhatsAppButton from "./WhatsAppButton";
 import MobileNav from "./MobileNav";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
 import { useNativeApp } from "@/hooks/useNativeApp";
-import { StatusBar, Style } from '@capacitor/status-bar';
+import { StatusBar, Style } from "@capacitor/status-bar";
 
 interface LayoutProps {
   children: ReactNode;
   showNavbar?: boolean;
   showWhatsAppButton?: boolean;
+  showMobileNav?: boolean;
 }
 
-const Layout = ({ children, showNavbar = true, showWhatsAppButton = true, showMobileNav = true }: LayoutProps) => {
+const Layout = ({
+  children,
+  showNavbar = true,
+  showWhatsAppButton = true,
+  showMobileNav = true,
+}: LayoutProps) => {
   const { isInstalledApp } = useInstalledApp();
   const { isNative } = useNativeApp();
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,7 +29,7 @@ const Layout = ({ children, showNavbar = true, showWhatsAppButton = true, showMo
   useEffect(() => {
     if (isNative) {
       StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
-      StatusBar.setBackgroundColor({ color: '#0ea5e9' }).catch(() => {});
+      StatusBar.setBackgroundColor({ color: "#0ea5e9" }).catch(() => {});
     }
   }, [isNative]);
 
@@ -34,14 +38,19 @@ const Layout = ({ children, showNavbar = true, showWhatsAppButton = true, showMo
     if (location.pathname === "/dashboard" || location.pathname === "/mobile-home") return "dashboard";
     if (location.pathname === "/study-hub") return "study";
     if (location.pathname === "/forum") return "forum";
-    if (location.pathname.includes("profile") || location.search.includes("tab=profile") || location.search.includes("tab=settings")) return "profile";
+    if (
+      location.pathname.includes("profile") ||
+      location.search.includes("tab=profile") ||
+      location.search.includes("tab=settings")
+    )
+      return "profile";
     return "";
   };
 
   const handleTabChange = (tab: string) => {
     if (tab === "dashboard") {
-      // Navigate to mobile-home if on mobile, otherwise dashboard
-      navigate(isInstalledApp ? "/mobile-home" : "/dashboard");
+      // For app users, go to mobile-home, otherwise dashboard
+      navigate(isInstalledApp || isNative ? "/mobile-home" : "/dashboard");
     } else if (tab === "study") {
       navigate("/study-hub");
     } else if (tab === "forum") {
@@ -51,18 +60,18 @@ const Layout = ({ children, showNavbar = true, showWhatsAppButton = true, showMo
     }
   };
 
-  // Show mobile nav for installed apps OR mobile devices
-  const shouldShowMobileNav = showMobileNav && (isInstalledApp || isMobile);
+  // ✅ Mobile Navigation: show ONLY for the app (installed PWA OR native app)
+  const shouldShowMobileNav = showMobileNav && (isInstalledApp || isNative);
 
   return (
     <div className="min-h-screen bg-background">
-      {showNavbar && !isInstalledApp && <Navbar />}
-      <main className={showNavbar ? "" : "min-h-screen"}>
-        {children}
-      </main>
-      {showWhatsAppButton && !isInstalledApp && <WhatsAppButton />}
-      
-      {/* Mobile Navigation - Show for installed apps and mobile devices */}
+      {showNavbar && !(isInstalledApp || isNative) && <Navbar />}
+
+      <main className={showNavbar ? "" : "min-h-screen"}>{children}</main>
+
+      {showWhatsAppButton && !(isInstalledApp || isNative) && <WhatsAppButton />}
+
+      {/* Mobile Navigation - Show ONLY for installed apps / native app */}
       {shouldShowMobileNav && (
         <>
           <MobileNav activeTab={getActiveTab()} onTabChange={handleTabChange} />
