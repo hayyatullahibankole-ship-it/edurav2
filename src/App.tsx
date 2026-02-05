@@ -9,7 +9,6 @@ import { useOfflineSync } from "./hooks/useOfflineSync";
 import { offlineStorage } from "./utils/offlineStorage";
 import { useEffect } from "react";
 import { PlatformRouter } from "./components/PlatformRouter";
-import { AppDownloadPopup } from "./components/AppDownloadPopup";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +25,6 @@ const AppRoutes = () => {
   return (
     <>
       <OfflineIndicator />
-      <AppDownloadPopup />
       <PlatformRouter />
     </>
   );
