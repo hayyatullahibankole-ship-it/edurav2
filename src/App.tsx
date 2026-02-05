@@ -11,10 +11,16 @@ import { useEffect } from "react";
 import { PlatformRouter } from "./components/PlatformRouter";
 import { AppDownloadPopup } from "./components/AppDownloadPopup";
 
+// ✅ ADD THIS IMPORT
+import { useAndroidBackButton } from "./hooks/useAndroidBackButton";
+
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   useOfflineSync(); // Enable offline sync
+
+  // ✅ HANDLE ANDROID BACK BUTTON HERE
+  useAndroidBackButton(["/"]); // change "/" if your home route is different
 
   // Initialize offline storage and cleanup on mount
   useEffect(() => {
