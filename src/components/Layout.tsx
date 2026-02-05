@@ -1,21 +1,34 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Navbar from "./Navbar";
 import WhatsAppButton from "./WhatsAppButton";
 import MobileNav from "./MobileNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
+import { useNativeApp } from "@/hooks/useNativeApp";
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 interface LayoutProps {
   children: ReactNode;
   showNavbar?: boolean;
   showWhatsAppButton?: boolean;
+  showMobileNav?: boolean;
 }
 
-const Layout = ({ children, showNavbar = true, showWhatsAppButton = true }: LayoutProps) => {
+const Layout = ({ children, showNavbar = true, showWhatsAppButton = true, showMobileNav = true }: LayoutProps) => {
   const { isInstalledApp } = useInstalledApp();
+  const { isNative } = useNativeApp();
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Configure status bar for native apps
+  useEffect(() => {
+    if (isNative) {
+      StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
+      StatusBar.setBackgroundColor({ color: '#0ea5e9' }).catch(() => {});
+    }
+  }, [isNative]);
 
   // Determine active tab based on current route
   const getActiveTab = () => {
@@ -39,16 +52,19 @@ const Layout = ({ children, showNavbar = true, showWhatsAppButton = true }: Layo
     }
   };
 
+  // Show mobile nav for installed apps OR mobile devices
+  const shouldShowMobileNav = showMobileNav && (isInstalledApp || isMobile);
+
   return (
     <div className="min-h-screen bg-background">
-      {showNavbar && <Navbar />}
+      {showNavbar && !isInstalledApp && <Navbar />}
       <main className={showNavbar ? "" : "min-h-screen"}>
         {children}
       </main>
-      {showWhatsAppButton && <WhatsAppButton />}
+      {showWhatsAppButton && !isInstalledApp && <WhatsAppButton />}
       
-      {/* Mobile Navigation - Show only for installed apps */}
-      {isInstalledApp && (
+      {/* Mobile Navigation - Show for installed apps and mobile devices */}
+      {shouldShowMobileNav && (
         <>
           <MobileNav activeTab={getActiveTab()} onTabChange={handleTabChange} />
           {/* Add padding to bottom to prevent content being hidden by nav */}
