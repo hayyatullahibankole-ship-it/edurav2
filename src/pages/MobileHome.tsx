@@ -45,7 +45,6 @@ import { AIAssistant } from '@/components/AIAssistant';
 import { MobilePromoCodeActivation } from '@/components/dashboard/MobilePromoCodeActivation';
 import { useInstalledApp } from '@/hooks/useInstalledApp';
 import { InstallRequiredModal } from '@/components/InstallRequiredModal';
-import eduraLogo from '@/assets/edura-logo.png';
 
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
@@ -297,14 +296,9 @@ const MobileHome = () => {
             {/* Left Column - Branding and Welcome */}
             <div className="flex flex-col items-start gap-3 flex-1">
               {/* App Branding */}
-              <div className="flex items-center gap-2">
-                <div className="bg-white/95 rounded-xl p-1.5 shadow-lg">
-                  <img src={eduraLogo} alt="Edura" className="h-6 w-auto" />
-                </div>
-                <div>
-                  <h1 className="text-white font-black text-xl tracking-tight drop-shadow-lg">Edura</h1>
-                  <p className="text-white/90 text-[10px] font-bold -mt-0.5">Learning Platform</p>
-                </div>
+              <div>
+                <h1 className="text-white font-black text-2xl tracking-tight drop-shadow-lg">EduRa</h1>
+                <p className="text-white/90 text-xs font-bold">Learning Platform</p>
               </div>
               
               {/* Welcome Section with Avatar */}

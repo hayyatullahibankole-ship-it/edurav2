@@ -5,7 +5,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import ProtectedRoute from "./ProtectedRoute";
 import Layout from "./Layout";
 import { DashboardLayout } from "./DashboardLayout";
-import { NativeAppWrapper } from "./NativeAppWrapper";
 
 // Edura Pages
 import Home from "@/pages/Home";
@@ -292,7 +291,6 @@ const EduraRoutes = () => {
 // Main Platform Router
 export const PlatformRouter = () => {
   const { isAkboy } = useDomainDetection();
-  const { isInstalledApp } = useInstalledApp();
 
   // In preview/development we access Akboy pages under the /akboy prefix.
   // In that case we must keep EduraRoutes mounted so /akboy/* routes resolve.
@@ -303,15 +301,7 @@ export const PlatformRouter = () => {
     return <AkboyRoutes />;
   }
 
-  // Wrap with NativeAppWrapper for installed apps
-  if (isInstalledApp) {
-    return (
-      <NativeAppWrapper>
-        <EduraRoutes />
-      </NativeAppWrapper>
-    );
-  }
-
+  // Default to Edura routes (also contains /akboy/* routes for preview)
   return <EduraRoutes />;
 };
 
