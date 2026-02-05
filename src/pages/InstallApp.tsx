@@ -1,217 +1,162 @@
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Download, Smartphone, CheckCircle, Loader2, RefreshCw } from "lucide-react";
+import { ArrowLeft, Download, Smartphone, Zap, Wifi, Bell, Star, Shield, Clock } from "lucide-react";
+import eduraLogo from "@/assets/edura-logo.png";
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-
-// Global prompt storage to persist across component remounts
-let globalDeferredPrompt: BeforeInstallPromptEvent | null = null;
+const UPTODOWN_URL = "https://edura-advanced-cbt-platform.en.uptodown.com/android/download";
 
 export default function InstallApp() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(globalDeferredPrompt);
-  const [showManualInstructions, setShowManualInstructions] = useState(false);
-  const [installing, setInstalling] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    // Detect iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    setIsIOS(iOS);
-
-    // iOS doesn't support beforeinstallprompt, show manual instructions immediately
-    if (iOS) {
-      setShowManualInstructions(true);
-      return;
-    }
-
-    const handler = (e: Event) => {
-      e.preventDefault();
-      const promptEvent = e as BeforeInstallPromptEvent;
-      globalDeferredPrompt = promptEvent;
-      setDeferredPrompt(promptEvent);
-    };
-
-    window.addEventListener("beforeinstallprompt", handler);
-
-    // Show manual instructions after 3 seconds if no prompt is available
-    const timer = setTimeout(() => {
-      if (!globalDeferredPrompt) {
-        setShowManualInstructions(true);
-      }
-    }, 3000);
-
-    return () => {
-      window.removeEventListener("beforeinstallprompt", handler);
-      clearTimeout(timer);
-    };
-  }, []);
-
-  const handleInstall = useCallback(async () => {
-    const prompt = deferredPrompt || globalDeferredPrompt;
-
-    if (!prompt) {
-      setShowManualInstructions(true);
-      return;
-    }
-
-    setInstalling(true);
-
-    try {
-      await prompt.prompt();
-      const { outcome } = await prompt.userChoice;
-
-      if (outcome === "accepted") {
-        globalDeferredPrompt = null;
-        setDeferredPrompt(null);
-      }
-    } catch (error) {
-      console.error("Install prompt error:", error);
-      setShowManualInstructions(true);
-    }
-
-    setInstalling(false);
-  }, [deferredPrompt]);
-
-  const retryInstall = () => {
-    // Try to trigger the prompt again
-    if (globalDeferredPrompt) {
-      setDeferredPrompt(globalDeferredPrompt);
-      handleInstall();
-    } else {
-      setShowManualInstructions(true);
-    }
-  };
+  const features = [
+    { icon: Zap, title: "Lightning Fast", desc: "Instant loading & smooth performance" },
+    { icon: Wifi, title: "Offline Mode", desc: "Practice without internet" },
+    { icon: Bell, title: "Notifications", desc: "Never miss exam updates" },
+    { icon: Shield, title: "Secure", desc: "Your data stays protected" },
+    { icon: Clock, title: "Real-time", desc: "Accurate exam timing" },
+    { icon: Star, title: "Premium", desc: "Full CBT experience" },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 overflow-hidden relative">
-      {/* Animated Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 -right-20 w-80 h-80 bg-gradient-to-br from-primary/20 to-primary-glow/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-secondary/20 to-success/15 rounded-full blur-3xl animate-pulse" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary to-slate-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary-glow/30 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 -right-32 w-80 h-80 bg-secondary/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/5 rounded-full blur-3xl" />
+        
+        {/* Floating particles */}
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-white/40 rounded-full animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${4 + Math.random() * 4}s`,
+            }}
+          />
+        ))}
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 p-4 md:p-6 space-y-6 max-w-4xl mx-auto pb-24 pt-20">
-        {/* Hero Section */}
-        <div
-          className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-primary via-primary-glow to-secondary p-8 shadow-2xl text-center animate-fade-in"
-          style={{ boxShadow: "0 25px 70px rgba(0, 123, 255, 0.4)" }}
+      {/* Back Button */}
+      <div className="absolute top-6 left-6 z-20">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate(-1)}
+          className="bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-sm"
         >
-          <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/30 rounded-full blur-2xl animate-pulse" />
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+      </div>
 
-          <div className="relative z-10">
-            <div className="inline-flex p-6 rounded-3xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl mb-6">
-              <Smartphone className="h-16 w-16 text-white" strokeWidth={2.5} />
+      {/* Main Content */}
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-16">
+        {/* Phone Mockup */}
+        <div className="relative mb-8 animate-fade-in-up">
+          {/* Phone Frame */}
+          <div className="relative w-48 h-96 md:w-56 md:h-[420px] bg-slate-800 rounded-[3rem] p-2 shadow-2xl border-4 border-slate-700">
+            {/* Screen */}
+            <div className="w-full h-full bg-gradient-to-br from-primary via-primary-glow to-secondary rounded-[2.5rem] flex flex-col items-center justify-center overflow-hidden relative">
+              {/* Notch */}
+              <div className="absolute top-2 w-20 h-5 bg-slate-800 rounded-full" />
+              
+              {/* Screen Content */}
+              <div className="flex flex-col items-center gap-4 p-6">
+                <div className="bg-white/95 rounded-2xl p-4 shadow-xl">
+                  <img src={eduraLogo} alt="Edura" className="h-12 w-auto" />
+                </div>
+                <h3 className="text-white font-black text-lg drop-shadow-lg">Edura CBT</h3>
+                <p className="text-white/80 text-xs text-center font-medium">Your Gateway to Success</p>
+                
+                {/* Mini stats */}
+                <div className="flex gap-3 mt-2">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5">
+                    <p className="text-white text-xs font-bold">50K+</p>
+                    <p className="text-white/70 text-[10px]">Users</p>
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5">
+                    <p className="text-white text-xs font-bold">4.8★</p>
+                    <p className="text-white/70 text-[10px]">Rating</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Home indicator */}
+              <div className="absolute bottom-3 w-24 h-1 bg-white/50 rounded-full" />
             </div>
-
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-lg">Install EduRa App</h2>
-            <p className="text-white/90 text-lg font-semibold mb-8 max-w-2xl mx-auto">
-              Get the full mobile app experience with offline access, faster loading, and push notifications for your
-              exam preparation.
-            </p>
-
-            {/* Install Button */}
-            <div className="flex flex-col gap-3">
-              <Button
-                onClick={handleInstall}
-                disabled={installing}
-                size="lg"
-                className="bg-white text-primary hover:bg-white/90 font-black text-lg px-8 py-6 h-auto shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-70"
-              >
-                {installing ? (
-                  <Loader2 className="h-6 w-6 mr-2 animate-spin" strokeWidth={2.5} />
-                ) : (
-                  <Download className="h-6 w-6 mr-2" strokeWidth={2.5} />
-                )}
-                {installing ? "Installing..." : "Install From Web"}
-              </Button>
-
-              <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white font-black">
-                <a
-                  href="https://edura-advanced-cbt-platform.en.uptodown.com/android/download"
-                  download
-                >
-                  Download Android APP
-                </a>
-              </Button>
-
-              {!deferredPrompt && !isIOS && (
-                <Button
-                  onClick={retryInstall}
-                  variant="ghost"
-                  size="sm"
-                  className="text-white/80 hover:text-white hover:bg-white/10"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Retry Installation
-                </Button>
-              )}
-            </div>
+          </div>
+          
+          {/* Floating badges around phone */}
+          <div className="absolute -top-4 -right-4 bg-success text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-bounce">
+            FREE
+          </div>
+          <div className="absolute top-1/3 -left-6 bg-white/90 text-primary text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+            Android
           </div>
         </div>
 
-        {/* Benefits */}
-        <div className="space-y-4 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-          <h3 className="text-2xl font-black mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent text-center">
-            Why Install?
-          </h3>
+        {/* Text Content */}
+        <div className="text-center mb-8 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-3 drop-shadow-lg">
+            Get the App
+          </h1>
+          <p className="text-white/80 text-lg font-medium max-w-md mx-auto">
+            Download Edura CBT for the ultimate exam preparation experience
+          </p>
+        </div>
 
-          {[
-            { title: "Offline Access", description: "Practice tests even without internet connection" },
-            { title: "Faster Loading", description: "Instant app startup and smoother performance" },
-            { title: "Push Notifications", description: "Stay updated with exam reminders and tips" },
-            { title: "Home Screen Icon", description: "Quick access directly from your phone" },
-          ].map((benefit, index) => (
-            <Card key={index} className="border-2 border-primary/20 overflow-hidden shadow-lg">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
-              <CardContent className="p-6 relative z-10">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex-shrink-0">
-                    <CheckCircle className="h-6 w-6 text-primary" strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-lg mb-1">{benefit.title}</h3>
-                    <p className="text-sm text-muted-foreground font-semibold">{benefit.description}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        {/* Download Button */}
+        <a
+          href={UPTODOWN_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group animate-fade-in-up"
+          style={{ animationDelay: "0.3s" }}
+        >
+          <div className="relative">
+            {/* Glow effect */}
+            <div className="absolute inset-0 bg-success/50 blur-xl rounded-full group-hover:bg-success/70 transition-all" />
+            
+            <Button
+              size="lg"
+              className="relative bg-success hover:bg-success/90 text-white font-black text-lg px-10 py-7 h-auto rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 gap-3"
+            >
+              <Download className="h-6 w-6" strokeWidth={2.5} />
+              Download from Uptodown
+            </Button>
+          </div>
+        </a>
+
+        <p className="text-white/50 text-sm mt-4 animate-fade-in" style={{ animationDelay: "0.4s" }}>
+          Safe & Secure • No Registration Required
+        </p>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-3 gap-4 mt-12 max-w-lg animate-fade-in-up" style={{ animationDelay: "0.5s" }}>
+          {features.map((feature, index) => (
+            <div
+              key={index}
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center hover:bg-white/20 transition-all"
+            >
+              <div className="inline-flex p-2 rounded-xl bg-white/20 mb-2">
+                <feature.icon className="h-5 w-5 text-white" strokeWidth={2} />
+              </div>
+              <h4 className="text-white font-bold text-xs mb-0.5">{feature.title}</h4>
+              <p className="text-white/60 text-[10px]">{feature.desc}</p>
+            </div>
           ))}
         </div>
 
-        {/* Manual Instructions - Show after delay or if install not available */}
-        {showManualInstructions && (
-          <Card className="border-2 border-secondary/30 overflow-hidden shadow-xl animate-fade-in">
-            <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent" />
-            <CardContent className="p-8 relative z-10">
-              <h1 className="text-xl font-black mb-4 text-center">Manual Installation</h1>
-              <div className="space-y-4 text-sm">
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
-                    1
-                  </div>
-                  <p className="font-semibold">
-                    <strong>iPhone/iPad:</strong> Tap the Share button (square with arrow), then scroll down and tap
-                    "Add to Home Screen"
-                  </p>
-                </div>
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
-                    2
-                  </div>
-                  <p className="font-semibold">
-                    <strong>Android:</strong> Tap the menu (three dots), then tap "Add to Home screen" or "Install app"
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* iOS Note */}
+        <div className="mt-10 bg-white/10 backdrop-blur-sm rounded-2xl p-5 max-w-md text-center animate-fade-in" style={{ animationDelay: "0.6s" }}>
+          <Smartphone className="h-6 w-6 text-white/80 mx-auto mb-2" />
+          <p className="text-white/80 text-sm font-medium">
+            <strong>iPhone Users:</strong> Use Safari, tap Share → "Add to Home Screen" for the best experience
+          </p>
+        </div>
       </div>
     </div>
   );
