@@ -12,7 +12,6 @@ interface LayoutProps {
   children: ReactNode;
   showNavbar?: boolean;
   showWhatsAppButton?: boolean;
-  showMobileNav?: boolean;
 }
 
 const Layout = ({ children, showNavbar = true, showWhatsAppButton = true, showMobileNav = true }: LayoutProps) => {
