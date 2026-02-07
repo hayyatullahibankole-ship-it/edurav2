@@ -202,7 +202,7 @@ if (session?.access_token) {
 }
 
 const response = await fetch(
-  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`,
+  `https://zqapbmllkywsuywpfava.supabase.co/functions/v1/ai-assistant`,
   {
     method: "POST",
     headers,
