@@ -3,149 +3,78 @@ import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Users, Clock, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, ArrowRight, Sparkles } from "lucide-react";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
-import eventsHero from "@/assets/akboy-events-hero.jpg";
 
 export default function AkboyEvents() {
   const { isAkboy } = useDomainDetection();
   const basePath = isAkboy ? "" : "/akboy";
-  
+
   const upcomingEvents = [
-    {
-      id: 1,
-      title: "Web Development Bootcamp",
-      type: "Workshop",
-      description: "12-week intensive program covering HTML, CSS, JavaScript, React, and backend development with hands-on projects.",
-      date: "Starting January 15, 2026",
-      duration: "12 Weeks",
-      location: "Lagos & Online",
-      participants: "30 seats",
-      price: "₦150,000",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Graphics Design Masterclass",
-      type: "Training",
-      description: "Learn professional design principles, Adobe Creative Suite, branding, and portfolio building.",
-      date: "February 1, 2026",
-      duration: "8 Weeks",
-      location: "Hybrid",
-      participants: "25 seats",
-      price: "₦100,000",
-      featured: false
-    },
-    {
-      id: 3,
-      title: "Digital Marketing Workshop",
-      type: "Workshop",
-      description: "Master SEO, social media marketing, content creation, and analytics for business growth.",
-      date: "February 20, 2026",
-      duration: "2 Days",
-      location: "Online",
-      participants: "50 seats",
-      price: "₦25,000",
-      featured: false
-    }
+    { id: 1, title: "Web Development Bootcamp", type: "Workshop", description: "12-week intensive covering HTML, CSS, JavaScript, React, and backend development.", date: "Starting January 15, 2026", duration: "12 Weeks", location: "Lagos & Online", participants: "30 seats", price: "₦150,000", featured: true },
+    { id: 2, title: "Graphics Design Masterclass", type: "Training", description: "Learn professional design principles, Adobe Creative Suite, branding, and portfolio building.", date: "February 1, 2026", duration: "8 Weeks", location: "Hybrid", participants: "25 seats", price: "₦100,000", featured: false },
+    { id: 3, title: "Digital Marketing Workshop", type: "Workshop", description: "Master SEO, social media marketing, content creation, and analytics for business growth.", date: "February 20, 2026", duration: "2 Days", location: "Online", participants: "50 seats", price: "₦25,000", featured: false },
   ];
 
   return (
     <AkboyLayout>
-      {/* Hero Section */}
-      <section className="relative min-h-[70vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img src={eventsHero} alt="Events" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/95 via-teal-900/90 to-green-900/95"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-          <div className="max-w-3xl text-white space-y-6 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold">
-              <Calendar className="w-4 h-4" />
-              Upcoming Events
-            </div>
-            <h1 className="text-5xl md:text-7xl font-extrabold leading-tight">
-              Workshops &
-              <span className="block bg-gradient-to-r from-emerald-200 to-teal-200 bg-clip-text text-transparent">
-                Training Programs
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-emerald-50 leading-relaxed">
-              Enhance your skills and connect with creative professionals
-            </p>
+      {/* Hero */}
+      <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-slate-950 to-emerald-500/5" />
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `linear-gradient(rgba(6,182,212,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.5) 1px, transparent 1px)`,
+          backgroundSize: '40px 40px'
+        }} />
+        <div className="max-w-7xl mx-auto text-center relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-cyan-400 text-sm font-mono mb-6">
+            <Calendar className="w-4 h-4" /> Upcoming Events
           </div>
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+            Workshops & <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Training Programs</span>
+          </h1>
+          <p className="text-xl text-slate-400 max-w-2xl mx-auto">Enhance your skills and connect with creative professionals</p>
         </div>
       </section>
 
       {/* Events Grid */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-emerald-50/30">
+      <section className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Upcoming Events
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Join our professional training programs and workshops
-            </p>
+            <span className="text-cyan-400 font-mono text-sm tracking-wider uppercase">// Programs</span>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mt-3">Upcoming Events</h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {upcomingEvents.map((event, index) => (
-              <Card
-                key={event.id}
-                className={`group overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 ${
-                  event.featured ? 'border-yellow-400 ring-4 ring-yellow-100' : 'hover:border-emerald-300'
-                } bg-white`}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {upcomingEvents.map((event) => (
+              <Card key={event.id} className={`group overflow-hidden bg-slate-900/50 border transition-all rounded-xl ${event.featured ? 'border-cyan-500/30 ring-1 ring-cyan-500/10' : 'border-slate-800 hover:border-cyan-500/20'}`}>
                 {event.featured && (
-                  <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 px-6 py-3 text-center">
-                    <span className="text-yellow-900 font-bold text-sm">🌟 MOST POPULAR</span>
+                  <div className="bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 border-b border-cyan-500/20 px-4 py-2 text-center">
+                    <span className="text-cyan-400 font-mono text-xs font-bold"><Sparkles className="w-3 h-3 inline mr-1" />MOST POPULAR</span>
                   </div>
                 )}
+                <div className="p-6">
+                  <Badge className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-3 font-mono text-[10px]">{event.type}</Badge>
+                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">{event.title}</h3>
+                  <p className="text-sm text-slate-400 mb-4 leading-relaxed">{event.description}</p>
 
-                <div className="p-8">
-                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300 mb-4 font-semibold">
-                    {event.type}
-                  </Badge>
-
-                  <h3 className="text-2xl font-bold text-foreground mb-4 group-hover:text-emerald-600 transition-colors">
-                    {event.title}
-                  </h3>
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
-                    {event.description}
-                  </p>
-
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <Calendar className="w-5 h-5 text-emerald-600" />
-                      <span className="text-sm font-medium">{event.date}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <Clock className="w-5 h-5 text-emerald-600" />
-                      <span className="text-sm font-medium">{event.duration}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <MapPin className="w-5 h-5 text-emerald-600" />
-                      <span className="text-sm font-medium">{event.location}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <Users className="w-5 h-5 text-emerald-600" />
-                      <span className="text-sm font-medium">{event.participants}</span>
-                    </div>
+                  <div className="space-y-2 mb-4">
+                    {[
+                      { icon: Calendar, text: event.date },
+                      { icon: Clock, text: event.duration },
+                      { icon: MapPin, text: event.location },
+                      { icon: Users, text: event.participants },
+                    ].map(({ icon: Icon, text }, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs text-slate-500">
+                        <Icon className="w-3.5 h-3.5 text-cyan-500/50" />
+                        {text}
+                      </div>
+                    ))}
                   </div>
 
-                  <div className="flex items-center justify-between pt-6 border-t-2 border-emerald-100">
-                    <div className="text-3xl font-extrabold text-emerald-600">
-                      {event.price}
-                    </div>
-                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl transition-all">
-                      Register
-                      <ArrowRight className="ml-2 w-4 h-4" />
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+                    <div className="text-2xl font-bold text-cyan-400 font-mono">{event.price}</div>
+                    <Button className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/20 rounded-lg text-sm">
+                      Register <ArrowRight className="ml-1 w-3.5 h-3.5" />
                     </Button>
                   </div>
                 </div>
@@ -155,50 +84,36 @@ export default function AkboyEvents() {
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
+      {/* Benefits */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-900/50 border-y border-cyan-500/10">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Why Join Our Programs?
-            </h2>
+            <span className="text-cyan-400 font-mono text-sm tracking-wider uppercase">// Benefits</span>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mt-3">Why Join Our Programs?</h2>
           </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { icon: "🎓", title: "Expert Instructors", desc: "Learn from industry professionals" },
               { icon: "💼", title: "Practical Projects", desc: "Build real-world portfolio pieces" },
               { icon: "📜", title: "Certificates", desc: "Industry-recognized credentials" },
-              { icon: "🤝", title: "Networking", desc: "Connect with peers and mentors" }
-            ].map((benefit, i) => (
-              <Card key={i} className="p-8 text-center hover:shadow-xl transition-all border-2 hover:border-emerald-200">
-                <div className="text-5xl mb-4">{benefit.icon}</div>
-                <h3 className="text-xl font-bold text-foreground mb-2">{benefit.title}</h3>
-                <p className="text-muted-foreground">{benefit.desc}</p>
+              { icon: "🤝", title: "Networking", desc: "Connect with peers and mentors" },
+            ].map((b, i) => (
+              <Card key={i} className="p-6 text-center bg-slate-900/50 border border-slate-800 hover:border-cyan-500/20 transition-all rounded-xl">
+                <div className="text-4xl mb-3">{b.icon}</div>
+                <h3 className="text-lg font-bold text-white mb-1">{b.title}</h3>
+                <p className="text-sm text-slate-400">{b.desc}</p>
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-600 via-teal-600 to-green-600 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
-        }}></div>
-
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Want to Host an Event With Us?
-          </h2>
-          <p className="text-xl text-emerald-50 mb-10 leading-relaxed">
-            We're open to partnerships and collaboration opportunities
-          </p>
-          <Button
-            asChild
-            size="lg"
-            className="bg-white text-emerald-900 hover:bg-emerald-50 text-lg px-10 py-6 h-auto font-bold shadow-2xl hover:scale-105 transition-all rounded-2xl"
-          >
+      {/* CTA */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Want to Host an Event With Us?</h2>
+          <p className="text-lg text-slate-400 mb-10">We're open to partnerships and collaboration opportunities</p>
+          <Button asChild size="lg" className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-10 py-6 h-auto rounded-xl shadow-lg shadow-cyan-500/20">
             <Link to={`${basePath}/contact`}>Partner With Us</Link>
           </Button>
         </div>

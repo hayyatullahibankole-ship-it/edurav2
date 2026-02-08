@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Sparkles } from "lucide-react";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
-import portfolioHero from "@/assets/akboy-portfolio-hero.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -24,61 +23,35 @@ interface PortfolioItem {
 export default function AkboyPortfolio() {
   const { isAkboy } = useDomainDetection();
   const basePath = isAkboy ? "" : "/akboy";
-  
-  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-  const [filter, setFilter] = useState<string>("all");
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const [filter, setFilter] = useState<string>("All");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchPortfolio();
-  }, []);
+  useEffect(() => { fetchPortfolio(); }, []);
 
   const fetchPortfolio = async () => {
     try {
-      const { data, error } = await supabase
-        .from("akboy_portfolio")
-        .select("*")
-        .eq("is_active", true)
-        .order("display_order", { ascending: true })
-        .order("created_at", { ascending: false });
-
+      const { data, error } = await supabase.from("akboy_portfolio").select("*").eq("is_active", true).order("display_order", { ascending: true }).order("created_at", { ascending: false });
       if (error) throw error;
-
-      const formattedData = data?.map((item: any) => ({
-        id: item.id,
-        title: item.title,
-        category: item.category,
-        description: item.description,
-        tags: Array.isArray(item.tags) ? item.tags : [],
-        images: Array.isArray(item.images) ? item.images : [],
-        is_featured: item.is_featured,
-        project_url: item.project_url,
-      })) || [];
-
-      setPortfolio(formattedData);
-    } catch (error) {
-      console.error("Error fetching portfolio:", error);
-      toast.error("Failed to load portfolio");
-    } finally {
-      setLoading(false);
-    }
+      setPortfolio(data?.map((item: any) => ({
+        id: item.id, title: item.title, category: item.category, description: item.description,
+        tags: Array.isArray(item.tags) ? item.tags : [], images: Array.isArray(item.images) ? item.images : [],
+        is_featured: item.is_featured, project_url: item.project_url,
+      })) || []);
+    } catch (error) { console.error("Error:", error); toast.error("Failed to load portfolio"); }
+    finally { setLoading(false); }
   };
 
-  const categories = ["all", ...Array.from(new Set(portfolio.map(p => p.category)))].map(cat => 
-    cat === "all" ? "All" : cat
-  );
-  const filteredPortfolio = filter === "All" || filter === "all"
-    ? portfolio
-    : portfolio.filter(p => p.category === filter);
+  const categories = ["All", ...Array.from(new Set(portfolio.map(p => p.category)))];
+  const filtered = filter === "All" ? portfolio : portfolio.filter(p => p.category === filter);
 
   if (loading) {
     return (
       <AkboyLayout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading portfolio...</p>
+            <div className="animate-spin rounded-full h-10 w-10 border-2 border-cyan-500 border-t-transparent mx-auto mb-4" />
+            <p className="text-slate-500 font-mono text-sm">Loading portfolio...</p>
           </div>
         </div>
       </AkboyLayout>
@@ -87,46 +60,36 @@ export default function AkboyPortfolio() {
 
   return (
     <AkboyLayout>
-      {/* Hero Section */}
-      <section className="relative min-h-[70vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img src={portfolioHero} alt="Portfolio" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/95 via-teal-900/90 to-green-900/95"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-          <div className="max-w-3xl text-white space-y-6 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold">
-              <Sparkles className="w-4 h-4" />
-              Our Work
-            </div>
-            <h1 className="text-5xl md:text-7xl font-extrabold leading-tight">
+      {/* Hero */}
+      <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-slate-950 to-emerald-500/5" />
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `linear-gradient(rgba(6,182,212,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.5) 1px, transparent 1px)`,
+          backgroundSize: '40px 40px'
+        }} />
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="max-w-3xl space-y-6 animate-fade-in">
+            <span className="text-cyan-400 font-mono text-sm tracking-wider uppercase">// Portfolio</span>
+            <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight">
               Creative Excellence in
-              <span className="block bg-gradient-to-r from-emerald-200 to-teal-200 bg-clip-text text-transparent">
-                Every Project
-              </span>
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Every Project</span>
             </h1>
-            <p className="text-xl md:text-2xl text-emerald-50 leading-relaxed">
-              Showcasing our successful projects across education, design, and technology
-            </p>
+            <p className="text-xl text-slate-400">Showcasing successful projects across education, design, and technology</p>
           </div>
         </div>
       </section>
 
-      {/* Filter Section */}
-      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-white border-b-2 border-emerald-100 sticky top-20 z-40 backdrop-blur-sm">
+      {/* Filters */}
+      <section className="py-4 px-4 sm:px-6 lg:px-8 border-y border-cyan-500/10 sticky top-20 z-40 bg-slate-950/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-wrap gap-2 justify-center">
             {categories.map((cat) => (
-              <Button
-                key={cat}
-                onClick={() => setFilter(cat)}
-                variant={filter === cat ? "default" : "outline"}
-                className={`${
+              <Button key={cat} onClick={() => setFilter(cat)} variant="outline" size="sm"
+                className={`rounded-lg font-mono text-xs transition-all ${
                   filter === cat
-                    ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg"
-                    : "border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
-                } rounded-full px-6 font-semibold`}
+                    ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400'
+                    : 'border-slate-700 text-slate-400 hover:border-cyan-500/20 hover:text-cyan-400 bg-transparent'
+                }`}
               >
                 {cat}
               </Button>
@@ -136,66 +99,43 @@ export default function AkboyPortfolio() {
       </section>
 
       {/* Portfolio Grid */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-emerald-50/30">
+      <section className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {filteredPortfolio.map((project, index) => (
-              <Card
-                key={project.id}
-                className="group overflow-hidden hover:shadow-2xl transition-all duration-500 border-2 hover:border-emerald-300 bg-white"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="relative h-64 bg-gradient-to-br from-emerald-100 to-teal-100 overflow-hidden">
-                  {project.images && project.images.length > 0 ? (
-                    <img
-                      src={project.images[0]}
-                      alt={project.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((project) => (
+              <Card key={project.id} className="group overflow-hidden bg-slate-900/50 border border-slate-800 hover:border-cyan-500/20 transition-all rounded-xl">
+                <div className="relative h-56 overflow-hidden">
+                  {project.images?.[0] ? (
+                    <img src={project.images[0]} alt={project.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Sparkles className="w-16 h-16 text-emerald-300" />
+                    <div className="w-full h-full bg-slate-800/50 flex items-center justify-center">
+                      <Sparkles className="w-12 h-12 text-slate-700" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
                   {project.is_featured && (
-                    <Badge className="absolute top-4 right-4 bg-yellow-500 text-yellow-900 font-bold shadow-lg">
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      Featured
+                    <Badge className="absolute top-3 right-3 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono text-[10px]">
+                      <Sparkles className="w-3 h-3 mr-1" /> Featured
                     </Badge>
                   )}
                 </div>
+                <div className="p-5">
+                  <span className="text-[10px] font-mono text-cyan-500/60 uppercase tracking-widest">{project.category}</span>
+                  <h3 className="text-lg font-bold text-white mt-1 mb-2 group-hover:text-cyan-400 transition-colors">{project.title}</h3>
+                  <p className="text-xs text-slate-400 mb-3 leading-relaxed line-clamp-2">{project.description}</p>
 
-                <div className="p-8">
-                  <Badge variant="outline" className="border-emerald-600 text-emerald-700 mb-4 font-semibold">
-                    {project.category}
-                  </Badge>
-
-                  <h3 className="text-2xl font-bold text-foreground mb-3 group-hover:text-emerald-600 transition-colors">
-                    {project.title}
-                  </h3>
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
-                    {project.description}
-                  </p>
-
-                  {project.tags && project.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-6">
+                  {project.tags?.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
                       {project.tags.map((tag, i) => (
-                        <Badge key={i} variant="secondary" className="text-xs bg-emerald-50 text-emerald-700">
-                          {tag}
-                        </Badge>
+                        <span key={i} className="px-2 py-0.5 rounded text-[10px] font-mono text-slate-500 bg-slate-800/50 border border-slate-700/30">{tag}</span>
                       ))}
                     </div>
                   )}
 
                   {project.project_url && (
-                    <Button
-                      asChild
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl transition-all"
-                    >
+                    <Button asChild size="sm" className="w-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/20 rounded-lg text-xs">
                       <a href={project.project_url} target="_blank" rel="noopener noreferrer">
-                        View Project
-                        <ExternalLink className="ml-2 w-4 h-4" />
+                        View Project <ExternalLink className="ml-1 w-3 h-3" />
                       </a>
                     </Button>
                   )}
@@ -203,27 +143,22 @@ export default function AkboyPortfolio() {
               </Card>
             ))}
           </div>
+
+          {filtered.length === 0 && (
+            <div className="text-center py-16">
+              <Sparkles className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+              <p className="text-slate-500">No projects in this category yet</p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-600 via-teal-600 to-green-600 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
-        }}></div>
-
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Start Your Project?
-          </h2>
-          <p className="text-xl text-emerald-50 mb-10 leading-relaxed">
-            Let's create something amazing together
-          </p>
-          <Button
-            asChild
-            size="lg"
-            className="bg-white text-emerald-900 hover:bg-emerald-50 text-lg px-10 py-6 h-auto font-bold shadow-2xl hover:scale-105 transition-all rounded-2xl"
-          >
+      {/* CTA */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 border-t border-cyan-500/10">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Start Your Project?</h2>
+          <p className="text-lg text-slate-400 mb-10">Let's create something amazing together</p>
+          <Button asChild size="lg" className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-10 py-6 h-auto rounded-xl shadow-lg shadow-cyan-500/20">
             <Link to={`${basePath}/contact`}>Get Started Today</Link>
           </Button>
         </div>
