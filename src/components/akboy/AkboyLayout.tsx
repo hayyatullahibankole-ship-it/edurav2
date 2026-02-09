@@ -14,7 +14,7 @@ export function AkboyLayout({ children, title, description }: AkboyLayoutProps) 
   const pageDescription = description || "AKBOY Creative Hub - Your partner in innovation, creativity, and digital excellence.";
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 font-lato text-slate-100">
+    <div className="min-h-screen flex flex-col bg-white font-lato">
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
