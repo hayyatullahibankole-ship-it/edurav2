@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,10 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { 
-  BookOpen, Plus, Clock, Users, Trash2, Calendar, FileText, Upload, List, CheckCircle2
+  BookOpen, Plus, Clock, Users, Trash2, Calendar, FileText, Upload, 
+  CheckCircle2, Download, AlertCircle, Eye, Play, Pause, FileSpreadsheet
 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -20,16 +21,11 @@ interface SchoolExamManagerProps {
   schoolId: string;
 }
 
-interface QuestionOption {
-  text: string;
-  index: number;
-}
-
-interface NewQuestion {
+interface ParsedQuestion {
   question_text: string;
-  type: 'MCQ_SINGLE' | 'MCQ_MULTI' | 'TRUE_FALSE' | 'ESSAY';
+  type: 'MCQ_SINGLE';
   subject_id: string;
-  options: QuestionOption[];
+  options: string[];
   correct_answer: string;
   explanation: string;
   difficulty_level: number;
@@ -41,68 +37,50 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
   const [exams, setExams] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
-  const [availableQuestions, setAvailableQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isQuestionUploadOpen, setIsQuestionUploadOpen] = useState(false);
-  
-  const [newExam, setNewExam] = useState({
+  const [step, setStep] = useState(1); // 1: Details, 2: Questions, 3: Assign
+  const [examResults, setExamResults] = useState<Record<string, any[]>>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Exam form state
+  const [examForm, setExamForm] = useState({
     title: '',
     description: '',
     type: 'CUSTOM' as 'JAMB' | 'WAEC' | 'CUSTOM',
-    duration_minutes: 120,
+    duration_minutes: 60,
     instructions: '',
-    is_published: false,
     selectedSubjects: [] as string[],
-    questionSelectionMode: 'edura' as 'edura' | 'upload',
-    selectedQuestionIds: [] as string[],
     assignToAll: true,
     selectedStudents: [] as string[],
     startDate: '',
     endDate: '',
   });
 
-  const [uploadedQuestions, setUploadedQuestions] = useState<NewQuestion[]>([]);
-  const [currentQuestion, setCurrentQuestion] = useState<NewQuestion>({
+  // Question management state
+  const [questionTab, setQuestionTab] = useState<'upload' | 'manual' | 'bank'>('upload');
+  const [uploadedQuestions, setUploadedQuestions] = useState<ParsedQuestion[]>([]);
+  const [bankQuestions, setBankQuestions] = useState<any[]>([]);
+  const [selectedBankQuestionIds, setSelectedBankQuestionIds] = useState<string[]>([]);
+  const [manualQuestion, setManualQuestion] = useState({
     question_text: '',
-    type: 'MCQ_SINGLE',
     subject_id: '',
-    options: [
-      { text: '', index: 0 },
-      { text: '', index: 1 },
-      { text: '', index: 2 },
-      { text: '', index: 3 }
-    ],
+    options: ['', '', '', ''],
     correct_answer: '0',
     explanation: '',
-    difficulty_level: 1,
-    points: 1,
-    time_limit_seconds: 90,
   });
 
   useEffect(() => {
-    if (schoolId) {
-      fetchData();
-    }
+    if (schoolId) fetchData();
   }, [schoolId]);
-
-  useEffect(() => {
-    if (newExam.selectedSubjects.length > 0 && newExam.questionSelectionMode === 'edura') {
-      fetchAvailableQuestions();
-    }
-  }, [newExam.selectedSubjects, newExam.questionSelectionMode]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      
       const [examsResp, subjectsResp, studentsResp] = await Promise.all([
         supabase
           .from('exams')
-          .select(`
-            *,
-            exam_subjects(*)
-          `)
+          .select('*, exam_subjects(*)')
           .eq('school_id', schoolId)
           .order('created_at', { ascending: false }),
         supabase
@@ -112,62 +90,283 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
           .order('name'),
         supabase
           .from('school_students')
-          .select(`
-            user_id,
-            users(id, first_name, last_name, email)
-          `)
+          .select('user_id, users(id, first_name, last_name, email)')
           .eq('school_id', schoolId)
           .eq('is_active', true)
       ]);
 
-      setExams(examsResp.data || []);
+      const examsList = examsResp.data || [];
+      setExams(examsList);
       setSubjects(subjectsResp.data || []);
       setStudents(studentsResp.data?.map(s => s.users).filter(Boolean) || []);
-      
+
+      // Fetch results for each exam
+      for (const exam of examsList) {
+        fetchExamResults(exam.id);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast.error('Failed to load exams data');
+      toast.error('Failed to load data');
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchAvailableQuestions = async () => {
+  const fetchExamResults = async (examId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data: attempts } = await supabase
+        .from('attempts')
+        .select(`
+          id, user_id, status, submitted_at,
+          users(first_name, last_name),
+          results(raw_score, total_questions, percentage)
+        `)
+        .eq('exam_id', examId)
+        .in('status', ['SUBMITTED', 'GRADED']);
+
+      if (attempts) {
+        setExamResults(prev => ({ ...prev, [examId]: attempts }));
+      }
+    } catch (error) {
+      console.error('Error fetching results:', error);
+    }
+  };
+
+  // CSV Parsing
+  const parseCSV = (text: string): string[][] => {
+    const rows: string[][] = [];
+    let currentRow: string[] = [];
+    let currentField = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+
+      if (inQuotes) {
+        if (char === '"' && nextChar === '"') {
+          currentField += '"';
+          i++;
+        } else if (char === '"') {
+          inQuotes = false;
+        } else {
+          currentField += char;
+        }
+      } else {
+        if (char === '"') {
+          inQuotes = true;
+        } else if (char === ',') {
+          currentRow.push(currentField.trim());
+          currentField = '';
+        } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+          currentRow.push(currentField.trim());
+          if (currentRow.some(f => f)) rows.push(currentRow);
+          currentRow = [];
+          currentField = '';
+          if (char === '\r') i++;
+        } else {
+          currentField += char;
+        }
+      }
+    }
+    // Last field
+    currentRow.push(currentField.trim());
+    if (currentRow.some(f => f)) rows.push(currentRow);
+
+    return rows;
+  };
+
+  const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv') && !file.name.endsWith('.txt')) {
+      toast.error('Please upload a CSV file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const rows = parseCSV(text);
+
+        if (rows.length < 2) {
+          toast.error('CSV must have a header row and at least one question');
+          return;
+        }
+
+        // Dynamic header mapping (case-insensitive)
+        const headers = rows[0].map(h => h.toLowerCase().trim());
+        const colMap: Record<string, number> = {};
+        
+        const findCol = (names: string[]) => {
+          for (const name of names) {
+            const idx = headers.findIndex(h => h.includes(name));
+            if (idx !== -1) return idx;
+          }
+          return -1;
+        };
+
+        colMap.subject = findCol(['subject']);
+        colMap.question = findCol(['question']);
+        colMap.optionA = findCol(['option a', 'option_a', 'a)']);
+        colMap.optionB = findCol(['option b', 'option_b', 'b)']);
+        colMap.optionC = findCol(['option c', 'option_c', 'c)']);
+        colMap.optionD = findCol(['option d', 'option_d', 'd)']);
+        colMap.answer = findCol(['correct', 'answer']);
+        colMap.explanation = findCol(['explanation', 'explain']);
+
+        if (colMap.question === -1) {
+          toast.error('CSV must have a "Question" column');
+          return;
+        }
+        if (colMap.optionA === -1 || colMap.optionB === -1) {
+          toast.error('CSV must have at least "Option A" and "Option B" columns');
+          return;
+        }
+
+        const parsed: ParsedQuestion[] = [];
+        const errors: string[] = [];
+
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i];
+          const questionText = row[colMap.question] || '';
+          if (!questionText) {
+            errors.push(`Row ${i + 1}: Missing question text`);
+            continue;
+          }
+
+          const options = [
+            row[colMap.optionA] || '',
+            row[colMap.optionB] || '',
+            colMap.optionC !== -1 ? (row[colMap.optionC] || '') : '',
+            colMap.optionD !== -1 ? (row[colMap.optionD] || '') : '',
+          ].filter(Boolean);
+
+          if (options.length < 2) {
+            errors.push(`Row ${i + 1}: Need at least 2 options`);
+            continue;
+          }
+
+          // Match correct answer
+          let correctAnswer = '0';
+          if (colMap.answer !== -1) {
+            const rawAnswer = (row[colMap.answer] || '').trim().toUpperCase();
+            if (rawAnswer === 'A' || rawAnswer === '1') correctAnswer = '0';
+            else if (rawAnswer === 'B' || rawAnswer === '2') correctAnswer = '1';
+            else if (rawAnswer === 'C' || rawAnswer === '3') correctAnswer = '2';
+            else if (rawAnswer === 'D' || rawAnswer === '4') correctAnswer = '3';
+            else {
+              // Try matching answer text
+              const ansIdx = options.findIndex(o => o.toLowerCase() === rawAnswer.toLowerCase());
+              if (ansIdx !== -1) correctAnswer = String(ansIdx);
+            }
+          }
+
+          // Match subject
+          let subjectId = examForm.selectedSubjects[0] || '';
+          if (colMap.subject !== -1) {
+            const subjectName = (row[colMap.subject] || '').trim().toLowerCase();
+            const matched = subjects.find(s => s.name.toLowerCase().includes(subjectName) || subjectName.includes(s.name.toLowerCase()));
+            if (matched) subjectId = matched.id;
+          }
+
+          parsed.push({
+            question_text: questionText,
+            type: 'MCQ_SINGLE',
+            subject_id: subjectId,
+            options,
+            correct_answer: correctAnswer,
+            explanation: colMap.explanation !== -1 ? (row[colMap.explanation] || '') : '',
+            difficulty_level: 1,
+            points: 1,
+            time_limit_seconds: 90,
+          });
+        }
+
+        if (errors.length > 0 && parsed.length === 0) {
+          toast.error(`Failed to parse CSV: ${errors.slice(0, 3).join('; ')}`);
+          return;
+        }
+
+        setUploadedQuestions(prev => [...prev, ...parsed]);
+        toast.success(`${parsed.length} questions parsed from CSV${errors.length > 0 ? `. ${errors.length} rows skipped.` : ''}`);
+        
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      } catch (error) {
+        console.error('CSV parse error:', error);
+        toast.error('Failed to parse CSV file');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const addManualQuestion = () => {
+    if (!manualQuestion.question_text || !manualQuestion.subject_id) {
+      toast.error('Please fill in question text and select a subject');
+      return;
+    }
+    if (manualQuestion.options.filter(Boolean).length < 2) {
+      toast.error('Please provide at least 2 options');
+      return;
+    }
+
+    const validOptions = manualQuestion.options.filter(Boolean);
+    setUploadedQuestions(prev => [...prev, {
+      question_text: manualQuestion.question_text,
+      type: 'MCQ_SINGLE',
+      subject_id: manualQuestion.subject_id,
+      options: validOptions,
+      correct_answer: manualQuestion.correct_answer,
+      explanation: manualQuestion.explanation,
+      difficulty_level: 1,
+      points: 1,
+      time_limit_seconds: 90,
+    }]);
+
+    setManualQuestion({
+      question_text: '',
+      subject_id: manualQuestion.subject_id,
+      options: ['', '', '', ''],
+      correct_answer: '0',
+      explanation: '',
+    });
+    toast.success('Question added');
+  };
+
+  const fetchBankQuestions = async () => {
+    if (examForm.selectedSubjects.length === 0) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('school-bulk-questions', {
+        body: { action: 'get_school_questions' }
+      });
+      if (error) throw error;
+      setBankQuestions(data?.questions || []);
+    } catch (error) {
+      console.error('Error fetching bank questions:', error);
+      // Fallback: try direct query
+      const { data } = await supabase
         .from('questions')
-        .select('*, subjects(name)')
-        .in('subject_id', newExam.selectedSubjects)
+        .select('id, question_text, type, options, subject_id, difficulty_level, subjects(name)')
+        .in('subject_id', examForm.selectedSubjects)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
-        .limit(100);
-
-      if (error) throw error;
-      setAvailableQuestions(data || []);
-    } catch (error) {
-      console.error('Error fetching questions:', error);
+        .limit(200);
+      setBankQuestions(data || []);
     }
   };
 
   const handleCreateExam = async () => {
     try {
-      if (!newExam.title || newExam.selectedSubjects.length === 0) {
-        toast.error('Please fill in all required fields');
-        return;
-      }
-
-      if (newExam.questionSelectionMode === 'upload' && uploadedQuestions.length === 0) {
-        toast.error('Please upload at least one question');
-        return;
-      }
-
-      if (newExam.questionSelectionMode === 'edura' && newExam.selectedQuestionIds.length === 0) {
-        toast.error('Please select at least one question');
+      const totalQuestions = uploadedQuestions.length + selectedBankQuestionIds.length;
+      if (totalQuestions === 0) {
+        toast.error('Please add at least one question');
         return;
       }
 
       setLoading(true);
-      
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -179,81 +378,64 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
 
       if (!userData) throw new Error('User not found');
 
-      let finalQuestionIds: string[] = [];
-
-      // If uploading custom questions, save them to Edura's question bank first
-      if (newExam.questionSelectionMode === 'upload') {
-        const questionsToInsert = uploadedQuestions.map(q => ({
-          question_text: q.question_text,
-          type: q.type,
-          subject_id: q.subject_id,
-          options: q.type === 'TRUE_FALSE' ? ['True', 'False'] : q.options.map(opt => opt.text),
-          correct_answer: q.correct_answer,
-          explanation: q.explanation || null,
-          difficulty_level: q.difficulty_level,
-          points: q.points,
-          time_limit_seconds: q.time_limit_seconds,
-          created_by: userData.id,
-          is_active: true,
-        }));
-
-        const { data: insertedQuestions, error: questionError } = await supabase
-          .from('questions')
-          .insert(questionsToInsert)
-          .select('id');
-
-        if (questionError) throw questionError;
-        
-        finalQuestionIds = insertedQuestions.map(q => q.id);
-        toast.success(`${finalQuestionIds.length} questions added to Edura question bank!`);
-      } else {
-        finalQuestionIds = newExam.selectedQuestionIds;
-      }
-
-      // Create exam with question IDs in proctoring_data
+      // Step 1: Create the exam
       const { data: exam, error: examError } = await supabase
         .from('exams')
         .insert({
-          title: newExam.title,
-          description: newExam.description,
-          type: newExam.type,
-          duration_minutes: newExam.duration_minutes,
-          total_questions: finalQuestionIds.length,
-          instructions: newExam.instructions,
-          is_published: newExam.is_published,
+          title: examForm.title,
+          description: examForm.description,
+          type: examForm.type,
+          duration_minutes: examForm.duration_minutes,
+          total_questions: totalQuestions,
+          instructions: examForm.instructions,
+          is_published: false,
           school_id: schoolId,
           created_by: userData.id,
+          requires_subscription: false,
         })
         .select()
         .single();
 
       if (examError) throw examError;
 
-      // Store question IDs in attempts.proctoring_data for pre-selected questions
-      // This will be used by useCBTExam to load exact questions
-      // We'll create a sample attempt structure to document the format
-      const examMetadata = {
-        question_ids: finalQuestionIds,
-        question_selection_mode: newExam.questionSelectionMode,
-        created_at: new Date().toISOString(),
-      };
+      // Step 2: Upload new questions via edge function
+      let allQuestionIds: string[] = [...selectedBankQuestionIds];
 
-      // Update exam with metadata
-      await supabase
-        .from('exams')
-        .update({
-          instructions: `${newExam.instructions}\n\n__EXAM_METADATA__:${JSON.stringify(examMetadata)}`
-        })
-        .eq('id', exam.id);
+      if (uploadedQuestions.length > 0) {
+        const { data: bulkResult, error: bulkError } = await supabase.functions.invoke('school-bulk-questions', {
+          body: {
+            action: 'bulk_insert_questions',
+            questions: uploadedQuestions,
+            exam_id: exam.id,
+          }
+        });
 
-      // Create exam subjects
+        if (bulkError) throw new Error(bulkError.message || 'Failed to upload questions');
+        if (bulkResult?.question_ids) {
+          allQuestionIds = [...allQuestionIds, ...bulkResult.question_ids];
+        }
+      }
+
+      // Step 3: Link existing bank questions to exam
+      if (selectedBankQuestionIds.length > 0) {
+        await supabase.functions.invoke('school-bulk-questions', {
+          body: {
+            action: 'link_questions_to_exam',
+            exam_id: exam.id,
+            question_ids: allQuestionIds,
+          }
+        });
+      }
+
+      // Step 4: Create exam subjects
       const subjectQuestionCounts: Record<string, number> = {};
-      finalQuestionIds.forEach(qid => {
-        const question = newExam.questionSelectionMode === 'upload' 
-          ? uploadedQuestions.find((_, idx) => finalQuestionIds[idx] === qid)
-          : availableQuestions.find(q => q.id === qid);
-        if (question && question.subject_id) {
-          subjectQuestionCounts[question.subject_id] = (subjectQuestionCounts[question.subject_id] || 0) + 1;
+      uploadedQuestions.forEach(q => {
+        subjectQuestionCounts[q.subject_id] = (subjectQuestionCounts[q.subject_id] || 0) + 1;
+      });
+      selectedBankQuestionIds.forEach(qid => {
+        const q = bankQuestions.find(bq => bq.id === qid);
+        if (q) {
+          subjectQuestionCounts[q.subject_id] = (subjectQuestionCounts[q.subject_id] || 0) + 1;
         }
       });
 
@@ -268,49 +450,42 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
         };
       });
 
-      const { error: subjectsError } = await supabase
-        .from('exam_subjects')
-        .insert(examSubjects);
+      if (examSubjects.length > 0) {
+        await supabase.from('exam_subjects').insert(examSubjects);
+      }
 
-      if (subjectsError) throw subjectsError;
-
-      // Create exam assignments
+      // Step 5: Create assignments
       const assignments = [];
-      
-      if (newExam.assignToAll) {
+      if (examForm.assignToAll) {
         assignments.push({
           exam_id: exam.id,
           school_id: schoolId,
           assigned_to_all: true,
-          start_date: newExam.startDate || null,
-          end_date: newExam.endDate || null,
+          start_date: examForm.startDate || null,
+          end_date: examForm.endDate || null,
           created_by: userData.id,
         });
       } else {
-        newExam.selectedStudents.forEach(studentId => {
+        examForm.selectedStudents.forEach(studentId => {
           assignments.push({
             exam_id: exam.id,
             school_id: schoolId,
             student_id: studentId,
             assigned_to_all: false,
-            start_date: newExam.startDate || null,
-            end_date: newExam.endDate || null,
+            start_date: examForm.startDate || null,
+            end_date: examForm.endDate || null,
             created_by: userData.id,
           });
         });
       }
 
-      const { error: assignError } = await supabase
-        .from('school_exam_assignments')
-        .insert(assignments);
+      await supabase.from('school_exam_assignments').insert(assignments);
 
-      if (assignError) throw assignError;
-
-      toast.success('Exam created successfully with selected questions!');
+      toast.success(`Exam created with ${totalQuestions} questions!`);
       setIsCreateModalOpen(false);
       resetForm();
       fetchData();
-      
+
     } catch (error: any) {
       console.error('Error creating exam:', error);
       toast.error(error.message || 'Failed to create exam');
@@ -320,89 +495,26 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
   };
 
   const resetForm = () => {
-    setNewExam({
+    setExamForm({
       title: '',
       description: '',
       type: 'CUSTOM',
-      duration_minutes: 120,
+      duration_minutes: 60,
       instructions: '',
-      is_published: false,
       selectedSubjects: [],
-      questionSelectionMode: 'edura',
-      selectedQuestionIds: [],
       assignToAll: true,
       selectedStudents: [],
       startDate: '',
       endDate: '',
     });
     setUploadedQuestions([]);
-    setCurrentQuestion({
-      question_text: '',
-      type: 'MCQ_SINGLE',
-      subject_id: '',
-      options: [
-        { text: '', index: 0 },
-        { text: '', index: 1 },
-        { text: '', index: 2 },
-        { text: '', index: 3 }
-      ],
-      correct_answer: '0',
-      explanation: '',
-      difficulty_level: 1,
-      points: 1,
-      time_limit_seconds: 90,
-    });
-  };
-
-  const updateOption = (index: number, text: string) => {
-    const newOptions = [...currentQuestion.options];
-    newOptions[index].text = text;
-    setCurrentQuestion({ ...currentQuestion, options: newOptions });
-  };
-
-  const addQuestionToList = () => {
-    if (!currentQuestion.question_text || !currentQuestion.subject_id) {
-      toast.error('Please fill in question text and select a subject');
-      return;
-    }
-
-    if ((currentQuestion.type === 'MCQ_SINGLE' || currentQuestion.type === 'MCQ_MULTI') && 
-        currentQuestion.options.some(opt => !opt.text.trim())) {
-      toast.error('Please fill in all answer options');
-      return;
-    }
-
-    setUploadedQuestions([...uploadedQuestions, { ...currentQuestion }]);
-    setCurrentQuestion({
-      question_text: '',
-      type: 'MCQ_SINGLE',
-      subject_id: currentQuestion.subject_id, // Keep same subject
-      options: [
-        { text: '', index: 0 },
-        { text: '', index: 1 },
-        { text: '', index: 2 },
-        { text: '', index: 3 }
-      ],
-      correct_answer: '0',
-      explanation: '',
-      difficulty_level: 1,
-      points: 1,
-      time_limit_seconds: 90,
-    });
-    toast.success('Question added to upload list');
-  };
-
-  const toggleQuestionSelection = (questionId: string) => {
-    setNewExam(prev => ({
-      ...prev,
-      selectedQuestionIds: prev.selectedQuestionIds.includes(questionId)
-        ? prev.selectedQuestionIds.filter(id => id !== questionId)
-        : [...prev.selectedQuestionIds, questionId]
-    }));
+    setSelectedBankQuestionIds([]);
+    setStep(1);
+    setQuestionTab('upload');
   };
 
   const toggleSubject = (subjectId: string) => {
-    setNewExam(prev => ({
+    setExamForm(prev => ({
       ...prev,
       selectedSubjects: prev.selectedSubjects.includes(subjectId)
         ? prev.selectedSubjects.filter(id => id !== subjectId)
@@ -411,7 +523,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
   };
 
   const toggleStudent = (studentId: string) => {
-    setNewExam(prev => ({
+    setExamForm(prev => ({
       ...prev,
       selectedStudents: prev.selectedStudents.includes(studentId)
         ? prev.selectedStudents.filter(id => id !== studentId)
@@ -420,44 +532,51 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
   };
 
   const deleteExam = async (examId: string) => {
-    if (!confirm('Are you sure you want to delete this exam?')) return;
-
+    if (!confirm('Delete this exam? This cannot be undone.')) return;
     try {
-      const { error } = await supabase.from('exams').delete().eq('id', examId);
-      if (error) throw error;
-      toast.success('Exam deleted successfully');
+      await supabase.from('exams').delete().eq('id', examId);
+      toast.success('Exam deleted');
       fetchData();
     } catch (error: any) {
-      console.error('Error deleting exam:', error);
       toast.error('Failed to delete exam');
     }
   };
 
-  const togglePublishStatus = async (examId: string, currentStatus: boolean) => {
+  const togglePublish = async (examId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('exams')
-        .update({ is_published: !currentStatus })
-        .eq('id', examId);
-
-      if (error) throw error;
-      toast.success(`Exam ${!currentStatus ? 'published' : 'unpublished'} successfully`);
+      await supabase.from('exams').update({ is_published: !currentStatus }).eq('id', examId);
+      toast.success(`Exam ${!currentStatus ? 'published' : 'unpublished'}`);
       fetchData();
     } catch (error: any) {
-      console.error('Error toggling publish status:', error);
-      toast.error('Failed to update exam status');
+      toast.error('Failed to update exam');
     }
   };
+
+  const downloadCSVTemplate = () => {
+    const csv = 'Subject,Question,Option A,Option B,Option C,Option D,Correct Answer,Explanation\nMathematics,"What is 2 + 2?",2,3,4,5,C,"2 + 2 equals 4"\nEnglish,"Choose the correct spelling",Recieve,Receive,Receve,Receeve,B,"The correct spelling is Receive"';
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'question_template.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const totalQuestionsCount = uploadedQuestions.length + selectedBankQuestionIds.length;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Exam Management</h2>
-          <p className="text-muted-foreground">Create exams with your own questions or select from Edura's question bank</p>
+          <p className="text-muted-foreground">Create exams, upload questions, and track results</p>
         </div>
-        
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+
+        <Dialog open={isCreateModalOpen} onOpenChange={(open) => {
+          setIsCreateModalOpen(open);
+          if (!open) resetForm();
+        }}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
@@ -466,40 +585,51 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create New Exam</DialogTitle>
+              <DialogTitle>Create New Exam — Step {step} of 3</DialogTitle>
             </DialogHeader>
-            
-            <div className="space-y-6">
-              {/* Basic Info */}
+
+            {/* Step indicators */}
+            <div className="flex items-center gap-2 mb-4">
+              {[1, 2, 3].map(s => (
+                <div key={s} className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    step >= s ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {step > s ? <CheckCircle2 className="w-4 h-4" /> : s}
+                  </div>
+                  <span className="text-xs text-muted-foreground hidden sm:inline">
+                    {s === 1 ? 'Details' : s === 2 ? 'Questions' : 'Assign'}
+                  </span>
+                  {s < 3 && <div className={`w-8 h-0.5 ${step > s ? 'bg-primary' : 'bg-muted'}`} />}
+                </div>
+              ))}
+            </div>
+
+            {/* STEP 1: Exam Details */}
+            {step === 1 && (
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="title">Exam Title *</Label>
+                  <Label>Exam Title *</Label>
                   <Input
-                    id="title"
-                    value={newExam.title}
-                    onChange={(e) => setNewExam({...newExam, title: e.target.value})}
+                    value={examForm.title}
+                    onChange={e => setExamForm({...examForm, title: e.target.value})}
                     placeholder="e.g., Mid-Term Mathematics Test"
                   />
                 </div>
-                
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label>Description</Label>
                   <Textarea
-                    id="description"
-                    value={newExam.description}
-                    onChange={(e) => setNewExam({...newExam, description: e.target.value})}
-                    placeholder="Brief description of the exam"
-                    rows={3}
+                    value={examForm.description}
+                    onChange={e => setExamForm({...examForm, description: e.target.value})}
+                    placeholder="Brief description"
+                    rows={2}
                   />
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="type">Exam Type</Label>
-                    <Select value={newExam.type} onValueChange={(value: any) => setNewExam({...newExam, type: value})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
+                    <Label>Exam Type</Label>
+                    <Select value={examForm.type} onValueChange={(v: any) => setExamForm({...examForm, type: v})}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="CUSTOM">Custom Exam</SelectItem>
                         <SelectItem value="JAMB">JAMB Style</SelectItem>
@@ -507,486 +637,473 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                       </SelectContent>
                     </Select>
                   </div>
-                  
                   <div>
-                    <Label htmlFor="duration">Duration (minutes)</Label>
+                    <Label>Duration (minutes)</Label>
                     <Input
-                      id="duration"
                       type="number"
-                      value={newExam.duration_minutes}
-                      onChange={(e) => setNewExam({...newExam, duration_minutes: parseInt(e.target.value) || 0})}
+                      value={examForm.duration_minutes}
+                      onChange={e => setExamForm({...examForm, duration_minutes: parseInt(e.target.value) || 60})}
                     />
                   </div>
                 </div>
-              </div>
-
-              {/* Subject Selection */}
-              <div>
-                <Label className="mb-3 block">Select Subjects *</Label>
-                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-lg p-3">
-                  {subjects.map((subject) => (
-                    <div key={subject.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={subject.id}
-                        checked={newExam.selectedSubjects.includes(subject.id)}
-                        onCheckedChange={() => toggleSubject(subject.id)}
-                      />
-                      <Label htmlFor={subject.id} className="cursor-pointer font-normal">
-                        {subject.name}
-                      </Label>
-                    </div>
-                  ))}
+                <div>
+                  <Label className="mb-2 block">Select Subjects *</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto border rounded-lg p-3">
+                    {subjects.map(subject => (
+                      <div key={subject.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`sub-${subject.id}`}
+                          checked={examForm.selectedSubjects.includes(subject.id)}
+                          onCheckedChange={() => toggleSubject(subject.id)}
+                        />
+                        <Label htmlFor={`sub-${subject.id}`} className="cursor-pointer font-normal text-sm">
+                          {subject.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+                <div>
+                  <Label>Instructions</Label>
+                  <Textarea
+                    value={examForm.instructions}
+                    onChange={e => setExamForm({...examForm, instructions: e.target.value})}
+                    placeholder="Instructions for students"
+                    rows={2}
+                  />
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    if (!examForm.title) return toast.error('Enter exam title');
+                    if (examForm.selectedSubjects.length === 0) return toast.error('Select at least one subject');
+                    setStep(2);
+                    fetchBankQuestions();
+                  }}
+                >
+                  Next: Add Questions
+                </Button>
               </div>
+            )}
 
-              {/* Question Selection Mode */}
-              {newExam.selectedSubjects.length > 0 && (
-                <div className="space-y-4">
-                  <Label>Question Selection Method *</Label>
-                  <RadioGroup
-                    value={newExam.questionSelectionMode}
-                    onValueChange={(value: 'edura' | 'upload') => setNewExam({...newExam, questionSelectionMode: value})}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="edura" id="edura" />
-                      <Label htmlFor="edura" className="cursor-pointer font-normal">
-                        <div className="flex items-center gap-2">
-                          <List className="w-4 h-4" />
-                          <span>Select from Edura Question Bank</span>
+            {/* STEP 2: Questions */}
+            {step === 2 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Badge variant="secondary" className="text-sm">
+                    {totalQuestionsCount} questions added
+                  </Badge>
+                </div>
+
+                <Tabs value={questionTab} onValueChange={(v: any) => setQuestionTab(v)}>
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="upload">
+                      <Upload className="w-3 h-3 mr-1" /> CSV Upload
+                    </TabsTrigger>
+                    <TabsTrigger value="manual">
+                      <Plus className="w-3 h-3 mr-1" /> Manual
+                    </TabsTrigger>
+                    <TabsTrigger value="bank">
+                      <BookOpen className="w-3 h-3 mr-1" /> Question Bank
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {/* CSV Upload */}
+                  <TabsContent value="upload" className="space-y-4">
+                    <Alert>
+                      <FileSpreadsheet className="h-4 w-4" />
+                      <AlertDescription>
+                        Upload a CSV file with columns: Subject, Question, Option A, Option B, Option C, Option D, Correct Answer, Explanation
+                      </AlertDescription>
+                    </Alert>
+
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={downloadCSVTemplate} className="flex-1">
+                        <Download className="w-4 h-4 mr-2" />
+                        Download Template
+                      </Button>
+                      <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="flex-1">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload CSV
+                      </Button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".csv,.txt"
+                        onChange={handleCSVUpload}
+                        className="hidden"
+                      />
+                    </div>
+                  </TabsContent>
+
+                  {/* Manual Entry */}
+                  <TabsContent value="manual" className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Subject *</Label>
+                        <Select value={manualQuestion.subject_id} onValueChange={v => setManualQuestion({...manualQuestion, subject_id: v})}>
+                          <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                          <SelectContent>
+                            {subjects.filter(s => examForm.selectedSubjects.includes(s.id)).map(s => (
+                              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Correct Answer</Label>
+                        <Select value={manualQuestion.correct_answer} onValueChange={v => setManualQuestion({...manualQuestion, correct_answer: v})}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {['A', 'B', 'C', 'D'].map((letter, idx) => (
+                              <SelectItem key={idx} value={String(idx)}>Option {letter}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Question *</Label>
+                      <Textarea
+                        value={manualQuestion.question_text}
+                        onChange={e => setManualQuestion({...manualQuestion, question_text: e.target.value})}
+                        placeholder="Enter question text..."
+                        rows={2}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {manualQuestion.options.map((opt, idx) => (
+                        <Input
+                          key={idx}
+                          value={opt}
+                          onChange={e => {
+                            const newOpts = [...manualQuestion.options];
+                            newOpts[idx] = e.target.value;
+                            setManualQuestion({...manualQuestion, options: newOpts});
+                          }}
+                          placeholder={`Option ${String.fromCharCode(65 + idx)}`}
+                        />
+                      ))}
+                    </div>
+                    <div>
+                      <Label>Explanation (optional)</Label>
+                      <Input
+                        value={manualQuestion.explanation}
+                        onChange={e => setManualQuestion({...manualQuestion, explanation: e.target.value})}
+                        placeholder="Why is this the answer?"
+                      />
+                    </div>
+                    <Button onClick={addManualQuestion} className="w-full">
+                      <Plus className="w-4 h-4 mr-2" /> Add Question
+                    </Button>
+                  </TabsContent>
+
+                  {/* Question Bank */}
+                  <TabsContent value="bank" className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">
+                        {bankQuestions.length} questions available
+                      </p>
+                      <Badge variant="secondary">{selectedBankQuestionIds.length} selected</Badge>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto space-y-2 border rounded-lg p-3">
+                      {bankQuestions.length === 0 ? (
+                        <p className="text-center text-muted-foreground py-6 text-sm">
+                          No questions in your bank. Upload some first!
+                        </p>
+                      ) : bankQuestions.map(q => (
+                        <div key={q.id} className="flex items-start space-x-2 p-2 border rounded hover:bg-muted/50">
+                          <Checkbox
+                            checked={selectedBankQuestionIds.includes(q.id)}
+                            onCheckedChange={() => {
+                              setSelectedBankQuestionIds(prev =>
+                                prev.includes(q.id) ? prev.filter(id => id !== q.id) : [...prev, q.id]
+                              );
+                            }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm line-clamp-2">{q.question_text}</p>
+                            <Badge variant="outline" className="text-xs mt-1">
+                              {q.subjects?.name || 'Unknown'}
+                            </Badge>
+                          </div>
                         </div>
-                      </Label>
+                      ))}
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="upload" id="upload" />
-                      <Label htmlFor="upload" className="cursor-pointer font-normal">
-                        <div className="flex items-center gap-2">
-                          <Upload className="w-4 h-4" />
-                          <span>Upload Custom Questions (saved to Edura bank)</span>
-                        </div>
-                      </Label>
+                  </TabsContent>
+                </Tabs>
+
+                {/* Queued questions summary */}
+                {uploadedQuestions.length > 0 && (
+                  <div className="border rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-sm">Queued Questions ({uploadedQuestions.length})</Label>
+                      <Button variant="ghost" size="sm" onClick={() => setUploadedQuestions([])}>
+                        Clear All
+                      </Button>
                     </div>
-                  </RadioGroup>
-
-                  {/* Edura Question Selection */}
-                  {newExam.questionSelectionMode === 'edura' && (
-                    <div className="border rounded-lg p-4 max-h-96 overflow-y-auto">
-                      <div className="flex items-center justify-between mb-3">
-                        <Label>Available Questions ({availableQuestions.length})</Label>
-                        <Badge variant="secondary">{newExam.selectedQuestionIds.length} selected</Badge>
-                      </div>
-                      <div className="space-y-2">
-                        {availableQuestions.map((question) => (
-                          <div key={question.id} className="flex items-start space-x-2 p-3 border rounded hover:bg-muted/50">
-                            <Checkbox
-                              id={`q-${question.id}`}
-                              checked={newExam.selectedQuestionIds.includes(question.id)}
-                              onCheckedChange={() => toggleQuestionSelection(question.id)}
-                            />
-                            <Label htmlFor={`q-${question.id}`} className="cursor-pointer flex-1 font-normal">
-                              <div className="space-y-1">
-                                <p className="line-clamp-2">{question.question_text}</p>
-                                <div className="flex gap-2 text-xs text-muted-foreground">
-                                  <Badge variant="outline" className="text-xs">{question.subjects?.name}</Badge>
-                                  <Badge variant="outline" className="text-xs">{question.type}</Badge>
-                                </div>
-                              </div>
-                            </Label>
-                          </div>
-                        ))}
-                        {availableQuestions.length === 0 && (
-                          <p className="text-center text-muted-foreground py-8">
-                            No questions found for selected subjects
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Upload Questions */}
-                  {newExam.questionSelectionMode === 'upload' && (
-                    <div className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <Label>Upload Questions</Label>
-                        <Badge variant="secondary">{uploadedQuestions.length} questions ready</Badge>
-                      </div>
-
-                      {/* Question Upload Form */}
-                      <Card className="mb-4">
-                        <CardContent className="pt-6 space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label>Question Type</Label>
-                              <Select 
-                                value={currentQuestion.type} 
-                                onValueChange={(value: any) => setCurrentQuestion({...currentQuestion, type: value})}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="MCQ_SINGLE">Multiple Choice</SelectItem>
-                                  <SelectItem value="TRUE_FALSE">True/False</SelectItem>
-                                  <SelectItem value="ESSAY">Essay</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label>Subject</Label>
-                              <Select 
-                                value={currentQuestion.subject_id} 
-                                onValueChange={(value) => setCurrentQuestion({...currentQuestion, subject_id: value})}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {subjects.filter(s => newExam.selectedSubjects.includes(s.id)).map((subject) => (
-                                    <SelectItem key={subject.id} value={subject.id}>
-                                      {subject.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-
-                          <div>
-                            <Label>Question Text *</Label>
-                            <Textarea
-                              value={currentQuestion.question_text}
-                              onChange={(e) => setCurrentQuestion({...currentQuestion, question_text: e.target.value})}
-                              placeholder="Enter question..."
-                              rows={3}
-                            />
-                          </div>
-
-                          {currentQuestion.type === 'MCQ_SINGLE' && (
-                            <>
-                              <div className="space-y-2">
-                                <Label>Options</Label>
-                                {currentQuestion.options.map((option, index) => (
-                                  <Input
-                                    key={index}
-                                    value={option.text}
-                                    onChange={(e) => updateOption(index, e.target.value)}
-                                    placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                                  />
-                                ))}
-                              </div>
-                              <div>
-                                <Label>Correct Answer</Label>
-                                <Select 
-                                  value={currentQuestion.correct_answer} 
-                                  onValueChange={(value) => setCurrentQuestion({...currentQuestion, correct_answer: value})}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {currentQuestion.options.map((_, index) => (
-                                      <SelectItem key={index} value={String(index)}>
-                                        Option {String.fromCharCode(65 + index)}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </>
-                          )}
-
-                          {currentQuestion.type === 'TRUE_FALSE' && (
-                            <div>
-                              <Label>Correct Answer</Label>
-                              <Select 
-                                value={currentQuestion.correct_answer} 
-                                onValueChange={(value) => setCurrentQuestion({...currentQuestion, correct_answer: value})}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="0">True</SelectItem>
-                                  <SelectItem value="1">False</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
-
-                          <div>
-                            <Label>Explanation (Optional)</Label>
-                            <Textarea
-                              value={currentQuestion.explanation}
-                              onChange={(e) => setCurrentQuestion({...currentQuestion, explanation: e.target.value})}
-                              placeholder="Explain the answer..."
-                              rows={2}
-                            />
-                          </div>
-
-                          <Button onClick={addQuestionToList} className="w-full">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Question
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      {uploadedQuestions.slice(0, 10).map((q, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-sm p-1.5 bg-muted/50 rounded">
+                          <span className="truncate flex-1 mr-2">{idx + 1}. {q.question_text}</span>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => {
+                            setUploadedQuestions(prev => prev.filter((_, i) => i !== idx));
+                          }}>
+                            <Trash2 className="w-3 h-3" />
                           </Button>
-                        </CardContent>
-                      </Card>
-
-                      {/* Uploaded Questions List */}
-                      {uploadedQuestions.length > 0 && (
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
-                          <Label>Questions to Upload ({uploadedQuestions.length})</Label>
-                          {uploadedQuestions.map((q, idx) => (
-                            <Card key={idx} className="p-3">
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex-1">
-                                  <p className="text-sm line-clamp-2">{q.question_text}</p>
-                                  <div className="flex gap-2 mt-1">
-                                    <Badge variant="outline" className="text-xs">
-                                      {subjects.find(s => s.id === q.subject_id)?.name}
-                                    </Badge>
-                                    <Badge variant="outline" className="text-xs">{q.type}</Badge>
-                                  </div>
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setUploadedQuestions(uploadedQuestions.filter((_, i) => i !== idx))}
-                                >
-                                  <Trash2 className="w-4 h-4 text-destructive" />
-                                </Button>
-                              </div>
-                            </Card>
-                          ))}
                         </div>
+                      ))}
+                      {uploadedQuestions.length > 10 && (
+                        <p className="text-xs text-muted-foreground text-center">
+                          ...and {uploadedQuestions.length - 10} more
+                        </p>
                       )}
                     </div>
-                  )}
-                </div>
-              )}
+                  </div>
+                )}
 
-              {/* Student Assignment */}
-              <div className="space-y-3">
-                <Label>Assign Exam To</Label>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="assignToAll"
-                    checked={newExam.assignToAll}
-                    onCheckedChange={(checked) => setNewExam({...newExam, assignToAll: !!checked})}
-                  />
-                  <Label htmlFor="assignToAll" className="cursor-pointer font-normal">
-                    All Students
-                  </Label>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
+                  <Button
+                    className="flex-1"
+                    onClick={() => {
+                      if (totalQuestionsCount === 0) return toast.error('Add at least one question');
+                      setStep(3);
+                    }}
+                  >
+                    Next: Assign to Students
+                  </Button>
                 </div>
-                
-                {!newExam.assignToAll && students.length > 0 && (
-                  <div className="border rounded-lg p-3 max-h-48 overflow-y-auto">
-                    <div className="space-y-2">
+              </div>
+            )}
+
+            {/* STEP 3: Assign */}
+            {step === 3 && (
+              <div className="space-y-4">
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <h4 className="font-medium mb-2">Exam Summary</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <span className="text-muted-foreground">Title:</span>
+                    <span className="font-medium">{examForm.title}</span>
+                    <span className="text-muted-foreground">Duration:</span>
+                    <span>{examForm.duration_minutes} minutes</span>
+                    <span className="text-muted-foreground">Questions:</span>
+                    <span>{totalQuestionsCount}</span>
+                    <span className="text-muted-foreground">Subjects:</span>
+                    <span>{examForm.selectedSubjects.length}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Label>Assign To</Label>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="assignAll"
+                      checked={examForm.assignToAll}
+                      onCheckedChange={checked => setExamForm({...examForm, assignToAll: !!checked})}
+                    />
+                    <Label htmlFor="assignAll" className="cursor-pointer font-normal">
+                      All Students ({students.length})
+                    </Label>
+                  </div>
+
+                  {!examForm.assignToAll && (
+                    <div className="border rounded-lg p-3 max-h-40 overflow-y-auto">
                       {students.map((student: any) => (
-                        <div key={student.id} className="flex items-center space-x-2">
+                        <div key={student.id} className="flex items-center space-x-2 py-1">
                           <Checkbox
-                            id={`student-${student.id}`}
-                            checked={newExam.selectedStudents.includes(student.id)}
+                            id={`stu-${student.id}`}
+                            checked={examForm.selectedStudents.includes(student.id)}
                             onCheckedChange={() => toggleStudent(student.id)}
                           />
-                          <Label htmlFor={`student-${student.id}`} className="cursor-pointer font-normal">
+                          <Label htmlFor={`stu-${student.id}`} className="cursor-pointer font-normal text-sm">
                             {student.first_name} {student.last_name}
                           </Label>
                         </div>
                       ))}
                     </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Start Date (optional)</Label>
+                    <Input
+                      type="datetime-local"
+                      value={examForm.startDate}
+                      onChange={e => setExamForm({...examForm, startDate: e.target.value})}
+                    />
                   </div>
-                )}
-              </div>
-
-              {/* Scheduling */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="startDate">Start Date</Label>
-                  <Input
-                    id="startDate"
-                    type="datetime-local"
-                    value={newExam.startDate}
-                    onChange={(e) => setNewExam({...newExam, startDate: e.target.value})}
-                  />
+                  <div>
+                    <Label>End Date (optional)</Label>
+                    <Input
+                      type="datetime-local"
+                      value={examForm.endDate}
+                      onChange={e => setExamForm({...examForm, endDate: e.target.value})}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="endDate">End Date</Label>
-                  <Input
-                    id="endDate"
-                    type="datetime-local"
-                    value={newExam.endDate}
-                    onChange={(e) => setNewExam({...newExam, endDate: e.target.value})}
-                  />
+
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    The exam will be created as <strong>unpublished</strong>. You can publish it later to make it visible to students.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
+                  <Button className="flex-1" onClick={handleCreateExam} disabled={loading}>
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    {loading ? 'Creating...' : 'Create Exam'}
+                  </Button>
                 </div>
               </div>
-
-              {/* Instructions */}
-              <div>
-                <Label htmlFor="instructions">Instructions</Label>
-                <Textarea
-                  id="instructions"
-                  value={newExam.instructions}
-                  onChange={(e) => setNewExam({...newExam, instructions: e.target.value})}
-                  placeholder="Exam instructions..."
-                  rows={3}
-                />
-              </div>
-
-              {/* Publish */}
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="published"
-                  checked={newExam.is_published}
-                  onCheckedChange={(checked) => setNewExam({...newExam, is_published: !!checked})}
-                />
-                <Label htmlFor="published" className="cursor-pointer font-normal">
-                  Publish immediately
-                </Label>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3 pt-4">
-                <Button onClick={handleCreateExam} disabled={loading} className="flex-1">
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  {loading ? 'Creating...' : 'Create Exam'}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setIsCreateModalOpen(false);
-                    resetForm();
-                  }} 
-                  disabled={loading}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Stats Cards - keep existing */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Existing Exams List */}
+      {loading && exams.length === 0 ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </div>
+      ) : exams.length === 0 ? (
         <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Total Exams</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{exams.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Published</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{exams.filter(e => e.is_published).length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Drafts</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{exams.filter(e => !e.is_published).length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Total Students</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{students.length}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Exams List - keep existing list rendering */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Exams</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {exams.length === 0 ? (
+          <CardContent className="pt-6">
             <div className="text-center py-12">
-              <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No exams created yet</p>
+              <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="font-semibold text-lg mb-2">No Exams Yet</h3>
+              <p className="text-muted-foreground mb-4">
+                Create your first exam to get started. You can upload questions via CSV or add them manually.
+              </p>
+              <Button onClick={() => setIsCreateModalOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" /> Create First Exam
+              </Button>
             </div>
-          ) : (
-            <Tabs defaultValue="all" className="w-full">
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="published">Published</TabsTrigger>
-                <TabsTrigger value="drafts">Drafts</TabsTrigger>
-              </TabsList>
-              <TabsContent value="all" className="space-y-4 mt-4">
-                {exams.map((exam) => (
-                  <Card key={exam.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold">{exam.title}</h3>
-                            <Badge variant={exam.is_published ? "default" : "secondary"}>
-                              {exam.is_published ? "Published" : "Draft"}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{exam.description}</p>
-                          <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {exam.duration_minutes}min
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <FileText className="w-3 h-3" />
-                              {exam.total_questions} questions
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => togglePublishStatus(exam.id, exam.is_published)}
-                          >
-                            {exam.is_published ? 'Unpublish' : 'Publish'}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteExam(exam.id)}
-                          >
-                            <Trash2 className="w-4 h-4 text-destructive" />
-                          </Button>
-                        </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {exams.map(exam => {
+            const results = examResults[exam.id] || [];
+            const completedCount = results.filter(r => r.results && r.results.length > 0).length;
+            const avgScore = completedCount > 0
+              ? Math.round(results.reduce((sum, r) => sum + (r.results?.[0]?.percentage || 0), 0) / completedCount)
+              : 0;
+
+            return (
+              <Card key={exam.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <CardTitle className="text-lg">{exam.title}</CardTitle>
+                        <Badge variant={exam.is_published ? 'default' : 'secondary'}>
+                          {exam.is_published ? 'Published' : 'Draft'}
+                        </Badge>
+                        <Badge variant="outline">{exam.type}</Badge>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </TabsContent>
-              <TabsContent value="published" className="space-y-4 mt-4">
-                {exams.filter(e => e.is_published).map((exam) => (
-                  <Card key={exam.id}>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold">{exam.title}</h3>
-                      <p className="text-sm text-muted-foreground">{exam.description}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </TabsContent>
-              <TabsContent value="drafts" className="space-y-4 mt-4">
-                {exams.filter(e => !e.is_published).map((exam) => (
-                  <Card key={exam.id}>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold">{exam.title}</h3>
-                      <p className="text-sm text-muted-foreground">{exam.description}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </TabsContent>
-            </Tabs>
-          )}
-        </CardContent>
-      </Card>
+                      {exam.description && (
+                        <CardDescription>{exam.description}</CardDescription>
+                      )}
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => togglePublish(exam.id, exam.is_published)}
+                      >
+                        {exam.is_published ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteExam(exam.id)}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <Clock className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-sm font-medium">{exam.duration_minutes} min</p>
+                      <p className="text-xs text-muted-foreground">Duration</p>
+                    </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <FileText className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-sm font-medium">{exam.total_questions || 0}</p>
+                      <p className="text-xs text-muted-foreground">Questions</p>
+                    </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <Users className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-sm font-medium">{completedCount}</p>
+                      <p className="text-xs text-muted-foreground">Submissions</p>
+                    </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <CheckCircle2 className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-sm font-medium">{avgScore}%</p>
+                      <p className="text-xs text-muted-foreground">Avg Score</p>
+                    </div>
+                  </div>
+
+                  {exam.exam_subjects && exam.exam_subjects.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {exam.exam_subjects.map((es: any) => (
+                        <Badge key={es.id} variant="outline">
+                          {es.subject_name} ({es.question_count}q)
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Results table */}
+                  {results.length > 0 && (
+                    <div className="border rounded-lg overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted/50">
+                          <tr>
+                            <th className="text-left p-2 font-medium">Student</th>
+                            <th className="text-center p-2 font-medium">Score</th>
+                            <th className="text-center p-2 font-medium">Percentage</th>
+                            <th className="text-center p-2 font-medium">Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {results.map(attempt => (
+                            <tr key={attempt.id} className="border-t">
+                              <td className="p-2">
+                                {attempt.users?.first_name} {attempt.users?.last_name}
+                              </td>
+                              <td className="p-2 text-center">
+                                {attempt.results?.[0]?.raw_score ?? '-'}/{attempt.results?.[0]?.total_questions ?? '-'}
+                              </td>
+                              <td className="p-2 text-center">
+                                <Badge variant={
+                                  (attempt.results?.[0]?.percentage ?? 0) >= 50 ? 'default' : 'destructive'
+                                }>
+                                  {Math.round(attempt.results?.[0]?.percentage ?? 0)}%
+                                </Badge>
+                              </td>
+                              <td className="p-2 text-center text-muted-foreground">
+                                {attempt.submitted_at ? new Date(attempt.submitted_at).toLocaleDateString() : '-'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
