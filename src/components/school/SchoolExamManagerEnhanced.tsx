@@ -9,9 +9,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Progress } from '@/components/ui/progress';
 import { 
-  BookOpen, Plus, Clock, Users, Trash2, Calendar, FileText, Upload, 
-  CheckCircle2, Download, AlertCircle, Eye, Play, Pause, FileSpreadsheet
+  BookOpen, Plus, Clock, Users, Trash2, FileText, Upload, 
+  CheckCircle2, Download, AlertCircle, Play, Pause, FileSpreadsheet,
+  Copy, Sparkles, Loader2
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,7 +42,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [step, setStep] = useState(1); // 1: Details, 2: Questions, 3: Assign
+  const [step, setStep] = useState(1);
   const [examResults, setExamResults] = useState<Record<string, any[]>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -53,15 +56,20 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
     selectedSubjects: [] as string[],
     assignToAll: true,
     selectedStudents: [] as string[],
+    selectedClasses: [] as string[],
     startDate: '',
     endDate: '',
+    publishImmediately: true,
   });
 
   // Question management state
-  const [questionTab, setQuestionTab] = useState<'upload' | 'manual' | 'bank'>('upload');
+  const [questionTab, setQuestionTab] = useState<'text' | 'csv' | 'manual' | 'bank'>('text');
   const [uploadedQuestions, setUploadedQuestions] = useState<ParsedQuestion[]>([]);
   const [bankQuestions, setBankQuestions] = useState<any[]>([]);
   const [selectedBankQuestionIds, setSelectedBankQuestionIds] = useState<string[]>([]);
+  const [questionsText, setQuestionsText] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [manualQuestion, setManualQuestion] = useState({
     question_text: '',
     subject_id: '',
@@ -69,6 +77,9 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
     correct_answer: '0',
     explanation: '',
   });
+
+  // Get unique class levels from students
+  const classLevels = [...new Set(students.map((s: any) => s.class_level).filter(Boolean))];
 
   useEffect(() => {
     if (schoolId) fetchData();
@@ -90,7 +101,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
           .order('name'),
         supabase
           .from('school_students')
-          .select('user_id, users(id, first_name, last_name, email)')
+          .select('user_id, full_name, class_level')
           .eq('school_id', schoolId)
           .eq('is_active', true)
       ]);
@@ -98,9 +109,8 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
       const examsList = examsResp.data || [];
       setExams(examsList);
       setSubjects(subjectsResp.data || []);
-      setStudents(studentsResp.data?.map(s => s.users).filter(Boolean) || []);
+      setStudents(studentsResp.data || []);
 
-      // Fetch results for each exam
       for (const exam of examsList) {
         fetchExamResults(exam.id);
       }
@@ -119,7 +129,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
         .select(`
           id, user_id, status, submitted_at,
           users(first_name, last_name),
-          results(raw_score, total_questions, percentage)
+          results(raw_score, total_questions, percentage, subject_breakdown)
         `)
         .eq('exam_id', examId)
         .in('status', ['SUBMITTED', 'GRADED']);
@@ -132,7 +142,96 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
     }
   };
 
-  // CSV Parsing
+  // ===== TEXT FORMAT PARSING (like admin SimpleBulkUpload) =====
+  const parseQuestionsText = (text: string): any[] => {
+    const lines = text.trim().split('\n').filter(line => line.trim());
+    const questions: any[] = [];
+    let currentQuestion: any = null;
+
+    for (let line of lines) {
+      line = line.trim();
+
+      if (line.match(/^\d+[.)]\s*/) || (line.includes('?') && !currentQuestion) || (!currentQuestion && line.length > 10)) {
+        if (currentQuestion && currentQuestion.question_text && currentQuestion.options.length >= 4) {
+          questions.push(currentQuestion);
+        }
+        currentQuestion = {
+          question_text: line.replace(/^\d+[.)]\s*/, '').trim(),
+          options: [],
+          correct_answer: null,
+          explanation: null,
+        };
+      } else if (line.match(/^[A-E][.)]\s*/)) {
+        if (currentQuestion) {
+          currentQuestion.options.push(line.replace(/^[A-E][.)]\s*/, '').trim());
+        }
+      } else if (line.toLowerCase().includes('answer:') || line.toLowerCase().includes('correct:')) {
+        if (currentQuestion) {
+          const answerPart = line.split(/(?:answer:|correct:)\s*/i)[1]?.trim();
+          if (answerPart) {
+            const match = answerPart.match(/^(?:option\s+)?([A-E])[\s.)\]:]?/i);
+            if (match && match[1]) {
+              currentQuestion.correct_answer = match[1].toUpperCase();
+            }
+          }
+        }
+      } else if (line.toLowerCase().includes('explanation:')) {
+        if (currentQuestion) {
+          currentQuestion.explanation = line.replace(/explanation:\s*/i, '').trim();
+        }
+      } else if (currentQuestion && line.length > 0) {
+        if (currentQuestion.options.length === 0) {
+          currentQuestion.question_text += ' ' + line;
+        }
+      }
+    }
+
+    if (currentQuestion && currentQuestion.question_text && currentQuestion.options.length >= 4) {
+      questions.push(currentQuestion);
+    }
+
+    return questions;
+  };
+
+  const handleTextUpload = () => {
+    if (!questionsText.trim()) {
+      toast.error('Please paste some questions');
+      return;
+    }
+
+    const subjectId = examForm.selectedSubjects[0] || '';
+    if (!subjectId) {
+      toast.error('Please select at least one subject in Step 1');
+      return;
+    }
+
+    const parsed = parseQuestionsText(questionsText);
+    if (parsed.length === 0) {
+      toast.error('No valid questions found. Use the template format.');
+      return;
+    }
+
+    const converted: ParsedQuestion[] = parsed.map(q => {
+      const correctIndex = q.correct_answer ? ['A', 'B', 'C', 'D', 'E'].indexOf(q.correct_answer) : 0;
+      return {
+        question_text: q.question_text,
+        type: 'MCQ_SINGLE' as const,
+        subject_id: subjectId,
+        options: q.options,
+        correct_answer: String(correctIndex >= 0 ? correctIndex : 0),
+        explanation: q.explanation || '',
+        difficulty_level: 1,
+        points: 1,
+        time_limit_seconds: 90,
+      };
+    });
+
+    setUploadedQuestions(prev => [...prev, ...converted]);
+    setQuestionsText('');
+    toast.success(`${converted.length} questions parsed successfully`);
+  };
+
+  // ===== CSV PARSING =====
   const parseCSV = (text: string): string[][] => {
     const rows: string[][] = [];
     let currentRow: string[] = [];
@@ -169,10 +268,8 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
         }
       }
     }
-    // Last field
     currentRow.push(currentField.trim());
     if (currentRow.some(f => f)) rows.push(currentRow);
-
     return rows;
   };
 
@@ -196,10 +293,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
           return;
         }
 
-        // Dynamic header mapping (case-insensitive)
         const headers = rows[0].map(h => h.toLowerCase().trim());
-        const colMap: Record<string, number> = {};
-        
         const findCol = (names: string[]) => {
           for (const name of names) {
             const idx = headers.findIndex(h => h.includes(name));
@@ -208,6 +302,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
           return -1;
         };
 
+        const colMap: Record<string, number> = {};
         colMap.subject = findCol(['subject']);
         colMap.question = findCol(['question']);
         colMap.optionA = findCol(['option a', 'option_a', 'a)']);
@@ -217,25 +312,15 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
         colMap.answer = findCol(['correct', 'answer']);
         colMap.explanation = findCol(['explanation', 'explain']);
 
-        if (colMap.question === -1) {
-          toast.error('CSV must have a "Question" column');
-          return;
-        }
-        if (colMap.optionA === -1 || colMap.optionB === -1) {
-          toast.error('CSV must have at least "Option A" and "Option B" columns');
-          return;
-        }
+        if (colMap.question === -1) { toast.error('CSV must have a "Question" column'); return; }
+        if (colMap.optionA === -1 || colMap.optionB === -1) { toast.error('CSV must have "Option A" and "Option B" columns'); return; }
 
         const parsed: ParsedQuestion[] = [];
-        const errors: string[] = [];
 
         for (let i = 1; i < rows.length; i++) {
           const row = rows[i];
           const questionText = row[colMap.question] || '';
-          if (!questionText) {
-            errors.push(`Row ${i + 1}: Missing question text`);
-            continue;
-          }
+          if (!questionText) continue;
 
           const options = [
             row[colMap.optionA] || '',
@@ -244,12 +329,8 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
             colMap.optionD !== -1 ? (row[colMap.optionD] || '') : '',
           ].filter(Boolean);
 
-          if (options.length < 2) {
-            errors.push(`Row ${i + 1}: Need at least 2 options`);
-            continue;
-          }
+          if (options.length < 2) continue;
 
-          // Match correct answer
           let correctAnswer = '0';
           if (colMap.answer !== -1) {
             const rawAnswer = (row[colMap.answer] || '').trim().toUpperCase();
@@ -257,14 +338,8 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
             else if (rawAnswer === 'B' || rawAnswer === '2') correctAnswer = '1';
             else if (rawAnswer === 'C' || rawAnswer === '3') correctAnswer = '2';
             else if (rawAnswer === 'D' || rawAnswer === '4') correctAnswer = '3';
-            else {
-              // Try matching answer text
-              const ansIdx = options.findIndex(o => o.toLowerCase() === rawAnswer.toLowerCase());
-              if (ansIdx !== -1) correctAnswer = String(ansIdx);
-            }
           }
 
-          // Match subject
           let subjectId = examForm.selectedSubjects[0] || '';
           if (colMap.subject !== -1) {
             const subjectName = (row[colMap.subject] || '').trim().toLowerCase();
@@ -285,17 +360,10 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
           });
         }
 
-        if (errors.length > 0 && parsed.length === 0) {
-          toast.error(`Failed to parse CSV: ${errors.slice(0, 3).join('; ')}`);
-          return;
-        }
-
         setUploadedQuestions(prev => [...prev, ...parsed]);
-        toast.success(`${parsed.length} questions parsed from CSV${errors.length > 0 ? `. ${errors.length} rows skipped.` : ''}`);
-        
+        toast.success(`${parsed.length} questions parsed from CSV`);
         if (fileInputRef.current) fileInputRef.current.value = '';
       } catch (error) {
-        console.error('CSV parse error:', error);
         toast.error('Failed to parse CSV file');
       }
     };
@@ -338,14 +406,6 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
   const fetchBankQuestions = async () => {
     if (examForm.selectedSubjects.length === 0) return;
     try {
-      const { data, error } = await supabase.functions.invoke('school-bulk-questions', {
-        body: { action: 'get_school_questions' }
-      });
-      if (error) throw error;
-      setBankQuestions(data?.questions || []);
-    } catch (error) {
-      console.error('Error fetching bank questions:', error);
-      // Fallback: try direct query
       const { data } = await supabase
         .from('questions')
         .select('id, question_text, type, options, subject_id, difficulty_level, subjects(name)')
@@ -354,6 +414,8 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
         .order('created_at', { ascending: false })
         .limit(200);
       setBankQuestions(data || []);
+    } catch (error) {
+      console.error('Error fetching bank questions:', error);
     }
   };
 
@@ -366,6 +428,8 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
       }
 
       setLoading(true);
+      setIsUploading(true);
+      setUploadProgress(10);
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -378,6 +442,8 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
 
       if (!userData) throw new Error('User not found');
 
+      setUploadProgress(20);
+
       // Step 1: Create the exam
       const { data: exam, error: examError } = await supabase
         .from('exams')
@@ -388,7 +454,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
           duration_minutes: examForm.duration_minutes,
           total_questions: totalQuestions,
           instructions: examForm.instructions,
-          is_published: false,
+          is_published: examForm.publishImmediately,
           school_id: schoolId,
           created_by: userData.id,
           requires_subscription: false,
@@ -397,6 +463,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
         .single();
 
       if (examError) throw examError;
+      setUploadProgress(40);
 
       // Step 2: Upload new questions via edge function
       let allQuestionIds: string[] = [...selectedBankQuestionIds];
@@ -416,16 +483,20 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
         }
       }
 
+      setUploadProgress(60);
+
       // Step 3: Link existing bank questions to exam
       if (selectedBankQuestionIds.length > 0) {
         await supabase.functions.invoke('school-bulk-questions', {
           body: {
             action: 'link_questions_to_exam',
             exam_id: exam.id,
-            question_ids: allQuestionIds,
+            question_ids: selectedBankQuestionIds,
           }
         });
       }
+
+      setUploadProgress(75);
 
       // Step 4: Create exam subjects
       const subjectQuestionCounts: Record<string, number> = {};
@@ -434,9 +505,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
       });
       selectedBankQuestionIds.forEach(qid => {
         const q = bankQuestions.find(bq => bq.id === qid);
-        if (q) {
-          subjectQuestionCounts[q.subject_id] = (subjectQuestionCounts[q.subject_id] || 0) + 1;
-        }
+        if (q) subjectQuestionCounts[q.subject_id] = (subjectQuestionCounts[q.subject_id] || 0) + 1;
       });
 
       const examSubjects = Object.entries(subjectQuestionCounts).map(([subjectId, count], index) => {
@@ -454,8 +523,10 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
         await supabase.from('exam_subjects').insert(examSubjects);
       }
 
+      setUploadProgress(90);
+
       // Step 5: Create assignments
-      const assignments = [];
+      const assignments: any[] = [];
       if (examForm.assignToAll) {
         assignments.push({
           exam_id: exam.id,
@@ -465,23 +536,45 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
           end_date: examForm.endDate || null,
           created_by: userData.id,
         });
-      } else {
-        examForm.selectedStudents.forEach(studentId => {
+      } else if (examForm.selectedClasses.length > 0) {
+        // Assign by class - create assignment for each student in the selected classes
+        const classStudents = students.filter((s: any) => examForm.selectedClasses.includes(s.class_level));
+        for (const student of classStudents) {
           assignments.push({
             exam_id: exam.id,
             school_id: schoolId,
-            student_id: studentId,
+            student_id: student.user_id,
             assigned_to_all: false,
             start_date: examForm.startDate || null,
             end_date: examForm.endDate || null,
             created_by: userData.id,
           });
-        });
+        }
+      } else {
+        for (const studentUserId of examForm.selectedStudents) {
+          assignments.push({
+            exam_id: exam.id,
+            school_id: schoolId,
+            student_id: studentUserId,
+            assigned_to_all: false,
+            start_date: examForm.startDate || null,
+            end_date: examForm.endDate || null,
+            created_by: userData.id,
+          });
+        }
       }
 
-      await supabase.from('school_exam_assignments').insert(assignments);
+      if (assignments.length > 0) {
+        const { error: assignError } = await supabase.from('school_exam_assignments').insert(assignments);
+        if (assignError) {
+          console.error('Assignment error:', assignError);
+          toast.error('Exam created but assignment failed: ' + assignError.message);
+        }
+      }
 
-      toast.success(`Exam created with ${totalQuestions} questions!`);
+      setUploadProgress(100);
+
+      toast.success(`Exam created with ${totalQuestions} questions!${examForm.publishImmediately ? ' Students can see it now.' : ' Remember to publish it.'}`);
       setIsCreateModalOpen(false);
       resetForm();
       fetchData();
@@ -491,26 +584,23 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
       toast.error(error.message || 'Failed to create exam');
     } finally {
       setLoading(false);
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
   const resetForm = () => {
     setExamForm({
-      title: '',
-      description: '',
-      type: 'CUSTOM',
-      duration_minutes: 60,
-      instructions: '',
-      selectedSubjects: [],
-      assignToAll: true,
-      selectedStudents: [],
-      startDate: '',
-      endDate: '',
+      title: '', description: '', type: 'CUSTOM', duration_minutes: 60,
+      instructions: '', selectedSubjects: [], assignToAll: true,
+      selectedStudents: [], selectedClasses: [], startDate: '', endDate: '',
+      publishImmediately: true,
     });
     setUploadedQuestions([]);
     setSelectedBankQuestionIds([]);
     setStep(1);
-    setQuestionTab('upload');
+    setQuestionTab('text');
+    setQuestionsText('');
   };
 
   const toggleSubject = (subjectId: string) => {
@@ -522,12 +612,21 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
     }));
   };
 
-  const toggleStudent = (studentId: string) => {
+  const toggleStudent = (userId: string) => {
     setExamForm(prev => ({
       ...prev,
-      selectedStudents: prev.selectedStudents.includes(studentId)
-        ? prev.selectedStudents.filter(id => id !== studentId)
-        : [...prev.selectedStudents, studentId]
+      selectedStudents: prev.selectedStudents.includes(userId)
+        ? prev.selectedStudents.filter(id => id !== userId)
+        : [...prev.selectedStudents, userId]
+    }));
+  };
+
+  const toggleClass = (className: string) => {
+    setExamForm(prev => ({
+      ...prev,
+      selectedClasses: prev.selectedClasses.includes(className)
+        ? prev.selectedClasses.filter(c => c !== className)
+        : [...prev.selectedClasses, className]
     }));
   };
 
@@ -545,7 +644,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
   const togglePublish = async (examId: string, currentStatus: boolean) => {
     try {
       await supabase.from('exams').update({ is_published: !currentStatus }).eq('id', examId);
-      toast.success(`Exam ${!currentStatus ? 'published' : 'unpublished'}`);
+      toast.success(`Exam ${!currentStatus ? 'published — students can now see it' : 'unpublished'}`);
       fetchData();
     } catch (error: any) {
       toast.error('Failed to update exam');
@@ -561,6 +660,28 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
     a.download = 'question_template.csv';
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const copyTextTemplate = () => {
+    const template = `1. What is the chemical formula for water?
+A) H2O2
+B) H2O
+C) HO2
+D) OH2
+Answer: B
+Explanation: Water is made up of 2 hydrogen atoms and 1 oxygen atom.
+
+2. Who is the first president of Nigeria?
+A) Obafemi Awolowo
+B) Nnamdi Azikiwe
+C) Tafawa Balewa
+D) Yakubu Gowon
+Answer: B
+Explanation: Dr. Nnamdi Azikiwe was the first President of Nigeria.`;
+
+    navigator.clipboard.writeText(template).then(() => {
+      toast.success('Template copied to clipboard');
+    });
   };
 
   const totalQuestionsCount = uploadedQuestions.length + selectedBankQuestionIds.length;
@@ -598,7 +719,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                     {step > s ? <CheckCircle2 className="w-4 h-4" /> : s}
                   </div>
                   <span className="text-xs text-muted-foreground hidden sm:inline">
-                    {s === 1 ? 'Details' : s === 2 ? 'Questions' : 'Assign'}
+                    {s === 1 ? 'Details' : s === 2 ? 'Questions' : 'Assign & Publish'}
                   </span>
                   {s < 3 && <div className={`w-8 h-0.5 ${step > s ? 'bg-primary' : 'bg-muted'}`} />}
                 </div>
@@ -696,20 +817,48 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                 </div>
 
                 <Tabs value={questionTab} onValueChange={(v: any) => setQuestionTab(v)}>
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="upload">
-                      <Upload className="w-3 h-3 mr-1" /> CSV Upload
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="text">
+                      <Sparkles className="w-3 h-3 mr-1" /> Text
+                    </TabsTrigger>
+                    <TabsTrigger value="csv">
+                      <FileSpreadsheet className="w-3 h-3 mr-1" /> CSV
                     </TabsTrigger>
                     <TabsTrigger value="manual">
                       <Plus className="w-3 h-3 mr-1" /> Manual
                     </TabsTrigger>
                     <TabsTrigger value="bank">
-                      <BookOpen className="w-3 h-3 mr-1" /> Question Bank
+                      <BookOpen className="w-3 h-3 mr-1" /> Bank
                     </TabsTrigger>
                   </TabsList>
 
+                  {/* Text Format Upload (like admin) */}
+                  <TabsContent value="text" className="space-y-4">
+                    <Alert>
+                      <Sparkles className="h-4 w-4" />
+                      <AlertDescription>
+                        Paste questions in standard WAEC/JAMB format. The system will auto-detect questions, options, answers and explanations.
+                      </AlertDescription>
+                    </Alert>
+
+                    <Button variant="outline" size="sm" onClick={copyTextTemplate} className="w-full">
+                      <Copy className="w-3 h-3 mr-2" /> Copy Sample Template
+                    </Button>
+
+                    <Textarea
+                      value={questionsText}
+                      onChange={e => setQuestionsText(e.target.value)}
+                      placeholder={`Paste questions here in this format:\n\n1. What is 2 + 2?\nA) 3\nB) 4\nC) 5\nD) 6\nAnswer: B\nExplanation: 2 + 2 = 4`}
+                      className="min-h-[200px] font-mono text-sm"
+                    />
+
+                    <Button onClick={handleTextUpload} className="w-full">
+                      <Upload className="w-4 h-4 mr-2" /> Parse & Add Questions
+                    </Button>
+                  </TabsContent>
+
                   {/* CSV Upload */}
-                  <TabsContent value="upload" className="space-y-4">
+                  <TabsContent value="csv" className="space-y-4">
                     <Alert>
                       <FileSpreadsheet className="h-4 w-4" />
                       <AlertDescription>
@@ -719,20 +868,12 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
 
                     <div className="flex gap-2">
                       <Button variant="outline" onClick={downloadCSVTemplate} className="flex-1">
-                        <Download className="w-4 h-4 mr-2" />
-                        Download Template
+                        <Download className="w-4 h-4 mr-2" /> Download Template
                       </Button>
                       <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="flex-1">
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload CSV
+                        <Upload className="w-4 h-4 mr-2" /> Upload CSV
                       </Button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".csv,.txt"
-                        onChange={handleCSVUpload}
-                        className="hidden"
-                      />
+                      <input ref={fileInputRef} type="file" accept=".csv,.txt" onChange={handleCSVUpload} className="hidden" />
                     </div>
                   </TabsContent>
 
@@ -801,9 +942,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                   {/* Question Bank */}
                   <TabsContent value="bank" className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">
-                        {bankQuestions.length} questions available
-                      </p>
+                      <p className="text-sm text-muted-foreground">{bankQuestions.length} questions available</p>
                       <Badge variant="secondary">{selectedBankQuestionIds.length} selected</Badge>
                     </div>
                     <div className="max-h-64 overflow-y-auto space-y-2 border rounded-lg p-3">
@@ -823,9 +962,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                           />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm line-clamp-2">{q.question_text}</p>
-                            <Badge variant="outline" className="text-xs mt-1">
-                              {q.subjects?.name || 'Unknown'}
-                            </Badge>
+                            <Badge variant="outline" className="text-xs mt-1">{q.subjects?.name || 'Unknown'}</Badge>
                           </div>
                         </div>
                       ))}
@@ -838,9 +975,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                   <div className="border rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
                       <Label className="text-sm">Queued Questions ({uploadedQuestions.length})</Label>
-                      <Button variant="ghost" size="sm" onClick={() => setUploadedQuestions([])}>
-                        Clear All
-                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setUploadedQuestions([])}>Clear All</Button>
                     </div>
                     <div className="max-h-32 overflow-y-auto space-y-1">
                       {uploadedQuestions.slice(0, 10).map((q, idx) => (
@@ -871,13 +1006,13 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                       setStep(3);
                     }}
                   >
-                    Next: Assign to Students
+                    Next: Assign & Publish
                   </Button>
                 </div>
               </div>
             )}
 
-            {/* STEP 3: Assign */}
+            {/* STEP 3: Assign & Publish */}
             {step === 3 && (
               <div className="space-y-4">
                 <div className="p-4 bg-muted/50 rounded-lg">
@@ -894,13 +1029,20 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                   </div>
                 </div>
 
+                {/* Assignment method */}
                 <div className="space-y-3">
-                  <Label>Assign To</Label>
+                  <Label className="font-medium">Assign To</Label>
+                  
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="assignAll"
                       checked={examForm.assignToAll}
-                      onCheckedChange={checked => setExamForm({...examForm, assignToAll: !!checked})}
+                      onCheckedChange={checked => setExamForm({
+                        ...examForm,
+                        assignToAll: !!checked,
+                        selectedStudents: [],
+                        selectedClasses: [],
+                      })}
                     />
                     <Label htmlFor="assignAll" className="cursor-pointer font-normal">
                       All Students ({students.length})
@@ -908,23 +1050,53 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                   </div>
 
                   {!examForm.assignToAll && (
-                    <div className="border rounded-lg p-3 max-h-40 overflow-y-auto">
-                      {students.map((student: any) => (
-                        <div key={student.id} className="flex items-center space-x-2 py-1">
-                          <Checkbox
-                            id={`stu-${student.id}`}
-                            checked={examForm.selectedStudents.includes(student.id)}
-                            onCheckedChange={() => toggleStudent(student.id)}
-                          />
-                          <Label htmlFor={`stu-${student.id}`} className="cursor-pointer font-normal text-sm">
-                            {student.first_name} {student.last_name}
-                          </Label>
+                    <div className="space-y-3">
+                      {/* By Class */}
+                      {classLevels.length > 0 && (
+                        <div>
+                          <Label className="text-sm mb-2 block">By Class</Label>
+                          <div className="flex flex-wrap gap-2">
+                            {classLevels.map(cls => (
+                              <div key={cls} className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`cls-${cls}`}
+                                  checked={examForm.selectedClasses.includes(cls)}
+                                  onCheckedChange={() => toggleClass(cls)}
+                                />
+                                <Label htmlFor={`cls-${cls}`} className="cursor-pointer font-normal text-sm">
+                                  {cls} ({students.filter((s: any) => s.class_level === cls).length} students)
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      ))}
+                      )}
+
+                      {/* Individual students */}
+                      {examForm.selectedClasses.length === 0 && (
+                        <div>
+                          <Label className="text-sm mb-2 block">Or Select Individual Students</Label>
+                          <div className="border rounded-lg p-3 max-h-40 overflow-y-auto">
+                            {students.map((student: any) => (
+                              <div key={student.user_id} className="flex items-center space-x-2 py-1">
+                                <Checkbox
+                                  id={`stu-${student.user_id}`}
+                                  checked={examForm.selectedStudents.includes(student.user_id)}
+                                  onCheckedChange={() => toggleStudent(student.user_id)}
+                                />
+                                <Label htmlFor={`stu-${student.user_id}`} className="cursor-pointer font-normal text-sm">
+                                  {student.full_name} {student.class_level ? `(${student.class_level})` : ''}
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
 
+                {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Start Date (optional)</Label>
@@ -944,18 +1116,41 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                   </div>
                 </div>
 
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    The exam will be created as <strong>unpublished</strong>. You can publish it later to make it visible to students.
-                  </AlertDescription>
-                </Alert>
+                {/* Publish toggle */}
+                <div className="flex items-center space-x-2 p-3 border rounded-lg bg-accent/5">
+                  <Checkbox
+                    id="publishNow"
+                    checked={examForm.publishImmediately}
+                    onCheckedChange={checked => setExamForm({...examForm, publishImmediately: !!checked})}
+                  />
+                  <div>
+                    <Label htmlFor="publishNow" className="cursor-pointer font-medium">
+                      Publish immediately
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Students will be able to see and take the exam right away. Uncheck to save as draft.
+                    </p>
+                  </div>
+                </div>
+
+                {isUploading && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Creating exam...</span>
+                      <span>{Math.round(uploadProgress)}%</span>
+                    </div>
+                    <Progress value={uploadProgress} />
+                  </div>
+                )}
 
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
-                  <Button className="flex-1" onClick={handleCreateExam} disabled={loading}>
-                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                    {loading ? 'Creating...' : 'Create Exam'}
+                  <Button variant="outline" onClick={() => setStep(2)} disabled={isUploading}>Back</Button>
+                  <Button className="flex-1" onClick={handleCreateExam} disabled={loading || isUploading}>
+                    {isUploading ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creating...</>
+                    ) : (
+                      <><CheckCircle2 className="w-4 h-4 mr-2" /> Create Exam</>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -976,7 +1171,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
               <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="font-semibold text-lg mb-2">No Exams Yet</h3>
               <p className="text-muted-foreground mb-4">
-                Create your first exam to get started. You can upload questions via CSV or add them manually.
+                Create your first exam to get started. You can upload questions via text, CSV, or add manually.
               </p>
               <Button onClick={() => setIsCreateModalOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" /> Create First Exam
@@ -988,9 +1183,9 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
         <div className="space-y-4">
           {exams.map(exam => {
             const results = examResults[exam.id] || [];
-            const completedCount = results.filter(r => r.results && r.results.length > 0).length;
+            const completedCount = results.filter((r: any) => r.results && r.results.length > 0).length;
             const avgScore = completedCount > 0
-              ? Math.round(results.reduce((sum, r) => sum + (r.results?.[0]?.percentage || 0), 0) / completedCount)
+              ? Math.round(results.reduce((sum: number, r: any) => sum + (r.results?.[0]?.percentage || 0), 0) / completedCount)
               : 0;
 
             return (
@@ -1005,23 +1200,14 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                         </Badge>
                         <Badge variant="outline">{exam.type}</Badge>
                       </div>
-                      {exam.description && (
-                        <CardDescription>{exam.description}</CardDescription>
-                      )}
+                      {exam.description && <CardDescription>{exam.description}</CardDescription>}
                     </div>
                     <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => togglePublish(exam.id, exam.is_published)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => togglePublish(exam.id, exam.is_published)}
+                        title={exam.is_published ? 'Unpublish' : 'Publish'}>
                         {exam.is_published ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteExam(exam.id)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => deleteExam(exam.id)}>
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>
                     </div>
@@ -1054,14 +1240,11 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                   {exam.exam_subjects && exam.exam_subjects.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-4">
                       {exam.exam_subjects.map((es: any) => (
-                        <Badge key={es.id} variant="outline">
-                          {es.subject_name} ({es.question_count}q)
-                        </Badge>
+                        <Badge key={es.id} variant="outline">{es.subject_name} ({es.question_count}q)</Badge>
                       ))}
                     </div>
                   )}
 
-                  {/* Results table */}
                   {results.length > 0 && (
                     <div className="border rounded-lg overflow-hidden">
                       <table className="w-full text-sm">
@@ -1074,18 +1257,14 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
                           </tr>
                         </thead>
                         <tbody>
-                          {results.map(attempt => (
+                          {results.map((attempt: any) => (
                             <tr key={attempt.id} className="border-t">
-                              <td className="p-2">
-                                {attempt.users?.first_name} {attempt.users?.last_name}
-                              </td>
+                              <td className="p-2">{attempt.users?.first_name} {attempt.users?.last_name}</td>
                               <td className="p-2 text-center">
                                 {attempt.results?.[0]?.raw_score ?? '-'}/{attempt.results?.[0]?.total_questions ?? '-'}
                               </td>
                               <td className="p-2 text-center">
-                                <Badge variant={
-                                  (attempt.results?.[0]?.percentage ?? 0) >= 50 ? 'default' : 'destructive'
-                                }>
+                                <Badge variant={(attempt.results?.[0]?.percentage ?? 0) >= 50 ? 'default' : 'destructive'}>
                                   {Math.round(attempt.results?.[0]?.percentage ?? 0)}%
                                 </Badge>
                               </td>
