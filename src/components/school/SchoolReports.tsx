@@ -42,6 +42,7 @@ interface StudentReport {
 
 export default function SchoolReports({ schoolId }: Props) {
   const [reports, setReports] = useState<StudentReport[]>([]);
+  const [schoolSubjects, setSchoolSubjects] = useState<Array<any>>([]);
   const [loading, setLoading] = useState(true);
   const [expandedStudent, setExpandedStudent] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'overall' | 'subject'>('overall');
@@ -94,12 +95,55 @@ export default function SchoolReports({ schoolId }: Props) {
       }));
 
       setReports(merged);
+
+      // Compute school-wide subject summary
+      const subjectMap: Record<string, { correct: number; total: number; attempts: number }> = {};
+      for (const stud of merged) {
+        for (const attempt of stud.attempts) {
+          const breakdown = attempt.results?.subject_breakdown;
+          if (breakdown && Array.isArray(breakdown)) {
+            for (const sub of breakdown) {
+              if (!subjectMap[sub.subject_name]) {
+                subjectMap[sub.subject_name] = { correct: 0, total: 0, attempts: 0 };
+              }
+              subjectMap[sub.subject_name].correct += sub.correct || 0;
+              subjectMap[sub.subject_name].total += sub.total || 0;
+              subjectMap[sub.subject_name].attempts += 1;
+            }
+          }
+        }
+      }
+
+      const aggregated = Object.entries(subjectMap).map(([name, data]) => ({
+        subject_name: name,
+        correct: data.correct,
+        total: data.total,
+        attempts: data.attempts,
+        percentage: data.total > 0 ? (data.correct / data.total) * 100 : 0,
+      })).sort((a, b) => b.percentage - a.percentage);
+
+      setSchoolSubjects(aggregated);
     } catch (error) {
       console.error("Error fetching reports:", error);
       toast.error("Failed to load reports");
     } finally {
       setLoading(false);
     }
+  };
+
+  const downloadSubjectSummary = () => {
+    const csv = [
+      ["Subject", "Correct", "Total", "Attempts", "Percentage"],
+      ...schoolSubjects.map(s => [s.subject_name, s.correct, s.total, s.attempts, s.percentage.toFixed(1)])
+    ].map(r => r.join(",")).join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `school_subject_summary_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    toast.success("Subject summary exported successfully");
   };
 
   const getSubjectPerformance = (student: StudentReport) => {
@@ -206,6 +250,10 @@ export default function SchoolReports({ schoolId }: Props) {
               <Download className="h-4 w-4 mr-2" />
               Export CSV
             </Button>
+            <Button variant="ghost" size="sm" onClick={downloadSubjectSummary} disabled={schoolSubjects.length === 0}>
+              <Download className="h-4 w-4 mr-2" />
+              Export Subject Summary
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -310,7 +358,7 @@ export default function SchoolReports({ schoolId }: Props) {
                               </>
                             )}
                           </div>
-                        ) : (
+                              </>
                           /* Overall Test View */
                           <Table>
                             <TableHeader>

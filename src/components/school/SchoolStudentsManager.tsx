@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Plus, Upload, Download, Trash2, User } from "lucide-react";
+import { Plus, Upload, Download, Trash2, User, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface Props {
@@ -21,6 +21,10 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [subjectsModalOpen, setSubjectsModalOpen] = useState(false);
+  const [selectedStudentSubjects, setSelectedStudentSubjects] = useState<Array<any>>([]);
+  const [loadingSubjects, setLoadingSubjects] = useState(false);
+  const [selectedStudentName, setSelectedStudentName] = useState<string | null>(null);
   const [newStudent, setNewStudent] = useState({
     fullName: "",
     classLevel: "",
@@ -140,6 +144,78 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
     }
   };
 
+  const getScoreColor = (percentage: number) => {
+    if (percentage >= 75) return "default";
+    if (percentage >= 50) return "secondary";
+    return "destructive";
+  };
+
+  const getScoreBarColor = (percentage: number) => {
+    if (percentage >= 75) return "bg-green-500";
+    if (percentage >= 50) return "bg-yellow-500";
+    return "bg-red-500";
+  };
+
+  const fetchStudentSubjects = async (userId: string, studentName: string) => {
+    try {
+      setLoadingSubjects(true);
+      setSelectedStudentName(studentName);
+      // fetch attempts
+      const { data: attempts, error: attemptsError } = await supabase
+        .from("attempts")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("status", "SUBMITTED");
+
+      if (attemptsError) throw attemptsError;
+      const attemptIds = (attempts || []).map((a: any) => a.id);
+
+      if (attemptIds.length === 0) {
+        setSelectedStudentSubjects([]);
+        setSubjectsModalOpen(true);
+        return;
+      }
+
+      const { data: results, error: resultsError } = await supabase
+        .from("results")
+        .select("subject_breakdown")
+        .in("attempt_id", attemptIds);
+
+      if (resultsError) throw resultsError;
+
+      const subjectMap: Record<string, { correct: number; total: number; attempts: number }> = {};
+      for (const r of results || []) {
+        const breakdown = r.subject_breakdown;
+        if (breakdown && Array.isArray(breakdown)) {
+          for (const sub of breakdown) {
+            if (!subjectMap[sub.subject_name]) {
+              subjectMap[sub.subject_name] = { correct: 0, total: 0, attempts: 0 };
+            }
+            subjectMap[sub.subject_name].correct += sub.correct || 0;
+            subjectMap[sub.subject_name].total += sub.total || 0;
+            subjectMap[sub.subject_name].attempts += 1;
+          }
+        }
+      }
+
+      const aggregated = Object.entries(subjectMap).map(([name, data]) => ({
+        subject_name: name,
+        correct: data.correct,
+        total: data.total,
+        attempts: data.attempts,
+        percentage: data.total > 0 ? (data.correct / data.total) * 100 : 0,
+      })).sort((a, b) => b.percentage - a.percentage);
+
+      setSelectedStudentSubjects(aggregated);
+      setSubjectsModalOpen(true);
+    } catch (error: any) {
+      console.error("Error fetching student subjects:", error);
+      toast.error("Failed to load student subjects");
+    } finally {
+      setLoadingSubjects(false);
+    }
+  };
+
   const exportCredentials = () => {
     const csv = [
       ["Full Name", "Email", "Password", "Class Level"],
@@ -250,13 +326,22 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteStudent(student.id, student.user_id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => fetchStudentSubjects(student.user_id, student.full_name)}
+                      >
+                        <BookOpen className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteStudent(student.id, student.user_id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -264,6 +349,42 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
           </Table>
         )}
       </CardContent>
+      {/* Student Subject Breakdown Modal */}
+      <Dialog open={subjectsModalOpen} onOpenChange={(v) => setSubjectsModalOpen(v)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Subject Performance</DialogTitle>
+            <DialogDescription>
+              {selectedStudentName ? `Subject breakdown for ${selectedStudentName}` : "Subject breakdown"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {loadingSubjects ? (
+              <p className="text-center py-6 text-muted-foreground">Loading subjects...</p>
+            ) : selectedStudentSubjects.length === 0 ? (
+              <p className="text-center py-6 text-muted-foreground">No subject data available</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {selectedStudentSubjects.map((s) => (
+                  <div key={s.subject_name} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="font-medium text-sm">{s.subject_name}</div>
+                      <Badge variant={getScoreColor(s.percentage)}>{s.percentage.toFixed(1)}%</Badge>
+                    </div>
+                    <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                      <div className={`absolute top-0 left-0 h-full rounded-full transition-all ${getScoreBarColor(s.percentage)}`} style={{ width: `${Math.min(s.percentage, 100)}%` }} />
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>{s.correct}/{s.total} correct</span>
+                      <span>{s.attempts} attempts</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
