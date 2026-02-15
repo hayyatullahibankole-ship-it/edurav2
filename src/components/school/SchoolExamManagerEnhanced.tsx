@@ -423,7 +423,11 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
 
   const handleCreateExam = async () => {
     try {
-      const totalQuestions = uploadedQuestions.length + selectedBankQuestionIds.length;
+      let totalQuestions = uploadedQuestions.length + selectedBankQuestionIds.length;
+      // If using Edura mode, total questions are determined by subjects × questionsPerSubject
+      if (examForm.questionSelectionMode === 'edura') {
+        totalQuestions = (examForm.selectedSubjects.length || 0) * (examForm.questionsPerSubject || 0);
+      }
       
       // For Edura mode, questions will be loaded dynamically, so we don't need questions upfront
       if (examForm.questionSelectionMode === 'custom' && totalQuestions === 0) {
@@ -627,9 +631,19 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
 
   const resetForm = () => {
     setExamForm({
-      title: '', description: '', type: 'CUSTOM', duration_minutes: 60,
-      instructions: '', selectedSubjects: [], assignToAll: true,
-      selectedStudents: [], selectedClasses: [], startDate: '', endDate: '',
+      title: '',
+      description: '',
+      type: 'CUSTOM',
+      duration_minutes: 60,
+      instructions: '',
+      selectedSubjects: [],
+      questionSelectionMode: 'custom',
+      questionsPerSubject: 10,
+      assignToAll: true,
+      selectedStudents: [],
+      selectedClasses: [],
+      startDate: '',
+      endDate: '',
       publishImmediately: true,
     });
     setUploadedQuestions([]);
@@ -720,7 +734,9 @@ Explanation: Dr. Nnamdi Azikiwe was the first President of Nigeria.`;
     });
   };
 
-  const totalQuestionsCount = uploadedQuestions.length + selectedBankQuestionIds.length;
+  const totalQuestionsCount = examForm.questionSelectionMode === 'edura'
+    ? (examForm.selectedSubjects.length || 0) * (examForm.questionsPerSubject || 0)
+    : (uploadedQuestions.length + selectedBankQuestionIds.length);
 
   return (
     <div className="space-y-6">
