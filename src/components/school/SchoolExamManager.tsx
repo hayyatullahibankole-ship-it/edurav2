@@ -615,6 +615,11 @@ export default function SchoolExamManager({ schoolId }: SchoolExamManagerProps) 
                           {exam.is_published ? 'Published' : 'Draft'}
                         </Badge>
                         <Badge variant="outline">{exam.type}</Badge>
+                        {exam.question_selection_mode === 'edura' && (
+                          <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                            📚 Edura Questions
+                          </Badge>
+                        )}
                       </div>
                       
                       {exam.description && (
@@ -683,6 +688,11 @@ export default function SchoolExamManager({ schoolId }: SchoolExamManagerProps) 
                       <h3 className="text-lg font-semibold">{exam.title}</h3>
                       <Badge variant="default">Published</Badge>
                       <Badge variant="outline">{exam.type}</Badge>
+                      {exam.question_selection_mode === 'edura' && (
+                        <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                          📚 Edura Questions
+                        </Badge>
+                      )}
                     </div>
                     
                     {exam.description && (
