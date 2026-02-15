@@ -301,8 +301,6 @@ export default function SchoolAvailableExams() {
                       <Badge variant="outline">{exam.type}</Badge>
                     </div>
                     {exam.description && (
-          if (attemptError) console.error('[SchoolAvailableExams] attemptError:', attemptError);
-          console.log('[SchoolAvailableExams] attempt created:', attempt);
                       <CardDescription className="mt-2">{exam.description}</CardDescription>
                     )}
                   </div>
