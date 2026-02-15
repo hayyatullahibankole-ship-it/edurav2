@@ -124,20 +124,26 @@ export default function SchoolExamManager({ schoolId }: SchoolExamManagerProps) 
       const totalQuestions = newExam.selectedSubjects.length * newExam.questionsPerSubject;
 
       // Create exam with question_selection_mode
+      const examData: any = {
+        title: newExam.title,
+        description: newExam.description,
+        type: newExam.type,
+        duration_minutes: newExam.duration_minutes,
+        total_questions: totalQuestions,
+        instructions: newExam.instructions,
+        is_published: newExam.is_published,
+        school_id: schoolId,
+        created_by: userData.id,
+      };
+      
+      // Only add question_selection_mode if database supports it
+      if (newExam.questionSelectionMode) {
+        examData.question_selection_mode = newExam.questionSelectionMode;
+      }
+      
       const { data: exam, error: examError } = await supabase
         .from('exams')
-        .insert({
-          title: newExam.title,
-          description: newExam.description,
-          type: newExam.type,
-          duration_minutes: newExam.duration_minutes,
-          total_questions: totalQuestions,
-          instructions: newExam.instructions,
-          is_published: newExam.is_published,
-          school_id: schoolId,
-          created_by: userData.id,
-          question_selection_mode: newExam.questionSelectionMode,
-        })
+        .insert(examData)
         .select()
         .single();
 

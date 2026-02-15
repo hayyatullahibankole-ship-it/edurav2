@@ -129,27 +129,58 @@ export default function SchoolAvailableExams() {
       }
 
       let questionIds: string[] = [];
+      
+      // Determine question selection mode (default to 'custom' for existing exams)
+      const selectionMode = exam.question_selection_mode || 'custom';
 
       // Load questions based on selection mode
-      if (exam.question_selection_mode === 'edura') {
+      if (selectionMode === 'edura') {
         // For Edura mode: fetch random questions per subject
         const allQuestions: any[] = [];
+        let rpcFailed = false;
+        
         for (const examSubject of exam.exam_subjects) {
-          const { data: questions, error: questionsError } = await supabase
-            .rpc('get_random_questions_for_subjects', {
-              subject_ids: [examSubject.subject_id],
-              per_subject_count: examSubject.question_count
-            });
-          
-          if (questionsError) {
-            console.error('Error fetching questions:', questionsError);
-            toast.error(`Failed to load questions for ${examSubject.subject_name}`);
+          try {
+            const { data: questions, error: questionsError } = await supabase
+              .rpc('get_random_questions_for_subjects', {
+                subject_ids: [examSubject.subject_id],
+                per_subject_count: examSubject.question_count
+              });
+            
+            if (questionsError) {
+              console.warn('RPC error for Edura questions:', questionsError);
+              rpcFailed = true;
+              break;
+            }
+            
+            if (questions && questions.length > 0) {
+              allQuestions.push(...questions);
+            }
+          } catch (err) {
+            console.warn('Exception calling RPC function:', err);
+            rpcFailed = true;
+            break;
+          }
+        }
+        
+        // If RPC failed, fall back to custom mode logic
+        if (rpcFailed || allQuestions.length === 0) {
+          console.warn('Edura mode RPC failed or no questions returned, falling back to custom mode');
+          const { data: examQuestions } = await supabase
+            .from('exam_questions')
+            .select('question_id')
+            .eq('exam_id', examId)
+            .order('display_order');
+
+          if (examQuestions && examQuestions.length > 0) {
+            questionIds = examQuestions.map(eq => eq.question_id);
+          } else {
+            toast.error('No questions available for this exam');
             return;
           }
-          
-          if (questions) allQuestions.push(...questions);
+        } else {
+          questionIds = allQuestions.map(q => q.id);
         }
-        questionIds = allQuestions.map(q => q.id);
       } else {
         // For custom mode: use pre-linked questions from exam_questions table
         const { data: examQuestions } = await supabase
@@ -164,12 +195,16 @@ export default function SchoolAvailableExams() {
           // Fallback: if no questions are linked, try random questions
           const allQuestions: any[] = [];
           for (const examSubject of exam.exam_subjects) {
-            const { data: questions } = await supabase
-              .rpc('get_random_questions_for_subjects', {
-                subject_ids: [examSubject.subject_id],
-                per_subject_count: examSubject.question_count
-              });
-            if (questions) allQuestions.push(...questions);
+            try {
+              const { data: questions } = await supabase
+                .rpc('get_random_questions_for_subjects', {
+                  subject_ids: [examSubject.subject_id],
+                  per_subject_count: examSubject.question_count
+                });
+              if (questions && questions.length > 0) allQuestions.push(...questions);
+            } catch (err) {
+              console.warn('Fallback RPC call failed:', err);
+            }
           }
           questionIds = allQuestions.map(q => q.id);
         }
