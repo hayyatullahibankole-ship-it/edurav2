@@ -1105,6 +1105,11 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
+                {/* School Assigned Exams (desktop) */}
+                <div className="mb-8">
+                  <SchoolAvailableExams />
+                </div>
+
                 {/* Recent Tests */}
                 {recentTests.length > 0 && (
                   <Card>
