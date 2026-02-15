@@ -128,34 +128,55 @@ export default function SchoolAvailableExams() {
         return;
       }
 
-      // First try exam_questions junction table (school-uploaded questions)
-      const { data: examQuestions } = await supabase
-        .from('exam_questions')
-        .select('question_id')
-        .eq('exam_id', examId)
-        .order('display_order');
-
       let questionIds: string[] = [];
 
-      if (examQuestions && examQuestions.length > 0) {
-        // Use pre-linked questions from exam_questions table
-        questionIds = examQuestions.map(eq => eq.question_id);
-      } else {
-        // Fallback: get random questions per subject
+      // Load questions based on selection mode
+      if (exam.question_selection_mode === 'edura') {
+        // For Edura mode: fetch random questions per subject
         const allQuestions: any[] = [];
         for (const examSubject of exam.exam_subjects) {
-          const { data: questions } = await supabase
+          const { data: questions, error: questionsError } = await supabase
             .rpc('get_random_questions_for_subjects', {
               subject_ids: [examSubject.subject_id],
               per_subject_count: examSubject.question_count
             });
+          
+          if (questionsError) {
+            console.error('Error fetching questions:', questionsError);
+            toast.error(`Failed to load questions for ${examSubject.subject_name}`);
+            return;
+          }
+          
           if (questions) allQuestions.push(...questions);
         }
         questionIds = allQuestions.map(q => q.id);
+      } else {
+        // For custom mode: use pre-linked questions from exam_questions table
+        const { data: examQuestions } = await supabase
+          .from('exam_questions')
+          .select('question_id')
+          .eq('exam_id', examId)
+          .order('display_order');
+
+        if (examQuestions && examQuestions.length > 0) {
+          questionIds = examQuestions.map(eq => eq.question_id);
+        } else {
+          // Fallback: if no questions are linked, try random questions
+          const allQuestions: any[] = [];
+          for (const examSubject of exam.exam_subjects) {
+            const { data: questions } = await supabase
+              .rpc('get_random_questions_for_subjects', {
+                subject_ids: [examSubject.subject_id],
+                per_subject_count: examSubject.question_count
+              });
+            if (questions) allQuestions.push(...questions);
+          }
+          questionIds = allQuestions.map(q => q.id);
+        }
       }
 
       if (questionIds.length === 0) {
-        toast.error('No questions available for this exam');
+        toast.error('No questions available for this exam. Please contact your administrator.');
         return;
       }
 

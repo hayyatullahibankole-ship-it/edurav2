@@ -100,6 +100,12 @@ export default function SchoolExamManager({ schoolId }: SchoolExamManagerProps) 
         return;
       }
 
+      // For Edura mode, validate questions per subject is set
+      if (newExam.questionSelectionMode === 'edura' && newExam.questionsPerSubject < 1) {
+        toast.error('Please specify the number of questions per subject');
+        return;
+      }
+
       setLoading(true);
       
       // Get user ID
@@ -114,10 +120,10 @@ export default function SchoolExamManager({ schoolId }: SchoolExamManagerProps) 
 
       if (!userData) throw new Error('User not found');
 
-      // Calculate total questions
+      // Calculate total questions based on mode
       const totalQuestions = newExam.selectedSubjects.length * newExam.questionsPerSubject;
 
-      // Create exam
+      // Create exam with question_selection_mode
       const { data: exam, error: examError } = await supabase
         .from('exams')
         .insert({
@@ -130,6 +136,7 @@ export default function SchoolExamManager({ schoolId }: SchoolExamManagerProps) 
           is_published: newExam.is_published,
           school_id: schoolId,
           created_by: userData.id,
+          question_selection_mode: newExam.questionSelectionMode,
         })
         .select()
         .single();
@@ -348,6 +355,40 @@ export default function SchoolExamManager({ schoolId }: SchoolExamManagerProps) 
                 </div>
               </div>
 
+              {/* Question Selection Mode */}
+              <div>
+                <Label className="mb-3 block">Question Selection Method *</Label>
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition"
+                    onClick={() => setNewExam({...newExam, questionSelectionMode: 'edura'})}>
+                    <Checkbox
+                      checked={newExam.questionSelectionMode === 'edura'}
+                      onCheckedChange={() => setNewExam({...newExam, questionSelectionMode: 'edura'})}
+                    />
+                    <div className="flex-1">
+                      <Label className="cursor-pointer font-semibold text-base">Use Edura Questions</Label>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Automatically pull random questions from Edura's database. Just specify the number of questions per subject.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition"
+                    onClick={() => setNewExam({...newExam, questionSelectionMode: 'custom'})}>
+                    <Checkbox
+                      checked={newExam.questionSelectionMode === 'custom'}
+                      onCheckedChange={() => setNewExam({...newExam, questionSelectionMode: 'custom'})}
+                    />
+                    <div className="flex-1">
+                      <Label className="cursor-pointer font-semibold text-base">Manual Question Selection</Label>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Upload your own questions via CSV, text, or select from the question bank manually.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Subject Selection */}
               <div>
                 <Label className="mb-3 block">Select Subjects *</Label>
@@ -370,21 +411,27 @@ export default function SchoolExamManager({ schoolId }: SchoolExamManagerProps) 
                 </p>
               </div>
 
-              {/* Questions per Subject */}
-              <div>
-                <Label htmlFor="questionsPerSubject">Questions per Subject</Label>
-                <Input
-                  id="questionsPerSubject"
-                  type="number"
-                  value={newExam.questionsPerSubject}
-                  onChange={(e) => setNewExam({...newExam, questionsPerSubject: parseInt(e.target.value) || 0})}
-                  min={1}
-                  max={50}
-                />
-                <p className="text-sm text-muted-foreground mt-1">
-                  Total questions: {newExam.selectedSubjects.length * newExam.questionsPerSubject}
-                </p>
-              </div>
+              {/* Questions per Subject - Only for Edura Mode */}
+              {newExam.questionSelectionMode === 'edura' && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <Label htmlFor="questionsPerSubject" className="font-semibold text-blue-900">Questions per Subject *</Label>
+                  <p className="text-sm text-blue-700 mt-1 mb-3">
+                    Specify how many questions each student will randomly receive from Edura's database per subject.
+                  </p>
+                  <Input
+                    id="questionsPerSubject"
+                    type="number"
+                    value={newExam.questionsPerSubject}
+                    onChange={(e) => setNewExam({...newExam, questionsPerSubject: parseInt(e.target.value) || 0})}
+                    min={1}
+                    max={100}
+                    placeholder="e.g., 10"
+                  />
+                  <p className="text-sm font-medium mt-2 text-blue-900">
+                    Total questions per student: {newExam.selectedSubjects.length * newExam.questionsPerSubject}
+                  </p>
+                </div>
+              )}
 
               {/* Student Assignment */}
               <div className="space-y-3">
