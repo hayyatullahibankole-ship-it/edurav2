@@ -188,6 +188,7 @@ export default function SchoolAvailableExams() {
   };
 
   if (loading) {
+          console.log('[SchoolAvailableExams] startExam - exam fetched:', exam);
     return (
       <Card>
         <CardContent className="pt-6">
@@ -220,6 +221,8 @@ export default function SchoolAvailableExams() {
 
       {exams.length === 0 ? (
         <Card>
+          console.log('[SchoolAvailableExams] startExam - questionIds length:', questionIds.length, 'ids:', questionIds.slice(0,10));
+
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -242,6 +245,8 @@ export default function SchoolAvailableExams() {
                       <Badge variant="outline">{exam.type}</Badge>
                     </div>
                     {exam.description && (
+          if (attemptError) console.error('[SchoolAvailableExams] attemptError:', attemptError);
+          console.log('[SchoolAvailableExams] attempt created:', attempt);
                       <CardDescription className="mt-2">{exam.description}</CardDescription>
                     )}
                   </div>
