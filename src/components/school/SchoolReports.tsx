@@ -322,8 +322,8 @@ export default function SchoolReports({ schoolId }: Props) {
                         {totalAttempts === 0 ? (
                           <p className="text-center py-8 text-muted-foreground">No test attempts yet</p>
                         ) : viewMode === 'subject' ? (
-                          /* Subject Performance View */
                           <div className="space-y-4">
+                            {/* Subject Performance View */}
                             {subjectPerformance.length === 0 ? (
                               <p className="text-center py-6 text-muted-foreground text-sm">
                                 No subject breakdown data available for this student's attempts.
@@ -358,9 +358,10 @@ export default function SchoolReports({ schoolId }: Props) {
                               </>
                             )}
                           </div>
-                              </>
-                          /* Overall Test View */
-                          <Table>
+                        ) : (
+                          <>
+                            {/* Overall Test View */}
+                            <Table>
                             <TableHeader>
                               <TableRow>
                                 <TableHead>Test</TableHead>
@@ -403,6 +404,7 @@ export default function SchoolReports({ schoolId }: Props) {
                               })}
                             </TableBody>
                           </Table>
+                          </>
                         )}
                       </CardContent>
                     </CollapsibleContent>
