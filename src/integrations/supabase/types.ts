@@ -1187,6 +1187,7 @@ export type Database = {
           is_published: boolean | null
           passing_score: number | null
           question_selection_mode: string | null
+          questions_per_subject: number | null
           requires_subscription: boolean | null
           school_id: string | null
           subscription_level: string | null
@@ -1205,6 +1206,7 @@ export type Database = {
           is_published?: boolean | null
           passing_score?: number | null
           question_selection_mode?: string | null
+          questions_per_subject?: number | null
           requires_subscription?: boolean | null
           school_id?: string | null
           subscription_level?: string | null
@@ -1223,6 +1225,7 @@ export type Database = {
           is_published?: boolean | null
           passing_score?: number | null
           question_selection_mode?: string | null
+          questions_per_subject?: number | null
           requires_subscription?: boolean | null
           school_id?: string | null
           subscription_level?: string | null
