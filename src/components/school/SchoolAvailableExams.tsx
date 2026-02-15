@@ -37,7 +37,7 @@ export default function SchoolAvailableExams() {
       if (!userData) return;
 
       // Fetch assigned school exams
-      const { data: assignments } = await supabase
+      const { data: assignments, error: assignmentsError } = await supabase
         .from('school_exam_assignments')
         .select(`
           *,
@@ -58,6 +58,10 @@ export default function SchoolAvailableExams() {
         `)
         .or(`student_id.eq.${userData.id},assigned_to_all.eq.true`)
         .eq('is_active', true);
+
+      console.log('[SchoolAvailableExams] fetchExams - userId:', userData?.id);
+      if (assignmentsError) console.error('[SchoolAvailableExams] assignmentsError:', assignmentsError);
+      console.log('[SchoolAvailableExams] raw assignments:', assignments);
 
       if (assignments) {
         // Filter for published exams and check dates
@@ -80,6 +84,7 @@ export default function SchoolAvailableExams() {
             assignment: a
           }));
 
+        console.log('[SchoolAvailableExams] availableExams after filtering:', availableExams);
         setExams(availableExams);
       }
     } catch (error: any) {
