@@ -54,6 +54,8 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
     duration_minutes: 60,
     instructions: '',
     selectedSubjects: [] as string[],
+    questionSelectionMode: 'custom' as 'edura' | 'custom',
+    questionsPerSubject: 10,
     assignToAll: true,
     selectedStudents: [] as string[],
     selectedClasses: [] as string[],
@@ -422,7 +424,9 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
   const handleCreateExam = async () => {
     try {
       const totalQuestions = uploadedQuestions.length + selectedBankQuestionIds.length;
-      if (totalQuestions === 0) {
+      
+      // For Edura mode, questions will be loaded dynamically, so we don't need questions upfront
+      if (examForm.questionSelectionMode === 'custom' && totalQuestions === 0) {
         toast.error('Please add at least one question');
         return;
       }
@@ -445,79 +449,111 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
       setUploadProgress(20);
 
       // Step 1: Create the exam
+      const examData: any = {
+        title: examForm.title,
+        description: examForm.description,
+        type: examForm.type,
+        duration_minutes: examForm.duration_minutes,
+        total_questions: totalQuestions,
+        instructions: examForm.instructions,
+        is_published: examForm.publishImmediately,
+        school_id: schoolId,
+        created_by: userData.id,
+        requires_subscription: false,
+      };
+
+      // Add question selection mode if using Edura mode
+      if (examForm.questionSelectionMode === 'edura') {
+        examData.question_selection_mode = 'edura';
+        examData.questions_per_subject = examForm.questionsPerSubject;
+      }
+
       const { data: exam, error: examError } = await supabase
         .from('exams')
-        .insert({
-          title: examForm.title,
-          description: examForm.description,
-          type: examForm.type,
-          duration_minutes: examForm.duration_minutes,
-          total_questions: totalQuestions,
-          instructions: examForm.instructions,
-          is_published: examForm.publishImmediately,
-          school_id: schoolId,
-          created_by: userData.id,
-          requires_subscription: false,
-        })
+        .insert(examData)
         .select()
         .single();
 
       if (examError) throw examError;
       setUploadProgress(40);
 
-      // Step 2: Upload new questions via edge function
-      let allQuestionIds: string[] = [...selectedBankQuestionIds];
+      // For Edura mode, skip manual question uploads
+      let allQuestionIds: string[] = [];
+      
+      if (examForm.questionSelectionMode === 'custom') {
+        // Step 2: Upload new questions via edge function
+        allQuestionIds = [...selectedBankQuestionIds];
 
-      if (uploadedQuestions.length > 0) {
-        const { data: bulkResult, error: bulkError } = await supabase.functions.invoke('school-bulk-questions', {
-          body: {
-            action: 'bulk_insert_questions',
-            questions: uploadedQuestions,
-            exam_id: exam.id,
+        if (uploadedQuestions.length > 0) {
+          const { data: bulkResult, error: bulkError } = await supabase.functions.invoke('school-bulk-questions', {
+            body: {
+              action: 'bulk_insert_questions',
+              questions: uploadedQuestions,
+              exam_id: exam.id,
+            }
+          });
+
+          if (bulkError) throw new Error(bulkError.message || 'Failed to upload questions');
+          if (bulkResult?.question_ids) {
+            allQuestionIds = [...allQuestionIds, ...bulkResult.question_ids];
           }
-        });
-
-        if (bulkError) throw new Error(bulkError.message || 'Failed to upload questions');
-        if (bulkResult?.question_ids) {
-          allQuestionIds = [...allQuestionIds, ...bulkResult.question_ids];
         }
-      }
 
-      setUploadProgress(60);
+        setUploadProgress(60);
 
-      // Step 3: Link existing bank questions to exam
-      if (selectedBankQuestionIds.length > 0) {
-        await supabase.functions.invoke('school-bulk-questions', {
-          body: {
-            action: 'link_questions_to_exam',
-            exam_id: exam.id,
-            question_ids: selectedBankQuestionIds,
-          }
-        });
+        // Step 3: Link existing bank questions to exam
+        if (selectedBankQuestionIds.length > 0) {
+          await supabase.functions.invoke('school-bulk-questions', {
+            body: {
+              action: 'link_questions_to_exam',
+              exam_id: exam.id,
+              question_ids: selectedBankQuestionIds,
+            }
+          });
+        }
+      } else {
+        setUploadProgress(60);
       }
 
       setUploadProgress(75);
 
       // Step 4: Create exam subjects
-      const subjectQuestionCounts: Record<string, number> = {};
-      uploadedQuestions.forEach(q => {
-        subjectQuestionCounts[q.subject_id] = (subjectQuestionCounts[q.subject_id] || 0) + 1;
-      });
-      selectedBankQuestionIds.forEach(qid => {
-        const q = bankQuestions.find(bq => bq.id === qid);
-        if (q) subjectQuestionCounts[q.subject_id] = (subjectQuestionCounts[q.subject_id] || 0) + 1;
-      });
+      let examSubjects: any[] = [];
+      
+      if (examForm.questionSelectionMode === 'edura') {
+        // For Edura mode, create exam_subjects for selected subjects with questions_per_subject count
+        examSubjects = examForm.selectedSubjects.map((subjectId, index) => {
+          const subject = subjects.find(s => s.id === subjectId);
+          return {
+            exam_id: exam.id,
+            subject_id: subjectId,
+            subject_name: subject?.name || '',
+            question_count: examForm.questionsPerSubject,
+            display_order: index,
+          };
+        });
+      } else {
+        // For custom mode, count actual questions uploaded/selected
+        const subjectQuestionCounts: Record<string, number> = {};
+        uploadedQuestions.forEach(q => {
+          subjectQuestionCounts[q.subject_id] = (subjectQuestionCounts[q.subject_id] || 0) + 1;
+        });
+        selectedBankQuestionIds.forEach(qid => {
+          const q = bankQuestions.find(bq => bq.id === qid);
+          if (q) subjectQuestionCounts[q.subject_id] = (subjectQuestionCounts[q.subject_id] || 0) + 1;
+        });
 
-      const examSubjects = Object.entries(subjectQuestionCounts).map(([subjectId, count], index) => {
-        const subject = subjects.find(s => s.id === subjectId);
-        return {
-          exam_id: exam.id,
-          subject_id: subjectId,
-          subject_name: subject?.name || '',
-          question_count: count,
-          display_order: index,
-        };
-      });
+        examSubjects = Object.entries(subjectQuestionCounts).map(([subjectId, count], index) => {
+          const subject = subjects.find(s => s.id === subjectId);
+          return {
+            exam_id: exam.id,
+            subject_id: subjectId,
+            subject_name: subject?.name || '',
+            question_count: count,
+            display_order: index,
+          };
+        });
+      }
 
       if (examSubjects.length > 0) {
         await supabase.from('exam_subjects').insert(examSubjects);
@@ -784,8 +820,64 @@ Explanation: Dr. Nnamdi Azikiwe was the first President of Nigeria.`;
                     ))}
                   </div>
                 </div>
+
+                {/* Question Selection Mode */}
                 <div>
-                  <Label>Instructions</Label>
+                  <Label className="mb-3 block">Question Selection Method *</Label>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition"
+                      onClick={() => setExamForm({...examForm, questionSelectionMode: 'edura'})}>
+                      <Checkbox
+                        checked={examForm.questionSelectionMode === 'edura'}
+                        onCheckedChange={() => setExamForm({...examForm, questionSelectionMode: 'edura'})}
+                      />
+                      <div className="flex-1">
+                        <Label className="cursor-pointer font-semibold text-base">Use Edura Questions</Label>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Automatically pull random questions from Edura's database. Just specify the number of questions per subject.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition"
+                      onClick={() => setExamForm({...examForm, questionSelectionMode: 'custom'})}>
+                      <Checkbox
+                        checked={examForm.questionSelectionMode === 'custom'}
+                        onCheckedChange={() => setExamForm({...examForm, questionSelectionMode: 'custom'})}
+                      />
+                      <div className="flex-1">
+                        <Label className="cursor-pointer font-semibold text-base">Manual Question Selection</Label>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Upload your own questions via CSV, text, or select from the question bank manually.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Questions per Subject - Only for Edura Mode */}
+                {examForm.questionSelectionMode === 'edura' && (
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <Label htmlFor="questionsPerSubject" className="font-semibold text-blue-900">Questions per Subject *</Label>
+                    <p className="text-sm text-blue-700 mt-1 mb-3">
+                      Specify how many questions each student will randomly receive from Edura's database per subject.
+                    </p>
+                    <Input
+                      id="questionsPerSubject"
+                      type="number"
+                      value={examForm.questionsPerSubject}
+                      onChange={(e) => setExamForm({...examForm, questionsPerSubject: parseInt(e.target.value) || 0})}
+                      min={1}
+                      max={100}
+                      placeholder="e.g., 10"
+                    />
+                    <p className="text-sm font-medium mt-2 text-blue-900">
+                      Total questions per student: {examForm.selectedSubjects.length * examForm.questionsPerSubject}
+                    </p>
+                  </div>
+                )}
+
+                <div>
                   <Textarea
                     value={examForm.instructions}
                     onChange={e => setExamForm({...examForm, instructions: e.target.value})}
@@ -798,6 +890,7 @@ Explanation: Dr. Nnamdi Azikiwe was the first President of Nigeria.`;
                   onClick={() => {
                     if (!examForm.title) return toast.error('Enter exam title');
                     if (examForm.selectedSubjects.length === 0) return toast.error('Select at least one subject');
+                    if (examForm.questionSelectionMode === 'edura' && !examForm.questionsPerSubject) return toast.error('Specify questions per subject for Edura mode');
                     setStep(2);
                     fetchBankQuestions();
                   }}
@@ -810,12 +903,26 @@ Explanation: Dr. Nnamdi Azikiwe was the first President of Nigeria.`;
             {/* STEP 2: Questions */}
             {step === 2 && (
               <div className="space-y-4">
+                {examForm.questionSelectionMode === 'edura' && (
+                  <Alert className="border-blue-200 bg-blue-50">
+                    <AlertDescription className="text-blue-900">
+                      <p className="font-semibold mb-2">✅ Edura Mode Enabled</p>
+                      <p>Your exam is set to use Edura's random question system. Questions will be automatically selected when students take the exam.</p>
+                      <p className="mt-2 text-sm font-medium">
+                        {examForm.selectedSubjects.length} subjects × {examForm.questionsPerSubject} questions = {examForm.selectedSubjects.length * examForm.questionsPerSubject} questions per student
+                      </p>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 <div className="flex items-center justify-between">
                   <Badge variant="secondary" className="text-sm">
-                    {totalQuestionsCount} questions added
+                    {examForm.questionSelectionMode === 'edura' ? 'Automatic Questions' : `${totalQuestionsCount} questions added`}
                   </Badge>
                 </div>
 
+                {examForm.questionSelectionMode === 'custom' && (
+                  <>
                 <Tabs value={questionTab} onValueChange={(v: any) => setQuestionTab(v)}>
                   <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="text">
@@ -996,13 +1103,17 @@ Explanation: Dr. Nnamdi Azikiwe was the first President of Nigeria.`;
                     </div>
                   </div>
                 )}
+                  </>
+                )}
 
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
                   <Button
                     className="flex-1"
                     onClick={() => {
-                      if (totalQuestionsCount === 0) return toast.error('Add at least one question');
+                      if (examForm.questionSelectionMode === 'custom' && totalQuestionsCount === 0) {
+                        return toast.error('Add at least one question');
+                      }
                       setStep(3);
                     }}
                   >
@@ -1016,7 +1127,12 @@ Explanation: Dr. Nnamdi Azikiwe was the first President of Nigeria.`;
             {step === 3 && (
               <div className="space-y-4">
                 <div className="p-4 bg-muted/50 rounded-lg">
-                  <h4 className="font-medium mb-2">Exam Summary</h4>
+                  <h4 className="font-medium mb-2 flex items-center gap-2">
+                    Exam Summary
+                    {examForm.questionSelectionMode === 'edura' && (
+                      <Badge className="bg-blue-100 text-blue-900 ml-auto">📚 Edura Questions</Badge>
+                    )}
+                  </h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <span className="text-muted-foreground">Title:</span>
                     <span className="font-medium">{examForm.title}</span>
