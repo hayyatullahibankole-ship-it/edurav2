@@ -244,7 +244,6 @@ export default function SchoolAvailableExams() {
   };
 
   if (loading) {
-          console.log('[SchoolAvailableExams] startExam - exam fetched:', exam);
     return (
       <Card>
         <CardContent className="pt-6">

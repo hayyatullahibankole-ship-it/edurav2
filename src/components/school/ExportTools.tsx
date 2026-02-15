@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, FileSpreadsheet, CalendarIcon, Loader2 } from "lucide-react";
+import { Download, FileText, FileSpreadsheet, Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format as formatDate } from "date-fns";
 import jsPDF from "jspdf";
