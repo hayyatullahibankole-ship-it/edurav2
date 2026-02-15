@@ -277,8 +277,6 @@ export default function SchoolAvailableExams() {
 
       {exams.length === 0 ? (
         <Card>
-          console.log('[SchoolAvailableExams] startExam - questionIds length:', questionIds.length, 'ids:', questionIds.slice(0,10));
-
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
