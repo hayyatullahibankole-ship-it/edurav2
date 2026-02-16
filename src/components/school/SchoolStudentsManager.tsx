@@ -35,7 +35,7 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
   const [newStudent, setNewStudent] = useState({
     fullName: "",
     classLevel: "",
-    department: "",
+    department: undefined as string | undefined,
   });
 
   // Standard departments
@@ -118,7 +118,7 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
         }
       );
       setIsAddModalOpen(false);
-      setNewStudent({ fullName: "", classLevel: "", department: "" });
+      setNewStudent({ fullName: "", classLevel: "", department: undefined });
       fetchStudents();
       onStudentsUpdate();
     } catch (error: any) {
@@ -296,7 +296,7 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
                   </div>
                   <div>
                     <Label htmlFor="department">Department</Label>
-                    <Select value={newStudent.department} onValueChange={(value) => setNewStudent({ ...newStudent, department: value })}>
+                    <Select value={newStudent.department || ""} onValueChange={(value) => setNewStudent({ ...newStudent, department: value || undefined })}>
                       <SelectTrigger id="department">
                         <SelectValue placeholder="Select department (optional)" />
                       </SelectTrigger>
