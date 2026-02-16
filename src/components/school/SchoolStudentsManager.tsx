@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const STUDENT_DEPARTMENTS = ["Science", "Arts", "Commercial"];
+
 interface Props {
   schoolId: string;
   schoolCode: string;
@@ -35,11 +37,8 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
   const [newStudent, setNewStudent] = useState({
     fullName: "",
     classLevel: "",
-    department: undefined as string | undefined,
+    department: "",
   });
-
-  // Standard departments
-  const DEPARTMENTS = ["Science", "Arts", "Commercial"];
 
   useEffect(() => {
     fetchStudents();
@@ -82,6 +81,7 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
 
     setLoading(true);
     try {
+      console.log("handleAddStudent - Starting student creation...");
       // Call Edge Function to create student
       const { data, error } = await supabase.functions.invoke('create-school-student', {
         body: {
@@ -92,10 +92,21 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
         }
       });
 
-      if (error) throw error;
+      console.log("handleAddStudent - Response:", { data, error });
+
+      if (error) {
+        console.error("handleAddStudent - Function error:", error);
+        throw error;
+      }
 
       if (data?.error) {
+        console.error("handleAddStudent - Data error:", data.error);
         throw new Error(data.error);
+      }
+
+      if (!data?.credentials) {
+        console.error("handleAddStudent - No credentials in response:", data);
+        throw new Error("No credentials returned from server");
       }
 
       const { email, password } = data.credentials;
@@ -118,7 +129,7 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
         }
       );
       setIsAddModalOpen(false);
-      setNewStudent({ fullName: "", classLevel: "", department: undefined });
+      setNewStudent({ fullName: "", classLevel: "", department: "" });
       fetchStudents();
       onStudentsUpdate();
     } catch (error: any) {
@@ -296,13 +307,13 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
                   </div>
                   <div>
                     <Label htmlFor="department">Department</Label>
-                    <Select value={newStudent.department || ""} onValueChange={(value) => setNewStudent({ ...newStudent, department: value || undefined })}>
+                    <Select value={newStudent.department} onValueChange={(value) => setNewStudent({ ...newStudent, department: value })}>
                       <SelectTrigger id="department">
                         <SelectValue placeholder="Select department (optional)" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">None</SelectItem>
-                        {DEPARTMENTS.map((dept) => (
+                        {STUDENT_DEPARTMENTS.map((dept) => (
                           <SelectItem key={dept} value={dept}>
                             {dept}
                           </SelectItem>
