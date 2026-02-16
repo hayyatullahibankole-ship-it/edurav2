@@ -12,6 +12,7 @@ export default function SchoolAvailableExams() {
   const [exams, setExams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [attemptedExamIds, setAttemptedExamIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchExams();
@@ -85,6 +86,27 @@ export default function SchoolAvailableExams() {
           throw examsError;
         }
 
+        // Fetch existing attempts for this user to prevent reattempts
+        const { data: attempts, error: attemptsError } = await supabase
+          .from('attempts')
+          .select('exam_id, status')
+          .eq('user_id', userData.id)
+          .in('exam_id', examIds);
+
+        if (attemptsError) {
+          console.error('[SchoolAvailableExams] attemptsError:', attemptsError);
+        }
+
+        // Build set of attempted exam IDs
+        const attempted = new Set<string>();
+        if (attempts) {
+          attempts.forEach((attempt: any) => {
+            attempted.add(attempt.exam_id);
+          });
+        }
+        setAttemptedExamIds(attempted);
+        console.log('[SchoolAvailableExams] Attempted exams:', Array.from(attempted));
+
         // Create a map of exams for quick lookup
         const examsMap = new Map(exams?.map(e => [e.id, e]) || []);
 
@@ -141,6 +163,26 @@ export default function SchoolAvailableExams() {
         .single();
 
       if (!userData) return;
+
+      // Check if student has already attempted this exam
+      if (attemptedExamIds.has(examId)) {
+        toast.error('You have already attempted this exam. Reattempts are not allowed.');
+        return;
+      }
+
+      // Double-check in database (in case of race condition)
+      const { data: existingAttempt } = await supabase
+        .from('attempts')
+        .select('id')
+        .eq('user_id', userData.id)
+        .eq('exam_id', examId)
+        .maybeSingle();
+
+      if (existingAttempt) {
+        toast.error('You have already attempted this exam. Reattempts are not allowed.');
+        setAttemptedExamIds(prev => new Set([...prev, examId]));
+        return;
+      }
 
       // Fetch exam details with subjects
       const { data: exam } = await supabase
@@ -359,10 +401,17 @@ export default function SchoolAvailableExams() {
                     )}
                   </div>
                   
-                  <Button onClick={() => startExam(exam.id)}>
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Exam
-                  </Button>
+                  {attemptedExamIds.has(exam.id) ? (
+                    <Button disabled variant="outline" className="cursor-not-allowed">
+                      <Play className="w-4 h-4 mr-2" />
+                      Attempted
+                    </Button>
+                  ) : (
+                    <Button onClick={() => startExam(exam.id)}>
+                      <Play className="w-4 h-4 mr-2" />
+                      Start Exam
+                    </Button>
+                  )}
                 </div>
 
                 {exam.exam_subjects && exam.exam_subjects.length > 0 && (
