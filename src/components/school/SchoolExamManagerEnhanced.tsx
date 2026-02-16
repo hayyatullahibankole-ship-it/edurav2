@@ -59,6 +59,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
     assignToAll: true,
     selectedStudents: [] as string[],
     selectedClasses: [] as string[],
+    targetDepartments: [] as string[],
     startDate: '',
     endDate: '',
     publishImmediately: true,
@@ -464,6 +465,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
         school_id: schoolId,
         created_by: userData.id,
         requires_subscription: false,
+        target_departments: examForm.targetDepartments.length > 0 ? examForm.targetDepartments : [],
       };
 
       // Add question selection mode if using Edura mode
@@ -645,6 +647,7 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
       assignToAll: true,
       selectedStudents: [],
       selectedClasses: [],
+      targetDepartments: [],
       startDate: '',
       endDate: '',
       publishImmediately: true,
@@ -680,6 +683,15 @@ export default function SchoolExamManagerEnhanced({ schoolId }: SchoolExamManage
       selectedClasses: prev.selectedClasses.includes(className)
         ? prev.selectedClasses.filter(c => c !== className)
         : [...prev.selectedClasses, className]
+    }));
+  };
+
+  const toggleDepartment = (department: string) => {
+    setExamForm(prev => ({
+      ...prev,
+      targetDepartments: prev.targetDepartments.includes(department)
+        ? prev.targetDepartments.filter(d => d !== department)
+        : [...prev.targetDepartments, department]
     }));
   };
 
@@ -1231,6 +1243,36 @@ Explanation: Dr. Nnamdi Azikiwe was the first President of Nigeria.`;
                   )}
                 </div>
 
+                {/* Target Departments */}
+                <div className="space-y-3">
+                  <Label className="font-medium">Target Departments (Optional)</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Leave empty to make exam visible to all departments. Select specific departments to limit visibility.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {['Science', 'Arts', 'Commercial'].map(dept => (
+                      <div key={dept} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`dept-${dept}`}
+                          checked={examForm.targetDepartments.includes(dept)}
+                          onCheckedChange={() => toggleDepartment(dept)}
+                        />
+                        <Label htmlFor={`dept-${dept}`} className="cursor-pointer font-normal text-sm">
+                          {dept}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                  {examForm.targetDepartments.length > 0 && (
+                    <Alert className="bg-blue-50 border-blue-200">
+                      <AlertCircle className="h-4 w-4 text-blue-600" />
+                      <AlertDescription className="text-sm text-blue-800">
+                        Only students in {examForm.targetDepartments.join(', ')} will see this exam
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+
                 {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -1336,6 +1378,15 @@ Explanation: Dr. Nnamdi Azikiwe was the first President of Nigeria.`;
                         <Badge variant="outline">{exam.type}</Badge>
                       </div>
                       {exam.description && <CardDescription>{exam.description}</CardDescription>}
+                      {exam.target_departments && exam.target_departments.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {exam.target_departments.map((dept: string) => (
+                            <Badge key={dept} variant="secondary" className="text-xs">
+                              {dept}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="sm" onClick={() => togglePublish(exam.id, exam.is_published)}

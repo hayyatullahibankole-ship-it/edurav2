@@ -9,6 +9,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { Plus, Upload, Download, Trash2, User, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Props {
   schoolId: string;
@@ -28,7 +35,11 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
   const [newStudent, setNewStudent] = useState({
     fullName: "",
     classLevel: "",
+    department: "",
   });
+
+  // Standard departments
+  const DEPARTMENTS = ["Science", "Arts", "Commercial"];
 
   useEffect(() => {
     fetchStudents();
@@ -77,6 +88,7 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
           schoolCode,
           fullName: newStudent.fullName,
           classLevel: newStudent.classLevel || null,
+          department: newStudent.department || null,
         }
       });
 
@@ -95,6 +107,7 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
           <div className="space-y-1 text-sm">
             <p><strong>Email:</strong> {email}</p>
             <p><strong>Password:</strong> {password}</p>
+            {newStudent.department && <p><strong>Department:</strong> {newStudent.department}</p>}
           </div>
           <p className="text-xs text-muted-foreground mt-2">
             Share these credentials with the student. They'll use the email to login.
@@ -105,7 +118,7 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
         }
       );
       setIsAddModalOpen(false);
-      setNewStudent({ fullName: "", classLevel: "" });
+      setNewStudent({ fullName: "", classLevel: "", department: "" });
       fetchStudents();
       onStudentsUpdate();
     } catch (error: any) {
@@ -218,12 +231,13 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
 
   const exportCredentials = () => {
     const csv = [
-      ["Full Name", "Email", "Password", "Class Level"],
+      ["Full Name", "Email", "Password", "Class Level", "Department"],
       ...students.map(s => [
         s.full_name, 
         `${s.student_username}@${schoolCode}.edu.ng`,
         s.student_password_hash, 
-        s.class_level || ""
+        s.class_level || "",
+        s.department || ""
       ])
     ].map(row => row.join(",")).join("\n");
 
@@ -280,6 +294,25 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
                       placeholder="e.g., SS3"
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="department">Department</Label>
+                    <Select value={newStudent.department} onValueChange={(value) => setNewStudent({ ...newStudent, department: value })}>
+                      <SelectTrigger id="department">
+                        <SelectValue placeholder="Select department (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">None</SelectItem>
+                        {DEPARTMENTS.map((dept) => (
+                          <SelectItem key={dept} value={dept}>
+                            {dept}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Students in a department can only see exams targeted to their department
+                    </p>
+                  </div>
                   <Button onClick={handleAddStudent} disabled={loading} className="w-full">
                     {loading ? "Adding..." : "Add Student"}
                   </Button>
@@ -307,6 +340,7 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
                 <TableHead>Student Email</TableHead>
                 <TableHead>Password</TableHead>
                 <TableHead>Class</TableHead>
+                <TableHead>Department</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -320,6 +354,13 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
                   </TableCell>
                   <TableCell className="font-mono">{student.student_password_hash}</TableCell>
                   <TableCell>{student.class_level || '-'}</TableCell>
+                  <TableCell>
+                    {student.department ? (
+                      <Badge variant="outline">{student.department}</Badge>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <Badge variant={student.is_active ? "default" : "secondary"}>
                       {student.is_active ? "Active" : "Inactive"}

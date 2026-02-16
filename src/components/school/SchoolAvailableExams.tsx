@@ -72,6 +72,7 @@ export default function SchoolAvailableExams() {
             duration_minutes,
             total_questions,
             is_published,
+            target_departments,
             question_selection_mode,
             exam_subjects (
               subject_id,
@@ -372,6 +373,15 @@ export default function SchoolAvailableExams() {
                       <CardTitle className="text-lg">{exam.title}</CardTitle>
                       <Badge variant="outline">{exam.type}</Badge>
                     </div>
+                    {exam.target_departments && exam.target_departments.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2 mb-2">
+                        {exam.target_departments.map((dept: string) => (
+                          <Badge key={dept} variant="secondary" className="text-xs">
+                            {dept}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                     {exam.description && (
                       <CardDescription className="mt-2">{exam.description}</CardDescription>
                     )}

@@ -36,7 +36,7 @@ serve(async (req) => {
     }
 
     // Get request body
-    const { schoolCode, fullName, classLevel } = await req.json();
+    const { schoolCode, fullName, classLevel, department } = await req.json();
 
     if (!schoolCode || !fullName) {
       return new Response(
@@ -146,6 +146,7 @@ serve(async (req) => {
         student_password_hash: password,
         full_name: fullName,
         class_level: classLevel || null,
+        department: department || null,
         is_active: true,
       });
 
