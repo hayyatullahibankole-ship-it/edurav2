@@ -36,25 +36,18 @@ export default function SchoolAvailableExams() {
 
       if (!userData) return;
 
-      // Fetch assigned school exams
+      // Fetch exam assignments with proper filtering
       const { data: assignments, error: assignmentsError } = await supabase
         .from('school_exam_assignments')
         .select(`
-          *,
-          exams (
-            id,
-            title,
-            description,
-            type,
-            duration_minutes,
-            total_questions,
-            is_published,
-            exam_subjects (
-              subject_id,
-              subject_name,
-              question_count
-            )
-          )
+          id,
+          exam_id,
+          school_id,
+          student_id,
+          assigned_to_all,
+          start_date,
+          end_date,
+          is_active
         `)
         .or(`student_id.eq.${userData.id},assigned_to_all.eq.true`)
         .eq('is_active', true);
@@ -63,24 +56,64 @@ export default function SchoolAvailableExams() {
       if (assignmentsError) console.error('[SchoolAvailableExams] assignmentsError:', assignmentsError);
       console.log('[SchoolAvailableExams] raw assignments:', assignments);
 
-      if (assignments) {
+      if (assignments && assignments.length > 0) {
+        // Get unique exam IDs
+        const examIds = [...new Set(assignments.map(a => a.exam_id))];
+        
+        // Fetch exams directly to bypass nested RLS issues
+        const { data: exams, error: examsError } = await supabase
+          .from('exams')
+          .select(`
+            id,
+            title,
+            description,
+            type,
+            duration_minutes,
+            total_questions,
+            is_published,
+            question_selection_mode,
+            exam_subjects (
+              subject_id,
+              subject_name,
+              question_count
+            )
+          `)
+          .in('id', examIds);
+
+        if (examsError) {
+          console.error('[SchoolAvailableExams] examsError:', examsError);
+          throw examsError;
+        }
+
+        // Create a map of exams for quick lookup
+        const examsMap = new Map(exams?.map(e => [e.id, e]) || []);
+
         // Filter for published exams and check dates
         const now = new Date();
         const availableExams = assignments
           .filter(a => {
-            const exam = a.exams;
-            if (!exam || !exam.is_published) return false;
+            const exam = examsMap.get(a.exam_id);
+            if (!exam || !exam.is_published) {
+              console.log(`[SchoolAvailableExams] Exam ${a.exam_id} not published or not found`);
+              return false;
+            }
             
             // Check start date
-            if (a.start_date && new Date(a.start_date) > now) return false;
+            if (a.start_date && new Date(a.start_date) > now) {
+              console.log(`[SchoolAvailableExams] Exam ${a.exam_id} not started yet`);
+              return false;
+            }
             
             // Check end date
-            if (a.end_date && new Date(a.end_date) < now) return false;
+            if (a.end_date && new Date(a.end_date) < now) {
+              console.log(`[SchoolAvailableExams] Exam ${a.exam_id} has ended`);
+              return false;
+            }
             
             return true;
           })
           .map(a => ({
-            ...a.exams,
+            ...examsMap.get(a.exam_id)!,
             assignment: a
           }));
 

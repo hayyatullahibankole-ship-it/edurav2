@@ -134,6 +134,7 @@ async function main() {
         exam_id: exam.id,
         school_id: schoolId,
         assigned_to_all: true,
+        is_active: true,
         start_date: null,
         end_date: null,
         created_by: userId,
