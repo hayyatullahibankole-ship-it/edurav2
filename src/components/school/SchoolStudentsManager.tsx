@@ -82,13 +82,25 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
     setLoading(true);
     try {
       console.log("handleAddStudent - Starting student creation...");
-      // Call Edge Function to create student
+      // Ensure we forward the current user's access token to the Edge Function
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = (sessionData?.session as any)?.access_token;
+      if (!token) {
+        toast.error('You must be signed in to add a student');
+        setLoading(false);
+        return;
+      }
+
+      // Call Edge Function to create student (forward auth)
       const { data, error } = await supabase.functions.invoke('create-school-student', {
         body: {
           schoolCode,
           fullName: newStudent.fullName,
           classLevel: newStudent.classLevel || null,
           department: newStudent.department || null,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`
         }
       });
 
@@ -96,16 +108,21 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
 
       if (error) {
         console.error("handleAddStudent - Function error:", error);
+        // Show detailed error to user (truncated)
+        const errText = error?.message || JSON.stringify(error);
+        toast.error(`Edge function error: ${String(errText).slice(0,200)}`);
         throw error;
       }
 
       if (data?.error) {
         console.error("handleAddStudent - Data error:", data.error);
+        toast.error(`Function response error: ${String(data.error).slice(0,200)}`);
         throw new Error(data.error);
       }
 
       if (!data?.credentials) {
         console.error("handleAddStudent - No credentials in response:", data);
+        toast.error(`No credentials returned from server: ${JSON.stringify(data).slice(0,200)}`);
         throw new Error("No credentials returned from server");
       }
 
@@ -307,12 +324,12 @@ export default function SchoolStudentsManager({ schoolId, schoolCode, remainingS
                   </div>
                   <div>
                     <Label htmlFor="department">Department</Label>
-                    <Select value={newStudent.department} onValueChange={(value) => setNewStudent({ ...newStudent, department: value })}>
+                    <Select value={newStudent.department || ""} onValueChange={(value) => setNewStudent({ ...newStudent, department: value === '__none' ? '' : value })}>
                       <SelectTrigger id="department">
                         <SelectValue placeholder="Select department (optional)" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="__none">None</SelectItem>
                         {STUDENT_DEPARTMENTS.map((dept) => (
                           <SelectItem key={dept} value={dept}>
                             {dept}
