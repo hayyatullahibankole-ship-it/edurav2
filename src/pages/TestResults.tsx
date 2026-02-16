@@ -127,7 +127,7 @@ export default function TestResults() {
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-foreground">Exam Results</h1>
               <p className="text-sm text-muted-foreground mt-1">
-                {results.percentage >= 50 ? 'Great job! Here's your detailed performance.' : 'Here's your detailed performance.'}
+                {results.percentage >= 50 ? "Great job! Here's your detailed performance." : "Here's your detailed performance."}
               </p>
             </div>
           </div>
