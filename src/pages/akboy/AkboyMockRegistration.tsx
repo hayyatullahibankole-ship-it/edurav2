@@ -195,7 +195,10 @@ export default function AkboyMockRegistration() {
             }
           }
 
-          const title = `Batch ${nextStart.toLocaleDateString()} ${nextStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+          // Generate batch letter name (A, B, C, etc.)
+          const totalBatches = (activeBatches || []).length;
+          const batchLetter = String.fromCharCode(65 + totalBatches); // 65 = 'A'
+          const title = `Batch ${batchLetter}`;
           const { data: newBatch, error: insErr } = await supabase
             .from("mock_batches" as any)
             .insert({ title, exam_date: nextStart.toISOString(), exam_venue: settings.default_exam_venue || null } as any)
