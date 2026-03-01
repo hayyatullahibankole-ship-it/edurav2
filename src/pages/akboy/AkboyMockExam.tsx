@@ -246,7 +246,9 @@ export default function AkboyMockExam() {
         throw new Error((rpcResp as any).message || "submission failed");
       }
 
-      navigate(`${basePath}/mock-submitted`);
+      // pass registration number along so the submitted page can offer a
+      // direct link to the result portal and pre‑fill the lookup field there.
+      navigate(`${basePath}/mock-submitted?reg=${encodeURIComponent(regNumber)}`);
     } catch (error: any) {
       console.error("Submit error:", error);
       toast.error(error?.message || "Failed to submit exam. Please try again.");

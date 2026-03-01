@@ -106,6 +106,11 @@ export default function TestResults() {
         <Card className="max-w-md">
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">Results not found</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              If you just completed a **mock exam**, please use the mock results
+              portal instead (menu → Mock Results) – the regular results page
+              only works for live/official exams.
+            </p>
             <Button onClick={() => navigate('/dashboard')} className="mt-4">
               Return to Dashboard
             </Button>

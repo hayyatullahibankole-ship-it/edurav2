@@ -12,11 +12,17 @@ import { Loader2, Search, Trophy, TrendingUp, TrendingDown, Printer, AlertCircle
 
 export default function AkboyMockResults() {
   const [regNumber, setRegNumber] = useState("");
+  // if ?reg= is provided we prefill and auto-check once the checkResult
+  // helper exists below. we declare the params/initialReg here and run the
+  // effect later.
+  const params = new URLSearchParams(window.location.search);
+  const initialReg = params.get('reg') || "";
   const [loading, setLoading] = useState(false);
   const [resultData, setResultData] = useState<any>(null);
   const [status, setStatus] = useState<string | null>(null);
 
   const checkResult = async () => {
+    // ignore empty input
     if (!regNumber.trim()) {
       toast.error("Please enter your registration number");
       return;
@@ -76,6 +82,15 @@ export default function AkboyMockResults() {
   // create a printable/downloadable version of the result slip that mirrors the
   // admit-slip download approach used in registration. this keeps prints from
   // capturing the entire page and ensures consistent styling.
+  // once the checkResult helper is declared we can run the initialReg effect
+  useEffect(() => {
+    if (initialReg) {
+      setRegNumber(initialReg);
+      checkResult();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialReg]);
+
   const downloadResultSlip = () => {
     if (!resultData) return;
 

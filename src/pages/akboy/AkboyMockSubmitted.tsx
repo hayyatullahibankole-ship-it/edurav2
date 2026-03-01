@@ -8,6 +8,10 @@ import { Link } from "react-router-dom";
 export default function AkboyMockSubmitted() {
   const { isAkboy } = useDomainDetection();
   const basePath = isAkboy ? "" : "/akboy";
+  // if a registration number was appended we can offer to auto‑open the
+  // results portal immediately or prefill the lookup field.
+  const searchParams = new URLSearchParams(window.location.search);
+  const regParam = searchParams.get('reg') || '';
 
   return (
     <AkboyLayout title="Exam Submitted" description="Your mock exam has been submitted successfully">
@@ -34,7 +38,9 @@ export default function AkboyMockSubmitted() {
               </div>
 
               <div className="space-y-3">
-                <Link to={`${basePath}/mock-results`}>
+                <Link to={`${basePath}/mock-results${regParam ? `?reg=${encodeURIComponent(
+              regParam)}
+            ` : ''}`}> 
                   <Button className="w-full bg-orange-500 hover:bg-orange-600">
                     <ExternalLink className="w-4 h-4 mr-2" /> Go to Result Portal
                   </Button>
