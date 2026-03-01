@@ -20,6 +20,7 @@ export function AkboyNavbar() {
     { name: "Register", path: `${basePath}/register` },
     { name: "Portfolio", path: `${basePath}/portfolio` },
     { name: "Events", path: `${basePath}/events` },
+    { name: "Mock Exams", path: `${basePath}/mock` },
     { name: "Blog", path: "/blog" },
     { name: "Contact", path: `${basePath}/contact` },
   ];

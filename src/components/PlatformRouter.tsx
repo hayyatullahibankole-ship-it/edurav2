@@ -65,6 +65,7 @@ import AkboyMockLogin from "@/pages/akboy/AkboyMockLogin";
 import AkboyMockExam from "@/pages/akboy/AkboyMockExam";
 import AkboyMockSubmitted from "@/pages/akboy/AkboyMockSubmitted";
 import AkboyMockResults from "@/pages/akboy/AkboyMockResults";
+import AkboyMockPages from "@/pages/akboy/AkboyMockPages";
 
 // Akboy Routes Component
 const AkboyRoutes = () => {
@@ -84,6 +85,7 @@ const AkboyRoutes = () => {
 
       <Route path="/blog" element={<AkboyBlog />} />
       <Route path="/blog/:slug" element={<AkboyBlogPost />} />
+      <Route path="/mock" element={<AkboyMockPages />} />
       <Route path="/mock-registration" element={<AkboyMockRegistration />} />
       <Route path="/mock-login" element={<AkboyMockLogin />} />
       <Route path="/mock-exam" element={<AkboyMockExam />} />
@@ -295,6 +297,7 @@ const EduraRoutes = () => {
       <Route path="/akboy/tutorials/register" element={<AkboyTutorialRegistration />} />
 
       {/* AKBOY Mock Exam Routes */}
+      <Route path="/akboy/mock" element={<AkboyMockPages />} />
       <Route path="/akboy/mock-registration" element={<AkboyMockRegistration />} />
       <Route path="/akboy/mock-login" element={<AkboyMockLogin />} />
       <Route path="/akboy/mock-exam" element={<AkboyMockExam />} />
