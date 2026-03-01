@@ -4394,6 +4394,18 @@ export type Database = {
         Args: { p_registration_number: string }
         Returns: Json
       }
+      submit_mock_result: {
+        Args: {
+          p_registration_number: string;
+          p_total_score: number;
+          p_max_score: number;
+          p_subject_scores: Json;
+          p_strengths: Json;
+          p_weaknesses: Json;
+          p_batch_id: string | null;
+        };
+        Returns: Json;
+      }
       validate_question_answer: {
         Args: { question_id: string; submitted_answer: Json }
         Returns: boolean

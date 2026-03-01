@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -9,6 +10,8 @@ import { CBTQuestion, CBTAnswers } from "@/hooks/useCBTExam";
 export default function AkboyMockExam() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { isAkboy } = useDomainDetection();
+  const basePath = isAkboy ? "" : "/akboy";
   const regNumber = searchParams.get("reg");
 
   const [loading, setLoading] = useState(true);
@@ -21,7 +24,7 @@ export default function AkboyMockExam() {
 
   useEffect(() => {
     if (!regNumber) {
-      navigate("/akboy/mock-login");
+      navigate(`${basePath}/mock-login`);
       return;
     }
     loadExam();
@@ -38,7 +41,7 @@ export default function AkboyMockExam() {
 
       if (!login.valid) {
         toast.error(login.message);
-        navigate("/akboy/mock-login");
+        navigate(`${basePath}/mock-login`);
         return;
       }
 
@@ -93,7 +96,7 @@ export default function AkboyMockExam() {
 
       if (allRawQuestions.length === 0) {
         toast.error("No questions available. Please contact the administrator.");
-        navigate("/akboy/mock-login");
+        navigate(`${basePath}/mock-login`);
         return;
       }
 
@@ -127,7 +130,7 @@ export default function AkboyMockExam() {
     } catch (error: any) {
       console.error("Error loading exam:", error);
       toast.error("Failed to load exam");
-      navigate("/akboy/mock-login");
+      navigate(`${basePath}/mock-login`);
     } finally {
       setLoading(false);
     }
@@ -192,26 +195,33 @@ export default function AkboyMockExam() {
       const strengths = sorted.filter(s => s.converted_score >= 60).map(s => s.subject_name);
       const weaknesses = sorted.filter(s => s.converted_score < 50).map(s => s.subject_name);
 
-      await supabase.from("mock_results" as any).insert({
-        registration_id: registrationData.registration_id,
-        registration_number: regNumber,
-        total_score: totalScore,
-        max_score: 400,
-        subject_scores: subjectScoresArray,
-        strengths,
-        weaknesses,
-        is_released: false,
-        batch_id: registrationData.batch_id || null,
-      } as any);
+      // send result data to a secure RPC that handles validation and RLS concerns
+      const { data: rpcResp, error: rpcError } = await supabase.rpc(
+        "submit_mock_result" as any,
+        {
+          p_registration_number: regNumber,
+          p_total_score: totalScore,
+          p_max_score: 400,
+          p_subject_scores: subjectScoresArray,
+          p_strengths: strengths,
+          p_weaknesses: weaknesses,
+          p_batch_id: registrationData.batch_id || null,
+        }
+      );
 
-      await supabase.from("mock_registrations" as any)
-        .update({ exam_status: "submitted", exam_submitted_at: new Date().toISOString() } as any)
-        .eq("id", registrationData.registration_id);
+      if (rpcError) {
+        throw rpcError;
+      }
 
-      navigate("/akboy/mock-submitted");
+      // successful submission returns status object
+      if (rpcResp && (rpcResp as any).status !== "ok") {
+        throw new Error((rpcResp as any).message || "submission failed");
+      }
+
+      navigate(`${basePath}/mock-submitted`);
     } catch (error: any) {
       console.error("Submit error:", error);
-      toast.error("Failed to submit exam. Please try again.");
+      toast.error(error?.message || "Failed to submit exam. Please try again.");
     } finally {
       setSubmitting(false);
     }

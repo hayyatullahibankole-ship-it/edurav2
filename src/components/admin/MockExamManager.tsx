@@ -40,6 +40,11 @@ export default function MockExamManager() {
         supabase.from("mock_settings" as any).select("key, value"),
       ]);
 
+      if (regsRes.error) console.error('Error loading registrations:', regsRes.error);
+      if (batchRes.error) console.error('Error loading batches:', batchRes.error);
+      if (resultsRes.error) console.error('Error loading results:', resultsRes.error);
+      if (settingsRes.error) console.error('Error loading settings:', settingsRes.error);
+
       if (regsRes.data) setRegistrations(regsRes.data as any[]);
       if (batchRes.data) setBatches(batchRes.data as any[]);
       if (resultsRes.data) setResults(resultsRes.data as any[]);

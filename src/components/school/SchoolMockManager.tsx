@@ -58,6 +58,11 @@ export default function SchoolMockManager({ schoolId }: Props) {
         supabase.from("mock_batches" as any).select("*").eq("is_active", true),
       ]);
 
+      if (studentsRes.error) console.error('Error loading students:', studentsRes.error);
+      if (regsRes.error) console.error('Error loading registrations:', regsRes.error);
+      if (resultsRes.error) console.error('Error loading results:', resultsRes.error);
+      if (batchRes.error) console.error('Error loading batches:', batchRes.error);
+
       if (studentsRes.data) setStudents(studentsRes.data);
       if (regsRes.data) setRegistrations(regsRes.data as any[]);
       if (batchRes.data) setBatches(batchRes.data as any[]);

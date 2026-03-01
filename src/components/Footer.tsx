@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useDomainDetection } from '@/hooks/useDomainDetection';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
@@ -65,15 +66,21 @@ const Footer = () => {
             
             {/* Link to AKBOY */}
             <div className="pt-4 mt-4 border-t border-border">
-              <Link to="/akboy" className="group inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-all">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-white font-bold text-xs">A</span>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">A product by</div>
-                  <div className="font-bold text-primary">AKBOY Creative Hub</div>
-                </div>
-              </Link>
+              {(() => {
+                const { isAkboy } = useDomainDetection();
+                const basePath = isAkboy ? "" : "/akboy";
+                return (
+                  <Link to={basePath || "/"} className="group inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-all">
+                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <span className="text-white font-bold text-xs">A</span>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">A product by</div>
+                      <div className="font-bold text-primary">AKBOY Creative Hub</div>
+                    </div>
+                  </Link>
+                );
+              })()}
             </div>
           </div>
 

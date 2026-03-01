@@ -414,7 +414,7 @@ export default function AkboyMockRegistration() {
                     }
                     setStep(2);
                   }}>
-                  Continue to Payment
+                  {form.mode === 'virtual' ? 'Complete Registration' : 'Continue to Payment'}
                 </Button>
               </CardContent>
             </Card>

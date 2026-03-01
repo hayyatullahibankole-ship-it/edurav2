@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { Loader2, BookOpen, Clock, AlertTriangle, Play, CheckCircle2 } from "lucide-react";
 
 export default function AkboyMockLogin() {
@@ -17,6 +18,9 @@ export default function AkboyMockLogin() {
   const [loginData, setLoginData] = useState<any>(null);
   const [showInstructions, setShowInstructions] = useState(false);
   const navigate = useNavigate();
+  const { isAkboy } = useDomainDetection();
+  // use root paths on akboy domain, prefix with /akboy when on edura
+  const basePath = isAkboy ? "" : "/akboy";
 
   const handleLogin = async () => {
     if (!regNumber.trim()) {
@@ -50,7 +54,7 @@ export default function AkboyMockLogin() {
 
   const startExam = () => {
     // Navigate to mock exam page with the registration data
-    navigate(`/akboy/mock-exam?reg=${regNumber.trim().toUpperCase()}`);
+    navigate(`${basePath}/mock-exam?reg=${regNumber.trim().toUpperCase()}`);
   };
 
   return (
