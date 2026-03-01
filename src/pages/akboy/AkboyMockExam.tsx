@@ -24,6 +24,8 @@ export default function AkboyMockExam() {
   const [examDuration, setExamDuration] = useState(120);
   const [showNotYetAvailableModal, setShowNotYetAvailableModal] = useState(false);
   const [notYetAvailableExam, setNotYetAvailableExam] = useState<{ title: string; scheduledDate: Date } | null>(null);
+  const [attemptId, setAttemptId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!regNumber) {
@@ -49,6 +51,15 @@ export default function AkboyMockExam() {
       }
 
       setRegistrationData(login);
+
+      // Get current user for attempt creation
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("User authentication required");
+        navigate(`${basePath}/mock-login`);
+        return;
+      }
+      setUserId(user.id);
 
       // Check if exam is scheduled for a future date/time
       if (login.batch_id) {
@@ -149,6 +160,39 @@ export default function AkboyMockExam() {
 
       setQuestions(cbtQuestions);
 
+      // Create an attempt record for this mock exam
+      try {
+        const { data: newAttempt, error: attemptError } = await supabase
+          .from("attempts")
+          .insert({
+            user_id: user.id,
+            exam_id: login.mock_exam_id || "mock-exam", // Use mock exam identifier
+            status: "STARTED",
+            time_remaining_seconds: examDuration * 60,
+            proctoring_data: {
+              mock_registration_id: login.registration_id,
+              registration_number: regNumber,
+              title: "AKBOY JAMB Mock Examination",
+              duration_minutes: examDuration,
+              is_mock: true,
+            },
+          })
+          .select()
+          .single();
+
+        if (attemptError) {
+          console.error("Failed to create attempt:", attemptError);
+          toast.error("Failed to initialize exam attempt");
+          return;
+        }
+
+        setAttemptId(newAttempt.id);
+      } catch (attemptCreationError: any) {
+        console.error("Attempt creation error:", attemptCreationError);
+        toast.error("Failed to create exam attempt");
+        return;
+      }
+
       // Update registration status
       await supabase
         .from("mock_registrations" as any)
@@ -169,85 +213,53 @@ export default function AkboyMockExam() {
   }, []);
 
   const submitExam = useCallback(async () => {
-    if (submitting) return;
+    if (submitting || !attemptId) return;
     setSubmitting(true);
 
     try {
-      // Calculate scores per subject (JAMB-style: converted over 100 each)
-      const subjectScores: Record<string, { correct: number; total: number }> = {};
+      // Prepare answer records for insertion into attempt_answers
+      const attemptAnswers = rawQuestions.map((q) => {
+        const optionIndex = answers[q.id];
+        let selectedAnswer: string | null = null;
 
-      rawQuestions.forEach((q, index) => {
-        const subjectName = q.subject_name || "Unknown";
-        if (!subjectScores[subjectName]) {
-          subjectScores[subjectName] = { correct: 0, total: 0 };
-        }
-        subjectScores[subjectName].total++;
-        
-        const userAnswerIndex = answers[q.id];
-        if (userAnswerIndex !== undefined) {
-          // Get the option text the user selected
-          const cbtQ = questions[index];
+        if (optionIndex !== undefined) {
+          const cbtQ = questions.find(cq => cq.id === q.id);
           if (cbtQ) {
-            const selectedOptionIndex = cbtQ.originalIndexMap[userAnswerIndex];
-            const options = Array.isArray(q.options) ? q.options : 
-              typeof q.options === 'object' ? Object.values(q.options) : [];
-            
-            // Check correct answer - could be letter (A, B, C, D) or index
-            const correctAnswer = q.correct_answer;
-            let isCorrect = false;
-            
-            if (typeof correctAnswer === 'string' && correctAnswer.length === 1) {
-              // Letter-based: A=0, B=1, C=2, D=3
-              const correctIndex = correctAnswer.toUpperCase().charCodeAt(0) - 65;
-              isCorrect = selectedOptionIndex === correctIndex;
-            } else {
-              isCorrect = String(selectedOptionIndex) === String(correctAnswer);
-            }
-            
-            if (isCorrect) {
-              subjectScores[subjectName].correct++;
-            }
+            // Map display index back to original DB index
+            const originalIndex = cbtQ.originalIndexMap[optionIndex];
+            // Convert to letter (A, B, C, D)
+            selectedAnswer = String.fromCharCode(65 + originalIndex);
           }
         }
+
+        return {
+          attempt_id: attemptId,
+          question_id: q.id,
+          selected_answer: selectedAnswer,
+        };
       });
 
-      const subjectScoresArray = Object.entries(subjectScores).map(([name, data]) => ({
-        subject_name: name,
-        correct: data.correct,
-        total: data.total,
-        converted_score: data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0,
-      }));
+      // Insert all answers into attempt_answers table
+      const { error: answersError } = await supabase
+        .from("attempt_answers")
+        .insert(attemptAnswers);
 
-      const totalScore = subjectScoresArray.reduce((sum, s) => sum + s.converted_score, 0);
-      const sorted = [...subjectScoresArray].sort((a, b) => b.converted_score - a.converted_score);
-      const strengths = sorted.filter(s => s.converted_score >= 60).map(s => s.subject_name);
-      const weaknesses = sorted.filter(s => s.converted_score < 50).map(s => s.subject_name);
-
-      // send result data to a secure RPC that handles validation and RLS concerns
-      const { data: rpcResp, error: rpcError } = await supabase.rpc(
-        "submit_mock_result" as any,
-        {
-          p_registration_number: regNumber,
-          p_total_score: totalScore,
-          p_max_score: 400,
-          p_subject_scores: subjectScoresArray,
-          p_strengths: strengths,
-          p_weaknesses: weaknesses,
-          p_batch_id: registrationData.batch_id || null,
-        }
-      );
-
-      if (rpcError) {
-        throw rpcError;
+      if (answersError) {
+        throw answersError;
       }
 
-      // successful submission returns status object
-      if (rpcResp && (rpcResp as any).status !== "ok") {
-        throw new Error((rpcResp as any).message || "submission failed");
+      // Update attempt status to SUBMITTED - this triggers result computation via the trigger
+      const { error: statusError } = await supabase
+        .from("attempts")
+        .update({ status: "SUBMITTED" })
+        .eq("id", attemptId);
+
+      if (statusError) {
+        throw statusError;
       }
 
-      // pass registration number along so the submitted page can offer a
-      // direct link to the result portal and pre‑fill the lookup field there.
+      // Redirect to mock-submitted page with registration number
+      // Results will be computed in background and available in mock-results when checked later
       navigate(`${basePath}/mock-submitted?reg=${encodeURIComponent(regNumber)}`);
     } catch (error: any) {
       console.error("Submit error:", error);
@@ -255,7 +267,7 @@ export default function AkboyMockExam() {
     } finally {
       setSubmitting(false);
     }
-  }, [questions, answers, rawQuestions, registrationData, regNumber, navigate, submitting]);
+  }, [attemptId, submitting, answers, rawQuestions, questions, navigate, basePath, regNumber]);
 
   if (!regNumber) return null;
 
