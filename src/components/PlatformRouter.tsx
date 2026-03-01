@@ -60,6 +60,11 @@ import AkboyServices from "@/pages/akboy/AkboyServices";
 import AkboyPortfolio from "@/pages/akboy/AkboyPortfolio";
 import AkboyEvents from "@/pages/akboy/AkboyEvents";
 import AkboyTutorialRegistration from "@/pages/akboy/AkboyTutorialRegistration";
+import AkboyMockRegistration from "@/pages/akboy/AkboyMockRegistration";
+import AkboyMockLogin from "@/pages/akboy/AkboyMockLogin";
+import AkboyMockExam from "@/pages/akboy/AkboyMockExam";
+import AkboyMockSubmitted from "@/pages/akboy/AkboyMockSubmitted";
+import AkboyMockResults from "@/pages/akboy/AkboyMockResults";
 
 // Akboy Routes Component
 const AkboyRoutes = () => {
@@ -79,6 +84,11 @@ const AkboyRoutes = () => {
 
       <Route path="/blog" element={<AkboyBlog />} />
       <Route path="/blog/:slug" element={<AkboyBlogPost />} />
+      <Route path="/mock-registration" element={<AkboyMockRegistration />} />
+      <Route path="/mock-login" element={<AkboyMockLogin />} />
+      <Route path="/mock-exam" element={<AkboyMockExam />} />
+      <Route path="/mock-submitted" element={<AkboyMockSubmitted />} />
+      <Route path="/mock-results" element={<AkboyMockResults />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="*" element={<NotFound />} />
@@ -283,6 +293,13 @@ const EduraRoutes = () => {
       <Route path="/akboy/register" element={<AkboyTutorialRegistration />} />
       <Route path="/akboy/tutorial-registration" element={<AkboyTutorialRegistration />} />
       <Route path="/akboy/tutorials/register" element={<AkboyTutorialRegistration />} />
+
+      {/* AKBOY Mock Exam Routes */}
+      <Route path="/akboy/mock-registration" element={<AkboyMockRegistration />} />
+      <Route path="/akboy/mock-login" element={<AkboyMockLogin />} />
+      <Route path="/akboy/mock-exam" element={<AkboyMockExam />} />
+      <Route path="/akboy/mock-submitted" element={<AkboyMockSubmitted />} />
+      <Route path="/akboy/mock-results" element={<AkboyMockResults />} />
 
       <Route path="*" element={<Layout><NotFound /></Layout>} />
     </Routes>

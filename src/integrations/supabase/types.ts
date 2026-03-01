@@ -1534,6 +1534,225 @@ export type Database = {
         }
         Relationships: []
       }
+      mock_batches: {
+        Row: {
+          created_at: string | null
+          exam_date: string | null
+          exam_venue: string | null
+          id: string
+          is_active: boolean | null
+          results_release_date: string | null
+          results_released: boolean | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          exam_date?: string | null
+          exam_venue?: string | null
+          id?: string
+          is_active?: boolean | null
+          results_release_date?: string | null
+          results_released?: boolean | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          exam_date?: string | null
+          exam_venue?: string | null
+          id?: string
+          is_active?: boolean | null
+          results_release_date?: string | null
+          results_released?: boolean | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      mock_registrations: {
+        Row: {
+          attempt_id: string | null
+          batch_id: string | null
+          created_at: string | null
+          email: string | null
+          exam_started_at: string | null
+          exam_status: string | null
+          exam_submitted_at: string | null
+          full_name: string
+          id: string
+          mode: string
+          payment_receipt_url: string | null
+          payment_status: string | null
+          phone: string
+          registration_number: string
+          school_id: string | null
+          school_student_id: string | null
+          subjects: Json
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attempt_id?: string | null
+          batch_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          exam_started_at?: string | null
+          exam_status?: string | null
+          exam_submitted_at?: string | null
+          full_name: string
+          id?: string
+          mode: string
+          payment_receipt_url?: string | null
+          payment_status?: string | null
+          phone: string
+          registration_number: string
+          school_id?: string | null
+          school_student_id?: string | null
+          subjects?: Json
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attempt_id?: string | null
+          batch_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          exam_started_at?: string | null
+          exam_status?: string | null
+          exam_submitted_at?: string | null
+          full_name?: string
+          id?: string
+          mode?: string
+          payment_receipt_url?: string | null
+          payment_status?: string | null
+          phone?: string
+          registration_number?: string
+          school_id?: string | null
+          school_student_id?: string | null
+          subjects?: Json
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_registrations_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_registrations_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "mock_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_registrations_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_registrations_school_student_id_fkey"
+            columns: ["school_student_id"]
+            isOneToOne: false
+            referencedRelation: "school_students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_registrations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_results: {
+        Row: {
+          batch_id: string | null
+          created_at: string | null
+          id: string
+          is_released: boolean | null
+          max_score: number
+          registration_id: string
+          registration_number: string
+          strengths: Json | null
+          subject_scores: Json
+          total_score: number
+          weaknesses: Json | null
+        }
+        Insert: {
+          batch_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_released?: boolean | null
+          max_score?: number
+          registration_id: string
+          registration_number: string
+          strengths?: Json | null
+          subject_scores?: Json
+          total_score?: number
+          weaknesses?: Json | null
+        }
+        Update: {
+          batch_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_released?: boolean | null
+          max_score?: number
+          registration_id?: string
+          registration_number?: string
+          strengths?: Json | null
+          subject_scores?: Json
+          total_score?: number
+          weaknesses?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_results_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "mock_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_results_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "mock_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_settings: {
+        Row: {
+          description: string | null
+          id: string
+          key: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -3670,6 +3889,10 @@ export type Database = {
         Args: { recipient_email: string }
         Returns: boolean
       }
+      check_mock_result: {
+        Args: { p_registration_number: string }
+        Returns: Json
+      }
       check_rate_limit: {
         Args: {
           endpoint_name: string
@@ -3734,6 +3957,7 @@ export type Database = {
           updated_count: number
         }[]
       }
+      generate_mock_reg_number: { Args: never; Returns: string }
       generate_professional_school_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       generate_school_code: { Args: { school_name: string }; Returns: string }
@@ -4165,6 +4389,10 @@ export type Database = {
       validate_answer_simple: {
         Args: { question_id_param: string; submitted_index: number }
         Returns: boolean
+      }
+      validate_mock_exam_login: {
+        Args: { p_registration_number: string }
+        Returns: Json
       }
       validate_question_answer: {
         Args: { question_id: string; submitted_answer: Json }

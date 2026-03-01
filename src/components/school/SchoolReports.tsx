@@ -102,7 +102,8 @@ export default function SchoolReports({ schoolId }: Props) {
         for (const attempt of stud.attempts) {
           const breakdown = attempt.results?.subject_breakdown;
           if (breakdown && Array.isArray(breakdown)) {
-            for (const sub of breakdown) {
+            for (const rawSub of breakdown) {
+              const sub = rawSub as any;
               if (!subjectMap[sub.subject_name]) {
                 subjectMap[sub.subject_name] = { correct: 0, total: 0, attempts: 0 };
               }
@@ -152,7 +153,8 @@ export default function SchoolReports({ schoolId }: Props) {
     for (const attempt of student.attempts) {
       const breakdown = attempt.results?.subject_breakdown;
       if (breakdown && Array.isArray(breakdown)) {
-        for (const sub of breakdown) {
+        for (const rawSub of breakdown) {
+          const sub = rawSub as any;
           if (!subjectMap[sub.subject_name]) {
             subjectMap[sub.subject_name] = { correct: 0, total: 0, attempts: 0 };
           }
