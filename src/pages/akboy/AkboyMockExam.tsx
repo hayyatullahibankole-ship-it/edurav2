@@ -25,7 +25,6 @@ export default function AkboyMockExam() {
   const [showNotYetAvailableModal, setShowNotYetAvailableModal] = useState(false);
   const [notYetAvailableExam, setNotYetAvailableExam] = useState<{ title: string; scheduledDate: Date } | null>(null);
   const [attemptId, setAttemptId] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!regNumber) {
@@ -51,15 +50,6 @@ export default function AkboyMockExam() {
       }
 
       setRegistrationData(login);
-
-      // Get current user for attempt creation
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("User authentication required");
-        navigate(`${basePath}/mock-login`);
-        return;
-      }
-      setUserId(user.id);
 
       // Check if exam is scheduled for a future date/time
       if (login.batch_id) {
@@ -160,13 +150,15 @@ export default function AkboyMockExam() {
 
       setQuestions(cbtQuestions);
 
-      // Create an attempt record for this mock exam
+      // Create an attempt record for this mock exam (unauthenticated)
       try {
+        // For mock exams, we use registration number as the identifier
+        // User_id can be null since mock exams are anonymous
         const { data: newAttempt, error: attemptError } = await supabase
           .from("attempts")
           .insert({
-            user_id: user.id,
-            exam_id: login.mock_exam_id || "mock-exam", // Use mock exam identifier
+            user_id: null, // Mock exams are unauthenticated
+            exam_id: login.mock_exam_id || "mock-exam",
             status: "STARTED",
             time_remaining_seconds: examDuration * 60,
             proctoring_data: {
