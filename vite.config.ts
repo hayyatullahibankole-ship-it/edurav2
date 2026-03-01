@@ -13,6 +13,13 @@ export default defineConfig(({ mode }) => ({
       origin: '*',
       methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
       allowedHeaders: ['Content-Type', 'Authorization']
+    },
+    hmr: {
+      host: process.env.CODESPACE_NAME 
+        ? `${process.env.CODESPACE_NAME}-8080.${process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}` 
+        : 'localhost',
+      port: 443,
+      protocol: 'wss'
     }
   },
   plugins: [
