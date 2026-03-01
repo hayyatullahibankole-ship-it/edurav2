@@ -56,7 +56,12 @@ export default function SchoolMockManager({ schoolId }: Props) {
     try {
       const [studentsRes, regsRes, resultsRes, batchRes] = await Promise.all([
         supabase.from("school_students").select("id, full_name, class_level, user_id").eq("school_id", schoolId),
-        supabase.from("mock_registrations" as any).select("*").eq("school_id", schoolId).order("created_at", { ascending: false }),
+        // fetch registrations along with linked batch info so we can display exam date/time
+        supabase
+          .from("mock_registrations" as any)
+          .select(`*, mock_batches(id, title, exam_date, exam_venue)`)
+          .eq("school_id", schoolId)
+          .order("created_at", { ascending: false }),
         supabase.from("mock_results" as any).select("*"),
         supabase.from("mock_batches" as any).select("*").eq("is_active", true),
       ]);
@@ -275,6 +280,8 @@ export default function SchoolMockManager({ schoolId }: Props) {
         <div class="section">
           <div class="section-title">Exam Details</div>
           <div class="field"><span class="label">Status:</span><span class="value">${reg.exam_status || 'Registered'}</span></div>
+          ${reg.mock_batches?.exam_date ? `<div class="field"><span class="label">Date:</span><span class="value">${new Date(reg.mock_batches.exam_date).toLocaleString()}</span></div>` : ''}
+          ${reg.mock_batches?.exam_venue ? `<div class="field"><span class="label">Venue:</span><span class="value">${reg.mock_batches.exam_venue}</span></div>` : ''}
           <div class="field"><span class="label">Duration:</span><span class="value">120 minutes</span></div>
         </div>
         
@@ -357,17 +364,6 @@ export default function SchoolMockManager({ schoolId }: Props) {
               {/* batch is assigned automatically; no UI needed */}
             </div>
 
-            {/* if virtual mode is chosen show the aggregate physical cost and payment account */}
-            {regMode === 'virtual' && (
-              <Alert className="border-blue-200 bg-blue-50">
-                <AlertDescription className="text-blue-800 text-sm">
-                  {selectedStudents.length > 0
-                    ? `Selected ${selectedStudents.length} student${selectedStudents.length !== 1 ? 's' : ''}. Physical exam cost: ₦${(Number(settings.registration_fee) || 0) * selectedStudents.length}.`
-                    : 'Select students to see the total cost for physical exam.'}
-                  {' '}Please pay to {settings.payment_account?.bank || 'Access Bank'} account&nbsp;{settings.payment_account?.account_number || '0123456789'}.
-                </AlertDescription>
-              </Alert>
-            )}
 
             <div className="border rounded-lg overflow-hidden">
               <Table>
@@ -429,7 +425,17 @@ export default function SchoolMockManager({ schoolId }: Props) {
                 </TableBody>
               </Table>
             </div>
-
+            {/* cost/pricing alert shown near the action button */}
+            {regMode === 'physical' && (
+              <Alert className="border-blue-200 bg-blue-50 mt-4">
+                <AlertDescription className="text-blue-800 text-sm">
+                  {selectedStudents.length > 0
+                    ? `Selected ${selectedStudents.length} student${selectedStudents.length !== 1 ? 's' : ''}. Total physical exam cost: ₦${(Number(settings.registration_fee) || 0) * selectedStudents.length}.`
+                    : 'Select students to see the total cost for physical exam.'}
+                  {' '}Pay to {settings.payment_account?.bank || 'Access Bank'} account {settings.payment_account?.account_number || '0123456789'}. After payment, send receipt to <strong>08101466977</strong> for confirmation.
+                </AlertDescription>
+              </Alert>
+            )}
             <Button
               onClick={registerStudents}
               disabled={registering || selectedStudents.length === 0}
@@ -463,6 +469,8 @@ export default function SchoolMockManager({ schoolId }: Props) {
                     <TableHead>Name</TableHead>
                     <TableHead>Reg Number</TableHead>
                     <TableHead>Mode</TableHead>
+                    <TableHead>Batch</TableHead>
+                    <TableHead>Exam Date</TableHead>
                     <TableHead>Subjects</TableHead>
                     <TableHead>Exam Status</TableHead>
                   </TableRow>
@@ -473,6 +481,12 @@ export default function SchoolMockManager({ schoolId }: Props) {
                       <TableCell className="font-medium">{reg.full_name}</TableCell>
                       <TableCell className="font-mono text-xs">{reg.registration_number}</TableCell>
                       <TableCell><Badge variant="outline" className="capitalize text-xs">{reg.mode}</Badge></TableCell>
+                      <TableCell className="font-medium">
+                        {reg.mock_batches?.title || '-'}
+                      </TableCell>
+                      <TableCell>
+                        {reg.mock_batches?.exam_date ? new Date(reg.mock_batches.exam_date).toLocaleString() : '-'}
+                      </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {(reg.subjects || []).map((s: any, i: number) => (

@@ -61,6 +61,111 @@ export default function AkboyMockResults() {
     return "bg-red-500";
   };
 
+  // helpers returning actual color codes for use in generated HTML
+  const scoreColorHex = (score: number) => {
+    if (score >= 75) return "#16a34a"; // green-600
+    if (score >= 50) return "#ca8a04"; // yellow-600
+    return "#dc2626"; // red-600
+  };
+  const progressHex = (score: number) => {
+    if (score >= 75) return "#22c55e"; // green-500
+    if (score >= 50) return "#eab308"; // yellow-500
+    return "#ef4444"; // red-500
+  };
+
+  // create a printable/downloadable version of the result slip that mirrors the
+  // admit-slip download approach used in registration. this keeps prints from
+  // capturing the entire page and ensures consistent styling.
+  const downloadResultSlip = () => {
+    if (!resultData) return;
+
+    // generate subject rows html
+    const subjectsHtml = (resultData.subject_scores || [])
+      .map((s: any) => {
+        const color = scoreColorHex(s.converted_score);
+        const width = `${s.converted_score}%`;
+        return `
+          <div style="border:1px solid #ddd;border-radius:4px;padding:8px;margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:14px;">
+              <span>${s.subject_name}</span>
+              <span style="font-weight:bold;color:${color};">${s.converted_score}/100</span>
+            </div>
+            <div style="background:#f3f3f3;height:8px;border-radius:4px;overflow:hidden;">
+              <div style="background:${progressHex(s.converted_score)};width:${width};height:100%;"></div>
+            </div>
+            <p style="font-size:12px;color:#666;margin-top:4px;">${s.correct}/${s.total} correct answers</p>
+          </div>`;
+      })
+      .join('');
+
+    const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>AKBOY Mock Exam Result Slip</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Arial',sans-serif; padding:20px; background:#f5f5f5; }
+    .container { max-width:8.5in; margin:0 auto; }
+    .result-slip { background:white; border:2px solid #333; padding:20px; margin-bottom:20px; }
+    .header { text-align:center; border-bottom:2px solid #ff8c00; padding-bottom:10px; margin-bottom:15px; }
+    .header h1 { color:#ff8c00; font-size:24px; margin-bottom:5px; }
+    .header p { color:#666; font-size:12px; }
+    .content { margin-bottom:15px; }
+    .section { margin-bottom:15px; }
+    .section-title { font-weight:bold; color:#ff8c00; font-size:12px; margin-bottom:8px; border-bottom:1px solid #ddd; padding-bottom:5px; }
+    .field { display:flex; margin-bottom:6px; font-size:12px; }
+    .label { font-weight:bold; width:120px; color:#555; }
+    .value { flex:1; color:#333; }
+    .score-box { text-align:center; background:linear-gradient(to right,#ffedd5,#fef3c7); padding:20px; border-radius:12px; border:1px solid #ddd; }
+    .score-box .score { font-size:48px; font-weight:bold; }
+    .subject-breakdown { margin-top:15px; }
+    .footer { border-top:1px solid #ddd; padding-top:10px; text-align:center; font-size:10px; color:#666; }
+    @media print { body { background:white; } .result-slip { page-break-after:always; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="result-slip">
+      <div class="header">
+        <h1>AKBOY Creative Hub</h1>
+        <p>JAMB Mock Examination Result Slip</p>
+      </div>
+      <div class="content">
+        <div class="section">
+          <div class="section-title">Student Information</div>
+          <div class="field"><span class="label">Name:</span><span class="value">${resultData.full_name}</span></div>
+          <div class="field"><span class="label">Reg Number:</span><span class="value" style="font-weight:bold;font-family:monospace;">${resultData.registration_number}</span></div>
+        </div>
+        <div class="section score-box">
+          <div class="score">${resultData.total_score}</div>
+          <div style="font-size:14px;color:#666;">/ ${resultData.max_score} (Total Score)</div>
+        </div>
+        <div class="section subject-breakdown">
+          <div class="section-title">Subject Breakdown</div>
+          ${subjectsHtml}
+        </div>
+      </div>
+      <div class="footer">
+        <div>For exam updates and announcements, visit: www.akboys.ng</div>
+        <div>Contact: 08101466977 | akboycreativehub@gmail.com</div>
+        <div style="margin-top:5px;font-size:9px;">Generated: ${new Date().toLocaleString()}</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `AKBOY_Result_Slip_${resultData.registration_number}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Result slip downloaded successfully");
+  };
+
   return (
     <AkboyLayout title="Mock Exam Results" description="Check your AKBOY JAMB Mock Exam results">
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12 px-4">
@@ -216,7 +321,7 @@ export default function AkboyMockResults() {
                 </CardContent>
               </Card>
 
-              <Button variant="outline" onClick={() => window.print()} className="w-full print:hidden">
+              <Button variant="outline" onClick={downloadResultSlip} className="w-full print:hidden">
                 <Printer className="w-4 h-4 mr-2" /> Print Result Slip
               </Button>
             </div>
