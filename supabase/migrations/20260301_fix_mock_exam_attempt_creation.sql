@@ -17,6 +17,7 @@ AS $$
 DECLARE
   attempt_id UUID;
   proctoring_data JSONB;
+  exam_uuid UUID;
 BEGIN
   -- Verify registration exists and is in valid state
   IF NOT EXISTS (
@@ -30,6 +31,13 @@ BEGIN
       'message', 'Invalid registration or exam not ready'
     );
   END IF;
+
+  -- Try to convert p_exam_id to UUID, or use NULL if it's not a valid UUID
+  BEGIN
+    exam_uuid := p_exam_id::uuid;
+  EXCEPTION WHEN OTHERS THEN
+    exam_uuid := NULL;
+  END;
 
   -- Build proctoring data
   proctoring_data := jsonb_build_object(
@@ -50,7 +58,7 @@ BEGIN
       proctoring_data
     ) VALUES (
       NULL,  -- Anonymous attempt
-      p_exam_id,
+      exam_uuid,  -- UUID or NULL
       'STARTED',
       p_exam_duration_minutes * 60,
       proctoring_data
