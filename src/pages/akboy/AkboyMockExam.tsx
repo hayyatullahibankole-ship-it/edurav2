@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { CleanCBTInterface } from "@/components/CleanCBTInterface";
 import { CBTQuestion, CBTAnswers } from "@/hooks/useCBTExam";
+import { ExamNotYetAvailableModal } from "@/components/ExamNotYetAvailableModal";
 
 export default function AkboyMockExam() {
   const [searchParams] = useSearchParams();
@@ -21,6 +22,8 @@ export default function AkboyMockExam() {
   const [registrationData, setRegistrationData] = useState<any>(null);
   const [rawQuestions, setRawQuestions] = useState<any[]>([]);
   const [examDuration, setExamDuration] = useState(120);
+  const [showNotYetAvailableModal, setShowNotYetAvailableModal] = useState(false);
+  const [notYetAvailableExam, setNotYetAvailableExam] = useState<{ title: string; scheduledDate: Date } | null>(null);
 
   useEffect(() => {
     if (!regNumber) {
@@ -46,6 +49,31 @@ export default function AkboyMockExam() {
       }
 
       setRegistrationData(login);
+
+      // Check if exam is scheduled for a future date/time
+      if (login.batch_id) {
+        const { data: batch } = await supabase
+          .from("mock_batches" as any)
+          .select("exam_date, title")
+          .eq("id", login.batch_id)
+          .single();
+        
+        if (batch?.exam_date) {
+          const scheduledExamTime = new Date(batch.exam_date);
+          const currentTime = new Date();
+          
+          if (currentTime < scheduledExamTime) {
+            // Show modal with the scheduled date/time
+            setNotYetAvailableExam({
+              title: batch.title || "Mock Examination",
+              scheduledDate: scheduledExamTime
+            });
+            setShowNotYetAvailableModal(true);
+            setLoading(false);
+            return;
+          }
+        }
+      }
 
       const { data: durSetting } = await supabase
         .from("mock_settings" as any)
@@ -228,6 +256,17 @@ export default function AkboyMockExam() {
   }, [questions, answers, rawQuestions, registrationData, regNumber, navigate, submitting]);
 
   if (!regNumber) return null;
+
+  if (showNotYetAvailableModal && notYetAvailableExam) {
+    return (
+      <ExamNotYetAvailableModal
+        isOpen={showNotYetAvailableModal}
+        examTitle={notYetAvailableExam.title}
+        scheduledDate={notYetAvailableExam.scheduledDate}
+        onClose={() => navigate(`${basePath}/mock-login`)}
+      />
+    );
+  }
 
   if (loading) {
     return (

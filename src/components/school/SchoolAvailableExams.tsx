@@ -7,12 +7,15 @@ import { BookOpen, Clock, FileText, AlertCircle, Play, Calendar } from "lucide-r
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { ExamNotYetAvailableModal } from "@/components/ExamNotYetAvailableModal";
 
 export default function SchoolAvailableExams() {
   const [exams, setExams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [attemptedExamIds, setAttemptedExamIds] = useState<Set<string>>(new Set());
+  const [showNotYetAvailableModal, setShowNotYetAvailableModal] = useState(false);
+  const [notYetAvailableExam, setNotYetAvailableExam] = useState<{ title: string; scheduledDate: Date } | null>(null);
 
   useEffect(() => {
     fetchExams();
@@ -203,6 +206,23 @@ export default function SchoolAvailableExams() {
         return;
       }
 
+      // Check if exam is scheduled for a future date/time
+      const examAssignment = exams.find(e => e.id === examId)?.assignment;
+      if (examAssignment?.start_date) {
+        const scheduledStartTime = new Date(examAssignment.start_date);
+        const currentTime = new Date();
+        
+        if (currentTime < scheduledStartTime) {
+          // Show modal with the scheduled date/time
+          setNotYetAvailableExam({
+            title: exam.title,
+            scheduledDate: scheduledStartTime
+          });
+          setShowNotYetAvailableModal(true);
+          return;
+        }
+      }
+
       let questionIds: string[] = [];
       
       // Determine question selection mode (default to 'custom' for existing exams)
@@ -335,6 +355,16 @@ export default function SchoolAvailableExams() {
 
   return (
     <div className="space-y-6">
+      {/* Exam Not Yet Available Modal */}
+      {notYetAvailableExam && (
+        <ExamNotYetAvailableModal
+          isOpen={showNotYetAvailableModal}
+          examTitle={notYetAvailableExam.title}
+          scheduledDate={notYetAvailableExam.scheduledDate}
+          onClose={() => setShowNotYetAvailableModal(false)}
+        />
+      )}
+
       <div>
         <h2 className="text-xl font-semibold mb-1">School Assigned Exams</h2>
         <p className="text-sm text-muted-foreground">
