@@ -52,7 +52,7 @@ export default function AkboyMockRegistration() {
     phone: "",
     email: "",
     mode: "" as string,
-    batchId: "" as string,
+    // batch will be determined automatically, users should not select it
     selectedSubjects: [] as string[],
   });
 
@@ -127,90 +127,11 @@ export default function AkboyMockRegistration() {
         questions: s.questions,
       }));
 
-      // Assign or create a batch automatically when none selected
+      // automatically assign/create batch using helper
       let assignedBatch: any = null;
-      let targetBatchId = form.batchId || null;
-      if (!targetBatchId) {
-        // Try to find an active batch with available capacity
-        const { data: activeBatches } = await supabase
-          .from("mock_batches" as any)
-          .select("*")
-          .eq("is_active", true)
-          .order("exam_date", { ascending: true });
-
-        const BATCH_CAPACITY = 30;
-        const SLOTS_PER_DAY = 3;
-        const SLOT_DURATION_MIN = 150; // 2h30 = 150 minutes
-        const BREAK_MIN = 30;
-
-        if (activeBatches && activeBatches.length > 0) {
-          // Check counts per batch
-          for (const b of activeBatches) {
-            if (!b.id) continue;
-            const { count, error: cErr } = await supabase
-              .from("mock_registrations" as any)
-              .select("id", { count: "exact", head: false })
-              .eq("batch_id", b.id);
-            const regCount = (count as number) || 0;
-            if (regCount < BATCH_CAPACITY) {
-              assignedBatch = b;
-              targetBatchId = b.id;
-              break;
-            }
-          }
-        }
-
-        // If still no available batch, create the next scheduled batch
-        if (!targetBatchId) {
-          // Determine next start slot based on latest batch or default start date April 2
-          const now = new Date();
-          const year = now.getFullYear();
-          const defaultStart = new Date(year, 3, 2, 9, 0, 0); // April is month 3 (0-indexed)
-
-          // Find latest exam_date among existing batches
-          let latestDate: Date | null = null;
-          if (activeBatches && activeBatches.length > 0) {
-            for (const b of activeBatches) {
-              if (b.exam_date) {
-                const d = new Date(b.exam_date);
-                if (!latestDate || d > latestDate) latestDate = d;
-              }
-            }
-          }
-
-          let nextStart: Date;
-          if (!latestDate) {
-            nextStart = defaultStart;
-          } else {
-            // Count how many batches are on latestDate's day
-            const sameDayBatches = (activeBatches || []).filter((b: any) => b.exam_date && new Date(b.exam_date).toDateString() === latestDate!.toDateString());
-            if (sameDayBatches.length < SLOTS_PER_DAY) {
-              // schedule after latestDate by slot interval
-              nextStart = new Date(latestDate.getTime() + (SLOT_DURATION_MIN + BREAK_MIN) * 60 * 1000);
-            } else {
-              // next day at 9:00
-              nextStart = new Date(latestDate);
-              nextStart.setDate(nextStart.getDate() + 1);
-              nextStart.setHours(9, 0, 0, 0);
-            }
-          }
-
-          // Generate batch letter name (A, B, C, etc.)
-          const totalBatches = (activeBatches || []).length;
-          const batchLetter = String.fromCharCode(65 + totalBatches); // 65 = 'A'
-          const title = `Batch ${batchLetter}`;
-          const { data: newBatch, error: insErr } = await supabase
-            .from("mock_batches" as any)
-            .insert({ title, exam_date: nextStart.toISOString(), exam_venue: settings.default_exam_venue || null } as any)
-            .select()
-            .single();
-          if (insErr) throw insErr;
-          assignedBatch = newBatch;
-          targetBatchId = newBatch.id;
-        }
-      } else {
-        assignedBatch = batches.find(b => b.id === targetBatchId) || null;
-      }
+      const { getOrCreateBatch } = await import("@/utils/mockBatch");
+      assignedBatch = await getOrCreateBatch(supabase, settings);
+      const targetBatchId = assignedBatch?.id || null;
 
       const insertPayload: any = {
         registration_number: regNum,
@@ -252,8 +173,100 @@ export default function AkboyMockRegistration() {
     }
   };
 
-  const printAdmitSlip = () => {
-    window.print();
+  // instead of printing the entire page we generate a downloadable HTML
+  // file containing just the admit slip
+  const downloadAdmitSlip = () => {
+    if (!result) return;
+
+    const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>AKBOY Mock Exam Admit Slip</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Arial', sans-serif; padding: 20px; background: #f5f5f5; }
+    .container { max-width: 8.5in; margin: 0 auto; }
+    .admit-slip { 
+      background: white; 
+      border: 2px solid #333; 
+      padding: 20px; 
+      margin-bottom: 20px; 
+      page-break-after: always;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header { 
+      text-align: center; 
+      border-bottom: 2px solid #ff8c00; 
+      padding-bottom: 10px; 
+      margin-bottom: 15px; 
+    }
+    .header h1 { color: #ff8c00; font-size: 24px; margin-bottom: 5px; }
+    .header p { color: #666; font-size: 12px; }
+    .content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px; }
+    .section { }
+    .section-title { font-weight: bold; color: #ff8c00; font-size: 12px; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+    .field { display: flex; margin-bottom: 6px; font-size: 12px; }
+    .label { font-weight: bold; width: 100px; color: #555; }
+    .value { flex: 1; color: #333; }
+    .subjects { grid-column: 1 / -1; }
+    .subject-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+    .subject-badge { background: #ff8c00; color: white; padding: 4px 8px; border-radius: 3px; font-size: 11px; }
+    .footer { 
+      border-top: 1px solid #ddd; 
+      padding-top: 10px; 
+      text-align: center; 
+      font-size: 10px; 
+      color: #666; 
+    }
+    .footer-note { margin: 5px 0; }
+    @media print {
+      body { background: white; }
+      .admit-slip { page-break-after: always; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="admit-slip">
+      <div class="header">
+        <h1>AKBOY Creative Hub</h1>
+        <p>JAMB Mock Examination Admit Slip</p>
+      </div>
+      <div class="content">
+        <div class="section">
+          <div class="section-title">Student Information</div>
+          <div class="field"><span class="label">Name:</span><span class="value">${result.fullName}</span></div>
+          <div class="field"><span class="label">Reg Number:</span><span class="value" style="font-weight: bold; font-family: monospace;">${result.registrationNumber}</span></div>
+          <div class="field"><span class="label">Mode:</span><span class="value" style="text-transform: capitalize;">${result.mode}</span></div>
+          ${result.batchTitle ? `<div class="field"><span class="label">Batch:</span><span class="value">${result.batchTitle}</span></div>` : ''}
+          ${result.examDate ? `<div class="field"><span class="label">Date:</span><span class="value">${new Date(result.examDate).toLocaleString()}</span></div>` : ''}
+        </div>
+        <div class="section subjects">
+          <div class="section-title">Selected Subjects</div>
+          <div class="subject-list">
+            ${result.subjects.map((s: any) => `<span class="subject-badge">${s.name}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="footer-note">For exam updates and announcements, visit: www.akboys.ng</div>
+        <div class="footer-note">Contact: 08101466977 | akboycreativehub@gmail.com</div>
+        <div class="footer-note" style="margin-top: 10px; font-size: 9px;">Generated: ${new Date().toLocaleString()}</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `AKBOY_Admit_Slip_${result.registrationNumber}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Admit slip downloaded successfully");
   };
 
   const fee = settings.registration_fee || "1000";
@@ -347,23 +360,7 @@ export default function AkboyMockRegistration() {
                   </div>
                 </div>
 
-                {/* Batch Selection */}
-                {batches.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Exam Batch (Optional)</Label>
-                    <Select value={form.batchId} onValueChange={v => setForm(p => ({ ...p, batchId: v === '__none' ? '' : v }))}>
-                      <SelectTrigger><SelectValue placeholder="Select a batch" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none">No specific batch</SelectItem>
-                        {batches.map(b => (
-                          <SelectItem key={b.id} value={b.id}>
-                            {b.title} {b.exam_date ? `(${new Date(b.exam_date).toLocaleDateString()})` : ''}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+                {/* batch information is determined automatically; users no longer choose it */}
 
                 {/* Subject Selection */}
                 <div className="space-y-3">
@@ -549,16 +546,16 @@ export default function AkboyMockRegistration() {
                 </CardContent>
               </Card>
 
-              <div className="flex gap-3 print:hidden">
-                <Button variant="outline" onClick={printAdmitSlip} className="flex-1">
-                  <Printer className="w-4 h-4 mr-2" /> Print Admit Slip
+                      <div className="flex gap-3 print:hidden">
+                <Button variant="outline" onClick={downloadAdmitSlip} className="flex-1">
+                  <Download className="w-4 h-4 mr-2" /> Download Admit Slip
                 </Button>
                 <Button
                   className="flex-1 bg-orange-500 hover:bg-orange-600"
                   onClick={() => {
                     setStep(1);
                     setResult(null);
-                    setForm({ fullName: "", phone: "", email: "", mode: "", batchId: "", selectedSubjects: [] });
+                    setForm({ fullName: "", phone: "", email: "", mode: "", selectedSubjects: [] });
                   }}>
                   Register Another Student
                 </Button>

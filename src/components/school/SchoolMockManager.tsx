@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Users, BookOpen, Plus, Download, Loader2, CheckCircle2, Trophy, TrendingUp, TrendingDown } from "lucide-react";
 
@@ -42,11 +43,13 @@ export default function SchoolMockManager({ schoolId }: Props) {
   // Registration form
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [regMode, setRegMode] = useState("virtual");
-  const [regBatch, setRegBatch] = useState("");
   const [studentSubjects, setStudentSubjects] = useState<Record<string, string[]>>({});
   const [registering, setRegistering] = useState(false);
 
-  useEffect(() => { loadData(); }, [schoolId]);
+  useEffect(() => {
+    loadData();
+    loadSettings();
+  }, [schoolId]);
 
   const loadData = async () => {
     setLoading(true);
@@ -99,6 +102,26 @@ export default function SchoolMockManager({ schoolId }: Props) {
     });
   };
 
+  // new state hooks for settings/fee
+  const [settings, setSettings] = useState<any>({});
+
+  const loadSettings = async () => {
+    const { data: settingsData } = await supabase
+      .from("mock_settings" as any)
+      .select("key, value");
+    const map: any = {};
+    if (settingsData) {
+      for (const s of settingsData as any[]) {
+        try { map[s.key] = typeof s.value === 'string' ? JSON.parse(s.value) : s.value; }
+        catch { map[s.key] = s.value; }
+      }
+    }
+    setSettings(map);
+  };
+
+  // settings and data are loaded in top-level effect (see above)
+
+
   const registerStudents = async () => {
     if (selectedStudents.length === 0) { toast.error("Select at least one student"); return; }
     
@@ -123,13 +146,17 @@ export default function SchoolMockManager({ schoolId }: Props) {
         const otherSubjects = (studentSubjects[studentId] || []).map(id => AVAILABLE_SUBJECTS.find(s => s.id === id)!);
         const subjects = [english, ...otherSubjects].map(s => ({ id: s.id, name: s.name, questions: s.questions }));
 
+        // automatically pick appropriate batch for each insertion
+        const { getOrCreateBatch } = await import("@/utils/mockBatch");
+        const batch = await getOrCreateBatch(supabase, settings);
+
         await supabase.from("mock_registrations" as any).insert({
           registration_number: regNum,
           full_name: student.full_name,
           phone: "school",
           mode: regMode,
           subjects,
-          batch_id: (regBatch && regBatch !== "__none") ? regBatch : null,
+          batch_id: batch?.id || null,
           school_id: schoolId,
           school_student_id: studentId,
           user_id: student.user_id,
@@ -327,19 +354,20 @@ export default function SchoolMockManager({ schoolId }: Props) {
                   </SelectContent>
                 </Select>
               </div>
-              {batches.length > 0 && (
-                <div>
-                  <Label>Batch</Label>
-                  <Select value={regBatch} onValueChange={setRegBatch}>
-                    <SelectTrigger><SelectValue placeholder="Select batch" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none">No batch</SelectItem>
-                      {batches.map(b => <SelectItem key={b.id} value={b.id}>{b.title}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              {/* batch is assigned automatically; no UI needed */}
             </div>
+
+            {/* if virtual mode is chosen show the aggregate physical cost and payment account */}
+            {regMode === 'virtual' && (
+              <Alert className="border-blue-200 bg-blue-50">
+                <AlertDescription className="text-blue-800 text-sm">
+                  {selectedStudents.length > 0
+                    ? `Selected ${selectedStudents.length} student${selectedStudents.length !== 1 ? 's' : ''}. Physical exam cost: ₦${(Number(settings.registration_fee) || 0) * selectedStudents.length}.`
+                    : 'Select students to see the total cost for physical exam.'}
+                  {' '}Please pay to {settings.payment_account?.bank || 'Access Bank'} account&nbsp;{settings.payment_account?.account_number || '0123456789'}.
+                </AlertDescription>
+              </Alert>
+            )}
 
             <div className="border rounded-lg overflow-hidden">
               <Table>
