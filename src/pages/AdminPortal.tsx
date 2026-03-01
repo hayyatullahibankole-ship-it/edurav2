@@ -65,6 +65,7 @@ import { AkboyEventsManager } from '@/components/admin/AkboyEventsManager';
 import { AkboyInquiriesManager } from '@/components/admin/AkboyInquiriesManager';
 import { AkboyTutorialsManager } from '@/components/admin/AkboyTutorialsManager';
 import { AkboyRegistrationsManager } from '@/components/admin/AkboyRegistrationsManager';
+import MockExamManager from '@/components/admin/MockExamManager';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -398,6 +399,15 @@ export default function AdminPortal() {
                 <span className="sm:hidden">Registrations</span>
               </Button>
               <Button
+                variant={activeSection === 'mock-exam' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+                onClick={() => setActiveSection('mock-exam')}
+              >
+                <FileText className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Mock Exam</span>
+                <span className="sm:hidden">Mock</span>
+              </Button>
+              <Button
                 variant={activeSection === 'settings' ? 'secondary' : 'ghost'}
                 className="w-full justify-start text-left text-xs sm:text-sm col-span-2 lg:col-span-1 text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('settings')}
@@ -622,8 +632,9 @@ export default function AdminPortal() {
           {activeSection === 'akboy-tutorials' && <AkboyTutorialsManager />}
           {activeSection === 'akboy-registrations' && <AkboyRegistrationsManager />}
 
-          {/* Other sections can be implemented similarly */}
-          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'promos', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools'].includes(activeSection) && (
+          {activeSection === 'mock-exam' && <MockExamManager />}
+
+          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'promos', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools', 'mock-exam'].includes(activeSection) && (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />

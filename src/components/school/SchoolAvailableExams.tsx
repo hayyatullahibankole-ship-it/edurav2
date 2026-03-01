@@ -72,7 +72,6 @@ export default function SchoolAvailableExams() {
             duration_minutes,
             total_questions,
             is_published,
-            target_departments,
             question_selection_mode,
             exam_subjects (
               subject_id,
@@ -80,7 +79,7 @@ export default function SchoolAvailableExams() {
               question_count
             )
           `)
-          .in('id', examIds);
+          .in('id', examIds) as { data: any[] | null; error: any };
 
         if (examsError) {
           console.error('[SchoolAvailableExams] examsError:', examsError);

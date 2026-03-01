@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { 
   Users, BookOpen, TrendingUp, DollarSign, LayoutDashboard, Settings, 
-  LogOut, Copy, Building2, HelpCircle, Video
+  LogOut, Copy, Building2, HelpCircle, Video, Trophy
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -39,11 +39,13 @@ import WelcomeManualModal from "@/components/school/WelcomeManualModal";
 import SchoolExamManager from "@/components/school/SchoolExamManagerEnhanced";
 import { AIAssistant } from "@/components/AIAssistant";
 import VideoTutorials from "@/components/school/VideoTutorials";
+import SchoolMockManager from "@/components/school/SchoolMockManager";
 
 const menuItems = [
   { id: "overview", title: "Overview", icon: LayoutDashboard },
   { id: "students", title: "Students", icon: Users },
   { id: "exams", title: "Exams", icon: BookOpen },
+  { id: "mock", title: "Mock Exam", icon: Trophy },
   { id: "reports", title: "Reports", icon: TrendingUp },
   { id: "tutorials", title: "Video Tutorials", icon: Video },
   { id: "billing", title: "Billing", icon: DollarSign },
@@ -398,6 +400,11 @@ export default function SchoolDashboard() {
                 <SchoolExamManager schoolId={schoolData.id} />
               )}
               
+
+              {activeTab === "mock" && schoolData && (
+                <SchoolMockManager schoolId={schoolData.id} />
+              )}
+
               {activeTab === "reports" && schoolData && (
                 <div className="space-y-6">
                   <ExportTools 
