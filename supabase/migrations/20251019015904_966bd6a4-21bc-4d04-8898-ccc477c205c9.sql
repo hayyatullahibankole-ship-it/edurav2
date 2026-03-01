@@ -146,6 +146,10 @@ BEGIN
   FROM attempts a
   WHERE a.id = NEW.attempt_id;
   
+  -- If attempt is anonymous (mock exam), skip syllabus coverage updates
+  IF v_user_id IS NULL THEN
+    RETURN NEW;
+  END IF;
   -- Get subject and topic from question
   SELECT q.subject_id, 
          COALESCE(q.tags->0->>'topic', 'General') INTO v_subject_id, v_topic_name
