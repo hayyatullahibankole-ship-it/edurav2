@@ -4,25 +4,34 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from 'vite-plugin-pwa';
 
-// https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-    cors: {
-      origin: '*',
-      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-      allowedHeaders: ['Content-Type', 'Authorization']
+// Detect if running in GitHub Codespaces
+const isCodespaces = !!process.env.CODESPACE_NAME;
+
+export default defineConfig(({ mode }) => {
+  const baseConfig = {
+    server: {
+      host: "0.0.0.0",
+      port: 8080,
+      cors: {
+        origin: '*',
+        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization']
+      }
     },
-    hmr: {
-      host: process.env.CODESPACE_NAME 
-        ? `${process.env.CODESPACE_NAME}-8080.${process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}` 
-        : 'localhost',
-      port: 443,
-      protocol: 'wss'
-    }
-  },
-  plugins: [
+  };
+
+  // For Codespaces, configure HMR to use the forwarded domain
+  if (isCodespaces) {
+    baseConfig.server.hmr = {
+      protocol: 'wss',
+      host: `${process.env.CODESPACE_NAME}-8080.app.github.dev`,
+      port: 443
+    };
+  }
+
+  return {
+    ...baseConfig,
+    plugins: [
     react(), 
     mode === "development" && componentTagger(),
     VitePWA({
