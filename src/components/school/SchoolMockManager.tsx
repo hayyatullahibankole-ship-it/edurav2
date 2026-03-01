@@ -175,7 +175,7 @@ export default function SchoolMockManager({ schoolId }: Props) {
       return;
     }
 
-    const htmlContent = `
+    let htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
