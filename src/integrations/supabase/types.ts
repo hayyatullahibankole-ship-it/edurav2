@@ -1191,6 +1191,7 @@ export type Database = {
           requires_subscription: boolean | null
           school_id: string | null
           subscription_level: string | null
+          target_departments: Json | null
           title: string
           total_questions: number | null
           type: Database["public"]["Enums"]["exam_type"]
@@ -1210,6 +1211,7 @@ export type Database = {
           requires_subscription?: boolean | null
           school_id?: string | null
           subscription_level?: string | null
+          target_departments?: Json | null
           title: string
           total_questions?: number | null
           type: Database["public"]["Enums"]["exam_type"]
@@ -1229,6 +1231,7 @@ export type Database = {
           requires_subscription?: boolean | null
           school_id?: string | null
           subscription_level?: string | null
+          target_departments?: Json | null
           title?: string
           total_questions?: number | null
           type?: Database["public"]["Enums"]["exam_type"]
@@ -2220,6 +2223,7 @@ export type Database = {
         Row: {
           class_level: string | null
           created_at: string | null
+          department: string | null
           enrollment_date: string | null
           full_name: string | null
           id: string
@@ -2233,6 +2237,7 @@ export type Database = {
         Insert: {
           class_level?: string | null
           created_at?: string | null
+          department?: string | null
           enrollment_date?: string | null
           full_name?: string | null
           id?: string
@@ -2246,6 +2251,7 @@ export type Database = {
         Update: {
           class_level?: string | null
           created_at?: string | null
+          department?: string | null
           enrollment_date?: string | null
           full_name?: string | null
           id?: string
@@ -3651,6 +3657,10 @@ export type Database = {
       }
       can_send_email: {
         Args: { email_type: string; target_user_id: string }
+        Returns: boolean
+      }
+      can_student_view_exam: {
+        Args: { p_exam_id: string; p_school_id: string; p_student_id: string }
         Returns: boolean
       }
       can_view_full_pii: { Args: { target_user_id: string }; Returns: boolean }
