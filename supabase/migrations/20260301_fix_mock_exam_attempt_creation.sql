@@ -114,7 +114,8 @@ BEGIN
     SELECT 
       p_attempt_id,
       (obj->>'question_id')::uuid,
-      obj->>'selected_answer'
+      -- use jsonb value for answer column (obj->'selected_answer' returns jsonb)
+      obj->'selected_answer'
     FROM jsonb_array_elements(p_answers) AS obj
     ON CONFLICT (attempt_id, question_id) DO UPDATE
     SET answer = EXCLUDED.answer;
@@ -188,6 +189,7 @@ GRANT EXECUTE ON FUNCTION public.submit_mock_exam TO authenticated, anon;
 
 -- Also add an RLS policy to allow anonymous inserts with proper checks
 -- This provides an additional layer of security
+DROP POLICY IF EXISTS "Mock exam attempts unauthenticated insert" ON public.attempts;
 CREATE POLICY "Mock exam attempts unauthenticated insert"
   ON public.attempts FOR INSERT
   WITH CHECK (
@@ -203,6 +205,7 @@ CREATE POLICY "Mock exam attempts unauthenticated insert"
   );
 
 -- Add SELECT policy for mock attempts
+DROP POLICY IF EXISTS "Mock exam attempts select by registration" ON public.attempts;
 CREATE POLICY "Mock exam attempts select by registration"
   ON public.attempts FOR SELECT
   USING (
@@ -212,6 +215,7 @@ CREATE POLICY "Mock exam attempts select by registration"
   );
 
 -- Add UPDATE policy for mock attempts
+DROP POLICY IF EXISTS "Mock exam attempts update status" ON public.attempts;
 CREATE POLICY "Mock exam attempts update status"
   ON public.attempts FOR UPDATE
   USING (
@@ -226,6 +230,7 @@ CREATE POLICY "Mock exam attempts update status"
   );
 
 -- Add RLS policy for attempt_answers for mock exams
+DROP POLICY IF EXISTS "Mock exam answers insert" ON public.attempt_answers;
 CREATE POLICY "Mock exam answers insert"
   ON public.attempt_answers FOR INSERT
   WITH CHECK (
@@ -239,6 +244,7 @@ CREATE POLICY "Mock exam answers insert"
   );
 
 -- Add RLS policy for reading mock exam answers
+DROP POLICY IF EXISTS "Mock exam answers select" ON public.attempt_answers;
 CREATE POLICY "Mock exam answers select"
   ON public.attempt_answers FOR SELECT
   USING (

@@ -160,7 +160,8 @@ export default function AkboyMockExam() {
 
         const { data: rpcResult, error: rpcError } = await supabase
           .rpc("create_mock_exam_attempt" as any, {
-            p_exam_id: login.mock_exam_id || "mock-exam",
+            // pass null when there is no valid exam id to avoid inserting text into uuid column
+            p_exam_id: (login?.mock_exam_id ?? null) as any,
             p_registration_id: login.registration_id,
             p_registration_number: regNumber,
             p_exam_duration_minutes: examDuration,
