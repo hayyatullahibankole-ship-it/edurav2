@@ -19,6 +19,7 @@ interface CleanCBTInterfaceProps {
   duration: number;
   examTitle?: string;
   submitting?: boolean;
+  bypassSubscription?: boolean;
 }
 
 export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
@@ -29,6 +30,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
   duration,
   examTitle = 'CBT Exam',
   submitting = false
+  , bypassSubscription = false
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(duration * 60);
@@ -65,7 +67,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
     if (submitting) return;
     
     // Block submission for free/basic users
-    if (!subscriptionLoading && !canAccessPremium) {
+    if (!bypassSubscription && !subscriptionLoading && !canAccessPremium) {
       setShowSubmitDialog(false);
       setShowUpgradeDialog(true);
       return;

@@ -240,6 +240,7 @@ export default function AkboyMockExam() {
       duration={examDuration}
       examTitle="AKBOY JAMB Mock Examination"
       submitting={submitting}
+      bypassSubscription={true}
     />
   );
 }

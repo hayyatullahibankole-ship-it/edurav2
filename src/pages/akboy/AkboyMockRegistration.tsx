@@ -127,19 +127,106 @@ export default function AkboyMockRegistration() {
         questions: s.questions,
       }));
 
-      const batch = batches.find(b => b.id === form.batchId);
+      // Assign or create a batch automatically when none selected
+      let assignedBatch: any = null;
+      let targetBatchId = form.batchId || null;
+      if (!targetBatchId) {
+        // Try to find an active batch with available capacity
+        const { data: activeBatches } = await supabase
+          .from("mock_batches" as any)
+          .select("*")
+          .eq("is_active", true)
+          .order("exam_date", { ascending: true });
+
+        const BATCH_CAPACITY = 30;
+        const SLOTS_PER_DAY = 3;
+        const SLOT_DURATION_MIN = 150; // 2h30 = 150 minutes
+        const BREAK_MIN = 30;
+
+        if (activeBatches && activeBatches.length > 0) {
+          // Check counts per batch
+          for (const b of activeBatches) {
+            if (!b.id) continue;
+            const { count, error: cErr } = await supabase
+              .from("mock_registrations" as any)
+              .select("id", { count: "exact", head: false })
+              .eq("batch_id", b.id);
+            const regCount = (count as number) || 0;
+            if (regCount < BATCH_CAPACITY) {
+              assignedBatch = b;
+              targetBatchId = b.id;
+              break;
+            }
+          }
+        }
+
+        // If still no available batch, create the next scheduled batch
+        if (!targetBatchId) {
+          // Determine next start slot based on latest batch or default start date April 2
+          const now = new Date();
+          const year = now.getFullYear();
+          const defaultStart = new Date(year, 3, 2, 9, 0, 0); // April is month 3 (0-indexed)
+
+          // Find latest exam_date among existing batches
+          let latestDate: Date | null = null;
+          if (activeBatches && activeBatches.length > 0) {
+            for (const b of activeBatches) {
+              if (b.exam_date) {
+                const d = new Date(b.exam_date);
+                if (!latestDate || d > latestDate) latestDate = d;
+              }
+            }
+          }
+
+          let nextStart: Date;
+          if (!latestDate) {
+            nextStart = defaultStart;
+          } else {
+            // Count how many batches are on latestDate's day
+            const sameDayBatches = (activeBatches || []).filter((b: any) => b.exam_date && new Date(b.exam_date).toDateString() === latestDate!.toDateString());
+            if (sameDayBatches.length < SLOTS_PER_DAY) {
+              // schedule after latestDate by slot interval
+              nextStart = new Date(latestDate.getTime() + (SLOT_DURATION_MIN + BREAK_MIN) * 60 * 1000);
+            } else {
+              // next day at 9:00
+              nextStart = new Date(latestDate);
+              nextStart.setDate(nextStart.getDate() + 1);
+              nextStart.setHours(9, 0, 0, 0);
+            }
+          }
+
+          const title = `Batch ${nextStart.toLocaleDateString()} ${nextStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+          const { data: newBatch, error: insErr } = await supabase
+            .from("mock_batches" as any)
+            .insert({ title, exam_date: nextStart.toISOString(), exam_venue: settings.default_exam_venue || null } as any)
+            .select()
+            .single();
+          if (insErr) throw insErr;
+          assignedBatch = newBatch;
+          targetBatchId = newBatch.id;
+        }
+      } else {
+        assignedBatch = batches.find(b => b.id === targetBatchId) || null;
+      }
+
+      const insertPayload: any = {
+        registration_number: regNum,
+        full_name: form.fullName.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim() || null,
+        mode: form.mode,
+        subjects,
+        batch_id: targetBatchId || null,
+      };
+
+      // Virtual mode: waive payment
+      if (form.mode === 'virtual') {
+        insertPayload.payment_status = 'waived';
+      }
 
       const { error: insertError } = await supabase
         .from("mock_registrations" as any)
-        .insert({
-          registration_number: regNum,
-          full_name: form.fullName.trim(),
-          phone: form.phone.trim(),
-          email: form.email.trim() || null,
-          mode: form.mode,
-          subjects,
-          batch_id: form.batchId || null,
-        } as any);
+        .insert(insertPayload as any);
 
       if (insertError) throw insertError;
 
@@ -148,9 +235,9 @@ export default function AkboyMockRegistration() {
         fullName: form.fullName.trim(),
         subjects,
         mode: form.mode,
-        batchTitle: batch?.title,
-        examDate: batch?.exam_date,
-        examVenue: batch?.exam_venue,
+        batchTitle: assignedBatch?.title,
+        examDate: assignedBatch?.exam_date,
+        examVenue: assignedBatch?.exam_venue,
       });
       setStep(3);
       toast.success("Registration successful!");
@@ -318,6 +405,11 @@ export default function AkboyMockRegistration() {
                     }
                     if (form.selectedSubjects.length !== 3) {
                       toast.error("Select exactly 3 subjects");
+                      return;
+                    }
+                    if (form.mode === 'virtual') {
+                      // Virtual mode does not require payment — register immediately
+                      handleSubmit();
                       return;
                     }
                     setStep(2);
