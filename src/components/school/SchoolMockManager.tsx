@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Users, BookOpen, Plus, Download, Printer, Loader2, CheckCircle2, Trophy, TrendingUp, TrendingDown } from "lucide-react";
+import { Users, BookOpen, Plus, Download, Loader2, CheckCircle2, Trophy, TrendingUp, TrendingDown } from "lucide-react";
 
 const AVAILABLE_SUBJECTS = [
   { id: "f01354df-283f-4069-a750-dba247a6bf97", name: "English Language", locked: true, questions: 60 },
@@ -129,7 +129,7 @@ export default function SchoolMockManager({ schoolId }: Props) {
           phone: "school",
           mode: regMode,
           subjects,
-          batch_id: regBatch || null,
+          batch_id: (regBatch && regBatch !== "__none") ? regBatch : null,
           school_id: schoolId,
           school_student_id: studentId,
           user_id: student.user_id,
@@ -167,6 +167,121 @@ export default function SchoolMockManager({ schoolId }: Props) {
     a.download = `school_mock_results_${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     toast.success("Results exported");
+  };
+
+  const downloadAdmitSlips = () => {
+    if (registrations.length === 0) {
+      toast.error("No registered students to download admit slips for");
+      return;
+    }
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>AKBOY Mock Exam Admit Slips</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Arial', sans-serif; padding: 20px; background: #f5f5f5; }
+    .container { max-width: 8.5in; margin: 0 auto; }
+    .admit-slip { 
+      background: white; 
+      border: 2px solid #333; 
+      padding: 20px; 
+      margin-bottom: 20px; 
+      page-break-after: always;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header { 
+      text-align: center; 
+      border-bottom: 2px solid #ff8c00; 
+      padding-bottom: 10px; 
+      margin-bottom: 15px; 
+    }
+    .header h1 { color: #ff8c00; font-size: 24px; margin-bottom: 5px; }
+    .header p { color: #666; font-size: 12px; }
+    .content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px; }
+    .section { }
+    .section-title { font-weight: bold; color: #ff8c00; font-size: 12px; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+    .field { display: flex; margin-bottom: 6px; font-size: 12px; }
+    .label { font-weight: bold; width: 100px; color: #555; }
+    .value { flex: 1; color: #333; }
+    .subjects { grid-column: 1 / -1; }
+    .subject-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+    .subject-badge { background: #ff8c00; color: white; padding: 4px 8px; border-radius: 3px; font-size: 11px; }
+    .footer { 
+      border-top: 1px solid #ddd; 
+      padding-top: 10px; 
+      text-align: center; 
+      font-size: 10px; 
+      color: #666; 
+    }
+    .footer-note { margin: 5px 0; }
+    @media print {
+      body { background: white; }
+      .admit-slip { page-break-after: always; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 style="text-align: center; margin-bottom: 20px;">AKBOY Mock Exam - Admit Slips</h1>
+`;
+
+    registrations.forEach(reg => {
+      htmlContent += `
+    <div class="admit-slip">
+      <div class="header">
+        <h1>AKBOY Creative Hub</h1>
+        <p>JAMB Mock Examination Admit Slip</p>
+      </div>
+      
+      <div class="content">
+        <div class="section">
+          <div class="section-title">Student Information</div>
+          <div class="field"><span class="label">Name:</span><span class="value">${reg.full_name}</span></div>
+          <div class="field"><span class="label">Reg Number:</span><span class="value" style="font-weight: bold; font-family: monospace;">${reg.registration_number}</span></div>
+          <div class="field"><span class="label">Mode:</span><span class="value" style="text-transform: uppercase;">${reg.mode}</span></div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Exam Details</div>
+          <div class="field"><span class="label">Status:</span><span class="value">${reg.exam_status || 'Registered'}</span></div>
+          <div class="field"><span class="label">Duration:</span><span class="value">120 minutes</span></div>
+        </div>
+        
+        <div class="section subjects">
+          <div class="section-title">Selected Subjects</div>
+          <div class="subject-list">
+            ${(reg.subjects || []).map((s: any) => `<span class="subject-badge">${s.name}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer">
+        <div class="footer-note">For exam updates and announcements, visit: www.akboys.ng</div>
+        <div class="footer-note">Contact: 08101466977 | akboycreativehub@gmail.com</div>
+        <div class="footer-note" style="margin-top: 10px; font-size: 9px;">Generated: ${new Date().toLocaleString()}</div>
+      </div>
+    </div>
+`;
+    });
+
+    htmlContent += `
+  </div>
+</body>
+</html>
+`;
+
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `AKBOY_Mock_Admit_Slips_${new Date().toISOString().split("T")[0]}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Admit slips downloaded successfully");
   };
 
   const registeredStudentIds = new Set(registrations.map(r => r.school_student_id));
@@ -305,8 +420,8 @@ export default function SchoolMockManager({ schoolId }: Props) {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Registered Mock Students</CardTitle>
-              <Button variant="outline" size="sm" onClick={() => window.print()}>
-                <Printer className="w-4 h-4 mr-1" /> Print Admit Slips
+              <Button variant="outline" size="sm" onClick={downloadAdmitSlips}>
+                <Download className="w-4 h-4 mr-1" /> Download Admit Slips
               </Button>
             </div>
           </CardHeader>

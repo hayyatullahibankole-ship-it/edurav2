@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Users, Search, Download, CheckCircle, XCircle, 
-  Eye, Printer, Filter, RefreshCw, Image as ImageIcon
+  Eye, Filter, RefreshCw, Image as ImageIcon
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -173,16 +173,14 @@ export function AkboyRegistrationsManager() {
   };
 
   const printConfirmation = (registration: Registration) => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    printWindow.document.write(`
+    const htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="UTF-8">
         <title>Registration Confirmation - ${registration.full_name}</title>
         <style>
-          body { font-family: Arial, sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; }
+          body { font-family: Arial, sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; background: white; }
           .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #10b981; padding-bottom: 20px; }
           .header h1 { color: #10b981; margin: 0; }
           .header p { color: #666; margin-top: 5px; }
@@ -236,12 +234,20 @@ export function AkboyRegistrationsManager() {
         <div class="footer">
           <p>AKBOY Creative Hub | 08101466977 | akboycreativehub@gmail.com</p>
           <p>This is an official registration confirmation.</p>
+          <p>Generated: ${new Date().toLocaleString()}</p>
         </div>
       </body>
       </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
+    `;
+
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `AKBOY_Confirmation_${registration.full_name.replace(/\s+/g, '_')}_${format(new Date(), 'yyyy-MM-dd')}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Confirmation downloaded", description: "Registration confirmation has been downloaded successfully" });
   };
 
   const filteredRegistrations = getFilteredRegistrations();
@@ -423,7 +429,7 @@ export function AkboyRegistrationsManager() {
                             onClick={() => printConfirmation(reg)}
                             className="text-slate-300 hover:text-white"
                           >
-                            <Printer className="w-4 h-4" />
+                            <Download className="w-4 h-4" />
                           </Button>
                         </div>
                       </td>
@@ -543,7 +549,7 @@ export function AkboyRegistrationsManager() {
                   )}
                 </Button>
                 <Button variant="outline" onClick={() => printConfirmation(selectedRegistration)}>
-                  <Printer className="w-4 h-4 mr-2" /> Print Confirmation
+                  <Download className="w-4 h-4 mr-2" /> Download Confirmation
                 </Button>
               </div>
             </div>
