@@ -53,25 +53,28 @@ export default function AkboyMockExam() {
 
       // Check if exam is scheduled for a future date/time
       if (login.batch_id) {
-        const { data: batch } = await supabase
+        const { data: batch, error: batchError } = await supabase
           .from("mock_batches" as any)
           .select("exam_date, title")
           .eq("id", login.batch_id)
           .single();
         
-        if (batch?.exam_date) {
-          const scheduledExamTime = new Date(batch.exam_date);
-          const currentTime = new Date();
-          
-          if (currentTime < scheduledExamTime) {
-            // Show modal with the scheduled date/time
-            setNotYetAvailableExam({
-              title: batch.title || "Mock Examination",
-              scheduledDate: scheduledExamTime
-            });
-            setShowNotYetAvailableModal(true);
-            setLoading(false);
-            return;
+        if (!batchError && batch) {
+          const batchData = batch as any;
+          if (batchData?.exam_date) {
+            const scheduledExamTime = new Date(batchData.exam_date);
+            const currentTime = new Date();
+            
+            if (currentTime < scheduledExamTime) {
+              // Show modal with the scheduled date/time
+              setNotYetAvailableExam({
+                title: batchData.title || "Mock Examination",
+                scheduledDate: scheduledExamTime
+              });
+              setShowNotYetAvailableModal(true);
+              setLoading(false);
+              return;
+            }
           }
         }
       }
@@ -151,37 +154,55 @@ export default function AkboyMockExam() {
       setQuestions(cbtQuestions);
 
       // Create an attempt record for this mock exam (unauthenticated)
+      // Using RPC function to bypass RLS constraints
       try {
-        // For mock exams, we use registration number as the identifier
-        // User_id can be null since mock exams are anonymous
-        const { data: newAttempt, error: attemptError } = await supabase
-          .from("attempts")
-          .insert({
-            user_id: null, // Mock exams are unauthenticated
-            exam_id: login.mock_exam_id || "mock-exam",
-            status: "STARTED",
-            time_remaining_seconds: examDuration * 60,
-            proctoring_data: {
-              mock_registration_id: login.registration_id,
-              registration_number: regNumber,
-              title: "AKBOY JAMB Mock Examination",
-              duration_minutes: examDuration,
-              is_mock: true,
-            },
-          })
-          .select()
-          .single();
+        console.log("Creating mock exam attempt using RPC function...");
 
-        if (attemptError) {
-          console.error("Failed to create attempt:", attemptError);
-          toast.error("Failed to initialize exam attempt");
+        const { data: rpcResult, error: rpcError } = await supabase
+          .rpc("create_mock_exam_attempt" as any, {
+            p_exam_id: login.mock_exam_id || "mock-exam",
+            p_registration_id: login.registration_id,
+            p_registration_number: regNumber,
+            p_exam_duration_minutes: examDuration,
+            p_exam_title: "AKBOY JAMB Mock Examination"
+          });
+
+        if (rpcError) {
+          console.error("RPC call failed:", {
+            message: rpcError.message,
+            code: rpcError.code,
+            details: rpcError.details,
+            fullError: rpcError
+          });
+          toast.error("Failed to initialize exam: " + rpcError.message);
           return;
         }
 
-        setAttemptId(newAttempt.id);
+        console.log("RPC result:", rpcResult);
+
+        const rpcData = rpcResult as any;
+        if (rpcData?.status !== 'success') {
+          console.error("RPC returned error status:", rpcData?.message);
+          toast.error("Failed to initialize exam: " + (rpcData?.message || "Unknown error"));
+          return;
+        }
+
+        const newAttemptId = rpcData?.attempt_id;
+        if (!newAttemptId) {
+          console.error("No attempt ID returned from RPC");
+          toast.error("Failed to initialize exam session");
+          return;
+        }
+
+        console.log("Mock exam attempt created successfully:", newAttemptId);
+        setAttemptId(newAttemptId);
       } catch (attemptCreationError: any) {
-        console.error("Attempt creation error:", attemptCreationError);
-        toast.error("Failed to create exam attempt");
+        console.error("Attempt creation try-catch error:", {
+          message: attemptCreationError.message,
+          stack: attemptCreationError.stack,
+          fullError: attemptCreationError
+        });
+        toast.error("Failed to create exam attempt: " + attemptCreationError.message);
         return;
       }
 
@@ -205,7 +226,21 @@ export default function AkboyMockExam() {
   }, []);
 
   const submitExam = useCallback(async () => {
-    if (submitting || !attemptId) return;
+    // Prevent submission if already submitting or exam not ready
+    if (submitting) return;
+    
+    if (!attemptId) {
+      console.error("Attempt ID not available");
+      toast.error("Exam session not initialized. Please reload the page.");
+      return;
+    }
+    
+    if (!regNumber) {
+      console.error("Registration number not available");
+      toast.error("Registration information missing. Please log in again.");
+      return;
+    }
+    
     setSubmitting(true);
 
     try {
@@ -225,41 +260,71 @@ export default function AkboyMockExam() {
         }
 
         return {
-          attempt_id: attemptId,
           question_id: q.id,
           selected_answer: selectedAnswer,
         };
       });
 
-      // Insert all answers into attempt_answers table
-      const { error: answersError } = await supabase
-        .from("attempt_answers")
-        .insert(attemptAnswers);
+      console.log(`Submitting ${attemptAnswers.length} answers for attempt ${attemptId}`);
+
+      // Insert all answers using RPC function to bypass RLS
+      const { data: answerResult, error: answersError } = await supabase
+        .rpc("submit_mock_exam_answers" as any, {
+          p_attempt_id: attemptId,
+          p_answers: attemptAnswers
+        });
 
       if (answersError) {
-        throw answersError;
+        console.error("Answers insert RPC error:", answersError);
+        toast.error("Failed to submit answers: " + answersError.message);
+        setSubmitting(false);
+        return;
       }
 
-      // Update attempt status to SUBMITTED - this triggers result computation via the trigger
-      const { error: statusError } = await supabase
-        .from("attempts")
-        .update({ status: "SUBMITTED" })
-        .eq("id", attemptId);
+      const answerData = answerResult as any;
+      if (answerData?.status !== 'success') {
+        console.error("Answers insert returned error status:", answerData?.message);
+        toast.error("Failed to submit answers: " + (answerData?.message || "Unknown error"));
+        setSubmitting(false);
+        return;
+      }
+
+      console.log("Answers inserted successfully, updating attempt status...");
+
+      // Update attempt status to SUBMITTED using RPC function
+      const { data: submitResult, error: statusError } = await supabase
+        .rpc("submit_mock_exam" as any, {
+          p_attempt_id: attemptId
+        });
 
       if (statusError) {
-        throw statusError;
+        console.error("Status update RPC error:", statusError);
+        toast.error("Failed to finalize submission: " + statusError.message);
+        setSubmitting(false);
+        return;
       }
+
+      const submitData = submitResult as any;
+      if (submitData?.status !== 'success') {
+        console.error("Status update returned error status:", submitData?.message);
+        toast.error("Failed to finalize submission: " + (submitData?.message || "Unknown error"));
+        setSubmitting(false);
+        return;
+      }
+
+      console.log("Exam submitted successfully, redirecting...");
+      toast.success("Exam submitted successfully!");
 
       // Redirect to mock-submitted page with registration number
       // Results will be computed in background and available in mock-results when checked later
       navigate(`${basePath}/mock-submitted?reg=${encodeURIComponent(regNumber)}`);
     } catch (error: any) {
       console.error("Submit error:", error);
-      toast.error(error?.message || "Failed to submit exam. Please try again.");
-    } finally {
+      const errorMessage = error?.message || "Failed to submit exam. Please try again.";
+      toast.error(errorMessage);
       setSubmitting(false);
     }
-  }, [attemptId, submitting, answers, rawQuestions, questions, navigate, basePath, regNumber]);
+  }, [attemptId, answers, rawQuestions, questions, navigate, basePath, regNumber, submitting]);
 
   if (!regNumber) return null;
 
@@ -296,6 +361,7 @@ export default function AkboyMockExam() {
       examTitle="AKBOY JAMB Mock Examination"
       submitting={submitting}
       bypassSubscription={true}
+      disableSubmit={!attemptId || loading}
     />
   );
 }

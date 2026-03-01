@@ -20,6 +20,7 @@ interface CleanCBTInterfaceProps {
   examTitle?: string;
   submitting?: boolean;
   bypassSubscription?: boolean;
+  disableSubmit?: boolean;
 }
 
 export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
@@ -29,8 +30,9 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
   onSubmit,
   duration,
   examTitle = 'CBT Exam',
-  submitting = false
-  , bypassSubscription = false
+  submitting = false,
+  bypassSubscription = false,
+  disableSubmit = false
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(duration * 60);
@@ -64,7 +66,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
 
   const handleSubmitClick = async () => {
     // Prevent double submission
-    if (submitting) return;
+    if (submitting || disableSubmit) return;
     
     // Block submission for free/basic users
     if (!bypassSubscription && !subscriptionLoading && !canAccessPremium) {
@@ -73,7 +75,15 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
       return;
     }
     const timeSpent = (duration * 60) - timeLeft;
-    await onSubmit(timeSpent);
+    try {
+      await onSubmit(timeSpent);
+      // Close the dialog after successful submission
+      setShowSubmitDialog(false);
+    } catch (error) {
+      console.error('Submission error:', error);
+      // Error toast should be handled in onSubmit
+      // Keep dialog open so user can try again
+    }
   };
 
   const progressPercentage = (Object.keys(answers).length / questions.length) * 100;
@@ -131,9 +141,10 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
                 variant="secondary"
                 size="sm"
                 onClick={() => setShowSubmitDialog(true)}
-                disabled={submitting}
+                disabled={submitting || disableSubmit}
                 className="bg-white text-primary hover:bg-white/90 font-black rounded-xl h-10 sm:h-11 px-4 sm:px-6 shadow-xl hover:scale-105 active:scale-95 transition-all"
                 style={{ boxShadow: '0 8px 24px rgba(255, 255, 255, 0.3)' }}
+                title={disableSubmit ? "Loading exam..." : "Submit exam"}
               >
                 {submitting ? 'Submitting...' : 'Submit'}
               </Button>
@@ -352,7 +363,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
                 <Button 
                   onClick={handleSubmitClick}
                   className="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary via-primary-glow to-secondary font-black hover:scale-105 active:scale-95 transition-all shadow-xl"
-                  disabled={submitting}
+                  disabled={submitting || disableSubmit}
                   style={{ boxShadow: '0 10px 30px rgba(0, 123, 255, 0.4)' }}
                 >
                   {submitting ? 'Submitting...' : 'Submit'}
