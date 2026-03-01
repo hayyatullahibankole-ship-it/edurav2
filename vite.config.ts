@@ -20,13 +20,9 @@ export default defineConfig(({ mode }) => {
     },
   };
 
-  // For Codespaces, configure HMR to use the forwarded domain
+  // For Codespaces, configure HMR to connect through the forwarded domain
   if (isCodespaces) {
-    baseConfig.server.hmr = {
-      protocol: 'wss',
-      host: `${process.env.CODESPACE_NAME}-8080.app.github.dev`,
-      port: 443
-    };
+    baseConfig.server.hmr = `${process.env.CODESPACE_NAME}-8080.app.github.dev`;
   }
 
   return {
