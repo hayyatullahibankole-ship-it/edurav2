@@ -8,7 +8,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 const isCodespaces = !!process.env.CODESPACE_NAME;
 
 export default defineConfig(({ mode }) => {
-  const baseConfig = {
+  const baseConfig: any = {
     server: {
       host: "0.0.0.0",
       port: 8080,

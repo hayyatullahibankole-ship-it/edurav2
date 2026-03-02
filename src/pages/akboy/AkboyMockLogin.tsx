@@ -8,9 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
-import { Loader2, BookOpen, Clock, AlertTriangle, Play, CheckCircle2 } from "lucide-react";
+import { Loader2, BookOpen, Clock, AlertTriangle, Play, GraduationCap, School } from "lucide-react";
 
 export default function AkboyMockLogin() {
   const [regNumber, setRegNumber] = useState("");
@@ -19,7 +19,6 @@ export default function AkboyMockLogin() {
   const [showInstructions, setShowInstructions] = useState(false);
   const navigate = useNavigate();
   const { isAkboy } = useDomainDetection();
-  // use root paths on akboy domain, prefix with /akboy when on edura
   const basePath = isAkboy ? "" : "/akboy";
 
   const handleLogin = async () => {
@@ -53,34 +52,41 @@ export default function AkboyMockLogin() {
   };
 
   const startExam = () => {
-    // Navigate to mock exam page with the registration data
     navigate(`${basePath}/mock-exam?reg=${regNumber.trim().toUpperCase()}`);
   };
 
   return (
     <AkboyLayout title="Mock Exam Login" description="Login to take the AKBOY JAMB Mock Examination">
-      <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12 px-4">
-        <div className="max-w-lg mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white py-8 px-4">
+        <div className="max-w-lg mx-auto space-y-6">
+          {/* Hero Header */}
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full text-sm font-medium">
+              <GraduationCap className="w-4 h-4" />
+              JAMB Mock CBT
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Exam Portal</h1>
+            <p className="text-muted-foreground">Enter your registration number to begin</p>
+          </div>
+
           {!showInstructions ? (
-            <Card>
-              <CardHeader className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
+            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
+              <CardHeader className="text-center pb-2">
+                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                   <img src="/akboy-logo.png" alt="AKBOY" className="w-10 h-10 rounded-full" />
                 </div>
-                <CardTitle className="text-2xl">Mock Exam Login</CardTitle>
-                <CardDescription>
-                  Enter your registration number to access the exam
-                </CardDescription>
+                <CardTitle className="text-xl">Mock Exam Login</CardTitle>
+                <CardDescription>Use your AKBOY registration number</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-5">
                 <div>
-                  <Label htmlFor="regNumber">Registration Number</Label>
+                  <Label htmlFor="regNumber" className="text-sm font-medium">Registration Number</Label>
                   <Input
                     id="regNumber"
                     placeholder="e.g., AKBM2600001"
                     value={regNumber}
                     onChange={e => setRegNumber(e.target.value.toUpperCase())}
-                    className="text-center text-lg font-mono tracking-wider"
+                    className="text-center text-lg font-mono tracking-wider mt-1.5 h-12 border-2 focus:border-orange-400"
                     onKeyDown={e => e.key === "Enter" && handleLogin()}
                   />
                 </div>
@@ -88,73 +94,84 @@ export default function AkboyMockLogin() {
                 <Button
                   onClick={handleLogin}
                   disabled={loading || !regNumber.trim()}
-                  className="w-full bg-orange-500 hover:bg-orange-600"
+                  className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-base font-semibold shadow-md"
                 >
                   {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Validating...</> : "Login to Exam"}
                 </Button>
+
+                <div className="pt-2 space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">Don't have a registration?</span>
+                    <Link to={`${basePath}/mock-registration`} className="text-orange-600 font-semibold hover:underline">
+                      Register Now
+                    </Link>
+                  </div>
+                  <Link to="/school-registration" className="flex items-center gap-2 text-sm text-orange-600 font-semibold hover:underline">
+                    <School className="w-4 h-4" /> Register as a School
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           ) : loginData && (
-            <Card className="border-2 border-orange-300">
-              <CardHeader className="bg-orange-500 text-white text-center">
+            <Card className="shadow-lg border-0 overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-center py-6">
                 <CardTitle className="text-xl flex items-center justify-center gap-2">
                   <BookOpen className="w-5 h-5" />
                   AKBOY JAMB Mock Examination
                 </CardTitle>
-                <CardDescription className="text-orange-100">Instruction Page</CardDescription>
+                <CardDescription className="text-orange-100 mt-1">Instruction Page</CardDescription>
               </CardHeader>
-              <CardContent className="p-6 space-y-6">
-                <div className="text-center">
-                  <p className="text-lg font-bold">{loginData.full_name}</p>
-                  <p className="text-sm text-muted-foreground font-mono">{regNumber}</p>
+              <CardContent className="p-6 space-y-5">
+                <div className="text-center bg-orange-50 rounded-xl p-4 border border-orange-100">
+                  <p className="text-lg font-bold text-gray-900">{loginData.full_name}</p>
+                  <p className="text-sm text-muted-foreground font-mono tracking-wider">{regNumber}</p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-2">Your Subjects:</h3>
+                  <h3 className="font-semibold mb-2 text-sm">Your Subjects:</h3>
                   <div className="flex flex-wrap gap-2">
                     {(loginData.subjects || []).map((s: any, i: number) => (
-                      <Badge key={i} className="bg-orange-100 text-orange-700 border-orange-300">
+                      <Badge key={i} className="bg-orange-100 text-orange-700 border-orange-200 px-3 py-1">
                         {s.name} ({s.questions}Q)
                       </Badge>
                     ))}
                   </div>
                 </div>
 
-                <div className="bg-muted p-4 rounded-lg space-y-2">
-                  <h3 className="font-semibold flex items-center gap-2">
+                <div className="bg-gray-50 p-4 rounded-xl space-y-2 border">
+                  <h3 className="font-semibold flex items-center gap-2 text-sm">
                     <AlertTriangle className="w-4 h-4 text-orange-500" /> Exam Rules
                   </h3>
-                  <ul className="text-sm space-y-2 text-muted-foreground list-disc list-inside">
-                    <li>Total Questions: <strong>180</strong> (English: 60, Others: 40 each)</li>
-                    <li>Duration: <strong>120 minutes (2 hours)</strong></li>
-                    <li>Timer starts immediately when you click START EXAM</li>
+                  <ul className="text-sm space-y-1.5 text-muted-foreground list-disc list-inside">
+                    <li>Total: <strong>180 questions</strong> (English: 60, Others: 40 each)</li>
+                    <li>Duration: <strong>120 minutes</strong></li>
+                    <li>Timer starts immediately on START EXAM</li>
                     <li>Exam auto-submits when time expires</li>
-                    <li>No going back once submitted</li>
-                    <li>Results will be released at a later date</li>
-                    <li className="text-destructive font-medium">Do NOT close the browser during the exam</li>
+                    <li>Results released at a later date</li>
+                    <li className="text-red-600 font-medium">Do NOT close the browser during the exam</li>
                   </ul>
                 </div>
 
-                <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
-                  <Clock className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                  <p className="text-yellow-800">
-                    <strong>Timer Warning:</strong> The 120-minute countdown begins as soon as you click "START EXAM". Make sure you are ready.
+                <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm">
+                  <Clock className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                  <p className="text-amber-800">
+                    <strong>Timer Warning:</strong> The 120-minute countdown begins immediately when you click "START EXAM".
                   </p>
                 </div>
 
                 {loginData.mode === 'physical' && (
-                  <Alert className="border-blue-200 bg-blue-50">
+                  <Alert className="border-blue-200 bg-blue-50 rounded-xl">
                     <AlertDescription className="text-blue-800 text-sm">
                       <strong>Physical Mode:</strong> Ensure your payment receipt is available for verification.
                     </AlertDescription>
                   </Alert>
                 )}
 
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => { setShowInstructions(false); setLoginData(null); }} className="flex-1">
+                <div className="flex gap-3 pt-2">
+                  <Button variant="outline" onClick={() => { setShowInstructions(false); setLoginData(null); }} className="flex-1 h-12">
                     Back
                   </Button>
-                  <Button onClick={startExam} className="flex-1 bg-green-600 hover:bg-green-700 text-lg py-6">
+                  <Button onClick={startExam} className="flex-1 bg-green-600 hover:bg-green-700 text-lg h-14 shadow-lg font-bold">
                     <Play className="w-5 h-5 mr-2" /> START EXAM
                   </Button>
                 </div>

@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { BookOpen, CheckCircle2, FileText, Clock, MapPin, Phone, User, Mail, Loader2, Download, Printer } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useDomainDetection } from "@/hooks/useDomainDetection";
+import { BookOpen, CheckCircle2, Clock, MapPin, Phone, User, Mail, Loader2, Download, GraduationCap, School } from "lucide-react";
 
 const AVAILABLE_SUBJECTS = [
   { id: "f01354df-283f-4069-a750-dba247a6bf97", name: "English Language", locked: true, questions: 60 },
@@ -44,15 +45,15 @@ export default function AkboyMockRegistration() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<any>({});
-  const [batches, setBatches] = useState<any[]>([]);
   const [result, setResult] = useState<RegistrationResult | null>(null);
+  const { isAkboy } = useDomainDetection();
+  const basePath = isAkboy ? "" : "/akboy";
 
   const [form, setForm] = useState({
     fullName: "",
     phone: "",
     email: "",
     mode: "" as string,
-    // batch will be determined automatically, users should not select it
     selectedSubjects: [] as string[],
   });
 
@@ -68,21 +69,11 @@ export default function AkboyMockRegistration() {
     const settingsMap: any = {};
     if (settingsData) {
       for (const s of settingsData as any[]) {
-        try {
-          settingsMap[s.key] = typeof s.value === 'string' ? JSON.parse(s.value) : s.value;
-        } catch {
-          settingsMap[s.key] = s.value;
-        }
+        try { settingsMap[s.key] = typeof s.value === 'string' ? JSON.parse(s.value) : s.value; }
+        catch { settingsMap[s.key] = s.value; }
       }
     }
     setSettings(settingsMap);
-
-    const { data: batchData } = await supabase
-      .from("mock_batches" as any)
-      .select("*")
-      .eq("is_active", true);
-    
-    if (batchData) setBatches(batchData as any[]);
   };
 
   const toggleSubject = (subjectId: string) => {
@@ -117,21 +108,16 @@ export default function AkboyMockRegistration() {
 
     setLoading(true);
     try {
-      // Generate registration number
       const { data: regNum, error: regError } = await supabase.rpc("generate_mock_reg_number" as any);
       if (regError) throw regError;
 
       const subjects = getSelectedSubjectsWithEnglish().map(s => ({
-        id: s.id,
-        name: s.name,
-        questions: s.questions,
+        id: s.id, name: s.name, questions: s.questions,
       }));
 
-      // automatically assign/create batch using helper
       let assignedBatch: any = null;
       const { getOrCreateBatch } = await import("@/utils/mockBatch");
       assignedBatch = await getOrCreateBatch(supabase, settings);
-      const targetBatchId = assignedBatch?.id || null;
 
       const insertPayload: any = {
         registration_number: regNum,
@@ -140,13 +126,10 @@ export default function AkboyMockRegistration() {
         email: form.email.trim() || null,
         mode: form.mode,
         subjects,
-        batch_id: targetBatchId || null,
+        batch_id: assignedBatch?.id || null,
       };
 
-      // Virtual mode: waive payment
-      if (form.mode === 'virtual') {
-        insertPayload.payment_status = 'waived';
-      }
+      if (form.mode === 'virtual') insertPayload.payment_status = 'waived';
 
       const { error: insertError } = await supabase
         .from("mock_registrations" as any)
@@ -173,8 +156,6 @@ export default function AkboyMockRegistration() {
     }
   };
 
-  // instead of printing the entire page we generate a downloadable HTML
-  // file containing just the admit slip
   const downloadAdmitSlip = () => {
     if (!result) return;
 
@@ -182,77 +163,55 @@ export default function AkboyMockRegistration() {
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>AKBOY Mock Exam Admit Slip</title>
+  <title>AKBOY Mock Exam Admit Slip - ${result.registrationNumber}</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Arial', sans-serif; padding: 20px; background: #f5f5f5; }
-    .container { max-width: 8.5in; margin: 0 auto; }
-    .admit-slip { 
-      background: white; 
-      border: 2px solid #333; 
-      padding: 20px; 
-      margin-bottom: 20px; 
-      page-break-after: always;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .header { 
-      text-align: center; 
-      border-bottom: 2px solid #ff8c00; 
-      padding-bottom: 10px; 
-      margin-bottom: 15px; 
-    }
-    .header h1 { color: #ff8c00; font-size: 24px; margin-bottom: 5px; }
-    .header p { color: #666; font-size: 12px; }
-    .content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px; }
-    .section { }
-    .section-title { font-weight: bold; color: #ff8c00; font-size: 12px; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-    .field { display: flex; margin-bottom: 6px; font-size: 12px; }
-    .label { font-weight: bold; width: 100px; color: #555; }
-    .value { flex: 1; color: #333; }
-    .subjects { grid-column: 1 / -1; }
-    .subject-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
-    .subject-badge { background: #ff8c00; color: white; padding: 4px 8px; border-radius: 3px; font-size: 11px; }
-    .footer { 
-      border-top: 1px solid #ddd; 
-      padding-top: 10px; 
-      text-align: center; 
-      font-size: 10px; 
-      color: #666; 
-    }
-    .footer-note { margin: 5px 0; }
-    @media print {
-      body { background: white; }
-      .admit-slip { page-break-after: always; box-shadow: none; }
-    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI','Arial',sans-serif; padding:20px; background:#f8fafc; }
+    .container { max-width:600px; margin:0 auto; }
+    .slip { background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
+    .header { text-align:center; background:linear-gradient(135deg,#f97316,#f59e0b); color:white; padding:24px 20px; }
+    .header h1 { font-size:22px; margin-bottom:4px; }
+    .header p { font-size:13px; opacity:0.9; }
+    .content { padding:24px; }
+    .reg-box { text-align:center; background:#fff7ed; padding:16px; border-radius:12px; border:2px dashed #fdba74; margin:16px 0; }
+    .reg-box .number { font-size:28px; font-weight:800; font-family:monospace; color:#ea580c; letter-spacing:2px; }
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+    .info-item label { display:block; font-size:11px; color:#9ca3af; text-transform:uppercase; }
+    .info-item span { display:block; font-size:14px; font-weight:600; color:#1f2937; }
+    .subjects { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    .subject-badge { background:#f97316; color:white; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:500; }
+    .footer { border-top:1px solid #e5e7eb; padding:16px 24px; text-align:center; font-size:11px; color:#9ca3af; }
+    @media print { body { background:white; } .slip { box-shadow:none; } }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="admit-slip">
+    <div class="slip">
       <div class="header">
         <h1>AKBOY Creative Hub</h1>
         <p>JAMB Mock Examination Admit Slip</p>
       </div>
       <div class="content">
-        <div class="section">
-          <div class="section-title">Student Information</div>
-          <div class="field"><span class="label">Name:</span><span class="value">${result.fullName}</span></div>
-          <div class="field"><span class="label">Reg Number:</span><span class="value" style="font-weight: bold; font-family: monospace;">${result.registrationNumber}</span></div>
-          <div class="field"><span class="label">Mode:</span><span class="value" style="text-transform: capitalize;">${result.mode}</span></div>
-          ${result.batchTitle ? `<div class="field"><span class="label">Batch:</span><span class="value">${result.batchTitle}</span></div>` : ''}
-          ${result.examDate ? `<div class="field"><span class="label">Date:</span><span class="value">${new Date(result.examDate).toLocaleString()}</span></div>` : ''}
+        <div class="reg-box">
+          <div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">REGISTRATION NUMBER</div>
+          <div class="number">${result.registrationNumber}</div>
         </div>
-        <div class="section subjects">
-          <div class="section-title">Selected Subjects</div>
-          <div class="subject-list">
-            ${result.subjects.map((s: any) => `<span class="subject-badge">${s.name}</span>`).join('')}
+        <div class="info-grid">
+          <div class="info-item"><label>Full Name</label><span>${result.fullName}</span></div>
+          <div class="info-item"><label>Mode</label><span style="text-transform:capitalize;">${result.mode}</span></div>
+          ${result.batchTitle ? `<div class="info-item"><label>Batch</label><span>${result.batchTitle}</span></div>` : ''}
+          ${result.examDate ? `<div class="info-item"><label>Date</label><span>${new Date(result.examDate).toLocaleString()}</span></div>` : ''}
+        </div>
+        <div>
+          <div style="font-size:12px;color:#9ca3af;text-transform:uppercase;margin-bottom:8px;font-weight:600;">Subjects</div>
+          <div class="subjects">
+            ${result.subjects.map((s: any) => `<span class="subject-badge">${s.name} (${s.questions}Q)</span>`).join('')}
           </div>
         </div>
       </div>
       <div class="footer">
-        <div class="footer-note">For exam updates and announcements, visit: www.akboys.ng</div>
-        <div class="footer-note">Contact: 08101466977 | akboycreativehub@gmail.com</div>
-        <div class="footer-note" style="margin-top: 10px; font-size: 9px;">Generated: ${new Date().toLocaleString()}</div>
+        <p>For exam updates: www.akboys.ng | Contact: 08101466977</p>
+        <p style="margin-top:4px;">Generated: ${new Date().toLocaleString()}</p>
       </div>
     </div>
   </div>
@@ -266,7 +225,7 @@ export default function AkboyMockRegistration() {
     a.download = `AKBOY_Admit_Slip_${result.registrationNumber}.html`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Admit slip downloaded successfully");
+    toast.success("Admit slip downloaded!");
   };
 
   const fee = settings.registration_fee || "1000";
@@ -274,43 +233,49 @@ export default function AkboyMockRegistration() {
 
   return (
     <AkboyLayout title="Mock Exam Registration" description="Register for the AKBOY JAMB Mock Examination">
-      <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          {/* Progress */}
-          <div className="flex items-center justify-center gap-2 mb-8">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white py-8 px-4">
+        <div className="max-w-2xl mx-auto space-y-6">
+          {/* Hero Header */}
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full text-sm font-medium">
+              <GraduationCap className="w-4 h-4" />
+              JAMB Mock CBT
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Mock Exam Registration</h1>
+            <p className="text-muted-foreground">180 questions • 120 minutes • JAMB-style scoring</p>
+          </div>
+
+          {/* Progress Steps */}
+          <div className="flex items-center justify-center gap-2">
             {[1, 2, 3].map(s => (
               <div key={s} className="flex items-center gap-2">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
-                  step >= s ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                  step >= s ? 'bg-orange-500 text-white shadow-md' : 'bg-gray-200 text-gray-500'
                 }`}>
                   {step > s ? <CheckCircle2 className="w-5 h-5" /> : s}
                 </div>
-                {s < 3 && <div className={`w-16 h-1 ${step > s ? 'bg-orange-500' : 'bg-gray-200'}`} />}
+                {s < 3 && <div className={`w-12 h-1 rounded-full transition-all ${step > s ? 'bg-orange-500' : 'bg-gray-200'}`} />}
               </div>
             ))}
           </div>
-          <div className="flex justify-center gap-8 mb-8 text-xs text-muted-foreground">
+          <div className="flex justify-center gap-8 text-xs text-muted-foreground">
             <span className={step >= 1 ? 'text-orange-600 font-semibold' : ''}>Details & Subjects</span>
             <span className={step >= 2 ? 'text-orange-600 font-semibold' : ''}>Payment</span>
             <span className={step >= 3 ? 'text-orange-600 font-semibold' : ''}>Confirmation</span>
           </div>
 
-          {/* Step 1: Details & Subject Selection */}
+          {/* Step 1 */}
           {step === 1 && (
-            <Card>
+            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-orange-500" />
-                  AKBOY JAMB Mock Exam Registration
+                  Registration Details
                 </CardTitle>
-                <CardDescription>
-                  Register for the CBT Mock Examination. Total: 180 questions in 120 minutes.
-                </CardDescription>
+                <CardDescription>Fill in your details and select subjects</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Personal Info */}
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Personal Information</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="fullName">Full Name *</Label>
@@ -341,32 +306,30 @@ export default function AkboyMockRegistration() {
 
                 {/* Mode */}
                 <div className="space-y-2">
-                  <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Exam Mode *</h3>
+                  <Label className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Exam Mode *</Label>
                   <div className="grid grid-cols-2 gap-3">
                     {['virtual', 'physical'].map(mode => (
                       <button key={mode} type="button"
                         onClick={() => setForm(p => ({ ...p, mode }))}
-                        className={`p-4 rounded-lg border-2 text-center transition-all ${
+                        className={`p-4 rounded-xl border-2 text-center transition-all ${
                           form.mode === mode
-                            ? 'border-orange-500 bg-orange-50 text-orange-700'
-                            : 'border-border hover:border-orange-300'
+                            ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm'
+                            : 'border-gray-200 hover:border-orange-300'
                         }`}>
                         <div className="font-semibold capitalize">{mode}</div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          {mode === 'virtual' ? 'Take exam online from anywhere' : 'Take exam at the physical venue'}
+                          {mode === 'virtual' ? 'Take exam online' : 'Exam at venue'}
                         </div>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* batch information is determined automatically; users no longer choose it */}
-
                 {/* Subject Selection */}
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                  <Label className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                     Select Subjects (English + 3 others)
-                  </h3>
+                  </Label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {AVAILABLE_SUBJECTS.map(subject => {
                       const isSelected = subject.locked || form.selectedSubjects.includes(subject.id);
@@ -374,17 +337,17 @@ export default function AkboyMockRegistration() {
                         <button key={subject.id} type="button"
                           onClick={() => toggleSubject(subject.id)}
                           disabled={subject.locked}
-                          className={`p-3 rounded-lg border text-left text-sm transition-all ${
+                          className={`p-3 rounded-xl border-2 text-left text-sm transition-all ${
                             isSelected
                               ? 'border-orange-500 bg-orange-50 text-orange-700'
-                              : 'border-border hover:border-orange-300'
+                              : 'border-gray-200 hover:border-orange-300'
                           } ${subject.locked ? 'cursor-not-allowed opacity-80' : ''}`}>
                           <div className="flex items-center gap-2">
                             <Checkbox checked={isSelected} disabled={subject.locked} className="pointer-events-none" />
                             <span className="font-medium text-xs leading-tight">{subject.name}</span>
                           </div>
                           <div className="text-xs text-muted-foreground mt-1">
-                            {subject.questions} questions
+                            {subject.questions}Q
                             {subject.locked && <Badge variant="outline" className="ml-1 text-[10px] px-1">Required</Badge>}
                           </div>
                         </button>
@@ -397,7 +360,7 @@ export default function AkboyMockRegistration() {
                 </div>
 
                 <Button
-                  className="w-full bg-orange-500 hover:bg-orange-600"
+                  className="w-full h-12 bg-orange-500 hover:bg-orange-600 font-semibold text-base"
                   onClick={() => {
                     if (!form.fullName.trim() || !form.phone.trim() || !form.mode) {
                       toast.error("Please fill all required fields");
@@ -408,7 +371,6 @@ export default function AkboyMockRegistration() {
                       return;
                     }
                     if (form.mode === 'virtual') {
-                      // Virtual mode does not require payment — register immediately
                       handleSubmit();
                       return;
                     }
@@ -416,19 +378,25 @@ export default function AkboyMockRegistration() {
                   }}>
                   {form.mode === 'virtual' ? 'Complete Registration' : 'Continue to Payment'}
                 </Button>
+
+                <div className="text-center">
+                  <Link to="/school-registration" className="inline-flex items-center gap-2 text-sm text-orange-600 font-semibold hover:underline">
+                    <School className="w-4 h-4" /> Register as a School
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           )}
 
           {/* Step 2: Payment */}
           {step === 2 && (
-            <Card>
+            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
               <CardHeader>
                 <CardTitle>Payment Information</CardTitle>
                 <CardDescription>Registration fee: ₦{Number(fee).toLocaleString()}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <Alert className="border-orange-200 bg-orange-50">
+                <Alert className="border-orange-200 bg-orange-50 rounded-xl">
                   <AlertDescription className="text-orange-800">
                     <p className="font-semibold mb-2">Make payment to:</p>
                     <div className="space-y-1 text-sm">
@@ -441,16 +409,16 @@ export default function AkboyMockRegistration() {
                 </Alert>
 
                 {form.mode === 'physical' && (
-                  <Alert className="border-blue-200 bg-blue-50">
+                  <Alert className="border-blue-200 bg-blue-50 rounded-xl">
                     <MapPin className="h-4 w-4 text-blue-600" />
                     <AlertDescription className="text-blue-800">
-                      <strong>Physical Mode:</strong> Please bring your payment receipt to the exam venue on the day of the exam.
+                      <strong>Physical Mode:</strong> Bring your payment receipt to the exam venue.
                     </AlertDescription>
                   </Alert>
                 )}
 
-                <div className="bg-muted p-4 rounded-lg space-y-2 text-sm">
-                  <h4 className="font-semibold">Registration Summary</h4>
+                <div className="bg-gray-50 p-4 rounded-xl space-y-2 text-sm border">
+                  <h4 className="font-semibold">Summary</h4>
                   <p><strong>Name:</strong> {form.fullName}</p>
                   <p><strong>Phone:</strong> {form.phone}</p>
                   <p><strong>Mode:</strong> <span className="capitalize">{form.mode}</span></p>
@@ -463,8 +431,8 @@ export default function AkboyMockRegistration() {
                 </div>
 
                 <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep(1)} className="flex-1">Back</Button>
-                  <Button onClick={handleSubmit} disabled={loading} className="flex-1 bg-orange-500 hover:bg-orange-600">
+                  <Button variant="outline" onClick={() => setStep(1)} className="flex-1 h-12">Back</Button>
+                  <Button onClick={handleSubmit} disabled={loading} className="flex-1 h-12 bg-orange-500 hover:bg-orange-600 font-semibold">
                     {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Registering...</> : "Complete Registration"}
                   </Button>
                 </div>
@@ -472,72 +440,74 @@ export default function AkboyMockRegistration() {
             </Card>
           )}
 
-          {/* Step 3: Confirmation / Admit Slip */}
+          {/* Step 3: Confirmation */}
           {step === 3 && result && (
-            <div className="space-y-6" id="admit-slip">
-              <Card className="border-2 border-orange-300">
-                <CardHeader className="bg-orange-500 text-white text-center">
+            <div className="space-y-4">
+              <Card className="shadow-lg border-0 overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-center py-6">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <img src="/akboy-logo.png" alt="AKBOY" className="w-10 h-10 rounded-full bg-white p-1" />
                     <CardTitle className="text-xl">AKBOY Mock Examination</CardTitle>
                   </div>
                   <CardDescription className="text-orange-100">Admit Slip / Confirmation</CardDescription>
                 </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  <div className="text-center mb-4">
-                    <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-2" />
+                <CardContent className="p-6 space-y-5">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <CheckCircle2 className="w-10 h-10 text-green-500" />
+                    </div>
                     <p className="text-lg font-bold text-green-700">Registration Successful!</p>
                   </div>
 
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
-                    <p className="text-sm text-muted-foreground">Your Registration Number</p>
-                    <p className="text-3xl font-bold text-orange-600 tracking-wider">{result.registrationNumber}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Keep this number safe. You'll need it to access the exam and check results.</p>
+                  <div className="bg-orange-50 border-2 border-dashed border-orange-300 rounded-xl p-5 text-center">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Your Registration Number</p>
+                    <p className="text-3xl font-extrabold text-orange-600 tracking-widest mt-1">{result.registrationNumber}</p>
+                    <p className="text-xs text-muted-foreground mt-2">Keep this number safe for exam access and results</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-muted-foreground">Full Name</p>
+                      <p className="text-muted-foreground text-xs uppercase">Full Name</p>
                       <p className="font-semibold">{result.fullName}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">Mode</p>
+                      <p className="text-muted-foreground text-xs uppercase">Mode</p>
                       <p className="font-semibold capitalize">{result.mode}</p>
                     </div>
                     {result.batchTitle && (
                       <div>
-                        <p className="text-muted-foreground">Batch</p>
+                        <p className="text-muted-foreground text-xs uppercase">Batch</p>
                         <p className="font-semibold">{result.batchTitle}</p>
                       </div>
                     )}
                     {result.examDate && (
                       <div>
-                        <p className="text-muted-foreground">Exam Date</p>
+                        <p className="text-muted-foreground text-xs uppercase">Exam Date</p>
                         <p className="font-semibold">{new Date(result.examDate).toLocaleString()}</p>
                       </div>
                     )}
                   </div>
 
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Subjects</p>
+                    <p className="text-xs text-muted-foreground uppercase mb-2">Subjects</p>
                     <div className="flex flex-wrap gap-2">
                       {result.subjects.map((s: any) => (
-                        <Badge key={s.id} className="bg-orange-100 text-orange-700 border-orange-300">
+                        <Badge key={s.id} className="bg-orange-100 text-orange-700 border-orange-200 px-3 py-1">
                           {s.name} ({s.questions}Q)
                         </Badge>
                       ))}
                     </div>
                   </div>
 
-                  <div className="bg-muted p-3 rounded text-sm space-y-1">
+                  <div className="bg-gray-50 p-4 rounded-xl text-sm space-y-1 border">
                     <p className="font-semibold">📋 Exam Instructions:</p>
                     <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                      <li>Total Questions: 180 (English: 60, Others: 40 each)</li>
-                      <li>Duration: 120 minutes (2 hours)</li>
-                      <li>Login at the exam portal using your registration number</li>
+                      <li>Total: 180 questions (English: 60, Others: 40 each)</li>
+                      <li>Duration: 120 minutes</li>
+                      <li>Login at the exam portal with your registration number</li>
                       {result.mode === 'physical' && (
                         <>
-                          <li><strong>Bring your payment receipt to the exam venue</strong></li>
+                          <li><strong>Bring payment receipt to venue</strong></li>
                           {result.examVenue && <li>Venue: {result.examVenue}</li>}
                         </>
                       )}
@@ -546,18 +516,18 @@ export default function AkboyMockRegistration() {
                 </CardContent>
               </Card>
 
-                      <div className="flex gap-3 print:hidden">
-                <Button variant="outline" onClick={downloadAdmitSlip} className="flex-1">
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={downloadAdmitSlip} className="flex-1 h-12 font-semibold">
                   <Download className="w-4 h-4 mr-2" /> Download Admit Slip
                 </Button>
                 <Button
-                  className="flex-1 bg-orange-500 hover:bg-orange-600"
+                  className="flex-1 h-12 bg-orange-500 hover:bg-orange-600 font-semibold"
                   onClick={() => {
                     setStep(1);
                     setResult(null);
                     setForm({ fullName: "", phone: "", email: "", mode: "", selectedSubjects: [] });
                   }}>
-                  Register Another Student
+                  Register Another
                 </Button>
               </div>
             </div>

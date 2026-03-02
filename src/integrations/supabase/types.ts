@@ -1723,7 +1723,7 @@ export type Database = {
           {
             foreignKeyName: "mock_results_registration_id_fkey"
             columns: ["registration_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "mock_registrations"
             referencedColumns: ["id"]
           },
@@ -3874,6 +3874,26 @@ export type Database = {
           updated_count: number
         }[]
       }
+      auto_schedule_batch: {
+        Args: never
+        Returns: {
+          created_at: string | null
+          exam_date: string | null
+          exam_venue: string | null
+          id: string
+          is_active: boolean | null
+          results_release_date: string | null
+          results_released: boolean | null
+          title: string
+          updated_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "mock_batches"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       can_send_email: {
         Args: { email_type: string; target_user_id: string }
         Returns: boolean
@@ -3909,6 +3929,16 @@ export type Database = {
         Returns: {
           updated_count: number
         }[]
+      }
+      create_mock_exam_attempt: {
+        Args: {
+          p_exam_duration_minutes?: number
+          p_exam_id: string
+          p_exam_title?: string
+          p_registration_id: string
+          p_registration_number: string
+        }
+        Returns: Json
       }
       create_test_school_account: {
         Args: {
@@ -4364,6 +4394,18 @@ export type Database = {
           wrong: number
         }[]
       }
+      recompute_results_for_mock_attempt: {
+        Args: { attempt_uuid: string }
+        Returns: {
+          correct: number
+          percentage: number
+          scaled_score: number
+          total: number
+          unanswered: number
+          updated: boolean
+          wrong: number
+        }[]
+      }
       record_login_attempt: {
         Args: {
           attempt_success: boolean
@@ -4376,6 +4418,23 @@ export type Database = {
       send_immediate_result_notification: {
         Args: { attempt_uuid: string }
         Returns: boolean
+      }
+      submit_mock_exam: { Args: { p_attempt_id: string }; Returns: Json }
+      submit_mock_exam_answers: {
+        Args: { p_answers: Json; p_attempt_id: string }
+        Returns: Json
+      }
+      submit_mock_result: {
+        Args: {
+          p_batch_id: string
+          p_max_score: number
+          p_registration_number: string
+          p_strengths: Json
+          p_subject_scores: Json
+          p_total_score: number
+          p_weaknesses: Json
+        }
+        Returns: Json
       }
       update_user_streak: { Args: { p_user_id: string }; Returns: Json }
       validate_admin_action: {
@@ -4393,18 +4452,6 @@ export type Database = {
       validate_mock_exam_login: {
         Args: { p_registration_number: string }
         Returns: Json
-      }
-      submit_mock_result: {
-        Args: {
-          p_registration_number: string;
-          p_total_score: number;
-          p_max_score: number;
-          p_subject_scores: Json;
-          p_strengths: Json;
-          p_weaknesses: Json;
-          p_batch_id: string | null;
-        };
-        Returns: Json;
       }
       validate_question_answer: {
         Args: { question_id: string; submitted_answer: Json }
