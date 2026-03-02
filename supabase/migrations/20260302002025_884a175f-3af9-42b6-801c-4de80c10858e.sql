@@ -56,7 +56,7 @@ BEGIN
   END IF;
 
   -- Compute per-subject scores
-  FOR subj IN SELECT * FROM jsonb_array_elements(reg_rec.subjects) AS s
+  FOR subj IN SELECT jsonb_array_elements(reg_rec.subjects) AS subject
   LOOP
     -- Count correct answers for this subject
     SELECT 
@@ -66,19 +66,19 @@ BEGIN
     FROM public.attempt_answers aa
     JOIN public.questions q ON q.id = aa.question_id
     WHERE aa.attempt_id = p_attempt_id
-      AND q.subject_id = (subj.s->>'id')::uuid;
+      AND q.subject_id = (subj.subject->>'id')::uuid;
 
     -- Expected questions for this subject
-    subj_total := COALESCE((subj.s->>'questions')::int, 
-      CASE WHEN subj.s->>'name' = 'English Language' THEN 60 ELSE 40 END);
+    subj_total := COALESCE((subj.subject->>'questions')::int, 
+      CASE WHEN subj.subject->>'name' = 'English Language' THEN 60 ELSE 40 END);
 
     -- Convert to /100 (JAMB-style)
     converted := CASE WHEN subj_total > 0 THEN ROUND((subj_correct::numeric / subj_total::numeric) * 100) ELSE 0 END;
     total_converted := total_converted + converted;
 
     subject_scores := subject_scores || jsonb_build_object(
-      'subject_name', subj.s->>'name',
-      'subject_id', subj.s->>'id',
+      'subject_name', subj.subject->>'name',
+      'subject_id', subj.subject->>'id',
       'correct', subj_correct,
       'total', subj_total,
       'converted_score', converted
@@ -86,9 +86,9 @@ BEGIN
 
     -- Classify as strength or weakness
     IF converted >= 60 THEN
-      strengths := array_append(strengths, subj.s->>'name');
+      strengths := array_append(strengths, subj.subject->>'name');
     ELSIF converted < 40 THEN
-      weaknesses := array_append(weaknesses, subj.s->>'name');
+      weaknesses := array_append(weaknesses, subj.subject->>'name');
     END IF;
   END LOOP;
 
