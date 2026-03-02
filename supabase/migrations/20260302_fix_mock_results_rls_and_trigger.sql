@@ -34,8 +34,11 @@ DECLARE
   reg_number TEXT;
   batch_id UUID;
   subject_scores JSONB := '[]'::jsonb;
-  strengths TEXT[] := '{}';
-  weaknesses TEXT[] := '{}';
+  -- after moving the column types to JSONB we must also compute
+  -- strengths/weaknesses as JSONB arrays; previously they were text[] and
+  casting during insert became a source of runtime errors.
+  strengths JSONB := '[]'::jsonb;
+  weaknesses JSONB := '[]'::jsonb;
   total_converted INT := 0;
   subj RECORD;
   subj_correct INT;
@@ -94,11 +97,11 @@ BEGIN
           'converted_score', converted
         );
 
-        -- Classify as strength or weakness
+        -- Classify as strength or weakness and append to JSONB array.
         IF converted >= 60 THEN
-          strengths := array_append(strengths, subj.subject->>'name');
+          strengths := strengths || jsonb_build_array(subj.subject->>'name');
         ELSIF converted < 40 THEN
-          weaknesses := array_append(weaknesses, subj.subject->>'name');
+          weaknesses := weaknesses || jsonb_build_array(subj.subject->>'name');
         END IF;
       END LOOP;
 

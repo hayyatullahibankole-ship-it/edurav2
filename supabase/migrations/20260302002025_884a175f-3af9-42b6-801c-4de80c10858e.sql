@@ -13,8 +13,12 @@ DECLARE
   reg_rec RECORD;
   answer_rec RECORD;
   subject_scores JSONB := '[]'::jsonb;
-  strengths TEXT[] := '{}';
-  weaknesses TEXT[] := '{}';
+  -- use JSONB instead of text[] so we can insert directly into the mock_results
+  -- table which defines these columns as JSONB.  previous versions built a
+  -- text array and relied on an implicit cast, which now fails (`column
+  -- "strengths" is of type jsonb but expression is of type text[]`).
+  strengths JSONB := '[]'::jsonb;
+  weaknesses JSONB := '[]'::jsonb;
   total_converted INT := 0;
   subj RECORD;
   subj_correct INT;
@@ -80,11 +84,13 @@ BEGIN
       'converted_score', converted
     );
 
-    -- Classify as strength or weakness
+    -- Classify as strength or weakness.  append the subject name to the
+    -- JSONB array.  We build a one‑element array and concatenate so that the
+    -- resulting value remains a flat JSON array of strings.
     IF converted >= 60 THEN
-      strengths := array_append(strengths, subj.subject->>'name');
+      strengths := strengths || jsonb_build_array(subj.subject->>'name');
     ELSIF converted < 40 THEN
-      weaknesses := array_append(weaknesses, subj.subject->>'name');
+      weaknesses := weaknesses || jsonb_build_array(subj.subject->>'name');
     END IF;
   END LOOP;
 
