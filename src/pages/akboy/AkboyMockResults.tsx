@@ -3,27 +3,26 @@ import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Search, Trophy, TrendingUp, TrendingDown, Printer, AlertCircle, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useDomainDetection } from "@/hooks/useDomainDetection";
+import { Loader2, Search, Trophy, TrendingUp, TrendingDown, Download, AlertCircle, Clock, GraduationCap, School } from "lucide-react";
 
 export default function AkboyMockResults() {
   const [regNumber, setRegNumber] = useState("");
-  // if ?reg= is provided we prefill and auto-check once the checkResult
-  // helper exists below. we declare the params/initialReg here and run the
-  // effect later.
   const params = new URLSearchParams(window.location.search);
   const initialReg = params.get('reg') || "";
   const [loading, setLoading] = useState(false);
   const [resultData, setResultData] = useState<any>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const { isAkboy } = useDomainDetection();
+  const basePath = isAkboy ? "" : "/akboy";
 
-  const checkResult = async () => {
-    // ignore empty input
-    if (!regNumber.trim()) {
+  const checkResult = async (regNum?: string) => {
+    const num = regNum || regNumber;
+    if (!num.trim()) {
       toast.error("Please enter your registration number");
       return;
     }
@@ -34,7 +33,7 @@ export default function AkboyMockResults() {
 
     try {
       const { data, error } = await supabase.rpc("check_mock_result" as any, {
-        p_registration_number: regNumber.trim().toUpperCase(),
+        p_registration_number: num.trim().toUpperCase(),
       });
 
       if (error) throw error;
@@ -55,60 +54,54 @@ export default function AkboyMockResults() {
     }
   };
 
+  useEffect(() => {
+    if (initialReg) {
+      setRegNumber(initialReg);
+      checkResult(initialReg);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialReg]);
+
   const getScoreColor = (score: number) => {
     if (score >= 75) return "text-green-600";
-    if (score >= 50) return "text-yellow-600";
+    if (score >= 50) return "text-amber-600";
     return "text-red-600";
   };
 
   const getProgressColor = (score: number) => {
     if (score >= 75) return "bg-green-500";
-    if (score >= 50) return "bg-yellow-500";
+    if (score >= 50) return "bg-amber-500";
     return "bg-red-500";
   };
 
-  // helpers returning actual color codes for use in generated HTML
   const scoreColorHex = (score: number) => {
-    if (score >= 75) return "#16a34a"; // green-600
-    if (score >= 50) return "#ca8a04"; // yellow-600
-    return "#dc2626"; // red-600
+    if (score >= 75) return "#16a34a";
+    if (score >= 50) return "#ca8a04";
+    return "#dc2626";
   };
   const progressHex = (score: number) => {
-    if (score >= 75) return "#22c55e"; // green-500
-    if (score >= 50) return "#eab308"; // yellow-500
-    return "#ef4444"; // red-500
+    if (score >= 75) return "#22c55e";
+    if (score >= 50) return "#eab308";
+    return "#ef4444";
   };
-
-  // create a printable/downloadable version of the result slip that mirrors the
-  // admit-slip download approach used in registration. this keeps prints from
-  // capturing the entire page and ensures consistent styling.
-  // once the checkResult helper is declared we can run the initialReg effect
-  useEffect(() => {
-    if (initialReg) {
-      setRegNumber(initialReg);
-      checkResult();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialReg]);
 
   const downloadResultSlip = () => {
     if (!resultData) return;
 
-    // generate subject rows html
     const subjectsHtml = (resultData.subject_scores || [])
       .map((s: any) => {
         const color = scoreColorHex(s.converted_score);
         const width = `${s.converted_score}%`;
         return `
-          <div style="border:1px solid #ddd;border-radius:4px;padding:8px;margin-bottom:8px;">
-            <div style="display:flex;justify-content:space-between;font-size:14px;">
-              <span>${s.subject_name}</span>
+          <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:10px;background:#fafafa;">
+            <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px;">
+              <span style="font-weight:600;">${s.subject_name}</span>
               <span style="font-weight:bold;color:${color};">${s.converted_score}/100</span>
             </div>
-            <div style="background:#f3f3f3;height:8px;border-radius:4px;overflow:hidden;">
-              <div style="background:${progressHex(s.converted_score)};width:${width};height:100%;"></div>
+            <div style="background:#e5e7eb;height:8px;border-radius:4px;overflow:hidden;">
+              <div style="background:${progressHex(s.converted_score)};width:${width};height:100%;border-radius:4px;"></div>
             </div>
-            <p style="font-size:12px;color:#666;margin-top:4px;">${s.correct}/${s.total} correct answers</p>
+            <p style="font-size:12px;color:#6b7280;margin-top:6px;">${s.correct}/${s.total} correct answers</p>
           </div>`;
       })
       .join('');
@@ -117,26 +110,25 @@ export default function AkboyMockResults() {
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>AKBOY Mock Exam Result Slip</title>
+  <title>AKBOY Mock Exam Result Slip - ${resultData.registration_number}</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Arial',sans-serif; padding:20px; background:#f5f5f5; }
-    .container { max-width:8.5in; margin:0 auto; }
-    .result-slip { background:white; border:2px solid #333; padding:20px; margin-bottom:20px; }
-    .header { text-align:center; border-bottom:2px solid #ff8c00; padding-bottom:10px; margin-bottom:15px; }
-    .header h1 { color:#ff8c00; font-size:24px; margin-bottom:5px; }
-    .header p { color:#666; font-size:12px; }
-    .content { margin-bottom:15px; }
-    .section { margin-bottom:15px; }
-    .section-title { font-weight:bold; color:#ff8c00; font-size:12px; margin-bottom:8px; border-bottom:1px solid #ddd; padding-bottom:5px; }
-    .field { display:flex; margin-bottom:6px; font-size:12px; }
-    .label { font-weight:bold; width:120px; color:#555; }
-    .value { flex:1; color:#333; }
-    .score-box { text-align:center; background:linear-gradient(to right,#ffedd5,#fef3c7); padding:20px; border-radius:12px; border:1px solid #ddd; }
-    .score-box .score { font-size:48px; font-weight:bold; }
-    .subject-breakdown { margin-top:15px; }
-    .footer { border-top:1px solid #ddd; padding-top:10px; text-align:center; font-size:10px; color:#666; }
-    @media print { body { background:white; } .result-slip { page-break-after:always; } }
+    body { font-family:'Segoe UI','Arial',sans-serif; padding:20px; background:#f8fafc; }
+    .container { max-width:600px; margin:0 auto; }
+    .result-slip { background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
+    .header { text-align:center; background:linear-gradient(135deg,#f97316,#f59e0b); color:white; padding:24px 20px; }
+    .header h1 { font-size:22px; margin-bottom:4px; }
+    .header p { font-size:13px; opacity:0.9; }
+    .content { padding:24px; }
+    .score-box { text-align:center; background:linear-gradient(135deg,#fff7ed,#fefce8); padding:24px; border-radius:12px; border:1px solid #fed7aa; margin:16px 0; }
+    .score-box .score { font-size:56px; font-weight:800; color:#ea580c; }
+    .score-box .max { font-size:16px; color:#9ca3af; }
+    .section-title { font-weight:700; color:#f97316; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid #fed7aa; }
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+    .info-item label { display:block; font-size:11px; color:#9ca3af; text-transform:uppercase; letter-spacing:0.5px; }
+    .info-item span { display:block; font-size:14px; font-weight:600; color:#1f2937; }
+    .footer { border-top:1px solid #e5e7eb; padding:16px 24px; text-align:center; font-size:11px; color:#9ca3af; }
+    @media print { body { background:white; } .result-slip { box-shadow:none; } }
   </style>
 </head>
 <body>
@@ -147,24 +139,22 @@ export default function AkboyMockResults() {
         <p>JAMB Mock Examination Result Slip</p>
       </div>
       <div class="content">
-        <div class="section">
-          <div class="section-title">Student Information</div>
-          <div class="field"><span class="label">Name:</span><span class="value">${resultData.full_name}</span></div>
-          <div class="field"><span class="label">Reg Number:</span><span class="value" style="font-weight:bold;font-family:monospace;">${resultData.registration_number}</span></div>
+        <div class="info-grid">
+          <div class="info-item"><label>Full Name</label><span>${resultData.full_name}</span></div>
+          <div class="info-item"><label>Reg Number</label><span style="font-family:monospace;letter-spacing:1px;">${resultData.registration_number}</span></div>
         </div>
-        <div class="section score-box">
+        <div class="score-box">
           <div class="score">${resultData.total_score}</div>
-          <div style="font-size:14px;color:#666;">/ ${resultData.max_score} (Total Score)</div>
+          <div class="max">/ ${resultData.max_score}</div>
         </div>
-        <div class="section subject-breakdown">
+        <div style="margin-top:20px;">
           <div class="section-title">Subject Breakdown</div>
           ${subjectsHtml}
         </div>
       </div>
       <div class="footer">
-        <div>For exam updates and announcements, visit: www.akboys.ng</div>
-        <div>Contact: 08101466977 | akboycreativehub@gmail.com</div>
-        <div style="margin-top:5px;font-size:9px;">Generated: ${new Date().toLocaleString()}</div>
+        <p>For exam updates: www.akboys.ng | Contact: 08101466977</p>
+        <p style="margin-top:4px;">Generated: ${new Date().toLocaleString()}</p>
       </div>
     </div>
   </div>
@@ -178,64 +168,81 @@ export default function AkboyMockResults() {
     a.download = `AKBOY_Result_Slip_${resultData.registration_number}.html`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Result slip downloaded successfully");
+    toast.success("Result slip downloaded!");
   };
 
   return (
     <AkboyLayout title="Mock Exam Results" description="Check your AKBOY JAMB Mock Exam results">
-      <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white py-8 px-4">
         <div className="max-w-2xl mx-auto space-y-6">
+          {/* Hero Header */}
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full text-sm font-medium">
+              <GraduationCap className="w-4 h-4" />
+              JAMB Mock CBT
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Result Portal</h1>
+            <p className="text-muted-foreground">Enter your registration number to view your results</p>
+          </div>
+
           {/* Search Card */}
-          <Card>
-            <CardHeader className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <img src="/akboy-logo.png" alt="AKBOY" className="w-10 h-10 rounded-full" />
-              </div>
-              <CardTitle className="text-2xl">Result Portal</CardTitle>
-              <CardDescription>Enter your registration number to check your mock exam result</CardDescription>
-            </CardHeader>
-            <CardContent>
+          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
+            <CardContent className="pt-6">
               <div className="flex gap-3">
                 <Input
                   placeholder="e.g., AKBM2600001"
                   value={regNumber}
                   onChange={e => setRegNumber(e.target.value.toUpperCase())}
-                  className="text-center font-mono tracking-wider"
+                  className="text-center font-mono tracking-wider h-12 border-2 focus:border-orange-400 text-lg"
                   onKeyDown={e => e.key === "Enter" && checkResult()}
                 />
-                <Button onClick={checkResult} disabled={loading} className="bg-orange-500 hover:bg-orange-600">
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                <Button onClick={() => checkResult()} disabled={loading} className="bg-orange-500 hover:bg-orange-600 h-12 px-6">
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
                 </Button>
+              </div>
+              <div className="mt-3 flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Need to register?</span>
+                <Link to={`${basePath}/mock-registration`} className="text-orange-600 font-semibold hover:underline">Register Now</Link>
+                <span className="text-muted-foreground mx-1">•</span>
+                <Link to="/school-registration" className="text-orange-600 font-semibold hover:underline inline-flex items-center gap-1">
+                  <School className="w-3.5 h-3.5" /> Register as a School
+                </Link>
               </div>
             </CardContent>
           </Card>
 
           {/* Status Messages */}
           {status === "not_found" && (
-            <Card className="border-red-200 bg-red-50">
+            <Card className="border-red-200 bg-red-50 shadow-sm">
               <CardContent className="pt-6 text-center">
-                <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-                <p className="text-red-700 font-semibold">No Registration Found</p>
+                <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  <AlertCircle className="w-8 h-8 text-red-400" />
+                </div>
+                <p className="text-red-700 font-semibold text-lg">No Registration Found</p>
                 <p className="text-sm text-red-600 mt-1">Please check your registration number and try again.</p>
               </CardContent>
             </Card>
           )}
 
           {status === "pending" && (
-            <Card className="border-yellow-200 bg-yellow-50">
+            <Card className="border-amber-200 bg-amber-50 shadow-sm">
               <CardContent className="pt-6 text-center">
-                <Clock className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
-                <p className="text-yellow-700 font-semibold">Result Being Processed</p>
-                <p className="text-sm text-yellow-600 mt-1">Your result is still being processed. Please check back later.</p>
+                <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  <Clock className="w-8 h-8 text-amber-500" />
+                </div>
+                <p className="text-amber-700 font-semibold text-lg">Result Being Processed</p>
+                <p className="text-sm text-amber-600 mt-1">Your result is still being processed. Please check back later.</p>
               </CardContent>
             </Card>
           )}
 
           {status === "not_released" && (
-            <Card className="border-orange-200 bg-orange-50">
+            <Card className="border-orange-200 bg-orange-50 shadow-sm">
               <CardContent className="pt-6 text-center">
-                <Clock className="w-12 h-12 text-orange-500 mx-auto mb-3" />
-                <p className="text-orange-700 font-semibold">Results Not Yet Released</p>
+                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  <Clock className="w-8 h-8 text-orange-500" />
+                </div>
+                <p className="text-orange-700 font-semibold text-lg">Results Not Yet Released</p>
                 <p className="text-sm text-orange-600 mt-1">Results have not been released yet. Please check back later.</p>
               </CardContent>
             </Card>
@@ -243,32 +250,34 @@ export default function AkboyMockResults() {
 
           {/* Result Display */}
           {status === "available" && resultData && (
-            <div id="result-slip" className="space-y-4">
-              <Card className="border-2 border-orange-300">
-                <CardHeader className="bg-orange-500 text-white text-center">
+            <div className="space-y-4">
+              <Card className="shadow-lg border-0 overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-center py-6">
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <img src="/akboy-logo.png" alt="AKBOY" className="w-8 h-8 rounded-full bg-white p-0.5" />
-                    <CardTitle>AKBOY Mock Examination Result</CardTitle>
+                    <CardTitle className="text-lg">AKBOY Mock Examination Result</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
                   {/* Student Info */}
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-muted-foreground">Full Name</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">Full Name</p>
                       <p className="font-bold text-lg">{resultData.full_name}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">Registration Number</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">Reg Number</p>
                       <p className="font-bold text-lg font-mono">{resultData.registration_number}</p>
                     </div>
                   </div>
 
                   {/* Total Score */}
-                  <div className="text-center bg-gradient-to-r from-orange-50 to-yellow-50 p-6 rounded-xl border">
-                    <Trophy className="w-10 h-10 text-orange-500 mx-auto mb-2" />
+                  <div className="text-center bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-100">
+                    <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                      <Trophy className="w-8 h-8 text-orange-500" />
+                    </div>
                     <p className="text-sm text-muted-foreground">Total Score</p>
-                    <p className={`text-5xl font-bold ${getScoreColor(resultData.total_score / 4)}`}>
+                    <p className={`text-5xl font-extrabold ${getScoreColor(resultData.total_score / 4)}`}>
                       {resultData.total_score}
                     </p>
                     <p className="text-lg text-muted-foreground">/ {resultData.max_score}</p>
@@ -276,23 +285,23 @@ export default function AkboyMockResults() {
 
                   {/* Subject Breakdown */}
                   <div>
-                    <h3 className="font-semibold mb-3">Subject Breakdown</h3>
+                    <h3 className="font-semibold mb-3 text-sm uppercase tracking-wide text-muted-foreground">Subject Breakdown</h3>
                     <div className="space-y-3">
                       {(resultData.subject_scores || []).map((subject: any, index: number) => (
-                        <div key={index} className="border rounded-lg p-3">
+                        <div key={index} className="border rounded-xl p-4 bg-gray-50/50">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium text-sm">{subject.subject_name}</span>
-                            <span className={`font-bold ${getScoreColor(subject.converted_score)}`}>
+                            <span className="font-medium">{subject.subject_name}</span>
+                            <span className={`font-bold text-lg ${getScoreColor(subject.converted_score)}`}>
                               {subject.converted_score}/100
                             </span>
                           </div>
-                          <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="relative h-2.5 bg-gray-200 rounded-full overflow-hidden">
                             <div
                               className={`absolute top-0 left-0 h-full rounded-full transition-all ${getProgressColor(subject.converted_score)}`}
                               style={{ width: `${subject.converted_score}%` }}
                             />
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-xs text-muted-foreground mt-2">
                             {subject.correct}/{subject.total} correct answers
                           </p>
                         </div>
@@ -303,10 +312,10 @@ export default function AkboyMockResults() {
                   {/* Analysis */}
                   <div className="grid grid-cols-2 gap-4">
                     {resultData.strengths && resultData.strengths.length > 0 && (
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <TrendingUp className="w-4 h-4 text-green-600" />
-                          <span className="font-semibold text-sm text-green-700">Strong Subjects</span>
+                          <span className="font-semibold text-sm text-green-700">Strong</span>
                         </div>
                         <div className="space-y-1">
                           {resultData.strengths.map((s: string, i: number) => (
@@ -318,10 +327,10 @@ export default function AkboyMockResults() {
                       </div>
                     )}
                     {resultData.weaknesses && resultData.weaknesses.length > 0 && (
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                      <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <TrendingDown className="w-4 h-4 text-red-600" />
-                          <span className="font-semibold text-sm text-red-700">Weak Subjects</span>
+                          <span className="font-semibold text-sm text-red-700">Weak</span>
                         </div>
                         <div className="space-y-1">
                           {resultData.weaknesses.map((s: string, i: number) => (
@@ -336,8 +345,8 @@ export default function AkboyMockResults() {
                 </CardContent>
               </Card>
 
-              <Button variant="outline" onClick={downloadResultSlip} className="w-full print:hidden">
-                <Printer className="w-4 h-4 mr-2" /> Print Result Slip
+              <Button variant="outline" onClick={downloadResultSlip} className="w-full h-12 text-base font-semibold">
+                <Download className="w-5 h-5 mr-2" /> Download Result Slip
               </Button>
             </div>
           )}
