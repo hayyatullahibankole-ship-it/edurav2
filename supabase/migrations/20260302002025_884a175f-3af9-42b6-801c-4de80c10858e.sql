@@ -43,17 +43,13 @@ BEGIN
   reg_id := (attempt_rec.proctoring_data->>'mock_registration_id')::uuid;
   reg_number := attempt_rec.proctoring_data->>'registration_number';
 
-  -- Update registration status to submitted
-  UPDATE public.mock_registrations
-  SET exam_status = 'submitted', exam_submitted_at = now()
-  WHERE id = reg_id;
-
   -- Get registration record for subjects
   SELECT * INTO reg_rec FROM public.mock_registrations WHERE id = reg_id;
 
   IF NOT FOUND THEN
     RETURN jsonb_build_object('status', 'success', 'message', 'Exam submitted but registration not found for scoring');
   END IF;
+
 
   -- Compute per-subject scores
   FOR subj IN SELECT jsonb_array_elements(reg_rec.subjects) AS subject
@@ -123,6 +119,11 @@ BEGIN
     strengths = EXCLUDED.strengths,
     weaknesses = EXCLUDED.weaknesses,
     attempt_id = EXCLUDED.attempt_id;
+
+  -- Update registration status to submitted AFTER inserting results
+  UPDATE public.mock_registrations
+  SET exam_status = 'submitted', exam_submitted_at = now(), attempt_id = p_attempt_id
+  WHERE id = reg_id;
 
   RETURN jsonb_build_object(
     'status', 'success',
