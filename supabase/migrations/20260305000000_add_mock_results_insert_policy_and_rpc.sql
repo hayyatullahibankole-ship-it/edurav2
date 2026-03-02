@@ -27,7 +27,8 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  reg_record RECORD;
+  -- concrete rowtype prevents unassigned-record errors during NULL lookups
+  reg_record public.mock_registrations%ROWTYPE;
   result_id UUID;
 BEGIN
   -- locate registration

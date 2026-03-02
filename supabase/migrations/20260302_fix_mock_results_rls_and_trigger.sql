@@ -44,7 +44,10 @@ DECLARE
   subj_correct INT;
   subj_total INT;
   converted INT;
-  reg_rec RECORD;
+  -- use rowtype instead of generic RECORD so that an empty select leaves a
+  -- null row rather than an unassigned record (avoids "record \"reg_rec\" is
+  -- not assigned yet" errors when later referencing fields).
+  reg_rec public.mock_registrations%ROWTYPE;
 BEGIN
   -- Only process if status changed to SUBMITTED
   IF NEW.status != 'SUBMITTED' OR OLD.status = 'SUBMITTED' THEN

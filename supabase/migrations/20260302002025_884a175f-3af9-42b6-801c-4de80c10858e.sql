@@ -10,7 +10,11 @@ SET search_path = public
 AS $$
 DECLARE
   attempt_rec RECORD;
-  reg_rec RECORD;
+  -- use concrete rowtype so a missing registration still produces a NULL
+  -- record instead of leaving `reg_rec` unassigned (which raises
+  -- "record \"reg_rec\" is not assigned yet" when its fields are
+  -- accessed).
+  reg_rec public.mock_registrations%ROWTYPE;
   answer_rec RECORD;
   subject_scores JSONB := '[]'::jsonb;
   -- use JSONB instead of text[] so we can insert directly into the mock_results
@@ -26,6 +30,7 @@ DECLARE
   converted INT;
   reg_id UUID;
   reg_number TEXT;
+  found_reg BOOLEAN := FALSE;
 BEGIN
   -- Verify attempt exists and is for a mock exam
   SELECT * INTO attempt_rec FROM public.attempts
@@ -49,11 +54,20 @@ BEGIN
 
   -- Get registration record for subjects
   SELECT * INTO reg_rec FROM public.mock_registrations WHERE id = reg_id;
+  found_reg := FOUND;
 
-  IF NOT FOUND THEN
-    RETURN jsonb_build_object('status', 'success', 'message', 'Exam submitted but registration not found for scoring');
+  -- if there is no registration we don't want to run the score loop or
+  -- try to access any fields on `reg_rec` (an uninitialised RECORD would
+  -- blow up).  return early with a helpful message, but still update the
+  -- attempt status above.
+  IF NOT found_reg THEN
+    -- registration missing; skip scoring and leave the later update of
+    -- mock_registrations harmless (it will simply affect no rows).
+    RETURN jsonb_build_object(
+      'status', 'success',
+      'message', 'Exam submitted but registration not found for scoring'
+    );
   END IF;
-
 
   -- Compute per-subject scores
   FOR subj IN SELECT jsonb_array_elements(reg_rec.subjects) AS subject
@@ -125,6 +139,8 @@ BEGIN
     strengths = EXCLUDED.strengths,
     weaknesses = EXCLUDED.weaknesses,
     attempt_id = EXCLUDED.attempt_id;
+
+  -- (no change here; this block only executes when found_reg is true)
 
   -- Update registration status to submitted AFTER inserting results
   UPDATE public.mock_registrations
