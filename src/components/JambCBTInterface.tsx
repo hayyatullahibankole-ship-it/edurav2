@@ -232,230 +232,275 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 flex flex-col select-none">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-accent text-white p-4 shadow-lg">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold">{examTitle}</h1>
-            <p className="text-primary-foreground/80 text-sm">{examDescription}</p>
-          </div>
-          
-          <div className="flex items-center gap-6">
-            {/* Timer */}
-            <div className="flex items-center bg-white/10 px-4 py-2 rounded-lg">
-              <Clock className="h-5 w-5 mr-2" />
-              <span className="font-mono text-lg font-bold">
-                {formatTime(timeLeft)}
-              </span>
+      <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">JAMB</div>
+              <div>
+                <h1 className="text-lg font-bold">{examTitle}</h1>
+                <p className="text-xs opacity-90">{examDescription}</p>
+              </div>
             </div>
             
-            {/* Controls */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              {/* Timer */}
+              <div className={`flex items-center px-4 py-2 rounded-xl font-mono text-lg font-bold ${
+                timeLeft < 300 ? 'bg-red-600 animate-pulse' : 'bg-white/20'
+              }`}>
+                <Clock className="h-4 w-4 mr-2" />
+                {formatTime(timeLeft)}
+              </div>
+              
+              {/* Controls */}
               <Button
-                variant="secondary"
                 size="sm"
                 onClick={togglePause}
                 disabled={isSubmitting}
+                className="bg-white/20 hover:bg-white/30 h-9 px-3"
               >
                 {isPaused ? "Resume" : "Pause"}
               </Button>
               
               <Button
-                variant="destructive"
                 size="sm"
                 onClick={confirmSubmit}
                 disabled={isSubmitting}
+                className="bg-white text-orange-600 hover:bg-white/90 font-bold h-9 px-4"
               >
-                Submit Test
+                {isSubmitting ? "Submitting..." : "Submit"}
               </Button>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="mt-2">
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span>{Object.keys(answers).length}/{questions.length} answered</span>
+              <span>{Math.round(getTotalProgress())}%</span>
+            </div>
+            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white rounded-full transition-all duration-300"
+                style={{ width: `${getTotalProgress()}%` }}
+              />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="bg-card border-b p-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Overall Progress</span>
-            <span className="text-sm text-muted-foreground">
-              {Object.keys(answers).length} of {questions.length} questions answered
-            </span>
+      {/* Subject Navigation */}
+      <div className="bg-white border-b shadow-sm">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center gap-1 overflow-x-auto py-2">
+            {Object.keys(subjectQuestions).map((subject) => {
+              const answeredInSubject = subjectQuestions[subject].questions.filter(q => answers.hasOwnProperty(q.id)).length;
+              const isActive = currentSubject === subject;
+              return (
+                <button
+                  key={subject}
+                  onClick={() => switchToSubject(subject)}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all",
+                    isActive
+                      ? "bg-orange-500 text-white shadow-md"
+                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600"
+                  )}
+                >
+                  {subject}
+                  <span className={cn(
+                    "text-[10px] px-1.5 py-0.5 rounded-full font-bold",
+                    isActive ? "bg-white/30" : "bg-gray-100"
+                  )}>
+                    {answeredInSubject}/{subjectQuestions[subject].questions.length}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-          <Progress value={getTotalProgress()} className="h-2" />
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-4">
-        {/* Subject Navigation at Top */}
-        <div className="mb-4 flex flex-wrap gap-2">
-          {Object.keys(subjectQuestions).map((subject) => (
-            <Button
-              key={subject}
-              variant={currentSubject === subject ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => switchToSubject(subject)}
-              className="flex items-center gap-2"
-            >
-              {subject}
-              <Badge variant="secondary" className="text-xs">
-                {subjectQuestions[subject].questions.filter(q => answers.hasOwnProperty(q.id)).length}/
-                {subjectQuestions[subject].questions.length}
-              </Badge>
-            </Button>
-          ))}
-        </div>
-
-        {/* Anti-cheat warning */}
-        {tabSwitchCount > 0 && (
-          <Alert className="mb-4 border-warning">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
+      {/* Anti-cheat warning */}
+      {tabSwitchCount > 0 && (
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <Alert className="border-red-200 bg-red-50">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-700">
               Tab switches detected: {tabSwitchCount}
               {tabSwitchCount >= 2 && " (Warning issued)"}
             </AlertDescription>
           </Alert>
-        )}
+        </div>
+      )}
 
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Question Navigator Sidebar */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Question Navigator</CardTitle>
+      {/* Progress Bar */}
+      <div className="bg-white/50 border-b">
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <Progress value={getTotalProgress()} className="h-2" />
+        </div>
+      </div>
+
+      <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-4">
+        <div className={cn("grid gap-4 lg:grid-cols-[1fr_280px]")}>
+          {/* Question Area */}
+          <div className="space-y-4">
+            <Card className="border shadow-sm">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base font-bold">
+                    Question {currentQuestionIndex + 1}
+                  </CardTitle>
+                  <Badge variant="outline" className="text-xs font-medium border-orange-200 bg-orange-50 text-orange-700">
+                    {currentSubject}
+                  </Badge>
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-5 gap-2">
-                  {subjectQuestions[currentSubject]?.questions.map((q, idx) => {
-                    const isAnswered = answers.hasOwnProperty(q.id);
-                    const isCurrent = idx === currentQuestionIndex;
-                    const isFlagged = flaggedQuestions.has(q.id);
-                    
+
+              <CardContent className="space-y-4">
+                {/* Question Text */}
+                <div className="p-4 rounded-xl bg-gray-50 border">
+                  <MathRenderer
+                    content={currentQuestion.question}
+                    className="text-base font-medium leading-relaxed"
+                  />
+                </div>
+
+                {/* Options */}
+                <div className="space-y-2.5">
+                  {currentQuestion.options.map((option, index) => {
+                    const isSelected = answers[currentQuestion.id] === option;
+
                     return (
-                      <Button
-                        key={q.id}
-                        variant={isCurrent ? 'default' : 'outline'}
-                        size="sm"
+                      <button
+                        key={index}
+                        onClick={() => handleAnswerSelect(currentQuestion.id, option)}
                         className={cn(
-                          "aspect-square p-0 text-xs relative",
-                          isAnswered && !isCurrent && "border-green-500 bg-green-50 hover:bg-green-100"
+                          "w-full text-left p-4 rounded-xl border-2 transition-all",
+                          isSelected
+                            ? "border-orange-500 bg-orange-50 shadow-md"
+                            : "border-gray-200 hover:border-orange-300 hover:bg-orange-50/30"
                         )}
-                        onClick={() => setCurrentQuestionIndex(idx)}
                       >
-                        {isFlagged && (
-                          <Flag className="h-2 w-2 absolute -top-1 -right-1 fill-warning text-warning" />
-                        )}
-                        {idx + 1}
-                      </Button>
+                        <div className="flex items-center">
+                          <div className={cn(
+                            "w-8 h-8 rounded-full border-2 mr-3 flex items-center justify-center font-bold text-sm",
+                            isSelected
+                              ? "border-orange-500 bg-orange-500 text-white"
+                              : "border-gray-300 text-gray-500"
+                          )}>
+                            {isSelected ? <Check className="h-4 w-4" /> : String.fromCharCode(65 + index)}
+                          </div>
+                          <MathRenderer content={option} className="flex-1 text-sm" />
+                        </div>
+                      </button>
                     );
                   })}
+                </div>
+
+                {/* Navigation */}
+                <div className="flex justify-between items-center pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={prevQuestionInSubject}
+                    disabled={currentQuestionIndex === 0}
+                    size="sm"
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Previous
+                  </Button>
+
+                  <span className="text-sm font-semibold text-orange-600">
+                    {currentQuestionIndex + 1} / {subjectQuestions[currentSubject]?.questions.length}
+                  </span>
+
+                  <Button
+                    onClick={nextQuestionInSubject}
+                    disabled={currentQuestionIndex === subjectQuestions[currentSubject]?.questions.length - 1}
+                    className="bg-orange-500 hover:bg-orange-600"
+                    size="sm"
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Main Question Area */}
-          <div className="lg:col-span-3">
-            <Card className="min-h-[600px]">
-              <CardHeader className="border-b">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">
-                      Question {currentQuestionIndex + 1} of {subjectQuestions[currentSubject]?.questions.length}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Subject: {currentSubject}
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsCalculatorOpen(true)}
-                      className="flex items-center gap-1"
-                    >
-                      <CalculatorIcon className="h-4 w-4" />
-                      Calculator
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleFlagQuestion(currentQuestion.id)}
-                      className={flaggedQuestions.has(currentQuestion.id) ? "bg-warning/10 border-warning" : ""}
-                    >
-                      <Flag className="h-4 w-4 mr-1" />
-                      {flaggedQuestions.has(currentQuestion.id) ? "Flagged" : "Flag"}
-                    </Button>
-                  </div>
-                </div>
+          {/* Sidebar */}
+          <div className="space-y-4">
+            {/* Question Navigation Grid */}
+            <Card className="border">
+              <CardHeader className="py-2 px-3 border-b bg-gray-50">
+                <CardTitle className="text-xs font-semibold text-gray-600">
+                  {currentSubject || 'All Questions'} — Navigation
+                </CardTitle>
               </CardHeader>
-              
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  {/* Question */}
-                  <div>
-                    <MathRenderer 
-                      content={currentQuestion.question}
-                      className="text-lg font-medium leading-relaxed"
-                    />
+              <CardContent className="p-3">
+                <div className="grid grid-cols-5 gap-1.5">
+                  {subjectQuestions[currentSubject]?.questions.map((q, idx) => {
+                    const isAnswered = answers.hasOwnProperty(q.id);
+                    const isCurrent = idx === currentQuestionIndex;
+                    const isFlagged = flaggedQuestions.has(q.id);
+
+                    return (
+                      <button
+                        key={q.id}
+                        onClick={() => setCurrentQuestionIndex(idx)}
+                        className={cn(
+                          "w-full aspect-square rounded-lg border text-xs font-bold flex items-center justify-center transition-all relative",
+                          isCurrent && "bg-orange-500 text-white border-orange-500 shadow-md",
+                          !isCurrent && isAnswered && "bg-green-100 text-green-700 border-green-300",
+                          !isCurrent && !isAnswered && "bg-white text-gray-400 border-gray-200 hover:border-orange-300"
+                        )}
+                      >
+                        {isFlagged && (
+                          <Flag className="h-2 w-2 absolute -top-1 -right-1 fill-red-500 text-red-500" />
+                        )}
+                        {idx + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Legend */}
+                <div className="flex items-center gap-3 mt-3 pt-3 border-t text-[10px] text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded bg-orange-500" /> Current
                   </div>
-
-                  {/* Options */}
-                  <div className="space-y-3">
-                    {currentQuestion.options.map((option, index) => {
-                      const isSelected = answers[currentQuestion.id] === option;
-                      
-                      return (
-                        <button
-                          key={index}
-                          onClick={() => handleAnswerSelect(currentQuestion.id, option)}
-                          className={cn(
-                            "w-full text-left p-4 rounded-lg border-2 transition-all hover:bg-muted/50",
-                            isSelected 
-                              ? "border-primary bg-primary/5 font-medium" 
-                              : "border-border hover:border-muted-foreground"
-                          )}
-                        >
-                          <div className="flex items-center">
-                            <div className={cn(
-                              "w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center",
-                              isSelected ? "border-primary bg-primary" : "border-muted-foreground"
-                            )}>
-                              {isSelected && <Check className="h-4 w-4 text-white" />}
-                            </div>
-                            <MathRenderer content={option} className="flex-1" />
-                          </div>
-                        </button>
-                      );
-                    })}
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded bg-green-100 border border-green-300" /> Answered
                   </div>
-
-                  {/* Navigation */}
-                  <div className="flex justify-between items-center pt-6 border-t">
-                    <Button
-                      variant="outline"
-                      onClick={prevQuestionInSubject}
-                      disabled={currentQuestionIndex === 0}
-                    >
-                      <ChevronLeft className="h-4 w-4 mr-2" />
-                      Previous
-                    </Button>
-
-                    <div className="text-sm text-muted-foreground">
-                      Question {currentQuestionIndex + 1} of {subjectQuestions[currentSubject]?.questions.length}
-                    </div>
-
-                    <Button
-                      onClick={nextQuestionInSubject}
-                      disabled={currentQuestionIndex === subjectQuestions[currentSubject]?.questions.length - 1}
-                    >
-                      Next
-                      <ChevronRight className="h-4 w-4 ml-2" />
-                    </Button>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded bg-white border border-gray-200" /> Unanswered
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Tools */}
+            <Card className="border">
+              <CardContent className="p-3 space-y-2">
+                <Button
+                  onClick={() => setIsCalculatorOpen(true)}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                  size="sm"
+                >
+                  <CalculatorIcon className="h-4 w-4 mr-2" />
+                  Calculator
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleFlagQuestion(currentQuestion.id)}
+                  className={flaggedQuestions.has(currentQuestion.id) ? "bg-red-50 border-red-200" : ""}
+                  size="sm"
+                >
+                  <Flag className="h-4 w-4 mr-1" />
+                  {flaggedQuestions.has(currentQuestion.id) ? "Flagged" : "Flag"}
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -464,42 +509,39 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
 
       {/* Submit Confirmation Dialog */}
       <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Submit JAMB CBT Test?</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to submit your test? This action cannot be undone.
-            </DialogDescription>
+        <DialogContent className="max-w-md">
+          <DialogHeader className="text-center pb-3">
+            <DialogTitle className="text-xl font-bold">Submit JAMB CBT Test?</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="p-3 bg-muted/30 rounded-lg">
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="p-3 bg-green-50 rounded-xl border border-green-200">
                 <div className="text-2xl font-bold text-green-600">{Object.keys(answers).length}</div>
-                <div className="text-sm text-muted-foreground">Answered</div>
+                <div className="text-xs text-gray-500">Answered</div>
               </div>
-              <div className="p-3 bg-muted/30 rounded-lg">
+              <div className="p-3 bg-yellow-50 rounded-xl border border-yellow-200">
                 <div className="text-2xl font-bold text-yellow-600">{flaggedQuestions.size}</div>
-                <div className="text-sm text-muted-foreground">Flagged</div>
+                <div className="text-xs text-gray-500">Flagged</div>
               </div>
-              <div className="p-3 bg-muted/30 rounded-lg">
+              <div className="p-3 bg-red-50 rounded-xl border border-red-200">
                 <div className="text-2xl font-bold text-red-600">{questions.length - Object.keys(answers).length}</div>
-                <div className="text-sm text-muted-foreground">Unanswered</div>
+                <div className="text-xs text-gray-500">Unanswered</div>
               </div>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <Button 
                 variant="outline" 
                 onClick={() => setShowSubmitDialog(false)}
-                className="flex-1"
+                className="flex-1 h-11"
               >
-                Continue Test
+                Continue
               </Button>
               <Button 
                 onClick={handleManualSubmit}
                 disabled={isSubmitting}
-                className="flex-1"
+                className="flex-1 h-11 bg-orange-500 hover:bg-orange-600 font-bold"
               >
                 {isSubmitting ? "Submitting..." : "Submit Test"}
               </Button>
@@ -511,10 +553,16 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
       {/* Pause Overlay */}
       {isPaused && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">Test Paused</h2>
-            <p className="text-muted-foreground mb-6">Click resume to continue your exam</p>
-            <Button onClick={togglePause}>Resume Test</Button>
+          <Card className="w-full max-w-md border-2 shadow-2xl mx-4">
+            <CardHeader className="text-center pb-3">
+              <CardTitle className="text-xl font-bold">Test Paused</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-center">
+              <p className="text-gray-600">Your exam has been paused. Click resume to continue.</p>
+              <Button onClick={togglePause} className="w-full bg-orange-500 hover:bg-orange-600 h-11">
+                Resume Test
+              </Button>
+            </CardContent>
           </Card>
         </div>
       )}
@@ -527,19 +575,19 @@ const JambCBTInterface: React.FC<JambCBTInterfaceProps> = ({
 
       {/* Upgrade Required Dialog */}
       <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upgrade to Submit</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="max-w-md">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-lg font-bold">Upgrade to Submit</DialogTitle>
+            <DialogDescription className="text-sm">
               Subscribe to submit your test and unlock full results and explanations.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setShowUpgradeDialog(false)} className="flex-1">
+          <div className="flex gap-3 mt-6">
+            <Button variant="outline" onClick={() => setShowUpgradeDialog(false)} className="flex-1 h-11">
               Continue Test
             </Button>
             <Link to="/payment" className="flex-1">
-              <Button className="w-full">Upgrade Now</Button>
+              <Button className="w-full h-11 bg-orange-500 hover:bg-orange-600">Upgrade Now</Button>
             </Link>
           </div>
         </DialogContent>

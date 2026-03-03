@@ -20,7 +20,8 @@ import {
   Pause,
   Play,
   RotateCcw,
-  Save
+  Save,
+  Check
 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useSubscription } from '@/hooks/useSubscription';
@@ -226,54 +227,58 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Anti-cheat warning */}
-      {showWarning && (
-        <Alert className="fixed top-4 left-4 right-4 z-50 border-destructive bg-destructive/10">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription className="flex justify-between items-center">
-            <span>Suspicious activity detected! Tab switches: {tabSwitchCount}</span>
-            <Button variant="ghost" size="sm" onClick={() => setShowWarning(false)}>
-              Dismiss
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
+    <div className="min-h-screen bg-gray-50 flex flex-col select-none">
       {/* Header */}
-      <div className="bg-card border-b border-border sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
+      <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="bg-primary p-2 rounded-lg">
-                <BookOpen className="h-5 w-5 text-primary-foreground" />
-              </div>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">📝</div>
               <div>
-                <h1 className="font-bold text-lg">{examTitle}</h1>
-                <p className="text-sm text-muted-foreground">{examDescription}</p>
+                <h1 className="text-lg font-bold">{examTitle}</h1>
+                <p className="text-xs opacity-90">{examDescription}</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <Badge 
-                variant={timeWarning ? "destructive" : "outline"} 
-                className={`${timeWarning ? 'animate-pulse' : ''} text-base px-3 py-1`}
-              >
-                <Clock className="h-4 w-4 mr-1" />
+            <div className="flex items-center gap-3">
+              {/* Timer */}
+              <div className={`flex items-center px-4 py-2 rounded-xl font-mono text-lg font-bold ${
+                timeWarning ? 'bg-red-600 animate-pulse' : 'bg-white/20'
+              }`}>
+                <Clock className="h-4 w-4 mr-2" />
                 {formatTime(timeLeft)}
-              </Badge>
+              </div>
               
-              <Button variant="outline" size="sm" onClick={togglePause}>
+              {/* Controls */}
+              <Button
+                size="sm"
+                onClick={togglePause}
+                className="bg-white/20 hover:bg-white/30 h-9 px-3"
+              >
                 {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
               </Button>
               
               <Button 
-                variant="destructive" 
+                size="sm"
                 onClick={handleManualSubmit}
-                className="hidden sm:flex"
+                className="bg-white text-orange-600 hover:bg-white/90 font-bold h-9 px-4 hidden sm:flex"
               >
-                Submit Exam
+                Submit
               </Button>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="mt-2">
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span>{answeredCount}/{questions.length} answered</span>
+              <span>{Math.round(progress)}%</span>
+            </div>
+            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
             </div>
           </div>
         </div>
@@ -281,17 +286,15 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
 
       {/* Pause overlay */}
       {isPaused && (
-        <div className="fixed inset-0 bg-black/80 z-30 flex items-center justify-center">
-          <Card className="w-96">
-            <CardHeader className="text-center">
-              <Pause className="h-12 w-12 mx-auto mb-4 text-primary" />
-              <CardTitle>Exam Paused</CardTitle>
+        <div className="fixed inset-0 bg-black/50 z-30 flex items-center justify-center">
+          <Card className="w-full max-w-md border-2 shadow-2xl mx-4">
+            <CardHeader className="text-center pb-3">
+              <Pause className="h-12 w-12 mx-auto mb-4 text-orange-600" />
+              <CardTitle className="text-xl font-bold">Exam Paused</CardTitle>
             </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-muted-foreground mb-4">
-                Your exam is currently paused. Click resume to continue.
-              </p>
-              <Button onClick={togglePause} className="w-full">
+            <CardContent className="text-center space-y-4">
+              <p className="text-gray-600">Your exam is currently paused. Click resume to continue.</p>
+              <Button onClick={togglePause} className="w-full bg-orange-500 hover:bg-orange-600 h-11">
                 <Play className="h-4 w-4 mr-2" />
                 Resume Exam
               </Button>
@@ -300,197 +303,182 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
         </div>
       )}
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Question Navigation Sidebar */}
-          <Card className="lg:order-2">
-            <CardHeader>
-              <CardTitle className="text-sm flex items-center justify-between">
-                Question Navigator
-                <Button variant="ghost" size="sm" onClick={() => setIsReviewMode(!isReviewMode)}>
-                  {isReviewMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </CardTitle>
-              <div className="text-xs text-muted-foreground">
-                {answeredCount} of {questions.length} answered ({Math.round(progress)}%)
-              </div>
-              <Progress value={progress} className="h-2" />
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-5 gap-2 mb-4">
-                {questions.map((_, index) => {
-                  const status = getQuestionStatus(index);
-                  return (
-                    <Button
-                      key={index}
-                      variant={currentQuestion === index ? "default" : "outline"}
-                      size="sm"
-                      className={`aspect-square p-0 text-xs ${
-                        status === "answered" ? "border-green-500 bg-green-50 hover:bg-green-100" :
-                        status === "flagged" ? "border-yellow-500 bg-yellow-50 hover:bg-yellow-100" : ""
-                      }`}
-                      onClick={() => setCurrentQuestion(index)}
-                    >
-                      {index + 1}
-                    </Button>
-                  );
-                })}
-              </div>
-              
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3 w-3 text-green-600" />
-                  <span>Answered ({answeredCount})</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Flag className="h-3 w-3 text-yellow-600" />
-                  <span>Flagged ({flagged.size})</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Circle className="h-3 w-3 text-muted-foreground" />
-                  <span>Not Visited ({questions.length - answeredCount - (flagged.size - Object.keys(answers).filter(key => flagged.has(parseInt(key))).length)})</span>
-                </div>
-              </div>
-
-              {allowReview && (
-                <div className="mt-4 pt-4 border-t">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => {
-                      // Jump to first unanswered question
-                      const firstUnanswered = questions.findIndex((_, index) => !answers[index]);
-                      if (firstUnanswered !== -1) {
-                        setCurrentQuestion(firstUnanswered);
-                      }
-                    }}
-                  >
-                    <RotateCcw className="h-3 w-3 mr-1" />
-                    Review Unanswered
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Main Question Area */}
-          <div className="lg:col-span-3 lg:order-1 space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="secondary">
-                        {questions[currentQuestion].subject}
-                      </Badge>
-                      <Badge variant="outline">
-                        Question {currentQuestion + 1} of {questions.length}
-                      </Badge>
-                      {questions[currentQuestion].difficulty && (
-                        <Badge variant={
-                          questions[currentQuestion].difficulty === 'easy' ? 'secondary' :
-                          questions[currentQuestion].difficulty === 'medium' ? 'default' : 'destructive'
-                        }>
-                          {questions[currentQuestion].difficulty}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="py-4">
-                      <MathRenderer 
-                        content={questions[currentQuestion].question}
-                        className="text-xl leading-relaxed font-semibold"
-                      />
-                    </div>
+      <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-4">
+        <div className={cn("grid gap-4 lg:grid-cols-[1fr_280px]")}>
+          {/* Question Area */}
+          <div className="space-y-4">
+            <Card className="border shadow-sm">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-base font-bold">
+                      Question {currentQuestion + 1}
+                    </CardTitle>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Subject: {questions[currentQuestion].subject}
+                    </p>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleFlagQuestion}
-                    className={flagged.has(currentQuestion) ? "text-yellow-600 border-yellow-600" : ""}
-                  >
-                    <Flag className="h-4 w-4" />
-                  </Button>
+                  
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs font-medium border-orange-200 bg-orange-50 text-orange-700">
+                      {questions[currentQuestion].subject}
+                    </Badge>
+                    {questions[currentQuestion].difficulty && (
+                      <Badge variant={
+                        questions[currentQuestion].difficulty === 'easy' ? 'secondary' :
+                        questions[currentQuestion].difficulty === 'medium' ? 'outline' : 'destructive'
+                      } className="text-xs">
+                        {questions[currentQuestion].difficulty}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
-              
-              <CardContent className="pt-6">
-                <div className="space-y-4">
+
+              <CardContent className="space-y-4">
+                {/* Question Text */}
+                <div className="p-4 rounded-xl bg-gray-50 border">
+                  <MathRenderer 
+                    content={questions[currentQuestion].question}
+                    className="text-base font-medium leading-relaxed"
+                  />
+                </div>
+
+                {/* Options */}
+                <div className="space-y-2.5">
                   {questions[currentQuestion].options.map((option, index) => {
-                    const optionLetter = String.fromCharCode(65 + index); // A, B, C, D
+                    const optionLetter = String.fromCharCode(65 + index);
                     const isSelected = answers[currentQuestion] === optionLetter;
-                    console.log('Option debug:', {
-                      option,
-                      index,
-                      optionLetter,
-                      currentAnswer: answers[currentQuestion],
-                      isSelected
-                    });
-                    const showCorrect = false; // Explanations will be loaded securely after submission
-                    const isCorrect = false; // Never expose during exam
-                    const isWrong = false; // Never expose during exam
                     
                     return (
-                      <div
+                      <button
                         key={index}
-                        className={`p-5 border rounded-lg cursor-pointer transition-all hover:bg-muted/50 ${
-                          isSelected ? "border-primary bg-primary/10" : 
-                          isCorrect ? "border-green-500 bg-green-50" :
-                          isWrong ? "border-red-500 bg-red-50" : "border-border"
-                        }`}
                         onClick={() => !showExplanations && handleAnswerSelect(currentQuestion, optionLetter)}
+                        className={cn(
+                          "w-full text-left p-4 rounded-xl border-2 transition-all",
+                          isSelected
+                            ? "border-orange-500 bg-orange-50 shadow-md"
+                            : "border-gray-200 hover:border-orange-300 hover:bg-orange-50/30"
+                        )}
                       >
-                        <div className="flex items-start gap-4">
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-1 ${
-                            isSelected ? "border-primary bg-primary" : 
-                            isCorrect ? "border-green-500 bg-green-500" :
-                            isWrong ? "border-red-500 bg-red-500" : "border-muted-foreground"
-                          }`}>
-                            {(isSelected || isCorrect || isWrong) && (
-                              <div className="w-2 h-2 rounded-full bg-white" />
-                            )}
+                        <div className="flex items-center">
+                          <div className={cn(
+                            "w-8 h-8 rounded-full border-2 mr-3 flex items-center justify-center font-bold text-sm",
+                            isSelected
+                              ? "border-orange-500 bg-orange-500 text-white"
+                              : "border-gray-300 text-gray-500"
+                          )}>
+                            {isSelected ? <Check className="h-4 w-4" /> : optionLetter}
                           </div>
-                          <div className="flex-1 py-1">
-                            <MathRenderer 
-                              content={option} 
-                              className="text-base leading-relaxed"
-                            />
-                          </div>
+                          <MathRenderer content={option} className="flex-1 text-sm" />
                         </div>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
 
                 {showExplanations && questions[currentQuestion].explanation && (
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h4 className="font-semibold text-blue-900 mb-2">Explanation:</h4>
+                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">Explanation:</h4>
                     <MathRenderer 
                       content={questions[currentQuestion].explanation || ""}
-                      className="text-blue-800"
+                      className="text-blue-800 text-sm"
                     />
                   </div>
                 )}
+
+                {/* Navigation */}
+                <div className="flex justify-between items-center pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
+                    disabled={currentQuestion === 0}
+                    size="sm"
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Previous
+                  </Button>
+
+                  <span className="text-sm font-semibold text-orange-600">
+                    {currentQuestion + 1} / {questions.length}
+                  </span>
+
+                  <Button
+                    onClick={() => setCurrentQuestion(Math.min(questions.length - 1, currentQuestion + 1))}
+                    disabled={currentQuestion === questions.length - 1}
+                    className="bg-orange-500 hover:bg-orange-600"
+                    size="sm"
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-4">
+            {/* Question Navigation Grid */}
+            <Card className="border">
+              <CardHeader className="py-2 px-3 border-b bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xs font-semibold text-gray-600">
+                    Question Navigator
+                  </CardTitle>
+                  <Button variant="ghost" size="sm" onClick={() => setIsReviewMode(!isReviewMode)} className="h-6 w-6 p-0">
+                    {isReviewMode ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-3">
+                <div className="grid grid-cols-5 gap-1.5 mb-3">
+                  {questions.map((_, index) => {
+                    const status = getQuestionStatus(index);
+                    const isCurrent = index === currentQuestion;
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentQuestion(index)}
+                        className={cn(
+                          "w-full aspect-square rounded-lg border text-xs font-bold flex items-center justify-center transition-all",
+                          isCurrent && "bg-orange-500 text-white border-orange-500 shadow-md",
+                          !isCurrent && status === "answered" && "bg-green-100 text-green-700 border-green-300",
+                          !isCurrent && status === "flagged" && "bg-yellow-100 text-yellow-700 border-yellow-300",
+                          !isCurrent && !status && "bg-white text-gray-400 border-gray-200 hover:border-orange-300"
+                        )}
+                      >
+                        {index + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Legend */}
+                <div className="flex flex-col gap-2 pt-3 border-t text-[10px] text-gray-500 space-y-1.5">
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded bg-orange-500" /> Current
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded bg-green-100 border border-green-300" /> Answered
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded bg-white border border-gray-200" /> Unanswered
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Navigation */}
-            <div className="flex justify-between items-center">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
-                disabled={currentQuestion === 0}
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Previous
-              </Button>
-
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
+            {/* Tools */}
+            <Card className="border">
+              <CardContent className="p-3 space-y-2">
+                <Button
+                  variant="outline"
                   onClick={handleFlagQuestion}
-                  className={flagged.has(currentQuestion) ? "text-yellow-600 border-yellow-600" : ""}
+                  className={flagged.has(currentQuestion) ? "bg-red-50 border-red-200 text-red-600 w-full" : "w-full"}
+                  size="sm"
                 >
+                  <Flag className="h-4 w-4 mr-2" />
                   {flagged.has(currentQuestion) ? "Unflag" : "Flag for Review"}
                 </Button>
                 
@@ -508,52 +496,30 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
                       description: "Your answers have been saved"
                     });
                   }}
+                  size="sm"
+                  className="w-full"
                 >
-                  <Save className="h-4 w-4 mr-1" />
-                  Save
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Progress
                 </Button>
-                
-                <Button 
-                  variant="destructive" 
-                  onClick={handleManualSubmit}
-                  className="sm:hidden"
-                >
-                  Submit
-                </Button>
-              </div>
-
-              <Button
-                onClick={() => setCurrentQuestion(Math.min(questions.length - 1, currentQuestion + 1))}
-                disabled={currentQuestion === questions.length - 1}
-              >
-                Next
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Progress Summary */}
-            <Card className="bg-muted/30">
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-4 gap-4 text-center">
-                  <div>
-                    <div className="font-bold text-lg text-green-600">{answeredCount}</div>
-                    <div className="text-sm text-muted-foreground">Answered</div>
+            <Card className="border bg-orange-50">
+              <CardContent className="p-3">
+                <div className="text-xs space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Answered:</span>
+                    <span className="font-bold text-green-600">{answeredCount}</span>
                   </div>
-                  <div>
-                    <div className="font-bold text-lg text-yellow-600">{flagged.size}</div>
-                    <div className="text-sm text-muted-foreground">Flagged</div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Flagged:</span>
+                    <span className="font-bold text-yellow-600">{flagged.size}</span>
                   </div>
-                  <div>
-                    <div className="font-bold text-lg text-muted-foreground">
-                      {questions.length - answeredCount}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Remaining</div>
-                  </div>
-                  <div>
-                    <div className="font-bold text-lg text-blue-600">
-                      {Math.round(progress)}%
-                    </div>
-                    <div className="text-sm text-muted-foreground">Complete</div>
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="text-gray-600">Remaining:</span>
+                    <span className="font-bold text-red-600">{questions.length - answeredCount}</span>
                   </div>
                 </div>
               </CardContent>
@@ -564,33 +530,30 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
 
       {/* Submit Confirmation Dialog */}
       <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Submit Exam?</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to submit your exam? This action cannot be undone.
-            </DialogDescription>
+        <DialogContent className="max-w-md">
+          <DialogHeader className="text-center pb-3">
+            <DialogTitle className="text-xl font-bold">Submit Exam?</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4 text-center text-sm">
-              <div>
-                <div className="font-bold text-green-600">{answeredCount}</div>
-                <div>Answered</div>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="p-3 bg-green-50 rounded-xl border border-green-200">
+                <div className="text-2xl font-bold text-green-600">{answeredCount}</div>
+                <div className="text-xs text-gray-500">Answered</div>
               </div>
-              <div>
-                <div className="font-bold text-yellow-600">{flagged.size}</div>
-                <div>Flagged</div>
+              <div className="p-3 bg-yellow-50 rounded-xl border border-yellow-200">
+                <div className="text-2xl font-bold text-yellow-600">{flagged.size}</div>
+                <div className="text-xs text-gray-500">Flagged</div>
               </div>
-              <div>
-                <div className="font-bold text-red-600">{questions.length - answeredCount}</div>
-                <div>Unanswered</div>
+              <div className="p-3 bg-red-50 rounded-xl border border-red-200">
+                <div className="text-2xl font-bold text-red-600">{questions.length - answeredCount}</div>
+                <div className="text-xs text-gray-500">Unanswered</div>
               </div>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setShowSubmitDialog(false)} className="flex-1">
+              <Button variant="outline" onClick={() => setShowSubmitDialog(false)} className="flex-1 h-11">
                 Continue Exam
               </Button>
-              <Button onClick={confirmSubmit} className="flex-1">
+              <Button onClick={confirmSubmit} className="flex-1 h-11 bg-orange-500 hover:bg-orange-600 font-bold">
                 Submit Now
               </Button>
             </div>
@@ -600,19 +563,19 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
 
       {/* Upgrade Required Dialog */}
       <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upgrade to Submit</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="max-w-md">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-lg font-bold">Upgrade to Submit</DialogTitle>
+            <DialogDescription className="text-sm">
               Subscribe to submit your exam and unlock full results and explanations.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setShowUpgradeDialog(false)} className="flex-1">
+          <div className="flex gap-3 mt-6">
+            <Button variant="outline" onClick={() => setShowUpgradeDialog(false)} className="flex-1 h-11">
               Continue Exam
             </Button>
             <Link to="/payment" className="flex-1">
-              <Button className="w-full">Upgrade Now</Button>
+              <Button className="w-full h-11 bg-orange-500 hover:bg-orange-600">Upgrade Now</Button>
             </Link>
           </div>
         </DialogContent>

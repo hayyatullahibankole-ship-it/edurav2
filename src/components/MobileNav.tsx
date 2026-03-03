@@ -59,7 +59,7 @@ const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, o
             <div className="flex items-center gap-2 mb-1">
               <h3 className="font-bold text-lg">{title}</h3>
               {badge && (
-                <Badge className="bg-primary/10 text-primary border-primary/20 text-xs px-2 py-0">
+                <Badge className="bg-orange-500/10 text-orange-600 border-orange-500/20 text-xs px-2 py-0">
                   {badge}
                 </Badge>
               )}
@@ -110,11 +110,11 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 >
                   <Home 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "dashboard" ? "text-primary" : "text-foreground/60"
+                      activeTab === "dashboard" ? "text-orange-500" : "text-foreground/60"
                     }`}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
-                    activeTab === "dashboard" ? "text-foreground/80 font-semibold" : "text-foreground/50"
+                    activeTab === "dashboard" ? "text-orange-500 font-semibold" : "text-foreground/50"
                   }`}>
                     Home
                   </span>
@@ -129,11 +129,11 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 >
                   <Library 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "study" ? "text-primary" : "text-foreground/60"
+                      activeTab === "study" ? "text-orange-500" : "text-foreground/60"
                     }`}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
-                    activeTab === "study" ? "text-foreground/80 font-semibold" : "text-foreground/50"
+                    activeTab === "study" ? "text-orange-500 font-semibold" : "text-foreground/50"
                   }`}>
                     Study
                   </span>
@@ -148,10 +148,10 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                   className="relative transition-all duration-300 active:scale-90"
                 >
                   {/* Glow effect */}
-                  <div className="absolute inset-0 bg-primary/30 rounded-full blur-xl" />
+                  <div className="absolute inset-0 bg-orange-500/30 rounded-full blur-xl" />
                   
                   {/* Main FAB */}
-                  <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl flex items-center justify-center border-4 border-white">
+                  <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 shadow-2xl flex items-center justify-center border-4 border-white">
                     <BookOpen className="h-7 w-7 text-white" />
                   </div>
                 </button>
@@ -159,15 +159,15 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 {/* Tests Sheet - only for installed app */}
                 <Sheet open={testsSheetOpen} onOpenChange={setTestsSheetOpen}>
                   
-                  <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl p-0 border-t-4 border-primary">
+                  <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl p-0 border-t-4 border-orange-500">
                     {/* Header with Gradient */}
                     <div className="relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10" />
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-amber-500/10 to-orange-500/10" />
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl" />
                       
                       <SheetHeader className="relative text-left p-6 pb-4">
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg">
                             <GraduationCap className="h-6 w-6 text-white" />
                           </div>
                           <div>
@@ -188,7 +188,7 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                         description="Practice for UTME with real exam format"
                         icon={GraduationCap}
                         badge="Popular"
-                        gradient="from-primary to-primary-glow"
+                        gradient="from-orange-500 to-amber-500"
                         onClose={() => setTestsSheetOpen(false)}
                       />
 
@@ -232,11 +232,11 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 >
                   <MessageSquare 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "forum" ? "text-primary" : "text-foreground/60"
+                      activeTab === "forum" ? "text-orange-500" : "text-foreground/60"
                     }`}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
-                    activeTab === "forum" ? "text-foreground/80 font-semibold" : "text-foreground/50"
+                    activeTab === "forum" ? "text-orange-500 font-semibold" : "text-foreground/50"
                   }`}>
                     Forum
                   </span>
@@ -254,11 +254,11 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 <div className="flex flex-col items-center justify-center gap-0.5 transition-all duration-300 active:scale-90 py-2">
                   <User 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "profile" || activeTab === "settings" ? "text-primary" : "text-foreground/60"
+                      activeTab === "profile" || activeTab === "settings" ? "text-orange-500" : "text-foreground/60"
                     }`}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
-                    activeTab === "profile" || activeTab === "settings" ? "text-foreground/80 font-semibold" : "text-foreground/50"
+                    activeTab === "profile" || activeTab === "settings" ? "text-orange-500 font-semibold" : "text-foreground/50"
                   }`}>
                     Profile
                   </span>

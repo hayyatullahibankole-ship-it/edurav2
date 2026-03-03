@@ -22,7 +22,8 @@ import {
   Play,
   RotateCcw,
   Save,
-  Target
+  Target,
+  Check
 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useSubscription } from '@/hooks/useSubscription';
@@ -290,63 +291,267 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 flex flex-col select-none">
       {/* Header */}
-      <div className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+      <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold">{examTitle}</h1>
-              <p className="text-sm text-muted-foreground">{examDescription}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">📚</div>
+              <div>
+                <h1 className="text-lg font-bold">{examTitle}</h1>
+                <p className="text-xs opacity-90">{examDescription}</p>
+              </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <div className={`text-lg font-mono ${timeLeft < 600 ? 'text-red-600' : 'text-foreground'}`}>
-                <Clock className="inline h-4 w-4 mr-1" />
+            <div className="flex items-center gap-3">
+              {/* Timer */}
+              <div className={`flex items-center px-4 py-2 rounded-xl font-mono text-lg font-bold ${
+                timeLeft < 300 ? 'bg-red-600 animate-pulse' : 'bg-white/20'
+              }`}>
+                <Clock className="h-4 w-4 mr-2" />
                 {formatTime(timeLeft)}
               </div>
               
-              <Button 
-                variant="outline" 
-                size="sm" 
+              {/* Controls */}
+              <Button
+                size="sm"
                 onClick={togglePause}
+                className="bg-white/20 hover:bg-white/30 h-9 px-3"
               >
                 {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
               </Button>
-
-              <Button 
-                variant="destructive" 
+              
+              <Button
                 size="sm"
                 onClick={handleManualSubmit}
+                className="bg-white text-orange-600 hover:bg-white/90 font-bold h-9 px-4"
               >
-                Submit Exam
+                Submit
               </Button>
             </div>
           </div>
 
-          {/* Overall Progress */}
-          <div className="mt-3">
-            <div className="flex justify-between text-sm text-muted-foreground mb-1">
-              <span>Overall Progress: {answeredCount}/{questions.length}</span>
-              <span>{Math.round(progress)}% Complete</span>
+          {/* Progress bar */}
+          <div className="mt-2">
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span>{answeredCount}/{questions.length} answered</span>
+              <span>{Math.round(progress)}%</span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {showWarning && (
-        <Alert className="mx-4 mt-4 border-yellow-500 bg-yellow-50">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            Suspicious activity detected. Tab switches: {tabSwitchCount}
-          </AlertDescription>
-        </Alert>
+      {/* Subject Tabs */}
+      {subjectQuestions.length > 0 && (
+        <div className="bg-white border-b shadow-sm">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="flex items-center gap-1 overflow-x-auto py-2">
+              {subjectQuestions.map((subject) => {
+                const answeredInSubject = subject.questions.filter(q => answers[q.id] !== undefined).length;
+                const isActive = currentSubject === subject.subject;
+                return (
+                  <button
+                    key={subject.subject}
+                    onClick={() => {
+                      setCurrentSubject(subject.subject);
+                      setCurrentQuestionInSubject(0);
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all",
+                      isActive
+                        ? "bg-orange-500 text-white shadow-md"
+                        : "text-gray-600 hover:bg-orange-50 hover:text-orange-600"
+                    )}
+                  >
+                    {subject.subject}
+                    <span className={cn(
+                      "text-[10px] px-1.5 py-0.5 rounded-full font-bold",
+                      isActive ? "bg-white/30" : "bg-gray-100"
+                    )}>
+                      {answeredInSubject}/{subject.questions.length}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       )}
 
-      <div className="container mx-auto px-4 py-6">
-        {subjectQuestions.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
+      {showWarning && (
+        <div className="max-w-7xl mx-auto px-4 py-2 mt-2">
+          <Alert className="border-yellow-200 bg-yellow-50">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-700">
+              Suspicious activity detected. Tab switches: {tabSwitchCount}
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-4">
+        <div className={cn("grid gap-4 lg:grid-cols-[1fr_280px]")}>
+          {/* Question Area */}
+          <div className="space-y-4">
+            <Card className="border shadow-sm">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base font-bold">
+                    Question {currentQuestionInSubject + 1}
+                  </CardTitle>
+                  <Badge variant="outline" className="text-xs font-medium border-orange-200 bg-orange-50 text-orange-700">
+                    {currentSubject}
+                  </Badge>
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                {/* Question Text */}
+                <div className="p-4 rounded-xl bg-gray-50 border">
+                  <MathRenderer
+                    content={currentQuestion.question}
+                    className="text-base font-medium leading-relaxed"
+                  />
+                </div>
+
+                {/* Options */}
+                <div className="space-y-2.5">
+                  {currentQuestion.options.map((option, index) => {
+                    const isSelected = answers[currentQuestion.id] === option;
+
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => handleAnswerSelect(currentQuestion.id, option)}
+                        className={cn(
+                          "w-full text-left p-4 rounded-xl border-2 transition-all",
+                          isSelected
+                            ? "border-orange-500 bg-orange-50 shadow-md"
+                            : "border-gray-200 hover:border-orange-300 hover:bg-orange-50/30"
+                        )}
+                      >
+                        <div className="flex items-center">
+                          <div className={cn(
+                            "w-8 h-8 rounded-full border-2 mr-3 flex items-center justify-center font-bold text-sm",
+                            isSelected
+                              ? "border-orange-500 bg-orange-500 text-white"
+                              : "border-gray-300 text-gray-500"
+                          )}>
+                            {isSelected ? <Check className="h-4 w-4" /> : String.fromCharCode(65 + index)}
+                          </div>
+                          <MathRenderer content={option} className="flex-1 text-sm" />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Navigation */}
+                <div className="flex justify-between items-center pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={prevQuestion}
+                    disabled={currentQuestionInSubject === 0}
+                    size="sm"
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Previous
+                  </Button>
+
+                  <span className="text-sm font-semibold text-orange-600">
+                    {currentQuestionInSubject + 1} / {currentSubjectData?.questions.length}
+                  </span>
+
+                  <Button
+                    onClick={nextQuestion}
+                    disabled={currentQuestionInSubject === (currentSubjectData?.questions.length || 0) - 1}
+                    className="bg-orange-500 hover:bg-orange-600"
+                    size="sm"
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-4">
+            {/* Question Navigation Grid */}
+            <Card className="border">
+              <CardHeader className="py-2 px-3 border-b bg-gray-50">
+                <CardTitle className="text-xs font-semibold text-gray-600">
+                  {currentSubject || 'All Questions'} — Navigation
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3">
+                <div className="grid grid-cols-5 gap-1.5">
+                  {currentSubjectData?.questions.map((q, idx) => {
+                    const isAnswered = answers[q.id] !== undefined;
+                    const isCurrent = idx === currentQuestionInSubject;
+
+                    return (
+                      <button
+                        key={q.id}
+                        onClick={() => setCurrentQuestionInSubject(idx)}
+                        className={cn(
+                          "w-full aspect-square rounded-lg border text-xs font-bold flex items-center justify-center transition-all",
+                          isCurrent && "bg-orange-500 text-white border-orange-500 shadow-md",
+                          !isCurrent && isAnswered && "bg-green-100 text-green-700 border-green-300",
+                          !isCurrent && !isAnswered && "bg-white text-gray-400 border-gray-200 hover:border-orange-300"
+                        )}
+                      >
+                        {idx + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Legend */}
+                <div className="flex items-center gap-3 mt-3 pt-3 border-t text-[10px] text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded bg-orange-500" /> Current
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded bg-green-100 border border-green-300" /> Answered
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded bg-white border border-gray-200" /> Unanswered
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Progress Summary */}
+            <Card className="border bg-orange-50">
+              <CardContent className="p-3">
+                <div className="text-xs space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Answered:</span>
+                    <span className="font-bold text-green-600">{answeredCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Flagged:</span>
+                    <span className="font-bold text-yellow-600">{flagged.size}</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="text-gray-600">Remaining:</span>
+                    <span className="font-bold text-red-600">{questions.length - answeredCount}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
             {subjectQuestions.map((sd) => (
               <Button
                 key={sd.subject}
@@ -385,223 +590,35 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
                   })}
                 </div>
               </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Question Area */}
-          <div className="lg:col-span-3">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5" />
-                      {currentSubject}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Question {currentQuestionInSubject + 1} of {currentSubjectData.questions.length}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={flagged.has(globalQuestionIndex) ? "destructive" : "outline"}>
-                      {flagged.has(globalQuestionIndex) ? "Flagged" : "Not flagged"}
-                    </Badge>
-                    <Badge variant={answers[globalQuestionIndex] ? "default" : "secondary"}>
-                      {answers[globalQuestionIndex] ? "Answered" : "Unanswered"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                <div className="mb-6">
-                  <MathRenderer 
-                    content={currentQuestion.question} 
-                    className="text-lg leading-relaxed"
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  {currentQuestion.options.map((option, index) => {
-                    // Handle both pre-lettered options (A) text) and plain text options
-                    const optionLetter = option.includes(')') ? option.split(')')[0] : String.fromCharCode(65 + index);
-                    const optionText = option.includes(')') ? option : `${optionLetter}) ${option}`;
-                    // SECURITY FIX: Remove direct access to correct answers during exam
-                    const isSelected = answers[globalQuestionIndex] === optionLetter;
-                    const isCorrect = false; // Never expose correct answers during active exam
-                    const isWrong = false; // Never expose incorrect indicators during active exam
-                    
-                    return (
-                      <div
-                        key={`${globalQuestionIndex}-${index}`} // Ensure unique keys for shuffled options
-                        className={`p-4 border rounded-lg cursor-pointer transition-all hover:bg-muted/50 ${
-                          isSelected ? "border-primary bg-primary/10" : 
-                          isCorrect ? "border-green-500 bg-green-50" :
-                          isWrong ? "border-red-500 bg-red-50" : "border-border"
-                        }`}
-                        onClick={() => !showExplanations && handleAnswerSelect(globalQuestionIndex, optionLetter)}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                            isSelected ? "border-primary bg-primary" : 
-                            isCorrect ? "border-green-500 bg-green-500" :
-                            isWrong ? "border-red-500 bg-red-500" : "border-muted-foreground"
-                          }`}>
-                            {(isSelected || isCorrect || isWrong) && (
-                              <div className="w-2 h-2 rounded-full bg-white" />
-                            )}
-                          </div>
-                          <MathRenderer 
-                            content={optionText} 
-                            className="flex-1"
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {showExplanations && currentQuestion.explanation && (
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h4 className="font-semibold text-blue-900 mb-2">Explanation:</h4>
-                    <MathRenderer 
-                      content={currentQuestion.explanation || ""}
-                      className="text-blue-800"
-                    />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Navigation */}
-            <div className="flex justify-between items-center mt-6">
-              <Button
-                variant="outline"
-                onClick={prevQuestionInSubject}
-                disabled={currentQuestionInSubject === 0}
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Previous
-              </Button>
-
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={handleFlagQuestion}
-                  className={flagged.has(globalQuestionIndex) ? "text-yellow-600 border-yellow-600" : ""}
-                >
-                  {flagged.has(globalQuestionIndex) ? "Unflag" : "Flag for Review"}
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    localStorage.setItem('exam_progress', JSON.stringify({
-                      answers,
-                      flagged: Array.from(flagged),
-                      currentSubject,
-                      currentQuestionInSubject,
-                      timeLeft
-                    }));
-                    toast({
-                      title: "Progress Saved",
-                      description: "Your answers have been saved"
-                    });
-                  }}
-                >
-                  <Save className="h-4 w-4 mr-1" />
-                  Save
-                </Button>
-              </div>
-
-              <Button
-                onClick={nextQuestionInSubject}
-                disabled={currentQuestionInSubject === currentSubjectData.questions.length - 1}
-              >
-                Next
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-
-            {/* Subject Summary */}
-            <Card className="bg-muted/30 mt-6">
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-4 gap-4 text-center">
-                  <div>
-                    <div className="font-bold text-lg text-green-600">
-                      {currentSubjectData.questions.filter(q => answers.hasOwnProperty(q.id - 1)).length}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Answered</div>
-                  </div>
-                  <div>
-                    <div className="font-bold text-lg text-yellow-600">
-                      {currentSubjectData.questions.filter(q => flagged.has(q.id - 1)).length}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Flagged</div>
-                  </div>
-                  <div>
-                    <div className="font-bold text-lg text-muted-foreground">
-                      {currentSubjectData.questions.length - currentSubjectData.questions.filter(q => answers.hasOwnProperty(q.id - 1)).length}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Remaining</div>
-                  </div>
-                  <div>
-                    <div className="font-bold text-lg text-blue-600">
-                      {getSubjectProgress(currentSubject)}%
-                    </div>
-                    <div className="text-sm text-muted-foreground">Complete</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
       </div>
 
       {/* Submit Confirmation Dialog */}
       <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Submit Exam?</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to submit your exam? This action cannot be undone.
-            </DialogDescription>
+        <DialogContent className="max-w-md">
+          <DialogHeader className="text-center pb-3">
+            <DialogTitle className="text-xl font-bold">Submit Exam?</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4 text-center text-sm">
-              <div>
-                <div className="font-bold text-green-600">{answeredCount}</div>
-                <div>Answered</div>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="p-3 bg-green-50 rounded-xl border border-green-200">
+                <div className="text-2xl font-bold text-green-600">{answeredCount}</div>
+                <div className="text-xs text-gray-500">Answered</div>
               </div>
-              <div>
-                <div className="font-bold text-yellow-600">{flagged.size}</div>
-                <div>Flagged</div>
+              <div className="p-3 bg-yellow-50 rounded-xl border border-yellow-200">
+                <div className="text-2xl font-bold text-yellow-600">{flagged.size}</div>
+                <div className="text-xs text-gray-500">Flagged</div>
               </div>
-              <div>
-                <div className="font-bold text-red-600">{questions.length - answeredCount}</div>
-                <div>Unanswered</div>
+              <div className="p-3 bg-red-50 rounded-xl border border-red-200">
+                <div className="text-2xl font-bold text-red-600">{questions.length - answeredCount}</div>
+                <div className="text-xs text-gray-500">Unanswered</div>
               </div>
-            </div>
-            
-            {/* Subject breakdown */}
-            <div className="space-y-2">
-              <h4 className="font-medium">Subject Progress:</h4>
-              {subjectQuestions.map((subjectData) => (
-                <div key={subjectData.subject} className="flex justify-between items-center text-sm">
-                  <span>{subjectData.subject}:</span>
-                  <span>
-                    {subjectData.questions.filter(q => answers.hasOwnProperty(q.id - 1)).length}/{subjectData.questions.length}
-                    ({getSubjectProgress(subjectData.subject)}%)
-                  </span>
-                </div>
-              ))}
             </div>
             
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setShowSubmitDialog(false)} className="flex-1">
+              <Button variant="outline" onClick={() => setShowSubmitDialog(false)} className="flex-1 h-11">
                 Continue Exam
               </Button>
-              <Button onClick={confirmSubmit} className="flex-1">
+              <Button onClick={confirmSubmit} className="flex-1 h-11 bg-orange-500 hover:bg-orange-600 font-bold">
                 Submit Now
               </Button>
             </div>
@@ -611,19 +628,19 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
 
       {/* Upgrade Required Dialog */}
       <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upgrade to Submit</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="max-w-md">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-lg font-bold">Upgrade to Submit</DialogTitle>
+            <DialogDescription className="text-sm">
               Subscribe to submit your exam and unlock full results and explanations.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setShowUpgradeDialog(false)} className="flex-1">
+          <div className="flex gap-3 mt-6">
+            <Button variant="outline" onClick={() => setShowUpgradeDialog(false)} className="flex-1 h-11">
               Continue Exam
             </Button>
             <Link to="/payment" className="flex-1">
-              <Button className="w-full">Upgrade Now</Button>
+              <Button className="w-full h-11 bg-orange-500 hover:bg-orange-600">Upgrade Now</Button>
             </Link>
           </div>
         </DialogContent>
