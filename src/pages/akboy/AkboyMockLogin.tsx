@@ -10,13 +10,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate, Link } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
-import { Loader2, BookOpen, Clock, AlertTriangle, Play, GraduationCap, School } from "lucide-react";
+import { Loader2, BookOpen, Clock, AlertTriangle, Play, GraduationCap, School, Camera, Mic, ShieldAlert } from "lucide-react";
 
 export default function AkboyMockLogin() {
   const [regNumber, setRegNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [loginData, setLoginData] = useState<any>(null);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [permissionsGranted, setPermissionsGranted] = useState(false);
+  const [requestingPermissions, setRequestingPermissions] = useState(false);
   const navigate = useNavigate();
   const { isAkboy } = useDomainDetection();
   const basePath = isAkboy ? "" : "/akboy";
@@ -51,7 +53,31 @@ export default function AkboyMockLogin() {
     }
   };
 
+  const requestPermissions = async () => {
+    setRequestingPermissions(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480 },
+        audio: true,
+      });
+      // Stop the stream immediately, we just needed permission
+      stream.getTracks().forEach(track => track.stop());
+      setPermissionsGranted(true);
+      toast.success("Camera & microphone access granted");
+    } catch (err: any) {
+      console.error("Permission denied:", err);
+      toast.error("You must allow camera and microphone access to take the exam");
+      setPermissionsGranted(false);
+    } finally {
+      setRequestingPermissions(false);
+    }
+  };
+
   const startExam = () => {
+    if (!permissionsGranted) {
+      toast.error("Camera & microphone access is required to start the exam");
+      return;
+    }
     navigate(`${basePath}/mock-exam?reg=${regNumber.trim().toUpperCase()}`);
   };
 
@@ -106,9 +132,9 @@ export default function AkboyMockLogin() {
                       Register Now
                     </Link>
                   </div>
-                  <Link to="/school-registration" className="flex items-center gap-2 text-sm text-orange-600 font-semibold hover:underline">
+                  <a href="https://edura.space/#/school-registration" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-orange-600 font-semibold hover:underline">
                     <School className="w-4 h-4" /> Register as a School
-                  </Link>
+                  </a>
                 </div>
               </CardContent>
             </Card>
@@ -152,6 +178,21 @@ export default function AkboyMockLogin() {
                   </ul>
                 </div>
 
+                {/* Proctoring Notice */}
+                <div className="bg-red-50 p-4 rounded-xl space-y-2 border border-red-200">
+                  <h3 className="font-semibold flex items-center gap-2 text-sm text-red-700">
+                    <ShieldAlert className="w-4 h-4" /> Proctoring & Anti-Cheat
+                  </h3>
+                  <ul className="text-sm space-y-1.5 text-red-600 list-disc list-inside">
+                    <li><strong>Camera & microphone are required</strong> throughout the exam</li>
+                    <li>Your camera will monitor for suspicious activity (e.g., looking away, multiple faces)</li>
+                    <li><strong>Exam will auto-submit if cheating is detected</strong></li>
+                    <li>Tab switching and copy/paste are blocked</li>
+                    <li>Right-click and keyboard shortcuts are disabled</li>
+                    <li className="font-bold">Anyone who does NOT allow camera/microphone cannot start the exam</li>
+                  </ul>
+                </div>
+
                 <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm">
                   <Clock className="w-5 h-5 text-amber-600 flex-shrink-0" />
                   <p className="text-amber-800">
@@ -167,11 +208,40 @@ export default function AkboyMockLogin() {
                   </Alert>
                 )}
 
+                {/* Camera/Mic Permission Button */}
+                {!permissionsGranted ? (
+                  <Button
+                    onClick={requestPermissions}
+                    disabled={requestingPermissions}
+                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 font-semibold"
+                  >
+                    {requestingPermissions ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Requesting Access...</>
+                    ) : (
+                      <><Camera className="w-4 h-4 mr-2" /><Mic className="w-4 h-4 mr-2" /> Allow Camera & Microphone</>
+                    )}
+                  </Button>
+                ) : (
+                  <div className="flex items-center justify-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-semibold">
+                    <Camera className="w-4 h-4" />
+                    <Mic className="w-4 h-4" />
+                    Camera & Microphone Access Granted ✓
+                  </div>
+                )}
+
                 <div className="flex gap-3 pt-2">
-                  <Button variant="outline" onClick={() => { setShowInstructions(false); setLoginData(null); }} className="flex-1 h-12">
+                  <Button variant="outline" onClick={() => { setShowInstructions(false); setLoginData(null); setPermissionsGranted(false); }} className="flex-1 h-12">
                     Back
                   </Button>
-                  <Button onClick={startExam} className="flex-1 bg-green-600 hover:bg-green-700 text-lg h-14 shadow-lg font-bold">
+                  <Button
+                    onClick={startExam}
+                    disabled={!permissionsGranted}
+                    className={`flex-1 text-lg h-14 shadow-lg font-bold ${
+                      permissionsGranted
+                        ? 'bg-green-600 hover:bg-green-700'
+                        : 'bg-gray-400 cursor-not-allowed'
+                    }`}
+                  >
                     <Play className="w-5 h-5 mr-2" /> START EXAM
                   </Button>
                 </div>

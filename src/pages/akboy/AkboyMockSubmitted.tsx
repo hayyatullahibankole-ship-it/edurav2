@@ -43,11 +43,11 @@ export default function AkboyMockSubmitted() {
                     <ExternalLink className="w-4 h-4 mr-2" /> Go to Result Portal
                   </Button>
                 </Link>
-                <Link to="/school-registration">
+                <a href="https://edura.space/#/school-registration" target="_blank" rel="noopener noreferrer">
                   <Button variant="outline" className="w-full mt-2 h-11">
                     <School className="w-4 h-4 mr-2" /> Register as a School
                   </Button>
-                </Link>
+                </a>
                 <Link to={basePath || "/"}>
                   <Button variant="ghost" className="w-full mt-1">
                     Back to Home
