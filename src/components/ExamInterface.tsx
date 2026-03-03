@@ -230,56 +230,42 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
     <div className="min-h-screen bg-gray-50 flex flex-col select-none">
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">📝</div>
-              <div>
-                <h1 className="text-lg font-bold">{examTitle}</h1>
-                <p className="text-xs opacity-90">{examDescription}</p>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0">📝</div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-base sm:text-lg font-bold truncate">{examTitle}</h1>
+                <p className="text-xs opacity-90 truncate">{examDescription}</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 justify-end flex-wrap">
               {/* Timer */}
-              <div className={`flex items-center px-4 py-2 rounded-xl font-mono text-lg font-bold ${
+              <div className={`flex items-center gap-1 px-2 sm:px-4 py-1 sm:py-2 rounded-xl font-mono text-xs sm:text-lg font-bold whitespace-nowrap flex-shrink-0 ${
                 timeWarning ? 'bg-red-600 animate-pulse' : 'bg-white/20'
               }`}>
-                <Clock className="h-4 w-4 mr-2" />
-                {formatTime(timeLeft)}
+                <Clock className="h-2.5 w-2.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="text-xs sm:text-base">{formatTime(timeLeft)}</span>
               </div>
               
-              {/* Controls */}
               <Button
                 size="sm"
-                onClick={togglePause}
-                className="bg-white/20 hover:bg-white/30 h-9 px-3"
+                onClick={handlePauseToggle}
+                className="bg-white/20 hover:bg-white/30 h-7 sm:h-9 px-2 sm:px-3 flex-shrink-0"
               >
-                {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-              </Button>
-              
-              <Button 
-                size="sm"
-                onClick={handleManualSubmit}
-                className="bg-white text-orange-600 hover:bg-white/90 font-bold h-9 px-4 hidden sm:flex"
-              >
-                Submit
+                {isPaused ? <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Pause className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
               </Button>
             </div>
           </div>
 
           {/* Progress bar */}
           <div className="mt-2">
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span>{answeredCount}/{questions.length} answered</span>
-              <span>{Math.round(progress)}%</span>
+            <div className="flex items-center justify-between text-[10px] sm:text-xs mb-1">
+              <span className="whitespace-nowrap">{answeredCount}/{questions.length}</span>
+              <span className="whitespace-nowrap">{Math.round(progress)}%</span>
             </div>
-            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-white rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+            <Progress value={progress} className="h-1 sm:h-1.5" />
           </div>
         </div>
       </div>
@@ -303,31 +289,31 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
         </div>
       )}
 
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-4">
-        <div className={cn("grid gap-4 lg:grid-cols-[1fr_280px]")}>
+      <div className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-4 py-3 sm:py-4 overflow-hidden">
+        <div className={cn("grid gap-3 sm:gap-4 lg:grid-cols-[1fr_280px]")}>
           {/* Question Area */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4 min-w-0">
             <Card className="border shadow-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-base font-bold">
-                      Question {currentQuestion + 1}
+              <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="text-sm sm:text-base font-bold">
+                      Q {currentQuestion + 1}
                     </CardTitle>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Subject: {questions[currentQuestion].subject}
+                    <p className="text-xs text-gray-500 mt-1 truncate">
+                      {questions[currentQuestion].subject}
                     </p>
                   </div>
                   
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs font-medium border-orange-200 bg-orange-50 text-orange-700">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
+                    <Badge variant="outline" className="text-[10px] sm:text-xs font-medium border-orange-200 bg-orange-50 text-orange-700 flex-shrink-0">
                       {questions[currentQuestion].subject}
                     </Badge>
                     {questions[currentQuestion].difficulty && (
                       <Badge variant={
                         questions[currentQuestion].difficulty === 'easy' ? 'secondary' :
                         questions[currentQuestion].difficulty === 'medium' ? 'outline' : 'destructive'
-                      } className="text-xs">
+                      } className="text-[10px] sm:text-xs flex-shrink-0">
                         {questions[currentQuestion].difficulty}
                       </Badge>
                     )}
@@ -335,17 +321,17 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
                 </div>
               </CardHeader>
 
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
                 {/* Question Text */}
-                <div className="p-4 rounded-xl bg-gray-50 border">
+                <div className="p-2.5 sm:p-4 rounded-lg sm:rounded-xl bg-gray-50 border text-sm sm:text-base overflow-x-auto">
                   <MathRenderer 
                     content={questions[currentQuestion].question}
-                    className="text-base font-medium leading-relaxed"
+                    className="text-sm sm:text-base font-medium leading-relaxed break-words"
                   />
                 </div>
 
                 {/* Options */}
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {questions[currentQuestion].options.map((option, index) => {
                     const optionLetter = String.fromCharCode(65 + index);
                     const isSelected = answers[currentQuestion] === optionLetter;

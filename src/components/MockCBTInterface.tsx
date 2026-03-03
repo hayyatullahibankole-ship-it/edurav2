@@ -194,68 +194,72 @@ export const MockCBTInterface: React.FC<MockCBTInterfaceProps> = ({
     <div className="min-h-screen bg-gray-50 flex flex-col select-none">
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src="/akboy-logo.png" alt="AKBOY" className="w-8 h-8 rounded-full bg-white p-0.5" />
-              <div>
-                <h1 className="text-lg font-bold">{examTitle}</h1>
-                <p className="text-xs opacity-90">Question {currentIndex + 1} of {questions.length}</p>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <img src="/akboy-logo.png" alt="AKBOY" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white p-0.5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <h1 className="text-base sm:text-lg font-bold truncate">{examTitle}</h1>
+                <p className="text-xs opacity-90 whitespace-nowrap">Q {currentIndex + 1}/{questions.length}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3 justify-end flex-wrap">
               {/* Camera indicator */}
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+              <div className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold flex-shrink-0 whitespace-nowrap ${
                 cameraActive ? 'bg-green-600/30 text-white' : 'bg-red-600/50 text-white'
               }`}>
-                <Camera className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{cameraActive ? 'Recording' : 'Camera Off'}</span>
-                {cameraActive && <span className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />}
+                <Camera className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                <span className="hidden sm:inline">{cameraActive ? 'Recording' : 'Off'}</span>
+                {cameraActive && <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />}
               </div>
 
               {/* Suspicious activity counter */}
               {suspiciousCount > 0 && (
-                <div className="flex items-center gap-1 px-3 py-1.5 bg-red-600/40 rounded-full text-xs font-bold">
-                  <AlertTriangle className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-0.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-red-600/40 rounded-full text-[10px] sm:text-xs font-bold flex-shrink-0 whitespace-nowrap">
+                  <AlertTriangle className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
                   {suspiciousCount}/3
                 </div>
               )}
 
               {/* Timer */}
-              <div className={`flex items-center px-4 py-2 rounded-xl font-mono text-lg font-bold ${
+              <div className={`flex items-center gap-1 px-2 sm:px-4 py-1 sm:py-2 rounded-xl font-mono text-xs sm:text-lg font-bold whitespace-nowrap flex-shrink-0 ${
                 isTimeWarning ? 'bg-red-600 animate-pulse' : 'bg-white/20'
               }`}>
-                <Clock className="h-4 w-4 mr-2" />
-                {formatTime(timeLeft)}
+                <Clock className="h-2.5 w-2.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="text-xs sm:text-base">{formatTime(timeLeft)}</span>
               </div>
-
-              <Button
-                size="sm"
-                onClick={() => setShowCalculator(true)}
-                className="bg-white/20 hover:bg-white/30 h-9 px-3"
-              >
-                <CalculatorIcon className="h-4 w-4" />
-              </Button>
-
-              <Button
-                size="sm"
-                onClick={() => setShowSubmitDialog(true)}
-                disabled={submitting || disableSubmit}
-                className="bg-white text-orange-600 hover:bg-white/90 font-bold h-9 px-4"
-              >
-                {submitting ? 'Submitting...' : 'Submit'}
-              </Button>
             </div>
+          </div>
+
+          {/* Second row of controls */}
+          <div className="flex items-center gap-2 justify-end">
+            <Button
+              size="sm"
+              onClick={() => setShowCalculator(true)}
+              className="bg-white/20 hover:bg-white/30 h-7 sm:h-9 px-2 sm:px-3 flex-shrink-0"
+            >
+              <CalculatorIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={() => setShowSubmitDialog(true)}
+              disabled={submitting || disableSubmit}
+              className="bg-white text-orange-600 hover:bg-white/90 font-bold h-7 sm:h-9 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0"
+            >
+              <span className="hidden sm:inline">{submitting ? 'Submitting...' : 'Submit'}</span>
+              <span className="sm:hidden">{submitting ? '...' : 'OK'}</span>
+            </Button>
           </div>
 
           {/* Progress bar */}
           <div className="mt-2">
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span>{Object.keys(answers).length}/{questions.length} answered</span>
-              <span>{Math.round(progressPercentage)}%</span>
+            <div className="flex items-center justify-between text-[10px] sm:text-xs mb-1">
+              <span className="whitespace-nowrap">{Object.keys(answers).length}/{questions.length}</span>
+              <span className="whitespace-nowrap">{Math.round(progressPercentage)}%</span>
             </div>
-            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+            <div className="h-1 sm:h-1.5 bg-white/20 rounded-full overflow-hidden">
               <div
                 className="h-full bg-white rounded-full transition-all duration-300"
                 style={{ width: `${progressPercentage}%` }}
@@ -265,9 +269,9 @@ export const MockCBTInterface: React.FC<MockCBTInterfaceProps> = ({
         </div>
       </div>
 
-      {/* Subject Tabs (Desktop) */}
-      {!isMobile && (
-        <div className="bg-white border-b shadow-sm">
+      {/* Subject Tabs - only on desktop wide screens */}
+      {!isMobile && subjects.length > 0 && (
+        <div className="hidden lg:block bg-white border-b shadow-sm">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center gap-1 overflow-x-auto py-2">
               {subjects.map((subject) => {
@@ -281,15 +285,15 @@ export const MockCBTInterface: React.FC<MockCBTInterfaceProps> = ({
                       setCurrentIndex(subject.indices[0]);
                     }}
                     className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all",
+                      "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all",
                       isActive
                         ? "bg-orange-500 text-white shadow-md"
                         : "text-gray-600 hover:bg-orange-50 hover:text-orange-600"
                     )}
                   >
-                    {subject.name}
+                    <span className="truncate">{subject.name}</span>
                     <span className={cn(
-                      "text-[10px] px-1.5 py-0.5 rounded-full font-bold",
+                      "text-[8px] px-1 py-0.5 rounded font-bold flex-shrink-0",
                       isActive ? "bg-white/30" : "bg-gray-100"
                     )}>
                       {answeredInSubject}/{subject.indices.length}
@@ -303,13 +307,13 @@ export const MockCBTInterface: React.FC<MockCBTInterfaceProps> = ({
       )}
 
       {/* Main Content */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-4">
-        <div className={cn("grid gap-4", !isMobile && "grid-cols-[1fr_280px]")}>
+      <div className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-4 py-3 sm:py-4 overflow-hidden">
+        <div className={cn("grid gap-3 sm:gap-4", !isMobile && "lg:grid-cols-[1fr_280px]")}>
           {/* Question Area */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4 min-w-0">
             {/* Mobile Subject Selector */}
-            {isMobile && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
+            {isMobile && subjects.length > 0 && (
+              <div className="flex gap-1.5 overflow-x-auto pb-2 px-0.5">
                 {subjects.map((subject) => (
                   <button
                     key={subject.name}
@@ -318,10 +322,10 @@ export const MockCBTInterface: React.FC<MockCBTInterfaceProps> = ({
                       setCurrentIndex(subject.indices[0]);
                     }}
                     className={cn(
-                      "px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-all",
+                      "px-2.5 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap border transition-all flex-shrink-0",
                       activeSubject === subject.name
                         ? "bg-orange-500 text-white border-orange-500"
-                        : "bg-white text-gray-600 border-gray-200"
+                        : "bg-white text-gray-600 border-gray-200 hover:border-orange-300"
                     )}
                   >
                     {subject.name}
@@ -331,28 +335,28 @@ export const MockCBTInterface: React.FC<MockCBTInterfaceProps> = ({
             )}
 
             <Card className="border shadow-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base font-bold">
-                    Question {currentIndex + 1}
+              <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-sm sm:text-base font-bold flex-shrink-0">
+                    Q {currentIndex + 1}
                   </CardTitle>
-                  <Badge variant="outline" className="text-xs font-medium border-orange-200 bg-orange-50 text-orange-700">
+                  <Badge variant="outline" className="text-[10px] sm:text-xs font-medium border-orange-200 bg-orange-50 text-orange-700 flex-shrink-0">
                     {currentQuestion.subject}
                   </Badge>
                 </div>
               </CardHeader>
 
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
                 {/* Question Text */}
-                <div className="p-4 rounded-xl bg-gray-50 border">
+                <div className="p-2.5 sm:p-4 rounded-lg sm:rounded-xl bg-gray-50 border text-sm sm:text-base overflow-x-auto">
                   <MathRenderer
                     content={currentQuestion.questionText}
-                    className="text-base font-medium leading-relaxed"
+                    className="text-sm sm:text-base font-medium leading-relaxed break-words"
                   />
                 </div>
 
                 {/* Options */}
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {currentQuestion.options.map((option, index) => {
                     const isSelected = answers[currentQuestion.id] === index;
                     const optionLabel = String.fromCharCode(65 + index);
@@ -362,22 +366,24 @@ export const MockCBTInterface: React.FC<MockCBTInterfaceProps> = ({
                         key={index}
                         onClick={() => onAnswerSelect(currentQuestion.id, index)}
                         className={cn(
-                          "w-full text-left p-4 rounded-xl border-2 transition-all",
+                          "w-full text-left p-2.5 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all",
                           isSelected
                             ? "border-orange-500 bg-orange-50 shadow-md"
                             : "border-gray-200 hover:border-orange-300 hover:bg-orange-50/30"
                         )}
                       >
-                        <div className="flex items-center">
+                        <div className="flex items-start gap-2 sm:gap-3 min-w-0">
                           <div className={cn(
-                            "w-8 h-8 rounded-full border-2 mr-3 flex items-center justify-center font-bold text-sm",
+                            "w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0 mt-0.5",
                             isSelected
                               ? "border-orange-500 bg-orange-500 text-white"
                               : "border-gray-300 text-gray-500"
                           )}>
-                            {isSelected ? <Check className="h-4 w-4" /> : optionLabel}
+                            {isSelected ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : optionLabel}
                           </div>
-                          <MathRenderer content={option} className="flex-1 text-sm" />
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <MathRenderer content={option} className="text-xs sm:text-sm break-words" />
+                          </div>
                         </div>
                       </button>
                     );
@@ -385,37 +391,39 @@ export const MockCBTInterface: React.FC<MockCBTInterfaceProps> = ({
                 </div>
 
                 {/* Navigation */}
-                <div className="flex justify-between items-center pt-4 border-t">
+                <div className="flex justify-between items-center gap-2 pt-3 sm:pt-4 border-t">
                   <Button
                     variant="outline"
                     onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
                     disabled={currentIndex === 0}
                     size="sm"
+                    className="text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-10 flex-1"
                   >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Previous
+                    <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 flex-shrink-0" />
+                    <span className="hidden sm:inline">Previous</span>
                   </Button>
 
-                  <span className="text-sm font-semibold text-orange-600">
-                    {currentIndex + 1} / {questions.length}
+                  <span className="text-xs sm:text-sm font-semibold text-orange-600 px-2 flex-shrink-0 whitespace-nowrap">
+                    {currentIndex + 1}/{questions.length}
                   </span>
 
                   <Button
                     onClick={() => setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1))}
                     disabled={currentIndex === questions.length - 1}
-                    className="bg-orange-500 hover:bg-orange-600"
+                    className="bg-orange-500 hover:bg-orange-600 text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-10 flex-1"
                     size="sm"
                   >
-                    Next
-                    <ChevronRight className="h-4 w-4 ml-1" />
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-0.5 sm:ml-1 flex-shrink-0" />
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-4">
+          {/* Sidebar - Hidden on mobile, only on lg screens */}
+          <div className="hidden lg:flex lg:flex-col lg:space-y-4">
+
             {/* Camera Feed */}
             <Card className="border overflow-hidden">
               <CardHeader className="py-2 px-3 bg-gray-50 border-b">
@@ -489,37 +497,37 @@ export const MockCBTInterface: React.FC<MockCBTInterfaceProps> = ({
 
       {/* Submit Confirmation Dialog */}
       {showSubmitDialog && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md border-2 shadow-2xl">
-            <CardHeader className="text-center pb-3">
-              <CardTitle className="text-xl font-bold">Submit Exam?</CardTitle>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+          <Card className="w-full max-w-sm border-2 shadow-2xl">
+            <CardHeader className="text-center pb-2 sm:pb-3">
+              <CardTitle className="text-lg sm:text-xl font-bold">Submit Exam?</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="p-3 bg-green-50 rounded-xl border border-green-200">
-                  <div className="text-2xl font-bold text-green-600">{Object.keys(answers).length}</div>
-                  <div className="text-xs text-gray-500">Answered</div>
+            <CardContent className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
+                <div className="p-2 sm:p-3 bg-green-50 rounded-lg sm:rounded-xl border border-green-200">
+                  <div className="text-xl sm:text-2xl font-bold text-green-600">{Object.keys(answers).length}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500">Answered</div>
                 </div>
-                <div className="p-3 bg-red-50 rounded-xl border border-red-200">
-                  <div className="text-2xl font-bold text-red-600">{questions.length - Object.keys(answers).length}</div>
-                  <div className="text-xs text-gray-500">Unanswered</div>
+                <div className="p-2 sm:p-3 bg-red-50 rounded-lg sm:rounded-xl border border-red-200">
+                  <div className="text-xl sm:text-2xl font-bold text-red-600">{questions.length - Object.keys(answers).length}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500">Unanswered</div>
                 </div>
-                <div className="p-3 bg-orange-50 rounded-xl border border-orange-200">
-                  <div className="text-2xl font-bold text-orange-600">{questions.length}</div>
-                  <div className="text-xs text-gray-500">Total</div>
+                <div className="p-2 sm:p-3 bg-orange-50 rounded-lg sm:rounded-xl border border-orange-200">
+                  <div className="text-xl sm:text-2xl font-bold text-orange-600">{questions.length}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500">Total</div>
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setShowSubmitDialog(false)} className="flex-1 h-11">
+              <div className="flex gap-2 sm:gap-3">
+                <Button variant="outline" onClick={() => setShowSubmitDialog(false)} className="flex-1 h-9 sm:h-11 text-sm">
                   Continue
                 </Button>
                 <Button
                   onClick={handleSubmitClick}
-                  className="flex-1 h-11 bg-orange-500 hover:bg-orange-600 font-bold"
+                  className="flex-1 h-9 sm:h-11 bg-orange-500 hover:bg-orange-600 font-bold text-sm"
                   disabled={submitting || disableSubmit}
                 >
-                  {submitting ? 'Submitting...' : 'Submit Exam'}
+                  {submitting ? 'Submitting...' : 'Submit'}
                 </Button>
               </div>
             </CardContent>
