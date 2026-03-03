@@ -31,7 +31,7 @@ const AVAILABLE_SUBJECTS = [
   { id: "dd65ca96-b892-4b14-93ea-994c921ea826", name: "Further Mathematics", locked: false, questions: 40 },
 ];
 
-const REGISTRATION_DEADLINE = new Date("2025-03-20T23:59:59");
+const REGISTRATION_DEADLINE = new Date("2026-03-20T23:59:59");
 
 interface RegistrationResult {
   registrationNumber: string;
