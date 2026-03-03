@@ -4,7 +4,7 @@ import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { CleanCBTInterface } from "@/components/CleanCBTInterface";
+import { MockCBTInterface } from "@/components/MockCBTInterface";
 import { CBTQuestion, CBTAnswers } from "@/hooks/useCBTExam";
 import { ExamNotYetAvailableModal } from "@/components/ExamNotYetAvailableModal";
 
@@ -66,7 +66,6 @@ export default function AkboyMockExam() {
             const currentTime = new Date();
             
             if (currentTime < scheduledExamTime) {
-              // Show modal with the scheduled date/time
               setNotYetAvailableExam({
                 title: batchData.title || "Mock Examination",
                 scheduledDate: scheduledExamTime
@@ -153,14 +152,10 @@ export default function AkboyMockExam() {
 
       setQuestions(cbtQuestions);
 
-      // Create an attempt record for this mock exam (unauthenticated)
-      // Using RPC function to bypass RLS constraints
+      // Create an attempt record
       try {
-        console.log("Creating mock exam attempt using RPC function...");
-
         const { data: rpcResult, error: rpcError } = await supabase
           .rpc("create_mock_exam_attempt" as any, {
-            // pass null when there is no valid exam id to avoid inserting text into uuid column
             p_exam_id: (login?.mock_exam_id ?? null) as any,
             p_registration_id: login.registration_id,
             p_registration_number: regNumber,
@@ -169,40 +164,26 @@ export default function AkboyMockExam() {
           });
 
         if (rpcError) {
-          console.error("RPC call failed:", {
-            message: rpcError.message,
-            code: rpcError.code,
-            details: rpcError.details,
-            fullError: rpcError
-          });
+          console.error("RPC call failed:", rpcError);
           toast.error("Failed to initialize exam: " + rpcError.message);
           return;
         }
 
-        console.log("RPC result:", rpcResult);
-
         const rpcData = rpcResult as any;
         if (rpcData?.status !== 'success') {
-          console.error("RPC returned error status:", rpcData?.message);
           toast.error("Failed to initialize exam: " + (rpcData?.message || "Unknown error"));
           return;
         }
 
         const newAttemptId = rpcData?.attempt_id;
         if (!newAttemptId) {
-          console.error("No attempt ID returned from RPC");
           toast.error("Failed to initialize exam session");
           return;
         }
 
-        console.log("Mock exam attempt created successfully:", newAttemptId);
         setAttemptId(newAttemptId);
       } catch (attemptCreationError: any) {
-        console.error("Attempt creation try-catch error:", {
-          message: attemptCreationError.message,
-          stack: attemptCreationError.stack,
-          fullError: attemptCreationError
-        });
+        console.error("Attempt creation error:", attemptCreationError);
         toast.error("Failed to create exam attempt: " + attemptCreationError.message);
         return;
       }
@@ -227,25 +208,21 @@ export default function AkboyMockExam() {
   }, []);
 
   const submitExam = useCallback(async () => {
-    // Prevent submission if already submitting or exam not ready
     if (submitting) return;
     
     if (!attemptId) {
-      console.error("Attempt ID not available");
-      toast.error("Exam session not initialized. Please reload the page.");
+      toast.error("Exam session not initialized.");
       return;
     }
     
     if (!regNumber) {
-      console.error("Registration number not available");
-      toast.error("Registration information missing. Please log in again.");
+      toast.error("Registration information missing.");
       return;
     }
     
     setSubmitting(true);
 
     try {
-      // Prepare answer records for insertion into attempt_answers
       const attemptAnswers = rawQuestions.map((q) => {
         const optionIndex = answers[q.id];
         let selectedAnswer: string | null = null;
@@ -253,9 +230,7 @@ export default function AkboyMockExam() {
         if (optionIndex !== undefined) {
           const cbtQ = questions.find(cq => cq.id === q.id);
           if (cbtQ) {
-            // Map display index back to original DB index
             const originalIndex = cbtQ.originalIndexMap[optionIndex];
-            // Convert to letter (A, B, C, D)
             selectedAnswer = String.fromCharCode(65 + originalIndex);
           }
         }
@@ -266,9 +241,6 @@ export default function AkboyMockExam() {
         };
       });
 
-      console.log(`Submitting ${attemptAnswers.length} answers for attempt ${attemptId}`);
-
-      // Insert all answers using RPC function to bypass RLS
       const { data: answerResult, error: answersError } = await supabase
         .rpc("submit_mock_exam_answers" as any, {
           p_attempt_id: attemptId,
@@ -276,7 +248,6 @@ export default function AkboyMockExam() {
         });
 
       if (answersError) {
-        console.error("Answers insert RPC error:", answersError);
         toast.error("Failed to submit answers: " + answersError.message);
         setSubmitting(false);
         return;
@@ -284,22 +255,17 @@ export default function AkboyMockExam() {
 
       const answerData = answerResult as any;
       if (answerData?.status !== 'success') {
-        console.error("Answers insert returned error status:", answerData?.message);
         toast.error("Failed to submit answers: " + (answerData?.message || "Unknown error"));
         setSubmitting(false);
         return;
       }
 
-      console.log("Answers inserted successfully, updating attempt status...");
-
-      // Update attempt status to SUBMITTED using RPC function
       const { data: submitResult, error: statusError } = await supabase
         .rpc("submit_mock_exam" as any, {
           p_attempt_id: attemptId
         });
 
       if (statusError) {
-        console.error("Status update RPC error:", statusError);
         toast.error("Failed to finalize submission: " + statusError.message);
         setSubmitting(false);
         return;
@@ -307,22 +273,16 @@ export default function AkboyMockExam() {
 
       const submitData = submitResult as any;
       if (submitData?.status !== 'success') {
-        console.error("Status update returned error status:", submitData?.message);
         toast.error("Failed to finalize submission: " + (submitData?.message || "Unknown error"));
         setSubmitting(false);
         return;
       }
 
-      console.log("Exam submitted successfully, redirecting...");
       toast.success("Exam submitted successfully!");
-
-      // Redirect to mock-submitted page with registration number
-      // Results will be computed in background and available in mock-results when checked later
       navigate(`${basePath}/mock-submitted?reg=${encodeURIComponent(regNumber)}`);
     } catch (error: any) {
       console.error("Submit error:", error);
-      const errorMessage = error?.message || "Failed to submit exam. Please try again.";
-      toast.error(errorMessage);
+      toast.error(error?.message || "Failed to submit exam.");
       setSubmitting(false);
     }
   }, [attemptId, answers, rawQuestions, questions, navigate, basePath, regNumber, submitting]);
@@ -353,7 +313,7 @@ export default function AkboyMockExam() {
   }
 
   return (
-    <CleanCBTInterface
+    <MockCBTInterface
       questions={questions}
       answers={answers}
       onAnswerSelect={selectAnswer}
@@ -361,7 +321,6 @@ export default function AkboyMockExam() {
       duration={examDuration}
       examTitle="AKBOY JAMB Mock Examination"
       submitting={submitting}
-      bypassSubscription={true}
       disableSubmit={!attemptId || loading}
     />
   );

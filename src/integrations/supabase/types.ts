@@ -1674,6 +1674,7 @@ export type Database = {
       }
       mock_results: {
         Row: {
+          attempt_id: string | null
           batch_id: string | null
           created_at: string | null
           id: string
@@ -1687,6 +1688,7 @@ export type Database = {
           weaknesses: Json | null
         }
         Insert: {
+          attempt_id?: string | null
           batch_id?: string | null
           created_at?: string | null
           id?: string
@@ -1700,6 +1702,7 @@ export type Database = {
           weaknesses?: Json | null
         }
         Update: {
+          attempt_id?: string | null
           batch_id?: string | null
           created_at?: string | null
           id?: string
@@ -1713,6 +1716,13 @@ export type Database = {
           weaknesses?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "mock_results_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "attempts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "mock_results_batch_id_fkey"
             columns: ["batch_id"]

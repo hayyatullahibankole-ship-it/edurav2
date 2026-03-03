@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -204,9 +204,9 @@ export default function AkboyMockResults() {
                 <span className="text-muted-foreground">Need to register?</span>
                 <Link to={`${basePath}/mock-registration`} className="text-orange-600 font-semibold hover:underline">Register Now</Link>
                 <span className="text-muted-foreground mx-1">•</span>
-                <Link to="/school-registration" className="text-orange-600 font-semibold hover:underline inline-flex items-center gap-1">
+                <a href="https://edura.space/#/school-registration" target="_blank" rel="noopener noreferrer" className="text-orange-600 font-semibold hover:underline inline-flex items-center gap-1">
                   <School className="w-3.5 h-3.5" /> Register as a School
-                </Link>
+                </a>
               </div>
             </CardContent>
           </Card>

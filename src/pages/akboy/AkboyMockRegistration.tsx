@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
-import { BookOpen, CheckCircle2, Clock, MapPin, Phone, User, Mail, Loader2, Download, GraduationCap, School } from "lucide-react";
+import { BookOpen, CheckCircle2, Clock, MapPin, Phone, User, Mail, Loader2, Download, GraduationCap, School, Timer, XCircle } from "lucide-react";
 
 const AVAILABLE_SUBJECTS = [
   { id: "f01354df-283f-4069-a750-dba247a6bf97", name: "English Language", locked: true, questions: 60 },
@@ -31,6 +31,8 @@ const AVAILABLE_SUBJECTS = [
   { id: "dd65ca96-b892-4b14-93ea-994c921ea826", name: "Further Mathematics", locked: false, questions: 40 },
 ];
 
+const REGISTRATION_DEADLINE = new Date("2025-03-20T23:59:59");
+
 interface RegistrationResult {
   registrationNumber: string;
   fullName: string;
@@ -41,6 +43,30 @@ interface RegistrationResult {
   examVenue?: string;
 }
 
+function useCountdown(deadline: Date) {
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const diff = deadline.getTime() - Date.now();
+    return diff > 0 ? diff : 0;
+  });
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const interval = setInterval(() => {
+      const diff = deadline.getTime() - Date.now();
+      setTimeLeft(diff > 0 ? diff : 0);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [deadline, timeLeft]);
+
+  const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+  const isExpired = timeLeft <= 0;
+
+  return { days, hours, minutes, seconds, isExpired };
+}
+
 export default function AkboyMockRegistration() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -48,6 +74,7 @@ export default function AkboyMockRegistration() {
   const [result, setResult] = useState<RegistrationResult | null>(null);
   const { isAkboy } = useDomainDetection();
   const basePath = isAkboy ? "" : "/akboy";
+  const { days, hours, minutes, seconds, isExpired } = useCountdown(REGISTRATION_DEADLINE);
 
   const [form, setForm] = useState({
     fullName: "",
@@ -97,6 +124,10 @@ export default function AkboyMockRegistration() {
   };
 
   const handleSubmit = async () => {
+    if (isExpired) {
+      toast.error("Registration is closed");
+      return;
+    }
     if (!form.fullName.trim() || !form.phone.trim() || !form.mode) {
       toast.error("Please fill in all required fields");
       return;
@@ -245,292 +276,350 @@ export default function AkboyMockRegistration() {
             <p className="text-muted-foreground">180 questions • 120 minutes • JAMB-style scoring</p>
           </div>
 
-          {/* Progress Steps */}
-          <div className="flex items-center justify-center gap-2">
-            {[1, 2, 3].map(s => (
-              <div key={s} className="flex items-center gap-2">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                  step >= s ? 'bg-orange-500 text-white shadow-md' : 'bg-gray-200 text-gray-500'
-                }`}>
-                  {step > s ? <CheckCircle2 className="w-5 h-5" /> : s}
+          {/* Countdown Timer */}
+          {!isExpired ? (
+            <Card className="border-0 shadow-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white overflow-hidden">
+              <CardContent className="py-5 px-6">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <Timer className="w-5 h-5" />
+                  <p className="font-bold text-sm uppercase tracking-wide">Registration Closes In</p>
                 </div>
-                {s < 3 && <div className={`w-12 h-1 rounded-full transition-all ${step > s ? 'bg-orange-500' : 'bg-gray-200'}`} />}
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-center gap-8 text-xs text-muted-foreground">
-            <span className={step >= 1 ? 'text-orange-600 font-semibold' : ''}>Details & Subjects</span>
-            <span className={step >= 2 ? 'text-orange-600 font-semibold' : ''}>Payment</span>
-            <span className={step >= 3 ? 'text-orange-600 font-semibold' : ''}>Confirmation</span>
-          </div>
+                <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto">
+                  {[
+                    { value: days, label: "Days" },
+                    { value: hours, label: "Hours" },
+                    { value: minutes, label: "Mins" },
+                    { value: seconds, label: "Secs" },
+                  ].map((item) => (
+                    <div key={item.label} className="text-center bg-white/20 backdrop-blur rounded-xl py-3 px-2">
+                      <div className="text-3xl font-black">{String(item.value).padStart(2, "0")}</div>
+                      <div className="text-[10px] uppercase tracking-wider font-semibold opacity-90">{item.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-center text-xs mt-3 opacity-90">Deadline: March 20, 2025 at 11:59 PM</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border-0 shadow-lg bg-gradient-to-r from-red-500 to-red-600 text-white">
+              <CardContent className="py-6 px-6 text-center">
+                <XCircle className="w-12 h-12 mx-auto mb-3 opacity-80" />
+                <h2 className="text-xl font-bold mb-1">Registration Closed</h2>
+                <p className="text-sm opacity-90">The registration deadline has passed. Contact us for more information.</p>
+              </CardContent>
+            </Card>
+          )}
 
-          {/* Step 1 */}
-          {step === 1 && (
+          {/* If registration is closed, show only links */}
+          {isExpired ? (
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-orange-500" />
-                  Registration Details
-                </CardTitle>
-                <CardDescription>Fill in your details and select subjects</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="fullName">Full Name *</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input id="fullName" className="pl-10" placeholder="Enter your full name"
-                          value={form.fullName} onChange={e => setForm(p => ({ ...p, fullName: e.target.value }))} />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="phone">Phone Number *</Label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input id="phone" className="pl-10" placeholder="08012345678"
-                          value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email (Optional)</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input id="email" type="email" className="pl-10" placeholder="your@email.com"
-                        value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mode */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Exam Mode *</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {['virtual', 'physical'].map(mode => (
-                      <button key={mode} type="button"
-                        onClick={() => setForm(p => ({ ...p, mode }))}
-                        className={`p-4 rounded-xl border-2 text-center transition-all ${
-                          form.mode === mode
-                            ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm'
-                            : 'border-gray-200 hover:border-orange-300'
-                        }`}>
-                        <div className="font-semibold capitalize">{mode}</div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {mode === 'virtual' ? 'Take exam online' : 'Exam at venue'}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Subject Selection */}
-                <div className="space-y-3">
-                  <Label className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                    Select Subjects (English + 3 others)
-                  </Label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {AVAILABLE_SUBJECTS.map(subject => {
-                      const isSelected = subject.locked || form.selectedSubjects.includes(subject.id);
-                      return (
-                        <button key={subject.id} type="button"
-                          onClick={() => toggleSubject(subject.id)}
-                          disabled={subject.locked}
-                          className={`p-3 rounded-xl border-2 text-left text-sm transition-all ${
-                            isSelected
-                              ? 'border-orange-500 bg-orange-50 text-orange-700'
-                              : 'border-gray-200 hover:border-orange-300'
-                          } ${subject.locked ? 'cursor-not-allowed opacity-80' : ''}`}>
-                          <div className="flex items-center gap-2">
-                            <Checkbox checked={isSelected} disabled={subject.locked} className="pointer-events-none" />
-                            <span className="font-medium text-xs leading-tight">{subject.name}</span>
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {subject.questions}Q
-                            {subject.locked && <Badge variant="outline" className="ml-1 text-[10px] px-1">Required</Badge>}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Selected: {form.selectedSubjects.length}/3 subjects (+ English Language)
-                  </p>
-                </div>
-
-                <Button
-                  className="w-full h-12 bg-orange-500 hover:bg-orange-600 font-semibold text-base"
-                  onClick={() => {
-                    if (!form.fullName.trim() || !form.phone.trim() || !form.mode) {
-                      toast.error("Please fill all required fields");
-                      return;
-                    }
-                    if (form.selectedSubjects.length !== 3) {
-                      toast.error("Select exactly 3 subjects");
-                      return;
-                    }
-                    if (form.mode === 'virtual') {
-                      handleSubmit();
-                      return;
-                    }
-                    setStep(2);
-                  }}>
-                  {form.mode === 'virtual' ? 'Complete Registration' : 'Continue to Payment'}
-                </Button>
-
-                <div className="text-center">
-                  <Link to="/school-registration" className="inline-flex items-center gap-2 text-sm text-orange-600 font-semibold hover:underline">
-                    <School className="w-4 h-4" /> Register as a School
+              <CardContent className="py-8 text-center space-y-4">
+                <p className="text-muted-foreground">Registration for this mock exam session is no longer available.</p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <a href="https://edura.space/#/school-registration" target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="w-full sm:w-auto h-11">
+                      <School className="w-4 h-4 mr-2" /> Register as a School
+                    </Button>
+                  </a>
+                  <Link to={`${basePath}/mock-login`}>
+                    <Button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 h-11">
+                      Already registered? Login
+                    </Button>
                   </Link>
                 </div>
               </CardContent>
             </Card>
-          )}
-
-          {/* Step 2: Payment */}
-          {step === 2 && (
-            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-              <CardHeader>
-                <CardTitle>Payment Information</CardTitle>
-                <CardDescription>Registration fee: ₦{Number(fee).toLocaleString()}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <Alert className="border-orange-200 bg-orange-50 rounded-xl">
-                  <AlertDescription className="text-orange-800">
-                    <p className="font-semibold mb-2">Make payment to:</p>
-                    <div className="space-y-1 text-sm">
-                      <p><strong>Bank:</strong> {paymentAccount.bank || 'Access Bank'}</p>
-                      <p><strong>Account Number:</strong> {paymentAccount.account_number || '0123456789'}</p>
-                      <p><strong>Account Name:</strong> {paymentAccount.account_name || 'AKBOY Creative Hub'}</p>
-                      <p><strong>Amount:</strong> ₦{Number(fee).toLocaleString()}</p>
+          ) : (
+            <>
+              {/* Progress Steps */}
+              <div className="flex items-center justify-center gap-2">
+                {[1, 2, 3].map(s => (
+                  <div key={s} className="flex items-center gap-2">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                      step >= s ? 'bg-orange-500 text-white shadow-md' : 'bg-gray-200 text-gray-500'
+                    }`}>
+                      {step > s ? <CheckCircle2 className="w-5 h-5" /> : s}
                     </div>
-                  </AlertDescription>
-                </Alert>
-
-                {form.mode === 'physical' && (
-                  <Alert className="border-blue-200 bg-blue-50 rounded-xl">
-                    <MapPin className="h-4 w-4 text-blue-600" />
-                    <AlertDescription className="text-blue-800">
-                      <strong>Physical Mode:</strong> Bring your payment receipt to the exam venue.
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                <div className="bg-gray-50 p-4 rounded-xl space-y-2 text-sm border">
-                  <h4 className="font-semibold">Summary</h4>
-                  <p><strong>Name:</strong> {form.fullName}</p>
-                  <p><strong>Phone:</strong> {form.phone}</p>
-                  <p><strong>Mode:</strong> <span className="capitalize">{form.mode}</span></p>
-                  <p><strong>Subjects:</strong></p>
-                  <div className="flex flex-wrap gap-1 ml-4">
-                    {getSelectedSubjectsWithEnglish().map(s => (
-                      <Badge key={s.id} variant="secondary" className="text-xs">{s.name}</Badge>
-                    ))}
+                    {s < 3 && <div className={`w-12 h-1 rounded-full transition-all ${step > s ? 'bg-orange-500' : 'bg-gray-200'}`} />}
                   </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep(1)} className="flex-1 h-12">Back</Button>
-                  <Button onClick={handleSubmit} disabled={loading} className="flex-1 h-12 bg-orange-500 hover:bg-orange-600 font-semibold">
-                    {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Registering...</> : "Complete Registration"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Step 3: Confirmation */}
-          {step === 3 && result && (
-            <div className="space-y-4">
-              <Card className="shadow-lg border-0 overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-center py-6">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <img src="/akboy-logo.png" alt="AKBOY" className="w-10 h-10 rounded-full bg-white p-1" />
-                    <CardTitle className="text-xl">AKBOY Mock Examination</CardTitle>
-                  </div>
-                  <CardDescription className="text-orange-100">Admit Slip / Confirmation</CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-5">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <CheckCircle2 className="w-10 h-10 text-green-500" />
-                    </div>
-                    <p className="text-lg font-bold text-green-700">Registration Successful!</p>
-                  </div>
-
-                  <div className="bg-orange-50 border-2 border-dashed border-orange-300 rounded-xl p-5 text-center">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Your Registration Number</p>
-                    <p className="text-3xl font-extrabold text-orange-600 tracking-widest mt-1">{result.registrationNumber}</p>
-                    <p className="text-xs text-muted-foreground mt-2">Keep this number safe for exam access and results</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground text-xs uppercase">Full Name</p>
-                      <p className="font-semibold">{result.fullName}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground text-xs uppercase">Mode</p>
-                      <p className="font-semibold capitalize">{result.mode}</p>
-                    </div>
-                    {result.batchTitle && (
-                      <div>
-                        <p className="text-muted-foreground text-xs uppercase">Batch</p>
-                        <p className="font-semibold">{result.batchTitle}</p>
-                      </div>
-                    )}
-                    {result.examDate && (
-                      <div>
-                        <p className="text-muted-foreground text-xs uppercase">Exam Date</p>
-                        <p className="font-semibold">{new Date(result.examDate).toLocaleString()}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase mb-2">Subjects</p>
-                    <div className="flex flex-wrap gap-2">
-                      {result.subjects.map((s: any) => (
-                        <Badge key={s.id} className="bg-orange-100 text-orange-700 border-orange-200 px-3 py-1">
-                          {s.name} ({s.questions}Q)
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 p-4 rounded-xl text-sm space-y-1 border">
-                    <p className="font-semibold">📋 Exam Instructions:</p>
-                    <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                      <li>Total: 180 questions (English: 60, Others: 40 each)</li>
-                      <li>Duration: 120 minutes</li>
-                      <li>Login at the exam portal with your registration number</li>
-                      {result.mode === 'physical' && (
-                        <>
-                          <li><strong>Bring payment receipt to venue</strong></li>
-                          {result.examVenue && <li>Venue: {result.examVenue}</li>}
-                        </>
-                      )}
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={downloadAdmitSlip} className="flex-1 h-12 font-semibold">
-                  <Download className="w-4 h-4 mr-2" /> Download Admit Slip
-                </Button>
-                <Button
-                  className="flex-1 h-12 bg-orange-500 hover:bg-orange-600 font-semibold"
-                  onClick={() => {
-                    setStep(1);
-                    setResult(null);
-                    setForm({ fullName: "", phone: "", email: "", mode: "", selectedSubjects: [] });
-                  }}>
-                  Register Another
-                </Button>
+                ))}
               </div>
-            </div>
+              <div className="flex justify-center gap-8 text-xs text-muted-foreground">
+                <span className={step >= 1 ? 'text-orange-600 font-semibold' : ''}>Details & Subjects</span>
+                <span className={step >= 2 ? 'text-orange-600 font-semibold' : ''}>Payment</span>
+                <span className={step >= 3 ? 'text-orange-600 font-semibold' : ''}>Confirmation</span>
+              </div>
+
+              {/* Step 1 */}
+              {step === 1 && (
+                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-orange-500" />
+                      Registration Details
+                    </CardTitle>
+                    <CardDescription>Fill in your details and select subjects</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="fullName">Full Name *</Label>
+                          <div className="relative">
+                            <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input id="fullName" className="pl-10" placeholder="Enter your full name"
+                              value={form.fullName} onChange={e => setForm(p => ({ ...p, fullName: e.target.value }))} />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="phone">Phone Number *</Label>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input id="phone" className="pl-10" placeholder="08012345678"
+                              value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="email">Email (Optional)</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input id="email" type="email" className="pl-10" placeholder="your@email.com"
+                            value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mode */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Exam Mode *</Label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {['virtual', 'physical'].map(mode => (
+                          <button key={mode} type="button"
+                            onClick={() => setForm(p => ({ ...p, mode }))}
+                            className={`p-4 rounded-xl border-2 text-center transition-all ${
+                              form.mode === mode
+                                ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm'
+                                : 'border-gray-200 hover:border-orange-300'
+                            }`}>
+                            <div className="font-semibold capitalize">{mode}</div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {mode === 'virtual' ? 'Take exam online' : 'Exam at venue'}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Subject Selection */}
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                        Select Subjects (English + 3 others)
+                      </Label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {AVAILABLE_SUBJECTS.map(subject => {
+                          const isSelected = subject.locked || form.selectedSubjects.includes(subject.id);
+                          return (
+                            <button key={subject.id} type="button"
+                              onClick={() => toggleSubject(subject.id)}
+                              disabled={subject.locked}
+                              className={`p-3 rounded-xl border-2 text-left text-sm transition-all ${
+                                isSelected
+                                  ? 'border-orange-500 bg-orange-50 text-orange-700'
+                                  : 'border-gray-200 hover:border-orange-300'
+                              } ${subject.locked ? 'cursor-not-allowed opacity-80' : ''}`}>
+                              <div className="flex items-center gap-2">
+                                <Checkbox checked={isSelected} disabled={subject.locked} className="pointer-events-none" />
+                                <span className="font-medium text-xs leading-tight">{subject.name}</span>
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {subject.questions}Q
+                                {subject.locked && <Badge variant="outline" className="ml-1 text-[10px] px-1">Required</Badge>}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Selected: {form.selectedSubjects.length}/3 subjects (+ English Language)
+                      </p>
+                    </div>
+
+                    <Button
+                      className="w-full h-12 bg-orange-500 hover:bg-orange-600 font-semibold text-base"
+                      onClick={() => {
+                        if (!form.fullName.trim() || !form.phone.trim() || !form.mode) {
+                          toast.error("Please fill all required fields");
+                          return;
+                        }
+                        if (form.selectedSubjects.length !== 3) {
+                          toast.error("Select exactly 3 subjects");
+                          return;
+                        }
+                        if (form.mode === 'virtual') {
+                          handleSubmit();
+                          return;
+                        }
+                        setStep(2);
+                      }}>
+                      {form.mode === 'virtual' ? 'Complete Registration' : 'Continue to Payment'}
+                    </Button>
+
+                    <div className="text-center">
+                      <a href="https://edura.space/#/school-registration" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-orange-600 font-semibold hover:underline">
+                        <School className="w-4 h-4" /> Register as a School
+                      </a>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Step 2: Payment */}
+              {step === 2 && (
+                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
+                  <CardHeader>
+                    <CardTitle>Payment Information</CardTitle>
+                    <CardDescription>Registration fee: ₦{Number(fee).toLocaleString()}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <Alert className="border-orange-200 bg-orange-50 rounded-xl">
+                      <AlertDescription className="text-orange-800">
+                        <p className="font-semibold mb-2">Make payment to:</p>
+                        <div className="space-y-1 text-sm">
+                          <p><strong>Bank:</strong> {paymentAccount.bank || 'Access Bank'}</p>
+                          <p><strong>Account Number:</strong> {paymentAccount.account_number || '0123456789'}</p>
+                          <p><strong>Account Name:</strong> {paymentAccount.account_name || 'AKBOY Creative Hub'}</p>
+                          <p><strong>Amount:</strong> ₦{Number(fee).toLocaleString()}</p>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+
+                    {form.mode === 'physical' && (
+                      <Alert className="border-blue-200 bg-blue-50 rounded-xl">
+                        <MapPin className="h-4 w-4 text-blue-600" />
+                        <AlertDescription className="text-blue-800">
+                          <strong>Physical Mode:</strong> Bring your payment receipt to the exam venue.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
+                    <div className="bg-gray-50 p-4 rounded-xl space-y-2 text-sm border">
+                      <h4 className="font-semibold">Summary</h4>
+                      <p><strong>Name:</strong> {form.fullName}</p>
+                      <p><strong>Phone:</strong> {form.phone}</p>
+                      <p><strong>Mode:</strong> <span className="capitalize">{form.mode}</span></p>
+                      <p><strong>Subjects:</strong></p>
+                      <div className="flex flex-wrap gap-1 ml-4">
+                        {getSelectedSubjectsWithEnglish().map(s => (
+                          <Badge key={s.id} variant="secondary" className="text-xs">{s.name}</Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button variant="outline" onClick={() => setStep(1)} className="flex-1 h-12">Back</Button>
+                      <Button onClick={handleSubmit} disabled={loading} className="flex-1 h-12 bg-orange-500 hover:bg-orange-600 font-semibold">
+                        {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Registering...</> : "Complete Registration"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Step 3: Confirmation */}
+              {step === 3 && result && (
+                <div className="space-y-4">
+                  <Card className="shadow-lg border-0 overflow-hidden">
+                    <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-center py-6">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <img src="/akboy-logo.png" alt="AKBOY" className="w-10 h-10 rounded-full bg-white p-1" />
+                        <CardTitle className="text-xl">AKBOY Mock Examination</CardTitle>
+                      </div>
+                      <CardDescription className="text-orange-100">Admit Slip / Confirmation</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-5">
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <CheckCircle2 className="w-10 h-10 text-green-500" />
+                        </div>
+                        <p className="text-lg font-bold text-green-700">Registration Successful!</p>
+                      </div>
+
+                      <div className="bg-orange-50 border-2 border-dashed border-orange-300 rounded-xl p-5 text-center">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide">Your Registration Number</p>
+                        <p className="text-3xl font-extrabold text-orange-600 tracking-widest mt-1">{result.registrationNumber}</p>
+                        <p className="text-xs text-muted-foreground mt-2">Keep this number safe for exam access and results</p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-muted-foreground text-xs uppercase">Full Name</p>
+                          <p className="font-semibold">{result.fullName}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs uppercase">Mode</p>
+                          <p className="font-semibold capitalize">{result.mode}</p>
+                        </div>
+                        {result.batchTitle && (
+                          <div>
+                            <p className="text-muted-foreground text-xs uppercase">Batch</p>
+                            <p className="font-semibold">{result.batchTitle}</p>
+                          </div>
+                        )}
+                        {result.examDate && (
+                          <div>
+                            <p className="text-muted-foreground text-xs uppercase">Exam Date</p>
+                            <p className="font-semibold">{new Date(result.examDate).toLocaleString()}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase mb-2">Subjects</p>
+                        <div className="flex flex-wrap gap-2">
+                          {result.subjects.map((s: any) => (
+                            <Badge key={s.id} className="bg-orange-100 text-orange-700 border-orange-200 px-3 py-1">
+                              {s.name} ({s.questions}Q)
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-50 p-4 rounded-xl text-sm space-y-1 border">
+                        <p className="font-semibold">📋 Exam Instructions:</p>
+                        <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                          <li>Total: 180 questions (English: 60, Others: 40 each)</li>
+                          <li>Duration: 120 minutes</li>
+                          <li>Login at the exam portal with your registration number</li>
+                          <li><strong>Camera & microphone access required during exam</strong></li>
+                          {result.mode === 'physical' && (
+                            <>
+                              <li><strong>Bring payment receipt to venue</strong></li>
+                              {result.examVenue && <li>Venue: {result.examVenue}</li>}
+                            </>
+                          )}
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <div className="flex gap-3">
+                    <Button variant="outline" onClick={downloadAdmitSlip} className="flex-1 h-12 font-semibold">
+                      <Download className="w-4 h-4 mr-2" /> Download Admit Slip
+                    </Button>
+                    <Button
+                      className="flex-1 h-12 bg-orange-500 hover:bg-orange-600 font-semibold"
+                      onClick={() => {
+                        setStep(1);
+                        setResult(null);
+                        setForm({ fullName: "", phone: "", email: "", mode: "", selectedSubjects: [] });
+                      }}>
+                      Register Another
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
