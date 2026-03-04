@@ -2,7 +2,7 @@ import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { BookOpen, FileText, LogIn, CheckCircle2, Trophy, BarChart3, ArrowRight } from "lucide-react";
+import { BookOpen, FileText, LogIn, CheckCircle2, Trophy, BarChart3, ArrowRight, Download } from "lucide-react";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 
 export default function AkboyMockPages() {
@@ -130,6 +130,45 @@ export default function AkboyMockPages() {
                 </Card>
               );
             })}
+          </div>
+
+          {/* Utility Actions */}
+          <div className="mb-12">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Utilities</h2>
+              <p className="text-gray-600">Helpful tools and resources for your exam</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card 
+                className="group hover:shadow-2xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden"
+              >
+                <div className="h-2 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white">
+                      <Download className="h-5 w-5" />
+                    </div>
+                    <span className="text-sm font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-500 px-3 py-1 rounded-full">
+                      Utility
+                    </span>
+                  </div>
+                  <CardTitle className="text-xl text-gray-900">Reprint Admit Slip</CardTitle>
+                  <CardDescription className="text-gray-600 mt-2">Reprint your admit slip for the mock exam</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-6 leading-relaxed">Download or reprint your admit slip with updated exam venue and batch information</p>
+                  <Button
+                    asChild
+                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:shadow-lg transition-all group-hover:translate-x-1"
+                  >
+                    <Link to={`${basePath}/reprint-admit-slip`} className="flex items-center justify-between">
+                      Reprint Slip
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           {/* Quick Start Section */}

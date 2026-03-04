@@ -696,7 +696,7 @@ export default function AkboyMockRegistration() {
                       className="flex-1 h-12"
                     >
                       {/* direct link to reprint page with reg param */}
-                      <a href={`/akboy/reprint-admit-slip?reg=${encodeURIComponent(result.registrationNumber)}`}>
+                      <a href={`${basePath}/reprint-admit-slip?reg=${encodeURIComponent(result.registrationNumber)}`}>
                         <Download className="w-4 h-4 mr-2" /> Reprint Admit Slip
                       </a>
                     </Button>

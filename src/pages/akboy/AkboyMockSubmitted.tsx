@@ -1,7 +1,7 @@
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Clock, ExternalLink, School } from "lucide-react";
+import { CheckCircle2, Clock, Download, ExternalLink, School } from "lucide-react";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { Link } from "react-router-dom";
 
@@ -43,6 +43,11 @@ export default function AkboyMockSubmitted() {
                     <ExternalLink className="w-4 h-4 mr-2" /> Go to Result Portal
                   </Button>
                 </Link>
+                <a href={`${basePath}/reprint-admit-slip${regParam ? `?reg=${encodeURIComponent(regParam)}` : ''}`}>
+                  <Button variant="outline" className="w-full h-11">
+                    <Download className="w-4 h-4 mr-2" /> Reprint Admit Slip
+                  </Button>
+                </a>
                 <a href="https://edura.space/#/school-registration" target="_blank" rel="noopener noreferrer">
                   <Button variant="outline" className="w-full mt-2 h-11">
                     <School className="w-4 h-4 mr-2" /> Register as a School
