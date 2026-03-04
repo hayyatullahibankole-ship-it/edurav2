@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -457,7 +458,7 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
                 <div className="flex justify-between items-center pt-4 border-t">
                   <Button
                     variant="outline"
-                    onClick={prevQuestion}
+                    onClick={prevQuestionInSubject}
                     disabled={currentQuestionInSubject === 0}
                     size="sm"
                   >
@@ -470,7 +471,7 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
                   </span>
 
                   <Button
-                    onClick={nextQuestion}
+                    onClick={nextQuestionInSubject}
                     disabled={currentQuestionInSubject === (currentSubjectData?.questions.length || 0) - 1}
                     className="bg-orange-500 hover:bg-orange-600"
                     size="sm"
@@ -552,45 +553,6 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
           </div>
         </div>
       </div>
-            {subjectQuestions.map((sd) => (
-              <Button
-                key={sd.subject}
-                variant={currentSubject === sd.subject ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => switchToSubject(sd.subject)}
-              >
-                {sd.subject}
-              </Button>
-            ))}
-          </div>
-        )}
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Subject Navigation Sidebar */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Question Navigator</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-5 gap-2">
-                  {currentSubjectData?.questions.map((q, idx) => {
-                    const isAnswered = answers.hasOwnProperty(q.id - 1);
-                    const isCurrent = idx === currentQuestionInSubject;
-                    return (
-                      <Button
-                        key={q.id}
-                        variant={isCurrent ? 'default' : 'outline'}
-                        size="sm"
-                        className={`${isAnswered ? 'border-green-500 bg-green-50 hover:bg-green-100' : ''} aspect-square p-0 text-xs`}
-                        onClick={() => setCurrentQuestionInSubject(idx)}
-                      >
-                        {idx + 1}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </CardContent>
-      </div>
 
       {/* Submit Confirmation Dialog */}
       <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
@@ -613,7 +575,6 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
                 <div className="text-xs text-gray-500">Unanswered</div>
               </div>
             </div>
-            
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setShowSubmitDialog(false)} className="flex-1 h-11">
                 Continue Exam

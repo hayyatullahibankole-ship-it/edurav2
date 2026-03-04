@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -251,7 +252,7 @@ const ExamInterface: React.FC<ExamInterfaceProps> = ({
               
               <Button
                 size="sm"
-                onClick={handlePauseToggle}
+                onClick={togglePause}
                 className="bg-white/20 hover:bg-white/30 h-7 sm:h-9 px-2 sm:px-3 flex-shrink-0"
               >
                 {isPaused ? <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Pause className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
