@@ -5,7 +5,7 @@
   "dir": "ltr",
   "display": "standalone",
   "name": "Edura - Advanced CBT Exam Platform",
-  "orientation": "any",
+  "orientation": "portrait",
   "scope": "/",
   "short_name": "Edura CBT",
   "start_url": "/",
