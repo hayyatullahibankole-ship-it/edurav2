@@ -14,7 +14,7 @@ interface MockCBTInterfaceProps {
   questions: CBTQuestion[];
   answers: CBTAnswers;
   onAnswerSelect: (questionId: string, optionIndex: number) => void;
-  onSubmit: (timeSpent: number) => Promise<void>;
+  onSubmit: (timeSpent?: number) => Promise<void>;
   duration: number;
   examTitle?: string;
   submitting?: boolean;

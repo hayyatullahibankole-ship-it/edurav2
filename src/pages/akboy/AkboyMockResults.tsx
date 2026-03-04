@@ -348,6 +348,21 @@ export default function AkboyMockResults() {
               <Button variant="outline" onClick={downloadResultSlip} className="w-full h-12 text-base font-semibold">
                 <Download className="w-5 h-5 mr-2" /> Download Result Slip
               </Button>
+
+              {/* WhatsApp Group CTA */}
+              <Card className="shadow-lg border-0 bg-gradient-to-r from-green-500 to-emerald-500 text-white overflow-hidden">
+                <CardContent className="py-5 px-6 text-center space-y-3">
+                  <div>
+                    <h3 className="text-lg font-bold">Join Our WhatsApp Group</h3>
+                    <p className="text-sm opacity-90">Get exam updates and connect with other candidates</p>
+                  </div>
+                  <a href="https://chat.whatsapp.com/JQ61pyPVTfT5MIW1X7P4TH?mode=gi_t" target="_blank" rel="noopener noreferrer">
+                    <Button className="bg-white text-green-600 hover:bg-white/90 font-bold h-11 px-8 mt-2">
+                      JOIN NOW
+                    </Button>
+                  </a>
+                </CardContent>
+              </Card>
             </div>
           )}
         </div>
