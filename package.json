@@ -79,7 +79,8 @@
     "vaul": "^0.9.9",
     "vite-plugin-pwa": "^1.1.0",
     "workbox-window": "^7.3.0",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "react-qr-reader": "^3.0.0"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",

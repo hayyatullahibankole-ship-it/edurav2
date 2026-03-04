@@ -211,9 +211,9 @@ export default function AdminPortal() {
 
       <div className="flex flex-col lg:flex-row">
         {/* Sidebar Navigation */}
-        <div className="lg:w-64 bg-slate-900 border-r border-slate-800 lg:min-h-screen">
-          <div className="p-4">
-            <nav className="grid grid-cols-2 lg:grid-cols-1 gap-2 lg:space-y-2 lg:grid-cols-none">
+        <div className="min-h-screen lg:w-64 bg-slate-900 border-r border-slate-800 overflow-y-auto">
+          <div className="p-2">
+            <nav className="flex flex-wrap lg:flex-col gap-2">
               <Button
                 variant={activeSection === 'dashboard' ? 'secondary' : 'ghost'}
                 className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
@@ -450,7 +450,7 @@ export default function AdminPortal() {
               </Button>
               <Button
                 variant={activeSection === 'settings' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm col-span-2 lg:col-span-1 text-slate-300 hover:text-white hover:bg-slate-800"
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('settings')}
               >
                 <Settings className="w-4 h-4 mr-2 lg:mr-3" />

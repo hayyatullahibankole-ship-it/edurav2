@@ -5,12 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  CheckCircle, XCircle, Loader2, Search, RefreshCw, Clock, MapPin, AlertCircle
+  CheckCircle, XCircle, Loader2, Search, RefreshCw, Clock, MapPin, AlertCircle, Camera
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
+// QR reader library for camera scanning
+import { QrReader } from 'react-qr-reader';
 
 interface StudentRecord {
   id: string;
@@ -40,6 +42,7 @@ export function ExamDayVerification() {
   const [selectedStudent, setSelectedStudent] = useState<StudentRecord | null>(null);
   const [verificationDialog, setVerificationDialog] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false); // controls QR scanner dialog
   const { toast } = useToast();
 
   useEffect(() => {
@@ -133,8 +136,38 @@ export function ExamDayVerification() {
     }
   };
 
-  const verifyStudent = async (present: boolean) => {
-    if (!selectedStudent) return;
+  // callback when QR reader produces a result
+  const handleQrResult = async (result: any, error: any) => {
+    if (!!result) {
+      const text = result?.text?.trim();
+      if (!text) return;
+
+      // assume QR contains registration number
+      const student = students.find(s =>
+        s.registration_number.toLowerCase() === text.toLowerCase()
+      );
+
+      if (student) {
+        // close scanner UI and verify immediately
+        setScannerOpen(false);
+        await verifyStudent(true, student);
+      } else {
+        toast({
+          title: "Code not recognised",
+          description: `Scanned value '${text}' did not match any registration`,
+          variant: "destructive",
+        });
+      }
+    }
+    if (error) {
+      // silent; scanner may report frame errors frequently
+      // console.error('QR error', error);
+    }
+  };
+
+  const verifyStudent = async (present: boolean, studentParam?: StudentRecord) => {
+    const student = studentParam || selectedStudent;
+    if (!student) return;
 
     setVerifying(true);
     try {
@@ -145,7 +178,7 @@ export function ExamDayVerification() {
           verified_at: new Date().toISOString(),
           exam_status: present ? "started" : "registered"
         })
-        .eq("id", selectedStudent.id);
+        .eq("id", student.id);
 
       if (error) throw error;
 
@@ -156,7 +189,7 @@ export function ExamDayVerification() {
 
       // Update local state
       setStudents(students.map(s =>
-        s.id === selectedStudent.id
+        s.id === student.id
           ? { ...s, verified_present: present, verified_at: new Date().toISOString() }
           : s
       ));
@@ -206,7 +239,7 @@ export function ExamDayVerification() {
       </Card>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
@@ -249,25 +282,34 @@ export function ExamDayVerification() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Scan Input */}
+          {/* Scan Input with camera button */}
           <div>
             <label className="text-sm font-semibold mb-2 block">Scan Registration Number</label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 items-start">
               <Input
                 placeholder="Scan or enter registration number..."
                 value={scanInput}
                 onChange={(e) => setScanInput(e.target.value)}
                 onKeyDown={handleScan}
-                className="flex-1"
+                className="flex-1 w-full"
                 autoFocus
               />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setScannerOpen(true)}
+                className="flex-shrink-0"
+              >
+                <Camera className="w-4 h-4 mr-1" />
+                Scan QR
+              </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               Press Enter after scanning or typing
             </p>
           </div>
 
-          {/* Or search manually */}
+          {/* Manual search block separated */}
           <div className="border-t pt-4">
             <label className="text-sm font-semibold mb-2 block">Or Search Manually</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -295,7 +337,7 @@ export function ExamDayVerification() {
       </Card>
 
       {/* Students List */}
-      <Card>
+      <Card className="overflow-x-auto">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Registered Students</CardTitle>
@@ -435,8 +477,26 @@ export function ExamDayVerification() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* QR scanner dialog */}
+      <Dialog open={scannerOpen} onOpenChange={setScannerOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Scan QR Code</DialogTitle>
+            <DialogDescription>Point your camera at the student's admit slip QR code.</DialogDescription>
+          </DialogHeader>
+          <div className="w-full">
+            <QrReader
+              constraints={{ facingMode: 'environment' }}
+              onResult={handleQrResult}
+              containerStyle={{ width: '100%' }}
+            />
+          </div>
+          <div className="mt-2 text-xs text-muted-foreground text-center">
+            If the camera does not start, make sure permission is granted.
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-
-import React from "react";

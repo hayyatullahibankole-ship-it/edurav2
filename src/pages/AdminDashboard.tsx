@@ -476,7 +476,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/5">
       {/* Admin Navigation Header */}
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 w-full max-w-full">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">

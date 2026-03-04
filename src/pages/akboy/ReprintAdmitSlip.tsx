@@ -360,6 +360,14 @@ export default function ReprintAdmitSlip() {
           <div class="reg-label">Registration Number</div>
         </div>
 
+        <!-- QR code so admins can scan during exam day -->
+        <div class="text-center mb-6">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+            registration.registration_number
+          )}" alt="QR code" />
+          <div class="text-xs text-muted-foreground mt-2">Scan to verify registration</div>
+        </div>
+
         <div class="student-name">${registration.full_name}</div>
 
         <div class="info-grid">

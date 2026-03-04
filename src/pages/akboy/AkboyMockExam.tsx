@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { MockCBTInterface } from "@/components/MockCBTInterface";
 import { CBTQuestion, CBTAnswers } from "@/hooks/useCBTExam";
 import { ExamNotYetAvailableModal } from "@/components/ExamNotYetAvailableModal";
+import { Button } from "@/components/ui/button";
 
 export default function AkboyMockExam() {
   const [searchParams] = useSearchParams();
@@ -326,9 +327,18 @@ export default function AkboyMockExam() {
     );
   }
 
+  const reprintButton = (
+    <div className="absolute top-4 right-4 z-10">
+      <Button variant="outline" size="sm" asChild>
+        <Link to={`${basePath}/reprint-admit-slip`}>Reprint Admit Slip</Link>
+      </Button>
+    </div>
+  );
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="relative min-h-screen bg-background flex items-center justify-center">
+        {reprintButton}
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-orange-500 mx-auto mb-4" />
           <p className="text-lg">Loading mock exam...</p>
@@ -339,15 +349,18 @@ export default function AkboyMockExam() {
   }
 
   return (
-    <MockCBTInterface
-      questions={questions}
-      answers={answers}
-      onAnswerSelect={selectAnswer}
-      onSubmit={submitExam}
-      duration={examDuration}
-      examTitle="AKBOY JAMB Mock Examination"
-      submitting={submitting}
-      disableSubmit={!attemptId || loading}
-    />
+    <div className="relative">
+      {reprintButton}
+      <MockCBTInterface
+        questions={questions}
+        answers={answers}
+        onAnswerSelect={selectAnswer}
+        onSubmit={submitExam}
+        duration={examDuration}
+        examTitle="AKBOY JAMB Mock Examination"
+        submitting={submitting}
+        disableSubmit={!attemptId || loading}
+      />
+    </div>
   );
 }
