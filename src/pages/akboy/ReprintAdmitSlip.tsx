@@ -44,24 +44,31 @@ export default function ReprintAdmitSlip() {
     setRegistration(null);
 
     try {
-      const { data, error: queryError } = await supabase
-        .from("mock_registrations")
-        .select(`
-          *,
-          batch:mock_batches(id, title, exam_date, exam_venue, is_active)
-        `)
-        .eq("registration_number", registrationNumber.trim().toUpperCase())
-        .single();
+      // use a security-definer RPC so that anonymous users can lookup a
+      // registration by number without RLS blocking the row. the query above
+      // used to hit RLS and return PGRST116 even when the record existed.
+      const { data, error: rpcError } = await supabase
+        .rpc("get_registration_for_admit", {
+          p_registration_number: registrationNumber.trim().toUpperCase(),
+        });
 
-      if (queryError) {
-        if (queryError.code === "PGRST116") {
-          setError("Registration number not found. Please check and try again.");
-        } else {
-          setError(queryError.message);
-        }
+      if (rpcError) {
+        // same message as before so users don't notice the internal change
+        setError(
+          rpcError.code === "PGRST116" || rpcError.code === "PGRST109"
+            ? "Registration number not found. Please check and try again."
+            : rpcError.message
+        );
         return;
       }
 
+      if (!data) {
+        setError("Registration number not found. Please check and try again.");
+        return;
+      }
+
+      // the rpc return type is a loose json record, so cast it to our
+      // component-friendly shape. we already defined it above.
       setRegistration(data as Registration);
       toast({ title: "Registration found", description: "Your admit slip is ready to download" });
     } catch (error: any) {
