@@ -356,7 +356,7 @@ export default function AkboyMockResults() {
                     <h3 className="text-lg font-bold">Join Our WhatsApp Group</h3>
                     <p className="text-sm opacity-90">Get exam updates and connect with other candidates</p>
                   </div>
-                  <a href="https://chat.whatsapp.com/JQ61pyPVTfT5MIW1X7P4TH?mode=gi_t" target="_blank" rel="noopener noreferrer">
+                  <a href="https://chat.whatsapp.com/JQ61pyPVTfT5MlW1X7P4TH?mode=gi_t" target="_blank" rel="noopener noreferrer">
                     <Button className="bg-white text-green-600 hover:bg-white/90 font-bold h-11 px-8 mt-2">
                       JOIN NOW
                     </Button>
