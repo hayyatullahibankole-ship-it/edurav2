@@ -1,18 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  CheckCircle, XCircle, Loader2, Search, RefreshCw, Clock, MapPin, AlertCircle, Camera
+  CheckCircle, XCircle, Loader2, Search, RefreshCw, Clock, MapPin, AlertCircle, Camera, volume2
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
-// QR reader library for camera scanning
-import { QrReader } from 'react-qr-reader';
+import { BrowserQRCodeReader } from "@zxing/library";
 
 interface StudentRecord {
   id: string;
@@ -42,7 +41,9 @@ export function ExamDayVerification() {
   const [selectedStudent, setSelectedStudent] = useState<StudentRecord | null>(null);
   const [verificationDialog, setVerificationDialog] = useState(false);
   const [verifying, setVerifying] = useState(false);
-  const [scannerOpen, setScannerOpen] = useState(false); // controls QR scanner dialog
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const readerRef = useRef<BrowserQRCodeReader | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -52,6 +53,33 @@ export function ExamDayVerification() {
   useEffect(() => {
     filterStudents();
   }, [students, searchTerm, selectedBatch]);
+
+  // Initialize camera when scanner opens
+  useEffect(() => {
+    if (scannerOpen && videoRef.current) {
+      const reader = new BrowserQRCodeReader();
+      readerRef.current = reader;
+      
+      reader.decodeFromVideoElement(videoRef.current)
+        .then(result => {
+          const text = result.getText().trim();
+          if (text) {
+            handleQrResult(text);
+          }
+        })
+        .catch(err => {
+          // QR not found in current frame, will retry
+          if (err.message !== "No multi-format reader could be detected automatically." &&
+              !err.message.includes("NotFoundException")) {
+            console.error("QR scan error:", err);
+          }
+        });
+
+      return () => {
+        readerRef.current?.reset();
+      };
+    }
+  }, [scannerOpen, students]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -136,32 +164,23 @@ export function ExamDayVerification() {
     }
   };
 
-  // callback when QR reader produces a result
-  const handleQrResult = async (result: any, error: any) => {
-    if (!!result) {
-      const text = result?.text?.trim();
-      if (!text) return;
+  // Handle QR code scan result
+  const handleQrResult = async (text: string) => {
+    if (!text) return;
 
-      // assume QR contains registration number
-      const student = students.find(s =>
-        s.registration_number.toLowerCase() === text.toLowerCase()
-      );
+    const student = students.find(s =>
+      s.registration_number.toLowerCase() === text.toLowerCase()
+    );
 
-      if (student) {
-        // close scanner UI and verify immediately
-        setScannerOpen(false);
-        await verifyStudent(true, student);
-      } else {
-        toast({
-          title: "Code not recognised",
-          description: `Scanned value '${text}' did not match any registration`,
-          variant: "destructive",
-        });
-      }
-    }
-    if (error) {
-      // silent; scanner may report frame errors frequently
-      // console.error('QR error', error);
+    if (student) {
+      setScannerOpen(false);
+      await verifyStudent(true, student);
+    } else {
+      toast({
+        title: "Code not recognised",
+        description: `Scanned value '${text}' did not match any registration`,
+        variant: "destructive",
+      });
     }
   };
 
@@ -485,15 +504,15 @@ export function ExamDayVerification() {
             <DialogTitle>Scan QR Code</DialogTitle>
             <DialogDescription>Point your camera at the student's admit slip QR code.</DialogDescription>
           </DialogHeader>
-          <div className="w-full">
-            <QrReader
-              constraints={{ facingMode: 'environment' }}
-              onResult={handleQrResult}
-              containerStyle={{ width: '100%' }}
+          <div className="w-full bg-black rounded-lg overflow-hidden">
+            <video 
+              ref={videoRef}
+              style={{ width: "100%", height: "400px" }}
+              autoPlay
             />
           </div>
           <div className="mt-2 text-xs text-muted-foreground text-center">
-            If the camera does not start, make sure permission is granted.
+            If the camera does not start, check your browser permissions or use manual entry instead.
           </div>
         </DialogContent>
       </Dialog>

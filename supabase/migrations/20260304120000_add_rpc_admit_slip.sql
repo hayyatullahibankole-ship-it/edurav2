@@ -26,7 +26,17 @@ AS $$
 BEGIN
   RETURN QUERY
   SELECT
-    r.*,
+    r.id,
+    r.registration_number,
+    r.full_name,
+    r.phone,
+    r.email,
+    r.subjects,
+    r.mode,
+    r.batch_id,
+    r.exam_status,
+    r.exam_started_at,
+    r.exam_submitted_at,
     json_build_object(
       'id', b.id,
       'title', b.title,

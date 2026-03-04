@@ -342,25 +342,25 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white">User Management</h2>
           <p className="text-slate-400">Manage system users and permissions</p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-2 flex-wrap">
           <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700">
+              <Button className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
                 <UserPlus className="w-4 h-4 mr-2" />
                 Add User
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New User</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName">First Name</Label>
                     <Input
@@ -415,19 +415,19 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
                   </Select>
                 </div>
 
-                <div className="flex gap-3 pt-4">
-                  <Button onClick={handleAddUser} disabled={loading} className="flex-1">
-                    {loading ? 'Creating...' : 'Create User'}
-                  </Button>
-                  <Button variant="outline" onClick={() => setIsAddModalOpen(false)} disabled={loading}>
+                <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
+                  <Button variant="outline" onClick={() => setIsAddModalOpen(false)} disabled={loading} className="w-full sm:flex-1">
                     Cancel
+                  </Button>
+                  <Button onClick={handleAddUser} disabled={loading} className="w-full sm:flex-1">
+                    {loading ? 'Creating...' : 'Create User'}
                   </Button>
                 </div>
               </div>
             </DialogContent>
           </Dialog>
 
-          <Button variant="outline" onClick={exportUsers}>
+          <Button variant="outline" onClick={exportUsers} className="w-full sm:w-auto">
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>
@@ -437,17 +437,17 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
       {/* Search and Filters */}
       <Card className="bg-slate-800 border-slate-700">
         <CardContent className="p-4">
-          <div className="flex items-center space-x-4">
-            <div className="relative flex-1">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="relative flex-1 w-full">
               <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
               <Input
                 placeholder="Search users by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-slate-700 border-slate-600 text-white"
+                className="pl-10 bg-slate-700 border-slate-600 text-white w-full"
               />
             </div>
-            <Badge className="bg-slate-700 text-slate-300">
+            <Badge className="bg-slate-700 text-slate-300 whitespace-nowrap">
               {filteredUsers.length} users
             </Badge>
           </div>
@@ -455,29 +455,29 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
       </Card>
 
       {/* Users List */}
-      <Card className="bg-slate-800 border-slate-700">
-        <CardContent className="p-6">
+      <Card className="bg-slate-800 border-slate-700 overflow-hidden">
+        <CardContent className="p-4 sm:p-6">
           <div className="space-y-4">
             {filteredUsers.map((user: any) => (
-              <div key={user.id} className="flex items-center justify-between p-4 bg-slate-700 rounded-lg border border-slate-600 hover:border-slate-500 transition-colors">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-slate-600 rounded-full flex items-center justify-center">
+              <div key={user.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-slate-700 rounded-lg border border-slate-600 hover:border-slate-500 transition-colors gap-4">
+                <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-600 rounded-full flex-shrink-0 flex items-center justify-center">
                     {user.profile_image_url ? (
-                      <img src={user.profile_image_url} alt="Profile" className="w-12 h-12 rounded-full" />
+                      <img src={user.profile_image_url} alt="Profile" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full" />
                     ) : (
-                      <Users className="w-6 h-6 text-slate-300" />
+                      <Users className="w-5 h-5 sm:w-6 sm:h-6 text-slate-300" />
                     )}
                   </div>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <p className="font-medium text-white">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-medium text-white truncate">
                         {user.first_name} {user.last_name}
                       </p>
                       {user.is_verified && (
-                        <Shield className="w-4 h-4 text-green-400" />
+                        <Shield className="w-4 h-4 text-green-400 flex-shrink-0" />
                       )}
                     </div>
-                    <p className="text-sm text-slate-400">{user.email}</p>
+                    <p className="text-sm text-slate-400 truncate">{user.email}</p>
                     <div className="flex items-center space-x-2 mt-1">
                       <Badge variant="secondary" className="text-xs">
                         {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
@@ -491,15 +491,15 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end">
                   {user.is_suspended && (
-                    <Badge className="bg-red-600 text-white">
+                    <Badge className="bg-red-600 text-white text-xs">
                       <AlertTriangle className="w-3 h-3 mr-1" />
                       Suspended
                     </Badge>
                   )}
                   {!user.is_verified && (
-                    <Badge className="bg-yellow-600 text-white">
+                    <Badge className="bg-yellow-600 text-white text-xs">
                       <Mail className="w-3 h-3 mr-1" />
                       Unverified
                     </Badge>
@@ -508,17 +508,18 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
                   <Button variant="ghost" size="sm" onClick={() => {
                     setSelectedUser(user);
                     setIsViewModalOpen(true);
-                  }}>
+                  }} className="h-8 w-8 p-0">
                     <Eye className="w-4 h-4" />
                   </Button>
                   
                   <Button 
                     variant="ghost" 
-                    size="sm" 
+                    size="sm"
                     onClick={() => {
                       setSelectedUser(user);
                       setIsEditModalOpen(true);
                     }}
+                    className="h-8 w-8 p-0"
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
@@ -529,7 +530,7 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
                       size="sm"
                       onClick={() => verifyUserEmail(user)}
                       disabled={loading}
-                      className="text-green-400 hover:text-green-300"
+                      className="text-green-400 hover:text-green-300 h-8 w-8 p-0"
                       title="Manually verify email"
                     >
                       <CheckCircle className="w-4 h-4" />
@@ -541,16 +542,17 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
                     size="sm"
                     onClick={() => toggleUserSuspension(user.id, user.is_suspended)}
                     disabled={loading}
+                    className="h-8 px-2 text-xs"
                   >
                     {user.is_suspended ? 'Activate' : 'Suspend'}
                   </Button>
                   
                   <Button 
                     variant="ghost" 
-                    size="sm" 
+                    size="sm"
                     onClick={() => handleDeleteUser(user.id)}
                     disabled={loading}
-                    className="text-red-400 hover:text-red-300"
+                    className="text-red-400 hover:text-red-300 h-8 w-8 p-0"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
