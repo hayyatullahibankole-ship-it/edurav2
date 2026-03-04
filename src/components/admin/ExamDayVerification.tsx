@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  CheckCircle, XCircle, Loader2, Search, RefreshCw, Clock, MapPin, AlertCircle, Camera, volume2
+  CheckCircle, XCircle, Loader2, Search, RefreshCw, Clock, MapPin, AlertCircle, Camera, Volume2
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
