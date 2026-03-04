@@ -72,6 +72,14 @@ export function ExamDayVerification() {
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
             
+            // Explicitly play the video
+            const playPromise = videoRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise.catch((error) => {
+                console.error("Video play failed:", error);
+              });
+            }
+            
             // Wait for video to load before starting decode
             videoRef.current.onloadedmetadata = () => {
               const reader = new BrowserQRCodeReader();
@@ -562,6 +570,8 @@ export function ExamDayVerification() {
               ref={videoRef}
               style={{ width: "100%", height: "400px" }}
               autoPlay
+              muted
+              playsInline
             />
           </div>
           <div className="mt-2 text-xs text-muted-foreground text-center">
