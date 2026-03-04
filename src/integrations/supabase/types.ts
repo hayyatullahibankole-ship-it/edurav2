@@ -3934,24 +3934,16 @@ export type Database = {
           subjects: Json
           mode: string
           batch_id: string | null
-          exam_status: string | null
+          exam_status: string
           exam_started_at: string | null
           exam_submitted_at: string | null
-          created_at: string | null
-          updated_at: string | null
-          attempt_id: string | null
-          payment_status: string | null
-          payment_receipt_url: string | null
-          school_id: string | null
-          school_student_id: string | null
-          user_id: string | null
           batch: {
             id: string
             title: string
             exam_date: string | null
             exam_venue: string | null
             is_active: boolean | null
-          } | null
+          }
         }
       }
       check_rate_limit: {
