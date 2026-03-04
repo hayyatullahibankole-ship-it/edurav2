@@ -189,8 +189,21 @@ export default function AkboyMockPages() {
             </CardContent>
           </Card>
 
+          {/* WhatsApp Group CTA */}
+          <Card className="border-0 bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg overflow-hidden">
+            <CardContent className="py-6 px-6 text-center space-y-3">
+              <h3 className="text-xl font-bold">Join Our WhatsApp Group</h3>
+              <p className="text-sm opacity-90">Stay updated on exam schedules, results, and tips from other candidates</p>
+              <a href="https://chat.whatsapp.com/JQ61pyPVTfT5MIW1X7P4TH?mode=gi_t" target="_blank" rel="noopener noreferrer">
+                <Button className="bg-white text-green-600 hover:bg-white/90 font-bold h-11 px-8 mt-2" size="lg">
+                  JOIN NOW
+                </Button>
+              </a>
+            </CardContent>
+          </Card>
+
           {/* CTA Button */}
-          <div className="text-center mt-16">
+          <div className="text-center mt-8">
             <Button
               asChild
               size="lg"
