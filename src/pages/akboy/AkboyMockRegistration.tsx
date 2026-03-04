@@ -603,6 +603,17 @@ export default function AkboyMockRegistration() {
                         <p className="text-xs text-muted-foreground uppercase tracking-wide">Your Registration Number</p>
                         <p className="text-3xl font-extrabold text-orange-600 tracking-widest mt-1">{result.registrationNumber}</p>
                         <p className="text-xs text-muted-foreground mt-2">Keep this number safe for exam access and results</p>
+                        {/* QR code for quick scanning */}
+                        <div className="mt-4">
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+                              result.registrationNumber
+                            )}`}
+                            alt="QR code"
+                            className="mx-auto"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">Scan at exam to verify registration</p>
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4 text-sm">
@@ -675,9 +686,19 @@ export default function AkboyMockRegistration() {
                     </CardContent>
                   </Card>
 
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <Button variant="outline" onClick={downloadAdmitSlip} className="flex-1 h-12 font-semibold">
                       <Download className="w-4 h-4 mr-2" /> Download Admit Slip
+                    </Button>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="flex-1 h-12"
+                    >
+                      {/* direct link to reprint page with reg param */}
+                      <a href={`/akboy/reprint-admit-slip?reg=${encodeURIComponent(result.registrationNumber)}`}>
+                        <Download className="w-4 h-4 mr-2" /> Reprint Admit Slip
+                      </a>
                     </Button>
                     <Button
                       className="flex-1 h-12 bg-orange-500 hover:bg-orange-600 font-semibold"

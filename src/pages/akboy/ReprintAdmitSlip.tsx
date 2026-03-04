@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,16 +28,21 @@ interface Registration {
 }
 
 export default function ReprintAdmitSlip() {
-  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [searchParams] = useSearchParams();
+  const regParam = searchParams.get("reg") || "";
+  const [registrationNumber, setRegistrationNumber] = useState(regParam);
   const [loading, setLoading] = useState(false);
   const [registration, setRegistration] = useState<Registration | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleSearch = async () => {
+  const handleSearch = async (): Promise<boolean> => {
+    // when triggered via query param, we don't want to call the RPC twice so
+    // guard against being invoked automatically and then manually again. the
+    // effect below only fires once on mount.
     if (!registrationNumber.trim()) {
       setError("Please enter your registration number");
-      return;
+      return false;
     }
 
     setLoading(true);
@@ -59,20 +65,22 @@ export default function ReprintAdmitSlip() {
             ? "Registration number not found. Please check and try again."
             : rpcError.message
         );
-        return;
+        return false;
       }
 
       if (!data) {
         setError("Registration number not found. Please check and try again.");
-        return;
+        return false;
       }
 
       // the rpc return type is a loose json record, so cast it to our
       // component-friendly shape. we already defined it above.
       setRegistration(data as Registration);
       toast({ title: "Registration found", description: "Your admit slip is ready to download" });
+      return true;
     } catch (error: any) {
       setError(error.message || "An error occurred");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -460,6 +468,20 @@ export default function ReprintAdmitSlip() {
       handleSearch();
     }
   };
+
+  // automatically search (and print) if the reg query parameter was provided
+  useEffect(() => {
+    if (regParam) {
+      handleSearch().then(found => {
+        if (found) {
+          // short delay so the registration state has updated and user can see
+          // the toast before the print window pops up
+          setTimeout(downloadAdmitSlip, 300);
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
