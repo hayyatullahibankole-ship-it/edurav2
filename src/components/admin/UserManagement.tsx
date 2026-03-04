@@ -572,13 +572,13 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
 
       {/* Edit User Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="editFirstName">First Name</Label>
                   <Input
@@ -616,12 +616,12 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
                 />
               </div>
 
-              <div className="flex gap-3 pt-4">
-                <Button onClick={handleEditUser} disabled={loading} className="flex-1">
-                  {loading ? 'Updating...' : 'Update User'}
-                </Button>
-                <Button variant="outline" onClick={() => setIsEditModalOpen(false)} disabled={loading}>
+              <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
+                <Button variant="outline" onClick={() => setIsEditModalOpen(false)} disabled={loading} className="w-full sm:flex-1">
                   Cancel
+                </Button>
+                <Button onClick={handleEditUser} disabled={loading} className="w-full sm:flex-1">
+                  {loading ? 'Updating...' : 'Update User'}
                 </Button>
               </div>
             </div>

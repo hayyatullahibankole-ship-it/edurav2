@@ -49,3 +49,4 @@ BEGIN
   WHERE r.registration_number = p_registration_number;
 END;
 $$;
+$$;
