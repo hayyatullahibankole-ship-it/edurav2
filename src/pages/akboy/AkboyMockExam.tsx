@@ -188,11 +188,37 @@ export default function AkboyMockExam() {
         return;
       }
 
-      // Update registration status
-      await supabase
-        .from("mock_registrations" as any)
-        .update({ exam_status: "started", exam_started_at: new Date().toISOString() } as any)
-        .eq("id", login.registration_id);
+      // For virtual registrations, call server RPC to verify + mark started atomically
+      if (login.mode === 'virtual') {
+        try {
+          const { data: verifyResult, error: verifyError } = await supabase.rpc('verify_virtual_student' as any, {
+            p_reg_number: regNumber,
+            p_attempt_id: (attemptId ?? null),
+          });
+
+          if (verifyError) {
+            console.error('verify_virtual_student RPC error', verifyError);
+            toast.error('Failed to verify virtual exam registration. Please contact support.');
+            return;
+          }
+
+          const vr = verifyResult as any;
+          if (!vr || !vr.ok) {
+            toast.error('Verification failed: ' + (vr?.error || 'unknown'));
+            return;
+          }
+        } catch (e) {
+          console.error('Verification call failed', e);
+          toast.error('Failed to verify virtual registration.');
+          return;
+        }
+      } else {
+        // Physical registrations: mark started locally as before
+        await supabase
+          .from("mock_registrations" as any)
+          .update({ exam_status: "started", exam_started_at: new Date().toISOString() } as any)
+          .eq("id", login.registration_id);
+      }
 
     } catch (error: any) {
       console.error("Error loading exam:", error);

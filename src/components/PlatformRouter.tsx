@@ -66,6 +66,7 @@ import AkboyMockExam from "@/pages/akboy/AkboyMockExam";
 import AkboyMockSubmitted from "@/pages/akboy/AkboyMockSubmitted";
 import AkboyMockResults from "@/pages/akboy/AkboyMockResults";
 import AkboyMockPages from "@/pages/akboy/AkboyMockPages";
+import ReprintAdmitSlip from "@/pages/akboy/ReprintAdmitSlip";
 
 // Akboy Routes Component
 const AkboyRoutes = () => {
@@ -92,6 +93,7 @@ const AkboyRoutes = () => {
       <Route path="/mock-submitted" element={<AkboyMockSubmitted />} />
       <Route path="/mock-results" element={<AkboyMockResults />} />
       <Route path="/privacy" element={<Privacy />} />
+        <Route path="/reprint-admit-slip" element={<ReprintAdmitSlip />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -153,7 +153,7 @@ export default function SchoolMockManager({ schoolId }: Props) {
 
         // automatically pick appropriate batch for each insertion
         const { getOrCreateBatch } = await import("@/utils/mockBatch");
-        const batch = await getOrCreateBatch(supabase, settings);
+        const batch = await getOrCreateBatch(supabase, settings, regMode);
 
         await supabase.from("mock_registrations" as any).insert({
           registration_number: regNum,

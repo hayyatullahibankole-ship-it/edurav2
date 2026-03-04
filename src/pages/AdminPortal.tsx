@@ -41,7 +41,8 @@ import {
   CalendarDays,
   Mail,
   GraduationCap as TutorialIcon,
-  ClipboardList
+  ClipboardList,
+  CheckCircle
 } from 'lucide-react';
 import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
@@ -66,6 +67,10 @@ import { AkboyInquiriesManager } from '@/components/admin/AkboyInquiriesManager'
 import { AkboyTutorialsManager } from '@/components/admin/AkboyTutorialsManager';
 import { AkboyRegistrationsManager } from '@/components/admin/AkboyRegistrationsManager';
 import MockExamManager from '@/components/admin/MockExamManager';
+import { MockExamDashboard } from '@/components/admin/MockExamDashboard';
+import { ExamDayVerification } from '@/components/admin/ExamDayVerification';
+import { MockExamDashboard } from '@/components/admin/MockExamDashboard';
+import { ExamDayVerification } from '@/components/admin/ExamDayVerification';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -408,6 +413,42 @@ export default function AdminPortal() {
                 <span className="sm:hidden">Mock</span>
               </Button>
               <Button
+                variant={activeSection === 'mock-dashboard' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+                onClick={() => setActiveSection('mock-dashboard')}
+              >
+                <Users className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Student Batches</span>
+                <span className="sm:hidden">Batches</span>
+              </Button>
+              <Button
+                variant={activeSection === 'exam-verification' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+                onClick={() => setActiveSection('exam-verification')}
+              >
+                <CheckCircle className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Verify Students</span>
+                <span className="sm:hidden">Verify</span>
+              </Button>
+              <Button
+                variant={activeSection === 'mock-dashboard' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+                onClick={() => setActiveSection('mock-dashboard')}
+              >
+                <Users className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Student Batches</span>
+                <span className="sm:hidden">Batches</span>
+              </Button>
+              <Button
+                variant={activeSection === 'exam-verification' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+                onClick={() => setActiveSection('exam-verification')}
+              >
+                <CheckCircle className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Verify Students</span>
+                <span className="sm:hidden">Verify</span>
+              </Button>
+              <Button
                 variant={activeSection === 'settings' ? 'secondary' : 'ghost'}
                 className="w-full justify-start text-left text-xs sm:text-sm col-span-2 lg:col-span-1 text-slate-300 hover:text-white hover:bg-slate-800"
                 onClick={() => setActiveSection('settings')}
@@ -633,8 +674,10 @@ export default function AdminPortal() {
           {activeSection === 'akboy-registrations' && <AkboyRegistrationsManager />}
 
           {activeSection === 'mock-exam' && <MockExamManager />}
+          {activeSection === 'mock-dashboard' && <MockExamDashboard />}
+          {activeSection === 'exam-verification' && <ExamDayVerification />}
 
-          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'promos', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools', 'mock-exam'].includes(activeSection) && (
+          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'promos', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools', 'mock-exam', 'mock-dashboard', 'exam-verification'].includes(activeSection) && (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />

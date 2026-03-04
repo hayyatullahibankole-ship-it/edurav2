@@ -180,7 +180,7 @@ export default function AkboyMockRegistration() {
 
       let assignedBatch: any = null;
       const { getOrCreateBatch } = await import("@/utils/mockBatch");
-      assignedBatch = await getOrCreateBatch(supabase, settings);
+      assignedBatch = await getOrCreateBatch(supabase, settings, form.mode);
 
       const insertPayload: any = {
         registration_number: regNum,
