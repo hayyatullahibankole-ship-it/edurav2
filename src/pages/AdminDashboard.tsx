@@ -139,8 +139,8 @@ export default function AdminDashboard() {
         console.log('Transaction changed, refreshing dashboard');
         fetchAdminData();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => {
-        console.log('User changed, refreshing dashboard');
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, (payload) => {
+        console.log('User changed event received:', payload);
         fetchAdminData();
       })
       .subscribe();

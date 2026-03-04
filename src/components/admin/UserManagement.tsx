@@ -308,6 +308,9 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'Verification failed');
 
+      // Add a small delay to ensure database writes are propagated
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       toast({
         title: alreadyVerifiedInApp ? "Synced" : "Success",
         description: alreadyVerifiedInApp
@@ -319,6 +322,7 @@ export default function UserManagement({ users: initialUsers, onRefresh }: UserM
         setSelectedUser({ ...selectedUser, is_verified: true });
       }
 
+      // Trigger refresh to reload from database
       onRefresh();
       return true;
     } catch (error: any) {

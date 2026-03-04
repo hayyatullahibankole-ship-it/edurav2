@@ -68,10 +68,24 @@ Deno.serve(async (req) => {
     // Privileged write (service role)
     const serviceClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Update the public.users table (match by auth_user_id)
+    // FIRST: Update auth.users email_confirmed_at (this triggers sync_user_verification)
+    const { error: authErr } = await serviceClient.auth.admin.updateUserById(authUserId, {
+      email_confirm: true,
+    });
+
+    if (authErr) {
+      console.error("Failed to confirm email in auth.users:", authErr);
+      return new Response(JSON.stringify({ success: false, error: authErr.message }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // SECOND: Ensure public.users table is updated with is_verified=true
+    // This is a safety measure in case the trigger didn't fire
     const { data: updatedProfiles, error: updateErr } = await serviceClient
       .from("users")
-      .update({ is_verified: true })
+      .update({ is_verified: true, updated_at: new Date().toISOString() })
       .eq("auth_user_id", authUserId)
       .select("id");
 
@@ -86,19 +100,6 @@ Deno.serve(async (req) => {
     if (!updatedProfiles || updatedProfiles.length === 0) {
       return new Response(JSON.stringify({ success: false, error: "User profile not found for authUserId" }), {
         status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // CRITICAL: Also update auth.users email_confirmed_at to allow login
-    const { error: authErr } = await serviceClient.auth.admin.updateUserById(authUserId, {
-      email_confirm: true,
-    });
-
-    if (authErr) {
-      console.error("Failed to confirm email in auth.users:", authErr);
-      return new Response(JSON.stringify({ success: false, error: authErr.message }), {
-        status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
