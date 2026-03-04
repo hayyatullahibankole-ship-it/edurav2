@@ -57,25 +57,78 @@ export function ExamDayVerification() {
   // Initialize camera when scanner opens
   useEffect(() => {
     if (scannerOpen && videoRef.current) {
-      const reader = new BrowserQRCodeReader();
-      readerRef.current = reader;
+      let stream: MediaStream | null = null;
+      let decodeInterval: NodeJS.Timeout | null = null;
       
-      reader.decodeFromVideoElement(videoRef.current)
-        .then(result => {
-          const text = result.getText().trim();
-          if (text) {
-            handleQrResult(text);
+      const initializeScanner = async () => {
+        try {
+          // Request camera permissions and get video stream
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" },
+            audio: false,
+          });
+          
+          // Set the stream to the video element
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            
+            // Wait for video to load before starting decode
+            videoRef.current.onloadedmetadata = () => {
+              const reader = new BrowserQRCodeReader();
+              readerRef.current = reader;
+              
+              // Continuous decoding
+              decodeInterval = setInterval(async () => {
+                if (videoRef.current && readerRef.current) {
+                  try {
+                    const result = await reader.decodeFromVideoElement(videoRef.current);
+                    if (result) {
+                      const text = result.getText().trim();
+                      if (text) {
+                        // Stop scanning after successful read
+                        if (stream) {
+                          stream.getTracks().forEach(track => track.stop());
+                        }
+                        if (decodeInterval) {
+                          clearInterval(decodeInterval);
+                        }
+                        handleQrResult(text);
+                      }
+                    }
+                  } catch (err: any) {
+                    // Continue scanning, expected to not find QR code in every frame
+                    if (err.message && !err.message.includes("NotFoundException")) {
+                      // Only log unexpected errors
+                    }
+                  }
+                }
+              }, 300);
+            };
           }
-        })
-        .catch(err => {
-          // QR not found in current frame, will retry
-          if (err.message !== "No multi-format reader could be detected automatically." &&
-              !err.message.includes("NotFoundException")) {
-            console.error("QR scan error:", err);
-          }
-        });
-
+        } catch (error: any) {
+          console.error("Camera access error:", error);
+          toast({
+            title: "Camera access denied",
+            description: "Please enable camera permissions in your browser settings to use QR scanning.",
+            variant: "destructive",
+          });
+          setScannerOpen(false);
+        }
+      };
+      
+      initializeScanner();
+      
       return () => {
+        // Cleanup
+        if (stream) {
+          stream.getTracks().forEach(track => track.stop());
+        }
+        if (decodeInterval) {
+          clearInterval(decodeInterval);
+        }
+        if (videoRef.current) {
+          videoRef.current.srcObject = null;
+        }
         readerRef.current?.reset();
       };
     }

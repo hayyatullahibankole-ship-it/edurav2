@@ -244,6 +244,8 @@ export default function AkboyMockRegistration() {
     .subjects { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
     .subject-badge { background:#f97316; color:white; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:500; }
     .footer { border-top:1px solid #e5e7eb; padding:16px 24px; text-align:center; font-size:11px; color:#9ca3af; }
+    .qr-container { text-align:center; margin:20px 0; }
+    .important-instructions { background:#f9fafb; padding:14px; border-radius:6px; margin:20px 0; font-size:11px; color:#9ca3af; line-height:1.7; }
     @media print { body { background:white; } .slip { box-shadow:none; } }
   </style>
 </head>
@@ -259,6 +261,10 @@ export default function AkboyMockRegistration() {
           <div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">REGISTRATION NUMBER</div>
           <div class="number">${result.registrationNumber}</div>
         </div>
+        <div style="text-align:center;margin:24px 0;">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(result.registrationNumber)}" alt="QR code" style="max-width:200px;width:auto;" />
+          <div style="font-size:11px;color:#9ca3af;margin-top:8px;">Scan to verify registration</div>
+        </div>
         <div class="info-grid">
           <div class="info-item"><label>Full Name</label><span>${result.fullName}</span></div>
           <div class="info-item"><label>Mode</label><span style="text-transform:capitalize;">${result.mode}</span></div>
@@ -271,9 +277,25 @@ export default function AkboyMockRegistration() {
             ${result.subjects.map((s: any) => `<span class="subject-badge">${s.name} (${s.questions}Q)</span>`).join('')}
           </div>
         </div>
+        <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:14px;border-radius:6px;margin:24px 0;font-size:12px;color:#92400e;line-height:1.5;">
+          <strong>⚠️ Important:</strong> This admit slip is your proof of registration. Please bring a valid form of identification on exam day. Arrive at least 30 minutes before your scheduled exam time. Check the exam venue and date carefully.
+        </div>
+        <div style="background:#f9fafb;padding:16px;border-top:1px solid #e5e7eb;border-radius:6px;margin:20px 0;font-size:11px;color:#9ca3af;line-height:1.6;">
+          <strong style="color:#1f2937;">📋 Exam Instructions:</strong>
+          <br>• Total: 180 questions (English: 60, Others: 40 each)
+          <br>• Duration: 120 minutes
+          <br>• Login at the exam portal with your registration number
+          <br>• Camera & microphone access required during exam
+          ${result.mode === 'physical' ? '<br>• Bring payment receipt to venue' : ''}
+          ${result.examVenue ? `<br>• Venue: ${result.examVenue}` : ''}
+          <br>• Arrive early (30 minutes before start time)
+          <br>• Bring valid ID and this admit slip
+          <br>• Use registered email for login
+          <br>• Ensure stable internet connection
+        </div>
       </div>
       <div class="footer">
-        <p>For exam updates: www.akboys.ng | Contact: 08101466977</p>
+        <p>For exam support: contact@akboy.ng | For updates: www.akboys.ng</p>
         <p style="margin-top:4px;">Generated: ${new Date().toLocaleString()}</p>
       </div>
     </div>
