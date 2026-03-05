@@ -11,10 +11,6 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, registrationMode: string = 'virtual') {
   // constants used for scheduling
   const BATCH_CAPACITY = 30;
-  const BATCH_INTERVAL_HOURS = 3; // 3-hour interval between batches
-  const BATCH_DURATION_MIN = 150; // 2.5 hours (150 minutes)
-  const DAILY_START_HOUR = 9; // 9:00 AM
-  const DAILY_END_HOUR = 18; // 6:00 PM (18:00 in 24-hour format)
 
   // For physical registrations, always use the dedicated Physical Exam Batch
   // scheduled for April 4-5, 2026
@@ -99,35 +95,21 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
     }
   }
 
-  let nextStart: Date;
-  if (!latestDate) {
-    nextStart = new Date(now.getFullYear(), 3, 2, DAILY_START_HOUR, 0, 0); // april 2 at 9am
-  } else {
-    // Calculate next batch start time (3 hours after the latest batch start)
-    const potentialNextStart = new Date(latestDate.getTime() + BATCH_INTERVAL_HOURS * 60 * 60 * 1000);
-    
-    // Calculate when this batch would end
-    const potentialEndTime = new Date(potentialNextStart.getTime() + BATCH_DURATION_MIN * 60 * 1000);
-    
-    // Check if the batch would end after 6:00 PM
-    if (potentialEndTime.getHours() > DAILY_END_HOUR || 
-        (potentialEndTime.getHours() === DAILY_END_HOUR && potentialEndTime.getMinutes() > 0)) {
-      // Schedule for next day at 9:00 AM
-      nextStart = new Date(potentialNextStart);
-      nextStart.setDate(nextStart.getDate() + 1);
-      nextStart.setHours(DAILY_START_HOUR, 0, 0, 0);
-    } else {
-      nextStart = potentialNextStart;
-    }
-  }
+  // Define fixed daily time slots for batches
+  const DAILY_TIME_SLOTS = [
+    { hour: 9, minute: 0, letter: 'A' },   // 9:00 AM - Batch A
+    { hour: 12, minute: 0, letter: 'B' }, // 12:00 PM - Batch B  
+    { hour: 15, minute: 0, letter: 'C' }  // 3:00 PM - Batch C
+  ];
 
-  // Determine the correct batch letter for the new batch
-  // Find ALL virtual batches for the same day (both active and inactive) to get the next available letter
-  const { data: allVirtualBatches } = await supabase
-    .from("mock_batches" as any)
-    .select("*")
-    .eq("batch_type", "virtual")
-    .neq("title", "Physical Exam Batch");
+  // Find the current date to check for available slots
+  let targetDate: Date;
+  if (!latestDate) {
+    // No batches exist yet, start with April 2, 2026
+    targetDate = new Date(now.getFullYear(), 3, 2); // April 2
+  } else {
+    targetDate = new Date(latestDate);
+  }
 
   // Helper function to compare dates ignoring timezone issues
   const isSameDay = (date1: Date, date2: Date): boolean => {
@@ -136,31 +118,59 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
            date1.getDate() === date2.getDate();
   };
 
-  const sameDayBatches = (allVirtualBatches || []).filter((b: any) => {
-    if (!b.exam_date) return false;
-    const batchDate = new Date(b.exam_date);
-    return isSameDay(batchDate, nextStart);
-  });
+  // Find the next available time slot
+  let nextStart: Date | null = null;
+  let nextLetter: string = '';
 
-  console.log(`[DEBUG] Sam day batches on ${nextStart.toISOString()}:`, sameDayBatches.map(b => b.title));
+  // Check current target date for available slots
+  const { data: allVirtualBatches } = await supabase
+    .from("mock_batches" as any)
+    .select("*")
+    .eq("batch_type", "virtual")
+    .neq("title", "Physical Exam Batch");
 
-  // Extract batch letters from same-day batches (e.g., "Batch A" -> "A")
-  const usedLetters = sameDayBatches
-    .map((b: any) => {
-      const match = b.title?.match(/^Batch\s+([A-Z])$/i);
-      return match ? match[1].toUpperCase() : null;
-    })
-    .filter((letter: string | null): letter is string => letter !== null);
+  // Loop through dates starting from targetDate until we find an available slot
+  let currentDate = new Date(targetDate);
+  let foundSlot = false;
 
-  console.log(`[DEBUG] Used letters on that day:`, usedLetters);
+  while (!foundSlot) {
+    // Get batches for current date
+    const sameDayBatches = (allVirtualBatches || []).filter((b: any) => {
+      if (!b.exam_date) return false;
+      const batchDate = new Date(b.exam_date);
+      return isSameDay(batchDate, currentDate);
+    });
 
-  // Find the next available letter
-  let nextLetter = 'A';
-  while (usedLetters.includes(nextLetter)) {
-    nextLetter = String.fromCharCode(nextLetter.charCodeAt(0) + 1);
+    // Extract used letters for this date
+    const usedLetters = sameDayBatches
+      .map((b: any) => {
+        const match = b.title?.match(/^Batch\s+([A-Z])$/i);
+        return match ? match[1].toUpperCase() : null;
+      })
+      .filter((letter: string | null): letter is string => letter !== null);
+
+    console.log(`[DEBUG] Checking date ${currentDate.toDateString()}: used letters:`, usedLetters);
+
+    // Check each time slot for availability
+    for (const slot of DAILY_TIME_SLOTS) {
+      if (!usedLetters.includes(slot.letter)) {
+        // This slot is available!
+        nextStart = new Date(currentDate);
+        nextStart.setHours(slot.hour, slot.minute, 0, 0);
+        nextLetter = slot.letter;
+        foundSlot = true;
+        break;
+      }
+    }
+
+    // If no slots available on this date, move to next day
+    if (!foundSlot) {
+      currentDate.setDate(currentDate.getDate() + 1);
+      console.log(`[DEBUG] No available slots on ${currentDate.toDateString()}, checking next day`);
+    }
   }
 
-  console.log(`[DEBUG] Next letter assigned:`, nextLetter);
+  console.log(`[DEBUG] Next batch: ${nextLetter} on ${nextStart!.toISOString()}`);
 
   const title = `Batch ${nextLetter}`;
 
@@ -168,7 +178,7 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
     .from("mock_batches" as any)
     .insert({ 
       title, 
-      exam_date: nextStart.toISOString(), 
+      exam_date: nextStart!.toISOString(), 
       exam_venue: settings.default_exam_venue || null,
       batch_type: 'virtual'  // Explicitly mark as virtual
     } as any)
