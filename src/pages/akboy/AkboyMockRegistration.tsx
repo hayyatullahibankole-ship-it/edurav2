@@ -182,6 +182,19 @@ export default function AkboyMockRegistration() {
       const { getOrCreateBatch } = await import("@/utils/mockBatch");
       assignedBatch = await getOrCreateBatch(supabase, settings, form.mode);
 
+        // Check batch capacity before registering
+        if (assignedBatch && assignedBatch.id) {
+          const { count: batchRegCount, error: batchCountError } = await supabase
+            .from("mock_registrations" as any)
+            .select("id", { count: "exact", head: false })
+            .eq("batch_id", assignedBatch.id);
+          if (batchCountError) throw batchCountError;
+          if ((batchRegCount as number) >= 30) {
+            toast.error(`Batch ${assignedBatch.title} is full. Please try again later or wait for the next batch.`);
+            setLoading(false);
+            return;
+          }
+        }
       const insertPayload: any = {
         registration_number: regNum,
         full_name: form.fullName.trim(),

@@ -64,14 +64,13 @@ BEGIN
     FROM public.mock_registrations
     WHERE batch_id = NEW.batch_id;
     
-    -- If batch reaches 30 registrations AND it's a virtual batch, mark it as inactive
-    -- Physical batches are never automatically deactivated
-    IF v_count >= 30 AND v_batch_type = 'virtual' THEN
-      UPDATE public.mock_batches
-      SET is_active = false
-      WHERE id = NEW.batch_id
-      AND batch_type = 'virtual';
-    END IF;
+    -- No longer mark batch as inactive when full; app logic will handle it
+    -- IF v_count >= 30 AND v_batch_type = 'virtual' THEN
+    --   UPDATE public.mock_batches
+    --   SET is_active = false
+    --   WHERE id = NEW.batch_id
+    --   AND batch_type = 'virtual';
+    -- END IF;
   END IF;
   
   RETURN NEW;
