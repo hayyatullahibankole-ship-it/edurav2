@@ -28,7 +28,7 @@ export default function SchoolVerificationPending() {
         type: "signup",
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/school-subscription`,
+          emailRedirectTo: `${window.location.origin}/school-dashboard`,
         },
       } as any);
 
@@ -58,7 +58,7 @@ export default function SchoolVerificationPending() {
 
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/school-subscription` },
+        options: { emailRedirectTo: `${window.location.origin}/school-dashboard` },
       });
 
       if (error) throw error;
