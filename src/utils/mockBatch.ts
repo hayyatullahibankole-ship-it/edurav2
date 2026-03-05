@@ -129,23 +129,38 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
     .eq("batch_type", "virtual")
     .neq("title", "Physical Exam Batch");
 
+  // Helper function to compare dates ignoring timezone issues
+  const isSameDay = (date1: Date, date2: Date): boolean => {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+  };
+
   const sameDayBatches = (allVirtualBatches || []).filter((b: any) => {
     if (!b.exam_date) return false;
     const batchDate = new Date(b.exam_date);
-    return batchDate.toDateString() === nextStart.toDateString();
+    return isSameDay(batchDate, nextStart);
   });
+
+  console.log(`[DEBUG] Sam day batches on ${nextStart.toISOString()}:`, sameDayBatches.map(b => b.title));
 
   // Extract batch letters from same-day batches (e.g., "Batch A" -> "A")
   const usedLetters = sameDayBatches
-    .map((b: any) => b.title?.match(/^Batch\s+([A-Z])$/i)?.[1])
-    .filter(Boolean)
-    .map((letter: string) => letter.toUpperCase());
+    .map((b: any) => {
+      const match = b.title?.match(/^Batch\s+([A-Z])$/i);
+      return match ? match[1].toUpperCase() : null;
+    })
+    .filter((letter: string | null): letter is string => letter !== null);
+
+  console.log(`[DEBUG] Used letters on that day:`, usedLetters);
 
   // Find the next available letter
   let nextLetter = 'A';
   while (usedLetters.includes(nextLetter)) {
     nextLetter = String.fromCharCode(nextLetter.charCodeAt(0) + 1);
   }
+
+  console.log(`[DEBUG] Next letter assigned:`, nextLetter);
 
   const title = `Batch ${nextLetter}`;
 
