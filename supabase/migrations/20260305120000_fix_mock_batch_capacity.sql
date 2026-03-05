@@ -95,6 +95,30 @@ SET
   is_active = true
 WHERE title = 'Physical Exam Batch';
 
+-- Fix any incorrectly named batches (e.g., "Physical Exam Batch A" should be "Physical Exam Batch")
+UPDATE public.mock_batches
+SET 
+  title = 'Physical Exam Batch',
+  batch_type = 'physical',
+  is_active = true
+WHERE title LIKE 'Physical Exam Batch%' AND title != 'Physical Exam Batch';
+
+-- Reassign any registrations from incorrectly named physical batches to the correct one
+UPDATE public.mock_registrations
+SET batch_id = (
+  SELECT id FROM public.mock_batches 
+  WHERE title = 'Physical Exam Batch' 
+  LIMIT 1
+)
+WHERE batch_id IN (
+  SELECT id FROM public.mock_batches 
+  WHERE title LIKE 'Physical Exam Batch%' AND title != 'Physical Exam Batch'
+);
+
+-- Delete duplicate/incorrectly named physical batches
+DELETE FROM public.mock_batches 
+WHERE title LIKE 'Physical Exam Batch%' AND title != 'Physical Exam Batch';
+
 -- Ensure all other batches have batch_type set
 UPDATE public.mock_batches
 SET batch_type = 'virtual'
@@ -106,4 +130,5 @@ BEGIN
   RAISE NOTICE 'Mock batch capacity migration completed successfully';
   RAISE NOTICE 'Physical Exam Batch is now properly isolated from virtual batches';
   RAISE NOTICE 'Virtual batches will auto-deactivate at 30 registrations';
+  RAISE NOTICE 'Fixed any incorrectly named Physical Exam Batch variants';
 END$$;
