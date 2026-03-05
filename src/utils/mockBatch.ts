@@ -4,6 +4,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 // new one automatically. This mirrors the logic previously inline in
 // AkboyMockRegistration, but extracted so that schools and single users can
 // reuse it.
+// 
+// NOTE: Database trigger `trigger_check_batch_capacity` automatically marks
+// batches as is_active=false once they reach 30+ registrations. This function
+// only queries is_active=true batches, ensuring we never over-assign to full batches.
 export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, registrationMode: string = 'virtual') {
   // constants used for scheduling
   const BATCH_CAPACITY = 30;
