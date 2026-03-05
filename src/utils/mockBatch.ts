@@ -104,26 +104,23 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
 
   // Fallback: client-side batch creation logic
   const now = new Date();
-  
-        const { data: allBatches, error: batchError } = await supabase
-          .from("mock_batches" as any)
-          .select("*")
-          .eq("batch_type", "virtual")
-          .neq("title", "Physical Exam Batch")
-          .order("exam_date", { ascending: true });
-      }
-    }
-  }
-  
+  // Use the already declared batchError if needed, do not redeclare
+  const { data: allBatches } = await supabase
+    .from("mock_batches" as any)
+    .select("*")
+    .eq("batch_type", "virtual")
+    .neq("title", "Physical Exam Batch")
+    .order("exam_date", { ascending: true });
+
   // Define fixed daily time slots for batches
   const DAILY_TIME_SLOTS = [
-        if (allBatches && allBatches.length > 0) {
     { hour: 12, minute: 0, letter: 'B' }, // 12:00 PM - Batch B  
     { hour: 15, minute: 0, letter: 'C' }  // 3:00 PM - Batch C
   ];
 
   // Find the current date to check for available slots
   let targetDate: Date;
+  let latestDate = allBatches && allBatches.length > 0 ? allBatches[allBatches.length - 1].exam_date : null;
   if (!latestDate) {
     // No batches exist yet, start with April 2, 2026
     targetDate = new Date(now.getFullYear(), 3, 2); // April 2
@@ -199,8 +196,10 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
     .insert({ 
       title, 
       exam_date: nextStart!.toISOString(), 
-      exam_venue: settings.default_exam_venue || null,
-        const allVirtualBatches = allBatches;
+      exam_venue: settings.default_exam_venue || null
+    });
   if (error) throw error;
+  // If you need to use allVirtualBatches, declare it here:
+  // const allVirtualBatches = allBatches;
   return newBatch;
 }
