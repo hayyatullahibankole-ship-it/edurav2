@@ -56,11 +56,11 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
   if (activeBatches && activeBatches.length > 0) {
     for (const b of activeBatches) {
       if (!b.id) continue;
+      // Count ALL registrations in this batch (virtual + physical) to check total capacity
       const { count } = await supabase
         .from("mock_registrations" as any)
         .select("id", { count: "exact", head: false })
-        .eq("batch_id", b.id)
-        .eq("mode", "virtual");
+        .eq("batch_id", b.id);
       const regCount = (count as number) || 0;
       if (regCount < BATCH_CAPACITY) {
         return b;
