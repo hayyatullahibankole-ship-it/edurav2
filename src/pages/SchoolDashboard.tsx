@@ -54,7 +54,7 @@ const menuItems = [
 ];
 
 function SchoolSidebar({ activeTab, setActiveTab, schoolData, isPaid }: any) {
-  const lockedTabs = isPaid ? [] : ['exams', 'mock', 'reports'];
+  const lockedTabs = isPaid ? [] : ['exams', 'reports'];
 
   return (
     <Sidebar className="border-r bg-card">
@@ -458,12 +458,7 @@ export default function SchoolDashboard() {
               )}
 
               {activeTab === "mock" && schoolData && (
-                <div className="relative">
-                  {!isPaid && <LockedOverlay featureName="Mock Exam Management" />}
-                  <div className={!isPaid ? "pointer-events-none opacity-40 min-h-[300px]" : ""}>
-                    <SchoolMockManager schoolId={schoolData.id} />
-                  </div>
-                </div>
+                <SchoolMockManager schoolId={schoolData.id} />
               )}
 
               {activeTab === "reports" && schoolData && (
