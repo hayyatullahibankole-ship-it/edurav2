@@ -7,9 +7,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, registrationMode: string = 'virtual') {
   // constants used for scheduling
   const BATCH_CAPACITY = 30;
-  const SLOTS_PER_DAY = 3;
-  const SLOT_DURATION_MIN = 150; // 2h30
-  const BREAK_MIN = 30;
+  const BATCH_INTERVAL_HOURS = 3; // 3-hour interval between batches
+  const BATCH_DURATION_MIN = 150; // 2.5 hours (150 minutes)
+  const DAILY_START_HOUR = 9; // 9:00 AM
+  const DAILY_END_HOUR = 18; // 6:00 PM (18:00 in 24-hour format)
 
   // For physical registrations, always use the dedicated Physical Exam Batch
   // scheduled for April 4-5, 2026
@@ -85,17 +86,23 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
 
   let nextStart: Date;
   if (!latestDate) {
-    nextStart = defaultStart;
+    nextStart = new Date(now.getFullYear(), 3, 2, DAILY_START_HOUR, 0, 0); // april 2 at 9am
   } else {
-    const sameDayBatches = (activeBatches || []).filter(
-      (b: any) => b.exam_date && new Date(b.exam_date).toDateString() === latestDate!.toDateString()
-    );
-    if (sameDayBatches.length < SLOTS_PER_DAY) {
-      nextStart = new Date(latestDate.getTime() + (SLOT_DURATION_MIN + BREAK_MIN) * 60 * 1000);
-    } else {
-      nextStart = new Date(latestDate);
+    // Calculate next batch start time (3 hours after the latest batch start)
+    const potentialNextStart = new Date(latestDate.getTime() + BATCH_INTERVAL_HOURS * 60 * 60 * 1000);
+    
+    // Calculate when this batch would end
+    const potentialEndTime = new Date(potentialNextStart.getTime() + BATCH_DURATION_MIN * 60 * 1000);
+    
+    // Check if the batch would end after 6:00 PM
+    if (potentialEndTime.getHours() > DAILY_END_HOUR || 
+        (potentialEndTime.getHours() === DAILY_END_HOUR && potentialEndTime.getMinutes() > 0)) {
+      // Schedule for next day at 9:00 AM
+      nextStart = new Date(potentialNextStart);
       nextStart.setDate(nextStart.getDate() + 1);
-      nextStart.setHours(9, 0, 0, 0);
+      nextStart.setHours(DAILY_START_HOUR, 0, 0, 0);
+    } else {
+      nextStart = potentialNextStart;
     }
   }
 
