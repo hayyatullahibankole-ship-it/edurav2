@@ -86,6 +86,34 @@ AFTER INSERT ON public.mock_registrations
 FOR EACH ROW
 EXECUTE FUNCTION public.check_batch_capacity();
 
+-- Enforce batch capacity at the database level
+-- Step 1: Create a function to prevent inserts if batch is full
+CREATE OR REPLACE FUNCTION public.enforce_batch_capacity()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_count INT;
+  v_batch_type VARCHAR;
+BEGIN
+  IF NEW.batch_id IS NOT NULL THEN
+    SELECT batch_type INTO v_batch_type FROM public.mock_batches WHERE id = NEW.batch_id;
+    IF v_batch_type = 'virtual' THEN
+      SELECT COUNT(*) INTO v_count FROM public.mock_registrations WHERE batch_id = NEW.batch_id;
+      IF v_count >= 30 THEN
+        RAISE EXCEPTION 'Batch is full: no more registrations allowed for this batch.';
+      END IF;
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Step 2: Create the BEFORE INSERT trigger
+DROP TRIGGER IF EXISTS trigger_enforce_batch_capacity ON public.mock_registrations;
+CREATE TRIGGER trigger_enforce_batch_capacity
+BEFORE INSERT ON public.mock_registrations
+FOR EACH ROW
+EXECUTE FUNCTION public.enforce_batch_capacity();
+
 -- Step 8: Final verification and cleanup
 -- Ensure Physical Exam Batch is properly configured
 UPDATE public.mock_batches
