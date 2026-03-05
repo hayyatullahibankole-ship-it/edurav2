@@ -105,20 +105,19 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
   // Fallback: client-side batch creation logic
   const now = new Date();
   
-  // Determine latest exam_date among existing active batches for fallback logic
-  let latestDate: Date | null = null;
-  if (activeBatches && activeBatches.length > 0) {
-    for (const b of activeBatches) {
-      if (b.exam_date) {
-        const d = new Date(b.exam_date);
-        if (!latestDate || d > latestDate) latestDate = d;
+        const { data: allBatches, error: batchError } = await supabase
+          .from("mock_batches" as any)
+          .select("*")
+          .eq("batch_type", "virtual")
+          .neq("title", "Physical Exam Batch")
+          .order("exam_date", { ascending: true });
       }
     }
   }
   
   // Define fixed daily time slots for batches
   const DAILY_TIME_SLOTS = [
-    { hour: 9, minute: 0, letter: 'A' },   // 9:00 AM - Batch A
+        if (allBatches && allBatches.length > 0) {
     { hour: 12, minute: 0, letter: 'B' }, // 12:00 PM - Batch B  
     { hour: 15, minute: 0, letter: 'C' }  // 3:00 PM - Batch C
   ];
@@ -162,15 +161,15 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
       return isSameDay(batchDate, currentDate);
     });
 
-    // Extract used letters for this date
-    const usedLetters = sameDayBatches
-      .map((b: any) => {
-        const match = b.title?.match(/^Batch\s+([A-Z])$/i);
-        return match ? match[1].toUpperCase() : null;
-      })
-      .filter((letter: string | null): letter is string => letter !== null);
-
-    console.log(`[DEBUG] Checking date ${currentDate.toDateString()}: used letters:`, usedLetters);
+        let latestDate: Date | null = null;
+        if (allBatches && allBatches.length > 0) {
+          for (const b of allBatches) {
+            if (b.exam_date) {
+              const d = new Date(b.exam_date);
+              if (!latestDate || d > latestDate) latestDate = d;
+            }
+          }
+        }
 
     // Check each time slot for availability
     for (const slot of DAILY_TIME_SLOTS) {
@@ -201,11 +200,7 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
       title, 
       exam_date: nextStart!.toISOString(), 
       exam_venue: settings.default_exam_venue || null,
-      batch_type: 'virtual'  // Explicitly mark as virtual
-    } as any)
-    .select()
-    .single();
-
+        const allVirtualBatches = allBatches;
   if (error) throw error;
   return newBatch;
 }
