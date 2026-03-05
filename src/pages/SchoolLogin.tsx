@@ -97,7 +97,7 @@ export default function SchoolLogin() {
           userData = newUser;
         }
 
-        // Check if school record exists and get is_active status
+        // Check if school record exists
         const { data: existingSchool } = await supabase
           .from("schools")
           .select("id, is_active")
@@ -133,18 +133,9 @@ export default function SchoolLogin() {
           }
           
           localStorage.removeItem('pendingSchoolRegistration');
-          toast.info("Please complete your school subscription to continue.");
-          navigate("/school-subscription");
-          return;
         }
 
-        // Check if school subscription is active
-        if (!existingSchool.is_active) {
-          toast.info("Please complete your school subscription to continue.");
-          navigate("/school-subscription");
-          return;
-        }
-
+        // Always allow access to dashboard after email verification
         toast.success("Login successful!");
         navigate("/school-dashboard");
       }

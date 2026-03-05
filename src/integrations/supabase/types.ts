@@ -1591,6 +1591,8 @@ export type Database = {
           subjects: Json
           updated_at: string | null
           user_id: string | null
+          verified_at: string | null
+          verified_present: boolean | null
         }
         Insert: {
           attempt_id?: string | null
@@ -1612,6 +1614,8 @@ export type Database = {
           subjects?: Json
           updated_at?: string | null
           user_id?: string | null
+          verified_at?: string | null
+          verified_present?: boolean | null
         }
         Update: {
           attempt_id?: string | null
@@ -1633,6 +1637,8 @@ export type Database = {
           subjects?: Json
           updated_at?: string | null
           user_id?: string | null
+          verified_at?: string | null
+          verified_present?: boolean | null
         }
         Relationships: [
           {
@@ -1762,6 +1768,50 @@ export type Database = {
           value?: Json
         }
         Relationships: []
+      }
+      mock_verification_logs: {
+        Row: {
+          attempt_id: string | null
+          created_at: string | null
+          id: string
+          method: string | null
+          payload: Json | null
+          reason: string | null
+          registration_id: string | null
+          registration_number: string | null
+          result: string | null
+        }
+        Insert: {
+          attempt_id?: string | null
+          created_at?: string | null
+          id?: string
+          method?: string | null
+          payload?: Json | null
+          reason?: string | null
+          registration_id?: string | null
+          registration_number?: string | null
+          result?: string | null
+        }
+        Update: {
+          attempt_id?: string | null
+          created_at?: string | null
+          id?: string
+          method?: string | null
+          payload?: Json | null
+          reason?: string | null
+          registration_id?: string | null
+          registration_number?: string | null
+          result?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_verification_logs_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "mock_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -3639,6 +3689,7 @@ export type Database = {
         Row: {
           active_session_token: string | null
           address: string | null
+          admin_verified_at: string | null
           auth_user_id: string | null
           country: string | null
           created_at: string | null
@@ -3664,6 +3715,7 @@ export type Database = {
         Insert: {
           active_session_token?: string | null
           address?: string | null
+          admin_verified_at?: string | null
           auth_user_id?: string | null
           country?: string | null
           created_at?: string | null
@@ -3689,6 +3741,7 @@ export type Database = {
         Update: {
           active_session_token?: string | null
           address?: string | null
+          admin_verified_at?: string | null
           auth_user_id?: string | null
           country?: string | null
           created_at?: string | null
@@ -3923,29 +3976,6 @@ export type Database = {
         Args: { p_registration_number: string }
         Returns: Json
       }
-      get_registration_for_admit: {
-        Args: { p_registration_number: string }
-        Returns: {
-          id: string
-          registration_number: string
-          full_name: string
-          phone: string
-          email: string | null
-          subjects: Json
-          mode: string
-          batch_id: string | null
-          exam_status: string
-          exam_started_at: string | null
-          exam_submitted_at: string | null
-          batch: {
-            id: string
-            title: string
-            exam_date: string | null
-            exam_venue: string | null
-            is_active: boolean | null
-          }
-        }
-      }
       check_rate_limit: {
         Args: {
           endpoint_name: string
@@ -4127,6 +4157,10 @@ export type Database = {
           time_limit_seconds: number
           type: Database["public"]["Enums"]["question_type"]
         }[]
+      }
+      get_registration_for_admit: {
+        Args: { p_registration_number: string }
+        Returns: Json
       }
       get_review_questions_for_attempt: {
         Args: { attempt_uuid: string }
@@ -4504,6 +4538,10 @@ export type Database = {
       validate_user_input: {
         Args: { input_data: Json; validation_rules: Json }
         Returns: boolean
+      }
+      verify_virtual_student: {
+        Args: { p_attempt_id?: string; p_reg_number: string }
+        Returns: Json
       }
     }
     Enums: {

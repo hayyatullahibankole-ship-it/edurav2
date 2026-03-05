@@ -75,7 +75,7 @@ export default function ReprintAdmitSlip() {
 
       // the rpc return type is a loose json record, so cast it to our
       // component-friendly shape. we already defined it above.
-      setRegistration(data as Registration);
+      setRegistration(data as unknown as Registration);
       toast({ title: "Registration found", description: "Your admit slip is ready to download" });
       return true;
     } catch (error: any) {
