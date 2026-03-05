@@ -161,6 +161,45 @@ export default function SchoolDashboard() {
       if (schoolError) throw schoolError;
 
       if (!school) {
+        // Try to create school from pending registration data
+        const pendingRaw = localStorage.getItem('pendingSchoolRegistration');
+        if (pendingRaw) {
+          const pendingData = JSON.parse(pendingRaw);
+          const { data: createResult, error: createError } = await supabase.functions.invoke(
+            'create-school-from-pending',
+            {
+              body: {
+                schoolData: {
+                  schoolName: pendingData.schoolName || "My School",
+                  schoolEmail: pendingData.schoolEmail || user?.email || "",
+                  schoolPhone: pendingData.schoolPhone || "",
+                  schoolAddress: pendingData.schoolAddress || "",
+                  state: pendingData.state || "",
+                  schoolType: pendingData.schoolType || "secondary",
+                },
+              },
+            }
+          );
+
+          if (!createError && createResult?.school) {
+            localStorage.removeItem('pendingSchoolRegistration');
+            setSchoolData(createResult.school);
+            // Continue to fetch subscription
+            const { data: subscriptions } = await (supabase as any)
+              .from("school_subscriptions")
+              .select("*")
+              .eq("school_id", createResult.school.id)
+              .order("created_at", { ascending: false })
+              .limit(1);
+            setSubscriptionData(subscriptions?.[0] || null);
+            const hasSeenWelcome = localStorage.getItem(`school_welcome_${createResult.school.id}`);
+            if (!hasSeenWelcome) setShowWelcomeModal(true);
+            return;
+          } else {
+            console.error("Failed to create school from pending data:", createError);
+          }
+        }
+
         setSchoolData(null);
         setSubscriptionData(null);
         toast.error("No school account found. Please complete registration.");

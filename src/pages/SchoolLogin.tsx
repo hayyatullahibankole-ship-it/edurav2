@@ -102,34 +102,35 @@ export default function SchoolLogin() {
           .from("schools")
           .select("id, is_active")
           .eq("admin_user_id", userData.id)
-          .single();
+          .maybeSingle();
 
         if (!existingSchool) {
           // Check for pending registration data
-          const pendingData = localStorage.getItem('pendingSchoolRegistration');
+          const pendingRaw = localStorage.getItem('pendingSchoolRegistration');
+          const pendingData = pendingRaw ? JSON.parse(pendingRaw) : null;
           
-          // Create school record
-          const { error: schoolError } = await (supabase as any)
-            .from("schools")
-            .insert({
-              name: pendingData ? JSON.parse(pendingData).schoolName : "My School",
-              email: formData.email,
-              phone: pendingData ? JSON.parse(pendingData).schoolPhone : "",
-              address: pendingData ? JSON.parse(pendingData).schoolAddress : "",
-              state: pendingData ? JSON.parse(pendingData).state : "",
-              school_code: `SCH-${Date.now().toString().slice(-8)}`,
-              type: "secondary",
-              admin_user_id: userData.id,
-              max_students: 50,
-              students_added: 0,
-              is_active: false,
-              email_verified: true,
-            })
-            .select()
-            .single();
+          // Use edge function to create school (bypasses RLS)
+          const { data: createResult, error: createError } = await supabase.functions.invoke(
+            'create-school-from-pending',
+            {
+              body: {
+                schoolData: {
+                  schoolName: pendingData?.schoolName || "My School",
+                  schoolEmail: formData.email,
+                  schoolPhone: pendingData?.schoolPhone || "",
+                  schoolAddress: pendingData?.schoolAddress || "",
+                  state: pendingData?.state || "",
+                  schoolType: pendingData?.schoolType || "secondary",
+                },
+              },
+            }
+          );
 
-          if (schoolError) {
-            console.error("School creation error:", schoolError);
+          if (createError) {
+            console.error("School creation via edge function error:", createError);
+            // Don't block login - they can still access the dashboard and we'll handle it there
+          } else {
+            console.log("School created successfully:", createResult);
           }
           
           localStorage.removeItem('pendingSchoolRegistration');
