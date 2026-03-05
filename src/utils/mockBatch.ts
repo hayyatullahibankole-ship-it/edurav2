@@ -50,13 +50,20 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
   }
 
   // fetch active batches sorted by exam_date ascending (for virtual registrations)
-  // Explicitly query ONLY virtual batches using batch_type column
-  const { data: activeBatches } = await supabase
+  // Use MULTIPLE filters to ensure Physical Exam Batch is never included:
+  // 1. batch_type must be 'virtual'
+  // 2. title must NOT be "Physical Exam Batch" (belt and suspenders)
+  const { data: activeBatches, error: batchError } = await supabase
     .from("mock_batches" as any)
     .select("*")
-    .eq("batch_type", "virtual")  // Only get virtual batches (Batch A, B, C, etc)
     .eq("is_active", true)
+    .eq("batch_type", "virtual")  // Only virtual batches
+    .neq("title", "Physical Exam Batch")  // Extra safety: exclude Physical Exam Batch by title
     .order("exam_date", { ascending: true });
+  
+  if (batchError) {
+    console.error("Error fetching virtual batches:", batchError);
+  }
 
   // look for an existing batch with room
   if (activeBatches && activeBatches.length > 0) {

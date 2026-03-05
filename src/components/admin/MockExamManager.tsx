@@ -71,6 +71,7 @@ export default function MockExamManager() {
         title: newBatch.title,
         exam_date: newBatch.exam_date || null,
         exam_venue: newBatch.exam_venue || null,
+        batch_type: 'virtual'  // Default to virtual for manually created batches
       } as any);
       if (error) throw error;
       toast.success("Batch created");
