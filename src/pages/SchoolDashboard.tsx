@@ -5,10 +5,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { 
   Users, BookOpen, TrendingUp, DollarSign, LayoutDashboard, Settings, 
-  LogOut, Copy, Building2, HelpCircle, Video, Trophy
+  LogOut, Copy, Building2, HelpCircle, Video, Trophy, Lock, AlertTriangle
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -52,7 +53,9 @@ const menuItems = [
   { id: "settings", title: "Settings", icon: Settings },
 ];
 
-function SchoolSidebar({ activeTab, setActiveTab, schoolData }: any) {
+function SchoolSidebar({ activeTab, setActiveTab, schoolData, isPaid }: any) {
+  const lockedTabs = isPaid ? [] : ['exams', 'mock', 'reports'];
+
   return (
     <Sidebar className="border-r bg-card">
       <div className="p-6 border-b">
@@ -72,6 +75,11 @@ function SchoolSidebar({ activeTab, setActiveTab, schoolData }: any) {
           <div className="flex-1 min-w-0">
             <h2 className="font-semibold text-base truncate">{schoolData?.name}</h2>
             <p className="text-xs text-muted-foreground truncate">{schoolData?.school_code}</p>
+            {!isPaid && (
+              <Badge variant="outline" className="text-[10px] mt-1 border-amber-500 text-amber-600">
+                Unpaid
+              </Badge>
+            )}
           </div>
         </div>
       </div>
@@ -89,6 +97,9 @@ function SchoolSidebar({ activeTab, setActiveTab, schoolData }: any) {
                   >
                     <item.icon className="h-4 w-4" />
                     <span>{item.title}</span>
+                    {lockedTabs.includes(item.id) && (
+                      <Lock className="h-3 w-3 ml-auto text-muted-foreground" />
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -157,12 +168,6 @@ export default function SchoolDashboard() {
         return;
       }
 
-      if (!school.is_active) {
-        toast.error("School account is not active. Please complete subscription.");
-        navigate("/school-subscription");
-        return;
-      }
-
       setSchoolData(school);
 
       const { data: subscriptions } = await (supabase as any)
@@ -202,11 +207,34 @@ export default function SchoolDashboard() {
 
   const remainingSlots = (subscriptionData?.student_seats || schoolData?.max_students || 0) - (schoolData?.students_added || 0);
   const isSubscriptionActive = subscriptionData?.status?.toUpperCase() === 'ACTIVE';
+  const isPaid = schoolData?.is_active && isSubscriptionActive;
+
+  // Locked feature overlay component
+  const LockedOverlay = ({ featureName }: { featureName: string }) => (
+    <div className="relative">
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+        <Card className="max-w-md mx-4 border-destructive/50">
+          <CardContent className="p-6 text-center">
+            <Lock className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
+            <h3 className="font-semibold text-lg mb-2">Feature Locked</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {featureName} is only available after completing your subscription payment. 
+              Your students also won't be able to access their portals until payment is made.
+            </p>
+            <Button onClick={() => navigate("/school-subscription")} className="w-full">
+              <DollarSign className="h-4 w-4 mr-2" />
+              Complete Payment
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 
   return (
     <SidebarProvider defaultOpen>
       <div className="min-h-screen w-full flex">
-        <SchoolSidebar activeTab={activeTab} setActiveTab={setActiveTab} schoolData={schoolData} />
+        <SchoolSidebar activeTab={activeTab} setActiveTab={setActiveTab} schoolData={schoolData} isPaid={isPaid} />
         
         <div className="flex-1 flex flex-col w-full">
           {/* Header */}
@@ -250,6 +278,30 @@ export default function SchoolDashboard() {
           {/* Main Content */}
           <main className="flex-1 overflow-y-auto bg-muted/30">
             <div className="container max-w-7xl mx-auto p-8">
+              {/* Payment Required Banner */}
+              {!isPaid && (
+                <Card className="mb-6 border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+                  <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <AlertTriangle className="h-6 w-6 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-amber-800 dark:text-amber-300">Subscription Payment Required</h3>
+                      <p className="text-sm text-amber-700 dark:text-amber-400">
+                        You can add students now, but features like Exams, Reports, and Mock Exams are locked. 
+                        Students won't be able to access their portals until payment is completed.
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={() => navigate("/school-subscription")} 
+                      className="shrink-0"
+                      size="sm"
+                    >
+                      <DollarSign className="h-4 w-4 mr-1" />
+                      Pay Now
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
               {activeTab === "overview" && (
                 <div className="space-y-8">
                   {/* Alerts Center - Critical Info First */}
@@ -397,25 +449,38 @@ export default function SchoolDashboard() {
               )}
 
               {activeTab === "exams" && schoolData && (
-                <SchoolExamManager schoolId={schoolData.id} />
+                <div className="relative">
+                  {!isPaid && <LockedOverlay featureName="Exam Management" />}
+                  <div className={!isPaid ? "pointer-events-none opacity-40 min-h-[300px]" : ""}>
+                    <SchoolExamManager schoolId={schoolData.id} />
+                  </div>
+                </div>
               )}
-              
 
               {activeTab === "mock" && schoolData && (
-                <SchoolMockManager schoolId={schoolData.id} />
+                <div className="relative">
+                  {!isPaid && <LockedOverlay featureName="Mock Exam Management" />}
+                  <div className={!isPaid ? "pointer-events-none opacity-40 min-h-[300px]" : ""}>
+                    <SchoolMockManager schoolId={schoolData.id} />
+                  </div>
+                </div>
               )}
 
               {activeTab === "reports" && schoolData && (
-                <div className="space-y-6">
-                  <ExportTools 
-                    schoolId={schoolData.id}
-                    schoolName={schoolData.name}
-                  />
-                  
-                  <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
-                    <ComparisonAnalytics schoolId={schoolData?.id} />
-                    <div>
-                      <SchoolReports schoolId={schoolData.id} />
+                <div className="relative">
+                  {!isPaid && <LockedOverlay featureName="Reports & Analytics" />}
+                  <div className={!isPaid ? "pointer-events-none opacity-40 min-h-[300px]" : ""}>
+                    <div className="space-y-6">
+                      <ExportTools 
+                        schoolId={schoolData.id}
+                        schoolName={schoolData.name}
+                      />
+                      <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
+                        <ComparisonAnalytics schoolId={schoolData?.id} />
+                        <div>
+                          <SchoolReports schoolId={schoolData.id} />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

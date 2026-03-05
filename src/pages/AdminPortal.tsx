@@ -69,8 +69,6 @@ import { AkboyRegistrationsManager } from '@/components/admin/AkboyRegistrations
 import MockExamManager from '@/components/admin/MockExamManager';
 import { MockExamDashboard } from '@/components/admin/MockExamDashboard';
 import { ExamDayVerification } from '@/components/admin/ExamDayVerification';
-import { MockExamDashboard } from '@/components/admin/MockExamDashboard';
-import { ExamDayVerification } from '@/components/admin/ExamDayVerification';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
