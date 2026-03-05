@@ -121,9 +121,33 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
     }
   }
 
-  const totalBatches = (activeBatches || []).length;
-  const batchLetter = String.fromCharCode(65 + totalBatches); // A, B, C...
-  const title = `Batch ${batchLetter}`;
+  // Determine the correct batch letter for the new batch
+  // Find ALL virtual batches for the same day (both active and inactive) to get the next available letter
+  const { data: allVirtualBatches } = await supabase
+    .from("mock_batches" as any)
+    .select("*")
+    .eq("batch_type", "virtual")
+    .neq("title", "Physical Exam Batch");
+
+  const sameDayBatches = (allVirtualBatches || []).filter((b: any) => {
+    if (!b.exam_date) return false;
+    const batchDate = new Date(b.exam_date);
+    return batchDate.toDateString() === nextStart.toDateString();
+  });
+
+  // Extract batch letters from same-day batches (e.g., "Batch A" -> "A")
+  const usedLetters = sameDayBatches
+    .map((b: any) => b.title?.match(/^Batch\s+([A-Z])$/i)?.[1])
+    .filter(Boolean)
+    .map((letter: string) => letter.toUpperCase());
+
+  // Find the next available letter
+  let nextLetter = 'A';
+  while (usedLetters.includes(nextLetter)) {
+    nextLetter = String.fromCharCode(nextLetter.charCodeAt(0) + 1);
+  }
+
+  const title = `Batch ${nextLetter}`;
 
   const { data: newBatch, error } = await supabase
     .from("mock_batches" as any)
