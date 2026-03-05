@@ -39,7 +39,8 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
         title: "Physical Exam Batch",
         exam_date: physicalExamDate.toISOString(),
         exam_venue: settings.default_exam_venue || null,
-        is_active: true
+        is_active: true,
+        batch_type: 'physical'  // Explicitly mark as physical
       } as any)
       .select()
       .single();
@@ -49,18 +50,21 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
   }
 
   // fetch active batches sorted by exam_date ascending (for virtual registrations)
+  // Explicitly query ONLY virtual batches using batch_type column
   const { data: activeBatches } = await supabase
     .from("mock_batches" as any)
     .select("*")
-    .neq("title", "Physical Exam Batch")
+    .eq("batch_type", "virtual")  // Only get virtual batches (Batch A, B, C, etc)
     .eq("is_active", true)
     .order("exam_date", { ascending: true });
 
   // look for an existing batch with room
   if (activeBatches && activeBatches.length > 0) {
     for (const b of activeBatches) {
-      if (!b.id) continue;
-      // Count ALL registrations in this batch (virtual + physical) to check total capacity
+      // Safety check: skip if not virtual type (should not happen, but defensive)
+      if (!b.id || b.batch_type !== "virtual") continue;
+      
+      // Count ALL registrations in this batch to check total capacity
       const { count } = await supabase
         .from("mock_registrations" as any)
         .select("id", { count: "exact", head: false })
@@ -116,7 +120,12 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
 
   const { data: newBatch, error } = await supabase
     .from("mock_batches" as any)
-    .insert({ title, exam_date: nextStart.toISOString(), exam_venue: settings.default_exam_venue || null } as any)
+    .insert({ 
+      title, 
+      exam_date: nextStart.toISOString(), 
+      exam_venue: settings.default_exam_venue || null,
+      batch_type: 'virtual'  // Explicitly mark as virtual
+    } as any)
     .select()
     .single();
 
