@@ -80,11 +80,32 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
   }
 
   // no available batch – create a new one for virtual registrations
-  const now = new Date();
-  const year = now.getFullYear();
-  const defaultStart = new Date(year, 3, 2, 9, 0, 0); // april 2 at 9am
+  // For virtual batches, use the database function that handles correct timing
+  try {
+    const { data: newBatch, error } = await supabase
+      .rpc('auto_schedule_batch');
+    
+    if (error) throw error;
+    
+    // Update the batch with exam venue from settings
+    if (settings.default_exam_venue) {
+      await supabase
+        .from("mock_batches" as any)
+        .update({ exam_venue: settings.default_exam_venue })
+        .eq('id', newBatch.id);
+      newBatch.exam_venue = settings.default_exam_venue;
+    }
+    
+    return newBatch;
+  } catch (error) {
+    console.error('Error calling auto_schedule_batch, falling back to client logic:', error);
+    // Fall back to client-side logic if database function fails
+  }
 
-  // determine latest exam_date among existing batches (excluding physical batch)
+  // Fallback: client-side batch creation logic
+  const now = new Date();
+  
+  // Determine latest exam_date among existing active batches for fallback logic
   let latestDate: Date | null = null;
   if (activeBatches && activeBatches.length > 0) {
     for (const b of activeBatches) {
@@ -94,7 +115,7 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
       }
     }
   }
-
+  
   // Define fixed daily time slots for batches
   const DAILY_TIME_SLOTS = [
     { hour: 9, minute: 0, letter: 'A' },   // 9:00 AM - Batch A

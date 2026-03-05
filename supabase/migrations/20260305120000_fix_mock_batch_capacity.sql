@@ -119,16 +119,82 @@ WHERE batch_id IN (
 DELETE FROM public.mock_batches 
 WHERE title LIKE 'Physical Exam Batch%' AND title != 'Physical Exam Batch';
 
--- Ensure all other batches have batch_type set
-UPDATE public.mock_batches
-SET batch_type = 'virtual'
-WHERE batch_type IS NULL AND title != 'Physical Exam Batch';
-
--- Log migration completion
-DO $$
+-- Create or replace the auto_schedule_batch function with correct timing logic
+-- This function creates virtual batches at fixed time slots: 9 AM (A), 12 PM (B), 3 PM (C)
+CREATE OR REPLACE FUNCTION public.auto_schedule_batch()
+RETURNS public.mock_batches AS $$
+DECLARE
+  v_batch public.mock_batches;
+  v_target_date DATE;
+  v_next_start TIMESTAMP WITH TIME ZONE;
+  v_next_letter TEXT;
+  v_found_slot BOOLEAN := false;
+  
+  -- Define fixed daily time slots for virtual batches
+  v_time_slots TEXT[] := ARRAY['09:00:00', '12:00:00', '15:00:00'];
+  v_slot_letters TEXT[] := ARRAY['A', 'B', 'C'];
 BEGIN
-  RAISE NOTICE 'Mock batch capacity migration completed successfully';
-  RAISE NOTICE 'Physical Exam Batch is now properly isolated from virtual batches';
-  RAISE NOTICE 'Virtual batches will auto-deactivate at 30 registrations';
-  RAISE NOTICE 'Fixed any incorrectly named Physical Exam Batch variants';
-END$$;
+  -- Find the current date to check for available slots
+  -- Start with today's date
+  v_target_date := CURRENT_DATE;
+  
+  -- If there are existing virtual batches, start from the latest date
+  SELECT GREATEST(CURRENT_DATE, exam_date::DATE) INTO v_target_date
+  FROM public.mock_batches
+  WHERE batch_type = 'virtual' AND exam_date IS NOT NULL
+  ORDER BY exam_date DESC
+  LIMIT 1;
+  
+  -- If no batches exist, use April 2, 2026 as default start date (if it's in the future)
+  IF v_target_date IS NULL THEN
+    v_target_date := GREATEST(CURRENT_DATE, '2026-04-02'::DATE);
+  END IF;
+  
+  -- Loop through dates starting from target_date until we find an available slot
+  WHILE NOT v_found_slot LOOP
+    -- Check each time slot for availability on current date
+    FOR i IN 1..array_length(v_time_slots, 1) LOOP
+      v_next_start := (v_target_date || ' ' || v_time_slots[i])::TIMESTAMP WITH TIME ZONE;
+      v_next_letter := v_slot_letters[i];
+      
+      -- Check if this slot is already taken
+      IF NOT EXISTS (
+        SELECT 1 FROM public.mock_batches
+        WHERE batch_type = 'virtual'
+        AND exam_date::DATE = v_target_date
+        AND title = 'Batch ' || v_next_letter
+      ) THEN
+        -- Slot is available, create the batch
+        INSERT INTO public.mock_batches (
+          title, 
+          exam_date, 
+          exam_venue,
+          batch_type,
+          is_active
+        ) VALUES (
+          'Batch ' || v_next_letter,
+          v_next_start,
+          NULL, -- exam_venue will be set by application
+          'virtual',
+          true
+        )
+        RETURNING * INTO v_batch;
+        
+        v_found_slot := true;
+        EXIT;
+      END IF;
+    END LOOP;
+    
+    -- If no slots available on this date, move to next day
+    IF NOT v_found_slot THEN
+      v_target_date := v_target_date + INTERVAL '1 day';
+    END IF;
+  END LOOP;
+  
+  RETURN v_batch;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission to authenticated users
+GRANT EXECUTE ON FUNCTION public.auto_schedule_batch() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.auto_schedule_batch() TO anon;
