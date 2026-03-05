@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { 
-  Users, BookOpen, TrendingUp, DollarSign, LayoutDashboard, Settings, 
-  LogOut, Copy, Building2, HelpCircle, Video, Trophy, Lock, AlertTriangle
-} from "lucide-react";
+import {
+  Users, BookOpen, TrendingUp, DollarSign, LayoutDashboard, Settings,
+  LogOut, Copy, Building2, HelpCircle, Video, Trophy, Lock, AlertTriangle } from
+"lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Sidebar,
@@ -21,8 +21,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+  SidebarTrigger } from
+"@/components/ui/sidebar";
 import SchoolStudentsManager from "@/components/school/SchoolStudentsManager";
 import SchoolReports from "@/components/school/SchoolReports";
 import SchoolBilling from "@/components/school/SchoolBilling";
@@ -43,15 +43,15 @@ import VideoTutorials from "@/components/school/VideoTutorials";
 import SchoolMockManager from "@/components/school/SchoolMockManager";
 
 const menuItems = [
-  { id: "overview", title: "Overview", icon: LayoutDashboard },
-  { id: "students", title: "Students", icon: Users },
-  { id: "exams", title: "Exams", icon: BookOpen },
-  { id: "mock", title: "Mock Exam", icon: Trophy },
-  { id: "reports", title: "Reports", icon: TrendingUp },
-  { id: "tutorials", title: "Video Tutorials", icon: Video },
-  { id: "billing", title: "Billing", icon: DollarSign },
-  { id: "settings", title: "Settings", icon: Settings },
-];
+{ id: "overview", title: "Overview", icon: LayoutDashboard },
+{ id: "students", title: "Students", icon: Users },
+{ id: "exams", title: "Exams", icon: BookOpen },
+{ id: "mock", title: "Mock Exam", icon: Trophy },
+{ id: "reports", title: "Reports", icon: TrendingUp },
+{ id: "tutorials", title: "Video Tutorials", icon: Video },
+{ id: "billing", title: "Billing", icon: DollarSign },
+{ id: "settings", title: "Settings", icon: Settings }];
+
 
 function SchoolSidebar({ activeTab, setActiveTab, schoolData, isPaid }: any) {
   const lockedTabs = isPaid ? [] : ['exams', 'reports'];
@@ -61,25 +61,25 @@ function SchoolSidebar({ activeTab, setActiveTab, schoolData, isPaid }: any) {
       <div className="p-6 border-b">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10 border-2">
-            {schoolData?.logo_url ? (
-              <AvatarImage 
-                src={`${schoolData.logo_url}?t=${Date.now()}`} 
-                alt={schoolData?.name}
-              />
-            ) : (
-              <AvatarFallback className="bg-primary text-primary-foreground">
+            {schoolData?.logo_url ?
+            <AvatarImage
+              src={`${schoolData.logo_url}?t=${Date.now()}`}
+              alt={schoolData?.name} /> :
+
+
+            <AvatarFallback className="bg-primary text-primary-foreground">
                 <Building2 className="h-5 w-5" />
               </AvatarFallback>
-            )}
+            }
           </Avatar>
           <div className="flex-1 min-w-0">
             <h2 className="font-semibold text-base truncate">{schoolData?.name}</h2>
             <p className="text-xs text-muted-foreground truncate">{schoolData?.school_code}</p>
-            {!isPaid && (
-              <Badge variant="outline" className="text-[10px] mt-1 border-amber-500 text-amber-600">
+            {!isPaid &&
+            <Badge variant="outline" className="text-[10px] mt-1 border-amber-500 text-amber-600">
                 Unpaid
               </Badge>
-            )}
+            }
           </div>
         </div>
       </div>
@@ -88,27 +88,27 @@ function SchoolSidebar({ activeTab, setActiveTab, schoolData, isPaid }: any) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.id}>
+              {menuItems.map((item) =>
+              <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton
-                    onClick={() => setActiveTab(item.id)}
-                    isActive={activeTab === item.id}
-                    className="w-full justify-start"
-                  >
+                  onClick={() => setActiveTab(item.id)}
+                  isActive={activeTab === item.id}
+                  className="w-full justify-start">
+                  
                     <item.icon className="h-4 w-4" />
                     <span>{item.title}</span>
-                    {lockedTabs.includes(item.id) && (
-                      <Lock className="h-3 w-3 ml-auto text-muted-foreground" />
-                    )}
+                    {lockedTabs.includes(item.id) &&
+                  <Lock className="h-3 w-3 ml-auto text-muted-foreground" />
+                  }
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-    </Sidebar>
-  );
+    </Sidebar>);
+
 }
 
 export default function SchoolDashboard() {
@@ -141,22 +141,22 @@ export default function SchoolDashboard() {
     try {
       setLoading(true);
 
-      const { data: userData } = await supabase
-        .from("users")
-        .select("id")
-        .eq("auth_user_id", user?.id)
-        .maybeSingle();
+      const { data: userData } = await supabase.
+      from("users").
+      select("id").
+      eq("auth_user_id", user?.id).
+      maybeSingle();
 
       if (!userData) {
         toast.error("User not found");
         return;
       }
 
-      const { data: school, error: schoolError } = await supabase
-        .from("schools")
-        .select("*")
-        .eq("admin_user_id", userData.id)
-        .maybeSingle();
+      const { data: school, error: schoolError } = await supabase.
+      from("schools").
+      select("*").
+      eq("admin_user_id", userData.id).
+      maybeSingle();
 
       if (schoolError) throw schoolError;
 
@@ -175,9 +175,9 @@ export default function SchoolDashboard() {
                   schoolPhone: pendingData.schoolPhone || "",
                   schoolAddress: pendingData.schoolAddress || "",
                   state: pendingData.state || "",
-                  schoolType: pendingData.schoolType || "secondary",
-                },
-              },
+                  schoolType: pendingData.schoolType || "secondary"
+                }
+              }
             }
           );
 
@@ -185,12 +185,12 @@ export default function SchoolDashboard() {
             localStorage.removeItem('pendingSchoolRegistration');
             setSchoolData(createResult.school);
             // Continue to fetch subscription
-            const { data: subscriptions } = await (supabase as any)
-              .from("school_subscriptions")
-              .select("*")
-              .eq("school_id", createResult.school.id)
-              .order("created_at", { ascending: false })
-              .limit(1);
+            const { data: subscriptions } = await (supabase as any).
+            from("school_subscriptions").
+            select("*").
+            eq("school_id", createResult.school.id).
+            order("created_at", { ascending: false }).
+            limit(1);
             setSubscriptionData(subscriptions?.[0] || null);
             const hasSeenWelcome = localStorage.getItem(`school_welcome_${createResult.school.id}`);
             if (!hasSeenWelcome) setShowWelcomeModal(true);
@@ -209,13 +209,13 @@ export default function SchoolDashboard() {
 
       setSchoolData(school);
 
-      const { data: subscriptions } = await (supabase as any)
-        .from("school_subscriptions")
-        .select("*")
-        .eq("school_id", school.id)
-        .order("created_at", { ascending: false })
-        .limit(1);
-      
+      const { data: subscriptions } = await (supabase as any).
+      from("school_subscriptions").
+      select("*").
+      eq("school_id", school.id).
+      order("created_at", { ascending: false }).
+      limit(1);
+
       const subscription = subscriptions && subscriptions.length > 0 ? subscriptions[0] : null;
       setSubscriptionData(subscription);
 
@@ -240,8 +240,8 @@ export default function SchoolDashboard() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-sm text-muted-foreground">Loading dashboard...</p>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   const remainingSlots = (subscriptionData?.student_seats || schoolData?.max_students || 0) - (schoolData?.students_added || 0);
@@ -249,8 +249,8 @@ export default function SchoolDashboard() {
   const isPaid = schoolData?.is_active && isSubscriptionActive;
 
   // Locked feature overlay component
-  const LockedOverlay = ({ featureName }: { featureName: string }) => (
-    <div className="relative">
+  const LockedOverlay = ({ featureName }: {featureName: string;}) =>
+  <div className="relative">
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
         <Card className="max-w-md mx-4 border-destructive/50">
           <CardContent className="p-6 text-center">
@@ -267,8 +267,8 @@ export default function SchoolDashboard() {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
+
 
   return (
     <SidebarProvider defaultOpen>
@@ -283,7 +283,7 @@ export default function SchoolDashboard() {
                 <SidebarTrigger />
                 <Separator orientation="vertical" className="h-6" />
                 <h1 className="text-lg font-semibold">
-                  {menuItems.find(item => item.id === activeTab)?.title}
+                  {menuItems.find((item) => item.id === activeTab)?.title}
                 </h1>
               </div>
               
@@ -293,8 +293,8 @@ export default function SchoolDashboard() {
                   size="sm"
                   onClick={() => {
                     window.open("https://wa.me/2347050757085?text=Hello,%20I%20need%20support%20with%20my%20school%20account", "_blank");
-                  }}
-                >
+                  }}>
+                  
                   <HelpCircle className="h-4 w-4 mr-2" />
                   Support
                 </Button>
@@ -305,8 +305,8 @@ export default function SchoolDashboard() {
                     await supabase.auth.signOut();
                     toast.success("Logged out successfully");
                     navigate("/school-login");
-                  }}
-                >
+                  }}>
+                  
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
                 </Button>
@@ -318,37 +318,37 @@ export default function SchoolDashboard() {
           <main className="flex-1 overflow-y-auto bg-muted/30">
             <div className="container max-w-7xl mx-auto p-8">
               {/* Payment Required Banner */}
-              {!isPaid && (
-                <Card className="mb-6 border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+              {!isPaid &&
+              <Card className="mb-6 border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
                   <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <AlertTriangle className="h-6 w-6 text-amber-600 shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <h3 className="font-semibold text-amber-800 dark:text-amber-300">Subscription Payment Required</h3>
-                      <p className="text-sm text-amber-700 dark:text-amber-400">
-                        You can add students now, but features like Exams, Reports, and Mock Exams are locked. 
-                        Students won't be able to access their portals until payment is completed.
-                      </p>
+                      <p className="text-sm text-amber-700 dark:text-amber-400">You can add students now, but features like Exams, and Reports are locked. Students won't be able to access their portals until payment is completed.
+
+
+                    </p>
                     </div>
-                    <Button 
-                      onClick={() => navigate("/school-subscription")} 
-                      className="shrink-0"
-                      size="sm"
-                    >
+                    <Button
+                    onClick={() => navigate("/school-subscription")}
+                    className="shrink-0"
+                    size="sm">
+                    
                       <DollarSign className="h-4 w-4 mr-1" />
                       Pay Now
                     </Button>
                   </CardContent>
                 </Card>
-              )}
+              }
 
-              {activeTab === "overview" && (
-                <div className="space-y-8">
+              {activeTab === "overview" &&
+              <div className="space-y-8">
                   {/* Alerts Center - Critical Info First */}
-                  <AlertsCenter 
-                    schoolId={schoolData?.id}
-                    subscriptionData={subscriptionData}
-                    schoolData={schoolData}
-                  />
+                  <AlertsCenter
+                  schoolId={schoolData?.id}
+                  subscriptionData={subscriptionData}
+                  schoolData={schoolData} />
+                
 
                   {/* School Code Section */}
                   <Card>
@@ -361,10 +361,10 @@ export default function SchoolDashboard() {
                           </CardDescription>
                         </div>
                         <div className={`px-3 py-1 rounded-md text-xs font-medium ${
-                          isSubscriptionActive 
-                            ? 'bg-green-50 text-green-700 border border-green-200' 
-                            : 'bg-amber-50 text-amber-700 border border-amber-200'
-                        }`}>
+                      isSubscriptionActive ?
+                      'bg-green-50 text-green-700 border border-green-200' :
+                      'bg-amber-50 text-amber-700 border border-amber-200'}`
+                      }>
                           {isSubscriptionActive ? 'Active' : 'Inactive'}
                         </div>
                       </div>
@@ -377,13 +377,13 @@ export default function SchoolDashboard() {
                           </p>
                         </div>
                         <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => {
-                            navigator.clipboard.writeText(schoolData?.school_code || '');
-                            toast.success('School code copied to clipboard');
-                          }}
-                        >
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          navigator.clipboard.writeText(schoolData?.school_code || '');
+                          toast.success('School code copied to clipboard');
+                        }}>
+                        
                           <Copy className="h-4 w-4" />
                         </Button>
                       </div>
@@ -442,23 +442,23 @@ export default function SchoolDashboard() {
                         <div className="text-2xl font-bold capitalize">
                           {subscriptionData?.status || 'Inactive'}
                         </div>
-                        {subscriptionData?.end_date && (
-                          <p className="text-xs text-muted-foreground mt-1">
+                        {subscriptionData?.end_date &&
+                      <p className="text-xs text-muted-foreground mt-1">
                             Until {new Date(subscriptionData.end_date).toLocaleDateString()}
                           </p>
-                        )}
+                      }
                       </CardContent>
                     </Card>
                   </div>
 
                   {/* Quick Actions + Engagement */}
                   <div className="grid gap-3 md:gap-4 grid-cols-1 lg:grid-cols-2">
-                    <QuickActions 
-                      onAddStudent={() => setActiveTab("students")}
-                      onViewReports={() => setActiveTab("reports")}
-                      onViewStudents={() => setActiveTab("students")}
-                      schoolId={schoolData?.id}
-                    />
+                    <QuickActions
+                    onAddStudent={() => setActiveTab("students")}
+                    onViewReports={() => setActiveTab("reports")}
+                    onViewStudents={() => setActiveTab("students")}
+                    schoolId={schoolData?.id} />
+                  
                     <StudentEngagement schoolId={schoolData?.id} />
                   </div>
 
@@ -476,39 +476,39 @@ export default function SchoolDashboard() {
                     </div>
                   </div>
                 </div>
-              )}
+              }
 
-              {activeTab === "students" && schoolData && (
-                <SchoolStudentsManager 
-                  schoolId={schoolData.id}
-                  schoolCode={schoolData.school_code}
-                  remainingSlots={remainingSlots}
-                  onStudentsUpdate={fetchSchoolData}
-                />
-              )}
+              {activeTab === "students" && schoolData &&
+              <SchoolStudentsManager
+                schoolId={schoolData.id}
+                schoolCode={schoolData.school_code}
+                remainingSlots={remainingSlots}
+                onStudentsUpdate={fetchSchoolData} />
 
-              {activeTab === "exams" && schoolData && (
-                <div className="relative">
+              }
+
+              {activeTab === "exams" && schoolData &&
+              <div className="relative">
                   {!isPaid && <LockedOverlay featureName="Exam Management" />}
                   <div className={!isPaid ? "pointer-events-none opacity-40 min-h-[300px]" : ""}>
                     <SchoolExamManager schoolId={schoolData.id} />
                   </div>
                 </div>
-              )}
+              }
 
-              {activeTab === "mock" && schoolData && (
-                <SchoolMockManager schoolId={schoolData.id} />
-              )}
+              {activeTab === "mock" && schoolData &&
+              <SchoolMockManager schoolId={schoolData.id} />
+              }
 
-              {activeTab === "reports" && schoolData && (
-                <div className="relative">
+              {activeTab === "reports" && schoolData &&
+              <div className="relative">
                   {!isPaid && <LockedOverlay featureName="Reports & Analytics" />}
                   <div className={!isPaid ? "pointer-events-none opacity-40 min-h-[300px]" : ""}>
                     <div className="space-y-6">
-                      <ExportTools 
-                        schoolId={schoolData.id}
-                        schoolName={schoolData.name}
-                      />
+                      <ExportTools
+                      schoolId={schoolData.id}
+                      schoolName={schoolData.name} />
+                    
                       <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
                         <ComparisonAnalytics schoolId={schoolData?.id} />
                         <div>
@@ -518,36 +518,36 @@ export default function SchoolDashboard() {
                     </div>
                   </div>
                 </div>
-              )}
+              }
 
-              {activeTab === "tutorials" && (
-                <VideoTutorials />
-              )}
+              {activeTab === "tutorials" &&
+              <VideoTutorials />
+              }
 
-              {activeTab === "billing" && schoolData && (
-                <SchoolBilling 
-                  schoolId={schoolData.id}
-                  currentStudentLimit={schoolData.student_limit}
-                />
-              )}
+              {activeTab === "billing" && schoolData &&
+              <SchoolBilling
+                schoolId={schoolData.id}
+                currentStudentLimit={schoolData.student_limit} />
 
-              {activeTab === "settings" && schoolData && (
-                <SchoolSettings schoolData={schoolData} onUpdate={fetchSchoolData} />
-              )}
+              }
+
+              {activeTab === "settings" && schoolData &&
+              <SchoolSettings schoolData={schoolData} onUpdate={fetchSchoolData} />
+              }
             </div>
           </main>
         </div>
       </div>
 
       {/* Welcome Modal for New Schools */}
-      {schoolData && (
-        <WelcomeManualModal
-          open={showWelcomeModal}
-          onClose={handleCloseWelcomeModal}
-          schoolName={schoolData.name}
-        />
-      )}
+      {schoolData &&
+      <WelcomeManualModal
+        open={showWelcomeModal}
+        onClose={handleCloseWelcomeModal}
+        schoolName={schoolData.name} />
+
+      }
       <AIAssistant />
-    </SidebarProvider>
-  );
+    </SidebarProvider>);
+
 }
