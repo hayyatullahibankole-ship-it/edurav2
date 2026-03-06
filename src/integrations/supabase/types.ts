@@ -1536,6 +1536,7 @@ export type Database = {
       }
       mock_batches: {
         Row: {
+          batch_type: string | null
           created_at: string | null
           exam_date: string | null
           exam_venue: string | null
@@ -1547,6 +1548,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          batch_type?: string | null
           created_at?: string | null
           exam_date?: string | null
           exam_venue?: string | null
@@ -1558,6 +1560,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          batch_type?: string | null
           created_at?: string | null
           exam_date?: string | null
           exam_venue?: string | null
@@ -3940,6 +3943,7 @@ export type Database = {
       auto_schedule_batch: {
         Args: never
         Returns: {
+          batch_type: string | null
           created_at: string | null
           exam_date: string | null
           exam_venue: string | null

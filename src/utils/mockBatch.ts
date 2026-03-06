@@ -158,15 +158,11 @@ export async function getOrCreateBatch(supabase: SupabaseClient, settings: any, 
       return isSameDay(batchDate, currentDate);
     });
 
-        let latestDate: Date | null = null;
-        if (allBatches && allBatches.length > 0) {
-          for (const b of allBatches) {
-            if (b.exam_date) {
-              const d = new Date(b.exam_date);
-              if (!latestDate || d > latestDate) latestDate = d;
-            }
-          }
-        }
+    // Determine which time slot letters are already used on this date
+    const usedLetters = sameDayBatches.map((b: any) => {
+      const match = b.title?.match(/Batch\s+(\w)/);
+      return match ? match[1] : '';
+    });
 
     // Check each time slot for availability
     for (const slot of DAILY_TIME_SLOTS) {
