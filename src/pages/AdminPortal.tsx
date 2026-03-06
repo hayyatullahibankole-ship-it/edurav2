@@ -67,6 +67,7 @@ import { AkboyInquiriesManager } from '@/components/admin/AkboyInquiriesManager'
 import { AkboyTutorialsManager } from '@/components/admin/AkboyTutorialsManager';
 import { AkboyRegistrationsManager } from '@/components/admin/AkboyRegistrationsManager';
 import MockExamManager from '@/components/admin/MockExamManager';
+import SubjectManager from '@/components/admin/SubjectManager';
 import { MockExamDashboard } from '@/components/admin/MockExamDashboard';
 import { ExamDayVerification } from '@/components/admin/ExamDayVerification';
 import { useAuth } from '@/hooks/useAuth';
@@ -247,6 +248,15 @@ export default function AdminPortal() {
                 <FileText className="w-4 h-4 mr-2 lg:mr-3" />
                 <span className="hidden sm:inline">Question Bank</span>
                 <span className="sm:hidden">Questions</span>
+              </Button>
+              <Button
+                variant={activeSection === 'subjects' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+                onClick={() => setActiveSection('subjects')}
+              >
+                <BookOpen className="w-4 h-4 mr-2 lg:mr-3" />
+                <span className="hidden sm:inline">Subject Management</span>
+                <span className="sm:hidden">Subjects</span>
               </Button>
               <Button
                 variant={activeSection === 'resources' ? 'secondary' : 'ghost'}
@@ -639,6 +649,7 @@ export default function AdminPortal() {
           )}
           
           {activeSection === 'resources' && <ResourceManagement />}
+          {activeSection === 'subjects' && <SubjectManager />}
           
           {activeSection === 'security' && <SecurityCenter suspiciousActivities={recentActivities} />}
 
@@ -675,7 +686,7 @@ export default function AdminPortal() {
           {activeSection === 'mock-dashboard' && <MockExamDashboard />}
           {activeSection === 'exam-verification' && <ExamDayVerification />}
 
-          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'promos', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools', 'mock-exam', 'mock-dashboard', 'exam-verification'].includes(activeSection) && (
+          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'subjects', 'security', 'analytics', 'pricing', 'promos', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools', 'mock-exam', 'mock-dashboard', 'exam-verification'].includes(activeSection) && (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
