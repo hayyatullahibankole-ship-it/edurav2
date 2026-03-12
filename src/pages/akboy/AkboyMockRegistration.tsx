@@ -514,6 +514,7 @@ export default function AkboyMockRegistration() {
 
                     <Button
                       className="w-full h-12 bg-orange-500 hover:bg-orange-600 font-semibold text-base"
+                      disabled={loading}
                       onClick={() => {
                         if (!form.fullName.trim() || !form.phone.trim() || !form.mode) {
                           toast.error("Please fill all required fields");
@@ -524,12 +525,15 @@ export default function AkboyMockRegistration() {
                           return;
                         }
                         if (form.mode === 'virtual') {
+                          toast.loading("Processing your registration...");
                           handleSubmit();
                           return;
                         }
                         setStep(2);
                       }}>
-                      {form.mode === 'virtual' ? 'Complete Registration' : 'Continue to Payment'}
+                      {loading && form.mode === 'virtual' ? (
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Registering...</>
+                      ) : form.mode === 'virtual' ? 'Complete Registration' : 'Continue to Payment'}
                     </Button>
 
                     <div className="text-center">
