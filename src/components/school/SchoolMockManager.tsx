@@ -13,19 +13,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Users, BookOpen, Plus, Download, Loader2, CheckCircle2, Trophy, TrendingUp, TrendingDown } from "lucide-react";
 
-const AVAILABLE_SUBJECTS = [
-  { id: "f01354df-283f-4069-a750-dba247a6bf97", name: "English Language", locked: true, questions: 60 },
-  { id: "d9bbd411-3623-4553-937c-cfe55a7ac82b", name: "Mathematics", questions: 40 },
-  { id: "d165bc08-818b-403d-bd31-f2c1965a2bfb", name: "Physics", questions: 40 },
-  { id: "76f33a39-4903-4336-84da-17d082f99498", name: "Chemistry", questions: 40 },
-  { id: "ce4023fd-9a2c-4065-9b83-8b5734f895a0", name: "Biology", questions: 40 },
-  { id: "ed819500-1ca7-4067-832b-13161a598a07", name: "Economics", questions: 40 },
-  { id: "2ec36942-176e-4fad-b451-c84c25ad30ec", name: "Government", questions: 40 },
-  { id: "be93668a-3fe1-4410-8062-6a1fcc8fd9d1", name: "Literature in English", questions: 40 },
-  { id: "2035b922-b680-40a7-8fc1-d7cd945d303b", name: "Commerce", questions: 40 },
-  { id: "f76a7b84-7c85-4d81-8aa9-fc406668a965", name: "Accounting", questions: 40 },
-  { id: "d482c961-afec-4078-919b-d52dee4b91d3", name: "Geography", questions: 40 },
-];
+interface MockSubject {
+  id: string;
+  name: string;
+  locked?: boolean;
+  questions: number;
+}
 
 interface Props {
   schoolId: string;
@@ -39,6 +32,7 @@ export default function SchoolMockManager({ schoolId }: Props) {
   const [loading, setLoading] = useState(true);
   const [showRegDialog, setShowRegDialog] = useState(false);
   const [tab, setTab] = useState<'register' | 'list' | 'results'>('list');
+  const [AVAILABLE_SUBJECTS, setAvailableSubjects] = useState<MockSubject[]>([]);
 
   // Registration form
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
@@ -49,7 +43,20 @@ export default function SchoolMockManager({ schoolId }: Props) {
   useEffect(() => {
     loadData();
     loadSettings();
+    loadSubjects();
   }, [schoolId]);
+
+  const loadSubjects = async () => {
+    const { data } = await supabase.from('subjects').select('*').eq('is_active', true).order('name');
+    if (data) {
+      setAvailableSubjects(data.map(s => ({
+        id: s.id,
+        name: s.name,
+        locked: s.name.toLowerCase() === 'english language',
+        questions: s.default_question_count || (s.name.toLowerCase() === 'english language' ? 60 : 40),
+      })));
+    }
+  };
 
   const loadData = async () => {
     setLoading(true);

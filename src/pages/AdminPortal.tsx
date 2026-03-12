@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription as AlertDialogDesc, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Shield,
   Users,
@@ -42,7 +44,8 @@ import {
   Mail,
   GraduationCap as TutorialIcon,
   ClipboardList,
-  CheckCircle
+  CheckCircle,
+  Menu,
 } from 'lucide-react';
 import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
@@ -67,6 +70,7 @@ import { AkboyInquiriesManager } from '@/components/admin/AkboyInquiriesManager'
 import { AkboyTutorialsManager } from '@/components/admin/AkboyTutorialsManager';
 import { AkboyRegistrationsManager } from '@/components/admin/AkboyRegistrationsManager';
 import MockExamManager from '@/components/admin/MockExamManager';
+import SubjectManager from '@/components/admin/SubjectManager';
 import { MockExamDashboard } from '@/components/admin/MockExamDashboard';
 import { ExamDayVerification } from '@/components/admin/ExamDayVerification';
 import { useAuth } from '@/hooks/useAuth';
@@ -80,6 +84,7 @@ export default function AdminPortal() {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('dashboard');
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -162,6 +167,56 @@ export default function AdminPortal() {
     }
   };
 
+  const navItems = [
+    { key: 'dashboard', label: 'System Overview', icon: Monitor },
+    { key: 'users', label: 'User Management', icon: Users },
+    { key: 'exams', label: 'Exam Control', icon: BookOpen },
+    { key: 'questions', label: 'Question Bank', icon: FileText },
+    { key: 'subjects', label: 'Subject Management', icon: BookOpen },
+    { key: 'resources', label: 'Resources', icon: Upload },
+    { key: 'security', label: 'Security Center', icon: Lock },
+    { key: 'analytics', label: 'Analytics Hub', icon: BarChart3 },
+    { key: 'pricing', label: 'Pricing Management', icon: DollarSign },
+    { key: 'promos', label: 'Promo Codes', icon: Gift },
+    { key: 'schools', label: 'School Management', icon: Users },
+    { key: 'blog', label: 'Blog Management', icon: Newspaper },
+    { key: 'communications', label: 'Communications', icon: MessageCircle },
+    { key: 'study-hub', label: 'Study Hub', icon: GraduationCap },
+    { key: 'forum', label: 'Forum', icon: MessageCircle },
+    { key: 'challenges', label: 'Challenges', icon: Sword },
+    { key: 'akboy-services', label: 'AKBOY Services', icon: Palette },
+    { key: 'akboy-portfolio', label: 'AKBOY Portfolio', icon: Briefcase },
+    { key: 'akboy-events', label: 'AKBOY Events', icon: CalendarDays },
+    { key: 'akboy-inquiries', label: 'AKBOY Inquiries', icon: Mail },
+    { key: 'akboy-tutorials', label: 'AKBOY Tutorials', icon: TutorialIcon },
+    { key: 'akboy-registrations', label: 'AKBOY Registrations', icon: ClipboardList },
+    { key: 'mock-exam', label: 'Mock Exam', icon: FileText },
+    { key: 'mock-dashboard', label: 'Student Batches', icon: Users },
+    { key: 'exam-verification', label: 'Verify Students', icon: CheckCircle },
+    { key: 'settings', label: 'System Config', icon: Settings },
+  ];
+
+  const handleNavClick = (key: string) => {
+    setActiveSection(key);
+    setSidebarOpen(false);
+  };
+
+  const NavContent = () => (
+    <nav className="flex flex-col gap-1">
+      {navItems.map(item => (
+        <Button
+          key={item.key}
+          variant={activeSection === item.key ? 'secondary' : 'ghost'}
+          className="w-full justify-start text-left text-sm text-slate-300 hover:text-white hover:bg-slate-800"
+          onClick={() => handleNavClick(item.key)}
+        >
+          <item.icon className="w-4 h-4 mr-3 shrink-0" />
+          <span>{item.label}</span>
+        </Button>
+      ))}
+    </nav>
+  );
+
   if (!isAdmin) return null;
 
   return (
@@ -170,7 +225,34 @@ export default function AdminPortal() {
       <div className="bg-slate-900 border-b border-slate-800">
         <div className="px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              {/* Mobile menu trigger */}
+              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="lg:hidden text-slate-300 hover:text-white">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-72 bg-slate-900 border-slate-800 p-0">
+                  <div className="p-4 border-b border-slate-800">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gradient-to-r from-red-600 to-orange-600 rounded-lg flex items-center justify-center">
+                        <Shield className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-sm font-bold text-white">Edura Control</h2>
+                        <p className="text-xs text-slate-400">Admin Portal</p>
+                      </div>
+                    </div>
+                  </div>
+                  <ScrollArea className="h-[calc(100vh-80px)]">
+                    <div className="p-2">
+                      <NavContent />
+                    </div>
+                  </ScrollArea>
+                </SheetContent>
+              </Sheet>
+
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-600 to-orange-600 rounded-lg flex items-center justify-center">
                   <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
@@ -207,256 +289,14 @@ export default function AdminPortal() {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row">
-        {/* Sidebar Navigation */}
-        <div className="min-h-screen lg:w-64 bg-slate-900 border-r border-slate-800 overflow-y-auto">
-          <div className="p-2">
-            <nav className="flex flex-wrap lg:flex-col gap-2">
-              <Button
-                variant={activeSection === 'dashboard' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('dashboard')}
-              >
-                <Monitor className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">System Overview</span>
-                <span className="sm:hidden">Overview</span>
-              </Button>
-              <Button
-                variant={activeSection === 'users' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('users')}
-              >
-                <Users className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">User Management</span>
-                <span className="sm:hidden">Users</span>
-              </Button>
-              <Button
-                variant={activeSection === 'exams' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('exams')}
-              >
-                <BookOpen className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Exam Control</span>
-                <span className="sm:hidden">Exams</span>
-              </Button>
-              <Button
-                variant={activeSection === 'questions' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('questions')}
-              >
-                <FileText className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Question Bank</span>
-                <span className="sm:hidden">Questions</span>
-              </Button>
-              <Button
-                variant={activeSection === 'resources' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('resources')}
-              >
-                <Upload className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Resources</span>
-                <span className="sm:hidden">Resources</span>
-              </Button>
-              <Button
-                variant={activeSection === 'security' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('security')}
-              >
-                <Lock className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Security Center</span>
-                <span className="sm:hidden">Security</span>
-              </Button>
-              <Button
-                variant={activeSection === 'analytics' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('analytics')}
-              >
-                <BarChart3 className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Analytics Hub</span>
-                <span className="sm:hidden">Analytics</span>
-              </Button>
-              <Button
-                variant={activeSection === 'pricing' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('pricing')}
-              >
-                <DollarSign className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Pricing Management</span>
-                <span className="sm:hidden">Pricing</span>
-              </Button>
-              <Button
-                variant={activeSection === 'promos' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('promos')}
-              >
-                <Gift className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Promo Codes</span>
-                <span className="sm:hidden">Promos</span>
-              </Button>
-              <Button
-                variant={activeSection === 'schools' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('schools')}
-              >
-                <Users className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">School Management</span>
-                <span className="sm:hidden">Schools</span>
-              </Button>
-              <Button
-                variant={activeSection === 'blog' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('blog')}
-              >
-                <Newspaper className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Blog Management</span>
-                <span className="sm:hidden">Blog</span>
-              </Button>
-              <Button
-                variant={activeSection === 'communications' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('communications')}
-              >
-                <MessageCircle className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Communications</span>
-                <span className="sm:hidden">Messages</span>
-              </Button>
-              <Button
-                variant={activeSection === 'study-hub' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('study-hub')}
-              >
-                <GraduationCap className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Study Hub</span>
-                <span className="sm:hidden">Study</span>
-              </Button>
-              <Button
-                variant={activeSection === 'forum' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('forum')}
-              >
-                <MessageCircle className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Forum</span>
-                <span className="sm:hidden">Forum</span>
-              </Button>
-              <Button
-                variant={activeSection === 'challenges' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('challenges')}
-              >
-                <Sword className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Challenges</span>
-                <span className="sm:hidden">Arena</span>
-              </Button>
-              <Button
-                variant={activeSection === 'akboy-services' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('akboy-services')}
-              >
-                <Palette className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">AKBOY Services</span>
-                <span className="sm:hidden">Services</span>
-              </Button>
-              <Button
-                variant={activeSection === 'akboy-portfolio' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('akboy-portfolio')}
-              >
-                <Briefcase className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">AKBOY Portfolio</span>
-                <span className="sm:hidden">Portfolio</span>
-              </Button>
-              <Button
-                variant={activeSection === 'akboy-events' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('akboy-events')}
-              >
-                <CalendarDays className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">AKBOY Events</span>
-                <span className="sm:hidden">Events</span>
-              </Button>
-              <Button
-                variant={activeSection === 'akboy-inquiries' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('akboy-inquiries')}
-              >
-                <Mail className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">AKBOY Inquiries</span>
-                <span className="sm:hidden">Inquiries</span>
-              </Button>
-              <Button
-                variant={activeSection === 'akboy-tutorials' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('akboy-tutorials')}
-              >
-                <TutorialIcon className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">AKBOY Tutorials</span>
-                <span className="sm:hidden">Tutorials</span>
-              </Button>
-              <Button
-                variant={activeSection === 'akboy-registrations' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('akboy-registrations')}
-              >
-                <ClipboardList className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">AKBOY Registrations</span>
-                <span className="sm:hidden">Registrations</span>
-              </Button>
-              <Button
-                variant={activeSection === 'mock-exam' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('mock-exam')}
-              >
-                <FileText className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Mock Exam</span>
-                <span className="sm:hidden">Mock</span>
-              </Button>
-              <Button
-                variant={activeSection === 'mock-dashboard' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('mock-dashboard')}
-              >
-                <Users className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Student Batches</span>
-                <span className="sm:hidden">Batches</span>
-              </Button>
-              <Button
-                variant={activeSection === 'exam-verification' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('exam-verification')}
-              >
-                <CheckCircle className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Verify Students</span>
-                <span className="sm:hidden">Verify</span>
-              </Button>
-              <Button
-                variant={activeSection === 'mock-dashboard' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('mock-dashboard')}
-              >
-                <Users className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Student Batches</span>
-                <span className="sm:hidden">Batches</span>
-              </Button>
-              <Button
-                variant={activeSection === 'exam-verification' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('exam-verification')}
-              >
-                <CheckCircle className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">Verify Students</span>
-                <span className="sm:hidden">Verify</span>
-              </Button>
-              <Button
-                variant={activeSection === 'settings' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-left text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-                onClick={() => setActiveSection('settings')}
-              >
-                <Settings className="w-4 h-4 mr-2 lg:mr-3" />
-                <span className="hidden sm:inline">System Config</span>
-                <span className="sm:hidden">Settings</span>
-              </Button>
-            </nav>
-          </div>
+      <div className="flex">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block w-64 bg-slate-900 border-r border-slate-800 min-h-[calc(100vh-73px)]">
+          <ScrollArea className="h-[calc(100vh-73px)]">
+            <div className="p-2">
+              <NavContent />
+            </div>
+          </ScrollArea>
         </div>
 
         {/* Main Content Area */}
@@ -639,6 +479,7 @@ export default function AdminPortal() {
           )}
           
           {activeSection === 'resources' && <ResourceManagement />}
+          {activeSection === 'subjects' && <SubjectManager />}
           
           {activeSection === 'security' && <SecurityCenter suspiciousActivities={recentActivities} />}
 
@@ -675,7 +516,7 @@ export default function AdminPortal() {
           {activeSection === 'mock-dashboard' && <MockExamDashboard />}
           {activeSection === 'exam-verification' && <ExamDayVerification />}
 
-          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'security', 'analytics', 'pricing', 'promos', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools', 'mock-exam', 'mock-dashboard', 'exam-verification'].includes(activeSection) && (
+          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'subjects', 'security', 'analytics', 'pricing', 'promos', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools', 'mock-exam', 'mock-dashboard', 'exam-verification'].includes(activeSection) && (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
