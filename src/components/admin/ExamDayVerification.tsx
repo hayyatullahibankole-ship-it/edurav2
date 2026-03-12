@@ -59,60 +59,75 @@ export function ExamDayVerification() {
     if (scannerOpen && videoRef.current) {
       let stream: MediaStream | null = null;
       let decodeInterval: NodeJS.Timeout | null = null;
+      let isScanning = true;
       
       const initializeScanner = async () => {
         try {
+          // Initialize reader first
+          const reader = new BrowserQRCodeReader();
+          readerRef.current = reader;
+          
           // Request camera permissions and get video stream
           stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: "environment" },
             audio: false,
           });
           
+          if (!videoRef.current || !isScanning) return;
+          
           // Set the stream to the video element
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            
-            // Explicitly play the video
-            const playPromise = videoRef.current.play();
-            if (playPromise !== undefined) {
-              playPromise.catch((error) => {
-                console.error("Video play failed:", error);
-              });
-            }
-            
-            // Wait for video to load before starting decode
-            videoRef.current.onloadedmetadata = () => {
-              const reader = new BrowserQRCodeReader();
-              readerRef.current = reader;
-              
-              // Continuous decoding
-              decodeInterval = setInterval(async () => {
-                if (videoRef.current && readerRef.current) {
-                  try {
-                    const result = await reader.decodeFromVideoElement(videoRef.current);
-                    if (result) {
-                      const text = result.getText().trim();
-                      if (text) {
-                        // Stop scanning after successful read
-                        if (stream) {
-                          stream.getTracks().forEach(track => track.stop());
-                        }
-                        if (decodeInterval) {
-                          clearInterval(decodeInterval);
-                        }
-                        handleQrResult(text);
-                      }
-                    }
-                  } catch (err: any) {
-                    // Continue scanning, expected to not find QR code in every frame
-                    if (err.message && !err.message.includes("NotFoundException")) {
-                      // Only log unexpected errors
-                    }
-                  }
-                }
-              }, 300);
+          videoRef.current.srcObject = stream;
+          
+          // Ensure video plays before starting decode
+          await new Promise<void>((resolve) => {
+            const checkPlaying = () => {
+              if (videoRef.current && videoRef.current.readyState >= 2) {
+                // readyState 2 = HAVE_CURRENT_DATA
+                videoRef.current.play().catch(() => {
+                  // Video play may fail but we can still try to decode
+                });
+                resolve();
+              } else if (isScanning) {
+                setTimeout(checkPlaying, 100);
+              }
             };
-          }
+            checkPlaying();
+          });
+          
+          if (!isScanning) return;
+          
+          // Start continuous decoding
+          decodeInterval = setInterval(async () => {
+            if (!videoRef.current || !isScanning || !readerRef.current) return;
+            
+            try {
+              const result = await readerRef.current.decodeFromVideoElement(videoRef.current);
+              if (result) {
+                const text = result.getText().trim();
+                if (text && isScanning) {
+                  // Stop scanning after successful read
+                  isScanning = false;
+                  if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                  }
+                  if (decodeInterval) {
+                    clearInterval(decodeInterval);
+                  }
+                  if (videoRef.current) {
+                    videoRef.current.srcObject = null;
+                  }
+                  readerRef.current?.reset();
+                  handleQrResult(text);
+                }
+              }
+            } catch (err: any) {
+              // NotFoundException is expected when no QR code is in frame
+              // Only log actual errors
+              if (err.name !== "NotFoundException" && !err.message?.includes("NotFoundException")) {
+                console.debug("QR decode attempt:", err.message);
+              }
+            }
+          }, 100); // Faster polling for better detection
         } catch (error: any) {
           console.error("Camera access error:", error);
           toast({
@@ -128,6 +143,7 @@ export function ExamDayVerification() {
       
       return () => {
         // Cleanup
+        isScanning = false;
         if (stream) {
           stream.getTracks().forEach(track => track.stop());
         }
@@ -140,7 +156,7 @@ export function ExamDayVerification() {
         readerRef.current?.reset();
       };
     }
-  }, [scannerOpen, students]);
+  }, [scannerOpen]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -565,17 +581,30 @@ export function ExamDayVerification() {
             <DialogTitle>Scan QR Code</DialogTitle>
             <DialogDescription>Point your camera at the student's admit slip QR code.</DialogDescription>
           </DialogHeader>
-          <div className="w-full bg-black rounded-lg overflow-hidden">
+          <div className="w-full bg-black rounded-lg overflow-hidden relative">
             <video 
               ref={videoRef}
-              style={{ width: "100%", height: "400px" }}
+              style={{ 
+                width: "100%", 
+                height: "400px",
+                objectFit: "cover",
+                display: "block"
+              }}
               autoPlay
               muted
               playsInline
+              webkit-playsinline="true"
+            />
+            <div className="absolute inset-0 border-2 border-yellow-400 pointer-events-none rounded-lg" 
+              style={{
+                backgroundImage: "linear-gradient(0deg, rgba(255, 224, 0, 0.1) 1px, transparent 1px)",
+                backgroundSize: "100% 20px",
+                opacity: 0.3
+              }}
             />
           </div>
-          <div className="mt-2 text-xs text-muted-foreground text-center">
-            If the camera does not start, check your browser permissions or use manual entry instead.
+          <div className="text-xs text-muted-foreground text-center">
+            Align the QR code within the frame. Scanning...
           </div>
         </DialogContent>
       </Dialog>
