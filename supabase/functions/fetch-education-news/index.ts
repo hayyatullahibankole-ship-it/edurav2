@@ -368,16 +368,29 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check existing posts to avoid duplicates
+    // First: Deduplicate within current batch (same article from multiple RSS sources)
+    const seenTitles = new Set<string>();
+    const deduplicatedNews = allNews.filter((item) => {
+      const lowerTitle = item.title.toLowerCase();
+      if (seenTitles.has(lowerTitle)) {
+        console.log(`Skipping duplicate within batch: ${item.title}`);
+        return false;
+      }
+      seenTitles.add(lowerTitle);
+      return true;
+    });
+
+    console.log(`After batch deduplication: ${deduplicatedNews.length} items`);
+
+    // Then: Check existing posts to avoid duplicate titles (all-time dedupe)
     const { data: existingPosts } = await supabase
       .from("blog_posts")
-      .select("title")
-      .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()); // Last 7 days
+      .select("title");
 
     const existingTitles = new Set((existingPosts || []).map((p) => p.title.toLowerCase()));
 
-    // Filter out duplicates
-    const newArticles = allNews.filter((item) => !existingTitles.has(item.title.toLowerCase()));
+    // Filter out duplicates by title
+    const newArticles = deduplicatedNews.filter((item) => !existingTitles.has(item.title.toLowerCase()));
 
     console.log(`New unique articles: ${newArticles.length}`);
 

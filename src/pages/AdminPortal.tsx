@@ -300,7 +300,7 @@ export default function AdminPortal() {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 p-4 lg:p-6">
+        <div className="flex-1 overflow-x-hidden p-3 sm:p-4 md:p-6">
           {activeSection === 'dashboard' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">

@@ -130,7 +130,7 @@ export default function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
@@ -148,7 +148,7 @@ export default function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
           </AlertDescription>
         </Alert>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           {/* Admin Token */}
           <div className="space-y-2">
             <Label htmlFor="token" className="text-sm font-medium">
@@ -170,7 +170,7 @@ export default function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
           </div>
 
           {/* Name Fields */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName" className="text-sm font-medium">
                 First Name *
@@ -308,7 +308,7 @@ export default function AddAdminModal({ isOpen, onClose }: AddAdminModalProps) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
             <Button
               type="button"
               variant="outline"

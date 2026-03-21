@@ -56,106 +56,179 @@ export function ExamDayVerification() {
 
   // Initialize camera when scanner opens
   useEffect(() => {
-    if (scannerOpen && videoRef.current) {
-      let stream: MediaStream | null = null;
-      let decodeInterval: NodeJS.Timeout | null = null;
-      let isScanning = true;
-      
-      const initializeScanner = async () => {
+    if (!scannerOpen) return;
+    
+    let stream: MediaStream | null = null;
+    let decodeInterval: NodeJS.Timeout | null = null;
+    let isScanning = true;
+    
+    const initializeScanner = async () => {
+      try {
+        if (!videoRef.current) {
+          console.error("Video ref not available");
+          return;
+        }
+        
+        console.log("Starting camera initialization...");
+        
+        // Initialize reader
+        const reader = new BrowserQRCodeReader();
+        readerRef.current = reader;
+        
+        // Try to get camera with flexible constraints
+        const constraints = {
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        };
+        
+        console.log("Requesting camera access with constraints:", constraints);
+        
         try {
-          // Initialize reader first
-          const reader = new BrowserQRCodeReader();
-          readerRef.current = reader;
-          
-          // Request camera permissions and get video stream
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          console.log("Camera access granted, stream obtained");
+        } catch (err: any) {
+          // Fallback to simpler constraints if specific ones fail
+          console.warn("Failed with primary constraints, trying fallback:", err.message);
           stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" },
+            video: true,
             audio: false,
           });
+          console.log("Camera access granted with fallback constraints");
+        }
+        
+        if (!isScanning || !videoRef.current) {
+          stream?.getTracks().forEach(track => track.stop());
+          return;
+        }
+        
+        // Set the stream to the video element
+        videoRef.current.srcObject = stream;
+        console.log("Stream assigned to video element");
+        
+        // Wait for video to be ready and start playing
+        const videoReady = new Promise<void>((resolve) => {
+          let attempts = 0;
+          const maxAttempts = 50; // 5 seconds max
           
-          if (!videoRef.current || !isScanning) return;
-          
-          // Set the stream to the video element
-          videoRef.current.srcObject = stream;
-          
-          // Ensure video plays before starting decode
-          await new Promise<void>((resolve) => {
-            const checkPlaying = () => {
-              if (videoRef.current && videoRef.current.readyState >= 2) {
-                // readyState 2 = HAVE_CURRENT_DATA
-                videoRef.current.play().catch(() => {
-                  // Video play may fail but we can still try to decode
-                });
-                resolve();
-              } else if (isScanning) {
-                setTimeout(checkPlaying, 100);
-              }
-            };
-            checkPlaying();
-          });
-          
-          if (!isScanning) return;
-          
-          // Start continuous decoding
-          decodeInterval = setInterval(async () => {
-            if (!videoRef.current || !isScanning || !readerRef.current) return;
+          const checkReady = () => {
+            attempts++;
+            if (!isScanning) {
+              resolve();
+              return;
+            }
             
-            try {
-              const result = await readerRef.current.decodeFromVideoElement(videoRef.current);
-              if (result) {
-                const text = result.getText().trim();
-                if (text && isScanning) {
-                  // Stop scanning after successful read
-                  isScanning = false;
-                  if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                  }
-                  if (decodeInterval) {
-                    clearInterval(decodeInterval);
-                  }
-                  if (videoRef.current) {
-                    videoRef.current.srcObject = null;
-                  }
-                  readerRef.current?.reset();
-                  handleQrResult(text);
+            if (videoRef.current?.readyState === 4) {
+              // HAVE_ENOUGH_DATA
+              console.log("Video ready, starting playback");
+              videoRef.current?.play().catch(err => {
+                console.warn("Video play error (may still work for scanning):", err);
+              });
+              resolve();
+            } else if (attempts < maxAttempts) {
+              setTimeout(checkReady, 100);
+            } else {
+              console.warn("Video took too long to be ready, proceeding anyway");
+              videoRef.current?.play().catch(err => {
+                console.warn("Video play error:", err);
+              });
+              resolve();
+            }
+          };
+          
+          checkReady();
+        });
+        
+        await videoReady;
+        
+        if (!isScanning) return;
+        
+        console.log("Starting QR code detection loop");
+        
+        // Start continuous decoding
+        decodeInterval = setInterval(async () => {
+          if (!videoRef.current || !isScanning || !readerRef.current) return;
+          
+          try {
+            const result = await readerRef.current.decodeFromVideoElement(videoRef.current);
+            if (result) {
+              const text = result.getText().trim();
+              if (text && isScanning) {
+                console.log("QR code detected:", text);
+                
+                // Stop scanning after successful read
+                isScanning = false;
+                if (stream) {
+                  stream.getTracks().forEach(track => track.stop());
                 }
-              }
-            } catch (err: any) {
-              // NotFoundException is expected when no QR code is in frame
-              // Only log actual errors
-              if (err.name !== "NotFoundException" && !err.message?.includes("NotFoundException")) {
-                console.debug("QR decode attempt:", err.message);
+                if (decodeInterval) {
+                  clearInterval(decodeInterval);
+                }
+                if (videoRef.current) {
+                  videoRef.current.srcObject = null;
+                }
+                readerRef.current?.reset();
+                handleQrResult(text);
               }
             }
-          }, 100); // Faster polling for better detection
-        } catch (error: any) {
-          console.error("Camera access error:", error);
-          toast({
-            title: "Camera access denied",
-            description: "Please enable camera permissions in your browser settings to use QR scanning.",
-            variant: "destructive",
-          });
-          setScannerOpen(false);
+          } catch (err: any) {
+            // NotFoundException is expected when no QR code is in frame
+            if (err.name !== "NotFoundException" && !err.message?.includes("NotFoundException")) {
+              console.debug("QR decode debug:", err.message);
+            }
+          }
+        }, 100); // Polling interval for detection
+        
+      } catch (error: any) {
+        console.error("Camera access error:", error);
+        console.error("Error name:", error.name);
+        console.error("Error message:", error.message);
+        
+        let describeerrors = "Please enable camera permissions in your browser settings.";
+        
+        if (error.name === "NotAllowedError") {
+          describeerrors = "Camera permission denied. Please enable it in browser settings.";
+        } else if (error.name === "NotFoundError") {
+          describeerrors = "No camera device found. Please check your device.";
+        } else if (error.name === "NotReadableError") {
+          describeerrors = "Camera is in use by another application.";
         }
-      };
-      
-      initializeScanner();
-      
-      return () => {
-        // Cleanup
-        isScanning = false;
-        if (stream) {
-          stream.getTracks().forEach(track => track.stop());
-        }
-        if (decodeInterval) {
-          clearInterval(decodeInterval);
-        }
-        if (videoRef.current) {
-          videoRef.current.srcObject = null;
-        }
-        readerRef.current?.reset();
-      };
-    }
+        
+        toast({
+          title: "Camera access failed",
+          description: describeerrors,
+          variant: "destructive",
+        });
+        setScannerOpen(false);
+      }
+    };
+    
+    // Small delay to ensure dialog is rendered before requesting camera
+    const timer = setTimeout(() => {
+      if (isScanning) {
+        initializeScanner();
+      }
+    }, 200);
+    
+    return () => {
+      // Cleanup
+      clearTimeout(timer);
+      isScanning = false;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      if (decodeInterval) {
+        clearInterval(decodeInterval);
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+      readerRef.current?.reset();
+      console.log("QR scanner cleanup complete");
+    };
   }, [scannerOpen]);
 
   const fetchData = async () => {
@@ -581,31 +654,47 @@ export function ExamDayVerification() {
             <DialogTitle>Scan QR Code</DialogTitle>
             <DialogDescription>Point your camera at the student's admit slip QR code.</DialogDescription>
           </DialogHeader>
-          <div className="w-full bg-black rounded-lg overflow-hidden relative">
-            <video 
-              ref={videoRef}
-              style={{ 
-                width: "100%", 
-                height: "400px",
-                objectFit: "cover",
-                display: "block"
-              }}
-              autoPlay
-              muted
-              playsInline
-              webkit-playsinline="true"
-            />
-            <div className="absolute inset-0 border-2 border-yellow-400 pointer-events-none rounded-lg" 
-              style={{
-                backgroundImage: "linear-gradient(0deg, rgba(255, 224, 0, 0.1) 1px, transparent 1px)",
-                backgroundSize: "100% 20px",
-                opacity: 0.3
-              }}
-            />
+          <div className="space-y-2">
+            <div className="w-full bg-black rounded-lg overflow-hidden relative" style={{ aspectRatio: "4/3" }}>
+              <video 
+                ref={videoRef}
+                autoPlay
+                muted
+                playsInline
+                webkit-playsinline="true"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  backgroundColor: "#000",
+                  display: "block",
+                }}
+              />
+              {/* Scanning overlay */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-64 h-64 border-4 border-yellow-400 rounded-lg opacity-50" />
+              </div>
+              {/* Animated scan line */}
+              <div 
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage: "linear-gradient(0deg, rgba(255, 224, 0, 0.3) 2px, transparent 2px)",
+                  backgroundSize: "100% 20px",
+                  animation: "pulse 2s ease-in-out infinite"
+                }}
+              />
+            </div>
+            <div className="text-xs text-muted-foreground text-center space-y-1">
+              <p>Align the QR code within the frame</p>
+              <p>Auto-scanning in progress...</p>
+            </div>
           </div>
-          <div className="text-xs text-muted-foreground text-center">
-            Align the QR code within the frame. Scanning...
-          </div>
+          <style>{`
+            @keyframes pulse {
+              0%, 100% { opacity: 0.3; }
+              50% { opacity: 0.8; }
+            }
+          `}</style>
         </DialogContent>
       </Dialog>
     </div>
