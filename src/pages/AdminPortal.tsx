@@ -77,6 +77,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import ResultManager from '@/components/admin/ResultManager';
 
 export default function AdminPortal() {
   const { user, isAdmin, signOut } = useAuth();
@@ -173,6 +174,7 @@ export default function AdminPortal() {
     { key: 'exams', label: 'Exam Control', icon: BookOpen },
     { key: 'questions', label: 'Question Bank', icon: FileText },
     { key: 'subjects', label: 'Subject Management', icon: BookOpen },
+    { key: 'results', label: 'Result Management', icon: BarChart3 },
     { key: 'resources', label: 'Resources', icon: Upload },
     { key: 'security', label: 'Security Center', icon: Lock },
     { key: 'analytics', label: 'Analytics Hub', icon: BarChart3 },
