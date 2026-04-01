@@ -70,6 +70,7 @@ import { AkboyInquiriesManager } from '@/components/admin/AkboyInquiriesManager'
 import { AkboyTutorialsManager } from '@/components/admin/AkboyTutorialsManager';
 import { AkboyRegistrationsManager } from '@/components/admin/AkboyRegistrationsManager';
 import MockExamManager from '@/components/admin/MockExamManager';
+import MockResultsManager from '@/components/admin/MockResultsManager';
 import SubjectManager from '@/components/admin/SubjectManager';
 import { MockExamDashboard } from '@/components/admin/MockExamDashboard';
 import { ExamDayVerification } from '@/components/admin/ExamDayVerification';
