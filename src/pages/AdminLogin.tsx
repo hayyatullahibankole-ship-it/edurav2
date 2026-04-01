@@ -122,7 +122,7 @@ export default function AdminLogin() {
         });
 
         // Navigate immediately since auth state will handle the rest
-        navigate('/admin', { replace: true });
+        navigate('/#/admin', { replace: true });
       }
     } catch (error) {
       console.error('Login process error:', error);
