@@ -191,6 +191,7 @@ export default function AdminPortal() {
     { key: 'akboy-tutorials', label: 'AKBOY Tutorials', icon: TutorialIcon },
     { key: 'akboy-registrations', label: 'AKBOY Registrations', icon: ClipboardList },
     { key: 'mock-exam', label: 'Mock Exam', icon: FileText },
+    { key: 'mock-results', label: 'Mock Results', icon: GraduationCap },
     { key: 'mock-dashboard', label: 'Student Batches', icon: Users },
     { key: 'exam-verification', label: 'Verify Students', icon: CheckCircle },
     { key: 'settings', label: 'System Config', icon: Settings },
