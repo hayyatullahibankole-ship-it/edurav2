@@ -104,6 +104,7 @@ const Dashboard = () => {
   const [schoolInfo, setSchoolInfo] = useState<any>(null);
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [blockedFeatureName, setBlockedFeatureName] = useState('');
+  const [showMockResult, setShowMockResult] = useState(false);
 
   // Check if user is on mobile browser (not installed app)
   const isMobileBrowser = isMobile && !isInstalledApp;
