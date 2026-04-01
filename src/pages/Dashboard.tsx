@@ -60,6 +60,8 @@ import SchoolAvailableExams from "@/components/school/SchoolAvailableExams";
 import { PromoCodeActivation } from "@/components/dashboard/PromoCodeActivation";
 import { FreeAccessBanner } from "@/components/dashboard/FreeAccessBanner";
 import { InstallRequiredModal } from "@/components/InstallRequiredModal";
+import MockResultChecker from "@/components/MockResultChecker";
+import { ArrowLeft } from "lucide-react";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -102,6 +104,7 @@ const Dashboard = () => {
   const [schoolInfo, setSchoolInfo] = useState<any>(null);
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [blockedFeatureName, setBlockedFeatureName] = useState('');
+  const [showMockResult, setShowMockResult] = useState(false);
 
   // Check if user is on mobile browser (not installed app)
   const isMobileBrowser = isMobile && !isInstalledApp;
@@ -463,6 +466,33 @@ const Dashboard = () => {
                   </Card>
                 </div>
               </div>
+
+              {/* Check Mock Result */}
+              {showMockResult ? (
+                <div className="space-y-4">
+                  <Button variant="outline" onClick={() => setShowMockResult(false)} className="gap-2">
+                    <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+                  </Button>
+                  <MockResultChecker />
+                </div>
+              ) : (
+              <>
+              <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-accent/5">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Award className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">2026 Mock Examination</h3>
+                      <p className="text-sm text-muted-foreground">Check your WAEC-style mock result</p>
+                    </div>
+                  </div>
+                  <Button onClick={() => setShowMockResult(true)} className="gap-2">
+                    <FileText className="h-4 w-4" /> Check Mock Result
+                  </Button>
+                </CardContent>
+              </Card>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                 {/* Main Content */}
@@ -945,6 +975,8 @@ const Dashboard = () => {
                   </Link>
                 </div>
               </div>
+              </>
+              )}
             </TabsContent>
 
             <TabsContent value="profile" className="mt-8">

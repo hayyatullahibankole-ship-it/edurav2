@@ -3817,6 +3817,71 @@ export type Database = {
           },
         ]
       }
+      waec_mock_results: {
+        Row: {
+          created_at: string
+          exam_year: string
+          grade: string
+          id: string
+          remark: string
+          school_name: string
+          score: number
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exam_year?: string
+          grade: string
+          id?: string
+          remark: string
+          school_name?: string
+          score: number
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          exam_year?: string
+          grade?: string
+          id?: string
+          remark?: string
+          school_name?: string
+          score?: number
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waec_mock_results_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      waec_result_settings: {
+        Row: {
+          id: string
+          result_published: boolean
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          result_published?: boolean
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          result_published?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       wallet_transactions: {
         Row: {
           amount: number
@@ -4374,6 +4439,14 @@ export type Database = {
       }
       increment_students_added: {
         Args: { school_id_param: string }
+        Returns: undefined
+      }
+      insert_manual_result: {
+        Args: {
+          student_id: string
+          subjects: Json
+          time_taken_minutes?: number
+        }
         Returns: undefined
       }
       is_account_locked: { Args: { user_email: string }; Returns: boolean }
