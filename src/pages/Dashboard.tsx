@@ -60,6 +60,8 @@ import SchoolAvailableExams from "@/components/school/SchoolAvailableExams";
 import { PromoCodeActivation } from "@/components/dashboard/PromoCodeActivation";
 import { FreeAccessBanner } from "@/components/dashboard/FreeAccessBanner";
 import { InstallRequiredModal } from "@/components/InstallRequiredModal";
+import MockResultChecker from "@/components/MockResultChecker";
+import { ArrowLeft } from "lucide-react";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
