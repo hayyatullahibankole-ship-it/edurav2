@@ -514,10 +514,11 @@ export default function AdminPortal() {
           {activeSection === 'akboy-registrations' && <AkboyRegistrationsManager />}
 
           {activeSection === 'mock-exam' && <MockExamManager />}
+          {activeSection === 'mock-results' && <MockResultsManager />}
           {activeSection === 'mock-dashboard' && <MockExamDashboard />}
           {activeSection === 'exam-verification' && <ExamDayVerification />}
 
-          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'subjects', 'security', 'analytics', 'pricing', 'promos', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools', 'mock-exam', 'mock-dashboard', 'exam-verification'].includes(activeSection) && (
+          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'subjects', 'security', 'analytics', 'pricing', 'promos', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools', 'mock-exam', 'mock-results', 'mock-dashboard', 'exam-verification'].includes(activeSection) && (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
