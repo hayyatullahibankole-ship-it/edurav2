@@ -49,7 +49,7 @@ export default function AdminLogin() {
   }
 
   if (user && isAdmin) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/#/admin" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
