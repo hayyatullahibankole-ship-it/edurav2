@@ -4376,6 +4376,14 @@ export type Database = {
         Args: { school_id_param: string }
         Returns: undefined
       }
+      insert_manual_result: {
+        Args: {
+          student_id: string
+          subjects: Json
+          time_taken_minutes?: number
+        }
+        Returns: undefined
+      }
       is_account_locked: { Args: { user_email: string }; Returns: boolean }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_school_admin: {
