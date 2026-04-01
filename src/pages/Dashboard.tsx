@@ -972,6 +972,8 @@ const Dashboard = () => {
                   </Link>
                 </div>
               </div>
+              </>
+              )}
             </TabsContent>
 
             <TabsContent value="profile" className="mt-8">
