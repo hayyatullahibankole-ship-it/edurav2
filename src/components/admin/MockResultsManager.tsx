@@ -144,22 +144,30 @@ export default function MockResultsManager() {
   };
 
   const handleSaveStudentResults = async () => {
-    if (!selectedStudent) return;
+    if (!selectedStudent || !selectedStudent.id) return;
     setSaving(true);
     try {
-      const rows = selectedSubjects.map(subject => {
-        const score = parseInt(scores[subject] || '0');
-        const { grade, remark } = getGradeRemark(score);
-        return {
-          user_id: selectedStudent.id,
-          subject,
-          score,
-          grade,
-          remark,
-          exam_year: '2026 MOCK',
-          school_name: 'AL-BARI COLLEGE',
-        };
-      });
+      const rows = selectedSubjects
+        .filter(subject => scores[subject] !== undefined && scores[subject] !== '')
+        .map(subject => {
+          const score = parseInt(scores[subject] || '0');
+          const { grade, remark } = getGradeRemark(score);
+          return {
+            user_id: selectedStudent.id,
+            subject,
+            score,
+            grade,
+            remark,
+            exam_year: '2026 MOCK',
+            school_name: 'AL-BARI COLLEGE',
+          };
+        });
+
+      if (rows.length === 0) {
+        toast({ title: 'Error', description: 'Please enter scores for at least one subject', variant: 'destructive' });
+        setSaving(false);
+        return;
+      }
 
       const { error } = await supabase.from('waec_mock_results').upsert(rows as any, { onConflict: 'user_id,subject,exam_year' });
       if (error) throw error;
@@ -210,19 +218,27 @@ export default function MockResultsManager() {
     if (!selectedSubject) return;
     setSaving(true);
     try {
-      const rows = selectedStudentIds.map(userId => {
-        const score = parseInt(subjectScores[userId] || '0');
-        const { grade, remark } = getGradeRemark(score);
-        return {
-          user_id: userId,
-          subject: selectedSubject.name,
-          score,
-          grade,
-          remark,
-          exam_year: '2026 MOCK',
-          school_name: 'AL-BARI COLLEGE',
-        };
-      });
+      const rows = selectedStudentIds
+        .filter(userId => userId && userId.trim() !== '')
+        .map(userId => {
+          const score = parseInt(subjectScores[userId] || '0');
+          const { grade, remark } = getGradeRemark(score);
+          return {
+            user_id: userId,
+            subject: selectedSubject.name,
+            score,
+            grade,
+            remark,
+            exam_year: '2026 MOCK',
+            school_name: 'AL-BARI COLLEGE',
+          };
+        });
+
+      if (rows.length === 0) {
+        toast({ title: 'Error', description: 'No valid students selected', variant: 'destructive' });
+        setSaving(false);
+        return;
+      }
 
       const { error } = await supabase.from('waec_mock_results').upsert(rows as any, { onConflict: 'user_id,subject,exam_year' });
       if (error) throw error;
