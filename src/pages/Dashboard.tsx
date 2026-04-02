@@ -1190,6 +1190,8 @@ const Dashboard = () => {
                     </CardContent>
                   </Card>
                 )}
+                </>
+                )}
               </TabsContent>
 
               <TabsContent value="profile" className="mt-0">
