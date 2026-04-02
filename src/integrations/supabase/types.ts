@@ -2367,7 +2367,7 @@ export type Database = {
           },
         ]
       }
-      roles: {
+      role: {
         Row: {
           created_at: string | null
           id: string

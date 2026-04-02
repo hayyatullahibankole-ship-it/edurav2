@@ -59,7 +59,7 @@ export function ExamDayVerification() {
     if (!scannerOpen) return;
     
     let stream: MediaStream | null = null;
-    let decodeInterval: NodeJS.Timeout | null = null;
+    let decodeInterval: ReturnType<typeof setInterval> | null = null;
     let isScanning = true;
     
     const initializeScanner = async () => {
