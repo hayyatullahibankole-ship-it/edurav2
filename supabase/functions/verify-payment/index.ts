@@ -199,13 +199,19 @@ serve(async (req) => {
             .eq('payment_reference', reference)
             .maybeSingle();
 
+          const newSeats = parseInt(transaction.metadata.student_seats) || 50;
+          const currentMaxStudents = school.max_students || 0;
+
           if (existingSub) {
-            console.log('Updating existing subscription:', existingSub.id);
-            // Update existing subscription
+            console.log('Updating existing subscription, adding', newSeats, 'seats to existing', existingSub.student_seats);
+            // Add new seats to existing subscription
+            const updatedSeats = (existingSub.student_seats || 0) + newSeats;
             await supabaseClient
               .from('school_subscriptions')
               .update({ 
                 status: 'ACTIVE',
+                student_seats: updatedSeats,
+                total_amount: (existingSub.total_amount || 0) + (transaction.amount / 100),
                 start_date: startDate.toISOString(),
                 end_date: endDate.toISOString()
               })
@@ -217,11 +223,11 @@ serve(async (req) => {
               .from('school_subscriptions')
               .insert({
                 school_id: school.id,
-                student_seats: transaction.metadata.student_seats || 50,
+                student_seats: newSeats,
                 price_per_student: transaction.metadata.price_per_student || 1000,
                 total_amount: transaction.amount / 100,
                 status: 'ACTIVE',
-                admin_user_id: userRecord?.id, // Use profile ID, not auth ID
+                admin_user_id: userRecord?.id,
                 start_date: startDate.toISOString(),
                 end_date: endDate.toISOString(),
                 payment_reference: reference,
@@ -235,12 +241,13 @@ serve(async (req) => {
             }
           }
 
-          // Activate the school regardless of subscription creation result
+          // Activate the school and ADD new seats to existing max_students
+          const updatedMaxStudents = currentMaxStudents + newSeats;
           const { error: activateError } = await supabaseClient
             .from('schools')
             .update({ 
               is_active: true,
-              max_students: transaction.metadata.student_seats || school.max_students
+              max_students: updatedMaxStudents
             })
             .eq('id', school.id);
           
