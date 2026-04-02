@@ -22,7 +22,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
 
   // Validate session on mount and periodically (but not during exams or for admins)
   useEffect(() => {
-    let intervalId: NodeJS.Timeout | undefined;
+    let intervalId: ReturnType<typeof setInterval> | undefined;
     let sessionTimeoutId: ReturnType<typeof setTimeout> | undefined;
     let roleTimeoutId: ReturnType<typeof setTimeout> | undefined;
 

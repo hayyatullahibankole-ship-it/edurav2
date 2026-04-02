@@ -89,7 +89,7 @@ export function validateInput(input: string, type: 'email' | 'url' | 'text' | 'a
 
 // Security event logging (client-side for development)
 export function logSecurityEvent(event: string, details: Record<string, any> = {}) {
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.warn('🔒 Security Event:', event, details);
   }
   

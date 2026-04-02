@@ -61,7 +61,7 @@ export function constantTimeEquals(a: string, b: string): boolean {
 
 // Log security events (client-side logging for development)
 export function logSecurityEvent(event: string, details: any = {}) {
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.warn('Security Event:', event, details);
   }
   
