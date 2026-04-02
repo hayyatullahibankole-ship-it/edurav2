@@ -194,9 +194,11 @@ serve(async (req) => {
           // Check if subscription already exists for this school
           const { data: existingSub } = await supabaseClient
             .from('school_subscriptions')
-            .select('id, status')
+            .select('id, status, student_seats, total_amount')
             .eq('school_id', school.id)
-            .eq('payment_reference', reference)
+            .eq('status', 'ACTIVE')
+            .order('created_at', { ascending: false })
+            .limit(1)
             .maybeSingle();
 
           const newSeats = parseInt(transaction.metadata.student_seats) || 50;
