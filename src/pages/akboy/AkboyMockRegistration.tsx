@@ -367,7 +367,7 @@ export default function AkboyMockRegistration() {
                     </div>
                   ))}
                 </div>
-                <p className="text-center text-xs mt-3 opacity-90">Deadline: March 20, 2026 at 11:59 PM</p>
+                <p className="text-center text-xs mt-3 opacity-90">Deadline: April 4, 2026 at 11:59 PM</p>
               </CardContent>
             </Card>
           ) : (
