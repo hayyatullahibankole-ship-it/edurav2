@@ -54,7 +54,7 @@ export default function MockResultChecker() {
         .from('waec_result_settings')
         .select('result_published')
         .limit(1)
-        .single();
+        .maybeSingle();
 
       const isPublished = (settings as any)?.result_published || false;
       setPublished(isPublished);

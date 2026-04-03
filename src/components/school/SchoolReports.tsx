@@ -40,6 +40,23 @@ interface StudentReport {
   attempts: StudentAttempt[];
 }
 
+function calculateAverageFromAttempts(attempts: StudentAttempt[]) {
+  const validAttempts = attempts.filter(a => a.results?.percentage);
+  if (validAttempts.length === 0) return 0;
+  const sum = validAttempts.reduce((acc, a) => acc + (a.results?.percentage || 0), 0);
+  return sum / validAttempts.length;
+}
+
+function getOrdinalLabel(position: number) {
+  const mod10 = position % 10;
+  const mod100 = position % 100;
+
+  if (mod10 === 1 && mod100 !== 11) return `${position}st`;
+  if (mod10 === 2 && mod100 !== 12) return `${position}nd`;
+  if (mod10 === 3 && mod100 !== 13) return `${position}rd`;
+  return `${position}th`;
+}
+
 export default function SchoolReports({ schoolId }: Props) {
   const [reports, setReports] = useState<StudentReport[]>([]);
   const [schoolSubjects, setSchoolSubjects] = useState<Array<any>>([]);
@@ -226,12 +243,24 @@ export default function SchoolReports({ schoolId }: Props) {
     return "bg-red-500";
   };
 
-  const calculateAverage = (attempts: StudentAttempt[]) => {
-    const validAttempts = attempts.filter(a => a.results?.percentage);
-    if (validAttempts.length === 0) return 0;
-    const sum = validAttempts.reduce((acc, a) => acc + (a.results?.percentage || 0), 0);
-    return sum / validAttempts.length;
-  };
+  const rankedReports = [...reports]
+    .map((student) => {
+      const avgScore = calculateAverageFromAttempts(student.attempts || []);
+      const totalAttempts = student.attempts?.length || 0;
+      const subjectPerformance = getSubjectPerformance(student);
+
+      return {
+        student,
+        avgScore,
+        totalAttempts,
+        subjectPerformance,
+      };
+    })
+    .sort((a, b) => {
+      if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
+      if (b.totalAttempts !== a.totalAttempts) return b.totalAttempts - a.totalAttempts;
+      return a.student.full_name.localeCompare(b.student.full_name);
+    });
 
   return (
     <Card>
@@ -239,7 +268,7 @@ export default function SchoolReports({ schoolId }: Props) {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Student Performance Reports</CardTitle>
-            <CardDescription>View detailed test scores per student and per subject</CardDescription>
+            <CardDescription>View ranked student performance from first position to last position</CardDescription>
           </div>
           <div className="flex items-center gap-2">
             <Tabs value={viewMode} onValueChange={(v: any) => setViewMode(v)} className="w-auto">
@@ -269,10 +298,46 @@ export default function SchoolReports({ schoolId }: Props) {
           </div>
         ) : (
           <div className="space-y-2">
-            {reports.map((student) => {
-              const avgScore = calculateAverage(student.attempts || []);
-              const totalAttempts = student.attempts?.length || 0;
-              const subjectPerformance = getSubjectPerformance(student);
+            <Card className="border-border/60">
+              <CardHeader>
+                <CardTitle className="text-base">Performance Ranking</CardTitle>
+                <CardDescription>Students ordered by average performance across submitted tests</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Position</TableHead>
+                      <TableHead>Student</TableHead>
+                      <TableHead>Class</TableHead>
+                      <TableHead>Average</TableHead>
+                      <TableHead>Tests</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rankedReports.map(({ student, avgScore, totalAttempts }, index) => (
+                      <TableRow key={`ranking-${student.id}`}>
+                        <TableCell>
+                          <Badge variant={index < 3 ? 'default' : 'secondary'}>
+                            {getOrdinalLabel(index + 1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-medium">{student.full_name}</TableCell>
+                        <TableCell>{student.class_level || 'No class'}</TableCell>
+                        <TableCell>
+                          <Badge variant={getScoreColor(avgScore)}>
+                            {avgScore.toFixed(1)}%
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{totalAttempts}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            {rankedReports.map(({ student, avgScore, totalAttempts, subjectPerformance }, index) => {
 
               return (
                 <Collapsible
@@ -291,6 +356,9 @@ export default function SchoolReports({ schoolId }: Props) {
                               ) : (
                                 <ChevronRight className="h-5 w-5 text-muted-foreground" />
                               )}
+                              <Badge variant={index < 3 ? 'default' : 'secondary'}>
+                                {getOrdinalLabel(index + 1)}
+                              </Badge>
                               <div className="text-left">
                                 <CardTitle className="text-lg">{student.full_name}</CardTitle>
                                 <CardDescription>

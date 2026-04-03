@@ -69,23 +69,45 @@ export default function MockResultsManager() {
     loadData();
   }, []);
 
+  const ensureSettingsRecord = async () => {
+    const { data: existing, error: existingError } = await supabase
+      .from('waec_result_settings')
+      .select('id, result_published')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingError) throw existingError;
+    if (existing) return existing;
+
+    const { data: inserted, error: insertError } = await supabase
+      .from('waec_result_settings')
+      .insert({ result_published: false } as any)
+      .select('id, result_published')
+      .single();
+
+    if (insertError) throw insertError;
+    return inserted;
+  };
+
   const loadData = async () => {
     setLoading(true);
     try {
       const [studentsRes, subjectsRes, settingsRes] = await Promise.all([
         supabase.rpc('get_users_masked'),
         supabase.from('subjects').select('id, name').eq('is_active', true).order('name'),
-        supabase.from('waec_result_settings').select('*').limit(1).single(),
+        ensureSettingsRecord(),
       ]);
 
       if (studentsRes.data) setStudents(studentsRes.data as any);
       if (subjectsRes.data) setSubjects(subjectsRes.data);
-      if (settingsRes.data) {
-        setPublished((settingsRes.data as any).result_published);
-        setSettingsId((settingsRes.data as any).id);
+      if (settingsRes) {
+        setPublished((settingsRes as any).result_published);
+        setSettingsId((settingsRes as any).id);
       }
     } catch (e) {
       console.error(e);
+      toast({ title: 'Error', description: 'Failed to load mock results settings', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -93,15 +115,21 @@ export default function MockResultsManager() {
 
   const togglePublish = async () => {
     const newVal = !published;
-    const { error } = await supabase
-      .from('waec_result_settings')
-      .update({ result_published: newVal } as any)
-      .eq('id', settingsId);
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
+    try {
+      const settings = settingsId ? { id: settingsId } : await ensureSettingsRecord();
+
+      const { error } = await supabase
+        .from('waec_result_settings')
+        .update({ result_published: newVal } as any)
+        .eq('id', settings.id);
+
+      if (error) throw error;
+
       setPublished(newVal);
+      setSettingsId(settings.id);
       toast({ title: newVal ? 'Results Published' : 'Results Unpublished', description: newVal ? 'Students can now view their results' : 'Results hidden from students' });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
   };
 
