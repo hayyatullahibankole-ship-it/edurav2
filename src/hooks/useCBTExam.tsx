@@ -270,7 +270,7 @@ export const useCBTExam = (attemptId: string | null) => {
     setAnswers(prev => ({ ...prev, [questionId]: displayIndex }));
   }, []);
 
-  // Submit exam - optimized for speed
+  // Submit exam - optimized for speed with chunked inserts to avoid statement timeout
   const submitExam = useCallback(async (timeSpentSeconds: number) => {
     if (!attemptId || submitting) return;
 
@@ -285,7 +285,6 @@ export const useCBTExam = (attemptId: string | null) => {
         if (displayIndex === undefined) return [] as any[];
 
         const originalIndex = question.originalIndexMap[displayIndex];
-        // Guard against invalid indices or NaN which can break JSON casts server-side
         if (!Number.isInteger(originalIndex) || originalIndex < 0 || originalIndex >= question.options.length) {
           return [] as any[];
         }
@@ -294,61 +293,72 @@ export const useCBTExam = (attemptId: string | null) => {
           {
             attempt_id: attemptId,
             question_id: question.id,
-            // Store as a JSON number; validator supports numbers and strings
             answer: originalIndex as any,
           },
         ];
       });
 
-      console.log('Submitting answers:', { attemptId, totalQuestions: questions.length, answered: answersToSubmit.length, sample: answersToSubmit.slice(0,3) });
+      console.log('Submitting answers:', { attemptId, totalQuestions: questions.length, answered: answersToSubmit.length });
 
-      // Submit answers if any were provided
+      // Submit answers in small batches to avoid statement timeout under heavy DB load
       if (answersToSubmit.length > 0) {
-        const { error: answersError } = await supabase
-          .from('attempt_answers')
-          .upsert(answersToSubmit, { onConflict: 'attempt_id,question_id' });
-
-         if (answersError) {
-            console.error('answers upsert error:', answersError);
-            throw answersError;
-         }
+        const BATCH_SIZE = 20;
+        for (let i = 0; i < answersToSubmit.length; i += BATCH_SIZE) {
+          const batch = answersToSubmit.slice(i, i + BATCH_SIZE);
+          let retries = 0;
+          let lastError: any = null;
+          while (retries < 3) {
+            const { error: batchError } = await supabase
+              .from('attempt_answers')
+              .upsert(batch, { onConflict: 'attempt_id,question_id' });
+            if (!batchError) {
+              lastError = null;
+              break;
+            }
+            lastError = batchError;
+            const isTimeout = batchError.message?.toLowerCase().includes('timeout') ||
+                              batchError.message?.toLowerCase().includes('canceling statement') ||
+                              batchError.code === '57014';
+            if (!isTimeout) throw batchError;
+            retries++;
+            await new Promise(r => setTimeout(r, 1000 * retries));
+          }
+          if (lastError) throw lastError;
+        }
       }
 
-      // Update attempt status to SUBMITTED
-      const { error: attemptError } = await supabase
-        .from('attempts')
-        .update({
-          status: 'SUBMITTED',
-          submitted_at: new Date().toISOString()
-        })
-        .eq('id', attemptId);
+      // Update attempt status to SUBMITTED — also retry on timeout
+      let statusRetries = 0;
+      while (statusRetries < 3) {
+        const { error: attemptError } = await supabase
+          .from('attempts')
+          .update({
+            status: 'SUBMITTED',
+            submitted_at: new Date().toISOString()
+          })
+          .eq('id', attemptId);
 
-      if (attemptError) throw attemptError;
-
-      // Poll for computed results to avoid "not ready" race condition
-      const start = Date.now();
-      let hasResult = false;
-      while (Date.now() - start < 5000) { // up to 5s
-        const { data } = await supabase
-          .from('results')
-          .select('id')
-          .eq('attempt_id', attemptId)
-          .maybeSingle();
-        if (data?.id) { hasResult = true; break; }
-        await new Promise(r => setTimeout(r, 400));
+        if (!attemptError) break;
+        const isTimeout = attemptError.message?.toLowerCase().includes('timeout') ||
+                          attemptError.message?.toLowerCase().includes('canceling statement') ||
+                          attemptError.code === '57014';
+        if (!isTimeout) throw attemptError;
+        statusRetries++;
+        if (statusRetries >= 3) throw attemptError;
+        await new Promise(r => setTimeout(r, 1500 * statusRetries));
       }
 
       toast({
         title: 'Exam Submitted Successfully',
-        description: hasResult ? 'Loading results...' : 'Processing your results...'
+        description: 'Processing your results...'
       });
 
+      // Navigate immediately — results page already handles loading state
       navigate(`/results?attempt=${attemptId}`);
 
     } catch (error: any) {
       console.error('Submission error:', error);
       
-      // More detailed error message
       let errorMessage = 'Failed to submit exam. Please try again.';
       if (error?.message) {
         errorMessage = error.message;
