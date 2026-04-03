@@ -94,10 +94,10 @@ export default defineConfig(({ mode }) => {
           }
         ],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api/]
+        navigateFallbackDenylist: [/^\/api/, /^\/~oauth/]
       },
       devOptions: {
-        enabled: true,
+        enabled: false,
         type: 'module'
       }
     })
