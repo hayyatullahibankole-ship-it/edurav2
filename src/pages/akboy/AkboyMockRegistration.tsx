@@ -21,7 +21,7 @@ interface MockSubject {
   questions: number;
 }
 
-const REGISTRATION_DEADLINE = new Date("2026-04-04T23:59:59");
+const REGISTRATION_DEADLINE = new Date("2026-04-10T23:59:59");
 
 interface RegistrationResult {
   registrationNumber: string;
@@ -369,7 +369,7 @@ export default function AkboyMockRegistration() {
                     </div>
                   ))}
                 </div>
-                <p className="text-center text-xs mt-3 opacity-90">Deadline: April 4, 2026 at 11:59 PM</p>
+                <p className="text-center text-xs mt-3 opacity-90">Deadline: April 10, 2026 at 11:59 PM</p>
               </CardContent>
             </Card>
           ) : (
