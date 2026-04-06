@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { Loader2, Search, Trophy, TrendingUp, TrendingDown, Download, AlertCircle, Clock, GraduationCap, School } from "lucide-react";
+import { MockBrandBanner } from "@/components/MockBrandBanner";
 
 export default function AkboyMockResults() {
   const [regNumber, setRegNumber] = useState("");
