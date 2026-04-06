@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { MockCBTInterface } from "@/components/MockCBTInterface";
+import { MockBrandBanner } from "@/components/MockBrandBanner";
 import { CBTQuestion, CBTAnswers } from "@/hooks/useCBTExam";
 import { ExamNotYetAvailableModal } from "@/components/ExamNotYetAvailableModal";
 import { Button } from "@/components/ui/button";
@@ -230,6 +231,28 @@ export default function AkboyMockExam() {
     }
   };
 
+  // Persist answers to localStorage on every change
+  useEffect(() => {
+    if (regNumber && Object.keys(answers).length > 0) {
+      localStorage.setItem(`mock_exam_answers_${regNumber}`, JSON.stringify(answers));
+    }
+  }, [answers, regNumber]);
+
+  // Restore answers from localStorage on mount
+  useEffect(() => {
+    if (regNumber) {
+      const saved = localStorage.getItem(`mock_exam_answers_${regNumber}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Object.keys(parsed).length > 0) {
+            setAnswers(parsed);
+          }
+        } catch {}
+      }
+    }
+  }, [regNumber]);
+
   const selectAnswer = useCallback((questionId: string, optionIndex: number) => {
     setAnswers(prev => ({ ...prev, [questionId]: optionIndex }));
   }, []);
@@ -249,67 +272,121 @@ export default function AkboyMockExam() {
     
     setSubmitting(true);
 
-    try {
-      const attemptAnswers = rawQuestions.map((q) => {
-        const optionIndex = answers[q.id];
-        let selectedAnswer: string | null = null;
+    const attemptAnswers = rawQuestions.map((q) => {
+      const optionIndex = answers[q.id];
+      let selectedAnswer: string | null = null;
 
-        if (optionIndex !== undefined) {
-          const cbtQ = questions.find(cq => cq.id === q.id);
-          if (cbtQ) {
-            const originalIndex = cbtQ.originalIndexMap[optionIndex];
-            selectedAnswer = String.fromCharCode(65 + originalIndex);
-          }
+      if (optionIndex !== undefined) {
+        const cbtQ = questions.find(cq => cq.id === q.id);
+        if (cbtQ) {
+          const originalIndex = cbtQ.originalIndexMap[optionIndex];
+          selectedAnswer = String.fromCharCode(65 + originalIndex);
+        }
+      }
+
+      return {
+        question_id: q.id,
+        selected_answer: selectedAnswer,
+      };
+    });
+
+    // Save submission payload locally for offline resilience
+    const submissionPayload = {
+      attemptId,
+      regNumber,
+      attemptAnswers,
+      timestamp: new Date().toISOString(),
+    };
+    localStorage.setItem(`mock_exam_pending_${regNumber}`, JSON.stringify(submissionPayload));
+
+    const trySubmit = async (): Promise<boolean> => {
+      try {
+        const { data: answerResult, error: answersError } = await supabase
+          .rpc("submit_mock_exam_answers" as any, {
+            p_attempt_id: attemptId,
+            p_answers: attemptAnswers
+          });
+
+        if (answersError) {
+          console.error("Answer submission error:", answersError);
+          return false;
         }
 
-        return {
-          question_id: q.id,
-          selected_answer: selectedAnswer,
-        };
-      });
+        const answerData = answerResult as any;
+        if (answerData?.status !== 'success') {
+          console.error("Answer submission failed:", answerData?.message);
+          return false;
+        }
 
-      const { data: answerResult, error: answersError } = await supabase
-        .rpc("submit_mock_exam_answers" as any, {
-          p_attempt_id: attemptId,
-          p_answers: attemptAnswers
-        });
+        const { data: submitResult, error: statusError } = await supabase
+          .rpc("submit_mock_exam" as any, {
+            p_attempt_id: attemptId
+          });
 
-      if (answersError) {
-        toast.error("Failed to submit answers: " + answersError.message);
-        setSubmitting(false);
-        return;
+        if (statusError) {
+          console.error("Exam finalize error:", statusError);
+          return false;
+        }
+
+        const submitData = submitResult as any;
+        if (submitData?.status !== 'success') {
+          console.error("Exam finalize failed:", submitData?.message);
+          return false;
+        }
+
+        // Clear local storage on success
+        localStorage.removeItem(`mock_exam_answers_${regNumber}`);
+        localStorage.removeItem(`mock_exam_pending_${regNumber}`);
+        return true;
+      } catch (err) {
+        console.error("Submit network error:", err);
+        return false;
       }
+    };
 
-      const answerData = answerResult as any;
-      if (answerData?.status !== 'success') {
-        toast.error("Failed to submit answers: " + (answerData?.message || "Unknown error"));
-        setSubmitting(false);
-        return;
-      }
+    // Retry up to 3 times with backoff
+    let success = false;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      success = await trySubmit();
+      if (success) break;
+      await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+    }
 
-      const { data: submitResult, error: statusError } = await supabase
-        .rpc("submit_mock_exam" as any, {
-          p_attempt_id: attemptId
-        });
-
-      if (statusError) {
-        toast.error("Failed to finalize submission: " + statusError.message);
-        setSubmitting(false);
-        return;
-      }
-
-      const submitData = submitResult as any;
-      if (submitData?.status !== 'success') {
-        toast.error("Failed to finalize submission: " + (submitData?.message || "Unknown error"));
-        setSubmitting(false);
-        return;
-      }
-
+    if (success) {
       toast.success("Exam submitted successfully!");
       navigate(`${basePath}/mock-submitted?reg=${encodeURIComponent(regNumber)}`);
-    } catch (error: any) {
-      console.error("Submit error:", error);
-      toast.error(error?.message || "Failed to submit exam.");
+    } else {
+      // If all retries fail, wait for reconnection
+      toast.info("Your answers are saved locally. They will be submitted once your connection is restored.", { duration: 10000 });
+      
+      const retryOnReconnect = () => {
+        const retrySubmit = async () => {
+          const retrySuccess = await trySubmit();
+          if (retrySuccess) {
+            toast.success("Exam submitted successfully after reconnection!");
+            navigate(`${basePath}/mock-submitted?reg=${encodeURIComponent(regNumber)}`);
+          } else {
+            // Try again in 10 seconds
+            setTimeout(retrySubmit, 10000);
+          }
+        };
+        retrySubmit();
+        window.removeEventListener("online", retryOnReconnect);
+      };
+
+      if (navigator.onLine) {
+        // Online but server issues - retry in 10s
+        setTimeout(async () => {
+          const retrySuccess = await trySubmit();
+          if (retrySuccess) {
+            toast.success("Exam submitted successfully!");
+            navigate(`${basePath}/mock-submitted?reg=${encodeURIComponent(regNumber)}`);
+          }
+        }, 10000);
+      } else {
+        window.addEventListener("online", retryOnReconnect);
+      }
+      
       setSubmitting(false);
     }
   }, [attemptId, answers, rawQuestions, questions, navigate, basePath, regNumber, submitting]);
@@ -351,6 +428,7 @@ export default function AkboyMockExam() {
   return (
     <div className="relative">
       {reprintButton}
+      <MockBrandBanner />
       <MockCBTInterface
         questions={questions}
         answers={answers}

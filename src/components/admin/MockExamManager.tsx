@@ -379,7 +379,6 @@ export default function MockExamManager() {
           </Card>
         </TabsContent>
 
-        {/* Settings Tab */}
         <TabsContent value="settings">
           <Card>
             <CardHeader><CardTitle>Mock Exam Settings</CardTitle></CardHeader>
@@ -427,6 +426,86 @@ export default function MockExamManager() {
                   onChange={e => setSettings((p: any) => ({ ...p, exam_duration_minutes: e.target.value }))}
                   onBlur={() => updateSetting("exam_duration_minutes", settings.exam_duration_minutes)}
                 />
+              </div>
+
+              {/* Brand Customization */}
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  🏷️ Brand Customization
+                </h3>
+                <p className="text-sm text-muted-foreground">Configure external brand identity that appears across the mock exam platform.</p>
+                
+                <div className="flex items-center gap-3">
+                  <Switch
+                    checked={settings.brand_enabled === true || settings.brand_enabled === "true"}
+                    onCheckedChange={val => {
+                      setSettings((p: any) => ({ ...p, brand_enabled: val }));
+                      updateSetting("brand_enabled", val);
+                    }}
+                  />
+                  <Label>Enable Brand Banner</Label>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Brand Name</Label>
+                    <Input
+                      placeholder="e.g., XYZ Academy"
+                      value={settings.brand_name || ""}
+                      onChange={e => setSettings((p: any) => ({ ...p, brand_name: e.target.value }))}
+                      onBlur={() => updateSetting("brand_name", settings.brand_name || "")}
+                    />
+                  </div>
+                  <div>
+                    <Label>Brand Tagline</Label>
+                    <Input
+                      placeholder="e.g., Excellence in Education"
+                      value={settings.brand_tagline || ""}
+                      onChange={e => setSettings((p: any) => ({ ...p, brand_tagline: e.target.value }))}
+                      onBlur={() => updateSetting("brand_tagline", settings.brand_tagline || "")}
+                    />
+                  </div>
+                  <div>
+                    <Label>Brand Logo URL</Label>
+                    <Input
+                      placeholder="https://example.com/logo.png"
+                      value={settings.brand_logo_url || ""}
+                      onChange={e => setSettings((p: any) => ({ ...p, brand_logo_url: e.target.value }))}
+                      onBlur={() => updateSetting("brand_logo_url", settings.brand_logo_url || "")}
+                    />
+                  </div>
+                  <div>
+                    <Label>Brand Color (hex)</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="#f97316"
+                        value={settings.brand_color || "#f97316"}
+                        onChange={e => setSettings((p: any) => ({ ...p, brand_color: e.target.value }))}
+                        onBlur={() => updateSetting("brand_color", settings.brand_color || "#f97316")}
+                      />
+                      <div
+                        className="w-10 h-10 rounded border shrink-0"
+                        style={{ backgroundColor: settings.brand_color || "#f97316" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {(settings.brand_enabled === true || settings.brand_enabled === "true") && settings.brand_name && (
+                  <div className="rounded-lg overflow-hidden border">
+                    <div className="py-3 px-4 flex items-center justify-center gap-3 text-white"
+                      style={{ backgroundColor: settings.brand_color || "#f97316" }}>
+                      {settings.brand_logo_url && (
+                        <img src={settings.brand_logo_url} alt="" className="h-8 w-auto object-contain rounded" />
+                      )}
+                      <div className="text-center">
+                        <p className="font-bold text-sm">{settings.brand_name}</p>
+                        {settings.brand_tagline && <p className="text-xs opacity-90">{settings.brand_tagline}</p>}
+                      </div>
+                    </div>
+                    <p className="text-xs text-center text-muted-foreground py-2">Banner Preview</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { Loader2, Search, Trophy, TrendingUp, TrendingDown, Download, AlertCircle, Clock, GraduationCap, School } from "lucide-react";
+import { MockBrandBanner } from "@/components/MockBrandBanner";
 
 export default function AkboyMockResults() {
   const [regNumber, setRegNumber] = useState("");
@@ -173,8 +174,9 @@ export default function AkboyMockResults() {
 
   return (
     <AkboyLayout title="Mock Exam Results" description="Check your AKBOY JAMB Mock Exam results">
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white py-8 px-4">
-        <div className="max-w-2xl mx-auto space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white">
+        <MockBrandBanner />
+        <div className="max-w-2xl mx-auto space-y-6 py-8 px-4">
           {/* Hero Header */}
           <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full text-sm font-medium">
