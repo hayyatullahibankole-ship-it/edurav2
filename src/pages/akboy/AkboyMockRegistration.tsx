@@ -335,8 +335,9 @@ export default function AkboyMockRegistration() {
 
   return (
     <AkboyLayout title="Mock Exam Registration" description="Register for the AKBOY JAMB Mock Examination">
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white py-8 px-4">
-        <div className="max-w-2xl mx-auto space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white">
+        <MockBrandBanner />
+        <div className="max-w-2xl mx-auto space-y-6 py-8 px-4">
           {/* Hero Header */}
           <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full text-sm font-medium">
