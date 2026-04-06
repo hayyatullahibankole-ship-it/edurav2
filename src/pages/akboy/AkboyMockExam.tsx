@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { MockCBTInterface } from "@/components/MockCBTInterface";
+import { MockBrandBanner } from "@/components/MockBrandBanner";
 import { CBTQuestion, CBTAnswers } from "@/hooks/useCBTExam";
 import { ExamNotYetAvailableModal } from "@/components/ExamNotYetAvailableModal";
 import { Button } from "@/components/ui/button";
@@ -351,6 +352,7 @@ export default function AkboyMockExam() {
   return (
     <div className="relative">
       {reprintButton}
+      <MockBrandBanner />
       <MockCBTInterface
         questions={questions}
         answers={answers}
