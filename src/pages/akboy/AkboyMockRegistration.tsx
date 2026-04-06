@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { BookOpen, CheckCircle2, Clock, MapPin, Phone, User, Mail, Loader2, Download, GraduationCap, School, Timer, XCircle } from "lucide-react";
+import { MockBrandBanner } from "@/components/MockBrandBanner";
 
 interface MockSubject {
   id: string;
@@ -70,7 +71,7 @@ export default function AkboyMockRegistration() {
     fullName: "",
     phone: "",
     email: "",
-    mode: "" as string,
+    mode: "physical" as string,
     selectedSubjects: [] as string[],
   });
 
@@ -460,25 +461,11 @@ export default function AkboyMockRegistration() {
                       </div>
                     </div>
 
-                    {/* Mode */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Exam Mode *</Label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {['virtual', 'physical'].map(mode => (
-                          <button key={mode} type="button"
-                            onClick={() => setForm(p => ({ ...p, mode }))}
-                            className={`p-4 rounded-xl border-2 text-center transition-all ${
-                              form.mode === mode
-                                ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm'
-                                : 'border-gray-200 hover:border-orange-300'
-                            }`}>
-                            <div className="font-semibold capitalize">{mode}</div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {mode === 'virtual' ? 'Take exam online' : 'Exam at venue'}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
+                    {/* Mode - Physical only */}
+                    <input type="hidden" value="physical" />
+                    <div className="p-3 rounded-xl border-2 border-orange-500 bg-orange-50 text-center">
+                      <div className="font-semibold text-orange-700">Physical</div>
+                      <div className="text-xs text-muted-foreground mt-1">Exam at venue</div>
                     </div>
 
                     {/* Subject Selection */}
@@ -519,7 +506,7 @@ export default function AkboyMockRegistration() {
                       className="w-full h-12 bg-orange-500 hover:bg-orange-600 font-semibold text-base"
                       disabled={loading}
                       onClick={() => {
-                        if (!form.fullName.trim() || !form.phone.trim() || !form.mode) {
+                        if (!form.fullName.trim() || !form.phone.trim()) {
                           toast.error("Please fill all required fields");
                           return;
                         }
@@ -527,16 +514,9 @@ export default function AkboyMockRegistration() {
                           toast.error("Select exactly 3 subjects");
                           return;
                         }
-                        if (form.mode === 'virtual') {
-                          toast.loading("Processing your registration...");
-                          handleSubmit();
-                          return;
-                        }
                         setStep(2);
                       }}>
-                      {loading && form.mode === 'virtual' ? (
-                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Registering...</>
-                      ) : form.mode === 'virtual' ? 'Complete Registration' : 'Continue to Payment'}
+                      Continue to Payment
                     </Button>
 
                     <div className="text-center">
