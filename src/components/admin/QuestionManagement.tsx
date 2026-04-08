@@ -414,19 +414,10 @@ export default function QuestionManagement() {
     }
   };
 
-  const filteredQuestions = questions.filter(question => {
-    const tags = Array.isArray(question.tags) ? question.tags : [];
-    const qText = (question.question_text || '').toString();
-    const matchesSearch = qText.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tags.some((tag: any) => String(tag).toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesSubject = selectedSubject === 'all' || question.subject_id === selectedSubject;
-    const matchesDifficulty = selectedDifficulty === 'all' || String(question.difficulty_level) === selectedDifficulty;
-    
-    return matchesSearch && matchesSubject && matchesDifficulty;
-  });
-
-  const activeQuestions = filteredQuestions.filter(q => q.is_active);
-  const inactiveQuestions = filteredQuestions.filter(q => !q.is_active);
+  // Server-side filtering now - questions are already filtered
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const activeQuestions = questions.filter(q => q.is_active);
+  const inactiveQuestions = questions.filter(q => !q.is_active);
 
   const getDifficultyLabel = (level: number) => {
     switch(level) {
