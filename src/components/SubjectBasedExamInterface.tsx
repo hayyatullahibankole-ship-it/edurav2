@@ -118,7 +118,7 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
   const handleAutoSubmit = useCallback(() => {
     if (hasAutoSubmittedRef.current) return;
     hasAutoSubmittedRef.current = true;
-    toast.info("Time is up! Your exam is being submitted automatically.");
+    toast({ title: "Time is up!", description: "Your exam is being submitted automatically." });
     const totalTime = duration * 60;
     const timeTaken = totalTime - timeLeft;
     onSubmit(answers, timeTaken);
