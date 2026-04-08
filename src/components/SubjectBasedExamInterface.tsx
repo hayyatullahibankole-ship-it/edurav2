@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -113,15 +113,16 @@ const SubjectBasedExamInterface: React.FC<ExamInterfaceProps> = ({
   const currentQuestion = currentSubjectData?.questions[currentQuestionInSubject];
   const globalQuestionIndex = currentQuestion ? currentQuestion.id - 1 : 0;
 
+  const hasAutoSubmittedRef = useRef(false);
+
   const handleAutoSubmit = useCallback(() => {
-    if (!subscriptionLoading && !canAccessPremium) {
-      setShowUpgradeDialog(true);
-      return;
-    }
+    if (hasAutoSubmittedRef.current) return;
+    hasAutoSubmittedRef.current = true;
+    toast({ title: "Time is up!", description: "Your exam is being submitted automatically." });
     const totalTime = duration * 60;
     const timeTaken = totalTime - timeLeft;
     onSubmit(answers, timeTaken);
-  }, [answers, duration, timeLeft, onSubmit, canAccessPremium, subscriptionLoading]);
+  }, [answers, duration, timeLeft, onSubmit]);
 
   // Timer effect with auto-submit on time expiry
   useEffect(() => {

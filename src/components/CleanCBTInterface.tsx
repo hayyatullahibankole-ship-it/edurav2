@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,10 +44,17 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
 
   const currentQuestion = questions[currentIndex];
 
-  // Timer
+  const hasAutoSubmittedRef = useRef(false);
+
+  // Timer with auto-submit
   useEffect(() => {
     if (timeLeft <= 0) {
-      handleSubmitClick();
+      if (!hasAutoSubmittedRef.current && !submitting) {
+        hasAutoSubmittedRef.current = true;
+        toast.info("Time is up! Your exam is being submitted automatically.");
+        const timeSpent = duration * 60;
+        onSubmit(timeSpent);
+      }
       return;
     }
 
@@ -55,7 +63,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft]);
+  }, [timeLeft, duration, onSubmit, submitting]);
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
