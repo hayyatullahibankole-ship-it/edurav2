@@ -61,13 +61,17 @@ interface Subject {
 export default function QuestionManagement() {
   const { toast } = useToast();
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
+  const [currentPage, setCurrentPage] = useState(0);
+  const PAGE_SIZE = 50;
   
   // Modal states
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -88,9 +92,19 @@ export default function QuestionManagement() {
     points: 1
   });
 
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(0);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Fetch when filters or page change
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentPage, debouncedSearch, selectedSubject, selectedDifficulty]);
 
   const fetchData = async () => {
     try {
