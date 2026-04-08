@@ -466,13 +466,52 @@ export default function MockExamManager() {
                     />
                   </div>
                   <div>
-                    <Label>Brand Logo URL</Label>
-                    <Input
-                      placeholder="https://example.com/logo.png"
-                      value={settings.brand_logo_url || ""}
-                      onChange={e => setSettings((p: any) => ({ ...p, brand_logo_url: e.target.value }))}
-                      onBlur={() => updateSetting("brand_logo_url", settings.brand_logo_url || "")}
-                    />
+                    <Label>Brand Logo</Label>
+                    <div className="space-y-2">
+                      {settings.brand_logo_url && (
+                        <div className="flex items-center gap-2">
+                          <img src={settings.brand_logo_url} alt="Brand logo" className="h-10 w-auto object-contain rounded border" />
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            setSettings((p: any) => ({ ...p, brand_logo_url: "" }));
+                            updateSetting("brand_logo_url", "");
+                          }}>Remove</Button>
+                        </div>
+                      )}
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          if (file.size > 2 * 1024 * 1024) {
+                            toast.error("Logo must be under 2MB");
+                            return;
+                          }
+                          try {
+                            toast.loading("Uploading logo...");
+                            const ext = file.name.split('.').pop();
+                            const fileName = `brand-logo-${Date.now()}.${ext}`;
+                            const { error: uploadErr } = await supabase.storage
+                              .from('brand-assets')
+                              .upload(fileName, file, { upsert: true });
+                            if (uploadErr) throw uploadErr;
+                            const { data: urlData } = supabase.storage
+                              .from('brand-assets')
+                              .getPublicUrl(fileName);
+                            const publicUrl = urlData.publicUrl;
+                            setSettings((p: any) => ({ ...p, brand_logo_url: publicUrl }));
+                            await updateSetting("brand_logo_url", publicUrl);
+                            toast.dismiss();
+                            toast.success("Logo uploaded successfully");
+                          } catch (err: any) {
+                            toast.dismiss();
+                            toast.error("Upload failed: " + (err.message || "Unknown error"));
+                          }
+                          e.target.value = '';
+                        }}
+                      />
+                      <p className="text-xs text-muted-foreground">Upload an image (max 2MB). JPG, PNG, or SVG recommended.</p>
+                    </div>
                   </div>
                   <div>
                     <Label>Brand Color (hex)</Label>
