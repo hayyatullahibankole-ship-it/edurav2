@@ -51,9 +51,12 @@ serve(async (req) => {
     const isPost = req.method === "POST";
     const body = isPost ? await req.json().catch(() => ({})) : {};
     const activeOnly = body.activeOnly !== false; // default true
-    const requestedLimit = typeof body.limit === "number" ? body.limit : 1000;
-    const limit = Math.min(requestedLimit, 1000); // PostgREST per-request cap
+    const requestedLimit = typeof body.limit === "number" ? body.limit : 50;
+    const limit = Math.min(requestedLimit, 1000);
     const offset = typeof body.offset === "number" ? Math.max(0, body.offset) : 0;
+    const subjectId = body.subject_id || null;
+    const searchTerm = body.search || null;
+    const difficulty = body.difficulty || null;
 
     const baseSelect = `id, question_text, type, options, correct_answer, explanation, difficulty_level, tags, subject_id, is_active, points, created_at`;
 
@@ -63,6 +66,9 @@ serve(async (req) => {
       .order("created_at", { ascending: false });
 
     if (activeOnly) query = query.eq("is_active", true);
+    if (subjectId) query = query.eq("subject_id", subjectId);
+    if (difficulty) query = query.eq("difficulty_level", Number(difficulty));
+    if (searchTerm) query = query.ilike("question_text", `%${searchTerm}%`);
 
     const { data, error, count } = await query.range(offset, offset + limit - 1);
 

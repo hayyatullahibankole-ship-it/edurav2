@@ -61,13 +61,17 @@ interface Subject {
 export default function QuestionManagement() {
   const { toast } = useToast();
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
+  const [currentPage, setCurrentPage] = useState(0);
+  const PAGE_SIZE = 50;
   
   // Modal states
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -88,178 +92,64 @@ export default function QuestionManagement() {
     points: 1
   });
 
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(0);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Fetch when filters or page change
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentPage, debouncedSearch, selectedSubject, selectedDifficulty]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       
-      // Fetch subjects first
-      console.log('Fetching subjects...');
-      const { data: subjectsData, error: subjectsError } = await supabase
-        .from('subjects')
-        .select('*')
-        .eq('is_active', true)
-        .order('name', { ascending: true });
-
-      if (subjectsError) {
-        console.error('Subjects error:', subjectsError);
-        toast({
-          title: "Error",
-          description: "Failed to load subjects: " + subjectsError.message,
-          variant: "destructive"
-        });
-        setSubjects([]);
-        setQuestions([]);
-        return;
-      }
-
-      console.log('Subjects loaded:', subjectsData?.length || 0);
-      setSubjects(subjectsData || []);
-
-      if (!subjectsData || subjectsData.length === 0) {
-        console.warn('No subjects found');
-        toast({
-          title: "Warning",
-          description: "No subjects found. Please create subjects first.",
-          variant: "destructive"
-        });
-        setQuestions([]);
-        return;
-      }
-
-      // For admin users, always try the edge function first since the regular query has RLS issues
-      console.log('Admin user detected - using admin edge function with pagination...');
-      try {
-        const pageSize = 1000; // Supabase PostgREST per-request cap
-        let offset = 0;
-        let all: any[] = [];
-
-        // First page
-        const first = await supabase.functions.invoke('admin-get-questions', {
-          body: { activeOnly: true, limit: pageSize, offset }
-        });
-        const fnError = first.error as any;
-        const fnData: any = first.data;
-
-        console.log('Edge function first page:', { count: fnData?.count, received: fnData?.questions?.length, fnError, offset });
-
-        if (fnError) {
-          console.error('Edge function error:', fnError);
-          throw new Error(fnError.message || 'Admin fetch failed');
-        }
-
-        const total: number = fnData?.count ?? 0;
-        all = (fnData?.questions as any[]) || [];
-        
-        console.log(`Initial batch loaded: ${all.length}/${total} questions`);
-        
-        // If there are more questions to fetch, continue pagination
-        if (total > pageSize) {
-          offset = pageSize; // Start from the next page
-          
-          while (offset < total && all.length < total) {
-            console.log(`Fetching next batch, offset: ${offset}, total needed: ${total}`);
-            
-            const next = await supabase.functions.invoke('admin-get-questions', {
-              body: { activeOnly: true, limit: pageSize, offset }
-            });
-            
-            if (next.error) {
-              console.error('Pagination fetch error:', next.error);
-              break;
-            }
-            
-            const nextBatch = ((next.data as any)?.questions || []) as any[];
-            console.log(`Received batch: ${nextBatch.length} questions`);
-            
-            if (nextBatch.length === 0) {
-              console.log('No more questions in batch, stopping pagination');
-              break;
-            }
-            
-            all = all.concat(nextBatch);
-            offset += nextBatch.length;
-            console.log(`Progress: ${all.length}/${total} questions loaded`);
-          }
-        }
-
-        console.log(`Final count: Loaded ${all.length} questions from edge function (expected: ${total})`);
-        setQuestions(all);
-
-        if (all.length === 0) {
-          toast({
-            title: "Info",
-            description: "No questions found. Start by creating some questions.",
-          });
-        } else {
-          toast({
-            title: "Success",
-            description: `Loaded ${all.length} questions successfully`,
-          });
-        }
-        return; // Success - exit early
-      } catch (fnCatch) {
-        console.error('Edge function failed, trying direct query:', fnCatch);
-        
-        // Fallback to direct query if edge function fails
-        console.log('Trying direct query as fallback...');
-        const { data: questionsData, error: questionsError } = await supabase
-          .from('questions')
-          .select(`
-            id,
-            question_text,
-            type,
-            options,
-            correct_answer,
-            explanation,
-            difficulty_level,
-            tags,
-            subject_id,
-            is_active,
-            points,
-            created_at
-          `)
+      // Fetch subjects first (only on initial load)
+      if (subjects.length === 0) {
+        const { data: subjectsData, error: subjectsError } = await supabase
+          .from('subjects')
+          .select('*')
           .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(5000);
+          .order('name', { ascending: true });
 
-        if (questionsError) {
-          console.error('Direct query also failed:', questionsError);
-          const msg = fnCatch instanceof Error ? fnCatch.message : 'Unknown error occurred';
-          toast({
-            title: 'Error Loading Data',
-            description: `Failed to load questions: ${msg}`,
-            variant: 'destructive'
-          });
+        if (subjectsError) {
+          toast({ title: "Error", description: "Failed to load subjects: " + subjectsError.message, variant: "destructive" });
+          setSubjects([]);
           setQuestions([]);
-        } else {
-          console.log('Direct query successful:', questionsData?.length || 0);
-          setQuestions(questionsData || []);
-          
-          if (!questionsData || questionsData.length === 0) {
-            toast({
-              title: "Info",
-              description: "No questions found. Start by creating some questions.",
-            });
-          }
+          return;
         }
+        setSubjects(subjectsData || []);
       }
-      
+
+      // Fetch questions with server-side pagination & filtering
+      const body: any = {
+        activeOnly: true,
+        limit: PAGE_SIZE,
+        offset: currentPage * PAGE_SIZE,
+      };
+      if (selectedSubject !== 'all') body.subject_id = selectedSubject;
+      if (selectedDifficulty !== 'all') body.difficulty = selectedDifficulty;
+      if (debouncedSearch.trim()) body.search = debouncedSearch.trim();
+
+      const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-get-questions', { body });
+
+      if (fnError) {
+        throw new Error((fnError as any).message || 'Failed to fetch questions');
+      }
+
+      const result = fnData as any;
+      setQuestions(result?.questions || []);
+      setTotalCount(result?.count ?? 0);
     } catch (error) {
       console.error('Error fetching data:', error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      toast({
-        title: "Error Loading Data", 
-        description: `Failed to load questions: ${errorMessage}`,
-        variant: "destructive"
-      });
-      
-      // Set empty arrays to prevent undefined errors
+      toast({ title: "Error", description: error instanceof Error ? error.message : "Failed to load questions", variant: "destructive" });
       setQuestions([]);
-      setSubjects([]);
     } finally {
       setLoading(false);
     }
@@ -524,19 +414,10 @@ export default function QuestionManagement() {
     }
   };
 
-  const filteredQuestions = questions.filter(question => {
-    const tags = Array.isArray(question.tags) ? question.tags : [];
-    const qText = (question.question_text || '').toString();
-    const matchesSearch = qText.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tags.some((tag: any) => String(tag).toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesSubject = selectedSubject === 'all' || question.subject_id === selectedSubject;
-    const matchesDifficulty = selectedDifficulty === 'all' || String(question.difficulty_level) === selectedDifficulty;
-    
-    return matchesSearch && matchesSubject && matchesDifficulty;
-  });
-
-  const activeQuestions = filteredQuestions.filter(q => q.is_active);
-  const inactiveQuestions = filteredQuestions.filter(q => !q.is_active);
+  // Server-side filtering now - questions are already filtered
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const activeQuestions = questions.filter(q => q.is_active);
+  const inactiveQuestions = questions.filter(q => !q.is_active);
 
   const getDifficultyLabel = (level: number) => {
     switch(level) {
@@ -820,8 +701,8 @@ export default function QuestionManagement() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Questions (DB)</p>
-                  <p className="text-2xl font-bold text-primary">{questions.length}</p>
+                  <p className="text-sm text-muted-foreground">Total Questions</p>
+                  <p className="text-2xl font-bold text-primary">{totalCount}</p>
                 </div>
                 <BookOpen className="w-8 h-8 text-primary" />
               </div>
@@ -890,7 +771,7 @@ export default function QuestionManagement() {
                 </div>
               </div>
               <div className="flex gap-3 items-center">
-                <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                <Select value={selectedSubject} onValueChange={(v) => { setSelectedSubject(v); setCurrentPage(0); }}>
                   <SelectTrigger className="w-40">
                     <SelectValue placeholder="All Subjects" />
                   </SelectTrigger>
@@ -903,7 +784,7 @@ export default function QuestionManagement() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                <Select value={selectedDifficulty} onValueChange={(v) => { setSelectedDifficulty(v); setCurrentPage(0); }}>
                   <SelectTrigger className="w-32">
                     <SelectValue placeholder="All Levels" />
                   </SelectTrigger>
@@ -918,6 +799,40 @@ export default function QuestionManagement() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Pagination Controls */}
+        {totalCount > PAGE_SIZE && (
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Showing {currentPage * PAGE_SIZE + 1}–{Math.min((currentPage + 1) * PAGE_SIZE, totalCount)} of {totalCount} questions
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 0 || loading}
+                    onClick={() => setCurrentPage(p => p - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm font-medium px-2">
+                    Page {currentPage + 1} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage >= totalPages - 1 || loading}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Questions List */}
         <Tabs defaultValue="active" className="space-y-4">
@@ -940,7 +855,14 @@ export default function QuestionManagement() {
           </TabsList>
 
           <TabsContent value="active">
-            {activeQuestions.length > 0 ? (
+            {loading ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+                  <h3 className="text-lg font-medium">Loading questions...</h3>
+                </CardContent>
+              </Card>
+            ) : activeQuestions.length > 0 ? (
               renderQuestionList(activeQuestions)
             ) : (
               <Card>
