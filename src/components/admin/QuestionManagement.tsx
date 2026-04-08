@@ -771,7 +771,7 @@ export default function QuestionManagement() {
                 </div>
               </div>
               <div className="flex gap-3 items-center">
-                <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                <Select value={selectedSubject} onValueChange={(v) => { setSelectedSubject(v); setCurrentPage(0); }}>
                   <SelectTrigger className="w-40">
                     <SelectValue placeholder="All Subjects" />
                   </SelectTrigger>
@@ -784,7 +784,7 @@ export default function QuestionManagement() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                <Select value={selectedDifficulty} onValueChange={(v) => { setSelectedDifficulty(v); setCurrentPage(0); }}>
                   <SelectTrigger className="w-32">
                     <SelectValue placeholder="All Levels" />
                   </SelectTrigger>
