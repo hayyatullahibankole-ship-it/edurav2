@@ -701,8 +701,8 @@ export default function QuestionManagement() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Questions (DB)</p>
-                  <p className="text-2xl font-bold text-primary">{questions.length}</p>
+                  <p className="text-sm text-muted-foreground">Total Questions</p>
+                  <p className="text-2xl font-bold text-primary">{totalCount}</p>
                 </div>
                 <BookOpen className="w-8 h-8 text-primary" />
               </div>
