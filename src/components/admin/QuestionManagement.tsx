@@ -800,6 +800,40 @@ export default function QuestionManagement() {
           </CardContent>
         </Card>
 
+        {/* Pagination Controls */}
+        {totalCount > PAGE_SIZE && (
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Showing {currentPage * PAGE_SIZE + 1}–{Math.min((currentPage + 1) * PAGE_SIZE, totalCount)} of {totalCount} questions
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 0 || loading}
+                    onClick={() => setCurrentPage(p => p - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm font-medium px-2">
+                    Page {currentPage + 1} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage >= totalPages - 1 || loading}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Questions List */}
         <Tabs defaultValue="active" className="space-y-4">
           <TabsList>
@@ -821,7 +855,14 @@ export default function QuestionManagement() {
           </TabsList>
 
           <TabsContent value="active">
-            {activeQuestions.length > 0 ? (
+            {loading ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+                  <h3 className="text-lg font-medium">Loading questions...</h3>
+                </CardContent>
+              </Card>
+            ) : activeQuestions.length > 0 ? (
               renderQuestionList(activeQuestions)
             ) : (
               <Card>
