@@ -175,10 +175,14 @@ export default function MockExamManager() {
     a.click();
   };
 
-  const exportResults = () => {
+  const exportResults = (batchId?: string) => {
+    const filteredResults = batchId ? results.filter(r => r.batch_id === batchId) : results;
+    const uniqueSubjects = getUniqueSubjects(filteredResults);
+    const batchName = batchId ? batches.find(b => b.id === batchId)?.title || "batch" : "all";
+    
     const csv = [
-      ["Reg Number", "Name", "Total Score", "Max Score", ...getUniqueSubjects().map(s => s)],
-      ...results.map(r => {
+      ["Reg Number", "Name", "Total Score", "Max Score", ...uniqueSubjects],
+      ...filteredResults.map(r => {
         const reg = registrations.find(reg => reg.registration_number === r.registration_number);
         const subjectMap: Record<string, string> = {};
         (r.subject_scores || []).forEach((s: any) => {
@@ -189,7 +193,7 @@ export default function MockExamManager() {
           reg?.full_name || "Unknown",
           r.total_score,
           r.max_score,
-          ...getUniqueSubjects().map(s => subjectMap[s] || "N/A")
+          ...uniqueSubjects.map(s => subjectMap[s] || "N/A")
         ];
       })
     ].map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
@@ -198,20 +202,28 @@ export default function MockExamManager() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `mock_results_${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `mock_results_${batchName.replace(/\s+/g, '_')}_${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     toast.success("Results exported");
   };
 
-  const getUniqueSubjects = (): string[] => {
+  const getUniqueSubjects = (resultsList?: any[]): string[] => {
     const subjects = new Set<string>();
-    results.forEach(r => {
+    (resultsList || results).forEach(r => {
       (r.subject_scores || []).forEach((s: any) => {
         if (s.subject_name) subjects.add(s.subject_name);
       });
     });
     return Array.from(subjects).sort();
   };
+
+  // Group results by batch
+  const resultsByBatch = batches.map(batch => ({
+    batch,
+    results: results.filter(r => r.batch_id === batch.id),
+  })).filter(g => g.results.length > 0);
+
+  const unbatchedResults = results.filter(r => !r.batch_id || !batches.find(b => b.id === r.batch_id));
 
   const filteredRegistrations = registrations.filter(r =>
     !searchQuery || 
