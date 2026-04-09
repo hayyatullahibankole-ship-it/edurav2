@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus, Download, Eye, CheckCircle2, XCircle, Settings, Users, BarChart3, Calendar, Loader2, Search } from "lucide-react";
+import { Plus, Download, Eye, CheckCircle2, XCircle, Settings, Users, BarChart3, Calendar, Loader2, Search, Archive, ArchiveRestore } from "lucide-react";
 
 export default function MockExamManager() {
   const [activeTab, setActiveTab] = useState("registrations");
