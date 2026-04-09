@@ -22,7 +22,7 @@ export default function MockExamManager() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showArchivedBatches, setShowArchivedBatches] = useState(false);
-  const [showArchivedResults, setShowArchivedResults] = useState(false);
+  
 
   // Batch form
   const [newBatch, setNewBatch] = useState({ title: "", exam_date: "", exam_venue: "" });
