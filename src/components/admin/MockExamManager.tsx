@@ -136,6 +136,26 @@ export default function MockExamManager() {
     }
   };
 
+  const archiveBatch = async (batchId: string) => {
+    try {
+      await supabase.from("mock_batches" as any).update({ is_active: false } as any).eq("id", batchId);
+      toast.success("Batch archived");
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const restoreBatch = async (batchId: string) => {
+    try {
+      await supabase.from("mock_batches" as any).update({ is_active: true } as any).eq("id", batchId);
+      toast.success("Batch restored");
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
   const exportRegistrations = () => {
     const csv = [
       ["Reg Number", "Name", "Phone", "Email", "Mode", "Subjects", "Payment", "Exam Status", "Date"],
@@ -155,12 +175,53 @@ export default function MockExamManager() {
     a.click();
   };
 
+  const exportResults = () => {
+    const csv = [
+      ["Reg Number", "Name", "Total Score", "Max Score", ...getUniqueSubjects().map(s => s)],
+      ...results.map(r => {
+        const reg = registrations.find(reg => reg.registration_number === r.registration_number);
+        const subjectMap: Record<string, string> = {};
+        (r.subject_scores || []).forEach((s: any) => {
+          subjectMap[s.subject_name] = String(s.converted_score ?? s.score ?? '');
+        });
+        return [
+          r.registration_number,
+          reg?.full_name || "Unknown",
+          r.total_score,
+          r.max_score,
+          ...getUniqueSubjects().map(s => subjectMap[s] || "N/A")
+        ];
+      })
+    ].map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `mock_results_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    toast.success("Results exported");
+  };
+
+  const getUniqueSubjects = (): string[] => {
+    const subjects = new Set<string>();
+    results.forEach(r => {
+      (r.subject_scores || []).forEach((s: any) => {
+        if (s.subject_name) subjects.add(s.subject_name);
+      });
+    });
+    return Array.from(subjects).sort();
+  };
+
   const filteredRegistrations = registrations.filter(r =>
     !searchQuery || 
     r.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.registration_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.phone?.includes(searchQuery)
   );
+
+  const activeBatches = batches.filter(b => b.is_active !== false);
+  const archivedBatches = batches.filter(b => b.is_active === false);
 
   if (loading) return <div className="text-center py-12"><Loader2 className="w-8 h-8 animate-spin mx-auto" /></div>;
 
