@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus, Download, Eye, CheckCircle2, XCircle, Settings, Users, BarChart3, Calendar, Loader2, Search } from "lucide-react";
+import { Plus, Download, Eye, CheckCircle2, XCircle, Settings, Users, BarChart3, Calendar, Loader2, Search, Archive, ArchiveRestore } from "lucide-react";
 
 export default function MockExamManager() {
   const [activeTab, setActiveTab] = useState("registrations");
@@ -21,6 +21,8 @@ export default function MockExamManager() {
   const [settings, setSettings] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showArchivedBatches, setShowArchivedBatches] = useState(false);
+  
 
   // Batch form
   const [newBatch, setNewBatch] = useState({ title: "", exam_date: "", exam_venue: "" });
@@ -134,6 +136,26 @@ export default function MockExamManager() {
     }
   };
 
+  const archiveBatch = async (batchId: string) => {
+    try {
+      await supabase.from("mock_batches" as any).update({ is_active: false } as any).eq("id", batchId);
+      toast.success("Batch archived");
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const restoreBatch = async (batchId: string) => {
+    try {
+      await supabase.from("mock_batches" as any).update({ is_active: true } as any).eq("id", batchId);
+      toast.success("Batch restored");
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
   const exportRegistrations = () => {
     const csv = [
       ["Reg Number", "Name", "Phone", "Email", "Mode", "Subjects", "Payment", "Exam Status", "Date"],
@@ -153,12 +175,53 @@ export default function MockExamManager() {
     a.click();
   };
 
+  const exportResults = () => {
+    const csv = [
+      ["Reg Number", "Name", "Total Score", "Max Score", ...getUniqueSubjects().map(s => s)],
+      ...results.map(r => {
+        const reg = registrations.find(reg => reg.registration_number === r.registration_number);
+        const subjectMap: Record<string, string> = {};
+        (r.subject_scores || []).forEach((s: any) => {
+          subjectMap[s.subject_name] = String(s.converted_score ?? s.score ?? '');
+        });
+        return [
+          r.registration_number,
+          reg?.full_name || "Unknown",
+          r.total_score,
+          r.max_score,
+          ...getUniqueSubjects().map(s => subjectMap[s] || "N/A")
+        ];
+      })
+    ].map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `mock_results_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    toast.success("Results exported");
+  };
+
+  const getUniqueSubjects = (): string[] => {
+    const subjects = new Set<string>();
+    results.forEach(r => {
+      (r.subject_scores || []).forEach((s: any) => {
+        if (s.subject_name) subjects.add(s.subject_name);
+      });
+    });
+    return Array.from(subjects).sort();
+  };
+
   const filteredRegistrations = registrations.filter(r =>
     !searchQuery || 
     r.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.registration_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.phone?.includes(searchQuery)
   );
+
+  const activeBatches = batches.filter(b => b.is_active !== false);
+  const archivedBatches = batches.filter(b => b.is_active === false);
 
   if (loading) return <div className="text-center py-12"><Loader2 className="w-8 h-8 animate-spin mx-auto" /></div>;
 
@@ -260,34 +323,44 @@ export default function MockExamManager() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Exam Batches</CardTitle>
-                <Dialog open={showBatchDialog} onOpenChange={setShowBatchDialog}>
-                  <DialogTrigger asChild>
-                    <Button size="sm"><Plus className="w-4 h-4 mr-1" /> New Batch</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader><DialogTitle>Create Exam Batch</DialogTitle></DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label>Title</Label>
-                        <Input value={newBatch.title} onChange={e => setNewBatch(p => ({ ...p, title: e.target.value }))} placeholder="e.g., Batch A - March 2026" />
+                <div className="flex gap-2">
+                  <Button
+                    variant={showArchivedBatches ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setShowArchivedBatches(!showArchivedBatches)}
+                  >
+                    <Archive className="w-4 h-4 mr-1" />
+                    {showArchivedBatches ? "Show Active" : "Show Archived"}
+                  </Button>
+                  <Dialog open={showBatchDialog} onOpenChange={setShowBatchDialog}>
+                    <DialogTrigger asChild>
+                      <Button size="sm"><Plus className="w-4 h-4 mr-1" /> New Batch</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader><DialogTitle>Create Exam Batch</DialogTitle></DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Title</Label>
+                          <Input value={newBatch.title} onChange={e => setNewBatch(p => ({ ...p, title: e.target.value }))} placeholder="e.g., Batch A - March 2026" />
+                        </div>
+                        <div>
+                          <Label>Exam Date</Label>
+                          <Input type="datetime-local" value={newBatch.exam_date} onChange={e => setNewBatch(p => ({ ...p, exam_date: e.target.value }))} />
+                        </div>
+                        <div>
+                          <Label>Venue (Physical)</Label>
+                          <Input value={newBatch.exam_venue} onChange={e => setNewBatch(p => ({ ...p, exam_venue: e.target.value }))} placeholder="Exam venue address" />
+                        </div>
+                        <Button onClick={createBatch} className="w-full">Create Batch</Button>
                       </div>
-                      <div>
-                        <Label>Exam Date</Label>
-                        <Input type="datetime-local" value={newBatch.exam_date} onChange={e => setNewBatch(p => ({ ...p, exam_date: e.target.value }))} />
-                      </div>
-                      <div>
-                        <Label>Venue (Physical)</Label>
-                        <Input value={newBatch.exam_venue} onChange={e => setNewBatch(p => ({ ...p, exam_venue: e.target.value }))} placeholder="Exam venue address" />
-                      </div>
-                      <Button onClick={createBatch} className="w-full">Create Batch</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {batches.map(batch => {
+                {(showArchivedBatches ? archivedBatches : activeBatches).map(batch => {
                   const batchRegs = registrations.filter(r => r.batch_id === batch.id);
                   const batchResults = results.filter(r => r.batch_id === batch.id);
                   return (
@@ -295,7 +368,10 @@ export default function MockExamManager() {
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h4 className="font-semibold">{batch.title}</h4>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-semibold">{batch.title}</h4>
+                              {!batch.is_active && <Badge variant="secondary" className="text-xs">Archived</Badge>}
+                            </div>
                             <p className="text-xs text-muted-foreground">
                               {batch.exam_date ? new Date(batch.exam_date).toLocaleString() : 'No date set'}
                               {batch.exam_venue && ` • ${batch.exam_venue}`}
@@ -306,10 +382,15 @@ export default function MockExamManager() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1">
-                              <span className="text-xs text-muted-foreground">Active</span>
-                              <Switch checked={batch.is_active} onCheckedChange={() => toggleBatchActive(batch.id, batch.is_active)} />
-                            </div>
+                            {batch.is_active ? (
+                              <Button size="sm" variant="outline" onClick={() => archiveBatch(batch.id)}>
+                                <Archive className="w-4 h-4 mr-1" /> Archive
+                              </Button>
+                            ) : (
+                              <Button size="sm" variant="outline" onClick={() => restoreBatch(batch.id)}>
+                                <ArchiveRestore className="w-4 h-4 mr-1" /> Restore
+                              </Button>
+                            )}
                             {batchResults.length > 0 && (
                               batch.results_released ? (
                                 <Button size="sm" variant="destructive" onClick={() => unpublishResults(batch.id)}>Unpublish</Button>
@@ -323,7 +404,11 @@ export default function MockExamManager() {
                     </Card>
                   );
                 })}
-                {batches.length === 0 && <p className="text-center py-8 text-muted-foreground">No batches created yet</p>}
+                {(showArchivedBatches ? archivedBatches : activeBatches).length === 0 && (
+                  <p className="text-center py-8 text-muted-foreground">
+                    {showArchivedBatches ? "No archived batches" : "No active batches"}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -336,6 +421,9 @@ export default function MockExamManager() {
               <div className="flex items-center justify-between">
                 <CardTitle>Mock Results</CardTitle>
                 <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={exportResults}>
+                    <Download className="w-4 h-4 mr-1" /> Export CSV
+                  </Button>
                   <Button size="sm" onClick={() => releaseResults()}>Release All</Button>
                   <Button size="sm" variant="destructive" onClick={() => unpublishResults()}>Unpublish All</Button>
                 </div>
@@ -346,32 +434,37 @@ export default function MockExamManager() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Reg Number</TableHead>
+                    <TableHead>Name</TableHead>
                     <TableHead>Score</TableHead>
                     <TableHead>Subject Scores</TableHead>
                     <TableHead>Released</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {results.map(r => (
-                    <TableRow key={r.id}>
-                      <TableCell className="font-mono text-xs">{r.registration_number}</TableCell>
-                      <TableCell className="font-bold">{r.total_score}/{r.max_score}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {(r.subject_scores || []).map((s: any, i: number) => (
-                            <Badge key={i} variant="outline" className="text-[10px]">
-                              {s.subject_name?.split(' ')[0]}: {s.converted_score}
-                            </Badge>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={r.is_released ? "default" : "secondary"}>
-                          {r.is_released ? "Released" : "Hidden"}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {results.map(r => {
+                    const reg = registrations.find(reg => reg.registration_number === r.registration_number);
+                    return (
+                      <TableRow key={r.id}>
+                        <TableCell className="font-mono text-xs">{r.registration_number}</TableCell>
+                        <TableCell className="font-medium text-sm">{reg?.full_name || "Unknown"}</TableCell>
+                        <TableCell className="font-bold">{r.total_score}/{r.max_score}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {(r.subject_scores || []).map((s: any, i: number) => (
+                              <Badge key={i} variant="outline" className="text-[10px]">
+                                {s.subject_name?.split(' ')[0]}: {s.converted_score}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={r.is_released ? "default" : "secondary"}>
+                            {r.is_released ? "Released" : "Hidden"}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
               {results.length === 0 && <p className="text-center py-8 text-muted-foreground">No results yet</p>}
