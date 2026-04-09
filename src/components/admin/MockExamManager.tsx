@@ -323,10 +323,19 @@ export default function MockExamManager() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Exam Batches</CardTitle>
-                <Dialog open={showBatchDialog} onOpenChange={setShowBatchDialog}>
-                  <DialogTrigger asChild>
-                    <Button size="sm"><Plus className="w-4 h-4 mr-1" /> New Batch</Button>
-                  </DialogTrigger>
+                <div className="flex gap-2">
+                  <Button
+                    variant={showArchivedBatches ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setShowArchivedBatches(!showArchivedBatches)}
+                  >
+                    <Archive className="w-4 h-4 mr-1" />
+                    {showArchivedBatches ? "Show Active" : "Show Archived"}
+                  </Button>
+                  <Dialog open={showBatchDialog} onOpenChange={setShowBatchDialog}>
+                    <DialogTrigger asChild>
+                      <Button size="sm"><Plus className="w-4 h-4 mr-1" /> New Batch</Button>
+                    </DialogTrigger>
                   <DialogContent>
                     <DialogHeader><DialogTitle>Create Exam Batch</DialogTitle></DialogHeader>
                     <div className="space-y-4">
