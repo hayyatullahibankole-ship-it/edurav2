@@ -175,10 +175,14 @@ export default function MockExamManager() {
     a.click();
   };
 
-  const exportResults = () => {
+  const exportResults = (batchId?: string) => {
+    const filteredResults = batchId ? results.filter(r => r.batch_id === batchId) : results;
+    const uniqueSubjects = getUniqueSubjects(filteredResults);
+    const batchName = batchId ? batches.find(b => b.id === batchId)?.title || "batch" : "all";
+    
     const csv = [
-      ["Reg Number", "Name", "Total Score", "Max Score", ...getUniqueSubjects().map(s => s)],
-      ...results.map(r => {
+      ["Reg Number", "Name", "Total Score", "Max Score", ...uniqueSubjects],
+      ...filteredResults.map(r => {
         const reg = registrations.find(reg => reg.registration_number === r.registration_number);
         const subjectMap: Record<string, string> = {};
         (r.subject_scores || []).forEach((s: any) => {
@@ -189,7 +193,7 @@ export default function MockExamManager() {
           reg?.full_name || "Unknown",
           r.total_score,
           r.max_score,
-          ...getUniqueSubjects().map(s => subjectMap[s] || "N/A")
+          ...uniqueSubjects.map(s => subjectMap[s] || "N/A")
         ];
       })
     ].map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
@@ -198,20 +202,28 @@ export default function MockExamManager() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `mock_results_${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `mock_results_${batchName.replace(/\s+/g, '_')}_${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     toast.success("Results exported");
   };
 
-  const getUniqueSubjects = (): string[] => {
+  const getUniqueSubjects = (resultsList?: any[]): string[] => {
     const subjects = new Set<string>();
-    results.forEach(r => {
+    (resultsList || results).forEach(r => {
       (r.subject_scores || []).forEach((s: any) => {
         if (s.subject_name) subjects.add(s.subject_name);
       });
     });
     return Array.from(subjects).sort();
   };
+
+  // Group results by batch
+  const resultsByBatch = batches.map(batch => ({
+    batch,
+    results: results.filter(r => r.batch_id === batch.id),
+  })).filter(g => g.results.length > 0);
+
+  const unbatchedResults = results.filter(r => !r.batch_id || !batches.find(b => b.id === r.batch_id));
 
   const filteredRegistrations = registrations.filter(r =>
     !searchQuery || 
@@ -419,54 +431,142 @@ export default function MockExamManager() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Mock Results</CardTitle>
+                <CardTitle>Mock Results by Batch</CardTitle>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={exportResults}>
-                    <Download className="w-4 h-4 mr-1" /> Export CSV
+                  <Button size="sm" variant="outline" onClick={() => exportResults()}>
+                    <Download className="w-4 h-4 mr-1" /> Export All
                   </Button>
                   <Button size="sm" onClick={() => releaseResults()}>Release All</Button>
                   <Button size="sm" variant="destructive" onClick={() => unpublishResults()}>Unpublish All</Button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Reg Number</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Score</TableHead>
-                    <TableHead>Subject Scores</TableHead>
-                    <TableHead>Released</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {results.map(r => {
-                    const reg = registrations.find(reg => reg.registration_number === r.registration_number);
-                    return (
-                      <TableRow key={r.id}>
-                        <TableCell className="font-mono text-xs">{r.registration_number}</TableCell>
-                        <TableCell className="font-medium text-sm">{reg?.full_name || "Unknown"}</TableCell>
-                        <TableCell className="font-bold">{r.total_score}/{r.max_score}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {(r.subject_scores || []).map((s: any, i: number) => (
-                              <Badge key={i} variant="outline" className="text-[10px]">
-                                {s.subject_name?.split(' ')[0]}: {s.converted_score}
-                              </Badge>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={r.is_released ? "default" : "secondary"}>
-                            {r.is_released ? "Released" : "Hidden"}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+            <CardContent className="space-y-6">
+              {resultsByBatch.map(({ batch, results: batchResults }) => (
+                <Card key={batch.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold">{batch.title}</h4>
+                          {!batch.is_active && <Badge variant="secondary" className="text-xs">Archived</Badge>}
+                          <Badge variant="outline" className="text-xs">{batchResults.length} results</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {batch.exam_date ? new Date(batch.exam_date).toLocaleString() : 'No date set'}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" variant="outline" onClick={() => exportResults(batch.id)}>
+                          <Download className="w-4 h-4 mr-1" /> Export
+                        </Button>
+                        {batch.is_active ? (
+                          <Button size="sm" variant="outline" onClick={() => archiveBatch(batch.id)}>
+                            <Archive className="w-4 h-4 mr-1" /> Archive
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="outline" onClick={() => restoreBatch(batch.id)}>
+                            <ArchiveRestore className="w-4 h-4 mr-1" /> Restore
+                          </Button>
+                        )}
+                        {batch.results_released ? (
+                          <Button size="sm" variant="destructive" onClick={() => unpublishResults(batch.id)}>Unpublish</Button>
+                        ) : (
+                          <Button size="sm" onClick={() => releaseResults(batch.id)}>Release</Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Reg Number</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Score</TableHead>
+                          <TableHead>Subject Scores</TableHead>
+                          <TableHead>Released</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {batchResults.map(r => {
+                          const reg = registrations.find(reg => reg.registration_number === r.registration_number);
+                          return (
+                            <TableRow key={r.id}>
+                              <TableCell className="font-mono text-xs">{r.registration_number}</TableCell>
+                              <TableCell className="font-medium text-sm">{reg?.full_name || "Unknown"}</TableCell>
+                              <TableCell className="font-bold">{r.total_score}/{r.max_score}</TableCell>
+                              <TableCell>
+                                <div className="flex flex-wrap gap-1">
+                                  {(r.subject_scores || []).map((s: any, i: number) => (
+                                    <Badge key={i} variant="outline" className="text-[10px]">
+                                      {s.subject_name?.split(' ')[0]}: {s.converted_score}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={r.is_released ? "default" : "secondary"}>
+                                  {r.is_released ? "Released" : "Hidden"}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {unbatchedResults.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <h4 className="font-semibold">Unbatched Results</h4>
+                    <Badge variant="outline" className="text-xs w-fit">{unbatchedResults.length} results</Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Reg Number</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Score</TableHead>
+                          <TableHead>Subject Scores</TableHead>
+                          <TableHead>Released</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {unbatchedResults.map(r => {
+                          const reg = registrations.find(reg => reg.registration_number === r.registration_number);
+                          return (
+                            <TableRow key={r.id}>
+                              <TableCell className="font-mono text-xs">{r.registration_number}</TableCell>
+                              <TableCell className="font-medium text-sm">{reg?.full_name || "Unknown"}</TableCell>
+                              <TableCell className="font-bold">{r.total_score}/{r.max_score}</TableCell>
+                              <TableCell>
+                                <div className="flex flex-wrap gap-1">
+                                  {(r.subject_scores || []).map((s: any, i: number) => (
+                                    <Badge key={i} variant="outline" className="text-[10px]">
+                                      {s.subject_name?.split(' ')[0]}: {s.converted_score}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={r.is_released ? "default" : "secondary"}>
+                                  {r.is_released ? "Released" : "Hidden"}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+
               {results.length === 0 && <p className="text-center py-8 text-muted-foreground">No results yet</p>}
             </CardContent>
           </Card>
