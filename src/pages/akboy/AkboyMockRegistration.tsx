@@ -21,7 +21,7 @@ interface MockSubject {
   questions: number;
 }
 
-const REGISTRATION_DEADLINE = new Date("2026-04-10T23:59:59");
+const REGISTRATION_DEADLINE = new Date("2026-04-11T23:59:59");
 
 interface RegistrationResult {
   registrationNumber: string;
