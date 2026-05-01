@@ -728,14 +728,17 @@ export type Database = {
           excerpt: string | null
           featured_image_url: string | null
           id: string
+          institution_type: string | null
           is_featured: boolean | null
           is_published: boolean | null
           published_at: string | null
+          school: string | null
           slug: string
           tags: Json | null
           title: string
           updated_at: string | null
           view_count: number | null
+          year: number | null
         }
         Insert: {
           author_id?: string | null
@@ -745,14 +748,17 @@ export type Database = {
           excerpt?: string | null
           featured_image_url?: string | null
           id?: string
+          institution_type?: string | null
           is_featured?: boolean | null
           is_published?: boolean | null
           published_at?: string | null
+          school?: string | null
           slug: string
           tags?: Json | null
           title: string
           updated_at?: string | null
           view_count?: number | null
+          year?: number | null
         }
         Update: {
           author_id?: string | null
@@ -762,14 +768,17 @@ export type Database = {
           excerpt?: string | null
           featured_image_url?: string | null
           id?: string
+          institution_type?: string | null
           is_featured?: boolean | null
           is_published?: boolean | null
           published_at?: string | null
+          school?: string | null
           slug?: string
           tags?: Json | null
           title?: string
           updated_at?: string | null
           view_count?: number | null
+          year?: number | null
         }
         Relationships: []
       }
