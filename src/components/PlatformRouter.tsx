@@ -52,6 +52,7 @@ import LessonQuiz from "@/pages/LessonQuiz";
 
 // Akboy Pages
 import AkboyHome from "@/pages/akboy/AkboyHome";
+import AkboyCampusHub from "@/pages/akboy/AkboyCampusHub";
 import AkboyContact from "@/pages/akboy/AkboyContact";
 import AkboyBlog from "@/pages/akboy/AkboyBlog";
 import AkboyBlogPost from "@/pages/akboy/AkboyBlogPost";
@@ -84,7 +85,8 @@ const AkboyRoutes = () => {
       <Route path="/tutorial-registration" element={<AkboyTutorialRegistration />} />
       <Route path="/tutorials/register" element={<AkboyTutorialRegistration />} />
 
-      <Route path="/blog" element={<AkboyBlog />} />
+      <Route path="/blog" element={<Navigate to="/campus-hub" replace />} />
+      <Route path="/campus-hub" element={<AkboyCampusHub />} />
       <Route path="/blog/:slug" element={<AkboyBlogPost />} />
       <Route path="/mock" element={<AkboyMockPages />} />
       <Route path="/mock-registration" element={<AkboyMockRegistration />} />
@@ -276,8 +278,9 @@ const EduraRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* Blog Routes - shared with Akboy */}
-      <Route path="/blog" element={<AkboyBlog />} />
+      {/* Blog Routes - shared with Akboy (now Campus Hub) */}
+      <Route path="/blog" element={<Navigate to="/campus-hub" replace />} />
+      <Route path="/campus-hub" element={<AkboyCampusHub />} />
       <Route path="/blog/:slug" element={<AkboyBlogPost />} />
       
       <Route path="/terms" element={<Layout><Terms /></Layout>} />
@@ -290,7 +293,8 @@ const EduraRoutes = () => {
       <Route path="/akboy/portfolio" element={<AkboyPortfolio />} />
       <Route path="/akboy/events" element={<AkboyEvents />} />
       <Route path="/akboy/contact" element={<AkboyContact />} />
-      <Route path="/akboy/blog" element={<AkboyBlog />} />
+      <Route path="/akboy/blog" element={<Navigate to="/akboy/campus-hub" replace />} />
+      <Route path="/akboy/campus-hub" element={<AkboyCampusHub />} />
       <Route path="/akboy/blog/:slug" element={<AkboyBlogPost />} />
 
       {/* Registration aliases */}
