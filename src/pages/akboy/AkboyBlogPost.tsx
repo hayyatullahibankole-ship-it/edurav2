@@ -36,13 +36,13 @@ const formatBlogContent = (content: string): string => {
 };
 
 // Social share utilities
-const getShareUrl = (platform: string, url: string, title: string, description: string, edgeFunctionUrl?: string) => {
+const getShareUrl = (platform: string, url: string, title: string, description: string, imageUrl?: string, edgeFunctionUrl?: string) => {
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
   const encodedDescription = encodeURIComponent(description);
   const encodedText = encodeURIComponent(`${title}\n\n${description}\n\n`);
   
-  // For WhatsApp, use the edge function URL for proper OG preview
+  // For WhatsApp, use the edge function URL for proper OG preview with image
   const shareLink = edgeFunctionUrl || url;
   const encodedShareLink = encodeURIComponent(shareLink);
   const whatsappText = encodeURIComponent(`${title}\n\n${description}\n\n${shareLink}`);
@@ -134,12 +134,13 @@ export default function AkboyBlogPost() {
     const url = window.location.href;
     const title = post.title;
     const description = post.excerpt || post.content?.substring(0, 160).replace(/<[^>]*>/g, '') || '';
+    const imageUrl = post.featured_image_url || '';
     
     // Build edge function URL for proper OG preview with blog featured image
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://zqapbmllkywsuywpfava.supabase.co';
-    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/blog-share?slug=${encodeURIComponent(slug || '')}&target=${encodeURIComponent(url)}`;
+    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/blog-share?slug=${encodeURIComponent(slug || '')}&target=${encodeURIComponent(url)}&image=${encodeURIComponent(imageUrl)}`;
     
-    const shareUrl = getShareUrl(platform, url, title, description, edgeFunctionUrl);
+    const shareUrl = getShareUrl(platform, url, title, description, imageUrl, edgeFunctionUrl);
     window.open(shareUrl, '_blank', 'width=600,height=400');
   };
 
@@ -299,7 +300,10 @@ export default function AkboyBlogPost() {
 
           {/* Share Section */}
           <div className="mt-16 pt-8 border-t border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">Share this article</h3>
+            <div className="flex flex-col gap-4 mb-6">
+              <h3 className="text-xl font-semibold text-gray-900">Share this article</h3>
+              <p className="text-sm text-gray-600">Sharing with image: {post.featured_image_url ? '✓' : '(no featured image)'}</p>
+            </div>
             <div className="flex flex-wrap gap-3">
               <Button
                 onClick={() => handleShare('whatsapp')}
