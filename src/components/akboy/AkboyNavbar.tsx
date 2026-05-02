@@ -13,9 +13,9 @@ export function AkboyNavbar() {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileGroup, setMobileGroup] = useState<string | null>(null);
   const location = useLocation();
-  const { isAkboy } = useDomainDetection();
+  const { isAkboy, isCampusHub } = useDomainDetection();
 
-  const basePath = isAkboy ? "" : "/akboy";
+  const basePath = isCampusHub ? "" : isAkboy ? "" : "/akboy";
 
   const groups: NavGroup[] = [
     {
@@ -69,6 +69,22 @@ export function AkboyNavbar() {
         {c.name}
       </Link>
     );
+
+  if (isCampusHub) {
+    return (
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center justify-between h-20 gap-4">
+            <Link to="/" className="text-lg md:text-xl font-semibold text-slate-900">Campus Hub</Link>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
+              <Link to="/" className="font-medium hover:text-slate-900">Home</Link>
+              <Link to="/blog" className="font-medium hover:text-slate-900">Blog</Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-emerald-100 shadow-sm">

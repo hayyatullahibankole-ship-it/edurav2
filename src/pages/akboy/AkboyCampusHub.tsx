@@ -8,6 +8,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
+import { useDomainDetection } from "@/hooks/useDomainDetection";
 import {
   Search, Calendar, ArrowRight, GraduationCap, School as SchoolIcon,
   Sparkles, Briefcase, BookOpen, Megaphone, Award, Users,
@@ -76,6 +77,7 @@ const timeAgo = (d?: string) => {
 };
 
 export default function AkboyCampusHub() {
+  const { isCampusHub } = useDomainDetection();
   const [searchParams, setSearchParams] = useSearchParams();
   const [posts, setPosts] = useState<CampusPost[]>([]);
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
@@ -294,7 +296,7 @@ export default function AkboyCampusHub() {
 
   return (
     <AkboyLayout
-      title="Campus Hub — Nigerian Admissions, Scholarships & Education News"
+      title={isCampusHub ? "Campus Hub — Admissions, Scholarships & Campus News" : "Campus Hub — Nigerian Admissions, Scholarships & Education News"}
       description="Latest admission updates, scholarships, JAMB/WAEC news and academic calendars from Nigerian universities, polytechnics and colleges. All in one hub."
     >
       {/* ============= 1. HERO WITH SEARCH ============= */}
@@ -304,17 +306,17 @@ export default function AkboyCampusHub() {
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-teal-400 rounded-full blur-3xl"></div>
         </div>
 
-        <div className="relative max-w-5xl mx-auto px-4 pt-20 pb-16 md:pt-28 md:pb-24 text-center">
+        <div className="relative max-w-5xl mx-auto px-4 py-10 text-center">
           <div className="max-w-2xl mx-auto">
-            <div className="inline-flex items-center justify-center gap-2 mb-6 px-4 py-2 bg-white/10 backdrop-blur border border-white/20 rounded-full text-emerald-100 text-xs md:text-sm font-semibold">
+            <div className="inline-flex items-center justify-center gap-2 mb-5 px-4 py-2 bg-white/10 backdrop-blur border border-white/20 rounded-full text-emerald-100 text-xs md:text-sm font-semibold">
               <Sparkles className="w-3.5 h-3.5" />
               CAMPUS NEWS · ADMISSIONS · SCHOLARSHIPS
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 font-poppins leading-tight">
-              AKBOY CAMPUS HUB
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3 font-poppins leading-tight">
+              Campus Hub
             </h1>
-            <p className="text-base md:text-lg text-emerald-50/90 mb-8 leading-relaxed">
-              Nigeria’s fastest campus hub for admissions, scholarship updates, and education news.
+            <p className="text-sm md:text-base text-emerald-50/90 mb-6 leading-relaxed">
+              Latest admissions, scholarship updates and campus news in one place.
             </p>
 
             {/* Live search */}
@@ -332,14 +334,6 @@ export default function AkboyCampusHub() {
                 </a>
               )}
             </div>
-
-            {/* Live stats */}
-            <div className="flex flex-wrap gap-6 mt-8 text-emerald-100/80 text-xs md:text-sm">
-              <span className="flex items-center gap-2"><Flame className="w-4 h-4 text-orange-300" /><b className="text-white">{posts.length}</b> updates live</span>
-              <span className="flex items-center gap-2"><GraduationCap className="w-4 h-4 text-emerald-300" /><b className="text-white">{categoryCounts["Admissions"] || 0}</b> admissions</span>
-              <span className="flex items-center gap-2"><Award className="w-4 h-4 text-amber-300" /><b className="text-white">{categoryCounts["Scholarships"] || 0}</b> scholarships</span>
-              <span className="flex items-center gap-2"><Building2 className="w-4 h-4 text-teal-300" /><b className="text-white">{schoolList.length}</b> institutions</span>
-            </div>
           </div>
         </div>
       </section>
@@ -348,20 +342,21 @@ export default function AkboyCampusHub() {
       {!loading && slideShowPosts.length > 0 && (
         <section className="py-12 md:py-16 px-4 bg-white">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
               <div>
                 <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Latest News</p>
                 <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">Breaking campus headlines</h2>
               </div>
               <div className="inline-flex items-center gap-3">
                 <span className="rounded-full border border-amber-400 bg-amber-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-amber-800">Latest Update</span>
-                <Link to="/akboy/blog" className="text-sm font-semibold text-emerald-700 hover:text-emerald-900">View all →</Link>
+                <a href="#feed" className="text-sm font-semibold text-emerald-700 hover:text-emerald-900">View all →</a>
               </div>
             </div>
 
+
             <div className="relative overflow-hidden rounded-[30px] bg-slate-950 text-white">
               <Link to={`/blog/${slideShowPosts[currentSlide].slug || slideShowPosts[currentSlide].id}`} className="block">
-                <div className="relative h-96 md:h-[520px]">
+                <div className="relative h-72 md:h-[420px]">
                   {slideShowPosts[currentSlide].featured_image_url ? (
                     <img
                       src={slideShowPosts[currentSlide].featured_image_url}
@@ -423,87 +418,6 @@ export default function AkboyCampusHub() {
         </section>
       )}
 
-      {/* ============= 3. BROWSE BY TOPIC ============= */}
-      <section className="py-8 md:py-12 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-4">
-            <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Browse by Topic</p>
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 font-poppins">Jump into the latest campus beats</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {BROWSE_BY_TOPIC.map((topic) => {
-              const Icon = topic.icon;
-              return (
-                <button
-                  key={topic.title}
-                  onClick={() => {
-                    setSelectedCategory(topic.category);
-                    updateParam("category", topic.category);
-                    setCurrentPage(1);
-                    document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="group overflow-hidden rounded-2xl border border-gray-200 bg-slate-950 p-4 text-left text-white transition hover:-translate-y-0.5 hover:shadow-lg"
-                >
-                  <div className={`inline-flex items-center justify-center rounded-xl p-3 mb-3 bg-white/10 ${topic.gradient}`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <h3 className="text-sm font-bold mb-1">{topic.title}</h3>
-                  <p className="text-xs text-slate-200/80 leading-tight">Quick access to top updates.</p>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ============= 4. BROWSE BY SCHOOL ============= */}
-      {featuredSchools.length > 0 && (
-        <section className="py-8 md:py-12 px-4 bg-gray-50">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-4">
-              <p className="text-xs font-bold text-blue-700 uppercase tracking-widest mb-2">Browse by School</p>
-              <h2 className="text-xl md:text-2xl font-bold text-gray-900 font-poppins">Pick your institution</h2>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => { setSelectedSchool("All"); updateParam("school", "All"); setCurrentPage(1); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 font-bold text-sm transition-all ${
-                  selectedSchool === "All"
-                    ? "bg-emerald-600 text-white border-emerald-600"
-                    : "bg-white text-gray-800 border-gray-200 hover:border-emerald-400"
-                }`}
-              >
-                All Schools
-              </button>
-              {featuredSchools.map(({ school, count }) => {
-                const active = selectedSchool === school;
-                return (
-                  <button
-                    key={school}
-                    onClick={() => {
-                      setSelectedSchool(school);
-                      updateParam("school", school);
-                      setCurrentPage(1);
-                      document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" });
-                    }}
-                    className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 font-bold text-sm transition-all ${
-                      active
-                        ? "bg-emerald-600 text-white border-emerald-600"
-                        : "bg-white text-gray-800 border-gray-200 hover:border-emerald-400"
-                    }`}
-                  >
-                    <SchoolIcon className="w-3.5 h-3.5" />
-                    {school}
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${active ? "bg-white/20" : "bg-gray-100"}`}>
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ============= 5. POPULAR POSTS (MOBILE FIRST) ============= */}
       {!loading && popularPosts.length > 0 && (
@@ -536,7 +450,7 @@ export default function AkboyCampusHub() {
       {/* ============= 6. THE FEED & SIDEBAR ============= */}
       <section id="feed" className="py-12 md:py-16 px-4 bg-gray-50 scroll-mt-20">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
             <div>
               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">📰 Campus Feed</p>
               <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">Latest updates, fast</h2>
@@ -572,6 +486,45 @@ export default function AkboyCampusHub() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-4">
+            {BROWSE_BY_TOPIC.map((topic) => {
+              const active = selectedCategory === topic.category;
+              return (
+                <button
+                  key={topic.title}
+                  onClick={() => {
+                    setSelectedCategory(topic.category);
+                    updateParam("category", topic.category);
+                    setCurrentPage(1);
+                  }}
+                  className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
+                    active ? "bg-emerald-600 text-white border-emerald-600" : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
+                  }`}
+                >
+                  {topic.title}
+                </button>
+              );
+            })}
+            {featuredSchools.slice(0, 5).map(({ school }) => {
+              const active = selectedSchool === school;
+              return (
+                <button
+                  key={school}
+                  onClick={() => {
+                    setSelectedSchool(school);
+                    updateParam("school", school);
+                    setCurrentPage(1);
+                  }}
+                  className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
+                    active ? "bg-blue-600 text-white border-blue-600" : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
+                  }`}
+                >
+                  {school}
+                </button>
+              );
+            })}
           </div>
 
           {(selectedCategory !== "All" || selectedSchool !== "All" || searchTerm) && (
@@ -675,7 +628,7 @@ export default function AkboyCampusHub() {
               )}
             </div>
 
-            <aside className="space-y-6">
+            <aside className="space-y-6 hidden lg:block">
               <Card className="p-6 bg-white border border-gray-200 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white grid place-items-center"><TrendingUp className="w-5 h-5" /></div>
@@ -695,28 +648,6 @@ export default function AkboyCampusHub() {
                         </div>
                       </div>
                     </Link>
-                  ))}
-                </div>
-              </Card>
-
-              <Card className="p-6 bg-white border border-gray-200 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-2xl bg-blue-600 text-white grid place-items-center"><FileText className="w-5 h-5" /></div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-blue-700 font-bold">Categories</p>
-                    <h3 className="text-lg font-bold text-slate-900">Browse by topic</h3>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  {Object.entries(categoryCounts).sort((a,b)=>b[1]-a[1]).slice(0, 8).map(([category, count]) => (
-                    <button
-                      key={category}
-                      onClick={() => { setSelectedCategory(category); updateParam("category", category); setCurrentPage(1); }}
-                      className="flex w-full items-center justify-between rounded-2xl border border-gray-100 bg-slate-50 px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-white"
-                    >
-                      <span>{category}</span>
-                      <span className="text-xs text-slate-500">{count}</span>
-                    </button>
                   ))}
                 </div>
               </Card>
@@ -745,31 +676,6 @@ export default function AkboyCampusHub() {
                   ))}
                 </div>
               </Card>
-
-              <Card className="p-6 bg-slate-950 text-white border border-slate-900 shadow-xl">
-                <div className="mb-4">
-                  <div className="w-12 h-12 rounded-3xl bg-emerald-500 grid place-items-center mb-4"><Mail className="w-5 h-5" /></div>
-                  <h3 className="text-xl font-bold">Stay informed</h3>
-                  <p className="mt-2 text-sm text-slate-200">Campus news, admissions & scholarships — delivered to your inbox.</p>
-                </div>
-                <div className="space-y-3">
-                  <Input
-                    value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                    placeholder="Your email address"
-                    className="w-full rounded-2xl bg-slate-900 border border-slate-700 text-white placeholder:text-slate-400"
-                  />
-                  <Button
-                    className="w-full rounded-2xl bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400"
-                    onClick={() => setNewsletterSuccess(true)}
-                  >
-                    Subscribe
-                  </Button>
-                  {newsletterSuccess && (
-                    <p className="text-sm text-emerald-200">Thanks! You’ll hear from us soon.</p>
-                  )}
-                </div>
-              </Card>
             </aside>
           </div>
         </div>
@@ -783,16 +689,18 @@ export default function AkboyCampusHub() {
             From JAMB news to scholarship deadlines and admission forms — Campus Hub keeps every Nigerian student in the loop.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link to="/akboy/services">
-              <Button size="lg" className="bg-white text-emerald-900 hover:bg-emerald-50 font-bold rounded-xl">
-                Explore Akboy Services <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            </Link>
-            <Link to="/akboy/mock-exam">
-              <Button size="lg" variant="outline" className="border-2 border-white/40 bg-transparent text-white hover:bg-white/10 font-bold rounded-xl">
-                Try Mock Exams
-              </Button>
-            </Link>
+            <button
+              onClick={() => document.getElementById('feed')?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-bold text-emerald-900 shadow-lg hover:bg-emerald-50"
+            >
+              Read latest headlines <ArrowRight className="w-4 h-4 ml-1" />
+            </button>
+            <button
+              onClick={() => document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-flex items-center justify-center rounded-xl border-2 border-white/40 bg-transparent px-6 py-3 text-sm font-bold text-white hover:bg-white/10"
+            >
+              Subscribe for alerts
+            </button>
           </div>
         </div>
       </section>

@@ -102,6 +102,19 @@ const AkboyRoutes = () => {
   );
 };
 
+// Campus Hub standalone routes
+const CampusHubRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<AkboyCampusHub />} />
+      <Route path="/campus-hub" element={<AkboyCampusHub />} />
+      <Route path="/blog" element={<Navigate to="/" replace />} />
+      <Route path="/blog/:slug" element={<AkboyBlogPost />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+};
+
 // Edura Routes Component
 const EduraRoutes = () => {
   const { isInstalledApp } = useInstalledApp();
@@ -317,12 +330,19 @@ const EduraRoutes = () => {
 
 // Main Platform Router
 export const PlatformRouter = () => {
-  const { isAkboy } = useDomainDetection();
+  const { isAkboy, isCampusHub } = useDomainDetection();
   const { isInstalledApp } = useInstalledApp();
 
   // In preview/development we access Akboy pages under the /akboy prefix.
   // In that case we must keep EduraRoutes mounted so /akboy/* routes resolve.
-  const isAkboyPrefixedPath = window.location.pathname.startsWith('/akboy');
+  const hash = window.location.hash.toLowerCase();
+  const normalizedHash = hash.replace(/^#!/, '#');
+  const isAkboyPrefixedPath = window.location.pathname.startsWith('/akboy') || normalizedHash.startsWith('#/akboy');
+
+  // If accessing from the Campus Hub standalone subdomain, show the standalone hub routes.
+  if (isCampusHub && !isAkboyPrefixedPath) {
+    return <CampusHubRoutes />;
+  }
 
   // If accessing from the Akboy domain, show Akboy routes
   if (isAkboy && !isAkboyPrefixedPath) {

@@ -6,6 +6,7 @@ interface DomainConfig {
   platform: Platform;
   isAkboy: boolean;
   isEdura: boolean;
+  isCampusHub: boolean;
 }
 
 // Configure your domains here
@@ -13,6 +14,11 @@ const AKBOY_DOMAINS = [
   'akboy.space',
   'www.akboy.space',
   'akboy.lovable.app',
+];
+
+const CAMPUS_HUB_DOMAINS = [
+  'campushub.akboy.space',
+  'www.campushub.akboy.space',
 ];
 
 const EDURA_DOMAINS = [
@@ -25,36 +31,39 @@ const EDURA_DOMAINS = [
 export function useDomainDetection(): DomainConfig {
   return useMemo(() => {
     const hostname = window.location.hostname.toLowerCase();
-    
-    // Check if current domain is Akboy
-    const isAkboyDomain = AKBOY_DOMAINS.some(domain => 
+    const hash = window.location.hash.toLowerCase();
+    const normalizedHash = hash.replace(/^#!/, '#');
+
+    const isCampusHubDomain = CAMPUS_HUB_DOMAINS.some(domain =>
       hostname === domain || hostname.endsWith('.' + domain)
     );
-    
-    // Check if current domain is Edura
-    const isEduraDomain = EDURA_DOMAINS.some(domain => 
+
+    const isAkboyDomain = !isCampusHubDomain && AKBOY_DOMAINS.some(domain =>
       hostname === domain || hostname.endsWith('.' + domain)
     );
-    
-    // For localhost/preview, check if URL path starts with /akboy
-    const isAkboyPath = window.location.pathname.startsWith('/akboy');
-    
-    // Determine platform
+
+    const isEduraDomain = EDURA_DOMAINS.some(domain =>
+      hostname === domain || hostname.endsWith('.' + domain)
+    );
+
+    const isAkboyPath = window.location.pathname.startsWith('/akboy') || normalizedHash.startsWith('#/akboy');
+
     let platform: Platform = 'edura'; // Default to Edura
-    
-    if (isAkboyDomain) {
+
+    if (isCampusHubDomain || isAkboyDomain) {
       platform = 'akboy';
     } else if (isEduraDomain) {
       platform = 'edura';
     } else if (isAkboyPath) {
-      // Fallback for development/preview - detect via path
+      // Fallback for development/preview - detect via path/hash
       platform = 'akboy';
     }
-    
+
     return {
       platform,
       isAkboy: platform === 'akboy',
       isEdura: platform === 'edura',
+      isCampusHub: isCampusHubDomain,
     };
   }, []);
 }
@@ -62,19 +71,24 @@ export function useDomainDetection(): DomainConfig {
 // Utility function for non-React contexts
 export function detectPlatform(): Platform {
   const hostname = window.location.hostname.toLowerCase();
-  
-  const isAkboyDomain = AKBOY_DOMAINS.some(domain => 
+  const hash = window.location.hash.toLowerCase();
+  const normalizedHash = hash.replace(/^#!/, '#');
+
+  const isCampusHubDomain = CAMPUS_HUB_DOMAINS.some(domain =>
     hostname === domain || hostname.endsWith('.' + domain)
   );
-  
-  if (isAkboyDomain) {
+
+  const isAkboyDomain = !isCampusHubDomain && AKBOY_DOMAINS.some(domain =>
+    hostname === domain || hostname.endsWith('.' + domain)
+  );
+
+  if (isCampusHubDomain || isAkboyDomain) {
     return 'akboy';
   }
-  
-  // Fallback for development - check path
-  if (window.location.pathname.startsWith('/akboy')) {
+
+  if (window.location.pathname.startsWith('/akboy') || normalizedHash.startsWith('#/akboy')) {
     return 'akboy';
   }
-  
+
   return 'edura';
 }
