@@ -12,7 +12,7 @@ import {
   Search, Calendar, ArrowRight, GraduationCap, School as SchoolIcon,
   Sparkles, Briefcase, BookOpen, Megaphone, Award, Users,
   TrendingUp, Newspaper, Lightbulb, Flame, FileText, ChevronRight,
-  Building2, Filter,
+  Building2, Filter, ChevronLeft,
 } from "lucide-react";
 
 interface CampusPost {
@@ -76,8 +76,20 @@ export default function AkboyCampusHub() {
   const [selectedSchool, setSelectedSchool] = useState(searchParams.get("school") || "All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 18;
 
   useEffect(() => { fetchPosts(); }, []);
+
+  // Auto-advance slideshow
+  useEffect(() => {
+    if (posts.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % Math.min(8, posts.length));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [posts]);
 
   const fetchPosts = async () => {
     try {
@@ -114,7 +126,16 @@ export default function AkboyCampusHub() {
     });
   }, [posts, searchTerm, selectedCategory, selectedSchool]);
 
+  const paginatedFeed = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filtered.slice(start, start + ITEMS_PER_PAGE);
+  }, [filtered, currentPage]);
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+
   const trending = useMemo(() => posts.slice(0, 5), [posts]);
+
+  const slideShowPosts = useMemo(() => posts.slice(0, 8), [posts]);
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -190,7 +211,7 @@ export default function AkboyCampusHub() {
       title="Campus Hub — Nigerian Admissions, Scholarships & Education News"
       description="Latest admission updates, scholarships, JAMB/WAEC news and academic calendars from Nigerian universities, polytechnics and colleges. All in one hub."
     >
-      {/* ============= 1. HERO ============= */}
+      {/* ============= 1. HERO WITH SEARCH ============= */}
       <section className="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-900">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-10 left-10 w-72 h-72 bg-emerald-500 rounded-full blur-3xl"></div>
@@ -204,8 +225,8 @@ export default function AkboyCampusHub() {
               NIGERIAN ADMISSIONS · SCHOLARSHIPS · EXAMS
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-5 font-poppins leading-[1.05]">
-              Every update.<br/>
-              <span className="bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-100 bg-clip-text text-transparent">One Campus Hub.</span>
+              AKBOY<br/>
+              <span className="bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-100 bg-clip-text text-transparent">Campus Hub.</span>
             </h1>
             <p className="text-base md:text-xl text-emerald-50/90 mb-8 max-w-2xl leading-relaxed">
               Admission forms, scholarships, JAMB news, accreditation, academic calendars and opportunities — from <b>every</b> Nigerian university, polytechnic and college. Updated daily.
@@ -216,7 +237,7 @@ export default function AkboyCampusHub() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-700" />
               <Input
                 value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); updateParam("q", e.target.value); }}
+                onChange={(e) => { setSearchTerm(e.target.value); updateParam("q", e.target.value); setCurrentPage(1); }}
                 placeholder="Search by school (e.g. UNILAG), course, or keyword…"
                 className="pl-12 h-14 text-base bg-white border-0 rounded-2xl shadow-2xl focus-visible:ring-2 focus-visible:ring-emerald-400"
               />
@@ -238,33 +259,107 @@ export default function AkboyCampusHub() {
         </div>
       </section>
 
-      {/* ============= 2. BROWSE BY CATEGORY ============= */}
-      <section className="py-12 md:py-16 px-4 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Browse by Category</p>
-            <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">What are you looking for?</h2>
+      {/* ============= 2. NEWS SLIDESHOW ============= */}
+      {!loading && slideShowPosts.length > 0 && (
+        <section className="py-12 md:py-16 px-4 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-6">
+              <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Latest News</p>
+              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">What's new</h2>
+            </div>
+
+            {/* Slideshow Container */}
+            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 group">
+              {/* Main Slide */}
+              <Link to={`/blog/${slideShowPosts[currentSlide].slug || slideShowPosts[currentSlide].id}`} className="block">
+                <div className="relative h-96 md:h-[500px] overflow-hidden">
+                  {slideShowPosts[currentSlide].featured_image_url ? (
+                    <img 
+                      src={slideShowPosts[currentSlide].featured_image_url} 
+                      alt={slideShowPosts[currentSlide].title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-200 to-teal-200 text-6xl">
+                      {CATEGORY_META[slideShowPosts[currentSlide].category || "News & Updates"]?.emoji || "📰"}
+                    </div>
+                  )}
+                  
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent"></div>
+                  
+                  {/* Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className={`${CATEGORY_META[slideShowPosts[currentSlide].category || "News & Updates"].bg} ${CATEGORY_META[slideShowPosts[currentSlide].category || "News & Updates"].color} px-3 py-1 rounded-full text-xs font-bold`}>
+                        {slideShowPosts[currentSlide].category || "News"}
+                      </span>
+                      {slideShowPosts[currentSlide].school && (
+                        <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold">
+                          {slideShowPosts[currentSlide].school}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-2xl md:text-4xl font-bold mb-2 line-clamp-3">{slideShowPosts[currentSlide].title}</h3>
+                    <p className="text-sm text-white/90 line-clamp-2">{slideShowPosts[currentSlide].excerpt || slideShowPosts[currentSlide].content?.replace(/<[^>]*>/g, '').substring(0, 150)}</p>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Navigation Arrows */}
+              <button
+                onClick={() => setCurrentSlide((prev) => (prev - 1 + slideShowPosts.length) % slideShowPosts.length)}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={() => setCurrentSlide((prev) => (prev + 1) % slideShowPosts.length)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+
+              {/* Slide Indicators */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                {slideShowPosts.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentSlide(idx)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      idx === currentSlide ? "bg-white w-8" : "bg-white/50 hover:bg-white/75"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+        </section>
+      )}
+
+      {/* ============= 3. BROWSE BY CATEGORY (COMPACT) ============= */}
+      <section className="py-12 md:py-16 px-4 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-6">
+            <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Browse by Category</p>
+            <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">Find what you need</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
             {QUICK_ACCESS.map((q) => {
               const Icon = q.icon;
               const count = categoryCounts[q.key] || 0;
               return (
                 <button
                   key={q.key}
-                  onClick={() => { setSelectedCategory(q.key); updateParam("category", q.key); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
-                  className="group relative overflow-hidden text-left rounded-2xl p-4 md:p-5 bg-white border border-gray-200 hover:border-transparent hover:shadow-2xl transition-all hover:-translate-y-1"
+                  onClick={() => { setSelectedCategory(q.key); updateParam("category", q.key); setCurrentPage(1); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
+                  className="group relative overflow-hidden text-left rounded-lg p-3 bg-white border border-gray-200 hover:border-emerald-400 hover:shadow-lg transition-all hover:-translate-y-0.5"
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${q.gradient} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
                   <div className="relative">
-                    <div className={`inline-flex w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br ${q.gradient} items-center justify-center text-white mb-3 shadow-lg`}>
-                      <Icon className="w-5 h-5 md:w-6 md:h-6" />
+                    <div className={`inline-flex w-8 h-8 rounded-lg bg-gradient-to-br ${q.gradient} items-center justify-center text-white mb-2 shadow`}>
+                      <Icon className="w-4 h-4" />
                     </div>
-                    <h3 className="font-bold text-gray-900 group-hover:text-white text-sm md:text-base mb-1">{q.title}</h3>
-                    <p className="text-[11px] md:text-xs text-gray-500 group-hover:text-white/90 line-clamp-2">{q.desc}</p>
-                    <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-emerald-700 group-hover:text-white">
-                      {count} updates <ChevronRight className="w-3 h-3" />
-                    </div>
+                    <h3 className="font-bold text-gray-900 text-xs mb-0.5 line-clamp-2">{q.title}</h3>
+                    <p className="text-[10px] text-gray-500 line-clamp-1">{count} updates</p>
                   </div>
                 </button>
               );
@@ -273,38 +368,45 @@ export default function AkboyCampusHub() {
         </div>
       </section>
 
-      {/* ============= 3. BROWSE BY SCHOOL ============= */}
+      {/* ============= 4. BROWSE BY SCHOOL ============= */}
       {featuredSchools.length > 0 && (
         <section className="py-12 md:py-16 px-4 bg-white">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <p className="text-xs font-bold text-blue-700 uppercase tracking-widest mb-2">Browse by School</p>
-                <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">Pick your institution</h2>
-                <p className="text-sm text-gray-600 mt-1">Filter every update from a specific Nigerian university, polytechnic or agency.</p>
-              </div>
+            <div className="mb-6">
+              <p className="text-xs font-bold text-blue-700 uppercase tracking-widest mb-2">Browse by School</p>
+              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">Pick your institution</h2>
             </div>
-            <div className="flex flex-wrap gap-2 md:gap-3">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => { setSelectedSchool("All"); updateParam("school", "All"); setCurrentPage(1); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 font-bold text-sm transition-all ${
+                  selectedSchool === "All"
+                    ? "bg-emerald-600 text-white border-emerald-600"
+                    : "bg-white text-gray-800 border-gray-200 hover:border-emerald-400"
+                }`}
+              >
+                All Schools
+              </button>
               {featuredSchools.map(({ school, count }) => {
                 const active = selectedSchool === school;
                 return (
                   <button
                     key={school}
                     onClick={() => {
-                      const next = active ? "All" : school;
-                      setSelectedSchool(next);
-                      updateParam("school", next);
+                      setSelectedSchool(school);
+                      updateParam("school", school);
+                      setCurrentPage(1);
                       document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" });
                     }}
-                    className={`group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-bold text-sm transition-all ${
+                    className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 font-bold text-sm transition-all ${
                       active
-                        ? "bg-emerald-600 text-white border-emerald-600 shadow-lg"
-                        : "bg-white text-gray-800 border-gray-200 hover:border-emerald-400 hover:text-emerald-700"
+                        ? "bg-emerald-600 text-white border-emerald-600"
+                        : "bg-white text-gray-800 border-gray-200 hover:border-emerald-400"
                     }`}
                   >
-                    <SchoolIcon className="w-4 h-4" />
+                    <SchoolIcon className="w-3.5 h-3.5" />
                     {school}
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-gray-100 group-hover:bg-emerald-50"}`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${active ? "bg-white/20" : "bg-gray-100"}`}>
                       {count}
                     </span>
                   </button>
@@ -315,44 +417,21 @@ export default function AkboyCampusHub() {
         </section>
       )}
 
-      {/* ============= 4. TRENDING ============= */}
-      {!loading && trending.length > 0 && (
-        <section className="py-12 md:py-16 px-4 bg-gradient-to-br from-orange-50 to-pink-50">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white shadow-lg">
-                <TrendingUp className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-orange-600 uppercase tracking-widest">Trending Now</p>
-                <h2 className="text-xl md:text-3xl font-bold text-gray-900 font-poppins">Latest updates across Nigeria</h2>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2"><PostCard post={trending[0]} /></div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4">
-                {trending.slice(1, 3).map(p => <PostCard key={p.id} post={p} compact />)}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ============= 5. THE FEED (filtered) ============= */}
+      {/* ============= 5. THE FEED (HORIZONTAL WITH PAGINATION) ============= */}
       <section id="feed" className="py-12 md:py-16 px-4 bg-gray-50 scroll-mt-20">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
             <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">📰 The Feed</p>
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">All updates, one stream</h2>
-              <p className="text-sm text-gray-600 mt-1">{filtered.length} of {posts.length} updates shown</p>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">📰 All Updates</p>
+              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">The Feed</h2>
+              <p className="text-sm text-gray-600 mt-1">Showing {paginatedFeed.length} of {filtered.length} updates • Page {currentPage} of {totalPages || 1}</p>
             </div>
 
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-2">
               <Select
                 value={selectedCategory}
-                onValueChange={(v) => { setSelectedCategory(v); updateParam("category", v); }}
+                onValueChange={(v) => { setSelectedCategory(v); updateParam("category", v); setCurrentPage(1); }}
               >
                 <SelectTrigger className="w-full sm:w-52 bg-white">
                   <Filter className="w-4 h-4 mr-1 text-emerald-600" />
@@ -365,7 +444,7 @@ export default function AkboyCampusHub() {
 
               <Select
                 value={selectedSchool}
-                onValueChange={(v) => { setSelectedSchool(v); updateParam("school", v); }}
+                onValueChange={(v) => { setSelectedSchool(v); updateParam("school", v); setCurrentPage(1); }}
               >
                 <SelectTrigger className="w-full sm:w-52 bg-white">
                   <SchoolIcon className="w-4 h-4 mr-1 text-blue-600" />
@@ -385,6 +464,7 @@ export default function AkboyCampusHub() {
                   onClick={() => {
                     setSelectedCategory("All"); setSelectedSchool("All"); setSearchTerm("");
                     setSearchParams({}, { replace: true });
+                    setCurrentPage(1);
                   }}
                 >
                   Clear
@@ -427,9 +507,70 @@ export default function AkboyCampusHub() {
               <p className="text-sm text-gray-500">Try clearing filters or a different search term.</p>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filtered.map(p => <PostCard key={p.id} post={p} />)}
-            </div>
+            <>
+              {/* Feed Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+                {paginatedFeed.map(p => <PostCard key={p.id} post={p} />)}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    onClick={() => { setCurrentPage(1); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 rounded-lg border border-gray-300 font-bold text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    ← First
+                  </button>
+                  <button
+                    onClick={() => { setCurrentPage(Math.max(1, currentPage - 1)); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 rounded-lg border border-gray-300 font-bold text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    ← Prev
+                  </button>
+
+                  {/* Page Numbers */}
+                  {Array.from({ length: Math.min(5, totalPages) }).map((_, idx) => {
+                    let pageNum = currentPage - 2 + idx;
+                    if (totalPages <= 5) pageNum = idx + 1;
+                    else if (currentPage <= 3) pageNum = idx + 1;
+                    else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + idx;
+
+                    if (pageNum < 1 || pageNum > totalPages) return null;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => { setCurrentPage(pageNum); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
+                        className={`px-3 py-2 rounded-lg font-bold text-sm transition ${
+                          currentPage === pageNum
+                            ? "bg-emerald-600 text-white"
+                            : "border border-gray-300 hover:bg-gray-100"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={() => { setCurrentPage(Math.min(totalPages, currentPage + 1)); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 rounded-lg border border-gray-300 font-bold text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Next →
+                  </button>
+                  <button
+                    onClick={() => { setCurrentPage(totalPages); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 rounded-lg border border-gray-300 font-bold text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Last →
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
