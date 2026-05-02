@@ -304,27 +304,26 @@ export default function AkboyCampusHub() {
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-teal-400 rounded-full blur-3xl"></div>
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 pt-20 pb-16 md:pt-28 md:pb-24">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-white/10 backdrop-blur border border-white/20 rounded-full text-emerald-100 text-xs md:text-sm font-semibold">
+        <div className="relative max-w-5xl mx-auto px-4 pt-20 pb-16 md:pt-28 md:pb-24 text-center">
+          <div className="max-w-2xl mx-auto">
+            <div className="inline-flex items-center justify-center gap-2 mb-6 px-4 py-2 bg-white/10 backdrop-blur border border-white/20 rounded-full text-emerald-100 text-xs md:text-sm font-semibold">
               <Sparkles className="w-3.5 h-3.5" />
-              NIGERIAN ADMISSIONS · SCHOLARSHIPS · EXAMS
+              CAMPUS NEWS · ADMISSIONS · SCHOLARSHIPS
             </div>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-5 font-poppins leading-[1.05]">
-              AKBOY<br/>
-              <span className="bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-100 bg-clip-text text-transparent">Campus Hub.</span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 font-poppins leading-tight">
+              AKBOY CAMPUS HUB
             </h1>
-            <p className="text-base md:text-xl text-emerald-50/90 mb-8 max-w-2xl leading-relaxed">
-              Admission forms, scholarships, JAMB news, accreditation, academic calendars and opportunities — from <b>every</b> Nigerian university, polytechnic and college. Updated daily.
+            <p className="text-base md:text-lg text-emerald-50/90 mb-8 leading-relaxed">
+              Nigeria’s fastest campus hub for admissions, scholarship updates, and education news.
             </p>
 
             {/* Live search */}
-            <div className="relative max-w-2xl">
+            <div className="relative mx-auto max-w-2xl">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-700" />
               <Input
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); updateParam("q", e.target.value); setCurrentPage(1); }}
-                placeholder="Search by school (e.g. UNILAG), course, or keyword…"
+                placeholder="Search by school, course, or keyword…"
                 className="pl-12 h-14 text-base bg-white border-0 rounded-2xl shadow-2xl focus-visible:ring-2 focus-visible:ring-emerald-400"
               />
               {searchTerm && (
@@ -349,72 +348,73 @@ export default function AkboyCampusHub() {
       {!loading && slideShowPosts.length > 0 && (
         <section className="py-12 md:py-16 px-4 bg-white">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-6">
-              <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Latest News</p>
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">What's new</h2>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <div>
+                <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Latest News</p>
+                <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">Breaking campus headlines</h2>
+              </div>
+              <div className="inline-flex items-center gap-3">
+                <span className="rounded-full border border-amber-400 bg-amber-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-amber-800">Latest Update</span>
+                <Link to="/akboy/blog" className="text-sm font-semibold text-emerald-700 hover:text-emerald-900">View all →</Link>
+              </div>
             </div>
 
-            {/* Slideshow Container */}
-            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 group">
-              {/* Main Slide */}
+            <div className="relative overflow-hidden rounded-[30px] bg-slate-950 text-white">
               <Link to={`/blog/${slideShowPosts[currentSlide].slug || slideShowPosts[currentSlide].id}`} className="block">
-                <div className="relative h-96 md:h-[500px] overflow-hidden">
+                <div className="relative h-96 md:h-[520px]">
                   {slideShowPosts[currentSlide].featured_image_url ? (
-                    <img 
-                      src={slideShowPosts[currentSlide].featured_image_url} 
+                    <img
+                      src={slideShowPosts[currentSlide].featured_image_url}
                       alt={slideShowPosts[currentSlide].title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-200 to-teal-200 text-6xl">
+                    <div className="w-full h-full flex items-center justify-center bg-slate-800 text-6xl">
                       {CATEGORY_META[slideShowPosts[currentSlide].category || "News & Updates"]?.emoji || "📰"}
                     </div>
                   )}
-                  
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent"></div>
-                  
-                  {/* Content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={`${CATEGORY_META[slideShowPosts[currentSlide].category || "News & Updates"].bg} ${CATEGORY_META[slideShowPosts[currentSlide].category || "News & Updates"].color} px-3 py-1 rounded-full text-xs font-bold`}>
-                        {slideShowPosts[currentSlide].category || "News"}
-                      </span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/25 to-transparent" />
+
+                  <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
+                    <div className="flex flex-wrap items-center gap-3 mb-4 justify-center">
+                      <span className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em]">{slideShowPosts[currentSlide].category || "News"}</span>
                       {slideShowPosts[currentSlide].school && (
-                        <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold">
-                          {slideShowPosts[currentSlide].school}
-                        </span>
+                        <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-100">{slideShowPosts[currentSlide].school}</span>
                       )}
                     </div>
-                    <h3 className="text-2xl md:text-4xl font-bold mb-2 line-clamp-3">{slideShowPosts[currentSlide].title}</h3>
-                    <p className="text-sm text-white/90 line-clamp-2">{slideShowPosts[currentSlide].excerpt || slideShowPosts[currentSlide].content?.replace(/<[^>]*>/g, '').substring(0, 150)}</p>
+                    <h3 className="mx-auto max-w-4xl text-center text-3xl md:text-4xl font-bold leading-tight mb-4">{slideShowPosts[currentSlide].title}</h3>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-slate-200 mb-6">
+                      <span className="inline-flex items-center gap-2"><Calendar className="w-4 h-4" />{timeAgo(slideShowPosts[currentSlide].created_at)}</span>
+                      <span className="inline-flex items-center gap-2"><Users className="w-4 h-4" />{slideShowPosts[currentSlide].school || "Campus news"}</span>
+                    </div>
+                    <div className="flex justify-center">
+                      <span className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/20 hover:bg-amber-400 transition">
+                        Read Story <ArrowRight className="w-4 h-4" />
+                      </span>
+                    </div>
                   </div>
                 </div>
               </Link>
 
-              {/* Navigation Arrows */}
               <button
                 onClick={() => setCurrentSlide((prev) => (prev - 1 + slideShowPosts.length) % slideShowPosts.length)}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur"
+                className="absolute left-6 top-1/2 -translate-y-1/2 z-10 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-900/70 text-white shadow-lg hover:bg-slate-900"
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setCurrentSlide((prev) => (prev + 1) % slideShowPosts.length)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all backdrop-blur"
+                className="absolute right-6 top-1/2 -translate-y-1/2 z-10 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-900/70 text-white shadow-lg hover:bg-slate-900"
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-5 h-5" />
               </button>
 
-              {/* Slide Indicators */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
                 {slideShowPosts.map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => setCurrentSlide(idx)}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      idx === currentSlide ? "bg-white w-8" : "bg-white/50 hover:bg-white/75"
-                    }`}
+                    className={`h-2.5 rounded-full transition-all ${idx === currentSlide ? 'w-10 bg-amber-500' : 'w-2.5 bg-slate-300/60'}`}
                   />
                 ))}
               </div>
@@ -423,30 +423,32 @@ export default function AkboyCampusHub() {
         </section>
       )}
 
-      {/* ============= 3. BROWSE BY CATEGORY (COMPACT) ============= */}
-      <section className="py-12 md:py-16 px-4 bg-gradient-to-b from-gray-50 to-white">
+      {/* ============= 3. BROWSE BY TOPIC ============= */}
+      <section className="py-8 md:py-12 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
-            <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Browse by Category</p>
-            <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">Find what you need</h2>
+          <div className="mb-4">
+            <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Browse by Topic</p>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900 font-poppins">Jump into the latest campus beats</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
-            {QUICK_ACCESS.map((q) => {
-              const Icon = q.icon;
-              const count = categoryCounts[q.key] || 0;
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {BROWSE_BY_TOPIC.map((topic) => {
+              const Icon = topic.icon;
               return (
                 <button
-                  key={q.key}
-                  onClick={() => { setSelectedCategory(q.key); updateParam("category", q.key); setCurrentPage(1); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
-                  className="group relative overflow-hidden text-left rounded-lg p-3 bg-white border border-gray-200 hover:border-emerald-400 hover:shadow-lg transition-all hover:-translate-y-0.5"
+                  key={topic.title}
+                  onClick={() => {
+                    setSelectedCategory(topic.category);
+                    updateParam("category", topic.category);
+                    setCurrentPage(1);
+                    document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="group overflow-hidden rounded-2xl border border-gray-200 bg-slate-950 p-4 text-left text-white transition hover:-translate-y-0.5 hover:shadow-lg"
                 >
-                  <div className="relative">
-                    <div className={`inline-flex w-8 h-8 rounded-lg bg-gradient-to-br ${q.gradient} items-center justify-center text-white mb-2 shadow`}>
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <h3 className="font-bold text-gray-900 text-xs mb-0.5 line-clamp-2">{q.title}</h3>
-                    <p className="text-[10px] text-gray-500 line-clamp-1">{count} updates</p>
+                  <div className={`inline-flex items-center justify-center rounded-xl p-3 mb-3 bg-white/10 ${topic.gradient}`}>
+                    <Icon className="w-4 h-4" />
                   </div>
+                  <h3 className="text-sm font-bold mb-1">{topic.title}</h3>
+                  <p className="text-xs text-slate-200/80 leading-tight">Quick access to top updates.</p>
                 </button>
               );
             })}
@@ -456,11 +458,11 @@ export default function AkboyCampusHub() {
 
       {/* ============= 4. BROWSE BY SCHOOL ============= */}
       {featuredSchools.length > 0 && (
-        <section className="py-12 md:py-16 px-4 bg-white">
+        <section className="py-8 md:py-12 px-4 bg-gray-50">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-6">
+            <div className="mb-4">
               <p className="text-xs font-bold text-blue-700 uppercase tracking-widest mb-2">Browse by School</p>
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">Pick your institution</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 font-poppins">Pick your institution</h2>
             </div>
             <div className="flex flex-wrap gap-2">
               <button
@@ -503,40 +505,35 @@ export default function AkboyCampusHub() {
         </section>
       )}
 
-      {/* ============= 4. BROWSE BY TOPIC ============= */}
-      <section className="py-12 md:py-16 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
-            <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Browse by Topic</p>
-            <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">Jump into the latest campus beats</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {BROWSE_BY_TOPIC.map((topic) => {
-              const Icon = topic.icon;
-              return (
-                <button
-                  key={topic.title}
-                  onClick={() => {
-                    setSelectedCategory(topic.category);
-                    updateParam("category", topic.category);
-                    setCurrentPage(1);
-                    document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="group overflow-hidden rounded-3xl border border-gray-200 bg-slate-950 p-6 text-left text-white transition hover:-translate-y-0.5 hover:shadow-2xl"
-                >
-                  <div className={`inline-flex items-center justify-center rounded-2xl p-4 mb-5 bg-white/10 ${topic.gradient}`}>
-                    <Icon className="w-5 h-5" />
+      {/* ============= 5. POPULAR POSTS (MOBILE FIRST) ============= */}
+      {!loading && popularPosts.length > 0 && (
+        <section className="py-8 md:py-12 px-4 bg-white md:hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white grid place-items-center"><TrendingUp className="w-5 h-5" /></div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-bold">Popular Posts</p>
+                <h3 className="text-lg font-bold text-slate-900">What people are reading</h3>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {popularPosts.slice(0, 5).map((post, idx) => (
+                <Link key={post.id} to={`/blog/${post.slug || post.id}`} className="group block rounded-2xl border border-gray-100 p-3 transition hover:border-emerald-300 hover:bg-emerald-50">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-bold">{idx + 1}</div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-900 line-clamp-2">{post.title}</p>
+                      <p className="text-[11px] text-slate-500 mt-1">{timeAgo(post.created_at)}</p>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2">{topic.title}</h3>
-                  <p className="text-sm text-slate-200/80 leading-relaxed">Quick access to top updates for this topic.</p>
-                </button>
-              );
-            })}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* ============= 5. THE FEED & SIDEBAR ============= */}
+      {/* ============= 6. THE FEED & SIDEBAR ============= */}
       <section id="feed" className="py-12 md:py-16 px-4 bg-gray-50 scroll-mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
