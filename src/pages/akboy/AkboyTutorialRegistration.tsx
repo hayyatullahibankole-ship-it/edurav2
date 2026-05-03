@@ -293,7 +293,7 @@ export default function AkboyTutorialRegistration() {
                   <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
                     <CheckCircle className="w-10 h-10 text-green-800" />
                   </div>
-                  <CardTitle className="text-2xl text-emerald-800">Registration Successful!</CardTitle>
+                  <CardTitle className="text-2xl text-green-800">Registration Successful!</CardTitle>
                   <CardDescription className="text-green-800">Thank you for registering</CardDescription>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
@@ -331,7 +331,7 @@ export default function AkboyTutorialRegistration() {
   return (
     <AkboyLayout>
       {/* Compact Hero */}
-      <section className="bg-gradient-to-br from-green-800 to-emerald-800 py-10 md:py-14">
+      <section className="bg-gradient-to-br from-green-800 to-green-800 py-10 md:py-14">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Tutorial Registration</h1>
           <p className="text-green-100 text-sm md:text-base">Choose a program, fill your details, and pay — it's that simple!</p>
@@ -419,7 +419,7 @@ export default function AkboyTutorialRegistration() {
                   </div>
                 )}
                 <div>
-                  <h3 className="font-semibold text-emerald-800">{selectedTutorial.name}</h3>
+                  <h3 className="font-semibold text-green-800">{selectedTutorial.name}</h3>
                   <p className="text-xs text-green-800">Selected tutorial</p>
                 </div>
               </CardContent>

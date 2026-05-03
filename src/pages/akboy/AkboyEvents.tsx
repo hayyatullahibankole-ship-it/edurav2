@@ -56,7 +56,7 @@ export default function AkboyEvents() {
       <section className="relative min-h-[70vh] flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <img src={eventsHero} alt="Events" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/95 via-teal-900/90 to-green-900/95"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-green-900/95 via-green-900/90 to-green-900/95"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
@@ -197,7 +197,7 @@ export default function AkboyEvents() {
           <Button
             asChild
             size="lg"
-            className="bg-white text-emerald-900 hover:bg-green-50 text-lg px-10 py-6 h-auto font-bold shadow-2xl hover:scale-105 transition-all rounded-2xl"
+            className="bg-white text-green-900 hover:bg-green-50 text-lg px-10 py-6 h-auto font-bold shadow-2xl hover:scale-105 transition-all rounded-2xl"
           >
             <Link to={`${basePath}/contact`}>Partner With Us</Link>
           </Button>

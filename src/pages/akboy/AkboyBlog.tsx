@@ -78,7 +78,7 @@ export default function AkboyBlog() {
   return (
     <AkboyLayout>
       {/* Hero Section */}
-      <section className="relative py-32 px-4 overflow-hidden bg-gradient-to-br from-emerald-900 via-teal-800 to-emerald-950">
+      <section className="relative py-32 px-4 overflow-hidden bg-gradient-to-br from-green-900 via-green-800 to-green-950">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute w-96 h-96 bg-green-700/20 rounded-full blur-3xl animate-float" style={{ top: '10%', left: '5%', animationDelay: '0s' }}></div>

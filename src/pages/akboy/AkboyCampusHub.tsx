@@ -57,7 +57,7 @@ const QUICK_ACCESS = [
 
 const BROWSE_BY_TOPIC = [
   { title: "University News", icon: GraduationCap, gradient: "from-blue-600 to-blue-800", category: "News & Updates" },
-  { title: "JAMB / Admission", icon: FileText, gradient: "from-green-800 to-emerald-800", category: "Exams & JAMB" },
+  { title: "JAMB / Admission", icon: FileText, gradient: "from-green-800 to-green-800", category: "Exams & JAMB" },
   { title: "Scholarships", icon: Award, gradient: "from-amber-600 to-amber-800", category: "Scholarships" },
   { title: "Trending", icon: TrendingUp, gradient: "from-orange-600 to-orange-800", category: "All" },
 ];
@@ -300,7 +300,7 @@ export default function AkboyCampusHub() {
       description="Latest admission updates, scholarships, JAMB/WAEC news and academic calendars from Nigerian universities, polytechnics and colleges. All in one hub."
     >
       {/* ============= 1. HERO WITH SEARCH ============= */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-900">
+      <section className="relative overflow-hidden bg-gradient-to-br from-green-950 via-green-900 to-green-900">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-10 left-10 w-72 h-72 bg-green-700 rounded-full blur-3xl"></div>
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-teal-400 rounded-full blur-3xl"></div>
@@ -329,7 +329,7 @@ export default function AkboyCampusHub() {
                 className="pl-12 h-14 text-base bg-white border-0 rounded-2xl shadow-2xl focus-visible:ring-2 focus-visible:ring-green-600"
               />
               {searchTerm && (
-                <a href="#feed" className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-green-900 hover:text-emerald-900">
+                <a href="#feed" className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-green-900 hover:text-green-900">
                   See {filtered.length} results →
                 </a>
               )}
@@ -349,7 +349,7 @@ export default function AkboyCampusHub() {
               </div>
               <div className="inline-flex items-center gap-3">
                 <span className="rounded-full border border-amber-400 bg-amber-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-amber-800">Latest Update</span>
-                <a href="#feed" className="text-sm font-semibold text-green-900 hover:text-emerald-900">View all →</a>
+                <a href="#feed" className="text-sm font-semibold text-green-900 hover:text-green-900">View all →</a>
               </div>
             </div>
 
@@ -533,7 +533,7 @@ export default function AkboyCampusHub() {
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">Search: {searchTerm}</span>
               )}
               {selectedCategory !== "All" && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-emerald-800 text-xs font-semibold">Category: {selectedCategory}</span>
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-semibold">Category: {selectedCategory}</span>
               )}
               {selectedSchool !== "All" && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">School: {selectedSchool}</span>
@@ -682,7 +682,7 @@ export default function AkboyCampusHub() {
       </section>
 
       {/* ============= 6. CTA ============= */}
-      <section className="py-14 md:py-20 px-4 bg-gradient-to-br from-emerald-900 to-teal-900 text-white">
+      <section className="py-14 md:py-20 px-4 bg-gradient-to-br from-green-900 to-green-900 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-bold font-poppins mb-4">Never miss an admission update</h2>
           <p className="text-green-100/85 mb-8 max-w-2xl mx-auto">
@@ -691,7 +691,7 @@ export default function AkboyCampusHub() {
           <div className="flex flex-wrap justify-center gap-3">
             <button
               onClick={() => document.getElementById('feed')?.scrollIntoView({ behavior: 'smooth' })}
-              className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-bold text-emerald-900 shadow-lg hover:bg-green-50"
+              className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-bold text-green-900 shadow-lg hover:bg-green-50"
             >
               Read latest headlines <ArrowRight className="w-4 h-4 ml-1" />
             </button>

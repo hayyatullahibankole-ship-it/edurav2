@@ -39,7 +39,7 @@ export default function AkboyAbout() {
       <section className="bg-white py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto grid gap-16 lg:grid-cols-2 lg:items-center">
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-emerald-900">
+            <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-900">
               <Lightbulb className="h-4 w-4" />
               Our Purpose
             </div>
@@ -112,7 +112,7 @@ export default function AkboyAbout() {
       <section className="bg-white py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto grid gap-16 lg:grid-cols-2 lg:items-center">
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-emerald-900">
+            <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-900">
               <Rocket className="h-4 w-4" />
               Next Phase
             </div>
