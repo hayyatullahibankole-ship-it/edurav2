@@ -76,15 +76,15 @@ export function AkboyNavbar() {
     );
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-akboy-cream/85 backdrop-blur-md border-b border-akboy-ink/10">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-akboy-forest/95 text-akboy-cream backdrop-blur-md border-b border-akboy-cream/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo */}
           <Link to={basePath || "/"} className="flex items-center gap-3 flex-shrink-0 group">
-            <img src={akboyLogo} alt="AKBOY Creative Hub" className="h-9 sm:h-10 w-auto" />
+            <img src={akboyLogo} alt="AKBOY Creative Hub" className="h-16 sm:h-20 w-auto" />
             <div className="hidden sm:flex flex-col leading-none">
-              <span className="font-display font-black tracking-tight text-akboy-forest text-lg">AKBOY</span>
-              <span className="text-[9px] uppercase tracking-[0.28em] text-akboy-ink/55 mt-0.5">Creative Hub</span>
+              <span className="font-display font-black tracking-tight text-akboy-cream text-xl sm:text-2xl">AKBOY</span>
+              <span className="text-[10px] uppercase tracking-[0.28em] text-akboy-cream/75 mt-0.5">Creative Hub</span>
             </div>
           </Link>
 
@@ -99,7 +99,7 @@ export function AkboyNavbar() {
               >
                 <button
                   className={`inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    openGroup === g.name ? "bg-akboy-ink/5 text-akboy-forest" : "text-akboy-ink/80 hover:text-akboy-forest"
+                    openGroup === g.name ? "bg-akboy-cream/10 text-akboy-cream" : "text-akboy-cream/80 hover:text-akboy-cream"
                   }`}
                 >
                   {g.name}
@@ -107,23 +107,23 @@ export function AkboyNavbar() {
                 </button>
                 {openGroup === g.name && (
                   <div className="absolute left-0 top-full pt-3 w-72">
-                    <div className="bg-akboy-paper border border-akboy-ink/10 rounded-2xl shadow-[0_24px_60px_-20px_rgba(15,61,46,0.25)] overflow-hidden">
+                    <div className="bg-akboy-paper border border-akboy-cream/15 rounded-2xl shadow-[0_24px_60px_-20px_rgba(15,61,46,0.25)] overflow-hidden">
                       <div className="p-2">
                         {g.children.map((c) => (
                           <div key={c.name}>
                             {renderLink(
                               c,
-                              "block px-3 py-2.5 text-sm font-semibold text-akboy-ink rounded-xl hover:bg-akboy-cream transition-colors",
+                              "block px-3 py-2.5 text-sm font-semibold text-akboy-forest rounded-xl hover:bg-akboy-cream transition-colors",
                               true
                             )}
                           </div>
                         ))}
                       </div>
                       {g.cta && (
-                        <div className="border-t border-akboy-ink/10 p-2 bg-akboy-cream/60">
+                        <div className="border-t border-akboy-cream/15 p-2 bg-akboy-forest/10">
                           {renderLink(
                             g.cta,
-                            "block text-center px-4 py-2.5 text-sm font-bold text-akboy-cream bg-akboy-forest hover:bg-akboy-ink rounded-xl transition-colors"
+                            "block text-center px-4 py-2.5 text-sm font-bold text-akboy-cream bg-akboy-forest hover:bg-akboy-moss rounded-xl transition-colors"
                           )}
                         </div>
                       )}
@@ -138,7 +138,7 @@ export function AkboyNavbar() {
           <div className="hidden lg:flex items-center gap-2">
             <Link
               to={`${basePath}/contact`}
-              className="inline-flex items-center gap-2 bg-akboy-forest hover:bg-akboy-ink text-akboy-cream font-bold rounded-full px-5 py-2.5 text-sm transition-colors shadow-[0_8px_24px_-8px_rgba(15,61,46,0.5)]"
+              className="inline-flex items-center gap-2 bg-akboy-cream text-akboy-forest font-bold rounded-full px-5 py-2.5 text-sm transition-colors shadow-[0_8px_24px_-8px_rgba(15,61,46,0.25)] hover:bg-akboy-paper"
             >
               Hire Akboy
               <ArrowUpRight className="h-4 w-4" />
@@ -149,13 +149,13 @@ export function AkboyNavbar() {
           <div className="lg:hidden flex items-center gap-2">
             <Link
               to={`${basePath}/contact`}
-              className="bg-akboy-forest text-akboy-cream font-bold rounded-full px-3.5 py-2 text-xs"
+              className="bg-akboy-cream text-akboy-forest font-bold rounded-full px-3.5 py-2 text-xs"
             >
               Hire
             </Link>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-full text-akboy-ink hover:bg-akboy-ink/5 transition-colors"
+              className="p-2 rounded-full text-akboy-cream hover:bg-akboy-cream/15 transition-colors"
               aria-label="Toggle menu"
             >
               {isOpen ? <X size={22} /> : <Menu size={22} />}
@@ -173,7 +173,7 @@ export function AkboyNavbar() {
                   <div key={g.name} className="border-b border-akboy-ink/5">
                     <button
                       onClick={() => setMobileGroup(expanded ? null : g.name)}
-                      className="w-full flex items-center justify-between px-2 py-3.5 text-base font-semibold text-akboy-ink"
+                      className="w-full flex items-center justify-between px-2 py-3.5 text-base font-semibold text-akboy-cream"
                     >
                       {g.name}
                       <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
@@ -182,14 +182,14 @@ export function AkboyNavbar() {
                       <div className="pb-3 pl-2 space-y-1">
                         {g.children.map((c) => (
                           <div key={c.name} className="py-0.5">
-                            {renderLink(c, "block px-3 py-2 text-sm font-medium text-akboy-ink/80 rounded-lg hover:bg-akboy-ink/5", true)}
+                            {renderLink(c, "block px-3 py-2 text-sm font-medium text-akboy-cream/90 rounded-lg hover:bg-akboy-cream/15", true)}
                           </div>
                         ))}
                         {g.cta && (
                           <div className="pt-2">
                             {renderLink(
                               g.cta,
-                              "block text-center px-4 py-2.5 text-sm font-bold text-akboy-cream bg-akboy-forest rounded-xl"
+                              "block text-center px-4 py-2.5 text-sm font-bold text-akboy-forest bg-akboy-cream rounded-xl hover:bg-akboy-paper"
                             )}
                           </div>
                         )}

@@ -116,7 +116,7 @@ export default function AkboyServices() {
     <AkboyLayout>
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-6xl mx-auto text-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-green-800 font-semibold mb-4">Our Services</p>
+          <p className="text-sm uppercase tracking-[0.3em] text-akboy-forest font-semibold mb-4">Our Services</p>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Professional services for education, design, and tech</h1>
           <p className="mx-auto max-w-3xl text-gray-600 text-lg leading-relaxed">
             Build better learning experiences, stronger brands, and modern digital products with AKBOY Creative Hub.
@@ -124,7 +124,7 @@ export default function AkboyServices() {
         </div>
       </section>
 
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-akboy-cream/95">
         <div className="max-w-7xl mx-auto grid gap-8 lg:grid-cols-2">
           {services.map((service) => {
             const Icon = iconMap[service.icon_name] || BookOpen;
@@ -134,8 +134,8 @@ export default function AkboyServices() {
                   <img src={service.image} alt={service.title} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-slate-900/30" />
                   <div className="absolute bottom-6 left-6 flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg">
-                      <Icon className="w-7 h-7 text-green-800" />
+                    <div className="w-14 h-14 rounded-2xl bg-akboy-cream flex items-center justify-center shadow-lg">
+                      <Icon className="w-7 h-7 text-akboy-forest" />
                     </div>
                     <h2 className="text-2xl font-semibold text-white">{service.title}</h2>
                   </div>
@@ -146,15 +146,15 @@ export default function AkboyServices() {
                   <div className="grid gap-3 mb-6 text-gray-600">
                     {service.features.map((feature, idx) => (
                       <div key={idx} className="flex items-start gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-green-800 mt-1" />
+                        <CheckCircle2 className="w-5 h-5 text-akboy-forest mt-1" />
                         <span>{feature}</span>
                       </div>
                     ))}
                   </div>
                   <div className="rounded-2xl border border-gray-200 bg-slate-50 p-4 mb-6">
-                    <p className="text-sm text-gray-700"><span className="font-semibold text-green-900">Pricing:</span> {service.pricing_info}</p>
+                    <p className="text-sm text-gray-700"><span className="font-semibold text-akboy-forest">Pricing:</span> {service.pricing_info}</p>
                   </div>
-                  <Button asChild className="w-full bg-green-800 hover:bg-green-900 text-white font-semibold">
+                  <Button asChild className="w-full bg-akboy-forest hover:bg-akboy-moss text-akboy-cream font-semibold">
                     <Link to={service.linkType === "register"
                       ? `${basePath}/register${service.registerSlug ? `?tutorial=${service.registerSlug}` : ""}`
                       : `${basePath}/contact`}>
@@ -174,7 +174,7 @@ export default function AkboyServices() {
           <p className="text-gray-600 text-lg leading-relaxed mb-8">
             Our team is ready to guide you through the best package for your goals — whether it is study support, digital creation, or a complete web solution.
           </p>
-          <Button asChild className="bg-green-800 hover:bg-green-900 text-white px-8 py-4 text-base font-semibold">
+          <Button asChild className="bg-akboy-forest hover:bg-akboy-moss text-akboy-cream px-8 py-4 text-base font-semibold">
             <Link to={`${basePath}/contact`}>Schedule a Consultation</Link>
           </Button>
         </div>
