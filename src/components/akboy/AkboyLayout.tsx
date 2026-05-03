@@ -14,14 +14,14 @@ export function AkboyLayout({ children, title, description }: AkboyLayoutProps) 
   const pageDescription = description || "AKBOY Creative Hub - Your partner in innovation, creativity, and digital excellence.";
 
   return (
-    <div className="min-h-screen flex flex-col bg-white font-lato">
+    <div className="min-h-screen flex flex-col bg-white font-sans">
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         <link rel="icon" href="/akboy-logo.png" type="image/png" />
       </Helmet>
       <AkboyNavbar />
-      <main className="flex-1 pt-20">
+      <main className="flex-1 pt-16 sm:pt-20">
         {children}
       </main>
       <AkboyFooter />

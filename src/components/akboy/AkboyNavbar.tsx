@@ -87,45 +87,45 @@ export function AkboyNavbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-emerald-100 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-stone-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo */}
-          <Link to={basePath || "/"} className="flex items-center">
-            <img src={akboyLogo} alt="AKBOY Creative Hub" className="h-12 sm:h-14 w-auto" />
+          <Link to={basePath || "/"} className="flex items-center flex-shrink-0">
+            <img src={akboyLogo} alt="AKBOY Creative Hub" className="h-10 sm:h-12 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center space-x-0.5">
             {groups.map((g) => (
               <div
                 key={g.name}
-                className="relative"
+                className="relative group"
                 onMouseEnter={() => setOpenGroup(g.name)}
                 onMouseLeave={() => setOpenGroup(null)}
               >
                 <button
-                  className="inline-flex items-center gap-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-800 hover:bg-emerald-50 hover:text-emerald-800 transition-colors"
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-stone-100 transition-colors duration-200"
                 >
                   {g.name}
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-4 w-4 text-gray-500 group-hover:text-gray-700 transition-colors" />
                 </button>
                 {openGroup === g.name && (
-                  <div className="absolute left-0 top-full pt-2 w-64">
-                    <div className="bg-white border border-emerald-100 rounded-xl shadow-xl overflow-hidden">
-                      <div className="py-2">
+                  <div className="absolute left-0 top-full pt-2 w-56">
+                    <div className="bg-white border border-stone-200 rounded-lg shadow-lg overflow-hidden">
+                      <div className="py-1">
                         {g.children.map((c) =>
                           renderLink(
                             c,
-                            "block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-emerald-50 hover:text-emerald-800"
+                            "block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-stone-50 hover:text-gray-900 transition-colors"
                           )
                         )}
                       </div>
                       {g.cta && (
-                        <div className="border-t border-emerald-100 p-2 bg-emerald-50/50">
+                        <div className="border-t border-stone-200 p-2 bg-stone-50">
                           {renderLink(
                             g.cta,
-                            "block text-center px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg"
+                            "block text-center px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors"
                           )}
                         </div>
                       )}
@@ -136,21 +136,21 @@ export function AkboyNavbar() {
             ))}
           </div>
 
-          {/* CTA Button (always visible on desktop) */}
+          {/* CTA Button (desktop) */}
           <div className="hidden lg:flex items-center">
-            <Button asChild className="bg-yellow-400 hover:bg-yellow-500 text-emerald-950 font-bold rounded-lg px-5 shadow-sm">
+            <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg px-6 py-2 shadow-sm transition-colors h-10">
               <Link to={`${basePath}/contact`}>Get Started</Link>
             </Button>
           </div>
 
           {/* Mobile CTA + Menu */}
           <div className="lg:hidden flex items-center gap-2">
-            <Button asChild size="sm" className="bg-yellow-400 hover:bg-yellow-500 text-emerald-950 font-bold rounded-lg">
+            <Button asChild size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg">
               <Link to={`${basePath}/contact`}>Get Started</Link>
             </Button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg text-emerald-900 hover:bg-emerald-50"
+              className="p-2 rounded-lg text-gray-700 hover:bg-stone-100 transition-colors"
               aria-label="Toggle menu"
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -160,31 +160,31 @@ export function AkboyNavbar() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="lg:hidden py-4 border-t border-emerald-100">
+          <div className="lg:hidden py-4 border-t border-stone-200">
             <div className="flex flex-col">
               {groups.map((g) => {
                 const expanded = mobileGroup === g.name;
                 return (
-                  <div key={g.name} className="border-b border-emerald-50">
+                  <div key={g.name} className="border-b border-stone-100">
                     <button
                       onClick={() => setMobileGroup(expanded ? null : g.name)}
-                      className="w-full flex items-center justify-between px-2 py-3 text-base font-semibold text-gray-800"
+                      className="w-full flex items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-stone-50 transition-colors"
                     >
                       {g.name}
-                      <ChevronDown className={`h-5 w-5 transition-transform ${expanded ? "rotate-180" : ""}`} />
+                      <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
                     </button>
                     {expanded && (
-                      <div className="pb-3 pl-4">
+                      <div className="pb-3 pl-4 space-y-1 bg-stone-50">
                         {g.children.map((c) => (
                           <div key={c.name} className="py-1">
-                            {renderLink(c, "block px-2 py-2 text-sm text-gray-700 hover:text-emerald-700")}
+                            {renderLink(c, "block px-2 py-2 text-sm font-medium text-gray-700 hover:text-emerald-700 hover:bg-white rounded transition-colors")}
                           </div>
                         ))}
                         {g.cta && (
-                          <div className="mt-2">
+                          <div className="mt-2 pt-2 border-t border-stone-200">
                             {renderLink(
                               g.cta,
-                              "block text-center px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 rounded-lg"
+                              "block text-center px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded transition-colors"
                             )}
                           </div>
                         )}

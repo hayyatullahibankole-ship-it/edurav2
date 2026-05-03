@@ -35,15 +35,15 @@ export function AkboyFooter() {
   }
 
   return (
-    <footer className="bg-emerald-950 text-white">
+    <footer className="bg-gray-900 text-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="space-y-6 lg:col-span-2">
-            <div className="inline-block bg-white px-6 py-4 rounded-xl">
-              <img src={akboyLogo} alt="AKBOY Creative Hub" className="h-16 w-auto" />
+            <div className="inline-block bg-white px-4 py-3 rounded-lg">
+              <img src={akboyLogo} alt="AKBOY Creative Hub" className="h-12 w-auto" />
             </div>
-            <p className="text-white/80 text-sm leading-relaxed">
+            <p className="text-gray-400 text-sm leading-relaxed">
               Empowering students and businesses through design, education, and digital solutions.
             </p>
             <div className="flex space-x-3">
@@ -58,7 +58,7 @@ export function AkboyFooter() {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-emerald-800 hover:bg-yellow-400 hover:text-emerald-950 rounded-lg flex items-center justify-center transition-colors"
+                  className="w-10 h-10 bg-gray-800 hover:bg-emerald-600 text-gray-300 hover:text-white rounded-lg flex items-center justify-center transition-colors duration-200"
                 >
                   <Icon className="w-5 h-5" />
                 </a>
@@ -68,52 +68,52 @@ export function AkboyFooter() {
 
           {/* Learn */}
           <div>
-            <h4 className="text-yellow-400 font-bold text-base mb-5">Learn</h4>
+            <h4 className="text-gray-50 font-semibold text-base mb-5">Learn</h4>
             <ul className="space-y-2.5 text-sm">
-              <li><Link to={`${basePath}/register`} className="text-white/80 hover:text-white">Exam Prep Academy</Link></li>
-              <li><Link to={`${basePath}/mock`} className="text-white/80 hover:text-white">Mock Exams</Link></li>
-              <li><a href="https://edura.space" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-white">JAMB CBT Practice</a></li>
-              <li><Link to={`${basePath}/register`} className="text-white/80 hover:text-white">Online Classes</Link></li>
+              <li><Link to={`${basePath}/register`} className="text-gray-400 hover:text-gray-50 transition-colors">Exam Prep Academy</Link></li>
+              <li><Link to={`${basePath}/mock`} className="text-gray-400 hover:text-gray-50 transition-colors">Mock Exams</Link></li>
+              <li><a href="https://edura.space" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-50 transition-colors">JAMB CBT Practice</a></li>
+              <li><Link to={`${basePath}/register`} className="text-gray-400 hover:text-gray-50 transition-colors">Online Classes</Link></li>
             </ul>
           </div>
 
           {/* Campus Hub & Services */}
           <div>
-            <h4 className="text-yellow-400 font-bold text-base mb-5">Explore</h4>
+            <h4 className="text-gray-50 font-semibold text-base mb-5">Explore</h4>
             <ul className="space-y-2.5 text-sm">
-              <li><Link to={`${basePath}/campus-hub`} className="text-white/80 hover:text-white">Campus Hub</Link></li>
-              <li><Link to={`${basePath}/services`} className="text-white/80 hover:text-white">Services</Link></li>
-              <li><Link to={`${basePath}/portfolio`} className="text-white/80 hover:text-white">Portfolio</Link></li>
-              <li><Link to={`${basePath}/about`} className="text-white/80 hover:text-white">About</Link></li>
-              <li><Link to="/blog" className="text-white/80 hover:text-white">Blog</Link></li>
+              <li><Link to={`${basePath}/campus-hub`} className="text-gray-400 hover:text-gray-50 transition-colors">Campus Hub</Link></li>
+              <li><Link to={`${basePath}/services`} className="text-gray-400 hover:text-gray-50 transition-colors">Services</Link></li>
+              <li><Link to={`${basePath}/portfolio`} className="text-gray-400 hover:text-gray-50 transition-colors">Portfolio</Link></li>
+              <li><Link to={`${basePath}/about`} className="text-gray-400 hover:text-gray-50 transition-colors">About</Link></li>
+              <li><Link to="/blog" className="text-gray-400 hover:text-gray-50 transition-colors">Blog</Link></li>
             </ul>
           </div>
 
           {/* Contact */}
           <div>
-            <h4 className="text-yellow-400 font-bold text-base mb-5">Get In Touch</h4>
+            <h4 className="text-gray-50 font-semibold text-base mb-5">Get In Touch</h4>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start space-x-3">
-                <Mail className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-                <a href="mailto:akboycreativehub@gmail.com" className="text-white/80 hover:text-white break-all">akboycreativehub@gmail.com</a>
+                <Mail className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                <a href="mailto:akboycreativehub@gmail.com" className="text-gray-400 hover:text-gray-50 break-all transition-colors">akboycreativehub@gmail.com</a>
               </li>
               <li className="flex items-start space-x-3">
-                <Phone className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-                <a href="tel:+2348101466977" className="text-white/80 hover:text-white">+234 810 146 6977</a>
+                <Phone className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                <a href="tel:+2348101466977" className="text-gray-400 hover:text-gray-50 transition-colors">+234 810 146 6977</a>
               </li>
               <li className="flex items-start space-x-3">
-                <MapPin className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-                <span className="text-white/80">Lagos, Nigeria</span>
+                <MapPin className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                <span className="text-gray-400">Lagos, Nigeria</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-emerald-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-white/60 text-sm">© {currentYear} AKBOY Creative Hub. All rights reserved.</p>
+        <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-gray-500 text-sm">© {currentYear} AKBOY Creative Hub. All rights reserved.</p>
           <div className="flex gap-6 text-sm">
-            <Link to="/privacy" className="text-white/60 hover:text-white">Privacy Policy</Link>
-            <Link to="/terms" className="text-white/60 hover:text-white">Terms of Service</Link>
+            <Link to="/privacy" className="text-gray-500 hover:text-gray-50 transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="text-gray-500 hover:text-gray-50 transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>
