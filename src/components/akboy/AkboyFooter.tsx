@@ -9,7 +9,7 @@ export function AkboyFooter() {
   const basePath = isCampusHub ? "" : isAkboy ? "" : "/akboy";
 
   return (
-    <footer className="bg-akboy-green text-akboy-cream">
+    <footer className="bg-akboy-forest text-akboy-cream">
       {/* Editorial top band */}
       <div className="border-b border-akboy-cream/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid gap-6 md:grid-cols-[1.5fr_1fr] md:items-end">
