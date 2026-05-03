@@ -33,7 +33,7 @@ export default function AkboyMockPages() {
       description: "Take the full mock examination in real exam conditions",
       icon: BookOpen,
       path: `${basePath}/mock-exam`,
-      color: "from-emerald-500 to-teal-500",
+      color: "from-green-700 to-teal-500",
       step: 3,
       details: "Complete the mock exam with timed questions and interactive interface"
     },
@@ -42,7 +42,7 @@ export default function AkboyMockPages() {
       description: "Confirmation page after completing the mock exam",
       icon: CheckCircle2,
       path: `${basePath}/mock-submitted`,
-      color: "from-green-500 to-emerald-600",
+      color: "from-green-500 to-green-800",
       step: 4,
       details: "View confirmation message and next steps"
     },
@@ -64,7 +64,7 @@ export default function AkboyMockPages() {
           {/* Header */}
           <div className="text-center mb-16">
             <div className="flex items-center justify-center mb-6">
-              <BarChart3 className="h-12 w-12 text-emerald-600" />
+              <BarChart3 className="h-12 w-12 text-green-800" />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Mock Examination Portal
@@ -86,7 +86,7 @@ export default function AkboyMockPages() {
                     <p className="text-sm font-semibold text-gray-700 mt-2 text-center">{page.title}</p>
                   </div>
                   {index < mockPages.length - 1 && (
-                    <div className="flex-1 h-1 bg-gradient-to-r from-emerald-400 to-emerald-200 mx-2"></div>
+                    <div className="flex-1 h-1 bg-gradient-to-r from-green-600 to-green-200 mx-2"></div>
                   )}
                 </div>
               ))}
@@ -172,7 +172,7 @@ export default function AkboyMockPages() {
           </div>
 
           {/* Quick Start Section */}
-          <Card className="border-0 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg">
+          <Card className="border-0 bg-gradient-to-br from-green-50 to-teal-50 shadow-lg">
             <CardHeader>
               <CardTitle className="text-2xl">Quick Start Guide</CardTitle>
               <CardDescription>Follow these steps to complete your mock examination</CardDescription>
@@ -180,7 +180,7 @@ export default function AkboyMockPages() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex gap-4">
-                  <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 font-bold">
+                  <div className="h-8 w-8 rounded-full bg-green-800 text-white flex items-center justify-center flex-shrink-0 font-bold">
                     1
                   </div>
                   <div>
@@ -189,7 +189,7 @@ export default function AkboyMockPages() {
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 font-bold">
+                  <div className="h-8 w-8 rounded-full bg-green-800 text-white flex items-center justify-center flex-shrink-0 font-bold">
                     2
                   </div>
                   <div>
@@ -198,7 +198,7 @@ export default function AkboyMockPages() {
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 font-bold">
+                  <div className="h-8 w-8 rounded-full bg-green-800 text-white flex items-center justify-center flex-shrink-0 font-bold">
                     3
                   </div>
                   <div>
@@ -207,7 +207,7 @@ export default function AkboyMockPages() {
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 font-bold">
+                  <div className="h-8 w-8 rounded-full bg-green-800 text-white flex items-center justify-center flex-shrink-0 font-bold">
                     4
                   </div>
                   <div>
@@ -216,7 +216,7 @@ export default function AkboyMockPages() {
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 font-bold">
+                  <div className="h-8 w-8 rounded-full bg-green-800 text-white flex items-center justify-center flex-shrink-0 font-bold">
                     5
                   </div>
                   <div>
@@ -229,7 +229,7 @@ export default function AkboyMockPages() {
           </Card>
 
           {/* WhatsApp Group CTA */}
-          <Card className="border-0 bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg overflow-hidden">
+          <Card className="border-0 bg-gradient-to-r from-green-500 to-green-700 text-white shadow-lg overflow-hidden">
             <CardContent className="py-6 px-6 text-center space-y-3">
               <h3 className="text-xl font-bold">Join Our WhatsApp Group</h3>
               <p className="text-sm opacity-90">Stay updated on exam schedules, results, and tips from other candidates</p>
@@ -246,7 +246,7 @@ export default function AkboyMockPages() {
             <Button
               asChild
               size="lg"
-              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xl hover:shadow-2xl transition-all"
+              className="bg-gradient-to-r from-green-800 to-teal-600 hover:from-green-900 hover:to-teal-700 text-white shadow-xl hover:shadow-2xl transition-all"
             >
               <Link to={`${basePath}/mock-registration`} className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5" />

@@ -285,22 +285,22 @@ export default function AkboyTutorialRegistration() {
   if (submissionData) {
     return (
       <AkboyLayout>
-        <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white py-16">
+        <div className="min-h-screen bg-gradient-to-b from-green-50 to-white py-16">
           <div className="container mx-auto px-4 max-w-lg">
             <div ref={printRef} className="print:p-8">
-              <Card className="border-emerald-200 shadow-lg">
-                <CardHeader className="text-center bg-emerald-50 rounded-t-lg">
-                  <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-                    <CheckCircle className="w-10 h-10 text-emerald-600" />
+              <Card className="border-green-200 shadow-lg">
+                <CardHeader className="text-center bg-green-50 rounded-t-lg">
+                  <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <CheckCircle className="w-10 h-10 text-green-800" />
                   </div>
-                  <CardTitle className="text-2xl text-emerald-800">Registration Successful!</CardTitle>
-                  <CardDescription className="text-emerald-600">Thank you for registering</CardDescription>
+                  <CardTitle className="text-2xl text-green-800">Registration Successful!</CardTitle>
+                  <CardDescription className="text-green-800">Thank you for registering</CardDescription>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
                   <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
                     <div className="flex justify-between"><span className="text-gray-600">ID:</span><span className="font-mono">{submissionData.registrationId.slice(0, 8).toUpperCase()}</span></div>
                     <div className="flex justify-between"><span className="text-gray-600">Tutorial:</span><span className="font-medium">{submissionData.tutorialName}</span></div>
-                    <div className="flex justify-between"><span className="text-gray-600">Amount:</span><span className="font-medium text-emerald-600">₦{submissionData.price.toLocaleString()}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-600">Amount:</span><span className="font-medium text-green-800">₦{submissionData.price.toLocaleString()}</span></div>
                     <div className="flex justify-between"><span className="text-gray-600">Status:</span><span className="text-amber-600 font-medium">Pending Verification</span></div>
                   </div>
                   <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg">
@@ -308,12 +308,12 @@ export default function AkboyTutorialRegistration() {
                   </div>
                   {submissionData.whatsappLink && (
                     <a href={submissionData.whatsappLink} target="_blank" rel="noopener noreferrer"
-                      className="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-medium">
+                      className="block w-full text-center bg-green-800 hover:bg-green-900 text-white py-3 rounded-lg font-medium">
                       Join WhatsApp Group
                     </a>
                   )}
                   <div className="flex gap-3 print:hidden">
-                    <Button onClick={() => window.print()} className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                    <Button onClick={() => window.print()} className="flex-1 bg-green-800 hover:bg-green-900">
                       <Printer className="w-4 h-4 mr-2" /> Print
                     </Button>
                     <Button variant="outline" onClick={() => window.location.href = basePath || '/'} className="flex-1">Home</Button>
@@ -331,10 +331,10 @@ export default function AkboyTutorialRegistration() {
   return (
     <AkboyLayout>
       {/* Compact Hero */}
-      <section className="bg-gradient-to-br from-emerald-600 to-emerald-800 py-10 md:py-14">
+      <section className="bg-gradient-to-br from-green-800 to-green-800 py-10 md:py-14">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Tutorial Registration</h1>
-          <p className="text-emerald-100 text-sm md:text-base">Choose a program, fill your details, and pay — it's that simple!</p>
+          <p className="text-green-100 text-sm md:text-base">Choose a program, fill your details, and pay — it's that simple!</p>
         </div>
       </section>
 
@@ -349,14 +349,14 @@ export default function AkboyTutorialRegistration() {
             ].map((s, i) => (
               <div key={s.num} className="flex items-center gap-2">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-                  step >= s.num ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-500'
+                  step >= s.num ? 'bg-green-800 text-white' : 'bg-gray-200 text-gray-500'
                 }`}>
                   {step > s.num ? <CheckCircle className="w-4 h-4" /> : s.num}
                 </div>
-                <span className={`text-xs font-medium hidden sm:inline ${step >= s.num ? 'text-emerald-700' : 'text-gray-400'}`}>
+                <span className={`text-xs font-medium hidden sm:inline ${step >= s.num ? 'text-green-900' : 'text-gray-400'}`}>
                   {s.label}
                 </span>
-                {i < 2 && <div className={`w-8 h-0.5 ${step > s.num ? 'bg-emerald-600' : 'bg-gray-200'}`} />}
+                {i < 2 && <div className={`w-8 h-0.5 ${step > s.num ? 'bg-green-800' : 'bg-gray-200'}`} />}
               </div>
             ))}
           </div>
@@ -369,7 +369,7 @@ export default function AkboyTutorialRegistration() {
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-center mb-2">Select a Tutorial</h2>
             {loading ? (
-              <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-emerald-600" /></div>
+              <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-green-800" /></div>
             ) : (
               <div className="space-y-3">
                 {tutorials.map((tutorial) => {
@@ -377,22 +377,22 @@ export default function AkboyTutorialRegistration() {
                   return (
                     <Card
                       key={tutorial.id}
-                      className="cursor-pointer hover:border-emerald-400 transition-colors active:scale-[0.99]"
+                      className="cursor-pointer hover:border-green-600 transition-colors active:scale-[0.99]"
                       onClick={() => selectTutorial(tutorial.id)}
                     >
                       <CardContent className="p-4 flex items-center gap-4">
                         {tutorial.flyer_url ? (
                           <img src={tutorial.flyer_url} alt={tutorial.name} className="w-16 h-16 rounded-lg object-cover shrink-0" />
                         ) : (
-                          <div className="w-16 h-16 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                            <Icon className="w-7 h-7 text-emerald-600" />
+                          <div className="w-16 h-16 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
+                            <Icon className="w-7 h-7 text-green-800" />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-sm">{tutorial.name}</h3>
                           <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{tutorial.description}</p>
                         </div>
-                        <ArrowRight className="w-5 h-5 text-emerald-600 shrink-0" />
+                        <ArrowRight className="w-5 h-5 text-green-800 shrink-0" />
                       </CardContent>
                     </Card>
                   );
@@ -405,22 +405,22 @@ export default function AkboyTutorialRegistration() {
         {/* STEP 2: Personal Details + Tutorial Options */}
         {step === 2 && selectedTutorial && (
           <div className="space-y-6">
-            <button onClick={() => { setStep(1); form.setValue('tutorial_id', ''); }} className="flex items-center gap-1 text-sm text-emerald-600 hover:underline">
+            <button onClick={() => { setStep(1); form.setValue('tutorial_id', ''); }} className="flex items-center gap-1 text-sm text-green-800 hover:underline">
               <ArrowLeft className="w-4 h-4" /> Change tutorial
             </button>
 
-            <Card className="bg-emerald-50 border-emerald-200">
+            <Card className="bg-green-50 border-green-200">
               <CardContent className="p-4 flex items-center gap-3">
                 {selectedTutorial.flyer_url ? (
                   <img src={selectedTutorial.flyer_url} alt="" className="w-12 h-12 rounded-lg object-cover" />
                 ) : (
-                  <div className="w-12 h-12 rounded-lg bg-emerald-200 flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 text-emerald-700" />
+                  <div className="w-12 h-12 rounded-lg bg-green-200 flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-green-900" />
                   </div>
                 )}
                 <div>
-                  <h3 className="font-semibold text-emerald-800">{selectedTutorial.name}</h3>
-                  <p className="text-xs text-emerald-600">Selected tutorial</p>
+                  <h3 className="font-semibold text-green-800">{selectedTutorial.name}</h3>
+                  <p className="text-xs text-green-800">Selected tutorial</p>
                 </div>
               </CardContent>
             </Card>
@@ -499,14 +499,14 @@ export default function AkboyTutorialRegistration() {
               </div>
 
               {price > 0 && (
-                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-lg text-center">
+                <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-center">
                   <p className="text-sm text-gray-600 mb-1">Your Fee</p>
-                  <p className="text-3xl font-bold text-emerald-600">₦{price.toLocaleString()}</p>
+                  <p className="text-3xl font-bold text-green-800">₦{price.toLocaleString()}</p>
                 </div>
               )}
             </div>
 
-            <Button onClick={goToPaymentStep} className="w-full bg-emerald-600 hover:bg-emerald-700 py-5" disabled={!price}>
+            <Button onClick={goToPaymentStep} className="w-full bg-green-800 hover:bg-green-900 py-5" disabled={!price}>
               Continue to Payment <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
@@ -515,12 +515,12 @@ export default function AkboyTutorialRegistration() {
         {/* STEP 3: Payment & Submit */}
         {step === 3 && selectedTutorial && (
           <form onSubmit={form.handleSubmit(onSubmit, () => toast.error('Please check all fields'))} className="space-y-6">
-            <button type="button" onClick={() => setStep(2)} className="flex items-center gap-1 text-sm text-emerald-600 hover:underline">
+            <button type="button" onClick={() => setStep(2)} className="flex items-center gap-1 text-sm text-green-800 hover:underline">
               <ArrowLeft className="w-4 h-4" /> Back to details
             </button>
 
             {/* Payment Summary */}
-            <Card className="border-emerald-200">
+            <Card className="border-green-200">
               <CardContent className="p-5 space-y-3">
                 <h3 className="font-semibold">Payment Summary</h3>
                 <div className="text-sm space-y-1">
@@ -528,7 +528,7 @@ export default function AkboyTutorialRegistration() {
                   <div className="flex justify-between"><span className="text-gray-600">Mode:</span><span className="capitalize">{modeOfLearning} {tutorialType}</span></div>
                   <div className="flex justify-between font-bold text-lg pt-2 border-t">
                     <span>Total:</span>
-                    <span className="text-emerald-600">₦{price.toLocaleString()}</span>
+                    <span className="text-green-800">₦{price.toLocaleString()}</span>
                   </div>
                 </div>
               </CardContent>
@@ -561,13 +561,13 @@ export default function AkboyTutorialRegistration() {
                   else if (file) toast.error('File must be less than 5MB');
                 }}
               />
-              {paymentProof && <p className="text-xs text-emerald-600">✓ {paymentProof.name}</p>}
+              {paymentProof && <p className="text-xs text-green-800">✓ {paymentProof.name}</p>}
               {uploadingProof && <Loader2 className="w-4 h-4 animate-spin" />}
             </div>
 
             {/* Optional: Guardian & Extras */}
             <details className="group">
-              <summary className="cursor-pointer text-sm text-emerald-600 font-medium hover:underline">
+              <summary className="cursor-pointer text-sm text-green-800 font-medium hover:underline">
                 + Add guardian info / special requests (optional)
               </summary>
               <div className="mt-4 space-y-4">
@@ -619,12 +619,12 @@ export default function AkboyTutorialRegistration() {
             </div>
             {form.formState.errors.agreement && <p className="text-xs text-red-500">{form.formState.errors.agreement.message}</p>}
 
-            <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 py-5 text-base" disabled={submitting}>
+            <Button type="submit" className="w-full bg-green-800 hover:bg-green-900 py-5 text-base" disabled={submitting}>
               {submitting ? (<><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Submitting...</>) : (<><Upload className="w-5 h-5 mr-2" /> Submit Registration</>)}
             </Button>
 
             <p className="text-center text-xs text-gray-500">
-              Questions? <a href="tel:08101466977" className="text-emerald-600">08101466977</a> | <a href="mailto:akboycreativehub@gmail.com" className="text-emerald-600">akboycreativehub@gmail.com</a>
+              Questions? <a href="tel:08101466977" className="text-green-800">08101466977</a> | <a href="mailto:akboycreativehub@gmail.com" className="text-green-800">akboycreativehub@gmail.com</a>
             </p>
           </form>
         )}

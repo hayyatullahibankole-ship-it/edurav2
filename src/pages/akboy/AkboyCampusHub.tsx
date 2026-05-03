@@ -1,19 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import {
-  Search, Calendar, ArrowRight, GraduationCap, School as SchoolIcon,
-  Sparkles, Briefcase, BookOpen, Megaphone, Award, Users,
-  TrendingUp, Newspaper, Lightbulb, Flame, FileText, ChevronRight,
-  Building2, Filter, ChevronLeft, Mail, Tag, Eye, MessageCircle,
+  Search, ArrowUpRight, ArrowRight, Sparkles, Flame,
+  GraduationCap, Award, FileText, Calendar, Briefcase, Megaphone,
+  Lightbulb, Newspaper, ChevronLeft, ChevronRight, Mail,
 } from "lucide-react";
 
 interface CampusPost {
@@ -31,39 +25,21 @@ interface CampusPost {
   year?: number | null;
 }
 
-const CATEGORY_META: Record<string, { color: string; bg: string; emoji: string; icon: any }> = {
-  "Admissions":            { color: "text-emerald-700", bg: "bg-emerald-100", emoji: "🎓", icon: GraduationCap },
-  "Scholarships":          { color: "text-amber-700",   bg: "bg-amber-100",   emoji: "💰", icon: Award },
-  "Exams & JAMB":          { color: "text-blue-700",    bg: "bg-blue-100",    emoji: "📝", icon: FileText },
-  "Academic Calendar":     { color: "text-purple-700",  bg: "bg-purple-100",  emoji: "📅", icon: Calendar },
-  "Accreditation":         { color: "text-indigo-700",  bg: "bg-indigo-100",  emoji: "✅", icon: Award },
-  "Convocation & Events":  { color: "text-orange-700",  bg: "bg-orange-100",  emoji: "🎉", icon: Calendar },
-  "Career & Internships":  { color: "text-teal-700",    bg: "bg-teal-100",    emoji: "💼", icon: Briefcase },
-  "News & Updates":        { color: "text-rose-700",    bg: "bg-rose-100",    emoji: "📢", icon: Megaphone },
-  "Study Tips":            { color: "text-fuchsia-700", bg: "bg-fuchsia-100", emoji: "💡", icon: Lightbulb },
+const CATEGORY_META: Record<string, { icon: any; tone: string }> = {
+  "Admissions":            { icon: GraduationCap, tone: "Admissions" },
+  "Scholarships":          { icon: Award,         tone: "Funding" },
+  "Exams & JAMB":          { icon: FileText,      tone: "Exams" },
+  "Academic Calendar":     { icon: Calendar,      tone: "Calendar" },
+  "Accreditation":         { icon: Award,         tone: "Accreditation" },
+  "Convocation & Events":  { icon: Megaphone,     tone: "Events" },
+  "Career & Internships":  { icon: Briefcase,     tone: "Career" },
+  "News & Updates":        { icon: Newspaper,     tone: "News" },
+  "Study Tips":            { icon: Lightbulb,     tone: "Study" },
 };
 const CATEGORIES = ["All", ...Object.keys(CATEGORY_META)];
 
-const QUICK_ACCESS = [
-  { key: "Admissions",           title: "Admissions",          desc: "ND, HND, UTME, DE & PG forms",      icon: GraduationCap, gradient: "from-emerald-500 to-teal-500" },
-  { key: "Scholarships",         title: "Scholarships",        desc: "Local & international funding",     icon: Award,         gradient: "from-amber-500 to-orange-500" },
-  { key: "Exams & JAMB",         title: "Exams & JAMB",        desc: "JAMB, WAEC, NECO, Post-UTME",       icon: FileText,      gradient: "from-blue-500 to-indigo-500" },
-  { key: "Academic Calendar",    title: "Academic Calendar",   desc: "Resumption, semesters, timetables", icon: Calendar,      gradient: "from-purple-500 to-fuchsia-500" },
-  { key: "Accreditation",        title: "Accreditation",       desc: "NUC, NBTE, programme approvals",    icon: Award,         gradient: "from-indigo-500 to-blue-500" },
-  { key: "Convocation & Events", title: "Convocation & Events", desc: "Matriculation, convocation, fests", icon: Megaphone,    gradient: "from-orange-500 to-red-500" },
-  { key: "Career & Internships", title: "Career",              desc: "Internships, jobs & opportunities", icon: Briefcase,     gradient: "from-teal-500 to-emerald-500" },
-  { key: "News & Updates",       title: "News & Updates",      desc: "Breaking education news",           icon: Newspaper,     gradient: "from-rose-500 to-pink-500" },
-];
-
-const BROWSE_BY_TOPIC = [
-  { title: "University News", icon: GraduationCap, gradient: "from-blue-600 to-blue-800", category: "News & Updates" },
-  { title: "JAMB / Admission", icon: FileText, gradient: "from-emerald-600 to-emerald-800", category: "Exams & JAMB" },
-  { title: "Scholarships", icon: Award, gradient: "from-amber-600 to-amber-800", category: "Scholarships" },
-  { title: "Trending", icon: TrendingUp, gradient: "from-orange-600 to-orange-800", category: "All" },
-];
-
 const formatDate = (d?: string) =>
-  d ? new Date(d).toLocaleDateString("en-NG", { month: "short", day: "numeric", year: "numeric" }) : "Recent";
+  d ? new Date(d).toLocaleDateString("en-NG", { month: "short", day: "numeric", year: "numeric" }) : "";
 
 const timeAgo = (d?: string) => {
   if (!d) return "";
@@ -76,6 +52,8 @@ const timeAgo = (d?: string) => {
   return formatDate(d);
 };
 
+const stripHtml = (s?: string) => (s || "").replace(/<[^>]*>/g, "").trim();
+
 export default function AkboyCampusHub() {
   const { isCampusHub } = useDomainDetection();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -84,42 +62,23 @@ export default function AkboyCampusHub() {
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "All");
   const [selectedSchool, setSelectedSchool] = useState(searchParams.get("school") || "All");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 18;
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [newsletterSuccess, setNewsletterSuccess] = useState(false);
+  const [heroIndex, setHeroIndex] = useState(0);
+  const ITEMS_PER_PAGE = 12;
 
-  useEffect(() => { fetchPosts(); }, []);
-
-  // Auto-advance slideshow
   useEffect(() => {
-    if (posts.length === 0) return;
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % Math.min(8, posts.length));
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [posts]);
-
-  const fetchPosts = async () => {
-    try {
-      setError(null);
-      const { data, error: fetchError } = await supabase
-        .from("blog_posts")
-        .select("id, title, slug, excerpt, content, featured_image_url, category, tags, created_at, school, institution_type, year")
-        .eq("is_published", true)
-        .order("created_at", { ascending: false })
-        .limit(500);
-      if (fetchError) throw fetchError;
-      setPosts((data as any) || []);
-    } catch (err) {
-      console.error("Error fetching campus posts:", err);
-      setError("Failed to load posts. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("blog_posts")
+          .select("id, title, slug, excerpt, content, featured_image_url, category, tags, created_at, school, institution_type, year")
+          .eq("is_published", true)
+          .order("created_at", { ascending: false })
+          .limit(500);
+        setPosts((data as any) || []);
+      } finally { setLoading(false); }
+    })();
+  }, []);
 
   const updateParam = (key: string, value: string) => {
     const next = new URLSearchParams(searchParams);
@@ -127,318 +86,215 @@ export default function AkboyCampusHub() {
     setSearchParams(next, { replace: true });
   };
 
-  const filtered = useMemo(() => {
-    return posts.filter((p) => {
-      const text = `${p.title || ""} ${p.excerpt || ""} ${p.school || ""}`.toLowerCase();
-      const matchSearch = !searchTerm || text.includes(searchTerm.toLowerCase());
-      const matchCat = selectedCategory === "All" || (p.category || "News & Updates") === selectedCategory;
-      const matchSchool = selectedSchool === "All" || (p.school || "Other") === selectedSchool;
-      return matchSearch && matchCat && matchSchool;
-    });
-  }, [posts, searchTerm, selectedCategory, selectedSchool]);
+  const filtered = useMemo(() => posts.filter((p) => {
+    const text = `${p.title || ""} ${p.excerpt || ""} ${p.school || ""}`.toLowerCase();
+    const matchSearch = !searchTerm || text.includes(searchTerm.toLowerCase());
+    const matchCat = selectedCategory === "All" || (p.category || "News & Updates") === selectedCategory;
+    const matchSchool = selectedSchool === "All" || (p.school || "Other") === selectedSchool;
+    return matchSearch && matchCat && matchSchool;
+  }), [posts, searchTerm, selectedCategory, selectedSchool]);
 
-  const paginatedFeed = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filtered.slice(start, start + ITEMS_PER_PAGE);
-  }, [filtered, currentPage]);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const paginatedFeed = useMemo(
+    () => filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
+    [filtered, currentPage]
+  );
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const heroPosts = useMemo(() => posts.slice(0, 5), [posts]);
+  const trending = useMemo(() => posts.slice(5, 10), [posts]);
+  const editorsPicks = useMemo(() => posts.slice(10, 14), [posts]);
 
-  const trending = useMemo(() => posts.slice(0, 5), [posts]);
+  useEffect(() => {
+    if (heroPosts.length < 2) return;
+    const t = setInterval(() => setHeroIndex((i) => (i + 1) % heroPosts.length), 6500);
+    return () => clearInterval(t);
+  }, [heroPosts.length]);
 
-  const slideShowPosts = useMemo(() => posts.slice(0, 8), [posts]);
-
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    posts.forEach(p => { const c = p.category || "News & Updates"; counts[c] = (counts[c] || 0) + 1; });
-    return counts;
-  }, [posts]);
-
-  // Featured schools (top schools by post count, excluding generic buckets)
   const schoolList = useMemo(() => {
     const counts: Record<string, number> = {};
-    posts.forEach(p => {
-      const s = p.school;
-      if (!s) return;
-      counts[s] = (counts[s] || 0) + 1;
-    });
+    posts.forEach((p) => { if (p.school) counts[p.school] = (counts[p.school] || 0) + 1; });
     return Object.entries(counts)
+      .filter(([s]) => !["Other", "Other University"].includes(s))
       .sort((a, b) => b[1] - a[1])
       .map(([school, count]) => ({ school, count }));
   }, [posts]);
 
-  const featuredSchools = useMemo(
-    () => schoolList.filter(s => !["Other", "Other University"].includes(s.school)).slice(0, 12),
-    [schoolList]
-  );
-
-  const popularPosts = useMemo(() => posts.slice(0, 10), [posts]);
-
-  const allTags = useMemo(() => {
-    const tagMap: Record<string, number> = {};
-    posts.forEach(p => {
-      if (p.tags) {
-        const tagsArray = Array.isArray(p.tags)
-          ? p.tags
-          : typeof p.tags === 'string'
-            ? (() => {
-                try {
-                  const parsed = JSON.parse(p.tags);
-                  return Array.isArray(parsed) ? parsed : [p.tags];
-                } catch {
-                  return [p.tags];
-                }
-              })()
-            : [];
-        tagsArray.forEach(tag => {
-          if (typeof tag === 'string' && tag.trim()) {
-            tagMap[tag.trim()] = (tagMap[tag.trim()] || 0) + 1;
-          }
-        });
-      }
-    });
-    return Object.entries(tagMap)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 15)
-      .map(([tag, count]) => ({ tag, count }));
+  const categoryCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    posts.forEach((p) => { const k = p.category || "News & Updates"; c[k] = (c[k] || 0) + 1; });
+    return c;
   }, [posts]);
 
-  const PostCard = ({ post, compact = false }: { post: CampusPost; compact?: boolean }) => {
-    const meta = CATEGORY_META[post.category || "News & Updates"] || CATEGORY_META["News & Updates"];
-    return (
-      <Link to={`/blog/${post.slug || post.id}`} className="group block h-full">
-        <Card className="overflow-hidden border border-gray-200 hover:border-emerald-400 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 rounded-2xl bg-white h-full flex flex-col">
-          <div className={`relative ${compact ? 'h-32' : 'h-44'} overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 flex-shrink-0`}>
-            {post.featured_image_url ? (
-              <img src={post.featured_image_url} alt={post.title} loading="lazy"
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-5xl">{meta.emoji}</div>
-            )}
-            <div className="absolute top-3 left-3 flex flex-wrap gap-2">
-              <span className={`${meta.bg} ${meta.color} px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide shadow-sm`}>
-                {meta.emoji} {post.category || "News"}
-              </span>
-              {post.school && !["Other", "Other University"].includes(post.school) && (
-                <span className="bg-gray-900/85 text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide shadow-sm backdrop-blur">
-                  {post.school}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="p-4 flex flex-col flex-grow">
-            <div className="flex items-center gap-2 text-[11px] text-gray-500 mb-2 font-medium">
-              <Calendar className="w-3 h-3" />
-              <span>{timeAgo(post.created_at)}</span>
-            </div>
-            <h3 className={`font-bold text-gray-900 ${compact ? 'text-sm line-clamp-2' : 'text-base line-clamp-2'} mb-2 group-hover:text-emerald-700 transition-colors leading-snug`}>
-              {post.title}
-            </h3>
-            {!compact && (
-              <p className="text-xs text-gray-600 line-clamp-2 flex-grow mb-3">
-                {post.excerpt || post.content?.replace(/<[^>]*>/g, '').substring(0, 100)}
-              </p>
-            )}
-            <div className="inline-flex items-center gap-1 text-emerald-600 font-bold text-xs group-hover:gap-2 transition-all mt-auto">
-              Read More <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </div>
-        </Card>
-      </Link>
-    );
-  };
-
-  const FeedListItem = ({ post }: { post: CampusPost }) => {
-    const meta = CATEGORY_META[post.category || "News & Updates"] || CATEGORY_META["News & Updates"];
-    return (
-      <Link to={`/blog/${post.slug || post.id}`} className="group block">
-        <div className="flex gap-4 py-4 px-4 border-b border-gray-200 hover:bg-gray-50 transition-colors rounded-lg">
-          {/* Left: Logo/Image */}
-          <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100">
-            {post.featured_image_url ? (
-              <img src={post.featured_image_url} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-2xl">{meta.emoji}</div>
-            )}
-          </div>
-
-          {/* Middle: Content */}
-          <div className="flex-grow min-w-0">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className={`${meta.bg} ${meta.color} px-2 py-0.5 rounded text-[10px] font-bold uppercase`}>
-                {post.category || "News"}
-              </span>
-              {post.school && !["Other", "Other University"].includes(post.school) && (
-                <span className="text-[10px] font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
-                  {post.school}
-                </span>
-              )}
-            </div>
-            <h3 className="font-bold text-gray-900 text-sm line-clamp-2 mb-1 group-hover:text-emerald-700 transition-colors">
-              {post.title}
-            </h3>
-            <p className="text-xs text-gray-600 line-clamp-1">
-              {post.excerpt || post.content?.replace(/<[^>]*>/g, '').substring(0, 80)}
-            </p>
-          </div>
-
-          {/* Right: Metadata */}
-          <div className="flex-shrink-0 text-right flex flex-col justify-between">
-            <div className="text-[10px] font-bold text-gray-500">{timeAgo(post.created_at)}</div>
-            <div className="flex items-center justify-end gap-1 text-xs text-emerald-600">
-              Read <ArrowRight className="w-3 h-3" />
-            </div>
-          </div>
-        </div>
-      </Link>
-    );
-  };
+  const featuredHero = heroPosts[heroIndex];
 
   return (
     <AkboyLayout
       title={isCampusHub ? "Campus Hub — Admissions, Scholarships & Campus News" : "Campus Hub — Nigerian Admissions, Scholarships & Education News"}
-      description="Latest admission updates, scholarships, JAMB/WAEC news and academic calendars from Nigerian universities, polytechnics and colleges. All in one hub."
+      description="The editorial newsroom for Nigerian students — admissions, scholarships, JAMB, WAEC and academic calendars across every major campus."
     >
-      {/* ============= 1. HERO WITH SEARCH ============= */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-900">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-emerald-500 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-teal-400 rounded-full blur-3xl"></div>
+      {/* ============================================================
+          MASTHEAD
+      ============================================================ */}
+      <header className="border-b border-akboy-ink/10 bg-akboy-cream">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
+          <div className="flex items-center justify-between gap-4 text-[11px] uppercase tracking-[0.28em] text-akboy-ink/60">
+            <span>Vol. 01 · The Student Edition</span>
+            <span className="hidden sm:inline">{new Date().toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
+            <span>Akboy Press</span>
+          </div>
+          <div className="mt-6 text-center">
+            <h1 className="font-display font-black tracking-tight text-akboy-forest leading-[0.95] text-[14vw] sm:text-[110px] md:text-[140px] lg:text-[180px]">
+              Campus<span className="italic text-akboy-ink/85">Hub</span>
+            </h1>
+            <p className="mt-3 text-akboy-ink/70 text-sm md:text-base max-w-2xl mx-auto font-serif italic">
+              An editorial newsroom for Nigerian students — admissions, scholarships, exams and the schools they shape.
+            </p>
+          </div>
+
+          {/* search */}
+          <div className="mt-6 max-w-2xl mx-auto relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-akboy-ink/50" />
+            <Input
+              value={searchTerm}
+              onChange={(e) => { setSearchTerm(e.target.value); updateParam("q", e.target.value); setCurrentPage(1); }}
+              placeholder="Search a school, scholarship, exam…"
+              className="pl-11 h-12 bg-akboy-paper border-akboy-ink/15 rounded-full text-sm shadow-[0_8px_28px_-12px_rgba(15,61,46,0.25)] focus-visible:ring-akboy-forest"
+            />
+          </div>
         </div>
 
-        <div className="relative max-w-5xl mx-auto px-4 py-10 text-center">
-          <div className="max-w-2xl mx-auto">
-            <div className="inline-flex items-center justify-center gap-2 mb-5 px-4 py-2 bg-white/10 backdrop-blur border border-white/20 rounded-full text-emerald-100 text-xs md:text-sm font-semibold">
-              <Sparkles className="w-3.5 h-3.5" />
-              CAMPUS NEWS · ADMISSIONS · SCHOLARSHIPS
-            </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3 font-poppins leading-tight">
-              Campus Hub
-            </h1>
-            <p className="text-sm md:text-base text-emerald-50/90 mb-6 leading-relaxed">
-              Latest admissions, scholarship updates and campus news in one place.
-            </p>
-
-            {/* Live search */}
-            <div className="relative mx-auto max-w-2xl">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-700" />
-              <Input
-                value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); updateParam("q", e.target.value); setCurrentPage(1); }}
-                placeholder="Search by school, course, or keyword…"
-                className="pl-12 h-14 text-base bg-white border-0 rounded-2xl shadow-2xl focus-visible:ring-2 focus-visible:ring-emerald-400"
-              />
-              {searchTerm && (
-                <a href="#feed" className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-700 hover:text-emerald-900">
-                  See {filtered.length} results →
-                </a>
-              )}
+        {/* sticky category rail */}
+        <div className="border-t border-akboy-ink/10 bg-akboy-paper">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-auto custom-scrollbar">
+            <div className="flex items-center gap-1 py-2.5 whitespace-nowrap">
+              {CATEGORIES.map((c) => {
+                const active = selectedCategory === c;
+                return (
+                  <button
+                    key={c}
+                    onClick={() => { setSelectedCategory(c); updateParam("category", c); setCurrentPage(1); }}
+                    className={`px-3.5 py-1.5 rounded-full text-[12px] font-semibold uppercase tracking-wider transition-colors ${
+                      active
+                        ? "bg-akboy-forest text-akboy-cream"
+                        : "text-akboy-ink/70 hover:text-akboy-forest hover:bg-akboy-cream"
+                    }`}
+                  >
+                    {c}
+                    {c !== "All" && categoryCounts[c] ? <span className="ml-1.5 opacity-70">{categoryCounts[c]}</span> : null}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* ============= 2. NEWS SLIDESHOW ============= */}
-      {!loading && slideShowPosts.length > 0 && (
-        <section className="py-12 md:py-16 px-4 bg-white">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-              <div>
-                <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Latest News</p>
-                <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">Breaking campus headlines</h2>
-              </div>
-              <div className="inline-flex items-center gap-3">
-                <span className="rounded-full border border-amber-400 bg-amber-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-amber-800">Latest Update</span>
-                <a href="#feed" className="text-sm font-semibold text-emerald-700 hover:text-emerald-900">View all →</a>
-              </div>
-            </div>
-
-
-            <div className="relative overflow-hidden rounded-[30px] bg-slate-950 text-white">
-              <Link to={`/blog/${slideShowPosts[currentSlide].slug || slideShowPosts[currentSlide].id}`} className="block">
-                <div className="relative h-72 md:h-[420px]">
-                  {slideShowPosts[currentSlide].featured_image_url ? (
+      {/* ============================================================
+          HERO LEAD STORY (editorial split)
+      ============================================================ */}
+      {featuredHero && (
+        <section className="bg-akboy-cream">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+            <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <Link to={`/blog/${featuredHero.slug || featuredHero.id}`} className="lg:col-span-7 group block">
+                <div className="relative aspect-[16/10] overflow-hidden rounded-[28px] bg-akboy-forest">
+                  {featuredHero.featured_image_url ? (
                     <img
-                      src={slideShowPosts[currentSlide].featured_image_url}
-                      alt={slideShowPosts[currentSlide].title}
-                      className="w-full h-full object-cover"
+                      src={featuredHero.featured_image_url}
+                      alt={featuredHero.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-slate-800 text-6xl">
-                      {CATEGORY_META[slideShowPosts[currentSlide].category || "News & Updates"]?.emoji || "📰"}
-                    </div>
+                    <div className="w-full h-full flex items-center justify-center text-akboy-cream/40 text-7xl font-display">A</div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/25 to-transparent" />
-
-                  <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
-                    <div className="flex flex-wrap items-center gap-3 mb-4 justify-center">
-                      <span className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em]">{slideShowPosts[currentSlide].category || "News"}</span>
-                      {slideShowPosts[currentSlide].school && (
-                        <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-100">{slideShowPosts[currentSlide].school}</span>
-                      )}
-                    </div>
-                    <h3 className="mx-auto max-w-4xl text-center text-3xl md:text-4xl font-bold leading-tight mb-4">{slideShowPosts[currentSlide].title}</h3>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-slate-200 mb-6">
-                      <span className="inline-flex items-center gap-2"><Calendar className="w-4 h-4" />{timeAgo(slideShowPosts[currentSlide].created_at)}</span>
-                      <span className="inline-flex items-center gap-2"><Users className="w-4 h-4" />{slideShowPosts[currentSlide].school || "Campus news"}</span>
-                    </div>
-                    <div className="flex justify-center">
-                      <span className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/20 hover:bg-amber-400 transition">
-                        Read Story <ArrowRight className="w-4 h-4" />
-                      </span>
-                    </div>
+                  <div className="absolute top-4 left-4 inline-flex items-center gap-2 bg-akboy-butter text-akboy-ink px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider">
+                    <Sparkles className="w-3 h-3" /> Lead story
                   </div>
                 </div>
               </Link>
 
-              <button
-                onClick={() => setCurrentSlide((prev) => (prev - 1 + slideShowPosts.length) % slideShowPosts.length)}
-                className="absolute left-6 top-1/2 -translate-y-1/2 z-10 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-900/70 text-white shadow-lg hover:bg-slate-900"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setCurrentSlide((prev) => (prev + 1) % slideShowPosts.length)}
-                className="absolute right-6 top-1/2 -translate-y-1/2 z-10 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-900/70 text-white shadow-lg hover:bg-slate-900"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
+              <div className="lg:col-span-5">
+                <p className="text-[11px] uppercase tracking-[0.28em] text-akboy-forest font-bold mb-4">
+                  {featuredHero.category || "News & Updates"}
+                  {featuredHero.school ? <span className="text-akboy-ink/50"> · {featuredHero.school}</span> : null}
+                </p>
+                <Link to={`/blog/${featuredHero.slug || featuredHero.id}`} className="block group">
+                  <h2 className="font-display font-black text-akboy-ink leading-[1.05] text-3xl sm:text-4xl lg:text-5xl group-hover:text-akboy-forest transition-colors">
+                    {featuredHero.title}
+                  </h2>
+                </Link>
+                <p className="mt-4 text-akboy-ink/70 text-base leading-relaxed line-clamp-4 font-serif">
+                  {featuredHero.excerpt || stripHtml(featuredHero.content).substring(0, 240)}
+                </p>
+                <div className="mt-6 flex items-center justify-between">
+                  <span className="text-xs text-akboy-ink/55">{timeAgo(featuredHero.created_at)}</span>
+                  <Link
+                    to={`/blog/${featuredHero.slug || featuredHero.id}`}
+                    className="inline-flex items-center gap-1.5 text-akboy-forest font-bold text-sm hover:gap-2.5 transition-all"
+                  >
+                    Read story <ArrowUpRight className="w-4 h-4" />
+                  </Link>
+                </div>
 
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
-                {slideShowPosts.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentSlide(idx)}
-                    className={`h-2.5 rounded-full transition-all ${idx === currentSlide ? 'w-10 bg-amber-500' : 'w-2.5 bg-slate-300/60'}`}
-                  />
-                ))}
+                {/* hero dots */}
+                {heroPosts.length > 1 && (
+                  <div className="mt-6 flex items-center gap-2">
+                    {heroPosts.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setHeroIndex(i)}
+                        className={`h-1.5 rounded-full transition-all ${
+                          i === heroIndex ? "w-8 bg-akboy-forest" : "w-1.5 bg-akboy-ink/20 hover:bg-akboy-ink/40"
+                        }`}
+                        aria-label={`Story ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </section>
       )}
 
-
-      {/* ============= 5. POPULAR POSTS (MOBILE FIRST) ============= */}
-      {!loading && popularPosts.length > 0 && (
-        <section className="py-8 md:py-12 px-4 bg-white md:hidden">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white grid place-items-center"><TrendingUp className="w-5 h-5" /></div>
+      {/* ============================================================
+          ABOVE-THE-FOLD: 3-UP TRENDING
+      ============================================================ */}
+      {trending.length > 0 && (
+        <section className="bg-akboy-paper border-y border-akboy-ink/10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="flex items-end justify-between mb-6">
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-bold">Popular Posts</p>
-                <h3 className="text-lg font-bold text-slate-900">What people are reading</h3>
+                <p className="text-[11px] uppercase tracking-[0.28em] text-akboy-ink/55 font-bold">The Wire</p>
+                <h2 className="font-display text-3xl md:text-4xl text-akboy-ink mt-1 flex items-center gap-3">
+                  Trending now <Flame className="w-6 h-6 text-akboy-butter" />
+                </h2>
               </div>
+              <Link to="?" onClick={(e) => { e.preventDefault(); setSelectedCategory("All"); updateParam("category", "All"); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }} className="text-sm font-semibold text-akboy-forest hover:underline hidden sm:inline-flex items-center gap-1">
+                See all <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-            <div className="space-y-3">
-              {popularPosts.slice(0, 5).map((post, idx) => (
-                <Link key={post.id} to={`/blog/${post.slug || post.id}`} className="group block rounded-2xl border border-gray-100 p-3 transition hover:border-emerald-300 hover:bg-emerald-50">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-bold">{idx + 1}</div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 line-clamp-2">{post.title}</p>
-                      <p className="text-[11px] text-slate-500 mt-1">{timeAgo(post.created_at)}</p>
-                    </div>
+
+            <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+              {trending.slice(0, 3).map((p, idx) => (
+                <Link key={p.id} to={`/blog/${p.slug || p.id}`} className="group block">
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-2xl mb-4 bg-akboy-cream">
+                    {p.featured_image_url ? (
+                      <img src={p.featured_image_url} alt={p.title} loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-5xl text-akboy-ink/20 font-display">{idx + 1}</div>
+                    )}
+                    <span className="absolute top-3 left-3 bg-akboy-paper/95 backdrop-blur text-akboy-forest text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
+                      0{idx + 1} · {p.category || "News"}
+                    </span>
+                  </div>
+                  <h3 className="font-display text-xl md:text-[22px] leading-tight text-akboy-ink group-hover:text-akboy-forest transition-colors">
+                    {p.title}
+                  </h3>
+                  <div className="mt-2 flex items-center gap-2 text-xs text-akboy-ink/55">
+                    <span>{timeAgo(p.created_at)}</span>
+                    {p.school && <><span>·</span><span className="font-semibold">{p.school}</span></>}
                   </div>
                 </Link>
               ))}
@@ -447,260 +303,216 @@ export default function AkboyCampusHub() {
         </section>
       )}
 
-      {/* ============= 6. THE FEED & SIDEBAR ============= */}
-      <section id="feed" className="py-12 md:py-16 px-4 bg-gray-50 scroll-mt-20">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
-            <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">📰 Campus Feed</p>
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">Latest updates, fast</h2>
-              <p className="text-sm text-gray-600 mt-1">Showing {paginatedFeed.length} of {filtered.length} updates • Page {currentPage} of {totalPages || 1}</p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <Select
-                value={selectedCategory}
-                onValueChange={(v) => { setSelectedCategory(v); updateParam("category", v); setCurrentPage(1); }}
-              >
-                <SelectTrigger className="w-full sm:w-52 bg-white">
-                  <Filter className="w-4 h-4 mr-1 text-emerald-600" />
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
+      {/* ============================================================
+          MAIN FEED + SIDEBAR (editorial column layout)
+      ============================================================ */}
+      <section id="feed" className="bg-akboy-cream">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+          <div className="grid lg:grid-cols-[1fr_320px] gap-10 lg:gap-14">
+            {/* Feed */}
+            <div className="min-w-0">
+              <div className="flex items-end justify-between mb-6 pb-4 border-b-2 border-akboy-ink">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-akboy-ink/55 font-bold">The Feed</p>
+                  <h2 className="font-display text-3xl md:text-4xl text-akboy-ink mt-1">
+                    {selectedCategory === "All" ? "Latest stories" : selectedCategory}
+                    {selectedSchool !== "All" && <span className="text-akboy-forest"> · {selectedSchool}</span>}
+                  </h2>
+                </div>
+                <span className="text-xs font-semibold text-akboy-ink/60">{filtered.length} stories</span>
+              </div>
 
-              <Select
-                value={selectedSchool}
-                onValueChange={(v) => { setSelectedSchool(v); updateParam("school", v); setCurrentPage(1); }}
-              >
-                <SelectTrigger className="w-full sm:w-52 bg-white">
-                  <SchoolIcon className="w-4 h-4 mr-1 text-blue-600" />
-                  <SelectValue placeholder="School" />
-                </SelectTrigger>
-                <SelectContent className="max-h-80">
-                  <SelectItem value="All">All Schools</SelectItem>
-                  {schoolList.map(({ school, count }) => (
-                    <SelectItem key={school} value={school}>{school} ({count})</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2 mb-4">
-            {BROWSE_BY_TOPIC.map((topic) => {
-              const active = selectedCategory === topic.category;
-              return (
-                <button
-                  key={topic.title}
-                  onClick={() => {
-                    setSelectedCategory(topic.category);
-                    updateParam("category", topic.category);
-                    setCurrentPage(1);
-                  }}
-                  className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
-                    active ? "bg-emerald-600 text-white border-emerald-600" : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
-                  }`}
-                >
-                  {topic.title}
-                </button>
-              );
-            })}
-            {featuredSchools.slice(0, 5).map(({ school }) => {
-              const active = selectedSchool === school;
-              return (
-                <button
-                  key={school}
-                  onClick={() => {
-                    setSelectedSchool(school);
-                    updateParam("school", school);
-                    setCurrentPage(1);
-                  }}
-                  className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
-                    active ? "bg-blue-600 text-white border-blue-600" : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
-                  }`}
-                >
-                  {school}
-                </button>
-              );
-            })}
-          </div>
-
-          {(selectedCategory !== "All" || selectedSchool !== "All" || searchTerm) && (
-            <div className="flex flex-wrap gap-2 mb-8 items-center">
-              {searchTerm && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">Search: {searchTerm}</span>
-              )}
-              {selectedCategory !== "All" && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">Category: {selectedCategory}</span>
-              )}
-              {selectedSchool !== "All" && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">School: {selectedSchool}</span>
-              )}
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedCategory("All"); setSelectedSchool("All"); setSearchTerm("");
-                  setSearchParams({}, { replace: true });
-                  setCurrentPage(1);
-                }}
-              >
-                Clear filters
-              </Button>
-            </div>
-          )}
-
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="space-y-4">
               {loading ? (
-                <div className="space-y-4">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <Card key={i} className="h-28 animate-pulse bg-gray-200 border-0" />
+                <div className="space-y-6">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="flex gap-5 animate-pulse">
+                      <div className="w-40 h-28 bg-akboy-ink/10 rounded-xl flex-shrink-0" />
+                      <div className="flex-1 space-y-2 py-2">
+                        <div className="h-3 w-24 bg-akboy-ink/10 rounded" />
+                        <div className="h-5 w-3/4 bg-akboy-ink/10 rounded" />
+                        <div className="h-3 w-full bg-akboy-ink/10 rounded" />
+                      </div>
+                    </div>
                   ))}
                 </div>
-              ) : error ? (
-                <Card className="p-8 text-center border-dashed border-2 border-red-200 bg-red-50">
-                  <p className="text-red-700 font-medium">{error}</p>
-                  <Button onClick={fetchPosts} className="mt-4">Retry</Button>
-                </Card>
-              ) : filtered.length === 0 ? (
-                <Card className="p-12 text-center border-dashed border-2 border-gray-300 bg-white">
-                  <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-700 font-bold mb-1">No matching updates</p>
-                  <p className="text-sm text-gray-500">Try clearing filters or a different search term.</p>
-                </Card>
-              ) : (
-                <div className="space-y-2">
-                  {paginatedFeed.map(post => <FeedListItem key={post.id} post={post} />)}
+              ) : paginatedFeed.length === 0 ? (
+                <div className="text-center py-20 border border-dashed border-akboy-ink/20 rounded-2xl">
+                  <p className="font-display text-2xl text-akboy-ink mb-2">Nothing matches that filter.</p>
+                  <p className="text-sm text-akboy-ink/60">Try clearing your search or switching categories.</p>
                 </div>
-              )}
-
-              {totalPages > 1 && (
-                <div className="flex flex-wrap items-center justify-center gap-2 py-4">
-                  <button
-                    onClick={() => { setCurrentPage(1); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
-                    disabled={currentPage === 1}
-                    className="px-3 py-2 rounded-lg border border-gray-300 font-semibold text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  >
-                    ← First
-                  </button>
-                  <button
-                    onClick={() => { setCurrentPage(Math.max(1, currentPage - 1)); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
-                    disabled={currentPage === 1}
-                    className="px-3 py-2 rounded-lg border border-gray-300 font-semibold text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  >
-                    ← Prev
-                  </button>
-                  {Array.from({ length: Math.min(5, totalPages) }).map((_, idx) => {
-                    let pageNum = currentPage - 2 + idx;
-                    if (totalPages <= 5) pageNum = idx + 1;
-                    else if (currentPage <= 3) pageNum = idx + 1;
-                    else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + idx;
-                    if (pageNum < 1 || pageNum > totalPages) return null;
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => { setCurrentPage(pageNum); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
-                        className={`px-3 py-2 rounded-lg font-semibold text-sm transition ${
-                          currentPage === pageNum ? "bg-emerald-600 text-white" : "border border-gray-300 hover:bg-gray-100"
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
+              ) : (
+                <div>
+                  {paginatedFeed.map((p, i) => {
+                    // every 5th item gets a wide editorial treatment
+                    const wide = i % 5 === 0;
+                    return wide ? (
+                      <Link key={p.id} to={`/blog/${p.slug || p.id}`} className="group block py-7 border-b border-akboy-ink/10">
+                        <div className="grid md:grid-cols-[1.4fr_1fr] gap-6 items-center">
+                          <div className="relative aspect-[4/3] md:aspect-[16/10] overflow-hidden rounded-2xl bg-akboy-paper order-1 md:order-2">
+                            {p.featured_image_url ? (
+                              <img src={p.featured_image_url} alt={p.title} loading="lazy"
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-5xl text-akboy-ink/20 font-display">A</div>
+                            )}
+                          </div>
+                          <div className="order-2 md:order-1">
+                            <p className="text-[11px] uppercase tracking-[0.24em] text-akboy-forest font-bold mb-2">
+                              {p.category || "News"}{p.school ? <span className="text-akboy-ink/45"> · {p.school}</span> : null}
+                            </p>
+                            <h3 className="font-display text-2xl md:text-3xl leading-tight text-akboy-ink group-hover:text-akboy-forest transition-colors">
+                              {p.title}
+                            </h3>
+                            <p className="mt-3 text-akboy-ink/65 text-sm leading-relaxed line-clamp-3 font-serif">
+                              {p.excerpt || stripHtml(p.content).substring(0, 200)}
+                            </p>
+                            <div className="mt-3 text-xs text-akboy-ink/50 flex items-center gap-2">
+                              <span>{timeAgo(p.created_at)}</span><span>·</span><span>5 min read</span>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ) : (
+                      <Link key={p.id} to={`/blog/${p.slug || p.id}`} className="group block py-5 border-b border-akboy-ink/10">
+                        <div className="grid grid-cols-[110px_1fr] sm:grid-cols-[160px_1fr] gap-4 sm:gap-6 items-start">
+                          <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-akboy-paper">
+                            {p.featured_image_url ? (
+                              <img src={p.featured_image_url} alt={p.title} loading="lazy"
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-3xl text-akboy-ink/20 font-display">A</div>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[10px] uppercase tracking-[0.22em] text-akboy-forest font-bold mb-1.5">
+                              {p.category || "News"}{p.school ? <span className="text-akboy-ink/45"> · {p.school}</span> : null}
+                            </p>
+                            <h3 className="font-display text-lg sm:text-xl leading-snug text-akboy-ink group-hover:text-akboy-forest transition-colors line-clamp-2">
+                              {p.title}
+                            </h3>
+                            <p className="hidden sm:block mt-2 text-sm text-akboy-ink/60 line-clamp-2 font-serif">
+                              {p.excerpt || stripHtml(p.content).substring(0, 160)}
+                            </p>
+                            <div className="mt-2 text-xs text-akboy-ink/50">{timeAgo(p.created_at)}</div>
+                          </div>
+                        </div>
+                      </Link>
                     );
                   })}
-                  <button
-                    onClick={() => { setCurrentPage(Math.min(totalPages, currentPage + 1)); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-2 rounded-lg border border-gray-300 font-semibold text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  >
-                    Next →
-                  </button>
-                  <button
-                    onClick={() => { setCurrentPage(totalPages); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-2 rounded-lg border border-gray-300 font-semibold text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  >
-                    Last →
-                  </button>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-8">
+                      <button
+                        onClick={() => { setCurrentPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: document.getElementById("feed")?.offsetTop || 0, behavior: "smooth" }); }}
+                        disabled={currentPage === 1}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border border-akboy-ink/20 text-akboy-ink hover:bg-akboy-paper disabled:opacity-40"
+                      >
+                        <ChevronLeft className="w-4 h-4" /> Previous
+                      </button>
+                      <span className="text-sm font-semibold text-akboy-ink/70">
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <button
+                        onClick={() => { setCurrentPage((p) => Math.min(totalPages, p + 1)); window.scrollTo({ top: document.getElementById("feed")?.offsetTop || 0, behavior: "smooth" }); }}
+                        disabled={currentPage === totalPages}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border border-akboy-ink/20 text-akboy-ink hover:bg-akboy-paper disabled:opacity-40"
+                      >
+                        Next <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            <aside className="space-y-6 hidden lg:block">
-              <Card className="p-6 bg-white border border-gray-200 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white grid place-items-center"><TrendingUp className="w-5 h-5" /></div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-bold">Popular Posts</p>
-                    <h3 className="text-lg font-bold text-slate-900">What people are reading</h3>
-                  </div>
+            {/* Sidebar */}
+            <aside className="space-y-10 lg:sticky lg:top-24 self-start">
+              {/* Editor's picks */}
+              {editorsPicks.length > 0 && (
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-akboy-ink/55 font-bold pb-3 border-b border-akboy-ink/15 mb-4">
+                    Editor’s picks
+                  </p>
+                  <ol className="space-y-5">
+                    {editorsPicks.map((p, i) => (
+                      <li key={p.id}>
+                        <Link to={`/blog/${p.slug || p.id}`} className="group flex gap-3">
+                          <span className="font-display text-2xl text-akboy-butter font-black leading-none w-7 flex-shrink-0">
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
+                          <div className="min-w-0">
+                            <h4 className="font-display text-[15px] leading-snug text-akboy-ink group-hover:text-akboy-forest transition-colors line-clamp-3">
+                              {p.title}
+                            </h4>
+                            <p className="text-[11px] text-akboy-ink/50 mt-1">{p.category || "News"} · {timeAgo(p.created_at)}</p>
+                          </div>
+                        </Link>
+                      </li>
+                    ))}
+                  </ol>
                 </div>
-                <div className="space-y-3">
-                  {popularPosts.slice(0, 5).map((post, idx) => (
-                    <Link key={post.id} to={`/blog/${post.slug || post.id}`} className="group block rounded-2xl border border-gray-100 p-3 transition hover:border-emerald-300 hover:bg-emerald-50">
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-bold">{idx + 1}</div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-slate-900 line-clamp-2">{post.title}</p>
-                          <p className="text-[11px] text-slate-500 mt-1">{timeAgo(post.created_at)}</p>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </Card>
+              )}
 
-              <Card className="p-6 bg-white border border-gray-200 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-2xl bg-slate-800 text-white grid place-items-center"><Tag className="w-5 h-5" /></div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-600 font-bold">Tags</p>
-                    <h3 className="text-lg font-bold text-slate-900">Explore tags</h3>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {allTags.map(({ tag }) => (
+              {/* Schools */}
+              {schoolList.length > 0 && (
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-akboy-ink/55 font-bold pb-3 border-b border-akboy-ink/15 mb-4">
+                    Browse by school
+                  </p>
+                  <div className="flex flex-wrap gap-2">
                     <button
-                      key={tag}
-                      onClick={() => {
-                        setSearchTerm(tag);
-                        setCurrentPage(1);
-                        updateParam("q", tag);
-                      }}
-                      className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
+                      onClick={() => { setSelectedSchool("All"); updateParam("school", "All"); setCurrentPage(1); }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+                        selectedSchool === "All"
+                          ? "bg-akboy-forest text-akboy-cream"
+                          : "bg-akboy-paper border border-akboy-ink/15 text-akboy-ink hover:border-akboy-forest"
+                      }`}
                     >
-                      {tag}
+                      All schools
                     </button>
-                  ))}
+                    {schoolList.slice(0, 16).map(({ school, count }) => (
+                      <button
+                        key={school}
+                        onClick={() => { setSelectedSchool(school); updateParam("school", school); setCurrentPage(1); }}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                          selectedSchool === school
+                            ? "bg-akboy-forest text-akboy-cream"
+                            : "bg-akboy-paper border border-akboy-ink/15 text-akboy-ink hover:border-akboy-forest"
+                        }`}
+                      >
+                        {school} <span className="opacity-60">{count}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </Card>
-            </aside>
-          </div>
-        </div>
-      </section>
+              )}
 
-      {/* ============= 6. CTA ============= */}
-      <section className="py-14 md:py-20 px-4 bg-gradient-to-br from-emerald-900 to-teal-900 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-5xl font-bold font-poppins mb-4">Never miss an admission update</h2>
-          <p className="text-emerald-100/85 mb-8 max-w-2xl mx-auto">
-            From JAMB news to scholarship deadlines and admission forms — Campus Hub keeps every Nigerian student in the loop.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <button
-              onClick={() => document.getElementById('feed')?.scrollIntoView({ behavior: 'smooth' })}
-              className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-bold text-emerald-900 shadow-lg hover:bg-emerald-50"
-            >
-              Read latest headlines <ArrowRight className="w-4 h-4 ml-1" />
-            </button>
-            <button
-              onClick={() => document.getElementById('newsletter')?.scrollIntoView({ behavior: 'smooth' })}
-              className="inline-flex items-center justify-center rounded-xl border-2 border-white/40 bg-transparent px-6 py-3 text-sm font-bold text-white hover:bg-white/10"
-            >
-              Subscribe for alerts
-            </button>
+              {/* Newsletter */}
+              <div className="rounded-3xl bg-akboy-forest text-akboy-cream p-6">
+                <Mail className="w-6 h-6 text-akboy-butter mb-3" />
+                <h3 className="font-display text-2xl leading-tight">Don’t miss a deadline.</h3>
+                <p className="text-sm text-akboy-cream/70 mt-2">
+                  The weekly Campus Hub digest — admissions, scholarships and exam alerts in your inbox.
+                </p>
+                <form
+                  onSubmit={(e) => { e.preventDefault(); }}
+                  className="mt-4 flex gap-2"
+                >
+                  <Input
+                    type="email"
+                    placeholder="you@school.edu.ng"
+                    className="bg-akboy-cream/10 border-akboy-cream/20 text-akboy-cream placeholder:text-akboy-cream/40 rounded-full h-10"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-akboy-butter text-akboy-ink font-bold rounded-full px-4 text-sm hover:bg-akboy-sun transition-colors"
+                  >
+                    Join
+                  </button>
+                </form>
+              </div>
+            </aside>
           </div>
         </div>
       </section>
