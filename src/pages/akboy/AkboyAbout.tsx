@@ -7,7 +7,7 @@ import teamImage from "@/assets/akboy-team.jpg";
 export default function AkboyAbout() {
   return (
     <AkboyLayout>
-      <section className="bg-akboy-forest text-akboy-cream">
+      <section className="bg-akboy-green text-akboy-cream">
         <div className="max-w-6xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
           <div className="space-y-8 md:max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full bg-akboy-cream/10 px-4 py-2 text-sm font-semibold tracking-wide text-akboy-cream">
@@ -15,10 +15,28 @@ export default function AkboyAbout() {
               About AKBOY
             </div>
             <div className="space-y-4">
-              <h1 className="text-4xl font-bold sm:text-5xl lg:text-6xl">Designing growth for students, creatives, and modern brands.</h1>
+              <h1 className="text-4xl font-bold sm:text-5xl lg:text-6xl">AKBOY Creative Hub: where learning, design, and community grow together.</h1>
               <p className="max-w-xl text-slate-300 text-lg leading-8">
-                AKBOY Creative Hub blends education, digital design, and community impact in a clean, modern experience built for today's learners and young entrepreneurs.
+                AKBOY Creative Hub helps students, young creatives, and growing brands build confidence with practical learning, creative coaching, and digital support that feels real and rooted in today’s world.
               </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <a
+                href="https://wa.me/2348101466977"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center rounded-full bg-akboy-cream px-6 py-3 text-sm font-semibold text-akboy-forest transition hover:bg-white"
+              >
+                Chat on WhatsApp
+              </a>
+              <a
+                href="https://wa.me/2348101466977?text=I%20want%20to%20join%20the%20AKBOY%20WhatsApp%20group"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center rounded-full border border-akboy-cream/30 bg-transparent px-6 py-3 text-sm font-semibold text-akboy-cream transition hover:bg-akboy-cream/10"
+              >
+                Join our WhatsApp group
+              </a>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[
