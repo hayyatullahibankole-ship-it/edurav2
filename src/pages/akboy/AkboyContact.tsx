@@ -57,7 +57,7 @@ export default function AkboyContact() {
   return (
     <AkboyLayout>
       {/* Hero Header */}
-      <section className="relative py-20 px-4 bg-gradient-to-br from-green-800 via-teal-600 to-green-600 overflow-hidden">
+      <section className="relative py-20 px-4 bg-gradient-to-br from-emerald-600 via-teal-600 to-green-600 overflow-hidden">
         <div className="absolute inset-0 opacity-10" style={{
           backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
         }}></div>
@@ -71,7 +71,7 @@ export default function AkboyContact() {
             Let's Create Something
             <span className="block">Amazing Together</span>
           </h1>
-          <p className="text-xl text-green-50 max-w-2xl mx-auto">
+          <p className="text-xl text-emerald-50 max-w-2xl mx-auto">
             We'd love to hear from you and discuss how we can help bring your ideas to life
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function AkboyContact() {
             {/* Contact Form */}
             <div>
               <h2 className="text-4xl font-bold text-foreground mb-6">Send Us a Message</h2>
-              <Card className="p-8 border-2 border-green-100 shadow-xl">
+              <Card className="p-8 border-2 border-emerald-100 shadow-xl">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <Label className="text-foreground font-semibold">Full Name *</Label>
@@ -92,7 +92,7 @@ export default function AkboyContact() {
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       required
                       placeholder="John Doe"
-                      className="mt-2 h-12 border-2 border-green-200 focus:border-green-700"
+                      className="mt-2 h-12 border-2 border-emerald-200 focus:border-emerald-500"
                     />
                   </div>
                   <div>
@@ -103,7 +103,7 @@ export default function AkboyContact() {
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
                       placeholder="john@example.com"
-                      className="mt-2 h-12 border-2 border-green-200 focus:border-green-700"
+                      className="mt-2 h-12 border-2 border-emerald-200 focus:border-emerald-500"
                     />
                   </div>
                   <div>
@@ -112,7 +112,7 @@ export default function AkboyContact() {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="+234 XXX XXX XXXX"
-                      className="mt-2 h-12 border-2 border-green-200 focus:border-green-700"
+                      className="mt-2 h-12 border-2 border-emerald-200 focus:border-emerald-500"
                     />
                   </div>
                   <div>
@@ -122,7 +122,7 @@ export default function AkboyContact() {
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       required
                       placeholder="How can we help you?"
-                      className="mt-2 h-12 border-2 border-green-200 focus:border-green-700"
+                      className="mt-2 h-12 border-2 border-emerald-200 focus:border-emerald-500"
                     />
                   </div>
                   <div>
@@ -133,12 +133,12 @@ export default function AkboyContact() {
                       required
                       rows={6}
                       placeholder="Tell us more about your project or inquiry..."
-                      className="mt-2 border-2 border-green-200 focus:border-green-700"
+                      className="mt-2 border-2 border-emerald-200 focus:border-emerald-500"
                     />
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-green-800 hover:bg-green-900 text-white h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all"
                     disabled={loading}
                   >
                     {loading ? "Sending..." : (
@@ -161,8 +161,8 @@ export default function AkboyContact() {
                 </p>
 
                 <div className="space-y-6">
-                  <Card className="p-6 flex items-start gap-4 hover:shadow-xl transition-all border-2 hover:border-green-200">
-                    <div className="w-14 h-14 bg-gradient-to-br from-green-700 to-teal-500 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <Card className="p-6 flex items-start gap-4 hover:shadow-xl transition-all border-2 hover:border-emerald-200">
+                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
                       <Mail className="w-7 h-7 text-white" />
                     </div>
                     <div>
@@ -170,14 +170,14 @@ export default function AkboyContact() {
                       <p className="text-muted-foreground mb-2">akboycreativehub@gmail.com</p>
                       <a
                         href="mailto:akboycreativehub@gmail.com"
-                        className="text-green-800 hover:text-green-900 font-semibold text-sm"
+                        className="text-emerald-600 hover:text-emerald-700 font-semibold text-sm"
                       >
                         Send an email →
                       </a>
                     </div>
                   </Card>
 
-                  <Card className="p-6 flex items-start gap-4 hover:shadow-xl transition-all border-2 hover:border-green-200">
+                  <Card className="p-6 flex items-start gap-4 hover:shadow-xl transition-all border-2 hover:border-emerald-200">
                     <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
                       <Phone className="w-7 h-7 text-white" />
                     </div>
@@ -186,15 +186,15 @@ export default function AkboyContact() {
                       <p className="text-muted-foreground mb-2">+234 810 146 6977</p>
                       <a
                         href="tel:+2348101466977"
-                        className="text-green-800 hover:text-green-900 font-semibold text-sm"
+                        className="text-emerald-600 hover:text-emerald-700 font-semibold text-sm"
                       >
                         Make a call →
                       </a>
                     </div>
                   </Card>
 
-                  <Card className="p-6 flex items-start gap-4 hover:shadow-xl transition-all border-2 hover:border-green-200">
-                    <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <Card className="p-6 flex items-start gap-4 hover:shadow-xl transition-all border-2 hover:border-emerald-200">
+                    <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
                       <MapPin className="w-7 h-7 text-white" />
                     </div>
                     <div>
@@ -229,7 +229,7 @@ export default function AkboyContact() {
               </div>
 
               {/* Business Hours */}
-              <Card className="p-8 bg-gradient-to-br from-green-800 to-teal-600 text-white border-none shadow-xl">
+              <Card className="p-8 bg-gradient-to-br from-emerald-600 to-teal-600 text-white border-none shadow-xl">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                     <Clock className="w-6 h-6" />

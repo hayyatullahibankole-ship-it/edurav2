@@ -148,7 +148,7 @@ export default function AkboyBlogPost() {
     return (
       <AkboyLayout>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin w-16 h-16 border-4 border-green-800 border-t-transparent rounded-full"></div>
+          <div className="animate-spin w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full"></div>
         </div>
       </AkboyLayout>
     );
@@ -162,7 +162,7 @@ export default function AkboyBlogPost() {
             <h1 className="text-4xl font-bold text-gray-900">Post Not Found</h1>
             <p className="text-gray-600">This blog post doesn't exist or has been removed.</p>
             <Link to="/blog">
-              <Button className="bg-green-800 hover:bg-green-900">
+              <Button className="bg-emerald-600 hover:bg-emerald-700">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Blog
               </Button>
@@ -212,14 +212,14 @@ export default function AkboyBlogPost() {
 
       {/* Floating Back Button */}
       <Link to="/blog" className="fixed top-24 left-4 z-50 animate-fade-in">
-        <Button className="bg-green-800 hover:bg-green-900 text-white shadow-2xl hover:shadow-green-700/50 transition-all hover:scale-105 rounded-full px-6 py-6">
+        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xl hover:shadow-emerald-500/50 transition-all hover:scale-105 rounded-full px-6 py-6">
           <ArrowLeft className="w-5 h-5 mr-2" />
           Back to Blog
         </Button>
       </Link>
 
       {/* Hero Section with Featured Image */}
-      <div className="relative h-[60vh] min-h-[500px] overflow-hidden bg-gradient-to-br from-green-100 to-teal-100">
+      <div className="relative h-[60vh] min-h-[500px] overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100">
         {post.featured_image_url ? (
           <>
             <img
@@ -240,7 +240,7 @@ export default function AkboyBlogPost() {
         <div className="absolute inset-0 flex items-end">
           <div className="max-w-4xl mx-auto px-4 pb-12 w-full">
             {post.category && (
-              <span className="inline-block bg-green-700 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              <span className="inline-block bg-emerald-500 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
                 {post.category}
               </span>
             )}
@@ -281,7 +281,7 @@ export default function AkboyBlogPost() {
               {postTags.map((tag: string) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 text-green-900 rounded-full text-sm font-medium"
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium"
                 >
                   <Tag className="w-3 h-3" />
                   {tag}
@@ -343,7 +343,7 @@ export default function AkboyBlogPost() {
               <Button
                 onClick={handleCopyLink}
                 variant="outline"
-                className="border-green-800 text-green-800 hover:bg-green-50"
+                className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
               >
                 <Copy className="w-4 h-4 mr-2" />
                 Copy Link
@@ -352,7 +352,7 @@ export default function AkboyBlogPost() {
           </div>
 
           {/* Back to Blog CTA */}
-          <div className="mt-12 p-8 bg-gradient-to-br from-green-50 to-teal-50 rounded-2xl text-center">
+          <div className="mt-12 p-8 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl text-center">
             <h3 className="text-2xl font-bold text-gray-900 mb-4 font-poppins">
               Explore More Articles
             </h3>
@@ -360,7 +360,7 @@ export default function AkboyBlogPost() {
               Discover more insights on education, design, and technology
             </p>
             <Link to="/blog">
-              <Button className="bg-green-800 hover:bg-green-900 text-lg px-8 py-6">
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-lg px-8 py-6">
                 View All Posts
               </Button>
             </Link>

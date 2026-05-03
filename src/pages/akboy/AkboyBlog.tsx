@@ -78,40 +78,40 @@ export default function AkboyBlog() {
   return (
     <AkboyLayout>
       {/* Hero Section */}
-      <section className="relative py-32 px-4 overflow-hidden bg-gradient-to-br from-green-900 via-green-800 to-green-950">
+      <section className="relative py-32 px-4 overflow-hidden bg-gradient-to-br from-emerald-900 via-teal-800 to-emerald-950">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute w-96 h-96 bg-green-700/20 rounded-full blur-3xl animate-float" style={{ top: '10%', left: '5%', animationDelay: '0s' }}></div>
+          <div className="absolute w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-float" style={{ top: '10%', left: '5%', animationDelay: '0s' }}></div>
           <div className="absolute w-80 h-80 bg-teal-500/20 rounded-full blur-3xl animate-float" style={{ top: '60%', right: '10%', animationDelay: '2s' }}></div>
-          <div className="absolute w-72 h-72 bg-green-600/10 rounded-full blur-3xl animate-float" style={{ bottom: '10%', left: '50%', animationDelay: '4s' }}></div>
+          <div className="absolute w-72 h-72 bg-emerald-400/10 rounded-full blur-3xl animate-float" style={{ bottom: '10%', left: '50%', animationDelay: '4s' }}></div>
         </div>
 
         <div className="max-w-7xl mx-auto text-center relative z-10">
           <div className="inline-block mb-6">
-            <span className="px-6 py-3 bg-green-700/20 backdrop-blur-sm border border-green-600/30 rounded-full text-green-100 text-sm font-semibold tracking-wide">
+            <span className="px-6 py-3 bg-emerald-500/20 backdrop-blur-sm border border-emerald-400/30 rounded-full text-emerald-100 text-sm font-semibold tracking-wide">
               📚 INSIGHTS & STORIES
             </span>
           </div>
           <h1 className="text-5xl md:text-7xl font-bold mb-6 font-poppins text-white animate-fade-in">
             AKBOY Blog
           </h1>
-          <p className="text-xl md:text-2xl text-green-50/90 font-lato max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-emerald-50/90 font-lato max-w-3xl mx-auto leading-relaxed">
             Explore our latest insights on education, design, technology, and creative innovation
           </p>
         </div>
       </section>
 
       {/* Search and Filter */}
-      <section className="py-12 px-4 bg-gradient-to-br from-gray-50 to-green-50/30">
+      <section className="py-12 px-4 bg-gradient-to-br from-gray-50 to-emerald-50/30">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="relative flex-1 max-w-md w-full group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-green-800 transition-transform group-focus-within:scale-110" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-600 transition-transform group-focus-within:scale-110" />
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search articles..."
-                className="pl-12 h-14 text-lg border-2 border-green-200 focus:border-green-700 rounded-xl shadow-sm"
+                className="pl-12 h-14 text-lg border-2 border-emerald-200 focus:border-emerald-500 rounded-xl shadow-sm"
               />
             </div>
             <div className="flex gap-3 flex-wrap justify-center">
@@ -121,8 +121,8 @@ export default function AkboyBlog() {
                   variant={selectedCategory === category ? "default" : "outline"}
                   onClick={() => setSelectedCategory(category)}
                   className={selectedCategory === category 
-                    ? "bg-gradient-to-r from-green-800 to-teal-600 hover:from-green-900 hover:to-teal-700 text-white shadow-lg shadow-green-700/30 px-6 py-2.5 rounded-full font-semibold" 
-                    : "border-2 border-green-800 text-green-900 hover:bg-green-50 px-6 py-2.5 rounded-full font-semibold"}
+                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/30 px-6 py-2.5 rounded-full font-semibold" 
+                    : "border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 px-6 py-2.5 rounded-full font-semibold"}
                 >
                   {category}
                 </Button>
@@ -137,7 +137,7 @@ export default function AkboyBlog() {
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="text-center py-20">
-              <div className="animate-spin w-16 h-16 border-4 border-green-800 border-t-transparent rounded-full mx-auto"></div>
+              <div className="animate-spin w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto"></div>
               <p className="mt-6 text-gray-600 text-lg font-lato">Loading articles...</p>
             </div>
           ) : error ? (
@@ -145,7 +145,7 @@ export default function AkboyBlog() {
               <div className="text-6xl mb-6">⚠️</div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3 font-poppins">Something went wrong</h3>
               <p className="text-gray-600 text-lg font-lato mb-6">{error}</p>
-              <Button onClick={fetchPosts} className="bg-green-800 hover:bg-green-900">
+              <Button onClick={fetchPosts} className="bg-emerald-600 hover:bg-emerald-700">
                 Try Again
               </Button>
             </div>
@@ -160,9 +160,9 @@ export default function AkboyBlog() {
               {filteredPosts.map((post) => (
                 <Card 
                   key={post.id} 
-                  className="group overflow-hidden border-2 border-gray-100 hover:border-green-200 hover:shadow-2xl shadow-xl transition-all duration-500 hover:-translate-y-3 rounded-2xl bg-white flex flex-col h-full"
+                  className="group overflow-hidden border-2 border-gray-100 hover:border-emerald-200 hover:shadow-2xl shadow-xl transition-all duration-500 hover:-translate-y-3 rounded-2xl bg-white flex flex-col h-full"
                 >
-                  <div className="relative h-56 overflow-hidden flex-shrink-0 bg-gradient-to-br from-green-100 to-teal-100">
+                  <div className="relative h-56 overflow-hidden flex-shrink-0 bg-gradient-to-br from-emerald-100 to-teal-100">
                     {post.featured_image_url ? (
                       <>
                         <img 
@@ -171,7 +171,7 @@ export default function AkboyBlog() {
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
-                            e.currentTarget.parentElement!.classList.add('bg-gradient-to-br', 'from-green-100', 'to-teal-100');
+                            e.currentTarget.parentElement!.classList.add('bg-gradient-to-br', 'from-emerald-100', 'to-teal-100');
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
@@ -183,7 +183,7 @@ export default function AkboyBlog() {
                     )}
                     {post.category && (
                       <div className="absolute top-4 left-4 z-10">
-                        <span className="bg-gradient-to-r from-green-700 to-teal-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg uppercase">
+                        <span className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg uppercase">
                           {post.category}
                         </span>
                       </div>
@@ -192,7 +192,7 @@ export default function AkboyBlog() {
                   <div className="p-7 flex flex-col flex-grow">
                     <div className="flex items-center gap-3 text-sm text-gray-500 mb-4 font-lato">
                       <div className="flex items-center gap-1.5">
-                        <Calendar className="w-4 h-4 text-green-800" />
+                        <Calendar className="w-4 h-4 text-emerald-600" />
                         <span>{post.created_at ? new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "Recent"}</span>
                       </div>
                       {post.read_time && (
@@ -201,7 +201,7 @@ export default function AkboyBlog() {
                         </span>
                       )}
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 font-poppins line-clamp-2 group-hover:text-green-800 transition-colors">
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 font-poppins line-clamp-2 group-hover:text-emerald-600 transition-colors">
                       {post.title}
                     </h3>
                     <p className="text-gray-600 mb-5 line-clamp-3 font-lato leading-relaxed flex-grow">
@@ -212,7 +212,7 @@ export default function AkboyBlog() {
                       return tagList.length > 0 && (
                         <div className="flex gap-2 mb-5 flex-wrap">
                           {tagList.slice(0, 3).map((tag: string) => (
-                            <span key={tag} className="inline-flex items-center gap-1 text-xs text-green-900 bg-green-50 px-3 py-1.5 rounded-full font-medium">
+                            <span key={tag} className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full font-medium">
                               <Tag className="w-3 h-3" />
                               {tag}
                             </span>
@@ -222,7 +222,7 @@ export default function AkboyBlog() {
                     })()}
                     <Link 
                       to={`/blog/${post.slug || post.id}`}
-                      className="inline-flex items-center gap-2 text-green-800 font-bold group-hover:gap-4 transition-all font-poppins text-sm uppercase tracking-wide mt-auto"
+                      className="inline-flex items-center gap-2 text-emerald-600 font-bold group-hover:gap-4 transition-all font-poppins text-sm uppercase tracking-wide mt-auto"
                     >
                       Read Article
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -238,7 +238,7 @@ export default function AkboyBlog() {
       {/* Newsletter CTA */}
       <section className="relative py-24 px-4 overflow-hidden">
         {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-green-800 via-teal-600 to-green-900"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700"></div>
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float" style={{ top: '20%', left: '10%', animationDelay: '0s' }}></div>
           <div className="absolute w-80 h-80 bg-white/10 rounded-full blur-3xl animate-float" style={{ bottom: '20%', right: '10%', animationDelay: '2s' }}></div>
@@ -260,7 +260,7 @@ export default function AkboyBlog() {
               placeholder="Enter your email address" 
               className="bg-white/95 backdrop-blur-sm border-0 text-gray-900 placeholder:text-gray-500 h-14 text-lg rounded-xl shadow-lg font-lato"
             />
-            <Button className="bg-white text-green-800 hover:bg-gray-50 font-bold px-8 h-14 text-lg rounded-xl shadow-lg whitespace-nowrap">
+            <Button className="bg-white text-emerald-600 hover:bg-gray-50 font-bold px-8 h-14 text-lg rounded-xl shadow-lg whitespace-nowrap">
               Subscribe Now
             </Button>
           </div>

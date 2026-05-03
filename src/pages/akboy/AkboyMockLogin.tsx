@@ -252,7 +252,7 @@ export default function AkboyMockLogin() {
           )}
 
           {/* WhatsApp Group CTA */}
-          <Card className="shadow-lg border-0 bg-gradient-to-r from-green-500 to-green-700 text-white overflow-hidden">
+          <Card className="shadow-lg border-0 bg-gradient-to-r from-green-500 to-emerald-500 text-white overflow-hidden">
             <CardContent className="py-4 px-6 text-center space-y-2">
               <h3 className="text-base font-bold">Join Our WhatsApp Group for Updates</h3>
               <a href="https://chat.whatsapp.com/JQ61pyPVTfT5MlW1X7P4TH?mode=gi_t" target="_blank" rel="noopener noreferrer">

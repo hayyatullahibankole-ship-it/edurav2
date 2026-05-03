@@ -7,36 +7,18 @@ import teamImage from "@/assets/akboy-team.jpg";
 export default function AkboyAbout() {
   return (
     <AkboyLayout>
-      <section className="bg-akboy-forest text-akboy-cream">
+      <section className="bg-slate-950 text-white">
         <div className="max-w-6xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
           <div className="space-y-8 md:max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-akboy-cream/10 px-4 py-2 text-sm font-semibold tracking-wide text-akboy-cream">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold tracking-wide text-slate-100">
               <Sparkles className="h-4 w-4" />
               About AKBOY
             </div>
             <div className="space-y-4">
-              <h1 className="text-4xl font-bold sm:text-5xl lg:text-6xl">AKBOY Creative Hub: where learning, design, and community grow together.</h1>
+              <h1 className="text-4xl font-bold sm:text-5xl lg:text-6xl">Designing growth for students, creatives, and modern brands.</h1>
               <p className="max-w-xl text-slate-300 text-lg leading-8">
-                AKBOY Creative Hub helps students, young creatives, and growing brands build confidence with practical learning, creative coaching, and digital support that feels real and rooted in today’s world.
+                AKBOY Creative Hub blends education, digital design, and community impact in a clean, modern experience built for today's learners and young entrepreneurs.
               </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <a
-                href="https://wa.me/2348101466977"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-full bg-akboy-cream px-6 py-3 text-sm font-semibold text-akboy-forest transition hover:bg-white"
-              >
-                Chat on WhatsApp
-              </a>
-              <a
-                href="https://wa.me/2348101466977?text=I%20want%20to%20join%20the%20AKBOY%20WhatsApp%20group"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-full border border-akboy-cream/30 bg-transparent px-6 py-3 text-sm font-semibold text-akboy-cream transition hover:bg-akboy-cream/10"
-              >
-                Join our WhatsApp group
-              </a>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[
@@ -44,9 +26,9 @@ export default function AkboyAbout() {
                 { label: "Programs Delivered", value: "120+" },
                 { label: "Young Creatives Helped", value: "500+" }
               ].map((item) => (
-                <div key={item.label} className="rounded-3xl border border-akboy-cream/15 bg-akboy-cream/5 p-6 backdrop-blur-xl">
-                  <p className="text-3xl font-bold text-akboy-cream">{item.value}</p>
-                  <p className="mt-2 text-sm uppercase tracking-[0.24em] text-akboy-cream/70">{item.label}</p>
+                <div key={item.label} className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+                  <p className="text-3xl font-bold text-white">{item.value}</p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.24em] text-slate-400">{item.label}</p>
                 </div>
               ))}
             </div>
@@ -57,7 +39,7 @@ export default function AkboyAbout() {
       <section className="bg-white py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto grid gap-16 lg:grid-cols-2 lg:items-center">
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-akboy-cream px-4 py-2 text-sm font-semibold text-akboy-forest">
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-900">
               <Lightbulb className="h-4 w-4" />
               Our Purpose
             </div>
@@ -67,14 +49,14 @@ export default function AkboyAbout() {
             </p>
             <div className="grid gap-5 sm:grid-cols-2">
               <Card className="border-gray-200 p-6 shadow-sm">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-akboy-cream text-akboy-forest">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
                   <Eye className="h-6 w-6" />
                 </div>
                 <h3 className="mt-5 text-xl font-semibold text-slate-950">Clear Vision</h3>
                 <p className="mt-3 text-slate-600">Build learning experiences and creative services that feel polished, practical, and human.</p>
               </Card>
               <Card className="border-gray-200 p-6 shadow-sm">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-akboy-cream text-akboy-forest">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
                   <Target className="h-6 w-6" />
                 </div>
                 <h3 className="mt-5 text-xl font-semibold text-slate-950">Purposeful Mission</h3>
@@ -89,11 +71,11 @@ export default function AkboyAbout() {
         </div>
       </section>
 
-      <section className="bg-akboy-cream/90 py-24 px-4 sm:px-6 lg:px-8">
+      <section className="bg-slate-50 py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="space-y-10 text-center">
             <div>
-              <p className="text-sm uppercase tracking-[0.32em] text-akboy-forest">What we do</p>
+              <p className="text-sm uppercase tracking-[0.32em] text-emerald-600">What we do</p>
               <h2 className="mt-4 text-3xl font-bold text-slate-950 sm:text-4xl">Practical services, focused support, and modern learning.</h2>
             </div>
             <div className="grid gap-6 md:grid-cols-3">
@@ -115,7 +97,7 @@ export default function AkboyAbout() {
                 }
               ].map((item) => (
                 <Card key={item.title} className="border-gray-200 p-8 shadow-sm">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-akboy-forest text-akboy-cream shadow-sm">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-emerald-700 text-white shadow-sm">
                     {item.icon}
                   </div>
                   <h3 className="mt-6 text-2xl font-semibold text-slate-950">{item.title}</h3>
@@ -130,7 +112,7 @@ export default function AkboyAbout() {
       <section className="bg-white py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto grid gap-16 lg:grid-cols-2 lg:items-center">
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-akboy-cream px-4 py-2 text-sm font-semibold text-akboy-forest">
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-900">
               <Rocket className="h-4 w-4" />
               Next Phase
             </div>
@@ -144,8 +126,8 @@ export default function AkboyAbout() {
                 "Guided design and creative growth programs.",
                 "Partnerships with schools, startups, and community groups."
               ].map((item, index) => (
-                <li key={index} className="flex gap-4 rounded-3xl border border-akboy-forest/10 bg-akboy-cream p-5 text-slate-700">
-                  <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-akboy-forest text-akboy-cream">✓</span>
+                <li key={index} className="flex gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-5 text-slate-700">
+                  <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-emerald-700 text-white">✓</span>
                   <span>{item}</span>
                 </li>
               ))}

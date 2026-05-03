@@ -352,7 +352,7 @@ export default function AkboyMockResults() {
               </Button>
 
               {/* WhatsApp Group CTA */}
-              <Card className="shadow-lg border-0 bg-gradient-to-r from-green-500 to-green-700 text-white overflow-hidden">
+              <Card className="shadow-lg border-0 bg-gradient-to-r from-green-500 to-emerald-500 text-white overflow-hidden">
                 <CardContent className="py-5 px-6 text-center space-y-3">
                   <div>
                     <h3 className="text-lg font-bold">Join Our WhatsApp Group</h3>
