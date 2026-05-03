@@ -32,7 +32,7 @@ interface CampusPost {
 }
 
 const CATEGORY_META: Record<string, { color: string; bg: string; emoji: string; icon: any }> = {
-  "Admissions":            { color: "text-emerald-700", bg: "bg-emerald-100", emoji: "🎓", icon: GraduationCap },
+  "Admissions":            { color: "text-green-900", bg: "bg-green-100", emoji: "🎓", icon: GraduationCap },
   "Scholarships":          { color: "text-amber-700",   bg: "bg-amber-100",   emoji: "💰", icon: Award },
   "Exams & JAMB":          { color: "text-blue-700",    bg: "bg-blue-100",    emoji: "📝", icon: FileText },
   "Academic Calendar":     { color: "text-purple-700",  bg: "bg-purple-100",  emoji: "📅", icon: Calendar },
@@ -45,19 +45,19 @@ const CATEGORY_META: Record<string, { color: string; bg: string; emoji: string; 
 const CATEGORIES = ["All", ...Object.keys(CATEGORY_META)];
 
 const QUICK_ACCESS = [
-  { key: "Admissions",           title: "Admissions",          desc: "ND, HND, UTME, DE & PG forms",      icon: GraduationCap, gradient: "from-emerald-500 to-teal-500" },
+  { key: "Admissions",           title: "Admissions",          desc: "ND, HND, UTME, DE & PG forms",      icon: GraduationCap, gradient: "from-green-700 to-teal-500" },
   { key: "Scholarships",         title: "Scholarships",        desc: "Local & international funding",     icon: Award,         gradient: "from-amber-500 to-orange-500" },
   { key: "Exams & JAMB",         title: "Exams & JAMB",        desc: "JAMB, WAEC, NECO, Post-UTME",       icon: FileText,      gradient: "from-blue-500 to-indigo-500" },
   { key: "Academic Calendar",    title: "Academic Calendar",   desc: "Resumption, semesters, timetables", icon: Calendar,      gradient: "from-purple-500 to-fuchsia-500" },
   { key: "Accreditation",        title: "Accreditation",       desc: "NUC, NBTE, programme approvals",    icon: Award,         gradient: "from-indigo-500 to-blue-500" },
   { key: "Convocation & Events", title: "Convocation & Events", desc: "Matriculation, convocation, fests", icon: Megaphone,    gradient: "from-orange-500 to-red-500" },
-  { key: "Career & Internships", title: "Career",              desc: "Internships, jobs & opportunities", icon: Briefcase,     gradient: "from-teal-500 to-emerald-500" },
+  { key: "Career & Internships", title: "Career",              desc: "Internships, jobs & opportunities", icon: Briefcase,     gradient: "from-teal-500 to-green-700" },
   { key: "News & Updates",       title: "News & Updates",      desc: "Breaking education news",           icon: Newspaper,     gradient: "from-rose-500 to-pink-500" },
 ];
 
 const BROWSE_BY_TOPIC = [
   { title: "University News", icon: GraduationCap, gradient: "from-blue-600 to-blue-800", category: "News & Updates" },
-  { title: "JAMB / Admission", icon: FileText, gradient: "from-emerald-600 to-emerald-800", category: "Exams & JAMB" },
+  { title: "JAMB / Admission", icon: FileText, gradient: "from-green-800 to-emerald-800", category: "Exams & JAMB" },
   { title: "Scholarships", icon: Award, gradient: "from-amber-600 to-amber-800", category: "Scholarships" },
   { title: "Trending", icon: TrendingUp, gradient: "from-orange-600 to-orange-800", category: "All" },
 ];
@@ -207,8 +207,8 @@ export default function AkboyCampusHub() {
     const meta = CATEGORY_META[post.category || "News & Updates"] || CATEGORY_META["News & Updates"];
     return (
       <Link to={`/blog/${post.slug || post.id}`} className="group block h-full">
-        <Card className="overflow-hidden border border-gray-200 hover:border-emerald-400 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 rounded-2xl bg-white h-full flex flex-col">
-          <div className={`relative ${compact ? 'h-32' : 'h-44'} overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 flex-shrink-0`}>
+        <Card className="overflow-hidden border border-gray-200 hover:border-green-600 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 rounded-2xl bg-white h-full flex flex-col">
+          <div className={`relative ${compact ? 'h-32' : 'h-44'} overflow-hidden bg-gradient-to-br from-green-50 to-teal-50 flex-shrink-0`}>
             {post.featured_image_url ? (
               <img src={post.featured_image_url} alt={post.title} loading="lazy"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -231,7 +231,7 @@ export default function AkboyCampusHub() {
               <Calendar className="w-3 h-3" />
               <span>{timeAgo(post.created_at)}</span>
             </div>
-            <h3 className={`font-bold text-gray-900 ${compact ? 'text-sm line-clamp-2' : 'text-base line-clamp-2'} mb-2 group-hover:text-emerald-700 transition-colors leading-snug`}>
+            <h3 className={`font-bold text-gray-900 ${compact ? 'text-sm line-clamp-2' : 'text-base line-clamp-2'} mb-2 group-hover:text-green-900 transition-colors leading-snug`}>
               {post.title}
             </h3>
             {!compact && (
@@ -239,7 +239,7 @@ export default function AkboyCampusHub() {
                 {post.excerpt || post.content?.replace(/<[^>]*>/g, '').substring(0, 100)}
               </p>
             )}
-            <div className="inline-flex items-center gap-1 text-emerald-600 font-bold text-xs group-hover:gap-2 transition-all mt-auto">
+            <div className="inline-flex items-center gap-1 text-green-800 font-bold text-xs group-hover:gap-2 transition-all mt-auto">
               Read More <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function AkboyCampusHub() {
       <Link to={`/blog/${post.slug || post.id}`} className="group block">
         <div className="flex gap-4 py-4 px-4 border-b border-gray-200 hover:bg-gray-50 transition-colors rounded-lg">
           {/* Left: Logo/Image */}
-          <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100">
+          <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gradient-to-br from-green-100 to-teal-100">
             {post.featured_image_url ? (
               <img src={post.featured_image_url} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
             ) : (
@@ -274,7 +274,7 @@ export default function AkboyCampusHub() {
                 </span>
               )}
             </div>
-            <h3 className="font-bold text-gray-900 text-sm line-clamp-2 mb-1 group-hover:text-emerald-700 transition-colors">
+            <h3 className="font-bold text-gray-900 text-sm line-clamp-2 mb-1 group-hover:text-green-900 transition-colors">
               {post.title}
             </h3>
             <p className="text-xs text-gray-600 line-clamp-1">
@@ -285,7 +285,7 @@ export default function AkboyCampusHub() {
           {/* Right: Metadata */}
           <div className="flex-shrink-0 text-right flex flex-col justify-between">
             <div className="text-[10px] font-bold text-gray-500">{timeAgo(post.created_at)}</div>
-            <div className="flex items-center justify-end gap-1 text-xs text-emerald-600">
+            <div className="flex items-center justify-end gap-1 text-xs text-green-800">
               Read <ArrowRight className="w-3 h-3" />
             </div>
           </div>
@@ -302,34 +302,34 @@ export default function AkboyCampusHub() {
       {/* ============= 1. HERO WITH SEARCH ============= */}
       <section className="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-900">
         <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-emerald-500 rounded-full blur-3xl"></div>
+          <div className="absolute top-10 left-10 w-72 h-72 bg-green-700 rounded-full blur-3xl"></div>
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-teal-400 rounded-full blur-3xl"></div>
         </div>
 
         <div className="relative max-w-5xl mx-auto px-4 py-10 text-center">
           <div className="max-w-2xl mx-auto">
-            <div className="inline-flex items-center justify-center gap-2 mb-5 px-4 py-2 bg-white/10 backdrop-blur border border-white/20 rounded-full text-emerald-100 text-xs md:text-sm font-semibold">
+            <div className="inline-flex items-center justify-center gap-2 mb-5 px-4 py-2 bg-white/10 backdrop-blur border border-white/20 rounded-full text-green-100 text-xs md:text-sm font-semibold">
               <Sparkles className="w-3.5 h-3.5" />
               CAMPUS NEWS · ADMISSIONS · SCHOLARSHIPS
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3 font-poppins leading-tight">
               Campus Hub
             </h1>
-            <p className="text-sm md:text-base text-emerald-50/90 mb-6 leading-relaxed">
+            <p className="text-sm md:text-base text-green-50/90 mb-6 leading-relaxed">
               Latest admissions, scholarship updates and campus news in one place.
             </p>
 
             {/* Live search */}
             <div className="relative mx-auto max-w-2xl">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-700" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-green-900" />
               <Input
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); updateParam("q", e.target.value); setCurrentPage(1); }}
                 placeholder="Search by school, course, or keyword…"
-                className="pl-12 h-14 text-base bg-white border-0 rounded-2xl shadow-2xl focus-visible:ring-2 focus-visible:ring-emerald-400"
+                className="pl-12 h-14 text-base bg-white border-0 rounded-2xl shadow-2xl focus-visible:ring-2 focus-visible:ring-green-600"
               />
               {searchTerm && (
-                <a href="#feed" className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-700 hover:text-emerald-900">
+                <a href="#feed" className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-green-900 hover:text-emerald-900">
                   See {filtered.length} results →
                 </a>
               )}
@@ -344,12 +344,12 @@ export default function AkboyCampusHub() {
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
               <div>
-                <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Latest News</p>
+                <p className="text-xs font-bold text-green-900 uppercase tracking-widest mb-2">Latest News</p>
                 <h2 className="text-2xl md:text-4xl font-bold text-gray-900 font-poppins">Breaking campus headlines</h2>
               </div>
               <div className="inline-flex items-center gap-3">
                 <span className="rounded-full border border-amber-400 bg-amber-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-amber-800">Latest Update</span>
-                <a href="#feed" className="text-sm font-semibold text-emerald-700 hover:text-emerald-900">View all →</a>
+                <a href="#feed" className="text-sm font-semibold text-green-900 hover:text-emerald-900">View all →</a>
               </div>
             </div>
 
@@ -372,7 +372,7 @@ export default function AkboyCampusHub() {
 
                   <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
                     <div className="flex flex-wrap items-center gap-3 mb-4 justify-center">
-                      <span className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em]">{slideShowPosts[currentSlide].category || "News"}</span>
+                      <span className="rounded-full bg-green-800 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em]">{slideShowPosts[currentSlide].category || "News"}</span>
                       {slideShowPosts[currentSlide].school && (
                         <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-100">{slideShowPosts[currentSlide].school}</span>
                       )}
@@ -424,17 +424,17 @@ export default function AkboyCampusHub() {
         <section className="py-8 md:py-12 px-4 bg-white md:hidden">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white grid place-items-center"><TrendingUp className="w-5 h-5" /></div>
+              <div className="w-10 h-10 rounded-2xl bg-green-800 text-white grid place-items-center"><TrendingUp className="w-5 h-5" /></div>
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-bold">Popular Posts</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-green-900 font-bold">Popular Posts</p>
                 <h3 className="text-lg font-bold text-slate-900">What people are reading</h3>
               </div>
             </div>
             <div className="space-y-3">
               {popularPosts.slice(0, 5).map((post, idx) => (
-                <Link key={post.id} to={`/blog/${post.slug || post.id}`} className="group block rounded-2xl border border-gray-100 p-3 transition hover:border-emerald-300 hover:bg-emerald-50">
+                <Link key={post.id} to={`/blog/${post.slug || post.id}`} className="group block rounded-2xl border border-gray-100 p-3 transition hover:border-green-300 hover:bg-green-50">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-bold">{idx + 1}</div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-green-100 text-green-900 font-bold">{idx + 1}</div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-slate-900 line-clamp-2">{post.title}</p>
                       <p className="text-[11px] text-slate-500 mt-1">{timeAgo(post.created_at)}</p>
@@ -462,7 +462,7 @@ export default function AkboyCampusHub() {
                 onValueChange={(v) => { setSelectedCategory(v); updateParam("category", v); setCurrentPage(1); }}
               >
                 <SelectTrigger className="w-full sm:w-52 bg-white">
-                  <Filter className="w-4 h-4 mr-1 text-emerald-600" />
+                  <Filter className="w-4 h-4 mr-1 text-green-800" />
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -500,7 +500,7 @@ export default function AkboyCampusHub() {
                     setCurrentPage(1);
                   }}
                   className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
-                    active ? "bg-emerald-600 text-white border-emerald-600" : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
+                    active ? "bg-green-800 text-white border-green-800" : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
                   }`}
                 >
                   {topic.title}
@@ -533,7 +533,7 @@ export default function AkboyCampusHub() {
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">Search: {searchTerm}</span>
               )}
               {selectedCategory !== "All" && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">Category: {selectedCategory}</span>
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-emerald-800 text-xs font-semibold">Category: {selectedCategory}</span>
               )}
               {selectedSchool !== "All" && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">School: {selectedSchool}</span>
@@ -603,7 +603,7 @@ export default function AkboyCampusHub() {
                         key={pageNum}
                         onClick={() => { setCurrentPage(pageNum); document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" }); }}
                         className={`px-3 py-2 rounded-lg font-semibold text-sm transition ${
-                          currentPage === pageNum ? "bg-emerald-600 text-white" : "border border-gray-300 hover:bg-gray-100"
+                          currentPage === pageNum ? "bg-green-800 text-white" : "border border-gray-300 hover:bg-gray-100"
                         }`}
                       >
                         {pageNum}
@@ -631,17 +631,17 @@ export default function AkboyCampusHub() {
             <aside className="space-y-6 hidden lg:block">
               <Card className="p-6 bg-white border border-gray-200 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white grid place-items-center"><TrendingUp className="w-5 h-5" /></div>
+                  <div className="w-11 h-11 rounded-2xl bg-green-800 text-white grid place-items-center"><TrendingUp className="w-5 h-5" /></div>
                   <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-bold">Popular Posts</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-green-900 font-bold">Popular Posts</p>
                     <h3 className="text-lg font-bold text-slate-900">What people are reading</h3>
                   </div>
                 </div>
                 <div className="space-y-3">
                   {popularPosts.slice(0, 5).map((post, idx) => (
-                    <Link key={post.id} to={`/blog/${post.slug || post.id}`} className="group block rounded-2xl border border-gray-100 p-3 transition hover:border-emerald-300 hover:bg-emerald-50">
+                    <Link key={post.id} to={`/blog/${post.slug || post.id}`} className="group block rounded-2xl border border-gray-100 p-3 transition hover:border-green-300 hover:bg-green-50">
                       <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-bold">{idx + 1}</div>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-green-100 text-green-900 font-bold">{idx + 1}</div>
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-slate-900 line-clamp-2">{post.title}</p>
                           <p className="text-[11px] text-slate-500 mt-1">{timeAgo(post.created_at)}</p>
@@ -669,7 +669,7 @@ export default function AkboyCampusHub() {
                         setCurrentPage(1);
                         updateParam("q", tag);
                       }}
-                      className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
+                      className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700 hover:border-green-300 hover:bg-green-50"
                     >
                       {tag}
                     </button>
@@ -685,13 +685,13 @@ export default function AkboyCampusHub() {
       <section className="py-14 md:py-20 px-4 bg-gradient-to-br from-emerald-900 to-teal-900 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-bold font-poppins mb-4">Never miss an admission update</h2>
-          <p className="text-emerald-100/85 mb-8 max-w-2xl mx-auto">
+          <p className="text-green-100/85 mb-8 max-w-2xl mx-auto">
             From JAMB news to scholarship deadlines and admission forms — Campus Hub keeps every Nigerian student in the loop.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <button
               onClick={() => document.getElementById('feed')?.scrollIntoView({ behavior: 'smooth' })}
-              className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-bold text-emerald-900 shadow-lg hover:bg-emerald-50"
+              className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-bold text-emerald-900 shadow-lg hover:bg-green-50"
             >
               Read latest headlines <ArrowRight className="w-4 h-4 ml-1" />
             </button>

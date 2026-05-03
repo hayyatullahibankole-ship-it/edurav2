@@ -58,7 +58,7 @@ export function AkboyFooter() {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800 hover:bg-emerald-600 text-gray-300 hover:text-white rounded-lg flex items-center justify-center transition-colors duration-200"
+                  className="w-10 h-10 bg-gray-800 hover:bg-green-800 text-gray-300 hover:text-white rounded-lg flex items-center justify-center transition-colors duration-200"
                 >
                   <Icon className="w-5 h-5" />
                 </a>
@@ -94,15 +94,15 @@ export function AkboyFooter() {
             <h4 className="text-gray-50 font-semibold text-base mb-5">Get In Touch</h4>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start space-x-3">
-                <Mail className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                <Mail className="w-4 h-4 text-green-700 mt-0.5 flex-shrink-0" />
                 <a href="mailto:akboycreativehub@gmail.com" className="text-gray-400 hover:text-gray-50 break-all transition-colors">akboycreativehub@gmail.com</a>
               </li>
               <li className="flex items-start space-x-3">
-                <Phone className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                <Phone className="w-4 h-4 text-green-700 mt-0.5 flex-shrink-0" />
                 <a href="tel:+2348101466977" className="text-gray-400 hover:text-gray-50 transition-colors">+234 810 146 6977</a>
               </li>
               <li className="flex items-start space-x-3">
-                <MapPin className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                <MapPin className="w-4 h-4 text-green-700 mt-0.5 flex-shrink-0" />
                 <span className="text-gray-400">Lagos, Nigeria</span>
               </li>
             </ul>

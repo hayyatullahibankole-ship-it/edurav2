@@ -87,7 +87,7 @@ export default function AkboyHome() {
       icon: BookOpen,
       title: "Educational Consultancy",
       description: "Expert guidance for academic excellence and curriculum development",
-      color: "bg-emerald-600"
+      color: "bg-green-800"
     },
     {
       icon: Users,
@@ -158,7 +158,7 @@ export default function AkboyHome() {
           <div className="animate-fade-in">
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
               Transform Ideas Into
-              <span className="block text-emerald-300">
+              <span className="block text-green-300">
                 Digital Reality
               </span>
             </h1>
@@ -205,7 +205,7 @@ export default function AkboyHome() {
             {services.map((service, index) => (
               <Card 
                 key={index}
-                className="group p-8 hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-emerald-300 bg-white"
+                className="group p-8 hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-green-300 bg-white"
               >
                 <div className={`w-14 h-14 rounded-lg ${service.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
                   <service.icon className="w-7 h-7 text-white" />
@@ -221,7 +221,7 @@ export default function AkboyHome() {
           </div>
 
           <div className="text-center mt-12">
-            <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 font-semibold">
+            <Button asChild size="lg" className="bg-green-800 hover:bg-green-900 text-white px-8 font-semibold">
               <Link to={`${basePath}/services`}>
                 View All Services
                 <ArrowRight className="ml-2 w-5 h-5" />
@@ -236,7 +236,7 @@ export default function AkboyHome() {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 rounded-lg text-emerald-700 font-semibold">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 rounded-lg text-green-900 font-semibold">
                 <Sparkles className="w-4 h-4" />
                 About Us
               </div>
@@ -250,23 +250,23 @@ export default function AkboyHome() {
               </p>
               <div className="grid grid-cols-2 gap-6 pt-4">
                 <div className="space-y-2">
-                  <div className="text-3xl font-bold text-emerald-600">5+</div>
+                  <div className="text-3xl font-bold text-green-800">5+</div>
                   <div className="text-sm text-gray-600 font-medium">Years Experience</div>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-3xl font-bold text-emerald-600">200+</div>
+                  <div className="text-3xl font-bold text-green-800">200+</div>
                   <div className="text-sm text-gray-600 font-medium">Projects Completed</div>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-3xl font-bold text-emerald-600">50+</div>
+                  <div className="text-3xl font-bold text-green-800">50+</div>
                   <div className="text-sm text-gray-600 font-medium">Happy Clients</div>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-3xl font-bold text-emerald-600">15+</div>
+                  <div className="text-3xl font-bold text-green-800">15+</div>
                   <div className="text-sm text-gray-600 font-medium">Team Members</div>
                 </div>
               </div>
-              <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 font-semibold">
+              <Button asChild size="lg" className="bg-green-800 hover:bg-green-900 text-white px-8 font-semibold">
                 <Link to={`${basePath}/about`}>
                   Learn More About Us
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -281,11 +281,11 @@ export default function AkboyHome() {
               />
               <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-green-800 rounded-lg flex items-center justify-center">
                     <Trophy className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-emerald-600">4.9★</div>
+                    <div className="text-2xl font-bold text-green-800">4.9★</div>
                     <div className="text-xs text-gray-600">Client Rating</div>
                   </div>
                 </div>
@@ -306,8 +306,8 @@ export default function AkboyHome() {
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, i) => (
               <div key={i} className="text-center">
-                <div className="w-16 h-16 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-6">
-                  <feature.icon className="w-8 h-8 text-emerald-600" />
+                <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-6">
+                  <feature.icon className="w-8 h-8 text-green-800" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
@@ -318,7 +318,7 @@ export default function AkboyHome() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-emerald-600">
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-green-800">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Ready to Get Started?
@@ -329,7 +329,7 @@ export default function AkboyHome() {
           <Button 
             asChild 
             size="lg" 
-            className="bg-white text-emerald-600 hover:bg-gray-100 px-10 py-6 text-lg font-semibold h-auto"
+            className="bg-white text-green-800 hover:bg-gray-100 px-10 py-6 text-lg font-semibold h-auto"
           >
             <Link to={`${basePath}/contact`}>
               Contact Us Today

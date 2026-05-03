@@ -39,7 +39,7 @@ export default function AkboyAbout() {
       <section className="bg-white py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto grid gap-16 lg:grid-cols-2 lg:items-center">
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-900">
+            <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-emerald-900">
               <Lightbulb className="h-4 w-4" />
               Our Purpose
             </div>
@@ -49,14 +49,14 @@ export default function AkboyAbout() {
             </p>
             <div className="grid gap-5 sm:grid-cols-2">
               <Card className="border-gray-200 p-6 shadow-sm">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 text-green-900">
                   <Eye className="h-6 w-6" />
                 </div>
                 <h3 className="mt-5 text-xl font-semibold text-slate-950">Clear Vision</h3>
                 <p className="mt-3 text-slate-600">Build learning experiences and creative services that feel polished, practical, and human.</p>
               </Card>
               <Card className="border-gray-200 p-6 shadow-sm">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 text-green-900">
                   <Target className="h-6 w-6" />
                 </div>
                 <h3 className="mt-5 text-xl font-semibold text-slate-950">Purposeful Mission</h3>
@@ -75,7 +75,7 @@ export default function AkboyAbout() {
         <div className="max-w-6xl mx-auto">
           <div className="space-y-10 text-center">
             <div>
-              <p className="text-sm uppercase tracking-[0.32em] text-emerald-600">What we do</p>
+              <p className="text-sm uppercase tracking-[0.32em] text-green-800">What we do</p>
               <h2 className="mt-4 text-3xl font-bold text-slate-950 sm:text-4xl">Practical services, focused support, and modern learning.</h2>
             </div>
             <div className="grid gap-6 md:grid-cols-3">
@@ -97,7 +97,7 @@ export default function AkboyAbout() {
                 }
               ].map((item) => (
                 <Card key={item.title} className="border-gray-200 p-8 shadow-sm">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-emerald-700 text-white shadow-sm">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-green-900 text-white shadow-sm">
                     {item.icon}
                   </div>
                   <h3 className="mt-6 text-2xl font-semibold text-slate-950">{item.title}</h3>
@@ -112,7 +112,7 @@ export default function AkboyAbout() {
       <section className="bg-white py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto grid gap-16 lg:grid-cols-2 lg:items-center">
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-900">
+            <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-emerald-900">
               <Rocket className="h-4 w-4" />
               Next Phase
             </div>
@@ -127,7 +127,7 @@ export default function AkboyAbout() {
                 "Partnerships with schools, startups, and community groups."
               ].map((item, index) => (
                 <li key={index} className="flex gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-5 text-slate-700">
-                  <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-emerald-700 text-white">✓</span>
+                  <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-green-900 text-white">✓</span>
                   <span>{item}</span>
                 </li>
               ))}

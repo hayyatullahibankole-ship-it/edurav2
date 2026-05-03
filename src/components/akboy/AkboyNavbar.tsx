@@ -125,7 +125,7 @@ export function AkboyNavbar() {
                         <div className="border-t border-stone-200 p-2 bg-stone-50">
                           {renderLink(
                             g.cta,
-                            "block text-center px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors"
+                            "block text-center px-4 py-2 text-sm font-semibold text-white bg-green-800 hover:bg-green-900 rounded-md transition-colors"
                           )}
                         </div>
                       )}
@@ -138,14 +138,14 @@ export function AkboyNavbar() {
 
           {/* CTA Button (desktop) */}
           <div className="hidden lg:flex items-center">
-            <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg px-6 py-2 shadow-sm transition-colors h-10">
+            <Button asChild className="bg-green-800 hover:bg-green-900 text-white font-semibold rounded-lg px-6 py-2 shadow-sm transition-colors h-10">
               <Link to={`${basePath}/contact`}>Get Started</Link>
             </Button>
           </div>
 
           {/* Mobile CTA + Menu */}
           <div className="lg:hidden flex items-center gap-2">
-            <Button asChild size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg">
+            <Button asChild size="sm" className="bg-green-800 hover:bg-green-900 text-white font-semibold rounded-lg">
               <Link to={`${basePath}/contact`}>Get Started</Link>
             </Button>
             <button
@@ -177,14 +177,14 @@ export function AkboyNavbar() {
                       <div className="pb-3 pl-4 space-y-1 bg-stone-50">
                         {g.children.map((c) => (
                           <div key={c.name} className="py-1">
-                            {renderLink(c, "block px-2 py-2 text-sm font-medium text-gray-700 hover:text-emerald-700 hover:bg-white rounded transition-colors")}
+                            {renderLink(c, "block px-2 py-2 text-sm font-medium text-gray-700 hover:text-green-900 hover:bg-white rounded transition-colors")}
                           </div>
                         ))}
                         {g.cta && (
                           <div className="mt-2 pt-2 border-t border-stone-200">
                             {renderLink(
                               g.cta,
-                              "block text-center px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded transition-colors"
+                              "block text-center px-4 py-2 text-sm font-semibold text-white bg-green-800 hover:bg-green-900 rounded transition-colors"
                             )}
                           </div>
                         )}
