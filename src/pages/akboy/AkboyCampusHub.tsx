@@ -15,6 +15,7 @@ import {
   TrendingUp, Newspaper, Lightbulb, Flame, FileText, ChevronRight,
   Building2, Filter, ChevronLeft, Mail, Tag, Eye, MessageCircle,
 } from "lucide-react";
+import { CampusHubAdvancedSection, WhatsAppConsultButton } from "@/components/akboy/CampusHubAdvanced";
 
 interface CampusPost {
   id: string;
