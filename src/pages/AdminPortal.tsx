@@ -31,6 +31,8 @@ import {
   GraduationCap as TutorialIcon,
   ClipboardList,
   CheckCircle,
+  Lock,
+  Upload,
 } from 'lucide-react';
 import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
@@ -42,7 +44,6 @@ import SystemConfig from '@/components/admin/SystemConfig';
 import PricingManager from '@/components/admin/PricingManager';
 import BlogManager from '@/components/admin/BlogManager';
 import CustomerCommunications from '@/components/admin/CustomerCommunications';
-import WelcomeEmailSender from '@/components/admin/WelcomeEmailSender';
 import StudyHubManager from '@/components/admin/StudyHubManager';
 import ForumManager from '@/components/admin/ForumManager';
 import SchoolManagement from '@/components/admin/SchoolManagement';
@@ -64,6 +65,45 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+
+const navGroups = {
+  edura: [
+    { key: 'dashboard', label: 'System Overview', icon: Monitor },
+    { key: 'users', label: 'User Management', icon: Users },
+    { key: 'exams', label: 'Exam Control', icon: BookOpen },
+    { key: 'questions', label: 'Question Bank', icon: FileText },
+    { key: 'subjects', label: 'Subject Management', icon: BookOpen },
+    { key: 'resources', label: 'Resources', icon: Upload },
+    { key: 'security', label: 'Security Center', icon: Lock },
+    { key: 'analytics', label: 'Analytics Hub', icon: BarChart3 },
+    { key: 'pricing', label: 'Pricing Management', icon: DollarSign },
+    { key: 'promos', label: 'Promo Codes', icon: Gift },
+    { key: 'schools', label: 'School Management', icon: Users },
+    { key: 'communications', label: 'Communications', icon: MessageCircle },
+    { key: 'study-hub', label: 'Study Hub', icon: GraduationCap },
+    { key: 'forum', label: 'Forum', icon: MessageCircle },
+    { key: 'challenges', label: 'Challenges', icon: Sword },
+    { key: 'settings', label: 'System Config', icon: Settings },
+  ],
+  akboy: [
+    { key: 'akboy-services', label: 'AKBOY Services', icon: Palette },
+    { key: 'akboy-portfolio', label: 'AKBOY Portfolio', icon: Briefcase },
+    { key: 'akboy-events', label: 'AKBOY Events', icon: CalendarDays },
+    { key: 'akboy-inquiries', label: 'AKBOY Inquiries', icon: Mail },
+    { key: 'akboy-newsletter', label: 'Newsletter Subscribers', icon: Mail },
+    { key: 'akboy-tutorials', label: 'AKBOY Tutorials', icon: TutorialIcon },
+    { key: 'akboy-registrations', label: 'AKBOY Registrations', icon: ClipboardList },
+  ],
+  mock: [
+    { key: 'mock-exam', label: 'Mock Exam', icon: FileText },
+    { key: 'mock-results', label: 'Mock Results', icon: GraduationCap },
+    { key: 'mock-dashboard', label: 'Student Batches', icon: Users },
+    { key: 'exam-verification', label: 'Verify Students', icon: CheckCircle },
+  ],
+  blog: [
+    { key: 'blog', label: 'Blog Management', icon: Newspaper },
+  ],
+};
 
 export default function AdminPortal() {
   const { user, isAdmin, signOut } = useAuth();
@@ -160,45 +200,6 @@ export default function AdminPortal() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const navGroups = {
-    edura: [
-      { key: 'dashboard', label: 'System Overview', icon: Monitor },
-      { key: 'users', label: 'User Management', icon: Users },
-      { key: 'exams', label: 'Exam Control', icon: BookOpen },
-      { key: 'questions', label: 'Question Bank', icon: FileText },
-      { key: 'subjects', label: 'Subject Management', icon: BookOpen },
-      { key: 'resources', label: 'Resources', icon: Upload },
-      { key: 'security', label: 'Security Center', icon: Lock },
-      { key: 'analytics', label: 'Analytics Hub', icon: BarChart3 },
-      { key: 'pricing', label: 'Pricing Management', icon: DollarSign },
-      { key: 'promos', label: 'Promo Codes', icon: Gift },
-      { key: 'schools', label: 'School Management', icon: Users },
-      { key: 'communications', label: 'Communications', icon: MessageCircle },
-      { key: 'study-hub', label: 'Study Hub', icon: GraduationCap },
-      { key: 'forum', label: 'Forum', icon: MessageCircle },
-      { key: 'challenges', label: 'Challenges', icon: Sword },
-      { key: 'settings', label: 'System Config', icon: Settings },
-    ],
-    akboy: [
-      { key: 'akboy-services', label: 'AKBOY Services', icon: Palette },
-      { key: 'akboy-portfolio', label: 'AKBOY Portfolio', icon: Briefcase },
-      { key: 'akboy-events', label: 'AKBOY Events', icon: CalendarDays },
-      { key: 'akboy-inquiries', label: 'AKBOY Inquiries', icon: Mail },
-      { key: 'akboy-newsletter', label: 'Newsletter Subscribers', icon: Mail },
-      { key: 'akboy-tutorials', label: 'AKBOY Tutorials', icon: TutorialIcon },
-      { key: 'akboy-registrations', label: 'AKBOY Registrations', icon: ClipboardList },
-    ],
-    mock: [
-      { key: 'mock-exam', label: 'Mock Exam', icon: FileText },
-      { key: 'mock-results', label: 'Mock Results', icon: GraduationCap },
-      { key: 'mock-dashboard', label: 'Student Batches', icon: Users },
-      { key: 'exam-verification', label: 'Verify Students', icon: CheckCircle },
-    ],
-    blog: [
-      { key: 'blog', label: 'Blog Management', icon: Newspaper },
-    ],
   };
 
   const handleNavClick = (mainTab: string, subTab: string) => {
