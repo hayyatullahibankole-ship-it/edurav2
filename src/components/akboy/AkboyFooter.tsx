@@ -10,24 +10,24 @@ export function AkboyFooter() {
 
   if (isCampusHub) {
     return (
-      <footer className="bg-slate-950 text-slate-100">
+      <footer className="bg-emerald-950 text-emerald-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-3 mb-4">
               <img src={akboyLogo} alt="Campus Hub" className="h-12 w-auto" />
               <span className="text-sm font-semibold text-white">Campus Hub</span>
             </div>
-            <p className="max-w-xl text-sm text-slate-400">
+            <p className="max-w-xl text-sm text-emerald-200/80">
               Fresh admission news, scholarship updates and campus headlines for Nigerian students.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-slate-300">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-emerald-100">
             <Link to="/" className="hover:text-white">Home</Link>
             <Link to="/blog" className="hover:text-white">Blog</Link>
             <a href="mailto:akboycreativehub@gmail.com" className="hover:text-white">Contact</a>
           </div>
         </div>
-        <div className="border-t border-slate-800 py-4 text-center text-sm text-slate-500">
+        <div className="border-t border-emerald-900 py-4 text-center text-sm text-emerald-300/70">
           © {currentYear} Campus Hub. All rights reserved.
         </div>
       </footer>

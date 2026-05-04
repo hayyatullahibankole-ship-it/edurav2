@@ -7,10 +7,10 @@ import teamImage from "@/assets/akboy-team.jpg";
 export default function AkboyAbout() {
   return (
     <AkboyLayout>
-      <section className="bg-slate-950 text-white">
+      <section className="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 text-white">
         <div className="max-w-6xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
           <div className="space-y-8 md:max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold tracking-wide text-slate-100">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold tracking-wide text-emerald-50">
               <Sparkles className="h-4 w-4" />
               About AKBOY
             </div>
@@ -26,9 +26,9 @@ export default function AkboyAbout() {
                 { label: "Programs Delivered", value: "120+" },
                 { label: "Young Creatives Helped", value: "500+" }
               ].map((item) => (
-                <div key={item.label} className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+                <div key={item.label} className="rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-xl">
                   <p className="text-3xl font-bold text-white">{item.value}</p>
-                  <p className="mt-2 text-sm uppercase tracking-[0.24em] text-slate-400">{item.label}</p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.24em] text-emerald-200">{item.label}</p>
                 </div>
               ))}
             </div>

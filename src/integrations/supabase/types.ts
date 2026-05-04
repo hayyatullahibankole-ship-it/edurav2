@@ -858,6 +858,78 @@ export type Database = {
           },
         ]
       }
+      campus_hub_consultations: {
+        Row: {
+          created_at: string
+          current_level: string | null
+          email: string
+          id: string
+          jamb_score: number | null
+          message: string | null
+          name: string
+          status: string
+          target_course: string | null
+          target_school: string | null
+          whatsapp: string
+        }
+        Insert: {
+          created_at?: string
+          current_level?: string | null
+          email: string
+          id?: string
+          jamb_score?: number | null
+          message?: string | null
+          name: string
+          status?: string
+          target_course?: string | null
+          target_school?: string | null
+          whatsapp: string
+        }
+        Update: {
+          created_at?: string
+          current_level?: string | null
+          email?: string
+          id?: string
+          jamb_score?: number | null
+          message?: string | null
+          name?: string
+          status?: string
+          target_course?: string | null
+          target_school?: string | null
+          whatsapp?: string
+        }
+        Relationships: []
+      }
+      campus_hub_subscribers: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          interests: string[] | null
+          level: string | null
+          school: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          interests?: string[] | null
+          level?: string | null
+          school?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          interests?: string[] | null
+          level?: string | null
+          school?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       challenge_attempts: {
         Row: {
           challenge_id: string
