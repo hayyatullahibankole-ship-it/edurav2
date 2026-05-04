@@ -1,0 +1,399 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { z } from "zod";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  MessageCircle, GraduationCap, Calculator as CalcIcon, Sparkles, Mail, ArrowRight, CheckCircle2, Star,
+} from "lucide-react";
+
+const WHATSAPP = "2348101466977"; // AKBOY consultancy
+
+/* -------------------- Floating WhatsApp -------------------- */
+export const WhatsAppConsultButton = () => {
+  const msg = encodeURIComponent("Hello AKBOY, I'd like to book a free admission consultation.");
+  const href = `https://wa.me/${WHATSAPP}?text=${msg}`;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="fixed bottom-6 right-6 z-40 group flex items-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white pl-4 pr-5 py-3 shadow-2xl shadow-emerald-700/40 transition-all hover:scale-105"
+      aria-label="Chat on WhatsApp"
+    >
+      <span className="absolute inset-0 rounded-full bg-emerald-400 blur-xl opacity-50 -z-10 animate-pulse" />
+      <MessageCircle className="w-5 h-5" />
+      <span className="text-sm font-bold hidden sm:inline">Free Consult</span>
+    </a>
+  );
+};
+
+/* -------------------- Consultation Booking -------------------- */
+const consultSchema = z.object({
+  name: z.string().trim().min(2, "Enter your full name").max(100),
+  whatsapp: z.string().trim().min(7, "Enter a valid phone").max(20),
+  email: z.string().trim().email("Valid email required").max(255),
+  current_level: z.string().max(80).optional().or(z.literal("")),
+  target_school: z.string().max(120).optional().or(z.literal("")),
+  target_course: z.string().max(120).optional().or(z.literal("")),
+  jamb_score: z.string().optional(),
+  message: z.string().max(1000).optional().or(z.literal("")),
+});
+
+export const ConsultationBookingForm = ({ trigger }: { trigger?: React.ReactNode }) => {
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    name: "", whatsapp: "", email: "", current_level: "",
+    target_school: "", target_course: "", jamb_score: "", message: "",
+  });
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = consultSchema.safeParse(form);
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message || "Please check the form");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const payload = {
+        name: form.name,
+        email: form.email,
+        whatsapp: form.whatsapp,
+        current_level: form.current_level || null,
+        target_school: form.target_school || null,
+        target_course: form.target_course || null,
+        jamb_score: form.jamb_score ? parseInt(form.jamb_score, 10) : null,
+        message: form.message || null,
+      };
+      const { error } = await supabase.from("campus_hub_consultations" as any).insert(payload);
+      if (error) throw error;
+      toast.success("Booking received — we'll reach out on WhatsApp shortly.");
+      setOpen(false);
+      setForm({ name: "", whatsapp: "", email: "", current_level: "", target_school: "", target_course: "", jamb_score: "", message: "" });
+    } catch (err: any) {
+      toast.error(err.message || "Could not submit booking");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger || (
+          <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+            <GraduationCap className="w-4 h-4 mr-2" /> Book Free Consultation
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold">Free Admission Consultation</DialogTitle>
+          <p className="text-sm text-muted-foreground">Tell us about your goals — we'll guide you to the right school & course.</p>
+        </DialogHeader>
+        <form onSubmit={onSubmit} className="space-y-3 mt-2">
+          <Input placeholder="Full name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <div className="grid grid-cols-2 gap-3">
+            <Input placeholder="WhatsApp *" value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} />
+            <Input type="email" placeholder="Email *" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Input placeholder="Current level (e.g. SS3)" value={form.current_level} onChange={(e) => setForm({ ...form, current_level: e.target.value })} />
+            <Input placeholder="JAMB score (optional)" type="number" value={form.jamb_score} onChange={(e) => setForm({ ...form, jamb_score: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Input placeholder="Target school" value={form.target_school} onChange={(e) => setForm({ ...form, target_school: e.target.value })} />
+            <Input placeholder="Target course" value={form.target_course} onChange={(e) => setForm({ ...form, target_course: e.target.value })} />
+          </div>
+          <Textarea placeholder="Anything else we should know?" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
+          <Button type="submit" disabled={submitting} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+            {submitting ? "Submitting…" : "Submit & Get Reply"}
+          </Button>
+          <a
+            href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hi AKBOY, I'd like to book a consultation.")}`}
+            target="_blank" rel="noopener noreferrer"
+            className="block text-center text-sm font-semibold text-emerald-700 hover:underline"
+          >
+            Or chat with us directly on WhatsApp →
+          </a>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+/* -------------------- Eligibility Checker -------------------- */
+const SCHOOL_CUTOFFS: { name: string; cutoff: number }[] = [
+  { name: "University of Lagos (UNILAG)", cutoff: 200 },
+  { name: "University of Ibadan (UI)", cutoff: 200 },
+  { name: "OAU", cutoff: 200 },
+  { name: "Lagos State University (LASU)", cutoff: 180 },
+  { name: "Uniosun", cutoff: 180 },
+  { name: "Federal Universities (most)", cutoff: 180 },
+  { name: "State Universities (most)", cutoff: 160 },
+  { name: "Polytechnics & Colleges of Education", cutoff: 150 },
+];
+
+export const EligibilityChecker = () => {
+  const [score, setScore] = useState("");
+  const [oLevel, setOLevel] = useState("5");
+  const num = parseInt(score, 10);
+  const matches = useMemo(
+    () => (Number.isFinite(num) && num > 0 ? SCHOOL_CUTOFFS.filter((s) => num >= s.cutoff) : []),
+    [num]
+  );
+  const insufficientOLevel = parseInt(oLevel, 10) < 5;
+
+  return (
+    <Card className="p-6 md:p-8 bg-white border-2 border-emerald-100 rounded-3xl shadow-sm">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white grid place-items-center">
+          <CalcIcon className="w-5 h-5" />
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-bold">Free Tool</p>
+          <h3 className="text-xl font-bold text-slate-900">Admission Eligibility Checker</h3>
+        </div>
+      </div>
+      <p className="text-sm text-slate-600 mb-4">Enter your JAMB score and O'Level credits to see which schools you may qualify for.</p>
+      <div className="grid sm:grid-cols-2 gap-3">
+        <Input type="number" placeholder="JAMB score (e.g. 230)" value={score} onChange={(e) => setScore(e.target.value)} />
+        <Select value={oLevel} onValueChange={setOLevel}>
+          <SelectTrigger><SelectValue placeholder="O'Level credits" /></SelectTrigger>
+          <SelectContent>
+            {[3, 4, 5, 6, 7, 8, 9].map((n) => <SelectItem key={n} value={String(n)}>{n} credits (incl. Eng & Maths)</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {num > 0 && (
+        <div className="mt-5">
+          {insufficientOLevel ? (
+            <p className="text-sm font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3">
+              You'll typically need at least 5 O'Level credits (including English and Maths) for university admission.
+            </p>
+          ) : matches.length === 0 ? (
+            <p className="text-sm font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3">
+              Your score is below most cut-off marks. Consider Polytechnics, IJMB, or a JAMB rewrite — we can guide you.
+            </p>
+          ) : (
+            <>
+              <p className="text-sm font-bold text-emerald-800 mb-2">You may qualify for {matches.length} of these tracks:</p>
+              <ul className="space-y-1.5">
+                {matches.map((s) => (
+                  <li key={s.name} className="flex items-center gap-2 text-sm text-slate-700">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <span><strong>{s.name}</strong> <span className="text-xs text-slate-500">(cutoff ~{s.cutoff})</span></span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <ConsultationBookingForm
+            trigger={
+              <Button className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+                Get personalized advice <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            }
+          />
+        </div>
+      )}
+      <p className="mt-4 text-[11px] text-slate-500">* Cut-offs are indicative — actual departmental cut-offs vary year to year.</p>
+    </Card>
+  );
+};
+
+/* -------------------- Newsletter Signup -------------------- */
+const subSchema = z.object({
+  email: z.string().trim().email("Valid email required").max(255),
+  whatsapp: z.string().trim().max(20).optional().or(z.literal("")),
+});
+
+export const NewsletterSignup = () => {
+  const [email, setEmail] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [done, setDone] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = subSchema.safeParse({ email, whatsapp });
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message); return; }
+    setBusy(true);
+    try {
+      const { error } = await supabase.from("campus_hub_subscribers" as any).insert({
+        email, whatsapp: whatsapp || null,
+      });
+      if (error) throw error;
+      setDone(true);
+      toast.success("You're in! Watch for updates.");
+    } catch (err: any) {
+      toast.error(err.message || "Could not subscribe");
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div id="newsletter" className="rounded-3xl bg-gradient-to-br from-emerald-700 to-emerald-900 text-white p-8 md:p-10 shadow-xl">
+      <div className="flex items-center gap-3 mb-3">
+        <Mail className="w-6 h-6" />
+        <h3 className="text-xl md:text-2xl font-bold">Get admission alerts first</h3>
+      </div>
+      <p className="text-emerald-50/85 text-sm mb-5">Drop your email and (optionally) WhatsApp — we'll send fresh scholarships, JAMB news and admission updates.</p>
+      {done ? (
+        <div className="flex items-center gap-2 bg-white/10 rounded-xl p-4 text-emerald-50 font-semibold">
+          <CheckCircle2 className="w-5 h-5" /> You're subscribed.
+        </div>
+      ) : (
+        <form onSubmit={submit} className="grid sm:grid-cols-[1fr_1fr_auto] gap-3">
+          <Input type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white text-slate-900 border-0 h-12" />
+          <Input type="tel" placeholder="WhatsApp (optional)" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="bg-white text-slate-900 border-0 h-12" />
+          <Button type="submit" disabled={busy} className="bg-amber-400 hover:bg-amber-300 text-emerald-950 font-bold h-12 px-6">
+            {busy ? "…" : "Subscribe"}
+          </Button>
+        </form>
+      )}
+    </div>
+  );
+};
+
+/* -------------------- Personalized Recommendations -------------------- */
+const PREF_KEY = "campus_hub_prefs_v1";
+type Prefs = { school?: string; interest?: string };
+
+export const PersonalizedRecommendations = ({
+  posts,
+  schools,
+}: {
+  posts: any[];
+  schools: { school: string; count: number }[];
+}) => {
+  const [prefs, setPrefs] = useState<Prefs>({});
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PREF_KEY);
+      if (raw) setPrefs(JSON.parse(raw));
+    } catch {}
+  }, []);
+  const save = (p: Prefs) => {
+    setPrefs(p);
+    try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch {}
+  };
+
+  const interests = ["Admissions", "Scholarships", "Exams & JAMB", "Career & Internships", "Academic Calendar"];
+  const recs = useMemo(() => {
+    if (!prefs.school && !prefs.interest) return [];
+    return posts
+      .filter((p) =>
+        (!prefs.school || p.school === prefs.school) &&
+        (!prefs.interest || (p.category || "News & Updates") === prefs.interest)
+      )
+      .slice(0, 6);
+  }, [posts, prefs]);
+
+  return (
+    <Card className="p-6 md:p-8 bg-white border-2 border-emerald-100 rounded-3xl shadow-sm">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white grid place-items-center">
+          <Star className="w-5 h-5" />
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-bold">For You</p>
+          <h3 className="text-xl font-bold text-slate-900">Personalized recommendations</h3>
+        </div>
+      </div>
+      <p className="text-sm text-slate-600 mb-4">Pick your school and main interest — we'll surface the most relevant posts.</p>
+
+      <div className="grid sm:grid-cols-2 gap-3 mb-4">
+        <Select value={prefs.school || "any"} onValueChange={(v) => save({ ...prefs, school: v === "any" ? undefined : v })}>
+          <SelectTrigger><SelectValue placeholder="Your school" /></SelectTrigger>
+          <SelectContent className="max-h-72">
+            <SelectItem value="any">Any school</SelectItem>
+            {schools.map((s) => <SelectItem key={s.school} value={s.school}>{s.school}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={prefs.interest || "any"} onValueChange={(v) => save({ ...prefs, interest: v === "any" ? undefined : v })}>
+          <SelectTrigger><SelectValue placeholder="Your interest" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="any">Any topic</SelectItem>
+            {interests.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {recs.length === 0 ? (
+        <p className="text-sm text-slate-500 italic">Pick at least one preference above to see your feed.</p>
+      ) : (
+        <div className="grid sm:grid-cols-2 gap-3">
+          {recs.map((p) => (
+            <Link key={p.id} to={`/blog/${p.slug || p.id}`} className="group block rounded-2xl border border-slate-200 p-3 hover:border-emerald-400 hover:bg-emerald-50/50 transition">
+              <p className="text-[10px] font-bold text-emerald-700 uppercase mb-1">{p.category || "News"}</p>
+              <p className="text-sm font-semibold text-slate-900 line-clamp-2 group-hover:text-emerald-700">{p.title}</p>
+            </Link>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+};
+
+/* -------------------- Combined section -------------------- */
+export const CampusHubAdvancedSection = ({
+  posts, schools,
+}: { posts: any[]; schools: { school: string; count: number }[] }) => {
+  return (
+    <section className="py-14 md:py-20 px-4 bg-gradient-to-b from-emerald-50/40 to-white">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-3">
+            <Sparkles className="w-3.5 h-3.5" /> Smart Tools
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-emerald-950">Get into the right school, faster</h2>
+          <p className="text-slate-600 mt-2 max-w-2xl mx-auto">Free tools, expert guidance, and personalized updates — built for Nigerian students.</p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          <EligibilityChecker />
+          <PersonalizedRecommendations posts={posts} schools={schools} />
+        </div>
+
+        <div className="grid lg:grid-cols-[1.2fr_1fr] gap-6">
+          <Card className="p-6 md:p-8 bg-emerald-950 text-white rounded-3xl shadow-xl border-0">
+            <div className="flex items-center gap-3 mb-3">
+              <GraduationCap className="w-6 h-6 text-emerald-300" />
+              <h3 className="text-xl md:text-2xl font-bold">Free Admission Consultation</h3>
+            </div>
+            <p className="text-emerald-50/85 text-sm md:text-base mb-5">
+              Stuck on choosing a course, school or how to use your JAMB score? Talk to AKBOY's admission team — guidance tailored to you.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <ConsultationBookingForm
+                trigger={
+                  <Button size="lg" className="bg-amber-400 hover:bg-amber-300 text-emerald-950 font-bold">
+                    Book Free Consultation
+                  </Button>
+                }
+              />
+              <a
+                href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hi AKBOY, I need admission guidance.")}`}
+                target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-md border-2 border-white/30 bg-transparent px-6 py-2.5 text-sm font-bold text-white hover:bg-white/10"
+              >
+                <MessageCircle className="w-4 h-4" /> Chat on WhatsApp
+              </a>
+            </div>
+          </Card>
+
+          <NewsletterSignup />
+        </div>
+      </div>
+    </section>
+  );
+};
