@@ -7,10 +7,10 @@ import teamImage from "@/assets/akboy-team.jpg";
 export default function AkboyAbout() {
   return (
     <AkboyLayout>
-      <section className="bg-slate-950 text-white">
+      <section className="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 text-white">
         <div className="max-w-6xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
           <div className="space-y-8 md:max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold tracking-wide text-slate-100">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold tracking-wide text-emerald-50">
               <Sparkles className="h-4 w-4" />
               About AKBOY
             </div>
