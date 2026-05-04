@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => {
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
+      manifestFilename: 'manifest.json',
       includeAssets: ['favicon.png', 'app-icon-white.png', 'robots.txt'],
       manifest: {
         name: 'Edura - Advanced CBT Exam Platform',

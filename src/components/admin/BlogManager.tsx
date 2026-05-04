@@ -47,6 +47,8 @@ const BlogManager = () => {
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8; // Between 7-9 as requested
 
   const [formData, setFormData] = useState({
     title: '',
@@ -59,8 +61,14 @@ const BlogManager = () => {
     tags: ''
   });
 
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const totalPages = Math.ceil(posts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPosts = posts.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const categories = [
     { value: 'general', label: 'General' },
@@ -588,7 +596,7 @@ const BlogManager = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {posts.map((post) => (
+            {currentPosts.map((post) => (
               <Card key={post.id} className="bg-slate-700 border-slate-600">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
@@ -663,6 +671,51 @@ const BlogManager = () => {
               </Card>
             ))}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6">
+              <div className="text-sm text-slate-400">
+                Showing {startIndex + 1}-{Math.min(endIndex, posts.length)} of {posts.length} posts
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                >
+                  Previous
+                </Button>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={() => handlePageChange(page)}
+                    className={currentPage === page 
+                      ? "bg-blue-600 text-white" 
+                      : "bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                    }
+                  >
+                    {page}
+                  </Button>
+                ))}
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
 
           {posts.length === 0 && (
             <div className="text-center py-12">

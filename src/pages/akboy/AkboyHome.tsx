@@ -157,13 +157,13 @@ export default function AkboyHome() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="animate-fade-in">
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-              Learn. Create.
+              Education. Consultancy.
               <span className="block text-emerald-300">
-                Get Admitted.
+                Design solutions.
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-12 leading-relaxed">
-              AKBOY Creative Hub — Tutorials, mock exams, admission consultancy, branding & web design, all under one roof for Nigerian students and brands.
+              AKBOY Creative Hub is an edtech institution offering education, admission consultancy, and creative design solutions for students and organizations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button 

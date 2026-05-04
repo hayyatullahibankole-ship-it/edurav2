@@ -94,6 +94,13 @@ export default function AkboyCampusHub() {
 
   useEffect(() => { fetchPosts(); }, []);
 
+  useEffect(() => {
+    setSelectedCategory(searchParams.get("category") || "All");
+    setSelectedSchool(searchParams.get("school") || "All");
+    setSearchTerm(searchParams.get("q") || "");
+    setCurrentPage(1);
+  }, [searchParams]);
+
   // Auto-advance slideshow
   useEffect(() => {
     if (posts.length === 0) return;
@@ -151,9 +158,30 @@ export default function AkboyCampusHub() {
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    posts.forEach(p => { const c = p.category || "News & Updates"; counts[c] = (counts[c] || 0) + 1; });
+    posts.forEach(p => {
+      const c = p.category?.trim() || "News & Updates";
+      counts[c] = (counts[c] || 0) + 1;
+    });
     return counts;
   }, [posts]);
+
+  const categoryOptions = useMemo(() => {
+    const categories = new Set<string>(["All"]);
+    posts.forEach((post) => {
+      if (post.category?.trim()) {
+        categories.add(post.category.trim());
+      }
+    });
+    if (selectedCategory && selectedCategory !== "All") {
+      categories.add(selectedCategory);
+    }
+    return Array.from(categories).sort((a, b) => {
+      if (a === "All") return -1;
+      if (b === "All") return 1;
+      const countDiff = (categoryCounts[b] || 0) - (categoryCounts[a] || 0);
+      return countDiff !== 0 ? countDiff : a.localeCompare(b);
+    });
+  }, [posts, selectedCategory, categoryCounts]);
 
   // Featured schools (top schools by post count, excluding generic buckets)
   const schoolList = useMemo(() => {
@@ -467,7 +495,11 @@ export default function AkboyCampusHub() {
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {categoryOptions.map(c => (
+                    <SelectItem key={c} value={c}>
+                      {c === "All" ? "All Categories" : `${c} (${categoryCounts[c] || 0})`}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 

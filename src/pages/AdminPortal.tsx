@@ -3,13 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription as AlertDialogDesc, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Shield,
   Users,
@@ -18,19 +13,10 @@ import {
   BarChart3,
   AlertTriangle,
   LogOut,
-  Search,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  Download,
-  Upload,
   Bell,
   Activity,
-  Lock,
   Database,
   Monitor,
-  Zap,
   FileText,
   DollarSign,
   Gift,
@@ -45,7 +31,6 @@ import {
   GraduationCap as TutorialIcon,
   ClipboardList,
   CheckCircle,
-  Menu,
 } from 'lucide-react';
 import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
@@ -69,6 +54,7 @@ import { AkboyEventsManager } from '@/components/admin/AkboyEventsManager';
 import { AkboyInquiriesManager } from '@/components/admin/AkboyInquiriesManager';
 import { AkboyTutorialsManager } from '@/components/admin/AkboyTutorialsManager';
 import { AkboyRegistrationsManager } from '@/components/admin/AkboyRegistrationsManager';
+import { AkboyNewsletterSubscribersManager } from '@/components/admin/AkboyNewsletterSubscribersManager';
 import MockExamManager from '@/components/admin/MockExamManager';
 import MockResultsManager from '@/components/admin/MockResultsManager';
 import SubjectManager from '@/components/admin/SubjectManager';
@@ -83,9 +69,9 @@ export default function AdminPortal() {
   const { user, isAdmin, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('dashboard');
+  const [activeMainTab, setActiveMainTab] = useState('edura');
+  const [activeSubTab, setActiveSubTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -103,6 +89,14 @@ export default function AdminPortal() {
       fetchAdminData();
     }
   }, [isAdmin]);
+
+  // Set default sub-tab when main tab changes
+  useEffect(() => {
+    const defaultSubTab = navGroups[activeMainTab as keyof typeof navGroups]?.[0]?.key || 'dashboard';
+    if (activeSubTab !== defaultSubTab) {
+      setActiveSubTab(defaultSubTab);
+    }
+  }, [activeMainTab]);
 
   const fetchAdminData = async () => {
     try {
@@ -168,56 +162,220 @@ export default function AdminPortal() {
     }
   };
 
-  const navItems = [
-    { key: 'dashboard', label: 'System Overview', icon: Monitor },
-    { key: 'users', label: 'User Management', icon: Users },
-    { key: 'exams', label: 'Exam Control', icon: BookOpen },
-    { key: 'questions', label: 'Question Bank', icon: FileText },
-    { key: 'subjects', label: 'Subject Management', icon: BookOpen },
-    { key: 'resources', label: 'Resources', icon: Upload },
-    { key: 'security', label: 'Security Center', icon: Lock },
-    { key: 'analytics', label: 'Analytics Hub', icon: BarChart3 },
-    { key: 'pricing', label: 'Pricing Management', icon: DollarSign },
-    { key: 'promos', label: 'Promo Codes', icon: Gift },
-    { key: 'schools', label: 'School Management', icon: Users },
-    { key: 'blog', label: 'Blog Management', icon: Newspaper },
-    { key: 'communications', label: 'Communications', icon: MessageCircle },
-    { key: 'study-hub', label: 'Study Hub', icon: GraduationCap },
-    { key: 'forum', label: 'Forum', icon: MessageCircle },
-    { key: 'challenges', label: 'Challenges', icon: Sword },
-    { key: 'akboy-services', label: 'AKBOY Services', icon: Palette },
-    { key: 'akboy-portfolio', label: 'AKBOY Portfolio', icon: Briefcase },
-    { key: 'akboy-events', label: 'AKBOY Events', icon: CalendarDays },
-    { key: 'akboy-inquiries', label: 'AKBOY Inquiries', icon: Mail },
-    { key: 'akboy-tutorials', label: 'AKBOY Tutorials', icon: TutorialIcon },
-    { key: 'akboy-registrations', label: 'AKBOY Registrations', icon: ClipboardList },
-    { key: 'mock-exam', label: 'Mock Exam', icon: FileText },
-    { key: 'mock-results', label: 'Mock Results', icon: GraduationCap },
-    { key: 'mock-dashboard', label: 'Student Batches', icon: Users },
-    { key: 'exam-verification', label: 'Verify Students', icon: CheckCircle },
-    { key: 'settings', label: 'System Config', icon: Settings },
-  ];
-
-  const handleNavClick = (key: string) => {
-    setActiveSection(key);
-    setSidebarOpen(false);
+  const navGroups = {
+    edura: [
+      { key: 'dashboard', label: 'System Overview', icon: Monitor },
+      { key: 'users', label: 'User Management', icon: Users },
+      { key: 'exams', label: 'Exam Control', icon: BookOpen },
+      { key: 'questions', label: 'Question Bank', icon: FileText },
+      { key: 'subjects', label: 'Subject Management', icon: BookOpen },
+      { key: 'resources', label: 'Resources', icon: Upload },
+      { key: 'security', label: 'Security Center', icon: Lock },
+      { key: 'analytics', label: 'Analytics Hub', icon: BarChart3 },
+      { key: 'pricing', label: 'Pricing Management', icon: DollarSign },
+      { key: 'promos', label: 'Promo Codes', icon: Gift },
+      { key: 'schools', label: 'School Management', icon: Users },
+      { key: 'communications', label: 'Communications', icon: MessageCircle },
+      { key: 'study-hub', label: 'Study Hub', icon: GraduationCap },
+      { key: 'forum', label: 'Forum', icon: MessageCircle },
+      { key: 'challenges', label: 'Challenges', icon: Sword },
+      { key: 'settings', label: 'System Config', icon: Settings },
+    ],
+    akboy: [
+      { key: 'akboy-services', label: 'AKBOY Services', icon: Palette },
+      { key: 'akboy-portfolio', label: 'AKBOY Portfolio', icon: Briefcase },
+      { key: 'akboy-events', label: 'AKBOY Events', icon: CalendarDays },
+      { key: 'akboy-inquiries', label: 'AKBOY Inquiries', icon: Mail },
+      { key: 'akboy-newsletter', label: 'Newsletter Subscribers', icon: Mail },
+      { key: 'akboy-tutorials', label: 'AKBOY Tutorials', icon: TutorialIcon },
+      { key: 'akboy-registrations', label: 'AKBOY Registrations', icon: ClipboardList },
+    ],
+    mock: [
+      { key: 'mock-exam', label: 'Mock Exam', icon: FileText },
+      { key: 'mock-results', label: 'Mock Results', icon: GraduationCap },
+      { key: 'mock-dashboard', label: 'Student Batches', icon: Users },
+      { key: 'exam-verification', label: 'Verify Students', icon: CheckCircle },
+    ],
+    blog: [
+      { key: 'blog', label: 'Blog Management', icon: Newspaper },
+    ],
   };
 
-  const NavContent = () => (
-    <nav className="flex flex-col gap-1">
-      {navItems.map(item => (
-        <Button
-          key={item.key}
-          variant={activeSection === item.key ? 'secondary' : 'ghost'}
-          className="w-full justify-start text-left text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-          onClick={() => handleNavClick(item.key)}
-        >
-          <item.icon className="w-4 h-4 mr-3 shrink-0" />
-          <span>{item.label}</span>
-        </Button>
-      ))}
-    </nav>
-  );
+  const handleNavClick = (mainTab: string, subTab: string) => {
+    setActiveMainTab(mainTab);
+    setActiveSubTab(subTab);
+  };
+
+  const renderTabContent = (section: string) => {
+    switch (section) {
+      case 'dashboard':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-white">System Overview</h2>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-slate-400">System Online</span>
+              </div>
+            </div>
+
+            {/* System Health Alert */}
+            {stats.suspiciousActivities > 0 && (
+              <Alert className="bg-red-950 border-red-800 text-red-100">
+                <AlertTriangle className="h-4 w-4 text-red-400" />
+                <AlertDescription>
+                  {stats.suspiciousActivities} suspicious activities detected. 
+                  <Button variant="link" className="p-0 h-auto ml-2 text-red-300">
+                    Investigate →
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* System Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
+              <Card className="bg-slate-800 border-slate-700">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm text-slate-400">Total Users</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-blue-400">{stats.totalUsers}</p>
+                    </div>
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                      <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800 border-slate-700">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm text-slate-400">Active Exams</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-green-400">{stats.activeExams}</p>
+                    </div>
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                      <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800 border-slate-700">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm text-slate-400">Total Attempts</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-purple-400">{stats.totalAttempts}</p>
+                    </div>
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+                      <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800 border-slate-700">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm text-slate-400">Security Alerts</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-red-400">{stats.suspiciousActivities}</p>
+                    </div>
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+                      <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Activities */}
+            <div className="grid grid-cols-1 gap-6">
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Recent System Activities</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {recentActivities.map((activity: any) => (
+                      <div key={activity.id} className="flex items-center space-x-3 p-3 bg-slate-700 rounded-lg">
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                        <div className="flex-1">
+                          <p className="text-sm text-white">
+                            {activity.users?.first_name} {activity.users?.last_name} attempted {activity.exams?.title}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            {new Date(activity.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        );
+      case 'users':
+        return <UserManagement users={users} onRefresh={fetchAdminData} />;
+      case 'exams':
+        return <ExamControl />;
+      case 'questions':
+        return <QuestionManagement />;
+      case 'subjects':
+        return <SubjectManager />;
+      case 'resources':
+        return <ResourceManagement />;
+      case 'security':
+        return <SecurityCenter />;
+      case 'analytics':
+        return <AnalyticsHub />;
+      case 'pricing':
+        return <PricingManager />;
+      case 'promos':
+        return <CouponManager />;
+      case 'schools':
+        return <SchoolManagement />;
+      case 'communications':
+        return <CustomerCommunications />;
+      case 'study-hub':
+        return <StudyHubManager />;
+      case 'forum':
+        return <ForumManager />;
+      case 'challenges':
+        return <ChallengeManager />;
+      case 'settings':
+        return <SystemConfig />;
+      case 'akboy-services':
+        return <AkboyServicesManager />;
+      case 'akboy-portfolio':
+        return <AkboyPortfolioManager />;
+      case 'akboy-events':
+        return <AkboyEventsManager />;
+      case 'akboy-inquiries':
+        return <AkboyInquiriesManager />;
+      case 'akboy-newsletter':
+        return <AkboyNewsletterSubscribersManager />;
+      case 'akboy-tutorials':
+        return <AkboyTutorialsManager />;
+      case 'akboy-registrations':
+        return <AkboyRegistrationsManager />;
+      case 'mock-exam':
+        return <MockExamManager />;
+      case 'mock-results':
+        return <MockResultsManager />;
+      case 'mock-dashboard':
+        return <MockExamDashboard />;
+      case 'exam-verification':
+        return <ExamDayVerification />;
+      case 'blog':
+        return <BlogManager />;
+      default:
+        return <div className="text-white">Section not found</div>;
+    }
+  };
 
   if (!isAdmin) return null;
 
@@ -228,41 +386,12 @@ export default function AdminPortal() {
         <div className="px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              {/* Mobile menu trigger */}
-              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="lg:hidden text-slate-300 hover:text-white">
-                    <Menu className="w-5 h-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-72 bg-slate-900 border-slate-800 p-0">
-                  <div className="p-4 border-b border-slate-800">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-red-600 to-orange-600 rounded-lg flex items-center justify-center">
-                        <Shield className="w-4 h-4 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-sm font-bold text-white">Edura Control</h2>
-                        <p className="text-xs text-slate-400">Admin Portal</p>
-                      </div>
-                    </div>
-                  </div>
-                  <ScrollArea className="h-[calc(100vh-80px)]">
-                    <div className="p-2">
-                      <NavContent />
-                    </div>
-                  </ScrollArea>
-                </SheetContent>
-              </Sheet>
-
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-600 to-orange-600 rounded-lg flex items-center justify-center">
-                  <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-lg sm:text-xl font-bold text-white">Edura Control Center</h1>
-                  <p className="text-xs sm:text-sm text-slate-400">Administrator Portal</p>
-                </div>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-600 to-orange-600 rounded-lg flex items-center justify-center">
+                <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold text-white">Edura Control Center</h1>
+                <p className="text-xs sm:text-sm text-slate-400">Administrator Portal</p>
               </div>
             </div>
             
@@ -291,246 +420,93 @@ export default function AdminPortal() {
         </div>
       </div>
 
-      <div className="flex">
-        {/* Desktop Sidebar */}
-        <div className="hidden lg:block w-64 bg-slate-900 border-r border-slate-800 min-h-[calc(100vh-73px)]">
-          <ScrollArea className="h-[calc(100vh-73px)]">
-            <div className="p-2">
-              <NavContent />
-            </div>
-          </ScrollArea>
-        </div>
+      {/* Main Content with Tabs */}
+      <div className="p-3 sm:p-4 md:p-6">
+        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="space-y-6">
+          {/* Main Tab List */}
+          <TabsList className="bg-slate-800 border-slate-700 w-full justify-start">
+            <TabsTrigger value="edura" className="text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              Edura CBT
+            </TabsTrigger>
+            <TabsTrigger value="akboy" className="text-sm font-medium data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              AKBOY
+            </TabsTrigger>
+            <TabsTrigger value="mock" className="text-sm font-medium data-[state=active]:bg-green-600 data-[state=active]:text-white">
+              Mock Exams
+            </TabsTrigger>
+            <TabsTrigger value="blog" className="text-sm font-medium data-[state=active]:bg-orange-600 data-[state=active]:text-white">
+              Blog
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-x-hidden p-3 sm:p-4 md:p-6">
-          {activeSection === 'dashboard' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-white">System Overview</h2>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-slate-400">System Online</span>
-                </div>
+          {/* Edura Tab Content */}
+          <TabsContent value="edura" className="space-y-6">
+            <Tabs value={activeSubTab} onValueChange={(value) => handleNavClick('edura', value)} className="space-y-6">
+              <TabsList className="bg-slate-700 border-slate-600 w-full justify-start overflow-x-auto">
+                {navGroups.edura.map(item => (
+                  <TabsTrigger key={item.key} value={item.key} className="text-xs sm:text-sm whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                    <item.icon className="w-4 h-4 mr-2" />
+                    {item.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <div className="space-y-6">
+                {renderTabContent(activeSubTab)}
               </div>
+            </Tabs>
+          </TabsContent>
 
-              {/* System Health Alert */}
-              {stats.suspiciousActivities > 0 && (
-                <Alert className="bg-red-950 border-red-800 text-red-100">
-                  <AlertTriangle className="h-4 w-4 text-red-400" />
-                  <AlertDescription>
-                    {stats.suspiciousActivities} suspicious activities detected. 
-                    <Button variant="link" className="p-0 h-auto ml-2 text-red-300">
-                      Investigate →
-                    </Button>
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {/* System Metrics */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
-                <Card className="bg-slate-800 border-slate-700">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs sm:text-sm text-slate-400">Total Users</p>
-                        <p className="text-2xl sm:text-3xl font-bold text-blue-400">{stats.totalUsers}</p>
-                      </div>
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-                        <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-slate-800 border-slate-700">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs sm:text-sm text-slate-400">Active Exams</p>
-                        <p className="text-2xl sm:text-3xl font-bold text-green-400">{stats.activeExams}</p>
-                      </div>
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                        <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-slate-800 border-slate-700">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs sm:text-sm text-slate-400">Total Attempts</p>
-                        <p className="text-2xl sm:text-3xl font-bold text-purple-400">{stats.totalAttempts}</p>
-                      </div>
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
-                        <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-slate-800 border-slate-700">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs sm:text-sm text-slate-400">Security Alerts</p>
-                        <p className="text-2xl sm:text-3xl font-bold text-red-400">{stats.suspiciousActivities}</p>
-                      </div>
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-500/20 rounded-full flex items-center justify-center">
-                        <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+          {/* AKBOY Tab Content */}
+          <TabsContent value="akboy" className="space-y-6">
+            <Tabs value={activeSubTab} onValueChange={(value) => handleNavClick('akboy', value)} className="space-y-6">
+              <TabsList className="bg-slate-700 border-slate-600 w-full justify-start overflow-x-auto">
+                {navGroups.akboy.map(item => (
+                  <TabsTrigger key={item.key} value={item.key} className="text-xs sm:text-sm whitespace-nowrap data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+                    <item.icon className="w-4 h-4 mr-2" />
+                    {item.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <div className="space-y-6">
+                {renderTabContent(activeSubTab)}
               </div>
+            </Tabs>
+          </TabsContent>
 
-              {/* Recent Activities */}
-              <div className="grid grid-cols-1 gap-6">
-                <Card className="bg-slate-800 border-slate-700">
-                  <CardHeader>
-                    <CardTitle className="text-white">Recent System Activities</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {recentActivities.map((activity: any) => (
-                        <div key={activity.id} className="flex items-center space-x-3 p-3 bg-slate-700 rounded-lg">
-                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                          <div className="flex-1">
-                            <p className="text-sm text-white">
-                              {activity.users?.first_name} {activity.users?.last_name} started exam
-                            </p>
-                            <p className="text-xs text-slate-400">{activity.exams?.title}</p>
-                          </div>
-                          <span className="text-xs text-slate-400">
-                            {new Date(activity.created_at).toLocaleTimeString()}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-slate-800 border-slate-700">
-                  <CardHeader>
-                    <CardTitle className="text-white">System Health Status</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-300">Database Connection</span>
-                        <Badge className="bg-green-600 text-white">Healthy</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-300">Authentication Service</span>
-                        <Badge className="bg-green-600 text-white">Active</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-300">Anti-Cheat System</span>
-                        <Badge className="bg-green-600 text-white">Monitoring</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-300">Backup Status</span>
-                        <Badge className="bg-yellow-600 text-white">Scheduled</Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+          {/* Mock Tab Content */}
+          <TabsContent value="mock" className="space-y-6">
+            <Tabs value={activeSubTab} onValueChange={(value) => handleNavClick('mock', value)} className="space-y-6">
+              <TabsList className="bg-slate-700 border-slate-600 w-full justify-start overflow-x-auto">
+                {navGroups.mock.map(item => (
+                  <TabsTrigger key={item.key} value={item.key} className="text-xs sm:text-sm whitespace-nowrap data-[state=active]:bg-green-600 data-[state=active]:text-white">
+                    <item.icon className="w-4 h-4 mr-2" />
+                    {item.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <div className="space-y-6">
+                {renderTabContent(activeSubTab)}
               </div>
-            </div>
-          )}
+            </Tabs>
+          </TabsContent>
 
-          {activeSection === 'users' && <UserManagement users={users} onRefresh={fetchAdminData} />}
-          
-          {activeSection === 'exams' && <ExamControl />}
-          
-          {activeSection === 'questions' && (
-            <div className="space-y-6">
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-white">Danger Zone</CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center justify-between">
-                  <p className="text-sm text-slate-300">Permanently delete all questions from the database.</p>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive">
-                        <Database className="w-4 h-4 mr-2" />
-                        Delete All Questions
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Confirm delete all</AlertDialogTitle>
-                        <AlertDialogDesc>
-                          This action cannot be undone. All questions will be permanently deleted.
-                        </AlertDialogDesc>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteAllQuestions} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                          Delete All
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </CardContent>
-              </Card>
-              <QuestionManagement />
-            </div>
-          )}
-          
-          {activeSection === 'resources' && <ResourceManagement />}
-          {activeSection === 'subjects' && <SubjectManager />}
-          
-          {activeSection === 'security' && <SecurityCenter suspiciousActivities={recentActivities} />}
-
-          {activeSection === 'analytics' && <AnalyticsHub />}
-
-          {activeSection === 'pricing' && <PricingManager />}
-          {activeSection === 'promos' && <CouponManager />}
-          {activeSection === 'schools' && <SchoolManagement />}
-          {activeSection === 'blog' && <BlogManager />}
-
-          {activeSection === 'communications' && (
-            <div className="space-y-6">
-              <WelcomeEmailSender />
-              <CustomerCommunications users={users} />
-            </div>
-          )}
-
-          {activeSection === 'study-hub' && <StudyHubManager />}
-
-          {activeSection === 'forum' && <ForumManager />}
-
-          {activeSection === 'challenges' && <ChallengeManager />}
-
-          {activeSection === 'settings' && <SystemConfig />}
-
-          {activeSection === 'akboy-services' && <AkboyServicesManager />}
-          {activeSection === 'akboy-portfolio' && <AkboyPortfolioManager />}
-          {activeSection === 'akboy-events' && <AkboyEventsManager />}
-          {activeSection === 'akboy-inquiries' && <AkboyInquiriesManager />}
-          {activeSection === 'akboy-tutorials' && <AkboyTutorialsManager />}
-          {activeSection === 'akboy-registrations' && <AkboyRegistrationsManager />}
-
-          {activeSection === 'mock-exam' && <MockExamManager />}
-          {activeSection === 'mock-results' && <MockResultsManager />}
-          {activeSection === 'mock-dashboard' && <MockExamDashboard />}
-          {activeSection === 'exam-verification' && <ExamDayVerification />}
-
-          {!['dashboard', 'users', 'exams', 'questions', 'resources', 'subjects', 'security', 'analytics', 'pricing', 'promos', 'blog', 'communications', 'study-hub', 'forum', 'challenges', 'settings', 'akboy-services', 'akboy-portfolio', 'akboy-events', 'akboy-inquiries', 'akboy-tutorials', 'akboy-registrations', 'schools', 'mock-exam', 'mock-results', 'mock-dashboard', 'exam-verification'].includes(activeSection) && (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-slate-300 mb-2">
-                  {activeSection.charAt(0).toUpperCase() + activeSection.slice(1)} Panel
-                </h3>
-                <p className="text-slate-500">This section is under development</p>
+          {/* Blog Tab Content */}
+          <TabsContent value="blog" className="space-y-6">
+            <Tabs value={activeSubTab} onValueChange={(value) => handleNavClick('blog', value)} className="space-y-6">
+              <TabsList className="bg-slate-700 border-slate-600 w-full justify-start">
+                {navGroups.blog.map(item => (
+                  <TabsTrigger key={item.key} value={item.key} className="text-sm data-[state=active]:bg-orange-600 data-[state=active]:text-white">
+                    <item.icon className="w-4 h-4 mr-2" />
+                    {item.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <div className="space-y-6">
+                {renderTabContent(activeSubTab)}
               </div>
-            </div>
-          )}
-        </div>
+            </Tabs>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
