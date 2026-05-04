@@ -48,6 +48,8 @@ const BlogManager = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState('');
   const itemsPerPage = 8; // Between 7-9 as requested
 
   const [formData, setFormData] = useState({
@@ -595,77 +597,105 @@ const BlogManager = () => {
           <CardTitle className="text-white">Blog Posts</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {currentPosts.map((post) => (
-              <Card key={post.id} className="bg-slate-700 border-slate-600">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="text-lg font-semibold text-white">{post.title}</h3>
-                        <div className="flex space-x-2">
-                          <Badge variant={post.is_published ? "default" : "secondary"}>
-                            {post.is_published ? "Published" : "Draft"}
-                          </Badge>
-                          {post.is_featured && (
-                            <Badge variant="outline" className="text-yellow-400 border-yellow-400">
-                              <Star className="w-3 h-3 mr-1" />
-                              Featured
-                            </Badge>
-                          )}
-                          <Badge variant="outline" className="text-xs">
-                            {post.category}
-                          </Badge>
-                        </div>
-                      </div>
-                      
-                      <p className="text-sm text-slate-300 mb-2 line-clamp-2">{post.excerpt}</p>
-                      
-                      <div className="flex items-center space-x-4 text-xs text-slate-400">
-                        <span className="flex items-center">
-                          <Calendar className="w-3 h-3 mr-1" />
-                          {formatDate(post.created_at)}
-                        </span>
-                        <span className="flex items-center">
-                          <Eye className="w-3 h-3 mr-1" />
-                          {post.view_count} views
-                        </span>
-                        {Array.isArray(post.tags) && post.tags.length > 0 && (
-                          <span>Tags: {post.tags.join(', ')}</span>
-                        )}
-                      </div>
+              <Card key={post.id} className="bg-slate-800 border-slate-700 overflow-hidden hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 flex flex-col h-full">
+                {/* Featured Image */}
+                {post.featured_image_url && (
+                  <div className="relative h-40 overflow-hidden bg-slate-900">
+                    <img 
+                      src={post.featured_image_url} 
+                      alt={post.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
+                  </div>
+                )}
+                
+                <CardContent className="flex-1 p-5 flex flex-col">
+                  {/* Title */}
+                  <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">{post.title}</h3>
+                  
+                  {/* Badges */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <Badge className={post.is_published ? "bg-green-600 text-white" : "bg-slate-600 text-slate-200"}>
+                      {post.is_published ? "Published" : "Draft"}
+                    </Badge>
+                    {post.is_featured && (
+                      <Badge className="bg-yellow-600 text-white">
+                        <Star className="w-3 h-3 mr-1" />
+                        Featured
+                      </Badge>
+                    )}
+                    <Badge variant="outline" className="text-xs text-slate-300">
+                      {post.category}
+                    </Badge>
+                  </div>
+                  
+                  {/* Excerpt */}
+                  <p className="text-sm text-slate-400 mb-4 line-clamp-2 flex-1">{post.excerpt || post.content.substring(0, 100)}</p>
+                  
+                  {/* Meta Info */}
+                  <div className="space-y-2 mb-4 text-xs text-slate-500 border-t border-slate-700 pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center">
+                        <Calendar className="w-3 h-3 mr-1.5" />
+                        {formatDate(post.created_at)}
+                      </span>
+                      <span className="flex items-center">
+                        <Eye className="w-3 h-3 mr-1.5" />
+                        {post.view_count}
+                      </span>
                     </div>
-                    
-                    <div className="flex space-x-2 ml-4">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEdit(post)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={post.is_published ? "secondary" : "default"}
-                        onClick={() => togglePostStatus(post.id, 'is_published', post.is_published)}
-                      >
-                        {post.is_published ? "Unpublish" : "Publish"}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={post.is_featured ? "secondary" : "outline"}
-                        onClick={() => togglePostStatus(post.id, 'is_featured', post.is_featured)}
-                      >
-                        <Star className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDelete(post.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    {Array.isArray(post.tags) && post.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {post.tags.slice(0, 2).map((tag, idx) => (
+                          <span key={idx} className="px-2 py-0.5 bg-slate-700 text-slate-300 rounded text-xs">
+                            #{tag}
+                          </span>
+                        ))}
+                        {post.tags.length > 2 && <span className="text-slate-500">+{post.tags.length - 2}</span>}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEdit(post)}
+                      className="flex-1 text-xs bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                    >
+                      <Edit className="w-3 h-3 mr-1" />
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => togglePostStatus(post.id, 'is_published', post.is_published)}
+                      className={`flex-1 text-xs ${post.is_published ? 'bg-slate-700 hover:bg-slate-600' : 'bg-green-600 hover:bg-green-700'} text-white`}
+                    >
+                      {post.is_published ? "Unpublish" : "Publish"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => togglePostStatus(post.id, 'is_featured', post.is_featured)}
+                      className={`flex-1 text-xs ${post.is_featured ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-slate-700 hover:bg-slate-600'} text-white`}
+                    >
+                      <Star className="w-3 h-3 mr-1" />
+                      {post.is_featured ? "Unfeature" : "Feature"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(post.id)}
+                      className="text-xs"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -674,44 +704,54 @@ const BlogManager = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-slate-700">
               <div className="text-sm text-slate-400">
-                Showing {startIndex + 1}-{Math.min(endIndex, posts.length)} of {posts.length} posts
+                Showing <span className="font-semibold text-white">{startIndex + 1}-{Math.min(endIndex, posts.length)}</span> of <span className="font-semibold text-white">{posts.length}</span> posts
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                  className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700"
                 >
-                  Previous
+                  ← Prev
                 </Button>
                 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? "secondary" : "outline"}
-                    size="sm"
-                    onClick={() => handlePageChange(page)}
-                    className={currentPage === page 
-                      ? "bg-blue-600 text-white" 
-                      : "bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
-                    }
-                  >
-                    {page}
-                  </Button>
-                ))}
+                <div className="flex items-center space-x-1 mx-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    currentPage === page || (
+                      currentPage - 1 === page || currentPage + 1 === page || page === 1 || page === totalPages
+                    ) ? (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? "secondary" : "outline"}
+                        size="sm"
+                        onClick={() => handlePageChange(page)}
+                        className={currentPage === page 
+                          ? "bg-orange-600 text-white border-orange-600" 
+                          : "bg-slate-800 border-slate-600 text-white hover:bg-slate-700"
+                        }
+                      >
+                        {page}
+                      </Button>
+                    ) : (
+                      page === 2 && currentPage > 3 ? <span key="dots1" className="px-2 text-slate-400">...</span> :
+                      page === totalPages - 1 && currentPage < totalPages - 2 ? <span key="dots2" className="px-2 text-slate-400">...</span> :
+                      null
+                    )
+                  ))}
+                </div>
                 
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                  className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700"
                 >
-                  Next
+                  Next →
                 </Button>
               </div>
             </div>
