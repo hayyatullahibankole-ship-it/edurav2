@@ -682,8 +682,11 @@ export default function AkboyCampusHub() {
         </div>
       </section>
 
+      {/* ============= ADVANCED: Tools, Booking & Newsletter ============= */}
+      <CampusHubAdvancedSection posts={posts} schools={featuredSchools} />
+
       {/* ============= 6. CTA ============= */}
-      <section className="py-14 md:py-20 px-4 bg-gradient-to-br from-emerald-900 to-teal-900 text-white">
+      <section className="py-14 md:py-20 px-4 bg-gradient-to-br from-emerald-900 to-emerald-950 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-bold font-poppins mb-4">Never miss an admission update</h2>
           <p className="text-emerald-100/85 mb-8 max-w-2xl mx-auto">
@@ -705,6 +708,8 @@ export default function AkboyCampusHub() {
           </div>
         </div>
       </section>
+
+      <WhatsAppConsultButton />
     </AkboyLayout>
   );
 }
