@@ -46,14 +46,14 @@ const CATEGORY_META: Record<string, { color: string; bg: string; emoji: string; 
 const CATEGORIES = ["All", ...Object.keys(CATEGORY_META)];
 
 const QUICK_ACCESS = [
-  { key: "Admissions",           title: "Admissions",          desc: "ND, HND, UTME, DE & PG forms",      icon: GraduationCap, gradient: "from-emerald-500 to-teal-500" },
-  { key: "Scholarships",         title: "Scholarships",        desc: "Local & international funding",     icon: Award,         gradient: "from-amber-500 to-orange-500" },
-  { key: "Exams & JAMB",         title: "Exams & JAMB",        desc: "JAMB, WAEC, NECO, Post-UTME",       icon: FileText,      gradient: "from-blue-500 to-indigo-500" },
-  { key: "Academic Calendar",    title: "Academic Calendar",   desc: "Resumption, semesters, timetables", icon: Calendar,      gradient: "from-purple-500 to-fuchsia-500" },
-  { key: "Accreditation",        title: "Accreditation",       desc: "NUC, NBTE, programme approvals",    icon: Award,         gradient: "from-indigo-500 to-blue-500" },
-  { key: "Convocation & Events", title: "Convocation & Events", desc: "Matriculation, convocation, fests", icon: Megaphone,    gradient: "from-orange-500 to-red-500" },
-  { key: "Career & Internships", title: "Career",              desc: "Internships, jobs & opportunities", icon: Briefcase,     gradient: "from-teal-500 to-emerald-500" },
-  { key: "News & Updates",       title: "News & Updates",      desc: "Breaking education news",           icon: Newspaper,     gradient: "from-rose-500 to-pink-500" },
+  { key: "Admissions",           title: "Admissions",     icon: GraduationCap },
+  { key: "Scholarships",         title: "Scholarships",   icon: Award },
+  { key: "Exams & JAMB",         title: "Exams & JAMB",   icon: FileText },
+  { key: "Academic Calendar",    title: "Calendar",       icon: Calendar },
+  { key: "Accreditation",        title: "Accreditation",  icon: Award },
+  { key: "Convocation & Events", title: "Events",         icon: Megaphone },
+  { key: "Career & Internships", title: "Career",         icon: Briefcase },
+  { key: "News & Updates",       title: "News",           icon: Newspaper },
 ];
 
 const BROWSE_BY_TOPIC = [
