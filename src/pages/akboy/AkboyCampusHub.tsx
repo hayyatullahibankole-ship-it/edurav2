@@ -277,6 +277,14 @@ export default function AkboyCampusHub() {
     );
   };
 
+  const handleWhatsAppShare = (e: React.MouseEvent, post: CampusPost) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `${window.location.origin}/blog/${post.slug || post.id}`;
+    const text = `📢 ${post.title}\n\nRead more: ${url}\n\nShared from Akboy Campus Hub`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
   const FeedListItem = ({ post }: { post: CampusPost }) => {
     const meta = CATEGORY_META[post.category || "News & Updates"] || CATEGORY_META["News & Updates"];
     return (
