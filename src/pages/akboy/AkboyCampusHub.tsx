@@ -462,15 +462,23 @@ export default function AkboyCampusHub() {
         </section>
       )}
 
-      {/* ============= QUICK ACCESS GRID ============= */}
+      {/* ============= QUICK ACCESS — minimal chips ============= */}
       {!loading && (
-        <section className="py-10 md:py-14 px-4 bg-gradient-to-b from-white to-emerald-50/40">
+        <section className="py-8 md:py-10 px-4 bg-white border-y border-gray-100">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-6 md:mb-8">
-              <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Browse by Topic</p>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 font-poppins">What are you looking for today?</h2>
+            <div className="flex items-end justify-between mb-4">
+              <div>
+                <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-widest mb-1">Browse by topic</p>
+                <h2 className="text-lg md:text-xl font-bold text-gray-900 font-poppins">What are you looking for?</h2>
+              </div>
+              {selectedCategory !== "All" && (
+                <button
+                  onClick={() => { setSelectedCategory("All"); updateParam("category", "All"); }}
+                  className="text-xs text-emerald-700 hover:underline font-medium"
+                >Clear</button>
+              )}
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-2 md:gap-3">
               {QUICK_ACCESS.map((item) => {
                 const Icon = item.icon;
                 const count = categoryCounts[item.key] || 0;
@@ -484,17 +492,15 @@ export default function AkboyCampusHub() {
                       setCurrentPage(1);
                       document.getElementById("feed")?.scrollIntoView({ behavior: "smooth" });
                     }}
-                    className={`group relative overflow-hidden rounded-2xl p-4 md:p-5 text-left transition-all hover:-translate-y-1 hover:shadow-xl ${
-                      active ? "ring-2 ring-emerald-600 ring-offset-2" : ""
-                    } bg-gradient-to-br ${item.gradient} text-white`}
+                    className={`group flex flex-col items-center justify-center gap-1.5 rounded-xl border px-2 py-3 transition-all ${
+                      active
+                        ? "bg-emerald-950 border-emerald-950 text-white"
+                        : "bg-white border-gray-200 text-gray-700 hover:border-emerald-600 hover:text-emerald-700"
+                    }`}
                   >
-                    <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/10 rounded-full blur-xl group-hover:scale-150 transition-transform" />
-                    <Icon className="w-6 h-6 md:w-7 md:h-7 mb-3" />
-                    <h3 className="font-bold text-sm md:text-base mb-1 leading-tight">{item.title}</h3>
-                    <p className="text-[11px] md:text-xs text-white/85 line-clamp-2 mb-2">{item.desc}</p>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-white/20 backdrop-blur px-2 py-0.5 rounded-full">
-                      {count} posts <ArrowRight className="w-3 h-3" />
-                    </span>
+                    <Icon className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="text-[10px] md:text-xs font-semibold leading-tight text-center">{item.title}</span>
+                    <span className={`text-[9px] font-bold ${active ? "text-emerald-200" : "text-gray-400"}`}>{count}</span>
                   </button>
                 );
               })}
@@ -502,48 +508,6 @@ export default function AkboyCampusHub() {
           </div>
         </section>
       )}
-
-      {/* ============= ASK AKBOY (CONSULTANCY LEAD CAPTURE) ============= */}
-      <section className="py-10 md:py-14 px-4 bg-emerald-950">
-        <div className="max-w-4xl mx-auto">
-          <div className="rounded-3xl bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-700 p-6 md:p-10 shadow-2xl border border-emerald-500/30">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-amber-400 grid place-items-center shadow-lg">
-                <MessageCircle className="w-8 h-8 md:w-10 md:h-10 text-emerald-950" />
-              </div>
-              <div className="flex-grow text-center md:text-left">
-                <p className="text-xs font-bold uppercase tracking-widest text-amber-300 mb-1">Ask Akboy · Free</p>
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-1 font-poppins">Confused about admission? Ask a real consultant.</h3>
-                <p className="text-sm text-emerald-100/85">Type your question — we'll reply on WhatsApp within minutes.</p>
-              </div>
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                const q = (formData.get("q") as string)?.trim();
-                if (!q) return;
-                const msg = `Hi Akboy 👋\n\nI have a question about admission/scholarship:\n\n${q}\n\n(Sent from Campus Hub)`;
-                window.open(`https://wa.me/2348101466977?text=${encodeURIComponent(msg)}`, "_blank");
-              }}
-              className="mt-5 flex flex-col sm:flex-row gap-2"
-            >
-              <Input
-                name="q"
-                placeholder="e.g. Can I still apply for UNILAG with 180 in JAMB?"
-                className="flex-grow h-12 bg-white border-0 text-sm rounded-xl"
-                required
-              />
-              <Button
-                type="submit"
-                className="h-12 px-6 bg-amber-400 hover:bg-amber-300 text-emerald-950 font-bold rounded-xl shadow-lg"
-              >
-                Ask on WhatsApp <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            </form>
-          </div>
-        </div>
-      </section>
 
 
       {!loading && popularPosts.length > 0 && (
