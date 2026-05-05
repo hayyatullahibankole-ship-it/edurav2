@@ -320,8 +320,15 @@ export default function AkboyCampusHub() {
           </div>
 
           {/* Right: Metadata */}
-          <div className="flex-shrink-0 text-right flex flex-col justify-between">
+          <div className="flex-shrink-0 text-right flex flex-col justify-between items-end gap-2">
             <div className="text-[10px] font-bold text-gray-500">{timeAgo(post.created_at)}</div>
+            <button
+              onClick={(e) => handleWhatsAppShare(e, post)}
+              className="inline-flex items-center gap-1 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2.5 py-1 text-[10px] font-bold transition"
+              aria-label="Share on WhatsApp"
+            >
+              <MessageCircle className="w-3 h-3" /> Share
+            </button>
             <div className="flex items-center justify-end gap-1 text-xs text-emerald-600">
               Read <ArrowRight className="w-3 h-3" />
             </div>
