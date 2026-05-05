@@ -176,7 +176,7 @@ export default function AdminPortal() {
       case 'questions': return <QuestionManagement />;
       case 'subjects': return <SubjectManager />;
       case 'resources': return <ResourceManagement />;
-      case 'security': return <SecurityCenter suspiciousActivities={stats.suspiciousActivities} />;
+      case 'security': return <SecurityCenter suspiciousActivities={recentActivities.filter((a: any) => a.suspicious_activity_count > 0)} />;
       case 'analytics': return <AnalyticsHub />;
       case 'pricing': return <PricingManager />;
       case 'promos': return <CouponManager />;
