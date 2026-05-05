@@ -1,38 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription as AlertDialogDesc, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
-  Shield,
-  Users,
-  BookOpen,
-  Settings,
-  BarChart3,
-  AlertTriangle,
-  LogOut,
-  Bell,
-  Activity,
-  Database,
-  Monitor,
-  FileText,
-  DollarSign,
-  Gift,
-  Newspaper,
-  MessageCircle,
-  GraduationCap,
-  Sword,
-  Palette,
-  Briefcase,
-  CalendarDays,
-  Mail,
-  GraduationCap as TutorialIcon,
-  ClipboardList,
-  CheckCircle,
-  Lock,
-  Upload,
+  Shield, Users, BookOpen, Settings, BarChart3, LogOut, FileText, DollarSign,
+  Gift, Newspaper, MessageCircle, GraduationCap, Sword, Palette, Briefcase,
+  CalendarDays, Mail, ClipboardList, CheckCircle, Lock, Upload, Search, Menu,
+  Home, ChevronRight, Activity, AlertTriangle, School,
 } from 'lucide-react';
 import UserManagement from '@/components/admin/UserManagement';
 import ExamControl from '@/components/admin/ExamControl';
@@ -66,449 +42,371 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
-const navGroups = {
-  edura: [
-    { key: 'dashboard', label: 'System Overview', icon: Monitor },
-    { key: 'users', label: 'User Management', icon: Users },
-    { key: 'exams', label: 'Exam Control', icon: BookOpen },
-    { key: 'questions', label: 'Question Bank', icon: FileText },
-    { key: 'subjects', label: 'Subject Management', icon: BookOpen },
-    { key: 'resources', label: 'Resources', icon: Upload },
-    { key: 'security', label: 'Security Center', icon: Lock },
-    { key: 'analytics', label: 'Analytics Hub', icon: BarChart3 },
-    { key: 'pricing', label: 'Pricing Management', icon: DollarSign },
-    { key: 'promos', label: 'Promo Codes', icon: Gift },
-    { key: 'schools', label: 'School Management', icon: Users },
-    { key: 'communications', label: 'Communications', icon: MessageCircle },
-    { key: 'study-hub', label: 'Study Hub', icon: GraduationCap },
-    { key: 'forum', label: 'Forum', icon: MessageCircle },
-    { key: 'challenges', label: 'Challenges', icon: Sword },
-    { key: 'settings', label: 'System Config', icon: Settings },
-  ],
-  akboy: [
-    { key: 'akboy-services', label: 'AKBOY Services', icon: Palette },
-    { key: 'akboy-portfolio', label: 'AKBOY Portfolio', icon: Briefcase },
-    { key: 'akboy-events', label: 'AKBOY Events', icon: CalendarDays },
-    { key: 'akboy-inquiries', label: 'AKBOY Inquiries', icon: Mail },
-    { key: 'akboy-newsletter', label: 'Newsletter Subscribers', icon: Mail },
-    { key: 'akboy-tutorials', label: 'AKBOY Tutorials', icon: TutorialIcon },
-    { key: 'akboy-registrations', label: 'AKBOY Registrations', icon: ClipboardList },
-  ],
-  mock: [
-    { key: 'mock-exam', label: 'Mock Exam', icon: FileText },
-    { key: 'mock-results', label: 'Mock Results', icon: GraduationCap },
-    { key: 'mock-dashboard', label: 'Student Batches', icon: Users },
-    { key: 'exam-verification', label: 'Verify Students', icon: CheckCircle },
-  ],
-  blog: [
-    { key: 'blog', label: 'Blog Management', icon: Newspaper },
-  ],
-};
+type NavItem = { key: string; label: string; icon: any };
+type NavSection = { label: string; items: NavItem[] };
+
+const NAV: NavSection[] = [
+  {
+    label: 'Overview',
+    items: [
+      { key: 'dashboard', label: 'Dashboard', icon: Home },
+      { key: 'analytics', label: 'Analytics', icon: BarChart3 },
+    ],
+  },
+  {
+    label: 'Edura CBT',
+    items: [
+      { key: 'users', label: 'Users', icon: Users },
+      { key: 'schools', label: 'Schools', icon: School },
+      { key: 'exams', label: 'Exams', icon: BookOpen },
+      { key: 'questions', label: 'Question Bank', icon: FileText },
+      { key: 'subjects', label: 'Subjects', icon: BookOpen },
+      { key: 'resources', label: 'Resources', icon: Upload },
+      { key: 'study-hub', label: 'Study Hub', icon: GraduationCap },
+      { key: 'forum', label: 'Forum', icon: MessageCircle },
+      { key: 'challenges', label: 'Challenges', icon: Sword },
+    ],
+  },
+  {
+    label: 'Mock Exams',
+    items: [
+      { key: 'mock-exam', label: 'Mock Exam', icon: FileText },
+      { key: 'mock-results', label: 'Results', icon: GraduationCap },
+      { key: 'mock-dashboard', label: 'Student Batches', icon: Users },
+      { key: 'exam-verification', label: 'Verify Students', icon: CheckCircle },
+    ],
+  },
+  {
+    label: 'Akboy',
+    items: [
+      { key: 'akboy-services', label: 'Services', icon: Palette },
+      { key: 'akboy-portfolio', label: 'Portfolio', icon: Briefcase },
+      { key: 'akboy-events', label: 'Events', icon: CalendarDays },
+      { key: 'akboy-tutorials', label: 'Tutorials', icon: GraduationCap },
+      { key: 'akboy-registrations', label: 'Registrations', icon: ClipboardList },
+      { key: 'akboy-inquiries', label: 'Inquiries', icon: Mail },
+      { key: 'akboy-newsletter', label: 'Subscribers', icon: Mail },
+    ],
+  },
+  {
+    label: 'Commerce & Content',
+    items: [
+      { key: 'pricing', label: 'Pricing', icon: DollarSign },
+      { key: 'promos', label: 'Promo Codes', icon: Gift },
+      { key: 'blog', label: 'Blog', icon: Newspaper },
+      { key: 'communications', label: 'Communications', icon: MessageCircle },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { key: 'security', label: 'Security', icon: Lock },
+      { key: 'settings', label: 'Settings', icon: Settings },
+    ],
+  },
+];
 
 export default function AdminPortal() {
   const { user, isAdmin, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [activeMainTab, setActiveMainTab] = useState('edura');
-  const [activeSubTab, setActiveSubTab] = useState('dashboard');
-  const [loading, setLoading] = useState(true);
-  
+  const [activeKey, setActiveKey] = useState('dashboard');
+  const [search, setSearch] = useState('');
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeExams: 0,
     totalAttempts: 0,
     suspiciousActivities: 0,
-    systemHealth: 'optimal'
   });
-
-  const [users, setUsers] = useState([]);
-  const [recentActivities, setRecentActivities] = useState([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchAdminData();
-    }
+    if (isAdmin) fetchAdminData();
   }, [isAdmin]);
-
-  // Set default sub-tab when main tab changes
-  useEffect(() => {
-    const defaultSubTab = navGroups[activeMainTab as keyof typeof navGroups]?.[0]?.key || 'dashboard';
-    if (activeSubTab !== defaultSubTab) {
-      setActiveSubTab(defaultSubTab);
-    }
-  }, [activeMainTab]);
 
   const fetchAdminData = async () => {
     try {
-      setLoading(true);
-      
       const [usersResp, examsResp, attemptsResp] = await Promise.all([
         supabase.rpc('get_users_masked'),
         supabase.from('exams').select('*'),
-        supabase.from('attempts').select(`
-          *,
-          users(first_name, last_name, email),
-          exams(title)
-        `).order('created_at', { ascending: false }).limit(5)
+        supabase.from('attempts').select(`*, users(first_name, last_name, email), exams(title)`)
+          .order('created_at', { ascending: false }).limit(8),
       ]);
-
       setStats({
         totalUsers: usersResp.data?.length || 0,
-        activeExams: examsResp.data?.filter(e => e.is_published).length || 0,
+        activeExams: examsResp.data?.filter((e: any) => e.is_published).length || 0,
         totalAttempts: attemptsResp.data?.length || 0,
-        suspiciousActivities: attemptsResp.data?.filter(a => a.suspicious_activity_count > 0).length || 0,
-        systemHealth: 'optimal'
+        suspiciousActivities: attemptsResp.data?.filter((a: any) => a.suspicious_activity_count > 0).length || 0,
       });
-
       setUsers(usersResp.data || []);
       setRecentActivities(attemptsResp.data || []);
-      
     } catch (error) {
       console.error('Error fetching admin data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load admin data",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      toast({ title: 'Error', description: 'Failed to load admin data', variant: 'destructive' });
     }
   };
 
   const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate('/admin/login');
-    } catch (error) {
-      console.error('Error signing out:', error);
+    try { await signOut(); navigate('/admin/login'); } catch (e) { console.error(e); }
+  };
+
+  const filteredNav = useMemo(() => {
+    if (!search.trim()) return NAV;
+    const q = search.toLowerCase();
+    return NAV.map(s => ({ ...s, items: s.items.filter(i => i.label.toLowerCase().includes(q)) }))
+      .filter(s => s.items.length);
+  }, [search]);
+
+  const activeMeta = useMemo(() => {
+    for (const s of NAV) {
+      const m = s.items.find(i => i.key === activeKey);
+      if (m) return { section: s.label, item: m };
     }
-  };
+    return { section: 'Overview', item: NAV[0].items[0] };
+  }, [activeKey]);
 
-  const handleDeleteAllQuestions = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase.rpc('admin_delete_all_questions');
-      if (error) throw error;
-      const result = data as { questions_deleted: number; attempt_answers_deleted: number };
-      toast({ 
-        title: 'Success', 
-        description: `Deleted ${result.questions_deleted} questions and ${result.attempt_answers_deleted} related answers.` 
-      });
-    } catch (e: any) {
-      console.error(e);
-      toast({ title: 'Delete failed', description: e.message || 'Unable to delete', variant: 'destructive' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleNavClick = (mainTab: string, subTab: string) => {
-    setActiveMainTab(mainTab);
-    setActiveSubTab(subTab);
-  };
-
-  const renderTabContent = (section: string) => {
-    switch (section) {
-      case 'dashboard':
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-white">System Overview</h2>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-slate-400">System Online</span>
-              </div>
-            </div>
-
-            {/* System Health Alert */}
-            {stats.suspiciousActivities > 0 && (
-              <Alert className="bg-red-950 border-red-800 text-red-100">
-                <AlertTriangle className="h-4 w-4 text-red-400" />
-                <AlertDescription>
-                  {stats.suspiciousActivities} suspicious activities detected. 
-                  <Button variant="link" className="p-0 h-auto ml-2 text-red-300">
-                    Investigate →
-                  </Button>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* System Metrics */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
-              <Card className="bg-slate-800 border-slate-700">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-slate-400">Total Users</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-blue-400">{stats.totalUsers}</p>
-                    </div>
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-                      <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-slate-800 border-slate-700">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-slate-400">Active Exams</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-green-400">{stats.activeExams}</p>
-                    </div>
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                      <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-slate-800 border-slate-700">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-slate-400">Total Attempts</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-purple-400">{stats.totalAttempts}</p>
-                    </div>
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
-                      <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-slate-800 border-slate-700">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-slate-400">Security Alerts</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-red-400">{stats.suspiciousActivities}</p>
-                    </div>
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-500/20 rounded-full flex items-center justify-center">
-                      <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Recent Activities */}
-            <div className="grid grid-cols-1 gap-6">
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-white">Recent System Activities</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentActivities.map((activity: any) => (
-                      <div key={activity.id} className="flex items-center space-x-3 p-3 bg-slate-700 rounded-lg">
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <div className="flex-1">
-                          <p className="text-sm text-white">
-                            {activity.users?.first_name} {activity.users?.last_name} attempted {activity.exams?.title}
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            {new Date(activity.created_at).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        );
-      case 'users':
-        return <UserManagement users={users} onRefresh={fetchAdminData} />;
-      case 'exams':
-        return <ExamControl />;
-      case 'questions':
-        return <QuestionManagement />;
-      case 'subjects':
-        return <SubjectManager />;
-      case 'resources':
-        return <ResourceManagement />;
-      case 'security':
-        return <SecurityCenter />;
-      case 'analytics':
-        return <AnalyticsHub />;
-      case 'pricing':
-        return <PricingManager />;
-      case 'promos':
-        return <CouponManager />;
-      case 'schools':
-        return <SchoolManagement />;
-      case 'communications':
-        return <CustomerCommunications />;
-      case 'study-hub':
-        return <StudyHubManager />;
-      case 'forum':
-        return <ForumManager />;
-      case 'challenges':
-        return <ChallengeManager />;
-      case 'settings':
-        return <SystemConfig />;
-      case 'akboy-services':
-        return <AkboyServicesManager />;
-      case 'akboy-portfolio':
-        return <AkboyPortfolioManager />;
-      case 'akboy-events':
-        return <AkboyEventsManager />;
-      case 'akboy-inquiries':
-        return <AkboyInquiriesManager />;
-      case 'akboy-newsletter':
-        return <AkboyNewsletterSubscribersManager />;
-      case 'akboy-tutorials':
-        return <AkboyTutorialsManager />;
-      case 'akboy-registrations':
-        return <AkboyRegistrationsManager />;
-      case 'mock-exam':
-        return <MockExamManager />;
-      case 'mock-results':
-        return <MockResultsManager />;
-      case 'mock-dashboard':
-        return <MockExamDashboard />;
-      case 'exam-verification':
-        return <ExamDayVerification />;
-      case 'blog':
-        return <BlogManager />;
-      default:
-        return <div className="text-white">Section not found</div>;
+  const renderContent = () => {
+    switch (activeKey) {
+      case 'dashboard': return <DashboardOverview stats={stats} activities={recentActivities} />;
+      case 'users': return <UserManagement users={users} onRefresh={fetchAdminData} />;
+      case 'exams': return <ExamControl />;
+      case 'questions': return <QuestionManagement />;
+      case 'subjects': return <SubjectManager />;
+      case 'resources': return <ResourceManagement />;
+      case 'security': return <SecurityCenter suspiciousActivities={stats.suspiciousActivities} />;
+      case 'analytics': return <AnalyticsHub />;
+      case 'pricing': return <PricingManager />;
+      case 'promos': return <CouponManager />;
+      case 'schools': return <SchoolManagement />;
+      case 'communications': return <CustomerCommunications users={users} />;
+      case 'study-hub': return <StudyHubManager />;
+      case 'forum': return <ForumManager />;
+      case 'challenges': return <ChallengeManager />;
+      case 'settings': return <SystemConfig />;
+      case 'akboy-services': return <AkboyServicesManager />;
+      case 'akboy-portfolio': return <AkboyPortfolioManager />;
+      case 'akboy-events': return <AkboyEventsManager />;
+      case 'akboy-inquiries': return <AkboyInquiriesManager />;
+      case 'akboy-newsletter': return <AkboyNewsletterSubscribersManager />;
+      case 'akboy-tutorials': return <AkboyTutorialsManager />;
+      case 'akboy-registrations': return <AkboyRegistrationsManager />;
+      case 'mock-exam': return <MockExamManager />;
+      case 'mock-results': return <MockResultsManager />;
+      case 'mock-dashboard': return <MockExamDashboard />;
+      case 'exam-verification': return <ExamDayVerification />;
+      case 'blog': return <BlogManager />;
+      default: return null;
     }
   };
 
   if (!isAdmin) return null;
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      {/* Admin Portal Header */}
-      <div className="bg-slate-900 border-b border-slate-800">
-        <div className="px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-red-600 to-orange-600 rounded-lg flex items-center justify-center">
-                <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg sm:text-xl font-bold text-white">Edura Control Center</h1>
-                <p className="text-xs sm:text-sm text-slate-400">Administrator Portal</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
-                <Bell className="w-4 h-4" />
-              </Button>
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium text-white">{user?.email}</p>
-                  <Badge className="bg-red-600 hover:bg-red-700 text-white text-xs">
-                    System Administrator
-                  </Badge>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleSignOut}
-                  className="text-slate-300 hover:text-white"
-                >
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
+  const SidebarBody = () => (
+    <div className="flex flex-col h-full bg-slate-950 border-r border-slate-800">
+      {/* Brand */}
+      <div className="px-5 py-5 border-b border-slate-800 flex items-center gap-2.5">
+        <div className="w-8 h-8 rounded-md bg-white grid place-items-center">
+          <Shield className="w-4 h-4 text-slate-950" />
+        </div>
+        <div>
+          <p className="text-sm font-bold text-white tracking-tight">Edura Admin</p>
+          <p className="text-[10px] text-slate-500 uppercase tracking-widest">Control Center</p>
         </div>
       </div>
 
-      {/* Main Content with Tabs */}
-      <div className="p-3 sm:p-4 md:p-6">
-        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="space-y-6">
-          {/* Main Tab List */}
-          <TabsList className="bg-slate-800 border-slate-700 w-full justify-start">
-            <TabsTrigger value="edura" className="text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              Edura CBT
-            </TabsTrigger>
-            <TabsTrigger value="akboy" className="text-sm font-medium data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-              AKBOY
-            </TabsTrigger>
-            <TabsTrigger value="mock" className="text-sm font-medium data-[state=active]:bg-green-600 data-[state=active]:text-white">
-              Mock Exams
-            </TabsTrigger>
-            <TabsTrigger value="blog" className="text-sm font-medium data-[state=active]:bg-orange-600 data-[state=active]:text-white">
-              Blog
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Edura Tab Content */}
-          <TabsContent value="edura" className="space-y-6">
-            <Tabs value={activeSubTab} onValueChange={(value) => handleNavClick('edura', value)} className="space-y-6">
-              <TabsList className="bg-slate-700 border-slate-600 w-full justify-start overflow-x-auto">
-                {navGroups.edura.map(item => (
-                  <TabsTrigger key={item.key} value={item.key} className="text-xs sm:text-sm whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                    <item.icon className="w-4 h-4 mr-2" />
-                    {item.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              <div className="space-y-6">
-                {renderTabContent(activeSubTab)}
-              </div>
-            </Tabs>
-          </TabsContent>
-
-          {/* AKBOY Tab Content */}
-          <TabsContent value="akboy" className="space-y-6">
-            <Tabs value={activeSubTab} onValueChange={(value) => handleNavClick('akboy', value)} className="space-y-6">
-              <TabsList className="bg-slate-700 border-slate-600 w-full justify-start overflow-x-auto">
-                {navGroups.akboy.map(item => (
-                  <TabsTrigger key={item.key} value={item.key} className="text-xs sm:text-sm whitespace-nowrap data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                    <item.icon className="w-4 h-4 mr-2" />
-                    {item.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              <div className="space-y-6">
-                {renderTabContent(activeSubTab)}
-              </div>
-            </Tabs>
-          </TabsContent>
-
-          {/* Mock Tab Content */}
-          <TabsContent value="mock" className="space-y-6">
-            <Tabs value={activeSubTab} onValueChange={(value) => handleNavClick('mock', value)} className="space-y-6">
-              <TabsList className="bg-slate-700 border-slate-600 w-full justify-start overflow-x-auto">
-                {navGroups.mock.map(item => (
-                  <TabsTrigger key={item.key} value={item.key} className="text-xs sm:text-sm whitespace-nowrap data-[state=active]:bg-green-600 data-[state=active]:text-white">
-                    <item.icon className="w-4 h-4 mr-2" />
-                    {item.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              <div className="space-y-6">
-                {renderTabContent(activeSubTab)}
-              </div>
-            </Tabs>
-          </TabsContent>
-
-          {/* Blog Tab Content */}
-          <TabsContent value="blog" className="space-y-6">
-            <Tabs value={activeSubTab} onValueChange={(value) => handleNavClick('blog', value)} className="space-y-6">
-              <TabsList className="bg-slate-700 border-slate-600 w-full justify-start">
-                {navGroups.blog.map(item => (
-                  <TabsTrigger key={item.key} value={item.key} className="text-sm data-[state=active]:bg-orange-600 data-[state=active]:text-white">
-                    <item.icon className="w-4 h-4 mr-2" />
-                    {item.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              <div className="space-y-6">
-                {renderTabContent(activeSubTab)}
-              </div>
-            </Tabs>
-          </TabsContent>
-        </Tabs>
+      {/* Search */}
+      <div className="p-3 border-b border-slate-800">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search..."
+            className="pl-8 h-9 bg-slate-900 border-slate-800 text-slate-200 placeholder:text-slate-600 text-sm focus-visible:ring-slate-700"
+          />
+        </div>
       </div>
+
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto px-3 py-3">
+        {filteredNav.map((section) => (
+          <div key={section.label} className="mb-4">
+            <p className="px-2 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+              {section.label}
+            </p>
+            <div className="space-y-0.5">
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const active = activeKey === item.key;
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => { setActiveKey(item.key); setMobileOpen(false); }}
+                    className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors ${
+                      active
+                        ? 'bg-slate-800 text-white font-medium'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      {/* User */}
+      <div className="border-t border-slate-800 p-3">
+        <div className="flex items-center gap-2.5 px-2 py-2">
+          <div className="w-8 h-8 rounded-full bg-slate-800 grid place-items-center text-xs font-bold text-white">
+            {user?.email?.[0]?.toUpperCase() || 'A'}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-white truncate">{user?.email}</p>
+            <p className="text-[10px] text-slate-500">Administrator</p>
+          </div>
+          <Button
+            onClick={handleSignOut}
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800"
+          >
+            <LogOut className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-100 flex">
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex w-64 shrink-0 sticky top-0 h-screen">
+        <SidebarBody />
+      </aside>
+
+      {/* Mobile sidebar */}
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent side="left" className="p-0 w-72 border-0 bg-slate-950">
+          <SidebarBody />
+        </SheetContent>
+      </Sheet>
+
+      {/* Main */}
+      <main className="flex-1 min-w-0 flex flex-col">
+        {/* Topbar */}
+        <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
+          <div className="px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+              </Sheet>
+              <div className="flex items-center gap-1.5 text-sm min-w-0">
+                <span className="text-slate-500 hidden sm:inline">{activeMeta.section}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400 hidden sm:inline" />
+                <span className="font-semibold text-slate-900 truncate">{activeMeta.item.label}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 text-[10px] font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
+                Online
+              </Badge>
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
+          {renderContent()}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+/* ====================== Dashboard Overview (clean, no gradients) ====================== */
+function DashboardOverview({ stats, activities }: { stats: any; activities: any[] }) {
+  const metrics = [
+    { label: 'Total Users', value: stats.totalUsers, icon: Users, accent: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Active Exams', value: stats.activeExams, icon: BookOpen, accent: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Attempts (recent)', value: stats.totalAttempts, icon: Activity, accent: 'text-violet-600', bg: 'bg-violet-50' },
+    { label: 'Security Alerts', value: stats.suspiciousActivities, icon: AlertTriangle, accent: 'text-rose-600', bg: 'bg-rose-50' },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
+        <p className="text-sm text-slate-500 mt-1">A quick look at your platform health.</p>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        {metrics.map((m) => {
+          const Icon = m.icon;
+          return (
+            <Card key={m.label} className="border-slate-200 shadow-none hover:border-slate-300 transition-colors">
+              <CardContent className="p-4 md:p-5">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{m.label}</p>
+                  <div className={`w-8 h-8 rounded-md ${m.bg} grid place-items-center`}>
+                    <Icon className={`w-4 h-4 ${m.accent}`} />
+                  </div>
+                </div>
+                <p className="text-2xl md:text-3xl font-bold text-slate-900 tabular-nums">{m.value}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      <Card className="border-slate-200 shadow-none">
+        <CardContent className="p-0">
+          <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">Recent Activity</h3>
+              <p className="text-xs text-slate-500">Latest exam attempts across the platform</p>
+            </div>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {activities.length === 0 && (
+              <div className="px-5 py-8 text-center text-sm text-slate-500">No recent activity</div>
+            )}
+            {activities.map((a: any) => (
+              <div key={a.id} className="px-5 py-3 flex items-center justify-between gap-3 hover:bg-slate-50">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-slate-100 grid place-items-center text-xs font-semibold text-slate-700 shrink-0">
+                    {a.users?.first_name?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm text-slate-900 truncate">
+                      <span className="font-medium">{a.users?.first_name} {a.users?.last_name}</span>
+                      <span className="text-slate-500"> attempted </span>
+                      <span className="font-medium">{a.exams?.title || 'Exam'}</span>
+                    </p>
+                    <p className="text-xs text-slate-500">{new Date(a.created_at).toLocaleString()}</p>
+                  </div>
+                </div>
+                {a.suspicious_activity_count > 0 && (
+                  <Badge variant="outline" className="border-rose-200 bg-rose-50 text-rose-700 text-[10px]">
+                    Flagged
+                  </Badge>
+                )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
