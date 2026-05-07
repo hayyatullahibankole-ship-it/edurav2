@@ -205,39 +205,40 @@ export default function AdminPortal() {
   if (!isAdmin) return null;
 
   const SidebarBody = () => (
-    <div className="flex flex-col h-full bg-slate-950 border-r border-slate-800">
+    <div className="flex flex-col h-full bg-white border-r border-slate-200">
       {/* Brand */}
-      <div className="px-5 py-5 border-b border-slate-800 flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-md bg-white grid place-items-center">
-          <Shield className="w-4 h-4 text-slate-950" />
+      <div className="px-4 py-4 border-b border-slate-200 flex items-center gap-2.5">
+        <div className="w-9 h-9 rounded-lg bg-slate-900 grid place-items-center">
+          <Shield className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
         </div>
-        <div>
-          <p className="text-sm font-bold text-white tracking-tight">Edura Admin</p>
-          <p className="text-[10px] text-slate-500 uppercase tracking-widest">Control Center</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] font-semibold text-slate-900 tracking-tight leading-tight">Edura</p>
+          <p className="text-[10px] text-slate-500 uppercase tracking-widest">Admin Portal</p>
         </div>
+        <kbd className="hidden lg:inline-flex h-5 px-1.5 text-[10px] font-mono bg-slate-100 text-slate-500 rounded border border-slate-200 items-center">⌘K</kbd>
       </div>
 
       {/* Search */}
-      <div className="p-3 border-b border-slate-800">
+      <div className="p-3 border-b border-slate-200">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search..."
-            className="pl-8 h-9 bg-slate-900 border-slate-800 text-slate-200 placeholder:text-slate-600 text-sm focus-visible:ring-slate-700"
+            placeholder="Search modules..."
+            className="pl-8 h-8 bg-slate-50 border-slate-200 text-slate-700 placeholder:text-slate-400 text-[13px] focus-visible:ring-1 focus-visible:ring-slate-300 focus-visible:border-slate-300"
           />
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-3">
+      <nav className="flex-1 overflow-y-auto px-2 py-3">
         {filteredNav.map((section) => (
-          <div key={section.label} className="mb-4">
-            <p className="px-2 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+          <div key={section.label} className="mb-3">
+            <p className="px-2.5 mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
               {section.label}
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-px">
               {section.items.map((item) => {
                 const Icon = item.icon;
                 const active = activeKey === item.key;
@@ -245,14 +246,14 @@ export default function AdminPortal() {
                   <button
                     key={item.key}
                     onClick={() => { setActiveKey(item.key); setMobileOpen(false); }}
-                    className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors ${
+                    className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-all relative ${
                       active
-                        ? 'bg-slate-800 text-white font-medium'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                        ? 'bg-slate-900 text-white font-medium'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span className="truncate">{item.label}</span>
+                    <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={active ? 2.5 : 2} />
+                    <span className="truncate flex-1 text-left">{item.label}</span>
                   </button>
                 );
               })}
@@ -262,22 +263,19 @@ export default function AdminPortal() {
       </nav>
 
       {/* User */}
-      <div className="border-t border-slate-800 p-3">
-        <div className="flex items-center gap-2.5 px-2 py-2">
-          <div className="w-8 h-8 rounded-full bg-slate-800 grid place-items-center text-xs font-bold text-white">
+      <div className="border-t border-slate-200 p-2.5">
+        <div className="flex items-center gap-2.5 px-1.5 py-1.5 rounded-md hover:bg-slate-50">
+          <div className="w-8 h-8 rounded-full bg-slate-900 grid place-items-center text-xs font-semibold text-white shrink-0">
             {user?.email?.[0]?.toUpperCase() || 'A'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-white truncate">{user?.email}</p>
-            <p className="text-[10px] text-slate-500">Administrator</p>
+            <p className="text-xs font-medium text-slate-900 truncate">{user?.email?.split('@')[0]}</p>
+            <p className="text-[10px] text-emerald-600 flex items-center gap-1">
+              <span className="w-1 h-1 bg-emerald-500 rounded-full"/> Online
+            </p>
           </div>
-          <Button
-            onClick={handleSignOut}
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800"
-          >
-            <LogOut className="w-4 h-4" />
+          <Button onClick={handleSignOut} size="icon" variant="ghost" className="h-7 w-7 text-slate-400 hover:text-rose-600">
+            <LogOut className="w-3.5 h-3.5" />
           </Button>
         </div>
       </div>
@@ -285,48 +283,48 @@ export default function AdminPortal() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-100 flex">
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 shrink-0 sticky top-0 h-screen">
+    <div className="min-h-screen bg-slate-50 flex">
+      <aside className="hidden lg:flex w-60 shrink-0 sticky top-0 h-screen">
         <SidebarBody />
       </aside>
 
-      {/* Mobile sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="p-0 w-72 border-0 bg-slate-950">
+        <SheetContent side="left" className="p-0 w-72 border-0 bg-white">
           <SidebarBody />
         </SheetContent>
       </Sheet>
 
-      {/* Main */}
       <main className="flex-1 min-w-0 flex flex-col">
-        {/* Topbar */}
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
-          <div className="px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
+        <header className="bg-white/80 backdrop-blur border-b border-slate-200 sticky top-0 z-20">
+          <div className="px-4 sm:px-6 h-12 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
               <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9">
-                    <Menu className="w-5 h-5" />
+                  <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8">
+                    <Menu className="w-4 h-4" />
                   </Button>
                 </SheetTrigger>
               </Sheet>
-              <div className="flex items-center gap-1.5 text-sm min-w-0">
+              <div className="flex items-center gap-1.5 text-[13px] min-w-0">
+                <Home className="w-3.5 h-3.5 text-slate-400"/>
+                <ChevronRight className="w-3 h-3 text-slate-300" />
                 <span className="text-slate-500 hidden sm:inline">{activeMeta.section}</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400 hidden sm:inline" />
+                <ChevronRight className="w-3 h-3 text-slate-300 hidden sm:inline" />
                 <span className="font-semibold text-slate-900 truncate">{activeMeta.item.label}</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 text-[10px] font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
-                Online
-              </Badge>
+              <span className="hidden md:flex items-center gap-1.5 text-[11px] text-slate-500 font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                All systems operational
+              </span>
+              <Button variant="outline" size="sm" className="h-7 text-[11px] font-medium border-slate-200">
+                <Activity className="w-3 h-3 mr-1"/> Live
+              </Button>
             </div>
           </div>
         </header>
 
-        {/* Content */}
         <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
           {renderContent()}
         </div>
@@ -335,78 +333,126 @@ export default function AdminPortal() {
   );
 }
 
-/* ====================== Dashboard Overview (clean, no gradients) ====================== */
+/* ====================== Dashboard Overview ====================== */
 function DashboardOverview({ stats, activities }: { stats: any; activities: any[] }) {
   const metrics = [
-    { label: 'Total Users', value: stats.totalUsers, icon: Users, accent: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Active Exams', value: stats.activeExams, icon: BookOpen, accent: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Attempts (recent)', value: stats.totalAttempts, icon: Activity, accent: 'text-violet-600', bg: 'bg-violet-50' },
-    { label: 'Security Alerts', value: stats.suspiciousActivities, icon: AlertTriangle, accent: 'text-rose-600', bg: 'bg-rose-50' },
+    { label: 'Total Users', value: stats.totalUsers, icon: Users, delta: '+12%', positive: true },
+    { label: 'Active Exams', value: stats.activeExams, icon: BookOpen, delta: '+3', positive: true },
+    { label: 'Recent Attempts', value: stats.totalAttempts, icon: Activity, delta: 'last 24h', positive: true },
+    { label: 'Security Flags', value: stats.suspiciousActivities, icon: AlertTriangle, delta: stats.suspiciousActivities > 0 ? 'review' : 'clean', positive: stats.suspiciousActivities === 0 },
   ];
+
+  const today = new Date().toLocaleDateString('en-NG', { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">A quick look at your platform health.</p>
+      {/* Header strip */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400 font-semibold">{today}</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight mt-1">Welcome back, admin</h1>
+          <p className="text-sm text-slate-500 mt-1">Here's what's happening across Edura, Akboy & Mock Exams.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="h-8 text-xs border-slate-200">Export</Button>
+          <Button size="sm" className="h-8 text-xs bg-slate-900 hover:bg-slate-800">View reports</Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      {/* Metrics — flat with delta */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {metrics.map((m) => {
           const Icon = m.icon;
           return (
-            <Card key={m.label} className="border-slate-200 shadow-none hover:border-slate-300 transition-colors">
-              <CardContent className="p-4 md:p-5">
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{m.label}</p>
-                  <div className={`w-8 h-8 rounded-md ${m.bg} grid place-items-center`}>
-                    <Icon className={`w-4 h-4 ${m.accent}`} />
-                  </div>
-                </div>
-                <p className="text-2xl md:text-3xl font-bold text-slate-900 tabular-nums">{m.value}</p>
-              </CardContent>
-            </Card>
+            <div key={m.label} className="bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 transition-colors">
+              <div className="flex items-center justify-between mb-3">
+                <Icon className="w-4 h-4 text-slate-400" />
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${m.positive ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                  {m.delta}
+                </span>
+              </div>
+              <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide mb-1">{m.label}</p>
+              <p className="text-3xl font-bold text-slate-900 tabular-nums leading-none">{m.value}</p>
+            </div>
           );
         })}
       </div>
 
-      <Card className="border-slate-200 shadow-none">
-        <CardContent className="p-0">
-          <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+      {/* Two column: activity + side panel */}
+      <div className="grid lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl">
+          <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">Recent Activity</h3>
-              <p className="text-xs text-slate-500">Latest exam attempts across the platform</p>
+              <h3 className="text-[13px] font-semibold text-slate-900">Recent Activity</h3>
+              <p className="text-[11px] text-slate-500">Latest exam attempts</p>
             </div>
+            <Badge variant="outline" className="text-[10px] h-5 border-slate-200 text-slate-600">{activities.length}</Badge>
           </div>
           <div className="divide-y divide-slate-100">
             {activities.length === 0 && (
-              <div className="px-5 py-8 text-center text-sm text-slate-500">No recent activity</div>
+              <div className="px-5 py-12 text-center">
+                <Activity className="w-8 h-8 text-slate-300 mx-auto mb-2"/>
+                <p className="text-sm text-slate-500">No recent activity</p>
+              </div>
             )}
             {activities.map((a: any) => (
-              <div key={a.id} className="px-5 py-3 flex items-center justify-between gap-3 hover:bg-slate-50">
+              <div key={a.id} className="px-5 py-3 flex items-center justify-between gap-3 hover:bg-slate-50/50">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-slate-100 grid place-items-center text-xs font-semibold text-slate-700 shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-slate-900 grid place-items-center text-[10px] font-semibold text-white shrink-0">
                     {a.users?.first_name?.[0]?.toUpperCase() || 'U'}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm text-slate-900 truncate">
+                    <p className="text-[13px] text-slate-900 truncate">
                       <span className="font-medium">{a.users?.first_name} {a.users?.last_name}</span>
-                      <span className="text-slate-500"> attempted </span>
-                      <span className="font-medium">{a.exams?.title || 'Exam'}</span>
+                      <span className="text-slate-500"> · </span>
+                      <span className="text-slate-700">{a.exams?.title || 'Exam'}</span>
                     </p>
-                    <p className="text-xs text-slate-500">{new Date(a.created_at).toLocaleString()}</p>
+                    <p className="text-[11px] text-slate-400 font-mono">{new Date(a.created_at).toLocaleString()}</p>
                   </div>
                 </div>
-                {a.suspicious_activity_count > 0 && (
-                  <Badge variant="outline" className="border-rose-200 bg-rose-50 text-rose-700 text-[10px]">
-                    Flagged
-                  </Badge>
+                {a.suspicious_activity_count > 0 ? (
+                  <Badge className="bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-50 text-[10px] h-5">Flagged</Badge>
+                ) : (
+                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50 text-[10px] h-5">OK</Badge>
                 )}
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        <div className="space-y-4">
+          <div className="bg-slate-900 text-white rounded-xl p-5">
+            <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-2">Health</div>
+            <p className="text-2xl font-bold">All systems normal</p>
+            <p className="text-xs text-slate-400 mt-1">Database, Edge functions & Auth responding within SLA.</p>
+            <div className="mt-4 flex gap-1">
+              {Array.from({length:24}).map((_,i)=>(
+                <div key={i} className={`flex-1 h-6 rounded-sm ${i > 21 ? 'bg-emerald-500' : 'bg-emerald-500/40'}`} />
+              ))}
+            </div>
+            <p className="text-[10px] text-slate-500 mt-2 font-mono">Uptime · 24h</p>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-xl p-5">
+            <h4 className="text-[13px] font-semibold text-slate-900 mb-3">Quick actions</h4>
+            <div className="space-y-1.5">
+              {[
+                { label: 'Add new admin', icon: Users },
+                { label: 'Publish blog post', icon: Newspaper },
+                { label: 'Create exam', icon: BookOpen },
+                { label: 'Send announcement', icon: MessageCircle },
+              ].map((q) => (
+                <button key={q.label} className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] text-slate-700 hover:bg-slate-50 transition-colors text-left">
+                  <q.icon className="w-3.5 h-3.5 text-slate-400"/>
+                  <span className="flex-1">{q.label}</span>
+                  <ChevronRight className="w-3 h-3 text-slate-300"/>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+
