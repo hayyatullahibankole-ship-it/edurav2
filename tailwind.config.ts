@@ -18,7 +18,6 @@ export default {
         sans: ['Inter', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         lato: ['Lato', 'sans-serif'],
-        serif: ['Fraunces', 'Georgia', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
