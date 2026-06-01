@@ -7,18 +7,16 @@ import teamImage from "@/assets/akboy-team.jpg";
 export default function AkboyAbout() {
   return (
     <AkboyLayout>
-      <section className="bg-akboy-forest text-akboy-paper">
+      <section className="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 text-white">
         <div className="max-w-6xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
           <div className="space-y-8 md:max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-akboy-paper/15 bg-white/5 px-4 py-2 text-xs font-semibold tracking-[0.18em] uppercase text-akboy-butter">
-              <Sparkles className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold tracking-wide text-emerald-50">
+              <Sparkles className="h-4 w-4" />
               About AKBOY
             </div>
-            <div className="space-y-5">
-              <h1 className="font-urbanist text-4xl font-extrabold sm:text-5xl lg:text-7xl leading-[1.02]">
-                Designing growth for students, creatives, and modern brands.
-              </h1>
-              <p className="max-w-xl text-akboy-paper/70 text-lg leading-8">
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold sm:text-5xl lg:text-6xl">Designing growth for students, creatives, and modern brands.</h1>
+              <p className="max-w-xl text-slate-300 text-lg leading-8">
                 AKBOY Creative Hub blends education, digital design, and community impact in a clean, modern experience built for today's learners and young entrepreneurs.
               </p>
             </div>
@@ -28,9 +26,9 @@ export default function AkboyAbout() {
                 { label: "Programs Delivered", value: "120+" },
                 { label: "Young Creatives Helped", value: "500+" }
               ].map((item) => (
-                <div key={item.label} className="rounded-2xl border border-akboy-paper/15 bg-white/5 p-6">
-                  <p className="font-urbanist text-3xl font-bold text-akboy-paper">{item.value}</p>
-                  <p className="mt-2 text-[11px] uppercase tracking-[0.24em] text-akboy-butter">{item.label}</p>
+                <div key={item.label} className="rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-xl">
+                  <p className="text-3xl font-bold text-white">{item.value}</p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.24em] text-emerald-200">{item.label}</p>
                 </div>
               ))}
             </div>
