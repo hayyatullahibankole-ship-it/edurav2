@@ -18,6 +18,10 @@ export default {
         sans: ['Inter', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         lato: ['Lato', 'sans-serif'],
+        urbanist: ['Urbanist', 'sans-serif'],
+        epilogue: ['Epilogue', 'sans-serif'],
+        'akboy-display': ['Urbanist', 'sans-serif'],
+        'akboy-body': ['Epilogue', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -77,6 +81,17 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+        },
+        akboy: {
+          paper: "#FBFAF6",
+          sand: "#F2EFE7",
+          ink: "#0B1410",
+          forest: "#0F3D2E",
+          moss: "#1F5A3F",
+          lime: "#C7E36B",
+          butter: "#F4E27A",
+          mute: "#5F6B65",
+          line: "#E5E2D8",
         },
       },
       borderRadius: {
