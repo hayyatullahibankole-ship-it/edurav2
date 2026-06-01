@@ -18,6 +18,10 @@ export default {
         sans: ['Inter', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         lato: ['Lato', 'sans-serif'],
+        urbanist: ['Urbanist', 'sans-serif'],
+        epilogue: ['Epilogue', 'sans-serif'],
+        'akboy-display': ['Urbanist', 'sans-serif'],
+        'akboy-body': ['Epilogue', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
