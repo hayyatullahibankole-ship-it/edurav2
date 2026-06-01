@@ -160,31 +160,31 @@ export function AkboyNavbar() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="lg:hidden py-4 border-t border-stone-200">
+          <div className="lg:hidden py-4 border-t border-akboy-line">
             <div className="flex flex-col">
               {groups.map((g) => {
                 const expanded = mobileGroup === g.name;
                 return (
-                  <div key={g.name} className="border-b border-stone-100">
+                  <div key={g.name} className="border-b border-akboy-line/60">
                     <button
                       onClick={() => setMobileGroup(expanded ? null : g.name)}
-                      className="w-full flex items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-stone-50 transition-colors"
+                      className="w-full flex items-center justify-between px-4 py-3 text-base font-medium text-akboy-ink hover:bg-akboy-sand transition-colors"
                     >
                       {g.name}
-                      <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
+                      <ChevronDown className={`h-5 w-5 text-akboy-mute transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
                     </button>
                     {expanded && (
-                      <div className="pb-3 pl-4 space-y-1 bg-stone-50">
+                      <div className="pb-3 pl-4 space-y-1 bg-akboy-paper">
                         {g.children.map((c) => (
                           <div key={c.name} className="py-1">
-                            {renderLink(c, "block px-2 py-2 text-sm font-medium text-gray-700 hover:text-emerald-700 hover:bg-white rounded transition-colors")}
+                            {renderLink(c, "block px-2 py-2 text-sm font-medium text-akboy-ink/80 hover:text-akboy-forest hover:bg-white rounded transition-colors")}
                           </div>
                         ))}
                         {g.cta && (
-                          <div className="mt-2 pt-2 border-t border-stone-200">
+                          <div className="mt-2 pt-2 border-t border-akboy-line">
                             {renderLink(
                               g.cta,
-                              "block text-center px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded transition-colors"
+                              "block text-center px-4 py-2.5 text-sm font-semibold text-akboy-paper bg-akboy-forest hover:bg-akboy-ink rounded-xl transition-colors"
                             )}
                           </div>
                         )}
