@@ -82,6 +82,17 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        akboy: {
+          paper: "#FBFAF6",
+          sand: "#F2EFE7",
+          ink: "#0B1410",
+          forest: "#0F3D2E",
+          moss: "#1F5A3F",
+          lime: "#C7E36B",
+          butter: "#F4E27A",
+          mute: "#5F6B65",
+          line: "#E5E2D8",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
