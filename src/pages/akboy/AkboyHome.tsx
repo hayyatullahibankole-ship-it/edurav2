@@ -376,22 +376,25 @@ function WhyChoose() {
           </h2>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-x-4 gap-y-10">
-          {stats.map((s, i) => {
-            const v = useCounter(s.n, 1800, active);
-            return (
-              <div key={i} className="border-t border-white/15 pt-5">
-                <div className="font-display text-5xl lg:text-6xl text-akboy-butter font-bold tabular-nums">
-                  {v}{s.suffix}
-                </div>
-                <div className="text-sm text-white/70 mt-2 font-medium">{s.label}</div>
-              </div>
-            );
-          })}
+          {stats.map((s, i) => (
+            <StatItem key={i} n={s.n} suffix={s.suffix} label={s.label} active={active} />
+          ))}
         </div>
       </div>
     </section>
   );
 }
+
+function StatItem({ n, suffix, label, active }: { n: number; suffix: string; label: string; active: boolean }) {
+  const v = useCounter(n, 1800, active);
+  return (
+    <div className="border-t border-white/15 pt-5">
+      <div className="font-display text-5xl lg:text-6xl text-akboy-butter font-bold tabular-nums">{v}{suffix}</div>
+      <div className="text-sm text-white/70 mt-2 font-medium">{label}</div>
+    </div>
+  );
+}
+
 
 /* ---------------- SUCCESS STORIES ---------------- */
 const SUCCESS = [
