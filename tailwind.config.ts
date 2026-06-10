@@ -80,6 +80,18 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        akboy: {
+          forest: "hsl(var(--akboy-forest))",
+          "forest-deep": "hsl(var(--akboy-forest-deep))",
+          emerald: "hsl(var(--akboy-emerald))",
+          leaf: "hsl(var(--akboy-leaf))",
+          mint: "hsl(var(--akboy-mint))",
+          butter: "hsl(var(--akboy-butter))",
+          "butter-soft": "hsl(var(--akboy-butter-soft))",
+          cream: "hsl(var(--akboy-cream))",
+          stone: "hsl(var(--akboy-stone))",
+          ink: "hsl(var(--akboy-ink))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
