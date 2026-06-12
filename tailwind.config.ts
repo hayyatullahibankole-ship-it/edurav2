@@ -18,7 +18,7 @@ export default {
         sans: ['Inter', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         lato: ['Lato', 'sans-serif'],
-        display: ['Fraunces', 'Playfair Display', 'serif'],
+        display: ['Syne', 'Inter', 'sans-serif'],
         body: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
       },
       colors: {
@@ -88,6 +88,7 @@ export default {
           mint: "hsl(var(--akboy-mint))",
           butter: "hsl(var(--akboy-butter))",
           "butter-soft": "hsl(var(--akboy-butter-soft))",
+          moss: "hsl(var(--akboy-moss))",
           cream: "hsl(var(--akboy-cream))",
           stone: "hsl(var(--akboy-stone))",
           ink: "hsl(var(--akboy-ink))",
