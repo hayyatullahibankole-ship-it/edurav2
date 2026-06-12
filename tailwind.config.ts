@@ -88,6 +88,7 @@ export default {
           mint: "hsl(var(--akboy-mint))",
           butter: "hsl(var(--akboy-butter))",
           "butter-soft": "hsl(var(--akboy-butter-soft))",
+          moss: "hsl(var(--akboy-moss))",
           cream: "hsl(var(--akboy-cream))",
           stone: "hsl(var(--akboy-stone))",
           ink: "hsl(var(--akboy-ink))",
