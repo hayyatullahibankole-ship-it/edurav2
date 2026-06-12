@@ -366,8 +366,8 @@ function CTA({ basePath }: { basePath: string }) {
 
 /* ---------------- PAGE ---------------- */
 export default function AkboyHome() {
-  const { isAkboyDomain } = useDomainDetection();
-  const basePath = isAkboyDomain ? "" : "/akboy";
+  const { isAkboy } = useDomainDetection();
+  const basePath = isAkboy ? "" : "/akboy";
 
   return (
     <AkboyLayout
