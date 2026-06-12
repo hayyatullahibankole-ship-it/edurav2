@@ -18,7 +18,7 @@ export default {
         sans: ['Inter', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         lato: ['Lato', 'sans-serif'],
-        display: ['Fraunces', 'Playfair Display', 'serif'],
+        display: ['Syne', 'Inter', 'sans-serif'],
         body: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
       },
       colors: {
