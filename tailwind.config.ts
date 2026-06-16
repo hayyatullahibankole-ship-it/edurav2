@@ -18,9 +18,8 @@ export default {
         sans: ['Inter', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         lato: ['Lato', 'sans-serif'],
-        display: ['Fraunces', 'Playfair Display', 'Georgia', 'serif'],
-        body: ['Inter', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],
-        serif: ['Fraunces', 'Playfair Display', 'Georgia', 'serif'],
+        display: ['Syne', 'Inter', 'sans-serif'],
+        body: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
