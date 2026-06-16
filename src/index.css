@@ -557,8 +557,9 @@ All colors MUST be HSL for consistency across light/dark modes.
   --akboy-ink: 145 30% 10%;
 }
 
-.font-display { font-family: 'Syne', 'Inter', sans-serif; letter-spacing: -0.02em; font-weight: 700; }
-.font-body    { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+.font-display { font-family: 'Fraunces', 'Playfair Display', Georgia, serif; letter-spacing: -0.025em; font-weight: 500; font-optical-sizing: auto; }
+.font-body    { font-family: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif; }
+.font-serif-display { font-family: 'Fraunces', 'Playfair Display', Georgia, serif; font-optical-sizing: auto; }
 
 .akboy-grain {
   background-image:
