@@ -1,68 +1,80 @@
-## Goal
-Rebuild the Akboy homepage as a premium, editorial, agency-meets-edtech experience using your brand palette (Dark Green #0D4D3A, Emerald, Light Green, Yellow #F4C542, White, Soft Gray). Then propagate the new design language across the other Akboy pages so the entire site feels like one product.
+# AKBOY Creative Hub — Full Website Redesign (Phase 1)
 
-## Scope — Homepage (`src/pages/akboy/AkboyHome.tsx`)
-Rebuild from scratch with these 19 sections, in order:
-1. Floating announcement bar (rotating: programs, admission updates, news)
-2. Premium navigation (keep current `AkboyNavbar`, restyle tokens)
-3. Hero — "Where Education Meets Creativity" with floating glassmorphism portfolio/mockup cluster
-4. Trusted-by strip (schools, parents, businesses, partner logos, key stats)
-5. About AKBOY — editorial storytelling block (mission / vision / impact / founder teaser)
-6. Core Services showcase — interactive asymmetric layout (6 services)
-7. Featured Programs — large cards (JAMB Orientation, Admission Assistance, Graphics, Web, Mentorship)
-8. Why Choose AKBOY — animated counters
-9. Student Success Stories — large before/after cards
-10. Creative Portfolio — masonry showcase pulling from existing portfolio data
-11. Testimonials carousel (students, parents, school owners, businesses)
-12. Latest News & Insights — pulls from Campus Hub feed
-13. Learning Resources Hub — links to edura.space resources + downloads
-14. Founder Section — Sulaimon Abdulhakeem Sonayon bio
-15. Community Section — WhatsApp, Telegram, newsletter, socials
-16. FAQ accordion
-17. Contact section — WhatsApp/email/phone/form
-18. Premium CTA — "Ready to Learn, Create and Succeed?"
-19. Modern footer (keep `AkboyFooter`, restyle)
+This plan implements the PRD as a complete frontend redesign of the Akboy domain, reusing the existing React/Vite/Tailwind/Supabase stack (the PRD's Next.js/Sanity recommendation does not apply — this project is locked to React+Vite+Supabase, which fully satisfies the requirements).
 
-## Scope — Design system
-- Update `src/index.css` Akboy tokens: introduce `--akboy-forest #0D4D3A`, emerald scale, `--akboy-butter #F4C542`, soft-gray surface, glass tokens, shadow tokens, gradient tokens.
-- Add new utility classes for glass cards, curved section dividers, floating shadows.
-- Typography: pair editorial display (Fraunces) with clean sans (Inter/Manrope) — already in project.
-- Add framer-motion-driven counters, smooth-scroll, hover lifts.
+## Scope of Phase 1 (this build)
 
-## Scope — Consistency pass across Akboy pages
-Apply the new tokens, hero treatment, section rhythm, and footer/nav styling to:
-- `AkboyAbout.tsx`
-- `AkboyServices.tsx`
-- `AkboyPortfolio.tsx`
-- `AkboyContact.tsx`
-- `AkboyCampusHub.tsx` (light touch — already recently redesigned, only color/typography harmonization)
-- `AkboyFooter.tsx` & `AkboyNavbar.tsx` (token swap to forest/butter)
+Public marketing site only. No Academy LMS, no payments, no client portal — those are explicitly Phase 2 in the PRD.
 
-Other Akboy pages (Mock exam flow, Tutorial registration, Blog) get token-only updates — no structural changes — to keep scope tight.
+### Pages
 
-## Out of scope
-- No backend/data model changes.
-- No changes to Edura (edura.space) pages.
-- No changes to admin dashboard, CBT, school portal.
-- Mock exam, tutorial registration, blog pages: visual token alignment only, no layout rewrites.
+1. **Home** — Hero, Trusted By, About Preview, Services Overview, Why Choose Us, Featured Projects, Student Success Stories, Stats, Testimonials, Blog Preview, CTA, Footer
+2. **About** — Story, Mission, Vision, Values, Founder Message, Team, Timeline
+3. **Services** — Educational, Creative, Web (grouped, each with detail anchor)
+4. **Portfolio** — Filterable grid (Graphic, Web, Education, Branding) + project detail page
+5. **Academy** (placeholder/coming soon — Phase 2 LMS)
+6. **CAMPUS HUB/ Insights** — list + post (reuse existing `CAMPUSHUB` + `AkboyBlogPost`, restyle)
+7. **Resources** — Downloadable JAMB/WAEC/E-books/Templates
+8. **Testimonials** — Full reviews page
+9. **Contact** — Form + WhatsApp + email + socials
+10. **Book Consultation** — Dedicated booking form
 
-## Technical notes
-- New homepage will be split into section components under `src/components/akboy/home/` (HeroSection, TrustedBy, ServicesShowcase, etc.) to keep `AkboyHome.tsx` thin.
-- Use existing `framer-motion`, `lucide-react`, shadcn primitives. No new heavy dependencies.
-- Portfolio masonry uses existing `akboy_portfolio` table data; falls back to curated samples if empty.
-- Testimonials, FAQ, stats: static curated content (you can edit copy after).
-- Founder image: placeholder until you upload a real photo.
+### Global
 
-## Deliverables
-1. New design tokens in `index.css` + `tailwind.config.ts`.
-2. ~12 new section components under `src/components/akboy/home/`.
-3. Rewritten `AkboyHome.tsx`.
-4. Restyled `AkboyAbout`, `AkboyServices`, `AkboyPortfolio`, `AkboyContact`, `AkboyNavbar`, `AkboyFooter`.
-5. Smoke check via preview.
+- New `AkboyNavbar` with mega-menu structure matching site map
+- New `AkboyFooter` aligned to PRD
+- WhatsApp floating button
+- SEO: per-route `<Helmet>` titles, descriptions, canonical, OG tags, JSON-LD (Organization sitewide, Article on blog)
+- Sitemap + robots.txt updates
 
-## What I need from you before I build
-1. **Founder photo** — drop a high-res image, otherwise I'll use a styled placeholder you can swap later.
-2. **Real logos** for the "Trusted By" strip (schools/partners) — otherwise styled name-chips.
-3. **Confirm**: build all 19 sections now in one pass, or stage it (1–10 first, 11–19 next)?
+## Design direction
 
-Approve this plan and I'll start with the design tokens + homepage sections in parallel.
+Per Core memory (Akboy brand system): cream/white background, dark green (`akboy-forest #0F3D2E`), butter yellow accent (`akboy-butter #F4E27A`), Fraunces/Playfair display + clean sans body. Premium, editorial, youth-friendly — not magazine layout (rejected), not generic SaaS.
+
+Before building, I will:
+
+1. Capture the current Akboy home preview
+2. Generate 3 rendered design directions (locked palette + type, varying composition/density/motion)
+3. Ask you to pick one
+4. Build the entire site against the chosen direction
+
+## Data / backend
+
+- **Portfolio**: reuse existing `akboy_portfolio` table (already in DB)
+- **CAMPUS HUB**: reuse existing blog tables
+- **Contact form**: new `contact_submissions` table + RLS (insert for anon, select for admins) + optional Resend edge function to email `akboycreativehub@gmail.com`
+- **Consultation bookings**: new `consultation_requests` table + RLS, same email flow
+- **Resources**: new `resources` table (title, category, file_url, description) — files in Supabase Storage bucket `resources`
+- **Testimonials**: new `testimonials` table (name, role, type, quote, image, featured)
+
+All new tables get explicit `GRANT` blocks per project rules.
+
+## Admin
+
+Reuse existing admin portal pattern — add tabs:
+
+- Portfolio (exists)
+- Blog (exists)
+- Contact Inbox (new)
+- Consultation Requests (new)
+- Resources (new)
+- Testimonials (new)
+
+## Out of scope (Phase 2, not built now)
+
+Student Dashboard, Online Courses, Payment Gateway, Certificates, LMS, AI Assistant, Client Portal, Job Board, Forum.
+
+## Sequence
+
+1. Approve plan
+2. Design directions round → you pick
+3. Build pages + components against chosen direction
+4. DB migrations + admin tabs
+5. SEO, sitemap, robots
+6. Walkthrough
+
+## Open questions before I start
+
+- Confirm Academy should be a "Coming Soon" landing for now (not removed entirely)? YES
+- Should the existing Akboy Mock Exam / Tutorial Registration flows stay linked from the new nav, or be hidden until you decide? SHOULD STAY
+- Any real content (founder photo, team members, real project images, real testimonials) you want to drop in, or use polished placeholders first? PLACEHOLDER FIRST
