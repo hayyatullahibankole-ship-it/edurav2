@@ -550,8 +550,8 @@ All colors MUST be HSL for consistency across light/dark modes.
   --akboy-leaf: 145 25% 45%;
   --akboy-moss: 110 25% 70%;          /* #a0c49d soft moss */
   --akboy-mint: 110 30% 90%;
-  --akboy-butter: 145 25% 45%;        /* alias kept = leaf, no yellow */
-  --akboy-butter-soft: 110 30% 90%;
+  --akboy-butter: 52 84% 72%;         /* #F4E27A warm yellow accent */
+  --akboy-butter-soft: 52 90% 90%;    /* soft butter wash */
   --akboy-cream: 40 30% 95%;          /* #F5F0E8 */
   --akboy-stone: 40 15% 88%;
   --akboy-ink: 145 30% 10%;
