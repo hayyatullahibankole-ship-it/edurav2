@@ -1,367 +1,401 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { BookOpen, Clock, Target, Users, Trophy, FileText, Video, MessageCircle, ArrowRight, CheckCircle, LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
-import heroImage from "@/assets/hero-students.jpg";
-import BlogSection from "@/components/BlogSection";
+import {
+  BookOpen, Clock, Target, Users, Trophy, FileText, Video, MessageCircle,
+  ArrowRight, ArrowUpRight, CheckCircle, LogIn, BarChart3, GraduationCap,
+} from "lucide-react";
 import Footer from "@/components/Footer";
 import ScheduleTestModal from "@/components/ScheduleTestModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Download } from "lucide-react";
+
+/* ============================================================
+   EDURA — Structured Magazine
+   Palette: bone #F2EFE6 · ink #0B2A1F · forest #234B36 · citrus #D7F26A
+   Type: Space Grotesk (display) · DM Sans (body)
+   ============================================================ */
+
+const BONE = "#F2EFE6";
+const INK = "#0B2A1F";
+const FOREST = "#234B36";
+const CITRUS = "#D7F26A";
+
+const display = { fontFamily: "'Space Grotesk', system-ui, sans-serif" };
+const body = { fontFamily: "'DM Sans', system-ui, sans-serif" };
+
+const Eyebrow = ({ children }: { children: React.ReactNode }) => (
+  <span className="inline-block text-[11px] font-bold uppercase tracking-[0.28em]" style={{ color: FOREST }}>
+    {children}
+  </span>
+);
+
+const SectionHead = ({
+  eyebrow,
+  title,
+  lede,
+}: {
+  eyebrow: string;
+  title: string;
+  lede?: string;
+}) => (
+  <div className="grid md:grid-cols-12 gap-8 md:gap-10 items-end mb-12 md:mb-16">
+    <div className="md:col-span-7">
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <h2 className="mt-4 text-4xl md:text-6xl font-bold leading-[0.95] tracking-tight" style={{ ...display, color: INK }}>
+        {title}
+      </h2>
+    </div>
+    {lede && (
+      <div className="md:col-span-5 md:pb-3">
+        <p className="text-lg leading-relaxed" style={{ color: `${INK}B3` }}>{lede}</p>
+      </div>
+    )}
+  </div>
+);
+
 const Home = () => {
-  const {
-    user
-  } = useAuth();
-  const {
-    isInstalledApp
-  } = useInstalledApp();
+  const { user } = useAuth();
+  const { isInstalledApp } = useInstalledApp();
   const isMobile = useIsMobile();
   const isMobileWeb = isMobile && !isInstalledApp;
-  const features = [{
-    icon: <Target className="h-6 w-6" />,
-    title: "WAEC & JAMB Practice",
-    description: "Comprehensive question banks for both WAEC and JAMB examinations"
-  }, {
-    icon: <Clock className="h-6 w-6" />,
-    title: "Timed Simulations",
-    description: "Practice with real exam timing and interface for better preparation"
-  }, {
-    icon: <Trophy className="h-6 w-6" />,
-    title: "Performance Analytics",
-    description: "Track your progress with detailed analytics and recommendations"
-  }, {
-    icon: <Users className="h-6 w-6" />,
-    title: "Expert Consultation",
-    description: "Book 1-on-1 sessions with experienced tutors and mentors"
-  }, {
-    icon: <FileText className="h-6 w-6" />,
-    title: "Study Resources",
-    description: "Access past questions, study guides, and comprehensive notes"
-  }, {
-    icon: <Video className="h-6 w-6" />,
-    title: "Video Tutorials",
-    description: "Learn difficult topics with our expert-created video content"
-  }];
-  const subjects = ["English Language", "Mathematics", "Physics", "Chemistry", "Biology", "Geography", "Economics", "Government", "Literature", "History"];
-  const benefits = ["Unlimited practice tests", "Detailed performance analytics", "Access to past questions (2015-2024)", "Expert consultation booking", "Video tutorials & study guides", "Mobile & web access"];
-  return <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden">
-        <div className="absolute inset-0" style={{
-        backgroundImage: `linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(59, 130, 246, 0.85)), url(${heroImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center"
-      }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/10" />
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-5xl mx-auto text-center">
-            <Badge className="mb-6 bg-white/20 text-white border-white/30 hover:bg-white/30 transition-all px-6 py-2 text-sm font-medium backdrop-blur-sm">
-              ✨ Trusted by 50,000+ Students Nationwide
-            </Badge>
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight tracking-tight animate-fade-in-up text-white drop-shadow-lg">
-              Master WAEC & JAMB
-              <span className="block mt-2 text-white">with Smart CBT Practice</span>
+
+  const startJambHref = isMobileWeb ? "/auth" : user ? null : "/auth";
+
+  const features = [
+    { n: "01", icon: <Target className="h-7 w-7" />, title: "WAEC & JAMB Banks", desc: "Comprehensive question banks across every science and arts subject, updated each session." },
+    { n: "02", icon: <Clock className="h-7 w-7" />, title: "Timed Simulations", desc: "Real exam timing and interface — build the stamina that wins on the actual paper.", dark: true },
+    { n: "03", icon: <BarChart3 className="h-7 w-7" />, title: "Performance Analytics", desc: "Granular charts and recommendations that point straight to your weakest topics." },
+    { n: "04", icon: <Users className="h-7 w-7" />, title: "Expert Consultation", desc: "Book 1-on-1 sessions with experienced tutors and mentors when you hit a wall." },
+    { n: "05", icon: <FileText className="h-7 w-7" />, title: "Study Resources", desc: "Past questions, study guides, and structured notes curated by subject experts." },
+    { n: "06", icon: <Video className="h-7 w-7" />, title: "Video Tutorials", desc: "Visual breakdowns of difficult topics from expert-created video lessons." },
+  ];
+
+  const subjects = [
+    "English Language", "Mathematics", "Physics", "Chemistry", "Biology",
+    "Geography", "Economics", "Government", "Literature", "History",
+  ];
+
+  return (
+    <div className="min-h-screen w-full overflow-x-hidden selection:bg-[#D7F26A] selection:text-[#0B2A1F]"
+      style={{ ...body, backgroundColor: BONE, color: INK }}>
+
+      {/* ============== NAV ============== */}
+      <nav className="border-b px-6 lg:px-10 py-5 flex items-center justify-between" style={{ borderColor: `${INK}1A` }}>
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-sm flex items-center justify-center" style={{ backgroundColor: FOREST }}>
+            <span className="text-xl font-bold" style={{ ...display, color: CITRUS }}>E</span>
+          </div>
+          <span className="text-xl font-bold tracking-tight" style={display}>edura</span>
+        </Link>
+        <div className="hidden md:flex gap-8 text-xs font-bold uppercase tracking-[0.18em]">
+          <Link to="/demo" className="hover:opacity-60 transition-opacity">Practice Tests</Link>
+          <Link to="/resources" className="hover:opacity-60 transition-opacity">Resources</Link>
+          <Link to="/consultation" className="hover:opacity-60 transition-opacity">Consultation</Link>
+          <Link to="/payment" className="hover:opacity-60 transition-opacity">Pricing</Link>
+        </div>
+        <Link to={user ? "/dashboard" : "/auth"}
+          className="px-5 py-2.5 text-xs font-bold uppercase tracking-[0.18em] transition-colors"
+          style={{ backgroundColor: INK, color: BONE }}>
+          {user ? "Dashboard" : "Get Started"}
+        </Link>
+      </nav>
+
+      {/* ============== HERO ============== */}
+      <header className="border-b" style={{ borderColor: INK }}>
+        <div className="grid lg:grid-cols-12 min-h-[78vh]">
+          {/* Copy column */}
+          <div className="lg:col-span-7 px-6 lg:px-16 py-16 lg:py-24 flex flex-col justify-center lg:border-r"
+            style={{ borderColor: INK }}>
+            <span className="inline-flex w-fit items-center px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] mb-8"
+              style={{ backgroundColor: CITRUS, color: INK }}>
+              Trusted by 50,000+ Students Nationwide
+            </span>
+            <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold leading-[0.92] tracking-tight mb-8"
+              style={{ ...display, color: INK }}>
+              Master WAEC<br />
+              & JAMB with<br />
+              <span className="italic" style={{ color: FOREST }}>Smart</span> CBT.
             </h1>
-            <p className="text-xl md:text-2xl mb-10 text-white/95 max-w-3xl mx-auto leading-relaxed font-light drop-shadow-md">
-              Access thousands of practice questions, detailed analytics, and expert guidance. Join successful students
-              who achieved their dream scores.
+            <p className="text-lg md:text-xl max-w-xl mb-10 leading-relaxed" style={{ color: `${INK}CC` }}>
+              Access thousands of practice questions, detailed analytics, and expert guidance — engineered for the Nigerian student.
             </p>
-            <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
-              {isMobileWeb ? <Link to="/auth" className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full sm:w-auto shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg font-semibold">
-                    <LogIn className="mr-2 h-6 w-6" />
-                    Get Started
-                  </Button>
-                </Link> : user ? <ScheduleTestModal defaultExamType="jamb">
-                  <Button size="lg" className="w-full sm:w-auto shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg font-semibold">
-                    Start JAMB Practice
-                    <ArrowRight className="ml-2 h-6 w-6" />
-                  </Button>
-                </ScheduleTestModal> : <Link to="/auth" className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full sm:w-auto shadow-lg hover:shadow-xl transition-all px-8 py-6 text-lg font-semibold">
-                    Start JAMB Practice
-                    <ArrowRight className="ml-2 h-6 w-6" />
-                  </Button>
-                </Link>}
-              <Link to="/demo" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 shadow-lg transition-all px-8 py-6 text-lg font-semibold">
-                  View Demo
-                </Button>
+            <div className="flex flex-wrap gap-3">
+              {user && !isMobileWeb ? (
+                <ScheduleTestModal defaultExamType="jamb">
+                  <button className="inline-flex items-center gap-3 px-8 py-4 font-bold uppercase tracking-[0.18em] text-sm"
+                    style={{ backgroundColor: FOREST, color: CITRUS }}>
+                    Start JAMB Practice <ArrowRight className="h-4 w-4" />
+                  </button>
+                </ScheduleTestModal>
+              ) : (
+                <Link to={startJambHref || "/auth"}
+                  className="inline-flex items-center gap-3 px-8 py-4 font-bold uppercase tracking-[0.18em] text-sm"
+                  style={{ backgroundColor: FOREST, color: CITRUS }}>
+                  Start JAMB Practice <ArrowRight className="h-4 w-4" />
+                </Link>
+              )}
+              <Link to="/demo"
+                className="inline-flex items-center px-8 py-4 font-bold uppercase tracking-[0.18em] text-sm border transition-colors hover:bg-[#0B2A1F] hover:text-[#F2EFE6]"
+                style={{ borderColor: INK, color: INK }}>
+                View Demo
               </Link>
             </div>
-            <div className="mt-8 text-center">
-              <Link to="/school-landing">
-                <Button size="lg" variant="secondary" className="border-2 border-white/40 bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all px-6 py-3 font-semibold">
-                  <Users className="mr-2 h-5 w-5" />
-                  Register as a School
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Practice Section */}
-      <section className="py-20 md:py-24 bg-gradient-to-b from-background via-muted/30 to-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-sm font-medium">
-              Start Practicing Now
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Choose Your Exam Practice
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Practice with authentic JAMB and WAEC exam conditions and timing
-            </p>
+            <Link to="/school-landing"
+              className="mt-8 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] hover:opacity-60 transition-opacity w-fit"
+              style={{ color: FOREST }}>
+              <Users className="h-4 w-4" /> Register as a School <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <Card className="group text-center hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/60 hover:scale-105 bg-gradient-to-br from-card to-primary/5">
-              <CardHeader className="pb-6">
-                <div className="mx-auto bg-gradient-to-br from-primary to-primary/80 w-20 h-20 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform">
-                  <Target className="h-10 w-10" />
-                </div>
-                <CardTitle className="text-3xl mb-3 font-bold">JAMB Practice</CardTitle>
-                <CardDescription className="text-base">
-                  Practice with 180 questions (English + 3 subjects) in 120 minutes - official JAMB format
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    120 minutes
-                  </div>
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                    <FileText className="h-4 w-4" />
-                    180 questions total
-                  </div>
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                    <Trophy className="h-4 w-4" />
-                    Score out of 400
-                  </div>
-                </div>
-                {isMobileWeb ? <Link to="/auth">
-                    <Button className="w-full" size="lg">
-                      <ArrowRight className="mr-2 h-5 w-5" />
-                      Practice Now
-                    </Button>
-                  </Link> : user ? <ScheduleTestModal defaultExamType="jamb">
-                    <Button className="w-full" size="lg">
-                      Start JAMB Practice
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </ScheduleTestModal> : <Link to="/auth">
-                    <Button className="w-full" size="lg">
-                      Start JAMB Practice
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>}
-              </CardContent>
-            </Card>
-
-            <Card className="group text-center hover:shadow-2xl transition-all duration-500 border-2 hover:border-accent/60 hover:scale-105 bg-gradient-to-br from-card to-accent/5">
-              <CardHeader className="pb-6">
-                <div className="mx-auto bg-gradient-to-br from-accent to-accent/80 w-20 h-20 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform">
-                  <BookOpen className="h-10 w-10" />
-                </div>
-                <CardTitle className="text-3xl mb-3 font-bold">WAEC Practice</CardTitle>
-                <CardDescription className="text-base">
-                  Subject-based practice with 50-60 questions per paper - authentic WAEC experience
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    Subject-specific timing
-                  </div>
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                    <FileText className="h-4 w-4" />
-                    50-60 questions per paper
-                  </div>
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                    <Trophy className="h-4 w-4" />
-                    A1-F9 grading system
-                  </div>
-                </div>
-                {isMobileWeb ? <Link to="/auth">
-                    <Button className="w-full" size="lg" variant="secondary">
-                      <ArrowRight className="mr-2 h-5 w-5" />
-                      Practice Now
-                    </Button>
-                  </Link> : user ? <ScheduleTestModal defaultExamType="waec">
-                    <Button className="w-full" size="lg" variant="secondary">
-                      Start WAEC Practice
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </ScheduleTestModal> : <Link to="/auth">
-                    <Button className="w-full" size="lg" variant="secondary">
-                      Start WAEC Practice
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-sm font-medium">
-              Powerful Features
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Everything You Need to Excel
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Comprehensive tools and resources designed specifically for WAEC and JAMB success
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {features.map((feature, index) => <Card key={index} className="group text-center hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 hover:border-primary/30 bg-gradient-to-br from-card to-muted/20">
-                <CardHeader className="pb-4">
-                  <div className="mx-auto bg-gradient-to-br from-primary/10 to-accent/10 w-16 h-16 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform shadow-sm">
-                    {feature.icon}
-                  </div>
-                  <CardTitle className="text-xl font-bold mb-2">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base leading-relaxed">{feature.description}</CardDescription>
-                </CardContent>
-              </Card>)}
-          </div>
-        </div>
-      </section>
-
-      {/* Subjects Section */}
-      <section className="py-24 bg-gradient-to-b from-muted/20 to-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-sm font-medium">
-              All Subjects Covered
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Practice All WAEC & JAMB Subjects
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Complete coverage of all examination subjects with up-to-date question banks
-            </p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4 max-w-5xl mx-auto">
-            {subjects.map((subject, index) => <Badge key={index} variant="secondary" className="px-6 py-3 text-base font-medium hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-lg">
-                <BookOpen className="w-5 h-5 mr-2" />
-                {subject}
-              </Badge>)}
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="py-24 bg-gradient-to-br from-primary/5 via-background to-accent/5">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-20">
-              <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-sm font-medium">
-                Why Students Love Us
-              </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Why Choose Edura?
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Join thousands of students who achieved their target scores with our platform
-              </p>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6">
-                {benefits.map((benefit, index) => <div key={index} className="flex items-center gap-5 group hover:translate-x-2 transition-transform">
-                    <div className="bg-gradient-to-br from-accent/20 to-primary/20 p-3 rounded-xl group-hover:scale-110 transition-transform shadow-sm">
-                      <CheckCircle className="h-6 w-6 text-accent" />
-                    </div>
-                    <span className="text-lg font-medium">{benefit}</span>
-                  </div>)}
+          {/* Feature column */}
+          <div className="lg:col-span-5 relative overflow-hidden min-h-[320px] lg:min-h-full"
+            style={{ backgroundColor: FOREST }}>
+            <div className="absolute inset-0 opacity-[0.07]"
+              style={{
+                backgroundImage: `linear-gradient(${CITRUS} 1px, transparent 1px), linear-gradient(90deg, ${CITRUS} 1px, transparent 1px)`,
+                backgroundSize: "48px 48px",
+              }} />
+            <div className="relative h-full flex flex-col justify-between p-10 lg:p-14">
+              <div className="flex items-start justify-between">
+                <Eyebrow><span style={{ color: CITRUS }}>// Featured Stat</span></Eyebrow>
+                <GraduationCap className="h-6 w-6" style={{ color: CITRUS }} />
               </div>
-
-              <Card className="p-10 bg-gradient-to-br from-primary/5 to-accent/5 border-2 shadow-2xl">
-                <div className="text-center space-y-8">
-                  <div className="space-y-2">
-                    <div className="text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                      92%
-                    </div>
-                    <p className="text-muted-foreground text-lg font-medium">Average Score Improvement</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="text-5xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
-                      50,000+
-                    </div>
-                    <p className="text-muted-foreground text-lg font-medium">Students Registered</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                      98%
-                    </div>
-                    <p className="text-muted-foreground text-lg font-medium">Success Rate</p>
-                  </div>
+              <div>
+                <div className="text-[6rem] md:text-[8rem] font-bold leading-none tracking-tighter" style={{ ...display, color: CITRUS }}>
+                  98%
                 </div>
-              </Card>
+                <div className="mt-4 pl-5 border-l-2" style={{ borderColor: CITRUS, color: BONE }}>
+                  <p className="text-2xl font-bold" style={display}>Pass Rate</p>
+                  <p className="text-sm opacity-70 mt-1">Among students who completed our 6-week JAMB program.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-px pt-px" style={{ backgroundColor: `${CITRUS}33` }}>
+                {[
+                  { v: "180", l: "Questions" },
+                  { v: "120m", l: "Timer" },
+                  { v: "10+", l: "Subjects" },
+                ].map((s) => (
+                  <div key={s.l} className="px-4 py-5 text-center" style={{ backgroundColor: FOREST, color: BONE }}>
+                    <div className="text-2xl font-bold" style={display}>{s.v}</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 mt-1">{s.l}</div>
+                  </div>
+                ))}
+              </div>
             </div>
+          </div>
+        </div>
+      </header>
+
+      {/* ============== EXAM PICKER ============== */}
+      <section className="px-6 lg:px-10 py-24 border-b" style={{ borderColor: INK }}>
+        <div className="max-w-7xl mx-auto">
+          <SectionHead
+            eyebrow="Choose Pathway"
+            title="Your Exam Practice"
+            lede="Practice with authentic JAMB and WAEC conditions, official question counts, and precise timing."
+          />
+          <div className="grid md:grid-cols-2 gap-px border" style={{ backgroundColor: INK, borderColor: INK }}>
+            {/* JAMB */}
+            <article className="p-10 lg:p-14 group transition-colors" style={{ backgroundColor: BONE }}>
+              <div className="flex items-start justify-between mb-10">
+                <div className="w-14 h-14 rounded-full border flex items-center justify-center transition-colors group-hover:bg-[#0B2A1F] group-hover:text-[#F2EFE6]"
+                  style={{ borderColor: INK }}>
+                  <Target className="h-6 w-6" />
+                </div>
+                <span className="text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: `${INK}80` }}>Paper A</span>
+              </div>
+              <h3 className="text-4xl font-bold mb-4 tracking-tight" style={display}>JAMB Practice</h3>
+              <p className="mb-10 leading-relaxed text-base" style={{ color: `${INK}B3` }}>
+                Subject-based practice with 180 questions (English + 3 subjects) in 120 minutes — official JAMB format.
+              </p>
+              <ul className="space-y-3 mb-12 text-sm">
+                {["120 minutes duration", "180 questions total", "Score out of 400"].map((x) => (
+                  <li key={x} className="flex items-center gap-3 font-medium" style={{ color: `${INK}CC` }}>
+                    <span className="text-base" style={{ color: FOREST }}>/</span> {x}
+                  </li>
+                ))}
+              </ul>
+              {user && !isMobileWeb ? (
+                <ScheduleTestModal defaultExamType="jamb">
+                  <button className="w-full py-4 border font-bold uppercase tracking-[0.18em] text-xs transition-colors hover:bg-[#0B2A1F] hover:text-[#F2EFE6]"
+                    style={{ borderColor: INK }}>
+                    Start JAMB
+                  </button>
+                </ScheduleTestModal>
+              ) : (
+                <Link to="/auth"
+                  className="block w-full py-4 border text-center font-bold uppercase tracking-[0.18em] text-xs transition-colors hover:bg-[#0B2A1F] hover:text-[#F2EFE6]"
+                  style={{ borderColor: INK }}>
+                  Start JAMB
+                </Link>
+              )}
+            </article>
+
+            {/* WAEC */}
+            <article className="p-10 lg:p-14 group transition-colors" style={{ backgroundColor: BONE }}>
+              <div className="flex items-start justify-between mb-10">
+                <div className="w-14 h-14 rounded-full border flex items-center justify-center transition-colors group-hover:bg-[#0B2A1F] group-hover:text-[#F2EFE6]"
+                  style={{ borderColor: INK }}>
+                  <BookOpen className="h-6 w-6" />
+                </div>
+                <span className="text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: `${INK}80` }}>Paper B</span>
+              </div>
+              <h3 className="text-4xl font-bold mb-4 tracking-tight" style={display}>WAEC Practice</h3>
+              <p className="mb-10 leading-relaxed text-base" style={{ color: `${INK}B3` }}>
+                Subject-based practice with 50–60 questions per paper — authentic WAEC experience.
+              </p>
+              <ul className="space-y-3 mb-12 text-sm">
+                {["Subject-specific timing", "50–60 questions per paper", "A1–F9 grading system"].map((x) => (
+                  <li key={x} className="flex items-center gap-3 font-medium" style={{ color: `${INK}CC` }}>
+                    <span className="text-base" style={{ color: FOREST }}>/</span> {x}
+                  </li>
+                ))}
+              </ul>
+              {user && !isMobileWeb ? (
+                <ScheduleTestModal defaultExamType="waec">
+                  <button className="w-full py-4 border font-bold uppercase tracking-[0.18em] text-xs transition-colors hover:bg-[#0B2A1F] hover:text-[#F2EFE6]"
+                    style={{ borderColor: INK }}>
+                    Start WAEC
+                  </button>
+                </ScheduleTestModal>
+              ) : (
+                <Link to="/auth"
+                  className="block w-full py-4 border text-center font-bold uppercase tracking-[0.18em] text-xs transition-colors hover:bg-[#0B2A1F] hover:text-[#F2EFE6]"
+                  style={{ borderColor: INK }}>
+                  Start WAEC
+                </Link>
+              )}
+            </article>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent" />
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight">Ready to Ace Your Exams?</h2>
-            <p className="text-xl md:text-2xl mb-12 opacity-95 leading-relaxed font-light max-w-2xl mx-auto">
-              Start your journey to exam success today. Free trial available - no credit card required.
+      {/* ============== FEATURES ============== */}
+      <section className="px-6 lg:px-10 py-24 border-b" style={{ borderColor: INK }}>
+        <div className="max-w-7xl mx-auto">
+          <SectionHead
+            eyebrow="The Toolkit"
+            title="Everything You Need to Excel"
+            lede="Engineered specifically for the Nigerian academic landscape — high-stakes simulation paired with deep educational insight."
+          />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px border" style={{ backgroundColor: INK, borderColor: INK }}>
+            {features.map((f) => {
+              const dark = f.dark;
+              return (
+                <div key={f.n}
+                  className="p-8 lg:p-10 flex flex-col min-h-[260px] transition-colors"
+                  style={{
+                    backgroundColor: dark ? FOREST : BONE,
+                    color: dark ? BONE : INK,
+                  }}>
+                  <div className="flex items-center justify-between mb-8">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.24em]"
+                      style={{ color: dark ? CITRUS : `${INK}80` }}>{f.n}</span>
+                    <div style={{ color: dark ? CITRUS : FOREST }}>{f.icon}</div>
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 uppercase tracking-tight leading-tight"
+                    style={{ ...display, color: dark ? CITRUS : INK }}>
+                    {f.title}
+                  </h4>
+                  <p className="text-sm leading-relaxed" style={{ color: dark ? `${BONE}CC` : `${INK}B3` }}>
+                    {f.desc}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============== SUBJECTS ============== */}
+      <section className="px-6 lg:px-10 py-24 border-b" style={{ borderColor: INK }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="border-l-[3px] pl-6 mb-12" style={{ borderColor: FOREST }}>
+            <Eyebrow>Subject Spectrum</Eyebrow>
+            <h2 className="mt-3 text-4xl md:text-5xl font-bold tracking-tight" style={display}>
+              Practice All WAEC &amp; JAMB Subjects
+            </h2>
+            <p className="mt-3 text-base" style={{ color: `${INK}B3` }}>
+              Complete coverage with up-to-date question banks.
             </p>
-            <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
-              <Link to="/auth" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-2xl hover:shadow-3xl transition-all px-10 py-6 text-lg font-semibold">
-                  {isMobileWeb ? (
-                    <>
-                      Practice Now
-                      <ArrowRight className="ml-2 h-6 w-6" />
-                    </>
-                  ) : (
-                    <>
-                      Start Free Trial
-                      <ArrowRight className="ml-2 h-6 w-6" />
-                    </>
-                  )}
-                </Button>
-              </Link>
-              <Link to="/payment" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto bg-white/10 backdrop-blur-sm text-white border-white/40 hover:bg-white/20 shadow-lg transition-all px-10 py-6 text-lg font-semibold">
-                  View Pricing
-                </Button>
-              </Link>
-            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {subjects.map((s) => (
+              <span key={s}
+                className="px-5 py-3 border text-sm font-bold uppercase tracking-tight transition-colors cursor-default hover:bg-[#D7F26A]"
+                style={{ borderColor: INK, color: INK }}>
+                {s}
+              </span>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Blog Section - Moved to AKBOY */}
-      {/* <BlogSection /> */}
+      {/* ============== WHY EDURA + STATS ============== */}
+      <section className="px-6 lg:px-10 py-24 border-b" style={{ backgroundColor: INK, color: BONE, borderColor: INK }}>
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+          <div className="lg:col-span-6">
+            <Eyebrow><span style={{ color: CITRUS }}>Why Edura</span></Eyebrow>
+            <h2 className="mt-4 text-4xl md:text-6xl font-bold leading-[0.95] tracking-tight" style={display}>
+              Built for students who refuse to guess.
+            </h2>
+            <div className="mt-10 space-y-6">
+              {[
+                "Unrivaled accuracy in JAMB exam pattern matching — we model the cognitive load of the real paper, not just the questions.",
+                "Over 50,000 students have used our analytics to convert weak subjects into core strengths within weeks.",
+                "Expert consultation and mentorship booking, on your schedule.",
+              ].map((t, i) => (
+                <div key={i} className="flex gap-5 border-b pb-6" style={{ borderColor: `${BONE}1A` }}>
+                  <div className="w-1 flex-shrink-0" style={{ backgroundColor: CITRUS }} />
+                  <p className="text-base lg:text-lg leading-relaxed" style={{ color: `${BONE}CC` }}>{t}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="lg:col-span-6 grid grid-cols-2 gap-px" style={{ backgroundColor: `${BONE}1A` }}>
+            {[
+              { v: "92%", l: "Avg. Score Improvement" },
+              { v: "50k+", l: "Registered Students" },
+              { v: "98%", l: "Success Rate" },
+              { v: "24/7", l: "Portal Access" },
+            ].map((s) => (
+              <div key={s.l} className="p-10 lg:p-12 text-center" style={{ backgroundColor: FOREST }}>
+                <div className="text-5xl lg:text-6xl font-bold mb-3" style={{ ...display, color: CITRUS }}>{s.v}</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.24em]" style={{ color: `${BONE}99` }}>{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      {/* Footer */}
+      {/* ============== FINAL CTA ============== */}
+      <section className="px-6 lg:px-10 py-28 text-center" style={{ backgroundColor: BONE }}>
+        <div className="max-w-4xl mx-auto">
+          <Eyebrow>Begin</Eyebrow>
+          <h2 className="mt-5 text-5xl md:text-7xl font-bold tracking-tight leading-[0.95]" style={display}>
+            Ready to <span className="italic" style={{ color: FOREST, textDecoration: `underline ${CITRUS}`, textUnderlineOffset: "8px" }}>Ace Your Exams?</span>
+          </h2>
+          <p className="mt-6 text-lg md:text-xl max-w-2xl mx-auto" style={{ color: `${INK}B3` }}>
+            Start your journey to exam success today. Free trial available — no credit card required.
+          </p>
+          <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+            <Link to="/auth"
+              className="px-10 py-5 font-bold uppercase tracking-[0.18em] text-sm transition-colors hover:bg-[#234B36]"
+              style={{ backgroundColor: INK, color: BONE }}>
+              {isMobileWeb ? "Practice Now" : "Start Free Trial"}
+            </Link>
+            <Link to="/payment"
+              className="px-10 py-5 font-bold uppercase tracking-[0.18em] text-sm border transition-colors hover:bg-[#0B2A1F] hover:text-[#F2EFE6]"
+              style={{ borderColor: INK, color: INK }}>
+              View Pricing
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <Footer />
-    </div>;
+    </div>
+  );
 };
+
 export default Home;
