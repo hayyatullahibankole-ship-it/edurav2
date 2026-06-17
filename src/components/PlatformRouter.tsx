@@ -68,10 +68,6 @@ import AkboyMockSubmitted from "@/pages/akboy/AkboyMockSubmitted";
 import AkboyMockResults from "@/pages/akboy/AkboyMockResults";
 import AkboyMockPages from "@/pages/akboy/AkboyMockPages";
 import ReprintAdmitSlip from "@/pages/akboy/ReprintAdmitSlip";
-import AkboyAcademy from "@/pages/akboy/AkboyAcademy";
-import AkboyResources from "@/pages/akboy/AkboyResources";
-import AkboyTestimonials from "@/pages/akboy/AkboyTestimonials";
-import AkboyConsultation from "@/pages/akboy/AkboyConsultation";
 
 // Akboy Routes Component
 const AkboyRoutes = () => {
@@ -83,11 +79,6 @@ const AkboyRoutes = () => {
       <Route path="/portfolio" element={<AkboyPortfolio />} />
       <Route path="/events" element={<AkboyEvents />} />
       <Route path="/contact" element={<AkboyContact />} />
-      <Route path="/academy" element={<AkboyAcademy />} />
-      <Route path="/resources" element={<AkboyResources />} />
-      <Route path="/testimonials" element={<AkboyTestimonials />} />
-      <Route path="/consultation" element={<AkboyConsultation />} />
-      <Route path="/book-consultation" element={<Navigate to="/consultation" replace />} />
 
       {/* Registration aliases */}
       <Route path="/register" element={<AkboyTutorialRegistration />} />

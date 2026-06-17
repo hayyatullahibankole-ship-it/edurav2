@@ -15,11 +15,9 @@ export default {
     extend: {
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
-        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         lato: ['Lato', 'sans-serif'],
-        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
-        body: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -79,19 +77,6 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
-        },
-        akboy: {
-          forest: "hsl(var(--akboy-forest))",
-          "forest-deep": "hsl(var(--akboy-forest-deep))",
-          emerald: "hsl(var(--akboy-emerald))",
-          leaf: "hsl(var(--akboy-leaf))",
-          mint: "hsl(var(--akboy-mint))",
-          butter: "hsl(var(--akboy-butter))",
-          "butter-soft": "hsl(var(--akboy-butter-soft))",
-          moss: "hsl(var(--akboy-moss))",
-          cream: "hsl(var(--akboy-cream))",
-          stone: "hsl(var(--akboy-stone))",
-          ink: "hsl(var(--akboy-ink))",
         },
       },
       borderRadius: {
