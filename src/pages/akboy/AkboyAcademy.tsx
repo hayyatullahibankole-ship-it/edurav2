@@ -18,9 +18,9 @@ export default function AkboyAcademy() {
     if (!email.trim()) return;
     setLoading(true);
     const { error } = await supabase.from("akboy_inquiries").insert({
-      full_name: "Academy waitlist",
+      name: "Academy waitlist",
       email: email.trim(),
-      service: "Academy waitlist",
+      subject: "Academy waitlist",
       message: "Notify me when AKBOY Academy launches.",
     });
     setLoading(false);
