@@ -15,10 +15,10 @@ export default {
     extend: {
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         lato: ['Lato', 'sans-serif'],
-        display: ['Syne', 'Inter', 'sans-serif'],
+        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
         body: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
       },
       colors: {
