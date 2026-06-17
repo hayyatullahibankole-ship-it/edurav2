@@ -575,7 +575,7 @@ function Blog({ basePath }: { basePath: string }) {
 
 /* ===================== PAGE ===================== */
 export default function AkboyHome() {
-  const { isAkboyDomain: isAkboy } = useDomainDetection();
+  const { isAkboy } = useDomainDetection();
   const basePath = isAkboy ? "" : "/akboy";
 
   return (
