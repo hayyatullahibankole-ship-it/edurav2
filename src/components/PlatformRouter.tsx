@@ -68,6 +68,10 @@ import AkboyMockSubmitted from "@/pages/akboy/AkboyMockSubmitted";
 import AkboyMockResults from "@/pages/akboy/AkboyMockResults";
 import AkboyMockPages from "@/pages/akboy/AkboyMockPages";
 import ReprintAdmitSlip from "@/pages/akboy/ReprintAdmitSlip";
+import AkboyAcademy from "@/pages/akboy/AkboyAcademy";
+import AkboyResources from "@/pages/akboy/AkboyResources";
+import AkboyTestimonials from "@/pages/akboy/AkboyTestimonials";
+import AkboyConsultation from "@/pages/akboy/AkboyConsultation";
 
 // Akboy Routes Component
 const AkboyRoutes = () => {
