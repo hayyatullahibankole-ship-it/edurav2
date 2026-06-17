@@ -1,20 +1,24 @@
 import { Link } from "react-router-dom";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import {
-  ArrowRight, ArrowUpRight, GraduationCap, Palette, Code, BookOpen,
-  Megaphone, Heart, Star, Quote, Trophy, Users, Briefcase,
+  ArrowRight, Phone, Play, CheckCircle2, GraduationCap, Code2, Palette,
+  Lightbulb, Trophy, Users, BookOpen, Sparkles, Star, Quote, Calendar,
 } from "lucide-react";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
-import hero1 from "@/assets/akboy-hero-1.jpg";
-import hero2 from "@/assets/akboy-hero-2.jpg";
-import hero3 from "@/assets/akboy-hero-3.jpg";
-import hero4 from "@/assets/akboy-hero-4.jpg";
+import hero from "@/assets/akboy-hero.jpg";
+import heroAlt from "@/assets/akboy-about-hero.jpg";
+import h1 from "@/assets/akboy-hero-1.jpg";
+import h2 from "@/assets/akboy-hero-2.jpg";
+import h3 from "@/assets/akboy-hero-3.jpg";
+import h4 from "@/assets/akboy-hero-4.jpg";
+import team from "@/assets/akboy-team.jpg";
+import portfolio from "@/assets/akboy-portfolio-hero.jpg";
+import events from "@/assets/akboy-events-hero.jpg";
 
 /* ============================================================
-   AKBOY — Structured Magazine
+   AKBOY — Infotek-style structure
+   Pillars: Education · Technology · Creativity
    Palette: bone #F2EFE6 · ink #0B2A1F · forest #234B36 · citrus #D7F26A
-   Type: Space Grotesk (display) · DM Sans (body)
-   Clear hierarchy · consistent 24px/96px rhythm · hairline rules
    ============================================================ */
 
 const BONE = "#F2EFE6";
@@ -23,163 +27,189 @@ const FOREST = "#234B36";
 const CITRUS = "#D7F26A";
 
 const display = { fontFamily: "'Space Grotesk', system-ui, sans-serif" };
-const body = { fontFamily: "'DM Sans', system-ui, sans-serif" };
 
 const Eyebrow = ({ children, light }: { children: React.ReactNode; light?: boolean }) => (
-  <span
-    className="inline-block text-[11px] font-bold uppercase tracking-[0.28em]"
-    style={{ color: light ? CITRUS : FOREST }}
-  >
-    {children}
-  </span>
-);
-
-const SectionHead = ({
-  eyebrow, title, lede, light,
-}: { eyebrow: string; title: string; lede?: string; light?: boolean }) => (
-  <div className="grid md:grid-cols-12 gap-8 md:gap-10 items-end mb-12 md:mb-16">
-    <div className="md:col-span-7">
-      <Eyebrow light={light}>{eyebrow}</Eyebrow>
-      <h2
-        className="mt-4 text-4xl md:text-6xl font-bold leading-[0.95] tracking-tight"
-        style={{ ...display, color: light ? BONE : INK }}
-      >
-        {title}
-      </h2>
-    </div>
-    {lede && (
-      <div className="md:col-span-5 md:pb-3">
-        <p className="text-lg leading-relaxed" style={{ color: light ? `${BONE}B3` : `${INK}B3` }}>
-          {lede}
-        </p>
-      </div>
-    )}
+  <div className="flex items-center gap-3 mb-4">
+    <span className="h-px w-8" style={{ backgroundColor: light ? CITRUS : FOREST }} />
+    <span
+      className="text-[11px] font-bold uppercase tracking-[0.3em]"
+      style={{ color: light ? CITRUS : FOREST }}
+    >
+      {children}
+    </span>
   </div>
 );
 
-/* ===================== HERO ===================== */
+/* ===================== 1. HERO ===================== */
 function Hero({ basePath }: { basePath: string }) {
   return (
-    <header className="border-b" style={{ borderColor: INK }}>
-      <div className="grid lg:grid-cols-12 min-h-[78vh]">
+    <section className="relative overflow-hidden" style={{ backgroundColor: BONE }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-16 pb-20 lg:pt-24 lg:pb-28 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         {/* Copy */}
-        <div
-          className="lg:col-span-7 px-6 lg:px-16 py-16 lg:py-24 flex flex-col justify-center lg:border-r"
-          style={{ borderColor: INK }}
-        >
-          <span
-            className="inline-flex w-fit items-center px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] mb-8"
-            style={{ backgroundColor: CITRUS, color: INK }}
-          >
-            Next Intake · March 2026
-          </span>
+        <div>
+          <Eyebrow>Best Creative Hub</Eyebrow>
           <h1
-            className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold leading-[0.92] tracking-tight mb-8"
+            className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[0.95] tracking-tight mb-6"
             style={{ ...display, color: INK }}
           >
-            Grow your future<br />
-            with <span className="italic" style={{ color: FOREST }}>smart</span><br />
-            creative solutions.
+            Grow Your Future <br />
+            With <span style={{ color: FOREST }}>Education,</span> <br />
+            Tech &amp; Creativity.
           </h1>
-          <p className="text-lg md:text-xl max-w-xl mb-10 leading-relaxed" style={{ color: `${INK}CC` }}>
-            AKBOY Creative Hub blends admission consultancy, tutorials, design and digital training
-            into one premium ecosystem for students, schools and brands.
+          <p className="text-lg max-w-xl mb-10 leading-relaxed" style={{ color: `${INK}CC` }}>
+            AKBOY is a creative learning ecosystem helping students, schools and brands
+            unlock potential through expert tutorials, modern technology training and
+            high-impact design.
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4">
             <Link
               to={`${basePath}/services`}
-              className="inline-flex items-center gap-3 px-8 py-4 font-bold uppercase tracking-[0.18em] text-sm"
+              className="inline-flex items-center gap-3 px-7 py-4 rounded-full font-semibold text-sm transition-transform hover:-translate-y-0.5"
               style={{ backgroundColor: FOREST, color: CITRUS }}
             >
-              Get Started <ArrowRight className="h-4 w-4" />
+              Explore More <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               to={`${basePath}/contact`}
-              className="inline-flex items-center px-8 py-4 font-bold uppercase tracking-[0.18em] text-sm border transition-colors hover:bg-[#0B2A1F] hover:text-[#F2EFE6]"
+              className="inline-flex items-center gap-3 px-7 py-4 rounded-full font-semibold text-sm border-2 transition-colors hover:bg-[#0B2A1F] hover:text-[#F2EFE6]"
               style={{ borderColor: INK, color: INK }}
             >
-              Explore
+              Contact Us <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
-
-          {/* Trust row */}
-          <div className="flex items-center gap-5 mt-10 pt-8 border-t" style={{ borderColor: `${INK}1A` }}>
-            <div className="flex -space-x-2.5">
-              {[hero1, hero2, hero3, hero4].map((src, i) => (
-                <img key={i} src={src} alt="" className="w-10 h-10 rounded-full border-2 object-cover" style={{ borderColor: BONE }} />
-              ))}
-            </div>
-            <div>
-              <div className="flex items-center gap-0.5" style={{ color: FOREST }}>
-                {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-current" />)}
-                <span className="ml-2 text-xs font-bold" style={{ color: INK }}>4.9</span>
-              </div>
-              <div className="text-xs mt-0.5" style={{ color: `${INK}80` }}>
-                1,200+ students &amp; brands trust us
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Featured stat panel */}
-        <div className="lg:col-span-5 relative overflow-hidden min-h-[360px] lg:min-h-full" style={{ backgroundColor: FOREST }}>
+        {/* Visual */}
+        <div className="relative">
           <div
-            className="absolute inset-0 opacity-[0.07]"
-            style={{
-              backgroundImage: `linear-gradient(${CITRUS} 1px, transparent 1px), linear-gradient(90deg, ${CITRUS} 1px, transparent 1px)`,
-              backgroundSize: "48px 48px",
-            }}
+            className="absolute -top-6 -left-6 w-40 h-40 rounded-full opacity-30 blur-3xl"
+            style={{ backgroundColor: CITRUS }}
           />
-          <div className="relative h-full flex flex-col justify-between p-10 lg:p-14">
-            <div className="flex items-start justify-between">
-              <Eyebrow light><span>// Featured Outcome</span></Eyebrow>
-              <GraduationCap className="h-6 w-6" style={{ color: CITRUS }} />
+          <div
+            className="relative aspect-[4/5] rounded-[120px_120px_24px_120px] overflow-hidden border-4"
+            style={{ borderColor: INK }}
+          >
+            <img src={hero} alt="Students learning" className="w-full h-full object-cover" />
+          </div>
+          {/* floating badge */}
+          <div
+            className="absolute -bottom-6 -left-6 px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-3"
+            style={{ backgroundColor: INK, color: BONE }}
+          >
+            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: CITRUS }}>
+              <Trophy className="w-5 h-5" style={{ color: INK }} />
             </div>
             <div>
-              <div
-                className="text-[6rem] md:text-[8rem] font-bold leading-none tracking-tighter"
-                style={{ ...display, color: CITRUS }}
-              >
-                98%
-              </div>
-              <div className="mt-4 pl-5 border-l-2" style={{ borderColor: CITRUS, color: BONE }}>
-                <p className="text-2xl font-bold" style={display}>Admission Success</p>
-                <p className="text-sm opacity-70 mt-1">Students placed in UNILAG, UI &amp; LASU through our consultancy.</p>
-              </div>
+              <div className="text-2xl font-bold" style={display}>98%</div>
+              <div className="text-[10px] uppercase tracking-widest opacity-70">Success Rate</div>
             </div>
-            <div className="grid grid-cols-3 gap-px pt-px" style={{ backgroundColor: `${CITRUS}33` }}>
-              {[
-                { v: "1,200+", l: "Students" },
-                { v: "300+", l: "Brands" },
-                { v: "8+", l: "Years" },
-              ].map((s) => (
-                <div key={s.l} className="px-3 py-5 text-center" style={{ backgroundColor: FOREST, color: BONE }}>
-                  <div className="text-xl font-bold" style={display}>{s.v}</div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 mt-1">{s.l}</div>
-                </div>
-              ))}
+          </div>
+          <div
+            className="absolute top-8 -right-4 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2"
+            style={{ backgroundColor: CITRUS, color: INK }}
+          >
+            <Sparkles className="w-4 h-4" />
+            <span className="text-xs font-bold uppercase tracking-wider">Award Winning</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ===================== 2. ABOUT ===================== */
+function About({ basePath }: { basePath: string }) {
+  return (
+    <section className="py-20 lg:py-28" style={{ backgroundColor: BONE }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        {/* Visual */}
+        <div className="relative">
+          <div
+            className="aspect-square rounded-[140px_24px_140px_24px] overflow-hidden border-4"
+            style={{ borderColor: INK }}
+          >
+            <img src={heroAlt} alt="Akboy learning" className="w-full h-full object-cover" />
+          </div>
+          <button
+            className="absolute inset-0 m-auto w-20 h-20 rounded-full flex items-center justify-center shadow-2xl"
+            style={{ backgroundColor: CITRUS, color: INK }}
+            aria-label="Play intro"
+          >
+            <Play className="w-7 h-7 ml-1 fill-current" />
+          </button>
+          <div
+            className="absolute -bottom-6 -right-6 px-6 py-5 rounded-2xl shadow-xl"
+            style={{ backgroundColor: FOREST, color: BONE }}
+          >
+            <div className="text-3xl font-bold" style={display}>6,561+</div>
+            <div className="text-xs uppercase tracking-widest opacity-80 mt-1">Learners Trained</div>
+          </div>
+        </div>
+
+        {/* Copy */}
+        <div>
+          <Eyebrow>About Akboy</Eyebrow>
+          <h2 className="text-4xl md:text-5xl font-bold leading-tight mb-6" style={{ ...display, color: INK }}>
+            We Empower Minds With Education &amp; Creativity
+          </h2>
+          <p className="text-base leading-relaxed mb-8" style={{ color: `${INK}B3` }}>
+            From admission consultancy and JAMB tutorials to design bootcamps and web
+            engineering — AKBOY is where ambitious learners build the skills the future
+            actually rewards.
+          </p>
+          <ul className="space-y-3 mb-8">
+            {[
+              "Expert-led tutorials & mentorship",
+              "Hands-on technology bootcamps",
+              "Creative design & brand training",
+            ].map((line) => (
+              <li key={line} className="flex items-center gap-3 text-sm font-medium" style={{ color: INK }}>
+                <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: FOREST }} />
+                {line}
+              </li>
+            ))}
+          </ul>
+          <div className="flex flex-wrap items-center gap-6">
+            <Link
+              to={`${basePath}/about`}
+              className="inline-flex items-center gap-3 px-7 py-4 rounded-full font-semibold text-sm"
+              style={{ backgroundColor: FOREST, color: CITRUS }}
+            >
+              Explore More <ArrowRight className="h-4 w-4" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full flex items-center justify-center" style={{ backgroundColor: CITRUS }}>
+                <Phone className="w-4 h-4" style={{ color: INK }} />
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-widest" style={{ color: `${INK}80` }}>Call Us Now</div>
+                <div className="text-sm font-bold" style={{ color: INK }}>+234 801 234 5678</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </header>
+    </section>
   );
 }
 
-/* ===================== TRUSTED LOGOS ===================== */
-function TrustedBy() {
-  const items = ["UI", "OAU", "LASU", "JAMB", "WAEC", "NECO", "Covenant", "UNILAG"];
+/* ===================== 3. BRANDS STRIP ===================== */
+function Brands() {
+  const brands = ["UNILAG", "OAU", "COVENANT", "BABCOCK", "UI"];
   return (
-    <section className="px-6 lg:px-10 py-10 border-b" style={{ borderColor: INK }}>
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-6 md:gap-10">
-        <span className="text-[10px] font-bold uppercase tracking-[0.28em] whitespace-nowrap" style={{ color: `${INK}80` }}>
-          Trusted By Students Placed At
-        </span>
-        <div className="flex-1 h-px" style={{ backgroundColor: `${INK}1A` }} />
-        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-          {items.map((x) => (
-            <span key={x} className="text-lg font-bold tracking-tight opacity-60 hover:opacity-100 transition-opacity" style={display}>
-              {x}
+    <section className="py-10 border-y" style={{ backgroundColor: BONE, borderColor: `${INK}1A` }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <span className="h-px w-8" style={{ backgroundColor: `${INK}40` }} />
+          <span className="text-[11px] font-bold uppercase tracking-[0.3em]" style={{ color: `${INK}80` }}>
+            15+ Partner Institutions
+          </span>
+          <span className="h-px w-8" style={{ backgroundColor: `${INK}40` }} />
+        </div>
+        <div className="flex flex-wrap items-center justify-around gap-8">
+          {brands.map((b) => (
+            <span key={b} className="text-2xl font-bold tracking-tight" style={{ ...display, color: `${INK}40` }}>
+              {b}
             </span>
           ))}
         </div>
@@ -188,163 +218,57 @@ function TrustedBy() {
   );
 }
 
-/* ===================== ECOSYSTEM (6 disciplines) ===================== */
-function Ecosystem({ basePath }: { basePath: string }) {
+/* ===================== 4. SERVICES ===================== */
+function Services({ basePath }: { basePath: string }) {
   const items = [
-    { icon: <GraduationCap className="h-7 w-7" />, n: "01", tag: "Education", title: "Admission Consultancy", desc: "Strategic university placement guidance — UNILAG, UI, LASU, overseas." },
-    { icon: <BookOpen className="h-7 w-7" />, n: "02", tag: "Learning", title: "Tutorial Services", desc: "JAMB · WAEC · Post-UTME live and on-demand classes.", dark: true },
-    { icon: <Palette className="h-7 w-7" />, n: "03", tag: "Creative", title: "Graphics Design", desc: "Brand identity, social, packaging and print collateral." },
-    { icon: <Code className="h-7 w-7" />, n: "04", tag: "Digital", title: "Web & App Design", desc: "Modern, conversion-ready websites and product apps." },
-    { icon: <Megaphone className="h-7 w-7" />, n: "05", tag: "Bootcamp", title: "Digital Skills Training", desc: "Bootcamps in design, no-code, marketing and AI." },
-    { icon: <Heart className="h-7 w-7" />, n: "06", tag: "Spiritual", title: "Quran & Tajweed", desc: "Personalised recitation classes with expert tutors." },
+    { icon: GraduationCap, title: "Tutorials", desc: "JAMB, WAEC & post-UTME masterclasses by top-scoring tutors.", img: h1 },
+    { icon: Code2, title: "Tech Training", desc: "Web development, data and product bootcamps for new careers.", img: h2 },
+    { icon: Palette, title: "Creative Design", desc: "Brand identity, social design and visual storytelling.", img: h3 },
+    { icon: BookOpen, title: "Consultancy", desc: "Admission guidance and academic counselling that delivers.", img: h4 },
   ];
   return (
-    <section className="px-6 lg:px-10 py-24 border-b" style={{ borderColor: INK }}>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-end justify-between mb-12 md:mb-16 gap-6">
-          <div>
-            <Eyebrow>Our Ecosystem</Eyebrow>
-            <h2 className="mt-4 text-4xl md:text-6xl font-bold leading-[0.95] tracking-tight" style={{ ...display, color: INK }}>
-              Six disciplines.<br />
-              <span className="italic" style={{ color: FOREST }}>One creative hub.</span>
+    <section className="py-20 lg:py-28" style={{ backgroundColor: "#EAE6D8" }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
+          <div className="max-w-xl">
+            <Eyebrow>What We Do</Eyebrow>
+            <h2 className="text-4xl md:text-5xl font-bold leading-tight" style={{ ...display, color: INK }}>
+              We Solve Real Problems With Education &amp; Technology
             </h2>
           </div>
           <Link
             to={`${basePath}/services`}
-            className="hidden md:inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] hover:opacity-60 transition-opacity"
-            style={{ color: INK }}
+            className="inline-flex w-fit items-center gap-3 px-6 py-3 rounded-full font-semibold text-sm"
+            style={{ backgroundColor: FOREST, color: CITRUS }}
           >
-            View All Services <ArrowUpRight className="h-3.5 w-3.5" />
+            See All Services <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px border" style={{ backgroundColor: INK, borderColor: INK }}>
-          {items.map((f) => {
-            const dark = f.dark;
-            return (
-              <Link
-                key={f.n}
-                to={`${basePath}/services`}
-                className="p-8 lg:p-10 flex flex-col min-h-[260px] transition-colors group"
-                style={{ backgroundColor: dark ? FOREST : BONE, color: dark ? BONE : INK }}
-              >
-                <div className="flex items-center justify-between mb-8">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: dark ? CITRUS : `${INK}80` }}>
-                    {f.n} · {f.tag}
-                  </span>
-                  <div style={{ color: dark ? CITRUS : FOREST }}>{f.icon}</div>
-                </div>
-                <h4
-                  className="text-xl font-bold mb-3 uppercase tracking-tight leading-tight"
-                  style={{ ...display, color: dark ? CITRUS : INK }}
-                >
-                  {f.title}
-                </h4>
-                <p className="text-sm leading-relaxed flex-1" style={{ color: dark ? `${BONE}CC` : `${INK}B3` }}>
-                  {f.desc}
-                </p>
-                <span
-                  className="mt-6 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em]"
-                  style={{ color: dark ? CITRUS : FOREST }}
-                >
-                  Learn more <ArrowUpRight className="h-3.5 w-3.5" />
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ===================== BENTO (Why AKBOY) ===================== */
-function Bento({ basePath }: { basePath: string }) {
-  return (
-    <section className="px-6 lg:px-10 py-24 border-b" style={{ borderColor: INK }}>
-      <div className="max-w-7xl mx-auto">
-        <SectionHead
-          eyebrow="Why Akboy"
-          title="Built on outcomes, not promises."
-          lede="Every program is anchored in measurable results — score gains, admissions secured, brands launched."
-        />
-
-        {/* Top row: testimonial + project + impact */}
-        <div className="grid md:grid-cols-12 gap-px border mb-px" style={{ backgroundColor: INK, borderColor: INK }}>
-          {/* Testimonial */}
-          <article className="md:col-span-5 p-10 lg:p-12" style={{ backgroundColor: BONE }}>
-            <Quote className="h-8 w-8 mb-6" style={{ color: FOREST }} />
-            <p className="text-xl md:text-2xl leading-snug font-medium mb-8" style={{ ...display, color: INK }}>
-              "AKBOY didn't just prep me for JAMB — they reshaped how I study. Scored 312 and got into UNILAG Medicine."
-            </p>
-            <div className="flex items-center gap-3 pt-6 border-t" style={{ borderColor: `${INK}1A` }}>
-              <img src={hero1} alt="" className="w-10 h-10 rounded-full object-cover" />
-              <div>
-                <div className="text-sm font-bold" style={{ color: INK }}>Aisha Bello</div>
-                <div className="text-xs" style={{ color: `${INK}80` }}>UNILAG Medical Student</div>
-              </div>
-            </div>
-          </article>
-
-          {/* Project image */}
-          <article
-            className="md:col-span-4 relative overflow-hidden min-h-[360px]"
-            style={{ backgroundColor: FOREST, backgroundImage: `url(${hero2})`, backgroundSize: "cover", backgroundPosition: "center" }}
-          >
-            <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent 40%, ${INK}E6 100%)` }} />
-            <div className="absolute bottom-0 left-0 right-0 p-8">
-              <Eyebrow light>Spotlight</Eyebrow>
-              <h3 className="mt-2 text-2xl font-bold leading-tight" style={{ ...display, color: BONE }}>
-                Featured Project:<br />Greenwood Brand Identity
-              </h3>
-              <Link
-                to={`${basePath}/portfolio`}
-                className="mt-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em]"
-                style={{ color: CITRUS }}
-              >
-                View portfolio <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </article>
-
-          {/* Impact panel */}
-          <article className="md:col-span-3 p-10 lg:p-12" style={{ backgroundColor: INK, color: BONE }}>
-            <Eyebrow light>Live Impact</Eyebrow>
-            <div className="mt-6 space-y-5">
-              {[
-                { l: "JAMB Top Score", v: "342" },
-                { l: "Projects Shipped", v: "+27" },
-                { l: "Active Cohorts", v: "12" },
-              ].map((s) => (
-                <div key={s.l} className="flex items-end justify-between pb-3 border-b" style={{ borderColor: `${BONE}1A` }}>
-                  <span className="text-xs uppercase tracking-[0.18em]" style={{ color: `${BONE}99` }}>{s.l}</span>
-                  <span className="text-2xl font-bold" style={{ ...display, color: CITRUS }}>{s.v}</span>
-                </div>
-              ))}
-            </div>
-            <Link
-              to={`${basePath}/about`}
-              className="mt-8 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em]"
-              style={{ color: CITRUS }}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {items.map(({ icon: Icon, title, desc, img }) => (
+            <article
+              key={title}
+              className="group bg-white rounded-2xl overflow-hidden border transition-transform hover:-translate-y-1"
+              style={{ borderColor: `${INK}1A` }}
             >
-              Our story <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
-          </article>
-        </div>
-
-        {/* Achievement strip */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px border" style={{ backgroundColor: INK, borderColor: INK }}>
-          {[
-            { icon: <Trophy className="h-5 w-5" />, t: "Fast Track", d: "8-week intensive bootcamps" },
-            { icon: <Briefcase className="h-5 w-5" />, t: "Full Stack", d: "Education + Creative + Digital" },
-            { icon: <Users className="h-5 w-5" />, t: "Global Reach", d: "Local roots, international standards" },
-            { icon: <Heart className="h-5 w-5" />, t: "1-on-1 Care", d: "Personalised mentor support" },
-          ].map((a) => (
-            <div key={a.t} className="p-6 lg:p-8" style={{ backgroundColor: BONE }}>
-              <div style={{ color: FOREST }}>{a.icon}</div>
-              <div className="mt-4 text-sm font-bold uppercase tracking-tight" style={{ ...display, color: INK }}>{a.t}</div>
-              <div className="mt-1 text-xs" style={{ color: `${INK}80` }}>{a.d}</div>
-            </div>
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <img src={img} alt={title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                <div
+                  className="absolute top-4 left-4 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
+                  style={{ backgroundColor: CITRUS, color: INK }}
+                >
+                  <Icon className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-bold mb-2" style={{ ...display, color: INK }}>{title}</h3>
+                <p className="text-sm leading-relaxed mb-4" style={{ color: `${INK}99` }}>{desc}</p>
+                <Link to={`${basePath}/services`} className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest" style={{ color: FOREST }}>
+                  Read More <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </article>
           ))}
         </div>
       </div>
@@ -352,131 +276,147 @@ function Bento({ basePath }: { basePath: string }) {
   );
 }
 
-/* ===================== PROGRAMS ===================== */
-function Programs({ basePath }: { basePath: string }) {
-  const tiers = [
-    {
-      tag: "Starter", title: "JAMB & Post-UTME Prep", subtitle: "Free intro class",
-      items: ["Live tutorials", "Past questions bank", "Weekly mocks"], popular: false,
-    },
-    {
-      tag: "Most Popular", title: "Creative Bootcamp", subtitle: "8-week intensive",
-      items: ["Design fundamentals", "Live client briefs", "Portfolio build"], popular: true,
-    },
-    {
-      tag: "Premium", title: "Admission Consultancy", subtitle: "1-on-1 placement",
-      items: ["University matching", "Application support", "Interview prep"], popular: false,
-    },
-  ];
+/* ===================== 5. CTA BANNER ===================== */
+function CTABanner({ basePath }: { basePath: string }) {
   return (
-    <section className="px-6 lg:px-10 py-24 border-b" style={{ borderColor: INK }}>
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12 md:mb-16">
-          <Eyebrow>Featured Programs</Eyebrow>
-          <h2 className="mt-4 text-4xl md:text-6xl font-bold leading-[0.95] tracking-tight" style={{ ...display, color: INK }}>
-            Programs that change<br />
-            <span className="italic" style={{ color: FOREST }}>trajectories.</span>
-          </h2>
-        </div>
-        <div className="grid md:grid-cols-3 gap-px border" style={{ backgroundColor: INK, borderColor: INK }}>
-          {tiers.map((t) => {
-            const pop = t.popular;
-            return (
-              <article
-                key={t.title}
-                className="p-10 lg:p-12 flex flex-col"
-                style={{
-                  backgroundColor: pop ? FOREST : BONE,
-                  color: pop ? BONE : INK,
-                }}
-              >
-                <span
-                  className="text-[10px] font-bold uppercase tracking-[0.24em] mb-6"
-                  style={{ color: pop ? CITRUS : `${INK}80` }}
-                >
-                  {t.tag}
-                </span>
-                <h3 className="text-2xl md:text-3xl font-bold tracking-tight mb-2" style={{ ...display, color: pop ? CITRUS : INK }}>
-                  {t.title}
-                </h3>
-                <p className="text-sm mb-8" style={{ color: pop ? `${BONE}B3` : `${INK}80` }}>{t.subtitle}</p>
-                <ul className="space-y-3 mb-10 text-sm flex-1">
-                  {t.items.map((x) => (
-                    <li key={x} className="flex items-center gap-3 font-medium">
-                      <span className="text-base" style={{ color: pop ? CITRUS : FOREST }}>/</span>
-                      <span style={{ color: pop ? BONE : `${INK}CC` }}>{x}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  to={`${basePath}/register`}
-                  className="w-full py-4 text-center font-bold uppercase tracking-[0.18em] text-xs transition-colors"
-                  style={
-                    pop
-                      ? { backgroundColor: CITRUS, color: INK }
-                      : { border: `1px solid ${INK}`, color: INK }
-                  }
-                >
-                  Enroll Now →
-                </Link>
-              </article>
-            );
-          })}
+    <section className="py-12" style={{ backgroundColor: BONE }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        <div
+          className="rounded-3xl px-8 lg:px-12 py-8 flex flex-col md:flex-row items-center justify-between gap-6"
+          style={{ backgroundColor: FOREST, color: BONE }}
+        >
+          <div className="flex items-center gap-5">
+            <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ backgroundColor: CITRUS, color: INK }}>
+              <Phone className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.3em] opacity-70">Call Us</div>
+              <div className="text-lg font-bold" style={display}>+234 801 234 5678</div>
+            </div>
+          </div>
+          <h3 className="text-2xl md:text-3xl font-bold text-center leading-tight" style={display}>
+            Stay Ahead With Future-Ready Learning
+          </h3>
+          <Link
+            to={`${basePath}/contact`}
+            className="inline-flex items-center gap-3 px-7 py-4 rounded-full font-semibold text-sm whitespace-nowrap"
+            style={{ backgroundColor: CITRUS, color: INK }}
+          >
+            Get Started <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </div>
     </section>
   );
 }
 
-/* ===================== INSIGHTS ===================== */
-function Insights({ basePath }: { basePath: string }) {
-  const posts = [
-    { tag: "JAMB", title: "How to score 300+ in JAMB: a tactical playbook", img: hero1 },
-    { tag: "Design", title: "From zero to client work in 8 weeks", img: hero2 },
-    { tag: "Admission", title: "Choosing the right university course in 2026", img: hero3 },
+/* ===================== 6. WORK PROCESS ===================== */
+function Process() {
+  const steps = [
+    { n: "01", title: "Choose a Program", desc: "Pick from tutorials, tech bootcamps or design tracks." },
+    { n: "02", title: "Onboard & Plan", desc: "Meet your mentor and set personalised learning goals." },
+    { n: "03", title: "Learn by Doing", desc: "Hands-on classes, projects and continuous assessment." },
+    { n: "04", title: "Launch Your Future", desc: "Graduate with skills, certificates and real outcomes." },
   ];
   return (
-    <section className="px-6 lg:px-10 py-24 border-b" style={{ borderColor: INK }}>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-end justify-between mb-12 md:mb-16 gap-6">
+    <section className="py-20 lg:py-28" style={{ backgroundColor: BONE }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 text-center mb-14">
+        <Eyebrow>How We Work</Eyebrow>
+        <h2 className="text-4xl md:text-5xl font-bold" style={{ ...display, color: INK }}>
+          Our Standard Learning Process
+        </h2>
+      </div>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+        {steps.map((s, i) => (
+          <div key={s.n} className="relative text-center">
+            <div
+              className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-5 border-2 font-bold text-xl"
+              style={{ ...display, borderColor: FOREST, color: FOREST, backgroundColor: BONE }}
+            >
+              {s.n}
+            </div>
+            <h3 className="text-lg font-bold mb-2" style={{ ...display, color: INK }}>{s.title}</h3>
+            <p className="text-sm leading-relaxed" style={{ color: `${INK}99` }}>{s.desc}</p>
+            {i < steps.length - 1 && (
+              <div className="hidden lg:block absolute top-10 -right-3 w-6 h-px" style={{ backgroundColor: `${INK}33` }} />
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ===================== 7. STATS + PROJECTS (dark) ===================== */
+function StatsAndProjects({ basePath }: { basePath: string }) {
+  const stats = [
+    { icon: Users, num: "6,561+", label: "Active Learners" },
+    { icon: Trophy, num: "600+", label: "Success Stories" },
+    { icon: GraduationCap, num: "250+", label: "Expert Tutors" },
+    { icon: Sparkles, num: "1,001+", label: "Projects Shipped" },
+  ];
+  const projects = [
+    { tag: "Education", title: "JAMB Mastery Program", img: h1 },
+    { tag: "Technology", title: "Web Dev Bootcamp", img: portfolio },
+    { tag: "Creativity", title: "Brand Design Studio", img: events },
+  ];
+  return (
+    <section className="relative py-20 lg:py-28 overflow-hidden" style={{ backgroundColor: INK }}>
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage: `radial-gradient(${CITRUS} 1px, transparent 1px)`,
+          backgroundSize: "32px 32px",
+        }}
+      />
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
+        {/* Stats */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-16 mb-16 border-b" style={{ borderColor: `${BONE}1A` }}>
+          {stats.map(({ icon: Icon, num, label }) => (
+            <div key={label} className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${CITRUS}1A`, color: CITRUS }}>
+                <Icon className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="text-3xl font-bold" style={{ ...display, color: BONE }}>{num}</div>
+                <div className="text-xs uppercase tracking-widest" style={{ color: `${BONE}80` }}>{label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Projects */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
           <div>
-            <Eyebrow>Resources &amp; Insights</Eyebrow>
-            <h2 className="mt-4 text-4xl md:text-6xl font-bold leading-[0.95] tracking-tight" style={{ ...display, color: INK }}>
-              Smart tips for a<br />
-              <span className="italic" style={{ color: FOREST }}>stronger future.</span>
+            <Eyebrow light>Our Programs</Eyebrow>
+            <h2 className="text-4xl md:text-5xl font-bold leading-tight" style={{ ...display, color: BONE }}>
+              Our Latest Incredible <br /> Learning Experiences
             </h2>
           </div>
           <Link
-            to={`${basePath}/campus-hub`}
-            className="hidden md:inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] hover:opacity-60 transition-opacity"
-            style={{ color: INK }}
+            to={`${basePath}/portfolio`}
+            className="inline-flex w-fit items-center gap-3 px-6 py-3 rounded-full font-semibold text-sm"
+            style={{ backgroundColor: CITRUS, color: INK }}
           >
-            View All <ArrowUpRight className="h-3.5 w-3.5" />
+            View All <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-px border" style={{ backgroundColor: INK, borderColor: INK }}>
-          {posts.map((p) => (
-            <Link
-              key={p.title}
-              to={`${basePath}/campus-hub`}
-              className="group flex flex-col"
-              style={{ backgroundColor: BONE }}
-            >
-              <div
-                className="aspect-[4/3] w-full overflow-hidden"
-                style={{ backgroundImage: `url(${p.img})`, backgroundSize: "cover", backgroundPosition: "center" }}
-              />
-              <div className="p-8">
-                <span className="text-[10px] font-bold uppercase tracking-[0.24em]" style={{ color: FOREST }}>{p.tag}</span>
-                <h3 className="mt-3 text-xl font-bold tracking-tight leading-tight" style={{ ...display, color: INK }}>
-                  {p.title}
-                </h3>
-                <span className="mt-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: FOREST }}>
-                  Read article <ArrowUpRight className="h-3.5 w-3.5" />
-                </span>
+        <div className="grid md:grid-cols-3 gap-6">
+          {projects.map((p) => (
+            <article key={p.title} className="group relative aspect-[4/5] rounded-2xl overflow-hidden">
+              <img src={p.img} alt={p.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <div
+                  className="inline-block text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3"
+                  style={{ backgroundColor: CITRUS, color: INK }}
+                >
+                  {p.tag}
+                </div>
+                <h3 className="text-xl font-bold text-white" style={display}>{p.title}</h3>
               </div>
-            </Link>
+            </article>
           ))}
         </div>
       </div>
@@ -484,40 +424,149 @@ function Insights({ basePath }: { basePath: string }) {
   );
 }
 
-/* ===================== CTA ===================== */
-function CTA({ basePath }: { basePath: string }) {
+/* ===================== 8. MARQUEE ===================== */
+function Marquee() {
+  const words = ["Education", "Technology", "Creativity", "Mentorship", "Innovation", "Design"];
   return (
-    <section className="px-6 lg:px-10 py-28" style={{ backgroundColor: INK, color: BONE }}>
-      <div className="max-w-5xl mx-auto grid lg:grid-cols-12 gap-10 items-end">
-        <div className="lg:col-span-7">
-          <Eyebrow light>Begin With AKBOY</Eyebrow>
-          <h2
-            className="mt-5 text-5xl md:text-7xl font-bold tracking-tight leading-[0.95]"
-            style={display}
-          >
-            Ready to learn,<br />
-            <span className="italic" style={{ color: CITRUS }}>create or grow?</span>
-          </h2>
-          <p className="mt-6 text-lg max-w-xl" style={{ color: `${BONE}B3` }}>
-            Book a free consultation. We'll map a plan tailored to where you are and where you're going.
+    <div className="overflow-hidden py-8 border-y" style={{ backgroundColor: CITRUS, borderColor: INK }}>
+      <div className="flex gap-12 animate-[scroll_30s_linear_infinite] whitespace-nowrap">
+        {[...words, ...words, ...words].map((w, i) => (
+          <span key={i} className="flex items-center gap-12 text-3xl md:text-4xl font-bold" style={{ ...display, color: INK }}>
+            {w}
+            <Sparkles className="w-6 h-6" />
+          </span>
+        ))}
+      </div>
+      <style>{`@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-33.333%)}}`}</style>
+    </div>
+  );
+}
+
+/* ===================== 9. TEAM ===================== */
+function Team() {
+  const people = [
+    { name: "Lawrence Akboy", role: "Founder / Lead Tutor", img: h1 },
+    { name: "Layla Akande", role: "Head of Technology", img: h2 },
+    { name: "Daniel Hassan", role: "Creative Director", img: h3 },
+    { name: "Sarah Bello", role: "Education Lead", img: h4 },
+  ];
+  return (
+    <section className="py-20 lg:py-28" style={{ backgroundColor: BONE }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
+          <div>
+            <Eyebrow>Meet The Team</Eyebrow>
+            <h2 className="text-4xl md:text-5xl font-bold" style={{ ...display, color: INK }}>
+              Our Dedicated <br /> Faculty Members
+            </h2>
+          </div>
+          <p className="max-w-md text-base" style={{ color: `${INK}99` }}>
+            Educators, engineers and creatives uniting to help you build a future you're proud of.
           </p>
         </div>
-        <div className="lg:col-span-5 flex flex-col gap-3">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {people.map((p) => (
+            <article key={p.name} className="group">
+              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-4">
+                <img src={p.img} alt={p.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
+                <div className="absolute inset-x-4 bottom-4 p-3 rounded-xl flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ backgroundColor: CITRUS, color: INK }}>
+                  <span className="text-xs font-bold uppercase tracking-widest">View</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+              <h3 className="text-lg font-bold" style={{ ...display, color: INK }}>{p.name}</h3>
+              <p className="text-sm" style={{ color: `${INK}80` }}>{p.role}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ===================== 10. TESTIMONIALS ===================== */
+function Testimonials() {
+  const reviews = [
+    { name: "Aisha Bello", role: "Medicine, OAU", quote: "AKBOY didn't just teach me — they prepared me. Scored 312 in JAMB and got my dream admission." },
+    { name: "Tunde Okafor", role: "Tech Bootcamp Grad", quote: "From zero coding to a junior developer role in 6 months. The mentorship is unreal." },
+  ];
+  return (
+    <section className="py-20 lg:py-28" style={{ backgroundColor: "#EAE6D8" }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        <div className="text-center mb-14">
+          <Eyebrow>Testimonials</Eyebrow>
+          <h2 className="text-4xl md:text-5xl font-bold" style={{ ...display, color: INK }}>
+            People Who Already Love Us
+          </h2>
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          {reviews.map((r) => (
+            <article key={r.name} className="bg-white rounded-2xl p-8 border" style={{ borderColor: `${INK}1A` }}>
+              <Quote className="w-10 h-10 mb-4" style={{ color: FOREST }} />
+              <p className="text-lg leading-relaxed mb-6" style={{ color: INK }}>"{r.quote}"</p>
+              <div className="flex items-center justify-between border-t pt-5" style={{ borderColor: `${INK}1A` }}>
+                <div>
+                  <div className="font-bold" style={{ ...display, color: INK }}>{r.name}</div>
+                  <div className="text-xs uppercase tracking-widest" style={{ color: `${INK}80` }}>{r.role}</div>
+                </div>
+                <div className="flex gap-0.5" style={{ color: FOREST }}>
+                  {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ===================== 11. BLOG ===================== */
+function Blog({ basePath }: { basePath: string }) {
+  const posts = [
+    { tag: "Education", title: "How to score above 300 in JAMB without burning out", date: "Mar 12, 2026", img: h2 },
+    { tag: "Technology", title: "Why every student should learn a programming language", date: "Mar 02, 2026", img: portfolio },
+    { tag: "Creativity", title: "Building a portfolio that gets you hired in 2026", date: "Feb 24, 2026", img: events },
+  ];
+  return (
+    <section className="py-20 lg:py-28" style={{ backgroundColor: BONE }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
+          <div>
+            <Eyebrow>Our Blog</Eyebrow>
+            <h2 className="text-4xl md:text-5xl font-bold" style={{ ...display, color: INK }}>
+              Latest News &amp; Articles
+            </h2>
+          </div>
           <Link
-            to={`${basePath}/contact`}
-            className="block w-full py-5 text-center font-bold uppercase tracking-[0.18em] text-sm"
-            style={{ backgroundColor: CITRUS, color: INK }}
+            to={`${basePath}/blog`}
+            className="inline-flex w-fit items-center gap-3 px-6 py-3 rounded-full font-semibold text-sm"
+            style={{ backgroundColor: FOREST, color: CITRUS }}
           >
-            Book Free Consultation
+            All Articles <ArrowRight className="h-4 w-4" />
           </Link>
-          <a
-            href="https://wa.me/2348101466977"
-            target="_blank" rel="noopener noreferrer"
-            className="block w-full py-5 text-center font-bold uppercase tracking-[0.18em] text-sm border transition-colors hover:bg-[#234B36]"
-            style={{ borderColor: `${BONE}33`, color: BONE }}
-          >
-            Chat on WhatsApp
-          </a>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {posts.map((p) => (
+            <article key={p.title} className="group bg-white rounded-2xl overflow-hidden border" style={{ borderColor: `${INK}1A` }}>
+              <div className="aspect-[4/3] overflow-hidden">
+                <img src={p.img} alt={p.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-3 mb-3 text-xs" style={{ color: `${INK}80` }}>
+                  <span className="font-bold uppercase tracking-widest" style={{ color: FOREST }}>{p.tag}</span>
+                  <span className="w-1 h-1 rounded-full" style={{ backgroundColor: `${INK}40` }} />
+                  <span className="inline-flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {p.date}</span>
+                </div>
+                <h3 className="text-lg font-bold mb-4 leading-snug" style={{ ...display, color: INK }}>{p.title}</h3>
+                <Link to={`${basePath}/blog`} className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest" style={{ color: FOREST }}>
+                  Read More <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>
@@ -530,22 +579,20 @@ export default function AkboyHome() {
   const basePath = isAkboy ? "" : "/akboy";
 
   return (
-    <AkboyLayout
-      title="AKBOY Creative Hub — Grow Your Future With Smart Creative Solutions"
-      description="AKBOY Creative Hub blends tutorials, admission consultancy, design and digital training into one premium ecosystem for students, schools and brands."
-    >
-      <div
-        className="min-h-screen w-full overflow-x-hidden selection:bg-[#D7F26A] selection:text-[#0B2A1F]"
-        style={{ ...body, backgroundColor: BONE, color: INK }}
-      >
+    <AkboyLayout>
+      <main style={{ backgroundColor: BONE, color: INK, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
         <Hero basePath={basePath} />
-        <TrustedBy />
-        <Ecosystem basePath={basePath} />
-        <Bento basePath={basePath} />
-        <Programs basePath={basePath} />
-        <Insights basePath={basePath} />
-        <CTA basePath={basePath} />
-      </div>
+        <About basePath={basePath} />
+        <Brands />
+        <Services basePath={basePath} />
+        <CTABanner basePath={basePath} />
+        <Process />
+        <StatsAndProjects basePath={basePath} />
+        <Marquee />
+        <Team />
+        <Testimonials />
+        <Blog basePath={basePath} />
+      </main>
     </AkboyLayout>
   );
 }
