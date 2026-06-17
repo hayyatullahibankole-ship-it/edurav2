@@ -460,10 +460,10 @@ export default function AkboyHome() {
                 </h2>
               </div>
               <div className="flex flex-col sm:flex-row lg:flex-col gap-3">
-                <Button asChild size="lg" className="bg-akboy-butter hover:brightness-95 text-akboy-ink font-semibold rounded-full h-13 px-6">
+                <Button asChild size="lg" className="bg-akboy-butter hover:brightness-95 text-akboy-ink font-semibold rounded-full h-14 px-6">
                   <Link to={`${basePath}/consultation`}>Book a consultation</Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="bg-transparent border-akboy-cream/30 text-akboy-cream hover:bg-akboy-cream/10 hover:text-akboy-cream rounded-full h-13 px-6 font-semibold">
+                <Button asChild size="lg" variant="outline" className="bg-transparent border-akboy-cream/30 text-akboy-cream hover:bg-akboy-cream/10 hover:text-akboy-cream rounded-full h-14 px-6 font-semibold">
                   <Link to={`${basePath}/contact`}>Send a message</Link>
                 </Button>
               </div>
