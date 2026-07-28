@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { BookOpen, Lock, KeyRound, ArrowRight } from "lucide-react";
+import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
 
 interface Ebook {
   id: string;
@@ -28,17 +29,16 @@ export default function EbookLibrary() {
   const basePath = isAkboy ? "" : "/akboy";
 
   const [books, setBooks] = useState<Ebook[]>([]);
-  const [accessIds, setAccessIds] = useState<string[]>([]);
+  const [accessIds, setAccessIds] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("ebook-unlocked-ids") || "[]") as string[];
+    } catch {
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState("");
   const [redeeming, setRedeeming] = useState(false);
-
-  const ensureAccessIdentity = async () => {
-    if (user) return user;
-    const { data, error } = await supabase.auth.signInAnonymously();
-    if (error) throw error;
-    return data.user;
-  };
 
   const load = async () => {
     setLoading(true);
@@ -48,7 +48,11 @@ export default function EbookLibrary() {
       .eq("is_published", true)
       .order("created_at", { ascending: false });
     setBooks((data as Ebook[]) || []);
-    setAccessIds([]);
+    try {
+      setAccessIds(JSON.parse(localStorage.getItem("ebook-unlocked-ids") || "[]") as string[]);
+    } catch {
+      setAccessIds([]);
+    }
     setLoading(false);
   };
 
@@ -61,14 +65,19 @@ export default function EbookLibrary() {
     if (!code.trim()) return;
     setRedeeming(true);
     try {
-      await ensureAccessIdentity();
-      const { data, error } = await supabase.rpc("redeem_ebook_code", { _code: code.trim() });
+      const { data, error } = await supabase.rpc("redeem_ebook_code" as any, {
+        _code: code.trim(),
+        _fingerprint: getDeviceFingerprint(),
+      });
       const res = data as any;
       if (error || !res?.success) {
         toast({ title: "Could not redeem", description: error?.message || res?.error || "Invalid code", variant: "destructive" });
         return;
       }
       toast({ title: "Access granted", description: "This code is now locked to this device." });
+      const unlocked = Array.from(new Set([...accessIds, res.ebook_id]));
+      localStorage.setItem("ebook-unlocked-ids", JSON.stringify(unlocked));
+      setAccessIds(unlocked);
       setCode("");
       await load();
       if (res.slug) navigate(`${basePath}/ebooks/${res.slug}`);

@@ -47,13 +47,6 @@ export default function EbookReader() {
   const [pdfError, setPdfError] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const ensureAccessIdentity = async () => {
-    if (user) return user;
-    const { data, error } = await supabase.auth.signInAnonymously();
-    if (error) throw error;
-    return data.user;
-  };
-
   const loadAll = async () => {
     setLoading(true);
     const { data: b } = await supabase.from("ebooks").select("*").eq("slug", slug).maybeSingle();
@@ -65,7 +58,6 @@ export default function EbookReader() {
 
     let allowed = false;
     try {
-      await ensureAccessIdentity();
       const { data: res } = await supabase.rpc("claim_ebook_access" as any, {
         _ebook_id: b.id,
         _fingerprint: getDeviceFingerprint(),
@@ -111,7 +103,6 @@ export default function EbookReader() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, user?.id]);
 
-  // Reading protections: block context menu, copy, and text selection inside the reader
   useEffect(() => {
     const el = contentRef.current;
     if (!el) return;
@@ -146,8 +137,10 @@ export default function EbookReader() {
   const redeem = async () => {
     if (!code.trim()) return;
     try {
-      await ensureAccessIdentity();
-      const { data, error } = await supabase.rpc("redeem_ebook_code", { _code: code.trim() });
+      const { data, error } = await supabase.rpc("redeem_ebook_code" as any, {
+        _code: code.trim(),
+        _fingerprint: getDeviceFingerprint(),
+      });
       const res = data as any;
       if (error || !res?.success) {
         toast({ title: "Could not redeem", description: error?.message || res?.error || "Invalid code", variant: "destructive" });
@@ -215,7 +208,6 @@ export default function EbookReader() {
         <style>{`@media print { .ebook-content, .ebook-pdf { display: none !important; } }`}</style>
       </Helmet>
 
-      {/* Top bar */}
       <div className="sticky top-0 z-40 bg-white border-b border-stone-200">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
           <Link to={`${basePath}/ebooks`} className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900">
