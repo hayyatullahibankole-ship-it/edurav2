@@ -9,33 +9,13 @@ class SoundManager {
   constructor() {
     if (typeof window !== 'undefined') {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      this.loadSounds();
     }
   }
 
   private async loadSounds() {
-    // Load sounds from a free CDN or generate them
-    const soundUrls = {
-      tap: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', // Soft tap
-      pop: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3', // Pop sound
-      whoosh: 'https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3', // Whoosh
-      success: 'https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3', // Success
-      click: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', // Click
-    };
-
-    // Preload sounds
-    for (const [key, url] of Object.entries(soundUrls)) {
-      try {
-        const response = await fetch(url);
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await this.audioContext?.decodeAudioData(arrayBuffer);
-        if (audioBuffer) {
-          this.sounds.set(key, audioBuffer);
-        }
-      } catch (error) {
-        console.warn(`Failed to load sound: ${key}`, error);
-      }
-    }
+    // Keep this method available but avoid remote fetches that can be blocked.
+    // Local generated tones are used as the fallback path.
+    return;
   }
 
   // Generate simple tones as fallback
@@ -62,8 +42,7 @@ class SoundManager {
 
     try {
       let buffer = this.sounds.get(soundName);
-      
-      // Generate fallback tones if sound not loaded
+
       if (!buffer) {
         const frequencies: { [key: string]: number } = {
           tap: 800,
