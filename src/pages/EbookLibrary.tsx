@@ -33,6 +33,13 @@ export default function EbookLibrary() {
   const [code, setCode] = useState("");
   const [redeeming, setRedeeming] = useState(false);
 
+  const ensureAccessIdentity = async () => {
+    if (user) return user;
+    const { data, error } = await supabase.auth.signInAnonymously();
+    if (error) throw error;
+    return data.user;
+  };
+
   const load = async () => {
     setLoading(true);
     const { data } = await supabase
@@ -41,13 +48,7 @@ export default function EbookLibrary() {
       .eq("is_published", true)
       .order("created_at", { ascending: false });
     setBooks((data as Ebook[]) || []);
-
-    if (user) {
-      const { data: acc } = await supabase.from("ebook_access").select("ebook_id");
-      setAccessIds((acc || []).map((a: any) => a.ebook_id));
-    } else {
-      setAccessIds([]);
-    }
+    setAccessIds([]);
     setLoading(false);
   };
 
@@ -57,24 +58,25 @@ export default function EbookLibrary() {
   }, [user?.id]);
 
   const redeem = async () => {
-    if (!user) {
-      toast({ title: "Sign in required", description: "Please sign in to redeem an access code." });
-      navigate(`${basePath}/auth`);
-      return;
-    }
     if (!code.trim()) return;
     setRedeeming(true);
-    const { data, error } = await supabase.rpc("redeem_ebook_code", { _code: code.trim() });
-    setRedeeming(false);
-    const res = data as any;
-    if (error || !res?.success) {
-      toast({ title: "Could not redeem", description: error?.message || res?.error || "Invalid code", variant: "destructive" });
-      return;
+    try {
+      await ensureAccessIdentity();
+      const { data, error } = await supabase.rpc("redeem_ebook_code", { _code: code.trim() });
+      const res = data as any;
+      if (error || !res?.success) {
+        toast({ title: "Could not redeem", description: error?.message || res?.error || "Invalid code", variant: "destructive" });
+        return;
+      }
+      toast({ title: "Access granted", description: "This code is now locked to this device." });
+      setCode("");
+      await load();
+      if (res.slug) navigate(`${basePath}/ebooks/${res.slug}`);
+    } catch (error: any) {
+      toast({ title: "Could not redeem", description: error?.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setRedeeming(false);
     }
-    toast({ title: "Access granted", description: "You can now read this book." });
-    setCode("");
-    await load();
-    if (res.slug) navigate(`${basePath}/ebooks/${res.slug}`);
   };
 
   return (
@@ -89,7 +91,7 @@ export default function EbookLibrary() {
           <Badge className="bg-white/10 text-emerald-50 border-0 mb-4">Reading Library</Badge>
           <h1 className="text-3xl md:text-5xl font-bold">Ebooks</h1>
           <p className="mt-3 text-emerald-100 max-w-2xl">
-            Read online with your access pass. Books are read-only — no downloads, no sharing.
+            Unlock each book with an access code. Once redeemed, it stays locked to the device that used it.
           </p>
         </div>
       </header>
@@ -98,7 +100,7 @@ export default function EbookLibrary() {
         <Card className="p-5 border-stone-200">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex items-center gap-2 text-sm font-medium text-stone-700">
-              <KeyRound className="w-4 h-4 text-emerald-700" /> Have an access code?
+              <KeyRound className="w-4 h-4 text-emerald-700" /> Enter your access code
             </div>
             <div className="flex flex-1 gap-2">
               <Input

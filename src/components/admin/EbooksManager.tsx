@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/admin/ImageUpload";
-import { BookOpen, Plus, Trash2, Edit, KeyRound, Users, ArrowLeft, Copy, FileText, Loader2, Mail, Smartphone } from "lucide-react";
+import { BookOpen, Plus, Trash2, Edit, KeyRound, Users, ArrowLeft, Copy, FileText, Loader2, Smartphone } from "lucide-react";
 
 const slugify = (s: string) =>
   s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -142,8 +142,6 @@ function BookDetail({ book: initialBook, onBack }: { book: any; onBack: () => vo
   const [chEdit, setChEdit] = useState<any>(null);
   const [chForm, setChForm] = useState({ chapter_number: 1, title: "", content: "", is_preview: false });
   const [codeForm, setCodeForm] = useState({ code: "", max_uses: 1 });
-  const [grantEmail, setGrantEmail] = useState("");
-  const [granting, setGranting] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
 
   const load = async () => {
@@ -191,28 +189,6 @@ function BookDetail({ book: initialBook, onBack }: { book: any; onBack: () => vo
     await supabase.storage.from("ebook-files").remove([book.pdf_path]);
     await supabase.from("ebooks").update({ pdf_path: null } as any).eq("id", book.id);
     toast({ title: "PDF removed" });
-    load();
-  };
-
-  const grantAccess = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setGranting(true);
-    const { data, error } = await supabase.rpc("grant_ebook_access_by_email" as any, {
-      _ebook_id: book.id,
-      _email: grantEmail,
-    });
-    setGranting(false);
-    const res = data as any;
-    if (error || !res?.success) {
-      return toast({ title: "Could not grant access", description: error?.message || res?.error, variant: "destructive" });
-    }
-    toast({
-      title: "Access granted",
-      description: res.registered
-        ? "This reader can open the book now."
-        : "No account with that email yet — access unlocks automatically once they sign up with it.",
-    });
-    setGrantEmail("");
     load();
   };
 
@@ -286,16 +262,12 @@ function BookDetail({ book: initialBook, onBack }: { book: any; onBack: () => vo
         </label>
       </Card>
 
-      {/* Access by email */}
+      {/* Access codes only */}
       <Card className="p-5 space-y-4">
-        <h3 className="font-medium flex items-center gap-2"><Mail className="w-4 h-4" /> Give access by email</h3>
+        <h3 className="font-medium flex items-center gap-2"><KeyRound className="w-4 h-4" /> Access codes only</h3>
         <p className="text-sm text-muted-foreground">
-          Access is per book and tied to one email. The first device that opens the book is locked in, so a login cannot be shared around.
+          Access is granted strictly through an access code and is tied to one device. Once a code is redeemed, the book opens only on that device.
         </p>
-        <form onSubmit={grantAccess} className="flex flex-col sm:flex-row gap-2">
-          <Input type="email" required placeholder="reader@email.com" value={grantEmail} onChange={(e) => setGrantEmail(e.target.value)} />
-          <Button type="submit" disabled={granting}>{granting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Grant access"}</Button>
-        </form>
       </Card>
 
       {/* Readers */}

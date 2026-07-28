@@ -9,7 +9,12 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
 import { ArrowLeft, ArrowRight, BookOpen, KeyRound, List, Lock, Minus, Plus, Smartphone } from "lucide-react";
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
 
 interface Chapter {
   id: string;
@@ -37,7 +42,17 @@ export default function EbookReader() {
   const [fontSize, setFontSize] = useState(18);
   const [showToc, setShowToc] = useState(false);
   const [code, setCode] = useState("");
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pdfError, setPdfError] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const ensureAccessIdentity = async () => {
+    if (user) return user;
+    const { data, error } = await supabase.auth.signInAnonymously();
+    if (error) throw error;
+    return data.user;
+  };
 
   const loadAll = async () => {
     setLoading(true);
@@ -49,7 +64,8 @@ export default function EbookReader() {
     setBook(b);
 
     let allowed = false;
-    if (user) {
+    try {
+      await ensureAccessIdentity();
       const { data: res } = await supabase.rpc("claim_ebook_access" as any, {
         _ebook_id: b.id,
         _fingerprint: getDeviceFingerprint(),
@@ -57,6 +73,9 @@ export default function EbookReader() {
       const r = res as any;
       allowed = !!r?.allowed;
       setAccessReason(r?.reason || "");
+    } catch (error) {
+      console.error("Could not check ebook access", error);
+      setAccessReason("error");
     }
     setHasAccess(allowed);
 
@@ -64,8 +83,14 @@ export default function EbookReader() {
     if (pdfPath && allowed) {
       const { data: signed } = await supabase.storage.from("ebook-files").createSignedUrl(pdfPath, 60 * 60);
       setPdfUrl(signed?.signedUrl || null);
+      setNumPages(null);
+      setPageNumber(1);
+      setPdfError(null);
     } else {
       setPdfUrl(null);
+      setNumPages(null);
+      setPageNumber(1);
+      setPdfError(null);
     }
 
     if (!pdfPath) {
@@ -101,26 +126,39 @@ export default function EbookReader() {
       el.removeEventListener("cut", block);
       el.removeEventListener("dragstart", block);
     };
-  }, [chapters, index, pdfUrl]);
+  }, [chapters, index, pdfUrl, pageNumber]);
+
+  useEffect(() => {
+    const blockPrint = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        toast({ title: "Printing disabled", description: "This book is protected from printing." });
+      }
+    };
+    window.addEventListener("keydown", blockPrint);
+    return () => window.removeEventListener("keydown", blockPrint);
+  }, [toast]);
 
   const isPdfBook = !!book && !!(book as any).pdf_path;
   const current = chapters[index];
   const locked = useMemo(() => !!current && !current.is_preview && !hasAccess, [current, hasAccess]);
 
   const redeem = async () => {
-    if (!user) {
-      navigate(`${basePath}/auth`);
-      return;
+    if (!code.trim()) return;
+    try {
+      await ensureAccessIdentity();
+      const { data, error } = await supabase.rpc("redeem_ebook_code", { _code: code.trim() });
+      const res = data as any;
+      if (error || !res?.success) {
+        toast({ title: "Could not redeem", description: error?.message || res?.error || "Invalid code", variant: "destructive" });
+        return;
+      }
+      toast({ title: "Access granted", description: "This code is now locked to this device." });
+      setCode("");
+      await loadAll();
+    } catch (error: any) {
+      toast({ title: "Could not redeem", description: error?.message || "Please try again.", variant: "destructive" });
     }
-    const { data, error } = await supabase.rpc("redeem_ebook_code", { _code: code.trim() });
-    const res = data as any;
-    if (error || !res?.success) {
-      toast({ title: "Could not redeem", description: error?.message || res?.error || "Invalid code", variant: "destructive" });
-      return;
-    }
-    toast({ title: "Access granted" });
-    setCode("");
-    await loadAll();
   };
 
   const AccessGate = () => (
@@ -144,9 +182,7 @@ export default function EbookReader() {
           <Lock className="w-10 h-10 mx-auto text-stone-400 mb-3" />
           <h2 className="text-xl font-semibold text-stone-900 mb-2">This book is locked</h2>
           <p className="text-stone-600 mb-6">
-            {user
-              ? "Access is granted per reader. Enter your access code, or ask AKBOY to grant access to this email."
-              : "Sign in with the email that was given access, or enter your access code."}
+            Enter the access code for this book. Once redeemed, it stays locked to this device and cannot be shared.
           </p>
           <div className="max-w-sm mx-auto flex gap-2">
             <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Access code" />
@@ -154,11 +190,6 @@ export default function EbookReader() {
               <KeyRound className="w-4 h-4 mr-1" /> Unlock
             </Button>
           </div>
-          {!user && (
-            <Button variant="link" className="mt-3" onClick={() => navigate(`${basePath}/auth`)}>
-              Sign in
-            </Button>
-          )}
         </>
       )}
     </Card>
@@ -218,14 +249,46 @@ export default function EbookReader() {
               ref={contentRef}
               className="ebook-pdf relative select-none rounded-lg overflow-hidden border border-stone-200 bg-white"
               style={{ userSelect: "none", WebkitUserSelect: "none" }}
+              onContextMenu={(e) => e.preventDefault()}
             >
               {pdfUrl ? (
                 <>
-                  <iframe
-                    title={book.title}
-                    src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-                    className="w-full h-[80vh] bg-white"
-                  />
+                  <div className="flex items-center justify-between gap-2 border-b border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-600">
+                    <span>{book.title}</span>
+                    {numPages ? <span>Page {pageNumber} of {numPages}</span> : null}
+                  </div>
+                  <div className="flex justify-center overflow-auto bg-stone-100 p-3 md:p-6">
+                    <Document
+                      file={pdfUrl}
+                      onLoadSuccess={({ numPages }) => {
+                        setNumPages(numPages);
+                        setPdfError(null);
+                      }}
+                      onLoadError={() => setPdfError("Unable to load this book preview.")}
+                      loading={<p className="p-10 text-center text-stone-600">Loading book preview...</p>}
+                      error={<p className="p-10 text-center text-stone-600">Unable to load this book preview.</p>}
+                    >
+                      <Page
+                        pageNumber={pageNumber}
+                        renderTextLayer={false}
+                        renderAnnotationLayer={false}
+                        className="shadow-sm"
+                        scale={1.1}
+                      />
+                    </Document>
+                  </div>
+                  {numPages && numPages > 1 ? (
+                    <div className="flex items-center justify-center gap-2 border-t border-stone-200 bg-stone-50 px-3 py-3">
+                      <Button variant="outline" size="sm" disabled={pageNumber <= 1} onClick={() => setPageNumber((p) => Math.max(1, p - 1))}>
+                        Previous
+                      </Button>
+                      <span className="text-sm text-stone-600">{pageNumber} / {numPages}</span>
+                      <Button variant="outline" size="sm" disabled={pageNumber >= numPages} onClick={() => setPageNumber((p) => Math.min(numPages, p + 1))}>
+                        Next
+                      </Button>
+                    </div>
+                  ) : null}
+                  {pdfError ? <p className="p-4 text-center text-sm text-red-600">{pdfError}</p> : null}
                   <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
                     <span className="rotate-[-30deg] text-3xl md:text-5xl font-bold text-stone-900/[0.06] whitespace-nowrap">
                       {user?.email || "AKBOY"}
