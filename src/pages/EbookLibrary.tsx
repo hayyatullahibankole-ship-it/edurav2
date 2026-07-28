@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { BookOpen, Lock, KeyRound, ArrowRight } from "lucide-react";
-import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
+import { getUnlockedEbookIds, saveEbookAccess } from "@/utils/ebookAccess";
 
 interface Ebook {
   id: string;
@@ -29,13 +29,7 @@ export default function EbookLibrary() {
   const basePath = isAkboy ? "" : "/akboy";
 
   const [books, setBooks] = useState<Ebook[]>([]);
-  const [accessIds, setAccessIds] = useState<string[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem("ebook-unlocked-ids") || "[]") as string[];
-    } catch {
-      return [];
-    }
-  });
+  const [accessIds, setAccessIds] = useState<string[]>(() => getUnlockedEbookIds());
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState("");
   const [redeeming, setRedeeming] = useState(false);
@@ -48,11 +42,7 @@ export default function EbookLibrary() {
       .eq("is_published", true)
       .order("created_at", { ascending: false });
     setBooks((data as Ebook[]) || []);
-    try {
-      setAccessIds(JSON.parse(localStorage.getItem("ebook-unlocked-ids") || "[]") as string[]);
-    } catch {
-      setAccessIds([]);
-    }
+    setAccessIds(getUnlockedEbookIds());
     setLoading(false);
   };
 
@@ -65,30 +55,42 @@ export default function EbookLibrary() {
     if (!code.trim()) return;
     setRedeeming(true);
     try {
-      let data: any;
-      let error: any;
+      const { data: bookData } = await supabase
+        .from("ebook_access_codes")
+        .select("ebook_id, code, max_uses, used_count, is_active, expires_at")
+        .ilike("code", code.trim())
+        .limit(1)
+        .maybeSingle();
 
-      ({ data, error } = await supabase.rpc("redeem_ebook_code" as any, {
-        _code: code.trim(),
-        _fingerprint: getDeviceFingerprint(),
-      }));
-
-      if (error && /redeem_ebook_code/.test(error.message || "")) {
-        ({ data, error } = await supabase.rpc("redeem_ebook_code" as any, { _code: code.trim() }));
-      }
-
-      const res = data as any;
-      if (error || !res?.success) {
-        toast({ title: "Could not redeem", description: error?.message || res?.error || "Invalid code", variant: "destructive" });
+      if (!bookData || !bookData.is_active) {
+        toast({ title: "Could not redeem", description: "Invalid access code", variant: "destructive" });
         return;
       }
-      toast({ title: "Access granted", description: "This code is now locked to this device." });
-      const unlocked = Array.from(new Set([...accessIds, res.ebook_id]));
-      localStorage.setItem("ebook-unlocked-ids", JSON.stringify(unlocked));
+
+      if (bookData.expires_at && new Date(bookData.expires_at) <= new Date()) {
+        toast({ title: "Could not redeem", description: "This access code has expired", variant: "destructive" });
+        return;
+      }
+
+      if (bookData.used_count >= bookData.max_uses) {
+        toast({ title: "Could not redeem", description: "This access code has reached its usage limit", variant: "destructive" });
+        return;
+      }
+
+      const { data: ebookData } = await supabase.from("ebooks").select("id, slug").eq("id", bookData.ebook_id).maybeSingle();
+      if (!ebookData) {
+        toast({ title: "Could not redeem", description: "This code does not belong to an active book", variant: "destructive" });
+        return;
+      }
+
+      saveEbookAccess(ebookData.id, code.trim());
+      const unlocked = Array.from(new Set([...accessIds, ebookData.id]));
       setAccessIds(unlocked);
       setCode("");
+      await supabase.from("ebook_access_codes").update({ used_count: (bookData.used_count || 0) + 1 }).eq("id", bookData.id);
+      toast({ title: "Access granted", description: "This code is now locked to this device." });
       await load();
-      if (res.slug) navigate(`${basePath}/ebooks/${res.slug}`);
+      if (ebookData.slug) navigate(`${basePath}/ebooks/${ebookData.slug}`);
     } catch (error: any) {
       toast({ title: "Could not redeem", description: error?.message || "Please try again.", variant: "destructive" });
     } finally {
