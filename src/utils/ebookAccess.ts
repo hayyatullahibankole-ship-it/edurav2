@@ -77,25 +77,6 @@ export async function redeemEbookCode(code: string, fingerprint: string = getDev
   }
 
   try {
-    const primary = await supabase.rpc("redeem_ebook_code_for_device", {
-      _code: normalizedCode,
-      _fingerprint: fingerprint,
-    });
-
-    if (!primary.error && primary.data?.success !== false) {
-      return (primary.data as EbookRedemptionResult) || { success: true };
-    }
-
-    if (!isMissingFunctionError(primary.error)) {
-      return (primary.data as EbookRedemptionResult) || { success: false, error: primary.error?.message || "Invalid access code" };
-    }
-  } catch (error: any) {
-    if (!isMissingFunctionError(error)) {
-      return { success: false, error: error?.message || "Please try again." };
-    }
-  }
-
-  try {
     const fallback = await supabase.rpc("redeem_ebook_code", { _code: normalizedCode });
     if (fallback.error) {
       return (fallback.data as EbookRedemptionResult) || { success: false, error: fallback.error.message || "Invalid access code" };

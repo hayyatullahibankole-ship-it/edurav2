@@ -16,11 +16,11 @@ const isPreviewHost =
   window.location.hostname.includes("lovableproject.com");
 
 if ("serviceWorker" in navigator && (isInIframe || isPreviewHost)) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    registrations.forEach((registration) => {
-      registration.unregister().catch(() => undefined);
-    });
-  }).catch(() => undefined);
+  navigator.serviceWorker.getRegistrations()
+    .then((registrations) => {
+      return Promise.all(registrations.map((registration) => registration.unregister().catch(() => undefined)));
+    })
+    .catch(() => undefined);
 }
 
 createRoot(document.getElementById("root")!).render(
