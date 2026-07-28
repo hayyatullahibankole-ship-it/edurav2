@@ -91,6 +91,18 @@ export default function AkboyEvents() {
             </p>
           </div>
 
+          {loading ? (
+            <p className="text-center text-muted-foreground">Loading events...</p>
+          ) : upcomingEvents.length === 0 ? (
+            <Card className="p-12 text-center border-2 border-emerald-100 bg-white max-w-xl mx-auto">
+              <Calendar className="w-10 h-10 mx-auto text-emerald-600 mb-3" />
+              <h3 className="text-xl font-bold mb-2">No events scheduled right now</h3>
+              <p className="text-muted-foreground mb-6">New workshops and programs are announced here regularly.</p>
+              <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                <Link to={`${basePath}/contact`}>Get notified</Link>
+              </Button>
+            </Card>
+          ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
             {upcomingEvents.map((event, index) => (
               <Card
@@ -101,9 +113,13 @@ export default function AkboyEvents() {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {event.featured && (
-                  <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 px-6 py-3 text-center">
-                    <span className="text-yellow-900 font-bold text-sm">🌟 MOST POPULAR</span>
+                  <div className="bg-emerald-700 px-6 py-3 text-center">
+                    <span className="text-white font-bold text-sm">NEXT UP</span>
                   </div>
+                )}
+
+                {event.image_url && (
+                  <img src={event.image_url} alt={event.title} className="w-full h-48 object-cover" loading="lazy" />
                 )}
 
                 <div className="p-8">
@@ -144,15 +160,26 @@ export default function AkboyEvents() {
                     <div className="text-3xl font-extrabold text-emerald-600">
                       {event.price}
                     </div>
-                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl transition-all">
-                      Register
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
+                    {event.registration_url ? (
+                      <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                        <a href={event.registration_url} target="_blank" rel="noopener noreferrer">
+                          Register <ArrowRight className="ml-2 w-4 h-4" />
+                        </a>
+                      </Button>
+                    ) : (
+                      <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                        <Link to={`${basePath}/contact`}>
+                          Register <ArrowRight className="ml-2 w-4 h-4" />
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 </div>
               </Card>
             ))}
           </div>
+          )}
+
         </div>
       </section>
 
