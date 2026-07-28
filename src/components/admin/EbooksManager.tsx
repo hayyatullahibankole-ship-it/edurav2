@@ -212,7 +212,7 @@ function BookDetail({ book: initialBook, onBack }: { book: any; onBack: () => vo
 
   const createCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    const code = (codeForm.code || Math.random().toString(36).slice(2, 8)).toUpperCase();
+    const code = (codeForm.code || Math.random().toString(36).slice(2, 8)).trim().toUpperCase();
     const { error } = await supabase.from("ebook_access_codes").insert([{ ebook_id: book.id, code, max_uses: codeForm.max_uses }]);
     if (error) return toast({ title: "Error", description: error.message, variant: "destructive" });
     toast({ title: "Access code created", description: code });

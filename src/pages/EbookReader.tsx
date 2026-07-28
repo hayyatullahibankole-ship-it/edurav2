@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Document, Page, pdfjs } from "react-pdf";
 import { hasEbookAccess } from "@/utils/ebookAccess";
+import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { ArrowLeft, ArrowRight, BookOpen, KeyRound, List, Lock, Minus, Plus, Smartphone } from "lucide-react";
@@ -130,43 +131,26 @@ export default function EbookReader() {
   const locked = useMemo(() => !!current && !current.is_preview && !hasAccess, [current, hasAccess]);
 
   const redeem = async () => {
-    if (!code.trim()) return;
+    const normalizedCode = code.trim().toUpperCase();
+    if (!normalizedCode) return;
     try {
-      const { data: codeRow, error: codeError } = await supabase
-        .from("ebook_access_codes")
-        .select("id, ebook_id, code, max_uses, used_count, is_active, expires_at")
-        .ilike("code", code.trim())
-        .limit(1)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("redeem_ebook_code_for_device", {
+        _code: normalizedCode,
+        _fingerprint: getDeviceFingerprint(),
+      });
+      const res = data as any;
 
-      if (codeError || !codeRow || !codeRow.is_active) {
-        toast({ title: "Could not redeem", description: "Invalid access code", variant: "destructive" });
+      if (error || !res?.success) {
+        toast({ title: "Could not redeem", description: res?.error || error?.message || "Invalid access code", variant: "destructive" });
         return;
       }
 
-      if (codeRow.expires_at && new Date(codeRow.expires_at) <= new Date()) {
-        toast({ title: "Could not redeem", description: "This access code has expired", variant: "destructive" });
-        return;
-      }
-
-      if (codeRow.used_count >= codeRow.max_uses) {
-        toast({ title: "Could not redeem", description: "This access code has reached its usage limit", variant: "destructive" });
-        return;
-      }
-
-      const { data: ebookData } = await supabase.from("ebooks").select("id").eq("id", codeRow.ebook_id).maybeSingle();
-      if (!ebookData) {
-        toast({ title: "Could not redeem", description: "This code does not belong to an active book", variant: "destructive" });
-        return;
-      }
-
-      const success = saveEbookAccess(ebookData.id, code.trim());
+      const success = saveEbookAccess(res.ebook_id, normalizedCode);
       if (!success) {
         toast({ title: "Could not redeem", description: "Could not store access on this device", variant: "destructive" });
         return;
       }
 
-      await supabase.from("ebook_access_codes").update({ used_count: (codeRow.used_count || 0) + 1 }).eq("id", codeRow.id);
       toast({ title: "Access granted", description: "This code is now locked to this device." });
       setCode("");
       await loadAll();
