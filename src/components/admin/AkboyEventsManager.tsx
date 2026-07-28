@@ -9,6 +9,8 @@ import { Plus, Edit, Trash2, Calendar } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
+import { ImageUpload } from "@/components/admin/ImageUpload";
+
 
 interface Event {
   id: string;
@@ -233,13 +235,15 @@ export function AkboyEventsManager() {
                 />
               </div>
               <div>
-                <Label>Image URL</Label>
-                <Input
+                <Label>Event Image</Label>
+                <ImageUpload
                   value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://..."
+                  onChange={(url) => setFormData({ ...formData, image_url: url })}
+                  folder="events"
+                  label="Event image"
                 />
               </div>
+
               <div>
                 <Label>Registration URL</Label>
                 <Input
