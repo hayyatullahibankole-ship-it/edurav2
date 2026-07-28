@@ -1079,6 +1079,165 @@ export type Database = {
           },
         ]
       }
+      ebook_access: {
+        Row: {
+          created_at: string
+          ebook_id: string
+          expires_at: string | null
+          granted_by: string | null
+          id: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ebook_id: string
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          source?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ebook_id?: string
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ebook_access_ebook_id_fkey"
+            columns: ["ebook_id"]
+            isOneToOne: false
+            referencedRelation: "ebooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ebook_access_codes: {
+        Row: {
+          code: string
+          created_at: string
+          ebook_id: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number
+          used_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          ebook_id: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          ebook_id?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          used_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ebook_access_codes_ebook_id_fkey"
+            columns: ["ebook_id"]
+            isOneToOne: false
+            referencedRelation: "ebooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ebook_chapters: {
+        Row: {
+          chapter_number: number
+          content: string
+          created_at: string
+          ebook_id: string
+          id: string
+          is_preview: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          chapter_number?: number
+          content?: string
+          created_at?: string
+          ebook_id: string
+          id?: string
+          is_preview?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          chapter_number?: number
+          content?: string
+          created_at?: string
+          ebook_id?: string
+          id?: string
+          is_preview?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ebook_chapters_ebook_id_fkey"
+            columns: ["ebook_id"]
+            isOneToOne: false
+            referencedRelation: "ebooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ebooks: {
+        Row: {
+          author: string
+          brand: string
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string
+          brand?: string
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          brand?: string
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_delivery_log: {
         Row: {
           created_at: string
@@ -4510,6 +4669,10 @@ export type Database = {
           updated_at: string
         }[]
       }
+      has_ebook_access: {
+        Args: { _ebook_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_premium_access: { Args: { _auth_user_id: string }; Returns: boolean }
       has_role: {
         Args: {
@@ -4532,6 +4695,7 @@ export type Database = {
       }
       is_account_locked: { Args: { user_email: string }; Returns: boolean }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_ebook_admin: { Args: { _user_id: string }; Returns: boolean }
       is_school_admin: {
         Args: { target_school_id: string; user_auth_id: string }
         Returns: boolean
@@ -4639,6 +4803,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      redeem_ebook_code: { Args: { _code: string }; Returns: Json }
       redeem_promo_coupon: { Args: { coupon_code: string }; Returns: Json }
       send_immediate_result_notification: {
         Args: { attempt_uuid: string }

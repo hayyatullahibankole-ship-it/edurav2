@@ -60,6 +60,8 @@ import AkboyAbout from "@/pages/akboy/AkboyAbout";
 import AkboyServices from "@/pages/akboy/AkboyServices";
 import AkboyPortfolio from "@/pages/akboy/AkboyPortfolio";
 import AkboyEvents from "@/pages/akboy/AkboyEvents";
+import EbookLibrary from "@/pages/EbookLibrary";
+import EbookReader from "@/pages/EbookReader";
 import AkboyTutorialRegistration from "@/pages/akboy/AkboyTutorialRegistration";
 import AkboyMockRegistration from "@/pages/akboy/AkboyMockRegistration";
 import AkboyMockLogin from "@/pages/akboy/AkboyMockLogin";
@@ -78,6 +80,9 @@ const AkboyRoutes = () => {
       <Route path="/services" element={<AkboyServices />} />
       <Route path="/portfolio" element={<AkboyPortfolio />} />
       <Route path="/events" element={<AkboyEvents />} />
+      <Route path="/ebooks" element={<EbookLibrary />} />
+      <Route path="/ebooks/:slug" element={<EbookReader />} />
+      <Route path="/auth" element={<Auth />} />
       <Route path="/contact" element={<AkboyContact />} />
 
       {/* Registration aliases */}
@@ -305,6 +310,10 @@ const EduraRoutes = () => {
       <Route path="/akboy/services" element={<AkboyServices />} />
       <Route path="/akboy/portfolio" element={<AkboyPortfolio />} />
       <Route path="/akboy/events" element={<AkboyEvents />} />
+      <Route path="/akboy/ebooks" element={<EbookLibrary />} />
+      <Route path="/akboy/ebooks/:slug" element={<EbookReader />} />
+      <Route path="/ebooks" element={<EbookLibrary />} />
+      <Route path="/ebooks/:slug" element={<EbookReader />} />
       <Route path="/akboy/contact" element={<AkboyContact />} />
       <Route path="/akboy/blog" element={<Navigate to="/akboy/campus-hub" replace />} />
       <Route path="/akboy/campus-hub" element={<AkboyCampusHub />} />

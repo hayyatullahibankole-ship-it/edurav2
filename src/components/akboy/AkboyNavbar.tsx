@@ -34,9 +34,12 @@ export function AkboyNavbar() {
         { name: "JAMB CBT Practice", path: "https://edura.space", external: true },
         { name: "Mock Exams", path: `${basePath}/mock` },
         { name: "Online Classes", path: `${basePath}/register` },
+        { name: "Events & Workshops", path: `${basePath}/events` },
+        { name: "Ebook Library", path: `${basePath}/ebooks` },
       ],
       cta: { name: "Start Learning", path: `${basePath}/register` },
     },
+
     {
       name: "Campus Hub",
       children: [
