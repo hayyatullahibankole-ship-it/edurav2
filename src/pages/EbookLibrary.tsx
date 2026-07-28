@@ -10,8 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { BookOpen, Lock, KeyRound, ArrowRight } from "lucide-react";
-import { getUnlockedEbookIds, saveEbookAccess } from "@/utils/ebookAccess";
-import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
+import { getUnlockedEbookIds, redeemEbookCode, saveEbookAccess } from "@/utils/ebookAccess";
 
 interface Ebook {
   id: string;
@@ -57,19 +56,15 @@ export default function EbookLibrary() {
     if (!normalizedCode) return;
     setRedeeming(true);
     try {
-      const { data, error } = await supabase.rpc("redeem_ebook_code_for_device", {
-        _code: normalizedCode,
-        _fingerprint: getDeviceFingerprint(),
-      });
-      const res = data as any;
+      const res = await redeemEbookCode(normalizedCode);
 
-      if (error || !res?.success) {
-        toast({ title: "Could not redeem", description: res?.error || error?.message || "Invalid access code", variant: "destructive" });
+      if (!res.success) {
+        toast({ title: "Could not redeem", description: res.error || "Invalid access code", variant: "destructive" });
         return;
       }
 
-      saveEbookAccess(res.ebook_id, normalizedCode);
-      const unlocked = Array.from(new Set([...accessIds, res.ebook_id]));
+      saveEbookAccess(res.ebook_id!, normalizedCode);
+      const unlocked = Array.from(new Set([...accessIds, res.ebook_id!]));
       setAccessIds(unlocked);
       setCode("");
       toast({ title: "Access granted", description: "This code is now locked to this device." });

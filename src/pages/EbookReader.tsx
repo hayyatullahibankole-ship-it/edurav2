@@ -9,8 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Document, Page, pdfjs } from "react-pdf";
-import { hasEbookAccess } from "@/utils/ebookAccess";
-import { getDeviceFingerprint } from "@/utils/deviceFingerprint";
+import { hasEbookAccess, redeemEbookCode, saveEbookAccess } from "@/utils/ebookAccess";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { ArrowLeft, ArrowRight, BookOpen, KeyRound, List, Lock, Minus, Plus, Smartphone } from "lucide-react";
@@ -134,18 +133,14 @@ export default function EbookReader() {
     const normalizedCode = code.trim().toUpperCase();
     if (!normalizedCode) return;
     try {
-      const { data, error } = await supabase.rpc("redeem_ebook_code_for_device", {
-        _code: normalizedCode,
-        _fingerprint: getDeviceFingerprint(),
-      });
-      const res = data as any;
+      const res = await redeemEbookCode(normalizedCode);
 
-      if (error || !res?.success) {
-        toast({ title: "Could not redeem", description: res?.error || error?.message || "Invalid access code", variant: "destructive" });
+      if (!res.success) {
+        toast({ title: "Could not redeem", description: res.error || "Invalid access code", variant: "destructive" });
         return;
       }
 
-      const success = saveEbookAccess(res.ebook_id, normalizedCode);
+      const success = saveEbookAccess(res.ebook_id!, normalizedCode);
       if (!success) {
         toast({ title: "Could not redeem", description: "Could not store access on this device", variant: "destructive" });
         return;
