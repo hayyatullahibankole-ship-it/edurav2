@@ -137,10 +137,18 @@ export default function EbookReader() {
   const redeem = async () => {
     if (!code.trim()) return;
     try {
-      const { data, error } = await supabase.rpc("redeem_ebook_code" as any, {
+      let data: any;
+      let error: any;
+
+      ({ data, error } = await supabase.rpc("redeem_ebook_code" as any, {
         _code: code.trim(),
         _fingerprint: getDeviceFingerprint(),
-      });
+      }));
+
+      if (error && /redeem_ebook_code/.test(error.message || "")) {
+        ({ data, error } = await supabase.rpc("redeem_ebook_code" as any, { _code: code.trim() }));
+      }
+
       const res = data as any;
       if (error || !res?.success) {
         toast({ title: "Could not redeem", description: error?.message || res?.error || "Invalid code", variant: "destructive" });
