@@ -1082,30 +1082,42 @@ export type Database = {
       ebook_access: {
         Row: {
           created_at: string
+          device_fingerprint: string | null
+          device_locked_at: string | null
           ebook_id: string
+          email: string | null
           expires_at: string | null
           granted_by: string | null
           id: string
+          last_seen_at: string | null
           source: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
+          device_fingerprint?: string | null
+          device_locked_at?: string | null
           ebook_id: string
+          email?: string | null
           expires_at?: string | null
           granted_by?: string | null
           id?: string
+          last_seen_at?: string | null
           source?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
+          device_fingerprint?: string | null
+          device_locked_at?: string | null
           ebook_id?: string
+          email?: string | null
           expires_at?: string | null
           granted_by?: string | null
           id?: string
+          last_seen_at?: string | null
           source?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1208,6 +1220,7 @@ export type Database = {
           description: string | null
           id: string
           is_published: boolean
+          pdf_path: string | null
           slug: string
           title: string
           updated_at: string
@@ -1220,6 +1233,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_published?: boolean
+          pdf_path?: string | null
           slug: string
           title: string
           updated_at?: string
@@ -1232,6 +1246,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_published?: boolean
+          pdf_path?: string | null
           slug?: string
           title?: string
           updated_at?: string
@@ -4294,6 +4309,10 @@ export type Database = {
         Returns: boolean
       }
       check_user_lookup_rate_limit: { Args: never; Returns: boolean }
+      claim_ebook_access: {
+        Args: { _ebook_id: string; _fingerprint: string }
+        Returns: Json
+      }
       clear_session_token: { Args: { user_auth_id: string }; Returns: boolean }
       compute_exam_results: { Args: { attempt_uuid: string }; Returns: string }
       convert_latex_mathbf_to_markdown: {
@@ -4669,6 +4688,10 @@ export type Database = {
           updated_at: string
         }[]
       }
+      grant_ebook_access_by_email: {
+        Args: { _ebook_id: string; _email: string; _expires_at?: string }
+        Returns: Json
+      }
       has_ebook_access: {
         Args: { _ebook_id: string; _user_id: string }
         Returns: boolean
@@ -4805,6 +4828,7 @@ export type Database = {
       }
       redeem_ebook_code: { Args: { _code: string }; Returns: Json }
       redeem_promo_coupon: { Args: { coupon_code: string }; Returns: Json }
+      reset_ebook_device: { Args: { _access_id: string }; Returns: Json }
       send_immediate_result_notification: {
         Args: { attempt_uuid: string }
         Returns: boolean
