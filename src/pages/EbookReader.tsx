@@ -163,7 +163,6 @@ export default function EbookReader() {
           data: safeCopy,
           useWorkerFetch: false,
           useSystemFonts: true,
-          isEvalSupported: false,
         });
         const doc = await loadingTask.promise;
         if (cancelled) {
