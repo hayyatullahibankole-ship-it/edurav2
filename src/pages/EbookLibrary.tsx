@@ -102,11 +102,16 @@ export default function EbookLibrary() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
         <Card className="p-5 border-stone-200">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-medium text-stone-700">
-              <KeyRound className="w-4 h-4 text-emerald-700" /> Enter your access code
+              <KeyRound className="w-4 h-4 text-emerald-700" /> Unlock a book
             </div>
-            <div className="flex flex-1 gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Your full name"
+              />
               <Input
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
@@ -117,7 +122,9 @@ export default function EbookLibrary() {
                 {redeeming ? "Checking..." : "Unlock"}
               </Button>
             </div>
+            <p className="text-xs text-stone-500">Your name is recorded with the code you use.</p>
           </div>
+
         </Card>
 
         {loading ? (
