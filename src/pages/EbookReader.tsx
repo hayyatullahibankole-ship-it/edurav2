@@ -73,37 +73,23 @@ export default function EbookReader() {
       let previewUrl: string | null = null;
       let previewError: string | null = null;
 
-      const { data: signed, error: signedError } = await supabase.storage.from("ebook-files").createSignedUrl(pdfPath, 60 * 60);
-      if (signedError || !signed?.signedUrl) {
-        previewError = signedError?.message || "Unable to generate access URL for this book.";
+      // Download the file directly so the viewer never depends on CORS/signed-URL quirks.
+      const { data: fileBlob, error: downloadError } = await supabase.storage.from("ebook-files").download(pdfPath);
+      if (fileBlob) {
+        previewUrl = URL.createObjectURL(fileBlob);
       } else {
-        previewUrl = signed.signedUrl;
-      }
-
-      if (!previewUrl) {
-        const { data: publicData, error: publicError } = await supabase.storage.from("ebook-files").getPublicUrl(pdfPath);
-        if (publicData?.publicUrl) {
-          previewUrl = publicData.publicUrl;
-          previewError = null;
-        } else if (!previewError) {
-          previewError = publicError?.message || "Unable to access the ebook preview.";
+        const { data: signed } = await supabase.storage.from("ebook-files").createSignedUrl(pdfPath, 60 * 60);
+        if (signed?.signedUrl) {
+          previewUrl = signed.signedUrl;
+        } else {
+          previewError = downloadError?.message || "Unable to load this book preview.";
         }
       }
 
-      if (previewUrl) {
-        try {
-          const validateResponse = await fetch(previewUrl, { method: "HEAD", mode: "cors" });
-          if (!validateResponse.ok) {
-            throw new Error(`Preview URL returned ${validateResponse.status} ${validateResponse.statusText}`);
-          }
-        } catch (error: any) {
-          console.error("Ebook preview URL validation failed", error);
-          previewError = error?.message || "Unable to reach the ebook preview URL.";
-          previewUrl = null;
-        }
-      }
-
-      setPdfUrl(previewUrl);
+      setPdfUrl((prev) => {
+        if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+        return previewUrl;
+      });
       setNumPages(null);
       setPageNumber(1);
       setPdfError(previewUrl ? null : previewError || "Unable to load this book preview.");
