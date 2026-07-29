@@ -54,17 +54,22 @@ export default function EbookLibrary() {
 
   const redeem = async () => {
     const normalizedCode = code.trim().toUpperCase();
+    const name = fullName.trim();
     if (!normalizedCode) return;
+    if (!name) {
+      toast({ title: "Name required", description: "Please enter your full name.", variant: "destructive" });
+      return;
+    }
     setRedeeming(true);
     try {
-      const res = await redeemEbookCode(normalizedCode);
+      const res = await redeemEbookCode(normalizedCode, name);
 
       if (!res.success) {
         toast({ title: "Could not redeem", description: res.error || "Invalid access code", variant: "destructive" });
         return;
       }
 
-      saveEbookAccess(res.ebook_id!, normalizedCode);
+      saveEbookAccess(res.ebook_id!, normalizedCode, name);
       const unlocked = Array.from(new Set([...accessIds, res.ebook_id!]));
       setAccessIds(unlocked);
       setCode("");
