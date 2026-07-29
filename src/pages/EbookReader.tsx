@@ -8,15 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Document, Page, pdfjs } from "react-pdf";
+import * as pdfjsLib from "pdfjs-dist";
 import { hasEbookAccess, redeemEbookCode, saveEbookAccess } from "@/utils/ebookAccess";
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
 import { ArrowLeft, ArrowRight, BookOpen, KeyRound, List, Lock, Minus, Plus, Smartphone } from "lucide-react";
 
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 interface Chapter {
   id: string;
@@ -39,8 +37,10 @@ export default function EbookReader() {
   const [index, setIndex] = useState(0);
   const [hasAccess, setHasAccess] = useState(false);
   const [accessReason, setAccessReason] = useState<string>("");
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfBytes, setPdfBytes] = useState<Uint8Array | null>(null);
+  const [pdfDoc, setPdfDoc] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [renderingPage, setRenderingPage] = useState(false);
   const [fontSize, setFontSize] = useState(18);
   const [showToc, setShowToc] = useState(false);
   const [code, setCode] = useState("");
@@ -49,6 +49,7 @@ export default function EbookReader() {
   const [pageNumber, setPageNumber] = useState(1);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const loadAll = async () => {
     setLoading(true);
@@ -71,31 +72,41 @@ export default function EbookReader() {
 
     const pdfPath = (b as any).pdf_path as string | null;
     if (pdfPath && allowed) {
-      let previewUrl: string | null = null;
       let previewError: string | null = null;
+      let previewBytes: Uint8Array | null = null;
 
-      // Download the file directly so the viewer never depends on CORS/signed-URL quirks.
+      // Download the PDF bytes and render them ourselves with PDF.js. This avoids
+      // signed URL, iframe, and react-pdf wrapper issues in production previews.
       const { data: fileBlob, error: downloadError } = await supabase.storage.from("ebook-files").download(pdfPath);
       if (fileBlob) {
-        previewUrl = URL.createObjectURL(fileBlob);
+        const buffer = await fileBlob.arrayBuffer();
+        previewBytes = new Uint8Array(buffer);
       } else {
-        const { data: signed } = await supabase.storage.from("ebook-files").createSignedUrl(pdfPath, 60 * 60);
-        if (signed?.signedUrl) {
-          previewUrl = signed.signedUrl;
-        } else {
-          previewError = downloadError?.message || "Unable to load this book preview.";
+        const { data: publicUrl } = supabase.storage.from("ebook-files").getPublicUrl(pdfPath);
+        if (publicUrl?.publicUrl) {
+          try {
+            const response = await fetch(publicUrl.publicUrl, { cache: "no-store" });
+            if (response.ok) {
+              const buffer = await response.arrayBuffer();
+              previewBytes = new Uint8Array(buffer);
+            } else {
+              previewError = `Unable to load this book preview (${response.status}).`;
+            }
+          } catch (error: any) {
+            previewError = error?.message || "Unable to load this book preview.";
+          }
         }
+        previewError = previewError || downloadError?.message || "Unable to load this book preview.";
       }
 
-      setPdfUrl((prev) => {
-        if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
-        return previewUrl;
-      });
+      setPdfBytes(previewBytes);
+      setPdfDoc(null);
       setNumPages(null);
       setPageNumber(1);
-      setPdfError(previewUrl ? null : previewError || "Unable to load this book preview.");
+      setPdfError(previewBytes ? null : previewError || "Unable to load this book preview.");
     } else {
-      setPdfUrl(null);
+      setPdfBytes(null);
+      setPdfDoc(null);
       setNumPages(null);
       setPageNumber(1);
       setPdfError(null);
@@ -133,7 +144,97 @@ export default function EbookReader() {
       el.removeEventListener("cut", block);
       el.removeEventListener("dragstart", block);
     };
-  }, [chapters, index, pdfUrl, pageNumber]);
+  }, [chapters, index, pdfBytes, pageNumber]);
+
+  useEffect(() => {
+    let cancelled = false;
+    let loadingTask: any = null;
+
+    const openPdf = async () => {
+      if (!pdfBytes) {
+        setPdfDoc(null);
+        return;
+      }
+
+      try {
+        setPdfError(null);
+        const safeCopy = new Uint8Array(pdfBytes);
+        loadingTask = pdfjsLib.getDocument({
+          data: safeCopy,
+          useWorkerFetch: false,
+          useSystemFonts: true,
+          isEvalSupported: false,
+        });
+        const doc = await loadingTask.promise;
+        if (cancelled) {
+          await doc.destroy();
+          return;
+        }
+        setPdfDoc(doc);
+        setNumPages(doc.numPages);
+        setPageNumber(1);
+      } catch (error: any) {
+        if (!cancelled) {
+          console.error("PDF open failed", error);
+          setPdfDoc(null);
+          setPdfError(error?.message || "Unable to load this book preview.");
+        }
+      }
+    };
+
+    openPdf();
+
+    return () => {
+      cancelled = true;
+      if (loadingTask?.destroy) loadingTask.destroy();
+    };
+  }, [pdfBytes]);
+
+  useEffect(() => {
+    let cancelled = false;
+    let renderTask: any = null;
+
+    const renderPage = async () => {
+      const canvas = canvasRef.current;
+      if (!pdfDoc || !canvas) return;
+
+      try {
+        setRenderingPage(true);
+        setPdfError(null);
+        const page = await pdfDoc.getPage(pageNumber);
+        if (cancelled) return;
+
+        const containerWidth = Math.min(contentRef.current?.clientWidth || 900, 980) - 32;
+        const baseViewport = page.getViewport({ scale: 1 });
+        const scale = Math.max(0.7, Math.min(1.5, containerWidth / baseViewport.width));
+        const viewport = page.getViewport({ scale });
+        const context = canvas.getContext("2d");
+        if (!context) return;
+
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+        canvas.style.width = `${Math.floor(viewport.width)}px`;
+        canvas.style.height = `${Math.floor(viewport.height)}px`;
+
+        renderTask = page.render({ canvasContext: context, viewport });
+        await renderTask.promise;
+      } catch (error: any) {
+        if (!cancelled && error?.name !== "RenderingCancelledException") {
+          console.error("PDF render failed", error);
+          setPdfError(error?.message || "Unable to load this book preview.");
+        }
+      } finally {
+        if (!cancelled) setRenderingPage(false);
+      }
+    };
+
+    renderPage();
+
+    return () => {
+      cancelled = true;
+      if (renderTask?.cancel) renderTask.cancel();
+    };
+  }, [pdfDoc, pageNumber]);
 
   useEffect(() => {
     const blockPrint = (event: KeyboardEvent) => {
@@ -273,31 +374,21 @@ export default function EbookReader() {
               style={{ userSelect: "none", WebkitUserSelect: "none" }}
               onContextMenu={(e) => e.preventDefault()}
             >
-              {pdfUrl ? (
+              {pdfBytes ? (
                 <>
                   <div className="flex items-center justify-between gap-2 border-b border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-600">
                     <span>{book.title}</span>
                     {numPages ? <span>Page {pageNumber} of {numPages}</span> : null}
                   </div>
-                  <div className="flex justify-center overflow-auto bg-stone-100 p-3 md:p-6">
-                    <Document
-                      file={pdfUrl}
-                      onLoadSuccess={({ numPages }) => {
-                        setNumPages(numPages);
-                        setPdfError(null);
-                      }}
-                      onLoadError={() => setPdfError("Unable to load this book preview.")}
-                      loading={<p className="p-10 text-center text-stone-600">Loading book preview...</p>}
-                      error={<p className="p-10 text-center text-stone-600">Unable to load this book preview.</p>}
-                    >
-                      <Page
-                        pageNumber={pageNumber}
-                        renderTextLayer={false}
-                        renderAnnotationLayer={false}
-                        className="shadow-sm"
-                        scale={1.1}
-                      />
-                    </Document>
+                  <div className="flex justify-center overflow-auto bg-stone-100 p-3 md:p-6 min-h-[65vh]">
+                    <div className="relative">
+                      {renderingPage || !pdfDoc ? (
+                        <div className="absolute inset-0 z-10 grid place-items-center bg-white/80 text-sm text-stone-600">
+                          Loading book preview...
+                        </div>
+                      ) : null}
+                      <canvas ref={canvasRef} className="block max-w-full bg-white shadow-sm" aria-label={`${book.title} page ${pageNumber}`} />
+                    </div>
                   </div>
                   {numPages && numPages > 1 ? (
                     <div className="flex items-center justify-center gap-2 border-t border-stone-200 bg-stone-50 px-3 py-3">
