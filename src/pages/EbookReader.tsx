@@ -151,16 +151,21 @@ export default function EbookReader() {
 
   const redeem = async () => {
     const normalizedCode = code.trim().toUpperCase();
+    const name = readerName.trim();
     if (!normalizedCode) return;
+    if (!name) {
+      toast({ title: "Name required", description: "Please enter your full name.", variant: "destructive" });
+      return;
+    }
     try {
-      const res = await redeemEbookCode(normalizedCode);
+      const res = await redeemEbookCode(normalizedCode, name);
 
       if (!res.success) {
         toast({ title: "Could not redeem", description: res.error || "Invalid access code", variant: "destructive" });
         return;
       }
 
-      const success = saveEbookAccess(res.ebook_id!, normalizedCode);
+      const success = saveEbookAccess(res.ebook_id!, normalizedCode, name);
       if (!success) {
         toast({ title: "Could not redeem", description: "Could not store access on this device", variant: "destructive" });
         return;
@@ -174,7 +179,7 @@ export default function EbookReader() {
     }
   };
 
-  const AccessGate = () => (
+  const renderAccessGate = () => (
     <Card className="p-10 text-center border-stone-200">
       {accessReason === "device_locked" ? (
         <>
@@ -195,18 +200,22 @@ export default function EbookReader() {
           <Lock className="w-10 h-10 mx-auto text-stone-400 mb-3" />
           <h2 className="text-xl font-semibold text-stone-900 mb-2">This book is locked</h2>
           <p className="text-stone-600 mb-6">
-            Enter the access code for this book. Once redeemed, it stays locked to this device and cannot be shared.
+            Enter your name and the access code for this book. Once redeemed, it stays locked to this device and cannot be shared.
           </p>
-          <div className="max-w-sm mx-auto flex gap-2">
-            <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Access code" />
-            <Button onClick={redeem} className="bg-emerald-700 hover:bg-emerald-800">
-              <KeyRound className="w-4 h-4 mr-1" /> Unlock
-            </Button>
+          <div className="max-w-sm mx-auto space-y-2">
+            <Input value={readerName} onChange={(e) => setReaderName(e.target.value)} placeholder="Your full name" />
+            <div className="flex gap-2">
+              <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Access code" className="uppercase" />
+              <Button onClick={redeem} className="bg-emerald-700 hover:bg-emerald-800">
+                <KeyRound className="w-4 h-4 mr-1" /> Unlock
+              </Button>
+            </div>
           </div>
         </>
       )}
     </Card>
   );
+
 
   if (loading) return <div className="min-h-screen grid place-items-center text-stone-500">Loading book...</div>;
   if (!book)
