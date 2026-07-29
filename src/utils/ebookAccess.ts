@@ -15,6 +15,7 @@ interface EbookDeviceAccessRecord {
   fingerprint: string;
   redeemedAt: string;
   code?: string;
+  name?: string;
 }
 
 function readRecords(): Record<string, EbookDeviceAccessRecord> {
@@ -32,57 +33,57 @@ function writeRecords(records: Record<string, EbookDeviceAccessRecord>) {
 
 export function getUnlockedEbookIds() {
   try {
-    const records = readRecords();
-    return Object.keys(records);
+    return Object.keys(readRecords());
   } catch {
     return [];
   }
 }
 
 export function hasEbookAccess(ebookId: string, fingerprint: string = getDeviceFingerprint()) {
-  const records = readRecords();
-  const record = records[ebookId];
+  const record = readRecords()[ebookId];
   return !!record && record.fingerprint === fingerprint;
 }
 
-export function saveEbookAccess(ebookId: string, code: string, fingerprint: string = getDeviceFingerprint()) {
+export function saveEbookAccess(
+  ebookId: string,
+  code: string,
+  name?: string,
+  fingerprint: string = getDeviceFingerprint()
+) {
   const records = readRecords();
   records[ebookId] = {
     ebookId,
     fingerprint,
     redeemedAt: new Date().toISOString(),
     code,
+    name,
   };
   writeRecords(records);
   return true;
 }
 
-function isMissingFunctionError(error: any) {
-  const message = `${error?.message || ""} ${error?.details || ""}`.toLowerCase();
-  return Boolean(
-    error && (
-      error.code === "PGRST301" ||
-      error.code === "42883" ||
-      message.includes("could not find the function") ||
-      message.includes("does not exist") ||
-      message.includes("schema cache")
-    )
-  );
-}
-
-export async function redeemEbookCode(code: string, fingerprint: string = getDeviceFingerprint()): Promise<EbookRedemptionResult> {
+export async function redeemEbookCode(
+  code: string,
+  name: string,
+  fingerprint: string = getDeviceFingerprint()
+): Promise<EbookRedemptionResult> {
   const normalizedCode = code.trim().toUpperCase();
-  if (!normalizedCode) {
-    return { success: false, error: "Please enter an access code." };
-  }
+  const normalizedName = name.trim();
+  if (!normalizedCode) return { success: false, error: "Please enter an access code." };
+  if (!normalizedName) return { success: false, error: "Please enter your full name." };
 
   try {
-    const fallback = await supabase.rpc("redeem_ebook_code", { _code: normalizedCode });
-    if (fallback.error) {
-      return (fallback.data as EbookRedemptionResult) || { success: false, error: fallback.error.message || "Invalid access code" };
+    const { data, error } = await supabase.rpc("redeem_ebook_code" as any, {
+      _code: normalizedCode,
+      _name: normalizedName,
+      _device: fingerprint,
+    });
+
+    if (error) {
+      return { success: false, error: error.message || "Invalid access code" };
     }
 
-    return (fallback.data as EbookRedemptionResult) || { success: true };
+    return (data as unknown as EbookRedemptionResult) || { success: true };
   } catch (error: any) {
     return { success: false, error: error?.message || "Please try again." };
   }
