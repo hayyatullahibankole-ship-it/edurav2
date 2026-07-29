@@ -14,7 +14,9 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { ArrowLeft, ArrowRight, BookOpen, KeyRound, List, Lock, Minus, Plus, Smartphone } from "lucide-react";
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 interface Chapter {
   id: string;
@@ -42,6 +44,7 @@ export default function EbookReader() {
   const [fontSize, setFontSize] = useState(18);
   const [showToc, setShowToc] = useState(false);
   const [code, setCode] = useState("");
+  const [readerName, setReaderName] = useState("");
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [pdfError, setPdfError] = useState<string | null>(null);
@@ -71,37 +74,23 @@ export default function EbookReader() {
       let previewUrl: string | null = null;
       let previewError: string | null = null;
 
-      const { data: signed, error: signedError } = await supabase.storage.from("ebook-files").createSignedUrl(pdfPath, 60 * 60);
-      if (signedError || !signed?.signedUrl) {
-        previewError = signedError?.message || "Unable to generate access URL for this book.";
+      // Download the file directly so the viewer never depends on CORS/signed-URL quirks.
+      const { data: fileBlob, error: downloadError } = await supabase.storage.from("ebook-files").download(pdfPath);
+      if (fileBlob) {
+        previewUrl = URL.createObjectURL(fileBlob);
       } else {
-        previewUrl = signed.signedUrl;
-      }
-
-      if (!previewUrl) {
-        const { data: publicData, error: publicError } = await supabase.storage.from("ebook-files").getPublicUrl(pdfPath);
-        if (publicData?.publicUrl) {
-          previewUrl = publicData.publicUrl;
-          previewError = null;
-        } else if (!previewError) {
-          previewError = publicError?.message || "Unable to access the ebook preview.";
+        const { data: signed } = await supabase.storage.from("ebook-files").createSignedUrl(pdfPath, 60 * 60);
+        if (signed?.signedUrl) {
+          previewUrl = signed.signedUrl;
+        } else {
+          previewError = downloadError?.message || "Unable to load this book preview.";
         }
       }
 
-      if (previewUrl) {
-        try {
-          const validateResponse = await fetch(previewUrl, { method: "HEAD", mode: "cors" });
-          if (!validateResponse.ok) {
-            throw new Error(`Preview URL returned ${validateResponse.status} ${validateResponse.statusText}`);
-          }
-        } catch (error: any) {
-          console.error("Ebook preview URL validation failed", error);
-          previewError = error?.message || "Unable to reach the ebook preview URL.";
-          previewUrl = null;
-        }
-      }
-
-      setPdfUrl(previewUrl);
+      setPdfUrl((prev) => {
+        if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+        return previewUrl;
+      });
       setNumPages(null);
       setPageNumber(1);
       setPdfError(previewUrl ? null : previewError || "Unable to load this book preview.");
@@ -163,16 +152,21 @@ export default function EbookReader() {
 
   const redeem = async () => {
     const normalizedCode = code.trim().toUpperCase();
+    const name = readerName.trim();
     if (!normalizedCode) return;
+    if (!name) {
+      toast({ title: "Name required", description: "Please enter your full name.", variant: "destructive" });
+      return;
+    }
     try {
-      const res = await redeemEbookCode(normalizedCode);
+      const res = await redeemEbookCode(normalizedCode, name);
 
       if (!res.success) {
         toast({ title: "Could not redeem", description: res.error || "Invalid access code", variant: "destructive" });
         return;
       }
 
-      const success = saveEbookAccess(res.ebook_id!, normalizedCode);
+      const success = saveEbookAccess(res.ebook_id!, normalizedCode, name);
       if (!success) {
         toast({ title: "Could not redeem", description: "Could not store access on this device", variant: "destructive" });
         return;
@@ -186,7 +180,7 @@ export default function EbookReader() {
     }
   };
 
-  const AccessGate = () => (
+  const renderAccessGate = () => (
     <Card className="p-10 text-center border-stone-200">
       {accessReason === "device_locked" ? (
         <>
@@ -207,18 +201,22 @@ export default function EbookReader() {
           <Lock className="w-10 h-10 mx-auto text-stone-400 mb-3" />
           <h2 className="text-xl font-semibold text-stone-900 mb-2">This book is locked</h2>
           <p className="text-stone-600 mb-6">
-            Enter the access code for this book. Once redeemed, it stays locked to this device and cannot be shared.
+            Enter your name and the access code for this book. Once redeemed, it stays locked to this device and cannot be shared.
           </p>
-          <div className="max-w-sm mx-auto flex gap-2">
-            <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Access code" />
-            <Button onClick={redeem} className="bg-emerald-700 hover:bg-emerald-800">
-              <KeyRound className="w-4 h-4 mr-1" /> Unlock
-            </Button>
+          <div className="max-w-sm mx-auto space-y-2">
+            <Input value={readerName} onChange={(e) => setReaderName(e.target.value)} placeholder="Your full name" />
+            <div className="flex gap-2">
+              <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Access code" className="uppercase" />
+              <Button onClick={redeem} className="bg-emerald-700 hover:bg-emerald-800">
+                <KeyRound className="w-4 h-4 mr-1" /> Unlock
+              </Button>
+            </div>
           </div>
         </>
       )}
     </Card>
   );
+
 
   if (loading) return <div className="min-h-screen grid place-items-center text-stone-500">Loading book...</div>;
   if (!book)
@@ -267,7 +265,7 @@ export default function EbookReader() {
       <div className={`${isPdfBook ? "max-w-5xl" : "max-w-4xl"} mx-auto px-4 py-8`}>
         {isPdfBook ? (
           !hasAccess ? (
-            <AccessGate />
+            renderAccessGate()
           ) : (
             <div
               ref={contentRef}
@@ -348,7 +346,7 @@ export default function EbookReader() {
             {chapters.length === 0 ? (
               <Card className="p-10 text-center border-stone-200 text-stone-600">Nothing published yet.</Card>
             ) : locked ? (
-              <AccessGate />
+              renderAccessGate()
             ) : (
               <article
                 ref={contentRef}

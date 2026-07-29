@@ -276,7 +276,9 @@ function BookDetail({ book: initialBook, onBack }: { book: any; onBack: () => vo
         <div className="divide-y">
           {readers.map((r) => (
             <div key={r.id} className="py-2 flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-medium truncate">{r.email || r.user_id}</span>
+              <span className="font-medium truncate">{r.full_name || r.email || r.user_id || "Unnamed reader"}</span>
+              {r.email && r.full_name && <span className="text-muted-foreground truncate">{r.email}</span>}
+              {r.code_used && <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">{r.code_used}</code>}
               <Badge variant="secondary">{r.source}</Badge>
               {r.device_fingerprint ? (
                 <Badge variant="outline" className="gap-1"><Smartphone className="w-3 h-3" /> Device locked</Badge>

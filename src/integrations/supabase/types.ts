@@ -1081,12 +1081,14 @@ export type Database = {
       }
       ebook_access: {
         Row: {
+          code_used: string | null
           created_at: string
           device_fingerprint: string | null
           device_locked_at: string | null
           ebook_id: string
           email: string | null
           expires_at: string | null
+          full_name: string | null
           granted_by: string | null
           id: string
           last_seen_at: string | null
@@ -1094,12 +1096,14 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          code_used?: string | null
           created_at?: string
           device_fingerprint?: string | null
           device_locked_at?: string | null
           ebook_id: string
           email?: string | null
           expires_at?: string | null
+          full_name?: string | null
           granted_by?: string | null
           id?: string
           last_seen_at?: string | null
@@ -1107,12 +1111,14 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          code_used?: string | null
           created_at?: string
           device_fingerprint?: string | null
           device_locked_at?: string | null
           ebook_id?: string
           email?: string | null
           expires_at?: string | null
+          full_name?: string | null
           granted_by?: string | null
           id?: string
           last_seen_at?: string | null
@@ -4826,7 +4832,12 @@ export type Database = {
         }
         Returns: undefined
       }
-      redeem_ebook_code: { Args: { _code: string }; Returns: Json }
+      redeem_ebook_code:
+        | { Args: { _code: string }; Returns: Json }
+        | {
+            Args: { _code: string; _device: string; _name: string }
+            Returns: Json
+          }
       redeem_promo_coupon: { Args: { coupon_code: string }; Returns: Json }
       reset_ebook_device: { Args: { _access_id: string }; Returns: Json }
       send_immediate_result_notification: {

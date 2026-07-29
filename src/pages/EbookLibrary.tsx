@@ -32,6 +32,7 @@ export default function EbookLibrary() {
   const [accessIds, setAccessIds] = useState<string[]>(() => getUnlockedEbookIds());
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState("");
+  const [fullName, setFullName] = useState("");
   const [redeeming, setRedeeming] = useState(false);
 
   const load = async () => {
@@ -53,17 +54,22 @@ export default function EbookLibrary() {
 
   const redeem = async () => {
     const normalizedCode = code.trim().toUpperCase();
+    const name = fullName.trim();
     if (!normalizedCode) return;
+    if (!name) {
+      toast({ title: "Name required", description: "Please enter your full name.", variant: "destructive" });
+      return;
+    }
     setRedeeming(true);
     try {
-      const res = await redeemEbookCode(normalizedCode);
+      const res = await redeemEbookCode(normalizedCode, name);
 
       if (!res.success) {
         toast({ title: "Could not redeem", description: res.error || "Invalid access code", variant: "destructive" });
         return;
       }
 
-      saveEbookAccess(res.ebook_id!, normalizedCode);
+      saveEbookAccess(res.ebook_id!, normalizedCode, name);
       const unlocked = Array.from(new Set([...accessIds, res.ebook_id!]));
       setAccessIds(unlocked);
       setCode("");
@@ -96,11 +102,16 @@ export default function EbookLibrary() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
         <Card className="p-5 border-stone-200">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-medium text-stone-700">
-              <KeyRound className="w-4 h-4 text-emerald-700" /> Enter your access code
+              <KeyRound className="w-4 h-4 text-emerald-700" /> Unlock a book
             </div>
-            <div className="flex flex-1 gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Your full name"
+              />
               <Input
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
@@ -111,7 +122,9 @@ export default function EbookLibrary() {
                 {redeeming ? "Checking..." : "Unlock"}
               </Button>
             </div>
+            <p className="text-xs text-stone-500">Your name is recorded with the code you use.</p>
           </div>
+
         </Card>
 
         {loading ? (
