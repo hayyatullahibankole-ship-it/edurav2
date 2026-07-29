@@ -120,9 +120,15 @@ export default defineConfig(({ mode }) => {
           // Chart/visualization libraries
           'vendor-charts': ['recharts'],
           // PDF and canvas utilities
-          'vendor-pdf': ['jspdf', 'html2canvas'],
+          'vendor-pdf': ['jspdf', 'html2canvas', 'react-pdf', 'pdfjs-dist', 'jspdf-autotable'],
           // Math rendering
           'vendor-math': ['katex'],
+          // Supabase and backend utilities
+          'vendor-supabase': ['@supabase/supabase-js'],
+          // Form, validation, and query libraries
+          'vendor-query': ['@tanstack/react-query'],
+          'vendor-zod': ['zod'],
+          'vendor-toast': ['sonner'],
         }
       }
     },

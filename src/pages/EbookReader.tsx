@@ -88,10 +88,23 @@ export default function EbookReader() {
         }
       }
 
+      if (previewUrl) {
+        try {
+          const validateResponse = await fetch(previewUrl, { method: "HEAD", mode: "cors" });
+          if (!validateResponse.ok) {
+            throw new Error(`Preview URL returned ${validateResponse.status} ${validateResponse.statusText}`);
+          }
+        } catch (error: any) {
+          console.error("Ebook preview URL validation failed", error);
+          previewError = error?.message || "Unable to reach the ebook preview URL.";
+          previewUrl = null;
+        }
+      }
+
       setPdfUrl(previewUrl);
       setNumPages(null);
       setPageNumber(1);
-      setPdfError(previewUrl ? null : previewError);
+      setPdfError(previewUrl ? null : previewError || "Unable to load this book preview.");
     } else {
       setPdfUrl(null);
       setNumPages(null);
