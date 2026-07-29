@@ -14,6 +14,28 @@ import { ArrowLeft, ArrowRight, BookOpen, KeyRound, List, Lock, Minus, Plus, Sma
 
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
+const mapPrototype = Map.prototype as Map<any, any> & {
+  getOrInsert?: (key: any, value: any) => any;
+  getOrInsertComputed?: (key: any, callback: (key: any) => any) => any;
+};
+
+if (!mapPrototype.getOrInsert) {
+  mapPrototype.getOrInsert = function (key: any, value: any) {
+    if (this.has(key)) return this.get(key);
+    this.set(key, value);
+    return value;
+  };
+}
+
+if (!mapPrototype.getOrInsertComputed) {
+  mapPrototype.getOrInsertComputed = function (key: any, callback: (key: any) => any) {
+    if (this.has(key)) return this.get(key);
+    const value = callback(key);
+    this.set(key, value);
+    return value;
+  };
+}
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 interface Chapter {
