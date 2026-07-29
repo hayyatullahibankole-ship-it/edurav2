@@ -44,6 +44,7 @@ export default function EbookReader() {
   const [fontSize, setFontSize] = useState(18);
   const [showToc, setShowToc] = useState(false);
   const [code, setCode] = useState("");
+  const [readerName, setReaderName] = useState("");
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [pdfError, setPdfError] = useState<string | null>(null);
