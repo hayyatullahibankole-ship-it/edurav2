@@ -68,11 +68,30 @@ export default function EbookReader() {
 
     const pdfPath = (b as any).pdf_path as string | null;
     if (pdfPath && allowed) {
-      const { data: signed } = await supabase.storage.from("ebook-files").createSignedUrl(pdfPath, 60 * 60);
-      setPdfUrl(signed?.signedUrl || null);
+      let previewUrl: string | null = null;
+      let previewError: string | null = null;
+
+      const { data: signed, error: signedError } = await supabase.storage.from("ebook-files").createSignedUrl(pdfPath, 60 * 60);
+      if (signedError || !signed?.signedUrl) {
+        previewError = signedError?.message || "Unable to generate access URL for this book.";
+      } else {
+        previewUrl = signed.signedUrl;
+      }
+
+      if (!previewUrl) {
+        const { data: publicData, error: publicError } = await supabase.storage.from("ebook-files").getPublicUrl(pdfPath);
+        if (publicData?.publicUrl) {
+          previewUrl = publicData.publicUrl;
+          previewError = null;
+        } else if (!previewError) {
+          previewError = publicError?.message || "Unable to access the ebook preview.";
+        }
+      }
+
+      setPdfUrl(previewUrl);
       setNumPages(null);
       setPageNumber(1);
-      setPdfError(null);
+      setPdfError(previewUrl ? null : previewError);
     } else {
       setPdfUrl(null);
       setNumPages(null);

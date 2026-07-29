@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
@@ -6,75 +7,77 @@ import ProtectedRoute from "./ProtectedRoute";
 import Layout from "./Layout";
 import { DashboardLayout } from "./DashboardLayout";
 import { NativeAppWrapper } from "./NativeAppWrapper";
+import LoadingAnimation from "./LoadingAnimation";
 
 // Edura Pages
-import Home from "@/pages/Home";
-import Auth from "@/pages/Auth";
-import Dashboard from "@/pages/Dashboard";
-import MobileSplash from "@/pages/MobileSplash";
-import MobileOnboarding from "@/pages/MobileOnboarding";
-import MobileHome from "@/pages/MobileHome";
-import InstallApp from "@/pages/InstallApp";
-import AdminPortal from "@/pages/AdminPortal";
-import AdminLogin from "@/pages/AdminLogin";
-import CBTExam from "@/pages/CBTExam";
-import TestResults from "@/pages/TestResults";
-import Demo from "@/pages/Demo";
-import DemoTest from "@/pages/DemoTest";
-import Resources from "@/pages/Resources";
-import Consultation from "@/pages/Consultation";
-import Payment from "@/pages/Payment";
-import NotFound from "@/pages/NotFound";
-import Privacy from "@/pages/Privacy";
-import Terms from "@/pages/Terms";
-import AnswerReview from "@/pages/AnswerReview";
-import PaymentSuccess from "@/pages/PaymentSuccess";
-import StudyHub from "@/pages/StudyHub";
-import StudyTopic from "@/pages/StudyTopic";
-import LessonView from "@/pages/LessonView";
-import Forum from "@/pages/Forum";
-import ForumNewPost from "@/pages/ForumNewPost";
-import ForumPost from "@/pages/ForumPost";
-import ChallengeArena from "@/pages/ChallengeArena";
-import ChallengeDetail from "@/pages/ChallengeDetail";
-import ChallengeResults from "@/pages/ChallengeResults";
-import SchoolRegistration from "@/pages/SchoolRegistration";
-import SchoolLogin from "@/pages/SchoolLogin";
-import SchoolSubscription from "@/pages/SchoolSubscription";
-import SchoolDashboard from "@/pages/SchoolDashboard";
-import SchoolVerificationPending from "@/pages/SchoolVerificationPending";
-import SchoolLanding from "@/pages/SchoolLanding";
-import OfflineExams from "@/pages/OfflineExams";
-import StudyPlanner from "@/pages/StudyPlanner";
-import ReferralProgram from "@/pages/ReferralProgram";
-import PerformanceReport from "@/pages/PerformanceReport";
-import LessonQuiz from "@/pages/LessonQuiz";
+const Home = lazy(() => import("@/pages/Home"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const MobileSplash = lazy(() => import("@/pages/MobileSplash"));
+const MobileOnboarding = lazy(() => import("@/pages/MobileOnboarding"));
+const MobileHome = lazy(() => import("@/pages/MobileHome"));
+const InstallApp = lazy(() => import("@/pages/InstallApp"));
+const AdminPortal = lazy(() => import("@/pages/AdminPortal"));
+const AdminLogin = lazy(() => import("@/pages/AdminLogin"));
+const CBTExam = lazy(() => import("@/pages/CBTExam"));
+const TestResults = lazy(() => import("@/pages/TestResults"));
+const Demo = lazy(() => import("@/pages/Demo"));
+const DemoTest = lazy(() => import("@/pages/DemoTest"));
+const Resources = lazy(() => import("@/pages/Resources"));
+const Consultation = lazy(() => import("@/pages/Consultation"));
+const Payment = lazy(() => import("@/pages/Payment"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const Privacy = lazy(() => import("@/pages/Privacy"));
+const Terms = lazy(() => import("@/pages/Terms"));
+const AnswerReview = lazy(() => import("@/pages/AnswerReview"));
+const PaymentSuccess = lazy(() => import("@/pages/PaymentSuccess"));
+const StudyHub = lazy(() => import("@/pages/StudyHub"));
+const StudyTopic = lazy(() => import("@/pages/StudyTopic"));
+const LessonView = lazy(() => import("@/pages/LessonView"));
+const Forum = lazy(() => import("@/pages/Forum"));
+const ForumNewPost = lazy(() => import("@/pages/ForumNewPost"));
+const ForumPost = lazy(() => import("@/pages/ForumPost"));
+const ChallengeArena = lazy(() => import("@/pages/ChallengeArena"));
+const ChallengeDetail = lazy(() => import("@/pages/ChallengeDetail"));
+const ChallengeResults = lazy(() => import("@/pages/ChallengeResults"));
+const SchoolRegistration = lazy(() => import("@/pages/SchoolRegistration"));
+const SchoolLogin = lazy(() => import("@/pages/SchoolLogin"));
+const SchoolSubscription = lazy(() => import("@/pages/SchoolSubscription"));
+const SchoolDashboard = lazy(() => import("@/pages/SchoolDashboard"));
+const SchoolVerificationPending = lazy(() => import("@/pages/SchoolVerificationPending"));
+const SchoolLanding = lazy(() => import("@/pages/SchoolLanding"));
+const OfflineExams = lazy(() => import("@/pages/OfflineExams"));
+const StudyPlanner = lazy(() => import("@/pages/StudyPlanner"));
+const ReferralProgram = lazy(() => import("@/pages/ReferralProgram"));
+const PerformanceReport = lazy(() => import("@/pages/PerformanceReport"));
+const LessonQuiz = lazy(() => import("@/pages/LessonQuiz"));
 
 // Akboy Pages
-import AkboyHome from "@/pages/akboy/AkboyHome";
-import AkboyCampusHub from "@/pages/akboy/AkboyCampusHub";
-import AkboyContact from "@/pages/akboy/AkboyContact";
-import AkboyBlog from "@/pages/akboy/AkboyBlog";
-import AkboyBlogPost from "@/pages/akboy/AkboyBlogPost";
-import AkboyAbout from "@/pages/akboy/AkboyAbout";
-import AkboyServices from "@/pages/akboy/AkboyServices";
-import AkboyPortfolio from "@/pages/akboy/AkboyPortfolio";
-import AkboyEvents from "@/pages/akboy/AkboyEvents";
-import EbookLibrary from "@/pages/EbookLibrary";
-import EbookReader from "@/pages/EbookReader";
-import AkboyTutorialRegistration from "@/pages/akboy/AkboyTutorialRegistration";
-import AkboyMockRegistration from "@/pages/akboy/AkboyMockRegistration";
-import AkboyMockLogin from "@/pages/akboy/AkboyMockLogin";
-import AkboyMockExam from "@/pages/akboy/AkboyMockExam";
-import AkboyMockSubmitted from "@/pages/akboy/AkboyMockSubmitted";
-import AkboyMockResults from "@/pages/akboy/AkboyMockResults";
-import AkboyMockPages from "@/pages/akboy/AkboyMockPages";
-import ReprintAdmitSlip from "@/pages/akboy/ReprintAdmitSlip";
+const AkboyHome = lazy(() => import("@/pages/akboy/AkboyHome"));
+const AkboyCampusHub = lazy(() => import("@/pages/akboy/AkboyCampusHub"));
+const AkboyContact = lazy(() => import("@/pages/akboy/AkboyContact"));
+const AkboyBlog = lazy(() => import("@/pages/akboy/AkboyBlog"));
+const AkboyBlogPost = lazy(() => import("@/pages/akboy/AkboyBlogPost"));
+const AkboyAbout = lazy(() => import("@/pages/akboy/AkboyAbout"));
+const AkboyServices = lazy(() => import("@/pages/akboy/AkboyServices"));
+const AkboyPortfolio = lazy(() => import("@/pages/akboy/AkboyPortfolio"));
+const AkboyEvents = lazy(() => import("@/pages/akboy/AkboyEvents"));
+const EbookLibrary = lazy(() => import("@/pages/EbookLibrary"));
+const EbookReader = lazy(() => import("@/pages/EbookReader"));
+const AkboyTutorialRegistration = lazy(() => import("@/pages/akboy/AkboyTutorialRegistration"));
+const AkboyMockRegistration = lazy(() => import("@/pages/akboy/AkboyMockRegistration"));
+const AkboyMockLogin = lazy(() => import("@/pages/akboy/AkboyMockLogin"));
+const AkboyMockExam = lazy(() => import("@/pages/akboy/AkboyMockExam"));
+const AkboyMockSubmitted = lazy(() => import("@/pages/akboy/AkboyMockSubmitted"));
+const AkboyMockResults = lazy(() => import("@/pages/akboy/AkboyMockResults"));
+const AkboyMockPages = lazy(() => import("@/pages/akboy/AkboyMockPages"));
+const ReprintAdmitSlip = lazy(() => import("@/pages/akboy/ReprintAdmitSlip"));
 
 // Akboy Routes Component
 const AkboyRoutes = () => {
   return (
-    <Routes>
+    <Suspense fallback={<LoadingAnimation />}>
+      <Routes>
       <Route path="/" element={<AkboyHome />} />
       <Route path="/about" element={<AkboyAbout />} />
       <Route path="/services" element={<AkboyServices />} />
@@ -104,19 +107,22 @@ const AkboyRoutes = () => {
       <Route path="/terms" element={<Terms />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </Suspense>
   );
 };
 
 // Campus Hub standalone routes
 const CampusHubRoutes = () => {
   return (
-    <Routes>
+    <Suspense fallback={<LoadingAnimation />}>
+      <Routes>
       <Route path="/" element={<AkboyCampusHub />} />
       <Route path="/campus-hub" element={<AkboyCampusHub />} />
       <Route path="/blog" element={<Navigate to="/" replace />} />
       <Route path="/blog/:slug" element={<AkboyBlogPost />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 };
 
@@ -125,7 +131,8 @@ const EduraRoutes = () => {
   const { isInstalledApp } = useInstalledApp();
   
   return (
-    <Routes>
+    <Suspense fallback={<LoadingAnimation />}>
+      <Routes>
       {/* Mobile-specific routes */}
       <Route path="/mobile-splash" element={<MobileSplash />} />
       <Route path="/mobile-onboarding" element={<MobileOnboarding />} />
@@ -334,6 +341,7 @@ const EduraRoutes = () => {
 
       <Route path="*" element={<Layout><NotFound /></Layout>} />
     </Routes>
+    </Suspense>
   );
 };
 
