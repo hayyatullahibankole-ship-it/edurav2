@@ -265,7 +265,7 @@ export default function EbookReader() {
       <div className={`${isPdfBook ? "max-w-5xl" : "max-w-4xl"} mx-auto px-4 py-8`}>
         {isPdfBook ? (
           !hasAccess ? (
-            <AccessGate />
+            {renderAccessGate()}
           ) : (
             <div
               ref={contentRef}
@@ -346,7 +346,7 @@ export default function EbookReader() {
             {chapters.length === 0 ? (
               <Card className="p-10 text-center border-stone-200 text-stone-600">Nothing published yet.</Card>
             ) : locked ? (
-              <AccessGate />
+              {renderAccessGate()}
             ) : (
               <article
                 ref={contentRef}
