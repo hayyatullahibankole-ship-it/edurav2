@@ -32,6 +32,7 @@ export default function EbookLibrary() {
   const [accessIds, setAccessIds] = useState<string[]>(() => getUnlockedEbookIds());
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState("");
+  const [fullName, setFullName] = useState("");
   const [redeeming, setRedeeming] = useState(false);
 
   const load = async () => {
