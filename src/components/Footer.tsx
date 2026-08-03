@@ -71,7 +71,7 @@ const Footer = () => {
             <div className="flex -ml-2">
               {[Facebook, Twitter, Instagram, Youtube].map((Icon, i) => (
                 <Button key={i} variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                  <Icon className="h-4.5 w-4.5" />
+                  <Icon className="h-4 w-4" />
                 </Button>
               ))}
             </div>
