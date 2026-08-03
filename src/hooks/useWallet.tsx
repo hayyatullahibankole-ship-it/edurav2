@@ -12,13 +12,13 @@ export type WalletTransaction = {
 };
 
 export const useWallet = () => {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    if (!user) {
+    if (!user || !userProfile?.id) {
       setBalance(0);
       setTransactions([]);
       setLoading(false);
@@ -29,7 +29,7 @@ export const useWallet = () => {
     const { data: wallet } = await supabase
       .from("user_wallets")
       .select("id, balance")
-      .eq("user_id", user.id)
+      .eq("user_id", userProfile.id)
       .maybeSingle();
 
     setBalance(Number(wallet?.balance ?? 0));
@@ -46,7 +46,7 @@ export const useWallet = () => {
       setTransactions([]);
     }
     setLoading(false);
-  }, [user?.id]);
+  }, [user?.id, userProfile?.id]);
 
   useEffect(() => {
     refresh();

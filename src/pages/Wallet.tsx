@@ -43,7 +43,6 @@ const Wallet = () => {
   const [account, setAccount] = useState<VirtualAccount | null>(null);
   const [accountLoading, setAccountLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [syncing, setSyncing] = useState(false);
 
 
   useEffect(() => {
@@ -102,28 +101,6 @@ const Wallet = () => {
       toast.error("Could not copy");
     }
   };
-
-  const syncTransfers = async () => {
-    setSyncing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("wallet-sync", { body: {} });
-      if (error || data?.error) {
-        toast.error(data?.error || "Could not check for transfers");
-      } else if (data?.credited > 0) {
-        toast.success(`${data.credited} transfer(s) added — ${naira(data.total)}`);
-        refresh();
-      } else {
-        toast.info("No new transfers found yet");
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not check for transfers");
-    } finally {
-      setSyncing(false);
-    }
-  };
-
-
-
 
   const fundWallet = async () => {
     const value = Number(amount);
@@ -223,16 +200,6 @@ const Wallet = () => {
                         Transfer to this account from any bank app and your wallet is funded
                         automatically.
                       </p>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="mt-2"
-                        onClick={syncTransfers}
-                        disabled={syncing}
-                      >
-                        {syncing && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-                        {syncing ? "Checking…" : "I've sent money — check now"}
-                      </Button>
                     </div>
 
                   ) : (
