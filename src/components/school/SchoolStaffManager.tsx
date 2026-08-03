@@ -81,14 +81,14 @@ export default function SchoolStaffManager({ schoolId }: Props) {
 
   const resendInvite = async (member: any) => {
     try {
-      const { data: session } = await supabase.auth.getSession();
+      const { data: sessionData } = await supabase.auth.getSession();
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/invite-school-staff`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.data.session?.access_token}`,
+            Authorization: `Bearer ${sessionData.session?.access_token}`,
           },
           body: JSON.stringify({
             school_id: schoolId,
