@@ -175,6 +175,26 @@ Deno.serve(async (req) => {
     const amount = unitPrice * quantity;
     if (amount <= 0) return json({ error: "Invalid service price" }, 400);
 
+    // Loss guard: never buy from the vendor for more than the customer paid.
+    const cardTypeIdEarly = Number(service.vendor_code);
+    if (Number.isFinite(cardTypeIdEarly) && cardTypeIdEarly > 0) {
+      const cardTypes = await fetchVendorCardTypes();
+      const vendorCard = cardTypes?.find((c) => c.id === cardTypeIdEarly);
+      if (vendorCard && vendorCard.price > unitPrice) {
+        console.error(
+          `Blocked sale: vendor price ${vendorCard.price} exceeds selling price ${unitPrice} for ${service.slug}`,
+        );
+        return json(
+          {
+            error:
+              "This card is temporarily unavailable at the listed price. Please try again later.",
+          },
+          400,
+        );
+      }
+    }
+
+
     // 1. Take payment
     if (paymentMethod === "card") {
       const paystackKey = Deno.env.get("PAYSTACK_SECRET_KEY");
