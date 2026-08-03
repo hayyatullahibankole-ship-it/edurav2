@@ -83,12 +83,12 @@ All colors MUST be HSL for consistency across light/dark modes.
 
     --sidebar-background: 0 0% 7%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 142 70% 50%;
+    --sidebar-primary: 152 82% 39%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 15%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 142 70% 50%;
+    --sidebar-ring: 152 82% 39%;
   }
 
   .dark {
@@ -102,23 +102,23 @@ All colors MUST be HSL for consistency across light/dark modes.
     --popover: 222 47% 13%;
     --popover-foreground: 214 50% 95%;
 
-    --primary: 142 70% 52%;
+    --primary: 152 76% 45%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 142 70% 47%;
-    --primary-glow: 142 70% 62%;
+    --primary-hover: 152 76% 40%;
+    --primary-glow: 152 70% 58%;
 
-    --secondary: 158 64% 55%;
+    --secondary: 222 40% 20%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 222 47% 16%;
     --muted-foreground: 215 15% 60%;
 
-    --accent: 142 70% 58%;
+    --accent: 152 70% 42%;
     --accent-foreground: 0 0% 100%;
     
-    --success: 142 70% 58%;
+    --success: 152 76% 45%;
     --success-foreground: 0 0% 100%;
-    --success-glow: 142 70% 68%;
+    --success-glow: 152 70% 58%;
 
     --warning: 38 92% 55%;
     --warning-foreground: 0 0% 100%;
@@ -131,16 +131,16 @@ All colors MUST be HSL for consistency across light/dark modes.
 
     --border: 222 47% 20%;
     --input: 222 47% 16%;
-    --ring: 142 70% 52%;
+    --ring: 152 76% 45%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 142 70% 52%;
+    --sidebar-primary: 152 76% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 142 70% 52%;
+    --sidebar-ring: 152 76% 45%;
   }
 }
 
@@ -150,7 +150,11 @@ All colors MUST be HSL for consistency across light/dark modes.
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
+    @apply bg-background text-foreground font-sans;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    @apply font-display tracking-tight;
   }
   
   /* Smooth scrolling for mobile */
