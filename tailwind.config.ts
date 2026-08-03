@@ -14,13 +14,19 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Figtree', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['Outfit', 'Figtree', 'system-ui', 'sans-serif'],
-        inter: ['Figtree', 'Inter', 'sans-serif'],
-        poppins: ['Outfit', 'Poppins', 'sans-serif'],
-        lato: ['Figtree', 'Lato', 'sans-serif'],
+        sans: ['DM Sans', 'Figtree', 'system-ui', 'sans-serif'],
+        display: ['Space Grotesk', 'DM Sans', 'system-ui', 'sans-serif'],
+        inter: ['DM Sans', 'Inter', 'sans-serif'],
+        poppins: ['Space Grotesk', 'Outfit', 'sans-serif'],
+        lato: ['DM Sans', 'Lato', 'sans-serif'],
       },
       colors: {
+        ink: {
+          DEFAULT: "hsl(var(--ink))",
+          soft: "hsl(var(--ink-soft))",
+          foreground: "hsl(var(--ink-foreground))",
+        },
+        surface: "hsl(var(--surface))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

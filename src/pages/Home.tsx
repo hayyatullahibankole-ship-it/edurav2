@@ -2,27 +2,25 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowRight,
-  ArrowUpRight,
-  BookOpen,
   Building2,
+  Check,
   CheckCircle2,
   ClipboardCheck,
   CreditCard,
   Download,
   GraduationCap,
   LineChart,
-  LogIn,
+  Plus,
   ShieldCheck,
   Sparkles,
   Ticket,
   Timer,
   WifiOff,
+  BookOpen,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import heroImage from "@/assets/hero-students.jpg";
 import BlogSection from "@/components/BlogSection";
 import Footer from "@/components/Footer";
-import ScheduleTestModal from "@/components/ScheduleTestModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -35,271 +33,328 @@ const Home = () => {
 
   const primaryHref = isMobileWeb ? "/auth" : user ? "/dashboard" : "/auth";
 
-  const stats = [
-    { value: "50,000+", label: "Students" },
-    { value: "120,000+", label: "Practice questions" },
-    { value: "24", label: "Student services" },
-    { value: "4.8★", label: "App rating" },
+  const pillars = [
+    {
+      no: "01",
+      title: "CBT Excellence",
+      body:
+        "120,000+ past questions with full explanations. Works offline, replicates the real JAMB and WAEC exam environment, and breaks down every attempt so you know exactly what to fix.",
+    },
+    {
+      no: "02",
+      title: "Service Desk",
+      body:
+        "No more queuing at a cybercafé. Buy WAEC, NECO and NABTEB result checker PINs instantly, run Post-UTME and admission processing, and track every request from one dashboard.",
+    },
+    {
+      no: "03",
+      title: "Smart Wallet",
+      body:
+        "Get a dedicated Nigerian account number automatically. Fund by bank transfer and pay for PINs, forms and services in one tap — no card details, no failed checkouts.",
+    },
   ];
 
   const services = [
     {
       icon: Ticket,
       title: "Result checker PINs",
-      body: "WAEC, NECO and NABTEB PINs delivered to your screen seconds after payment. No agent, no waiting.",
+      body: "WAEC, NECO and NABTEB PINs delivered to your screen seconds after payment.",
       tag: "Instant",
     },
     {
       icon: ClipboardCheck,
       title: "Admissions & Post-UTME",
-      body: "We fill and submit your Post-UTME or admission form. Pricing follows your institution's own fee.",
+      body: "We fill and submit your form. Pricing follows your institution's own fee.",
       tag: "Done for you",
     },
     {
       icon: CreditCard,
       title: "Edura Wallet",
-      body: "Get a dedicated account number, transfer in from any bank, and pay for anything on Edura in one tap.",
+      body: "A dedicated account number, funded from any bank, spendable anywhere on Edura.",
       tag: "Dedicated NUBAN",
     },
     {
       icon: GraduationCap,
       title: "JAMB services",
-      body: "Profile codes, e-PINs, and correction of data — handled by people who do it every day.",
+      body: "Profile codes, e-PINs and correction of data, handled by people who do it daily.",
       tag: "Verified",
     },
   ];
 
   const practiceFeatures = [
     { icon: Timer, title: "Real exam conditions", body: "180 questions in 120 minutes for JAMB, per-paper timing for WAEC." },
-    { icon: LineChart, title: "Analytics that teach", body: "See weak topics, streaks and score trends after every attempt." },
-    { icon: WifiOff, title: "Works offline", body: "Download a paper, write it with no data, and it syncs when you're back." },
+    { icon: LineChart, title: "Analytics that teach", body: "Weak topics, streaks and score trends after every single attempt." },
+    { icon: WifiOff, title: "Works offline", body: "Download a paper, write it with no data, it syncs when you're back." },
     { icon: BookOpen, title: "Past questions 2015–2025", body: "Explanations, syllabus coverage, video lessons and a study planner." },
   ];
 
-  const subjects = [
-    "English Language", "Mathematics", "Physics", "Chemistry", "Biology",
-    "Geography", "Economics", "Government", "Literature", "History",
-    "Agricultural Science", "Commerce", "CRS/IRS", "Further Maths",
-  ];
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* ============ HERO ============ */}
-      <section className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-24">
-          <div className="grid lg:grid-cols-[1.05fr,1fr] gap-12 lg:gap-16 items-center">
-            {/* Left */}
-            <div>
-              <Badge variant="secondary" className="mb-6 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest">
-                Edura v2 — two sides, one account
-              </Badge>
+    <div className="min-h-screen bg-background font-sans">
+      {/* ============ HERO — Deep Ink command center ============ */}
+      <section className="relative overflow-hidden bg-ink text-ink-foreground">
+        <div className="pointer-events-none absolute -top-40 right-0 h-[38rem] w-[38rem] rounded-full bg-primary/10 blur-[140px]" />
 
-              <h1 className="text-4xl sm:text-5xl xl:text-6xl font-bold leading-[1.05] text-foreground">
-                Pass the exam.
-                <span className="block text-primary">Skip the paperwork.</span>
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 md:pt-24 md:pb-28">
+          <div className="grid lg:grid-cols-2 gap-14 lg:gap-16 items-center">
+            {/* Copy */}
+            <div className="space-y-7">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-ink-soft px-3 py-1.5">
+                <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+                  The complete student ecosystem
+                </span>
+              </div>
+
+              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-bold leading-[1.05] tracking-tight">
+                Master your exams.
+                <br />
+                <span className="text-primary">Manage your future.</span>
               </h1>
 
-              <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
-                Edura is Nigeria's CBT practice platform <em className="not-italic font-semibold text-foreground">and</em> your
-                student services desk. Practise JAMB and WAEC under real conditions, then buy result PINs, fund a wallet and
-                process admissions without leaving the app.
+              <p className="max-w-xl text-base md:text-lg leading-relaxed text-ink-foreground/70">
+                Nigeria's most advanced platform for students. Take realistic CBT simulations for JAMB, WAEC, NECO and
+                Post-UTME, then handle every result PIN, admission form and payment through a wallet with your own
+                dedicated bank account.
               </p>
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                {user && !isMobileWeb ? (
-                  <ScheduleTestModal defaultExamType="jamb">
-                    <Button size="lg" className="h-12 px-7 text-base font-semibold">
-                      Start practising
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </ScheduleTestModal>
-                ) : (
-                  <Link to={primaryHref}>
-                    <Button size="lg" className="w-full sm:w-auto h-12 px-7 text-base font-semibold">
-                      {isMobileWeb ? <LogIn className="mr-2 h-5 w-5" /> : null}
-                      Start practising
-                      {!isMobileWeb && <ArrowRight className="ml-2 h-5 w-5" />}
-                    </Button>
-                  </Link>
-                )}
-                <Link to="/services">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 px-7 text-base font-semibold border-2">
-                    Explore student services
+              <div className="flex flex-wrap gap-3">
+                <Link to={primaryHref}>
+                  <Button size="lg" className="h-12 px-8 text-base font-bold text-ink hover:bg-primary-hover">
+                    Get started free
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link to="/demo-test">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 px-8 text-base font-bold border-white/15 bg-ink-soft text-ink-foreground hover:bg-ink-soft/70 hover:text-ink-foreground"
+                  >
+                    Try a free demo test
                   </Button>
                 </Link>
               </div>
 
-              <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-y-6 gap-x-4 border-t border-border pt-8">
-                {stats.map((s) => (
-                  <div key={s.label}>
-                    <div className="text-2xl font-bold text-foreground">{s.value}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
+              <div className="flex flex-wrap items-center gap-6 sm:gap-8 pt-6 border-t border-white/10">
+                {[
+                  { v: "120,000+", l: "Practice questions" },
+                  { v: "50,000+", l: "Students" },
+                  { v: "Instant", l: "PIN delivery" },
+                ].map((s, i) => (
+                  <div key={s.l} className="flex items-center gap-6 sm:gap-8">
+                    {i > 0 && <div className="hidden sm:block h-8 w-px bg-white/10" />}
+                    <div>
+                      <div className="font-display text-2xl font-bold">{s.v}</div>
+                      <div className="text-xs text-ink-foreground/50">{s.l}</div>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Right — bento preview */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2 rounded-2xl overflow-hidden border border-border bg-muted">
-                <img
-                  src={heroImage}
-                  alt="Nigerian students preparing for JAMB and WAEC with Edura CBT practice"
-                  className="w-full h-44 sm:h-56 object-cover"
-                  loading="lazy"
-                />
-              </div>
+            {/* Product surfaces */}
+            <div className="relative">
+              <div className="pointer-events-none absolute -inset-16 rounded-full bg-primary/5 blur-[120px]" />
 
-              <div className="rounded-2xl border border-border bg-background p-5">
-                <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4">
-                  <Timer className="h-5 w-5" />
-                </div>
-                <div className="font-semibold text-foreground">Mock in progress</div>
-                <div className="text-sm text-muted-foreground mt-1">Question 42 of 180</div>
-                <div className="mt-4 h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full w-[23%] bg-primary" />
-                </div>
-              </div>
+              <div className="relative grid grid-cols-12 gap-4 pb-8 lg:pb-0">
+                {/* CBT engine */}
+                <div className="col-span-12 sm:col-span-10 lg:col-span-9 rounded-2xl border border-white/10 bg-ink-soft shadow-2xl overflow-hidden lg:-rotate-2">
+                  <div className="flex items-center justify-between border-b border-white/5 bg-ink px-4 py-2.5">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-foreground/40">
+                      Edura CBT engine
+                    </span>
+                    <div className="flex gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-destructive/50" />
+                      <span className="h-2 w-2 rounded-full bg-warning/50" />
+                      <span className="h-2 w-2 rounded-full bg-primary/60" />
+                    </div>
+                  </div>
 
-              <div className="rounded-2xl border border-border bg-background p-5">
-                <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4">
-                  <CreditCard className="h-5 w-5" />
-                </div>
-                <div className="font-semibold text-foreground">Wallet</div>
-                <div className="text-sm text-muted-foreground mt-1">Funded by bank transfer</div>
-                <div className="mt-3 text-xs font-medium text-primary">Dedicated account ready</div>
-              </div>
+                  <div className="space-y-4 p-5 sm:p-6">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-display text-sm font-bold text-primary">JAMB — Use of English</h4>
+                      <span className="rounded border border-destructive/30 bg-destructive/15 px-2 py-1 text-[10px] font-semibold text-destructive tabular-nums">
+                        01:42:05
+                      </span>
+                    </div>
 
-              <div className="col-span-2 rounded-2xl border border-border bg-background p-5 flex items-center gap-4">
-                <div className="h-10 w-10 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                  <Ticket className="h-5 w-5" />
+                    <div className="space-y-1.5">
+                      <p className="text-sm font-medium">
+                        Choose the option most nearly opposite in meaning to the underlined word.
+                      </p>
+                      <p className="text-xs italic text-ink-foreground/60">
+                        The principal was <u>adamant</u> about the new school rules.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs">A. Flexible</div>
+                      <div className="rounded-lg border border-primary bg-primary/10 p-3 text-xs font-medium">
+                        B. Unyielding
+                      </div>
+                      <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs">C. Indifferent</div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="flex gap-1.5">
+                        <span className="flex h-6 w-6 items-center justify-center rounded bg-primary text-[10px] font-bold text-ink">1</span>
+                        <span className="flex h-6 w-6 items-center justify-center rounded bg-white/10 text-[10px]">2</span>
+                        <span className="flex h-6 w-6 items-center justify-center rounded bg-white/10 text-[10px]">3</span>
+                      </div>
+                      <span className="rounded bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wide">
+                        Next question
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="font-semibold text-foreground">WAEC checker PIN delivered</div>
-                  <div className="text-sm text-muted-foreground truncate">Automatically, 8 seconds after payment</div>
+
+                {/* Wallet & services */}
+                <div className="col-span-12 sm:col-span-8 sm:col-start-5 lg:col-span-7 lg:col-start-6 lg:-mt-24 rounded-2xl border border-white/60 bg-card text-card-foreground shadow-2xl overflow-hidden lg:rotate-3">
+                  <div className="space-y-4 p-5">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                          Available balance
+                        </p>
+                        <h3 className="font-display text-2xl font-bold tabular-nums">₦24,850.00</h3>
+                      </div>
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                        <Plus className="h-4 w-4 text-primary-foreground" />
+                      </span>
+                    </div>
+
+                    <div className="rounded-xl bg-surface p-3">
+                      <p className="text-[9px] font-bold uppercase text-muted-foreground">Dedicated account</p>
+                      <div className="mt-1 flex items-center justify-between">
+                        <span className="font-mono text-xs font-bold tracking-wider tabular-nums">8234991022</span>
+                        <span className="rounded border border-border bg-card px-1.5 py-0.5 text-[9px]">Wema Bank</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold uppercase text-muted-foreground">Quick services</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {["WAEC PIN", "JAMB e-PIN"].map((s) => (
+                          <div key={s} className="flex flex-col items-center gap-1 rounded-lg bg-surface p-2">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-card shadow-sm">
+                              <Ticket className="h-3 w-3 text-primary" />
+                            </span>
+                            <span className="text-[9px] font-bold">{s}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between border-t border-border pt-2.5">
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded bg-primary/15">
+                          <Check className="h-3 w-3 text-primary" />
+                        </span>
+                        <div>
+                          <p className="text-[10px] font-bold">WAEC checker PIN</p>
+                          <p className="text-[9px] text-muted-foreground">Delivered • 2m ago</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold text-destructive tabular-nums">-₦3,500</span>
+                    </div>
+                  </div>
                 </div>
-                <CheckCircle2 className="h-5 w-5 text-primary ml-auto shrink-0" />
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* ============ TWO SIDES ============ */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">One app, two sides</h2>
-            <p className="mt-3 text-lg text-muted-foreground">
-              Switch between practice and services any time from inside your dashboard.
-            </p>
-          </div>
-
-          <div className="mt-10 grid md:grid-cols-2 gap-5">
-            <div className="rounded-2xl border border-border bg-card p-7 md:p-9 flex flex-col">
-              <Badge className="w-fit rounded-full bg-primary/10 text-primary hover:bg-primary/10 border-0 font-semibold">
-                Side 1
-              </Badge>
-              <h3 className="mt-5 text-2xl font-bold text-foreground">CBT Practice</h3>
-              <p className="mt-2 text-muted-foreground">
-                JAMB, WAEC, NECO and Post-UTME simulations that behave exactly like the real thing.
-              </p>
-              <ul className="mt-6 space-y-3 flex-1">
-                {["Official JAMB layout and timing", "Instant scoring with full explanations", "Offline mode for poor networks", "Study hub, planner and challenge arena"].map((i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-foreground">
-                    <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    {i}
-                  </li>
-                ))}
-              </ul>
-              <Link to="/demo" className="mt-7">
-                <Button variant="outline" className="w-full sm:w-auto border-2 font-semibold">
-                  Try a free demo test
-                  <ArrowUpRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-
-            <div className="rounded-2xl border border-border bg-foreground p-7 md:p-9 flex flex-col">
-              <Badge className="w-fit rounded-full bg-primary text-primary-foreground hover:bg-primary border-0 font-semibold">
-                Side 2
-              </Badge>
-              <h3 className="mt-5 text-2xl font-bold text-background">Student Services</h3>
-              <p className="mt-2 text-background/70">
-                The errands every Nigerian student runs — automated, priced upfront, and tracked end to end.
-              </p>
-              <ul className="mt-6 space-y-3 flex-1">
-                {["Result checker PINs in seconds", "Post-UTME & admission processing", "Wallet with a dedicated account number", "Every request tracked with uploads"].map((i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-background">
-                    <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    {i}
-                  </li>
-                ))}
-              </ul>
-              <Link to="/services" className="mt-7">
-                <Button className="w-full sm:w-auto font-semibold">
-                  Browse services
-                  <ArrowUpRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ SERVICES ============ */}
-      <section className="py-16 md:py-24 bg-card border-y border-border">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">Services that used to cost you a trip to town</h2>
-            <p className="mt-3 text-lg text-muted-foreground">
-              Pay with your card or wallet. Automated services deliver instantly; the rest are fulfilled by our team.
-            </p>
-          </div>
-
-          <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {services.map((s) => (
-              <div key={s.title} className="rounded-2xl border border-border bg-background p-6 hover:border-primary/50 transition-colors">
-                <div className="h-11 w-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                  <s.icon className="h-5 w-5" />
-                </div>
-                <div className="mt-5 flex items-center gap-2">
-                  <h3 className="font-semibold text-foreground">{s.title}</h3>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.body}</p>
-                <div className="mt-4 text-xs font-semibold uppercase tracking-wider text-primary">{s.tag}</div>
+          {/* Three pillars */}
+          <div className="mt-20 grid gap-10 border-t border-white/10 pt-12 md:grid-cols-3 md:gap-12">
+            {pillars.map((p) => (
+              <div key={p.no}>
+                <h3 className="font-display text-xl md:text-2xl font-bold text-primary mb-3">
+                  {p.no}. {p.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-ink-foreground/60">{p.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ============ PRACTICE FEATURES ============ */}
+      {/* ============ SERVICES ============ */}
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-[0.9fr,1.1fr] gap-12 items-start">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground">Practice built for the real exam hall</h2>
-              <p className="mt-3 text-lg text-muted-foreground">
-                Not a quiz app. Every simulation mirrors the official layout, timing and scoring so exam day feels familiar.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-2">
-                {subjects.map((s) => (
-                  <span key={s} className="rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-muted-foreground">
-                    {s}
+          <div className="max-w-2xl">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Student services</span>
+            <h2 className="mt-4 font-display text-3xl md:text-4xl font-bold text-foreground">
+              Errands that used to cost you a trip to town
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Pay with your card or wallet. Automated services deliver instantly; the rest are fulfilled and tracked by our team.
+            </p>
+          </div>
+
+          <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {services.map((s) => (
+              <div
+                key={s.title}
+                className="rounded-2xl border border-border bg-card p-6 transition-colors hover:border-primary/40"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
+                    <s.icon className="h-5 w-5 text-primary" />
                   </span>
+                  <Badge variant="secondary" className="rounded-full text-[10px] font-semibold uppercase tracking-wide">
+                    {s.tag}
+                  </Badge>
+                </div>
+                <h3 className="mt-5 font-display text-base font-bold text-foreground">{s.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.body}</p>
+              </div>
+            ))}
+          </div>
+
+          <Link to="/services" className="mt-8 inline-block">
+            <Button size="lg" variant="outline" className="border-2 font-semibold">
+              Browse all services
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* ============ PRACTICE ============ */}
+      <section className="pb-16 md:pb-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-border bg-surface p-8 md:p-12">
+            <div className="grid lg:grid-cols-[1fr,1.1fr] gap-10 items-center">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">CBT practice</span>
+                <h2 className="mt-4 font-display text-3xl md:text-4xl font-bold text-foreground">
+                  Practice that behaves exactly like the real exam
+                </h2>
+                <p className="mt-3 text-muted-foreground">
+                  The same layout, the same clock, the same pressure — so exam day feels like something you've already done.
+                </p>
+                <div className="mt-7 flex flex-col sm:flex-row gap-3">
+                  <Link to="/demo-test">
+                    <Button size="lg" className="w-full sm:w-auto font-semibold">
+                      Try a free demo test
+                    </Button>
+                  </Link>
+                  <Link to="/resources">
+                    <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 font-semibold">
+                      See resources
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                {practiceFeatures.map((f) => (
+                  <div key={f.title} className="rounded-2xl border border-border bg-card p-5">
+                    <f.icon className="h-5 w-5 text-primary" />
+                    <div className="mt-3 font-display text-sm font-bold text-foreground">{f.title}</div>
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
+                  </div>
                 ))}
               </div>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-5">
-              {practiceFeatures.map((f) => (
-                <div key={f.title} className="rounded-2xl border border-border bg-card p-6">
-                  <f.icon className="h-6 w-6 text-primary" />
-                  <h3 className="mt-4 font-semibold text-foreground">{f.title}</h3>
-                  <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{f.body}</p>
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -308,15 +363,17 @@ const Home = () => {
       {/* ============ SCHOOLS ============ */}
       <section className="pb-16 md:pb-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-border bg-card p-8 md:p-12 grid md:grid-cols-[1.2fr,1fr] gap-8 items-center">
+          <div className="grid md:grid-cols-[1.2fr,1fr] gap-8 items-center rounded-3xl border border-border bg-card p-8 md:p-12">
             <div>
               <div className="flex items-center gap-2 text-primary">
                 <Building2 className="h-5 w-5" />
-                <span className="text-xs font-semibold uppercase tracking-widest">For schools</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.18em]">For schools</span>
               </div>
-              <h2 className="mt-4 text-3xl md:text-4xl font-bold text-foreground">Run your school's CBT on Edura</h2>
-              <p className="mt-3 text-muted-foreground max-w-xl">
-                Create exams, upload your own question bank, assign students, and get ranked performance reports per class.
+              <h2 className="mt-4 font-display text-3xl md:text-4xl font-bold text-foreground">
+                Run your school's CBT on Edura
+              </h2>
+              <p className="mt-3 max-w-xl text-muted-foreground">
+                Create exams, upload your own question bank, assign students and get ranked performance reports per class.
                 Mock exams are free — pay only when you're ready for full exams and reports.
               </p>
               <div className="mt-7 flex flex-col sm:flex-row gap-3">
@@ -338,10 +395,10 @@ const Home = () => {
                 { icon: LineChart, t: "Ranked reports", d: "Class averages, per-subject breakdowns, printable sheets." },
                 { icon: ClipboardCheck, t: "Bulk question upload", d: "CSV import for thousands of questions at once." },
               ].map((x) => (
-                <div key={x.t} className="flex items-start gap-4 rounded-xl border border-border bg-background p-4">
-                  <x.icon className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div key={x.t} className="flex items-start gap-4 rounded-xl border border-border bg-surface p-4">
+                  <x.icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                   <div>
-                    <div className="font-semibold text-sm text-foreground">{x.t}</div>
+                    <div className="font-display text-sm font-bold text-foreground">{x.t}</div>
                     <div className="text-sm text-muted-foreground">{x.d}</div>
                   </div>
                 </div>
@@ -354,17 +411,17 @@ const Home = () => {
       {/* ============ V3 TEASER ============ */}
       <section className="pb-16 md:pb-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-8 md:p-12 text-center">
+          <div className="rounded-3xl border border-dashed border-primary/40 bg-primary/5 p-8 md:p-12 text-center">
             <Badge variant="secondary" className="rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest">
-              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+              <Sparkles className="mr-1.5 h-3.5 w-3.5" />
               Coming soon
             </Badge>
-            <h2 className="mt-5 text-3xl md:text-4xl font-bold text-foreground">Edura v3 is on the way</h2>
-            <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="mt-5 font-display text-3xl md:text-4xl font-bold text-foreground">Edura v3 is on the way</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
               A smarter study companion, richer school tooling and a faster services desk. Everything you build up on Edura
               today carries straight over.
             </p>
-            <Link to="/auth" className="inline-block mt-7">
+            <Link to="/auth" className="mt-7 inline-block">
               <Button size="lg" variant="outline" className="border-2 font-semibold">
                 Create your account now
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -377,17 +434,17 @@ const Home = () => {
       <BlogSection />
 
       {/* ============ FINAL CTA ============ */}
-      <section className="bg-foreground py-16 md:py-24">
+      <section className="bg-ink py-16 md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-5xl font-bold text-background max-w-3xl mx-auto leading-tight">
+          <h2 className="mx-auto max-w-3xl font-display text-3xl md:text-5xl font-bold leading-tight text-ink-foreground">
             Everything a Nigerian student needs, in one place
           </h2>
-          <p className="mt-4 text-lg text-background/70 max-w-xl mx-auto">
+          <p className="mx-auto mt-4 max-w-xl text-lg text-ink-foreground/60">
             Free to start. No card required to practise.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
             <Link to={primaryHref}>
-              <Button size="lg" className="w-full sm:w-auto h-12 px-8 text-base font-semibold">
+              <Button size="lg" className="h-12 w-full sm:w-auto px-8 text-base font-bold text-ink">
                 Get started free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -396,12 +453,20 @@ const Home = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="w-full sm:w-auto h-12 px-8 text-base font-semibold border-2 border-background/30 bg-transparent text-background hover:bg-background hover:text-foreground"
+                className="h-12 w-full sm:w-auto border-white/20 bg-transparent px-8 text-base font-bold text-ink-foreground hover:bg-ink-soft hover:text-ink-foreground"
               >
                 <Download className="mr-2 h-5 w-5" />
                 Get the app
               </Button>
             </Link>
+          </div>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-ink-foreground/50">
+            {["Offline CBT", "Instant PINs", "Dedicated wallet account", "School exams"].map((t) => (
+              <span key={t} className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                {t}
+              </span>
+            ))}
           </div>
         </div>
       </section>
