@@ -865,7 +865,15 @@ const ServicesHome = () => {
                       </div>
                     )}
                   </div>
-                  {request.status === "awaiting_details" ? (
+                  {request.quote_status === "quoted" ? (
+                    <Button size="sm" className="shrink-0" onClick={() => setPayingQuote(request)}>
+                      Pay {naira(Number(request.quoted_amount) || 0)}
+                    </Button>
+                  ) : request.quote_status === "requested" ? (
+                    <Badge variant="secondary" className="shrink-0">
+                      Awaiting price
+                    </Badge>
+                  ) : request.status === "awaiting_details" ? (
                     <Button size="sm" className="shrink-0" onClick={() => resumeRequest(request)}>
                       Complete details
                     </Button>
@@ -1208,6 +1216,55 @@ const ServicesHome = () => {
         </DialogContent>
       </Dialog>
 
+
+      <Dialog open={!!payingQuote} onOpenChange={(open) => !open && setPayingQuote(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Pay for {payingQuote?.service_name}</DialogTitle>
+            <DialogDescription>
+              {payingQuote?.institution_name
+                ? `${payingQuote.institution_name} — priced by our team.`
+                : "Priced by our team."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <span className="text-sm text-muted-foreground">Amount</span>
+              <span className="text-lg font-bold">
+                {naira(Number(payingQuote?.quoted_amount) || 0)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="flex items-center gap-2">
+                <WalletIcon className="h-4 w-4 text-primary" />
+                <span className="text-sm">Wallet balance</span>
+              </div>
+              <Badge variant="secondary">{naira(balance)}</Badge>
+            </div>
+            <div className="grid gap-2">
+              <Button
+                onClick={() => payingQuote && payQuote(payingQuote, "wallet")}
+                disabled={submitting || balance < (Number(payingQuote?.quoted_amount) || 0)}
+              >
+                {submitting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <WalletIcon className="mr-2 h-4 w-4" />
+                )}
+                Pay from wallet
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => payingQuote && payQuote(payingQuote, "card")}
+                disabled={submitting}
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                Pay with card
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <ScratchCardDialog service={scratchService} onClose={() => setScratchService(null)} />
 
