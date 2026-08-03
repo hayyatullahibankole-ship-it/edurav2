@@ -388,10 +388,17 @@ const ServicesHome = () => {
       return;
     }
 
+    const existingFiles =
+      requests.find((r) => r.id === paidRequestId)?.user_files ?? [];
+
     setSubmitting(true);
     const { error } = await supabase
       .from("service_requests")
-      .update({ form_data: formValues, status: "pending" })
+      .update({
+        form_data: formValues,
+        user_files: [...existingFiles, ...uploads] as any,
+        status: "pending",
+      })
       .eq("id", paidRequestId);
     setSubmitting(false);
 
@@ -400,7 +407,11 @@ const ServicesHome = () => {
       return;
     }
 
-    toast.success("Details submitted. We'll process your request shortly.");
+    toast.success(
+      resubmitNote
+        ? "Documents resubmitted. We'll review them shortly."
+        : "Details submitted. We'll process your request shortly."
+    );
     closeDialog();
     loadRequests();
     setView("requests");
@@ -413,7 +424,11 @@ const ServicesHome = () => {
       return;
     }
     setActiveService(service);
-    setFormValues({});
+    setFormValues(
+      request.status === "needs_resubmission" ? { ...(request.form_data || {}) } : {}
+    );
+    setUploads([]);
+    setResubmitNote(request.status === "needs_resubmission" ? request.admin_note || "" : null);
     setPaidRequestId(request.id);
     setStep("details");
   };
