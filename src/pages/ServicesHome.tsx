@@ -540,8 +540,8 @@ const ServicesHome = () => {
                                   setScratchService(service);
                                   return;
                                 }
-                                setActiveService(service);
-                                setFormValues({});
+                                openService(service);
+
                               }}
                             >
                               {service.product_type === "scratch_card" ? "Buy now" : "Request"}
