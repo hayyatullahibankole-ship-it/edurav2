@@ -1,16 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Check, 
-  ArrowRight,
-  Star,
-  Crown,
-  Zap,
-  CreditCard,
-  Loader2
-} from "lucide-react";
+import { Check, ArrowRight, Star, Crown, Zap, CreditCard, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { createSubscriptionPayment } from "@/utils/paystack";
 import { supabase } from "@/integrations/supabase/client";
