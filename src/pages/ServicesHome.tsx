@@ -30,7 +30,10 @@ import ServicesMobileNav from "@/components/edura/ServicesMobileNav";
 import ProviderLogo, { providerInfo } from "@/components/edura/ProviderLogo";
 import eduraLogo from "@/assets/edura-logo.png";
 import {
+  AlertCircle,
   ArrowLeft,
+  Upload,
+  X,
   Briefcase,
   ClipboardList,
   CheckCircle2,
@@ -77,6 +80,8 @@ type ServiceRequest = {
   created_at: string;
   admin_note: string | null;
   result_files?: ResultFile[];
+  user_files?: ResultFile[];
+  form_data?: Record<string, string> | null;
 };
 
 type ResultFile = { path: string; name: string; type: string };
@@ -97,6 +102,9 @@ const naira = (value: number) =>
 const statusStyles: Record<string, string> = {
   pending: "bg-muted text-muted-foreground",
   awaiting_details: "bg-primary/10 text-primary",
+  needs_resubmission: "bg-destructive/10 text-destructive",
+
+
 
   processing: "bg-primary/10 text-primary",
   completed: "bg-success/10 text-success",
@@ -121,6 +129,9 @@ const ServicesHome = () => {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [step, setStep] = useState<"pay" | "details">("pay");
+  const [uploads, setUploads] = useState<ResultFile[]>([]);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [resubmitNote, setResubmitNote] = useState<string | null>(null);
   const [paidRequestId, setPaidRequestId] = useState<string | null>(null);
 
 
@@ -179,17 +190,32 @@ const ServicesHome = () => {
     window.open(data.signedUrl, "_blank", "noopener");
   };
 
+  const openUserFile = async (file: ResultFile) => {
+    const { data, error } = await supabase.storage
+      .from("service-uploads")
+      .createSignedUrl(file.path, 600);
+    if (error || !data?.signedUrl) {
+      toast.error("Could not open this file");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener");
+  };
+
   const loadRequests = async () => {
     if (!user) return;
     const { data } = await supabase
       .from("service_requests")
-      .select("id, service_id, service_name, provider, amount, status, created_at, admin_note, result_files")
+      .select(
+        "id, service_id, service_name, provider, amount, status, created_at, admin_note, result_files, user_files, form_data"
+      )
       .order("created_at", { ascending: false })
       .limit(50);
     setRequests(
       ((data as any[]) || []).map((r) => ({
         ...r,
         result_files: Array.isArray(r.result_files) ? (r.result_files as ResultFile[]) : [],
+        user_files: Array.isArray(r.user_files) ? (r.user_files as ResultFile[]) : [],
+        form_data: (r.form_data && typeof r.form_data === "object" ? r.form_data : {}) as Record<string, string>,
       })) as ServiceRequest[]
     );
   };
@@ -256,6 +282,8 @@ const ServicesHome = () => {
     setActiveService(service);
     setFormValues({});
     setPaidRequestId(null);
+    setUploads([]);
+    setResubmitNote(null);
     setStep("pay");
   };
 
@@ -263,7 +291,35 @@ const ServicesHome = () => {
     setActiveService(null);
     setFormValues({});
     setPaidRequestId(null);
+    setUploads([]);
+    setResubmitNote(null);
     setStep("pay");
+  };
+
+  const handleUpload = async (files: FileList | null) => {
+    if (!files?.length || !user || !paidRequestId) return;
+    setUploadingFile(true);
+    try {
+      for (const file of Array.from(files)) {
+        if (file.size > 15 * 1024 * 1024) {
+          toast.error(`${file.name} is larger than 15MB`);
+          continue;
+        }
+        const ext = file.name.split(".").pop() || "dat";
+        const path = `${user.id}/${paidRequestId}/${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase.storage.from("service-uploads").upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+        if (error) {
+          toast.error(`Could not upload ${file.name}`);
+          continue;
+        }
+        setUploads((prev) => [...prev, { path, name: file.name, type: file.type }]);
+      }
+    } finally {
+      setUploadingFile(false);
+    }
   };
 
   const afterPayment = async (payload: Record<string, unknown>) => {
@@ -335,10 +391,17 @@ const ServicesHome = () => {
       return;
     }
 
+    const existingFiles =
+      requests.find((r) => r.id === paidRequestId)?.user_files ?? [];
+
     setSubmitting(true);
     const { error } = await supabase
       .from("service_requests")
-      .update({ form_data: formValues, status: "pending" })
+      .update({
+        form_data: formValues,
+        user_files: [...existingFiles, ...uploads] as any,
+        status: "pending",
+      })
       .eq("id", paidRequestId);
     setSubmitting(false);
 
@@ -347,7 +410,11 @@ const ServicesHome = () => {
       return;
     }
 
-    toast.success("Details submitted. We'll process your request shortly.");
+    toast.success(
+      resubmitNote
+        ? "Documents resubmitted. We'll review them shortly."
+        : "Details submitted. We'll process your request shortly."
+    );
     closeDialog();
     loadRequests();
     setView("requests");
@@ -360,7 +427,11 @@ const ServicesHome = () => {
       return;
     }
     setActiveService(service);
-    setFormValues({});
+    setFormValues(
+      request.status === "needs_resubmission" ? { ...(request.form_data || {}) } : {}
+    );
+    setUploads([]);
+    setResubmitNote(request.status === "needs_resubmission" ? request.admin_note || "" : null);
     setPaidRequestId(request.id);
     setStep("details");
   };
@@ -598,8 +669,34 @@ const ServicesHome = () => {
                     <p className="text-xs text-muted-foreground">
                       {new Date(request.created_at).toLocaleDateString()} · {naira(request.amount)}
                     </p>
-                    {request.admin_note && (
+                    {request.status === "needs_resubmission" && (
+                      <div className="mt-2 rounded-md border border-destructive/30 bg-destructive/5 p-2">
+                        <p className="flex items-center gap-1 text-xs font-medium text-destructive">
+                          <AlertCircle className="h-3 w-3" /> Resubmission requested
+                        </p>
+                        {request.admin_note && (
+                          <p className="mt-1 text-xs text-muted-foreground">{request.admin_note}</p>
+                        )}
+                      </div>
+                    )}
+                    {request.admin_note && request.status !== "needs_resubmission" && (
                       <p className="mt-1 text-xs text-muted-foreground">{request.admin_note}</p>
+                    )}
+                    {(request.user_files?.length ?? 0) > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {request.user_files!.map((file) => (
+                          <Button
+                            key={file.path}
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 gap-1 border px-2 text-xs"
+                            onClick={() => openUserFile(file)}
+                          >
+                            <Upload className="h-3 w-3" />
+                            <span className="max-w-[140px] truncate">{file.name}</span>
+                          </Button>
+                        ))}
+                      </div>
                     )}
                     {(request.result_files?.length ?? 0) > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
@@ -622,14 +719,24 @@ const ServicesHome = () => {
                     <Button size="sm" className="shrink-0" onClick={() => resumeRequest(request)}>
                       Complete details
                     </Button>
+                  ) : request.status === "needs_resubmission" ? (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="shrink-0"
+                      onClick={() => resumeRequest(request)}
+                    >
+                      Resubmit
+                    </Button>
                   ) : (
                     <Badge
                       className={`shrink-0 border-0 capitalize ${
                         statusStyles[request.status] || statusStyles.pending
                       }`}
                     >
-                      {request.status}
+                      {request.status.replace(/_/g, " ")}
                     </Badge>
+
                   )}
 
                 </div>
@@ -700,10 +807,24 @@ const ServicesHome = () => {
           ) : (
             <>
               <div className="space-y-4">
-                <div className="flex items-center gap-2 rounded-lg border bg-muted p-3">
-                  <CheckCircle2 className="h-4 w-4 text-success" />
-                  <p className="text-sm font-medium">Payment confirmed</p>
-                </div>
+                {resubmitNote !== null ? (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                    <p className="flex items-center gap-2 text-sm font-medium text-destructive">
+                      <AlertCircle className="h-4 w-4" /> Resubmission requested
+                    </p>
+                    {resubmitNote && (
+                      <p className="mt-1 text-xs text-muted-foreground">{resubmitNote}</p>
+                    )}
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Correct the details below and upload the missing or corrected documents.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 rounded-lg border bg-muted p-3">
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                    <p className="text-sm font-medium">Payment confirmed</p>
+                  </div>
+                )}
                 {activeService?.fields.map((field) => (
                   <div key={field.key} className="space-y-2">
                     <Label htmlFor={field.key}>
@@ -748,16 +869,65 @@ const ServicesHome = () => {
                     )}
                   </div>
                 ))}
+
+                <div className="space-y-2">
+                  <Label>Documents {resubmitNote !== null ? "" : "(optional)"}</Label>
+                  <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed p-4 text-sm text-muted-foreground hover:border-primary hover:text-primary">
+                    {uploadingFile ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    {uploadingFile ? "Uploading..." : "Upload images or documents"}
+                    <input
+                      type="file"
+                      multiple
+                      className="hidden"
+                      accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                      disabled={uploadingFile}
+                      onChange={(e) => {
+                        handleUpload(e.target.files);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                  {uploads.length > 0 && (
+                    <div className="space-y-1">
+                      {uploads.map((file) => (
+                        <div
+                          key={file.path}
+                          className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-xs"
+                        >
+                          <span className="truncate">{file.name}</span>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${file.name}`}
+                            onClick={() =>
+                              setUploads((prev) => prev.filter((f) => f.path !== file.path))
+                            }
+                          >
+                            <X className="h-3.5 w-3.5 text-muted-foreground" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <DialogFooter>
                 <Button variant="outline" onClick={closeDialog}>
                   Later
                 </Button>
-                <Button onClick={submitDetails} disabled={submitting}>
-                  {submitting ? "Submitting..." : "Submit details"}
+                <Button onClick={submitDetails} disabled={submitting || uploadingFile}>
+                  {submitting
+                    ? "Submitting..."
+                    : resubmitNote !== null
+                      ? "Resubmit"
+                      : "Submit details"}
                 </Button>
               </DialogFooter>
+
             </>
           )}
         </DialogContent>

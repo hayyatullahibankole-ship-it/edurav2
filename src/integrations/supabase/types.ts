@@ -3129,6 +3129,7 @@ export type Database = {
           service_slug: string
           status: string
           updated_at: string
+          user_files: Json
           user_id: string
         }
         Insert: {
@@ -3147,6 +3148,7 @@ export type Database = {
           service_slug: string
           status?: string
           updated_at?: string
+          user_files?: Json
           user_id: string
         }
         Update: {
@@ -3165,6 +3167,7 @@ export type Database = {
           service_slug?: string
           status?: string
           updated_at?: string
+          user_files?: Json
           user_id?: string
         }
         Relationships: [

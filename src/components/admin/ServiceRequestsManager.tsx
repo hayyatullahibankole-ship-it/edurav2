@@ -25,6 +25,7 @@ import {
   Image as ImageIcon,
   Loader2,
   RefreshCw,
+  RotateCcw,
   Search,
   Trash2,
   Upload,
@@ -52,15 +53,24 @@ type ServiceRequest = {
   form_data: any;
   admin_note: string | null;
   result_files: ResultFile[];
+  user_files: ResultFile[];
   created_at: string;
 };
 
-const STATUSES = ["awaiting_details", "pending", "processing", "completed", "failed"];
+const STATUSES = [
+  "awaiting_details",
+  "pending",
+  "processing",
+  "needs_resubmission",
+  "completed",
+  "failed",
+];
 
 const statusStyles: Record<string, string> = {
   pending: "bg-muted text-muted-foreground",
   awaiting_details: "bg-primary/10 text-primary",
   processing: "bg-primary/10 text-primary",
+  needs_resubmission: "bg-destructive/10 text-destructive",
   completed: "bg-success/10 text-success",
   failed: "bg-destructive/10 text-destructive",
 };
@@ -86,7 +96,7 @@ export default function ServiceRequestsManager() {
     const { data, error } = await supabase
       .from("service_requests")
       .select(
-        "id, user_id, service_name, provider, amount, status, form_data, admin_note, result_files, created_at"
+        "id, user_id, service_name, provider, amount, status, form_data, admin_note, result_files, user_files, created_at"
       )
       .order("created_at", { ascending: false })
       .limit(200);
@@ -100,6 +110,7 @@ export default function ServiceRequestsManager() {
     const rows = (data || []).map((r: any) => ({
       ...r,
       result_files: Array.isArray(r.result_files) ? (r.result_files as ResultFile[]) : [],
+      user_files: Array.isArray(r.user_files) ? (r.user_files as ResultFile[]) : [],
     })) as ServiceRequest[];
     setRequests(rows);
 
@@ -210,6 +221,47 @@ export default function ServiceRequestsManager() {
     }
     window.open(data.signedUrl, "_blank", "noopener");
   };
+
+  const previewUserFile = async (file: ResultFile) => {
+    const { data, error } = await supabase.storage
+      .from("service-uploads")
+      .createSignedUrl(file.path, 600);
+    if (error || !data?.signedUrl) {
+      toast({ title: "Could not open file", variant: "destructive" });
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener");
+  };
+
+  const requestResubmission = async () => {
+    if (!active) return;
+    if (!note.trim()) {
+      toast({
+        title: "Add a note first",
+        description: "Tell the customer what document is missing or wrong.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from("service_requests")
+      .update({ status: "needs_resubmission", admin_note: note.trim() })
+      .eq("id", active.id);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Could not save", description: error.message, variant: "destructive" });
+      return;
+    }
+    setRequests((prev) =>
+      prev.map((r) =>
+        r.id === active.id ? { ...r, status: "needs_resubmission", admin_note: note.trim() } : r
+      )
+    );
+    toast({ title: "Resubmission requested", description: "The customer can now re-upload." });
+    setActive(null);
+  };
+
 
   const saveRequest = async () => {
     if (!active) return;
@@ -324,6 +376,32 @@ export default function ServiceRequestsManager() {
                 </div>
               )}
 
+              {active.user_files?.length > 0 && (
+                <div className="rounded-lg border p-3">
+                  <p className="mb-2 text-xs font-medium uppercase text-muted-foreground">
+                    Customer documents
+                  </p>
+                  <div className="space-y-2">
+                    {active.user_files.map((f) => (
+                      <button
+                        key={f.path}
+                        type="button"
+                        onClick={() => previewUserFile(f)}
+                        className="flex w-full min-w-0 items-center gap-2 rounded-md border p-2 text-left text-sm hover:underline"
+                      >
+                        {f.type?.startsWith("image/") ? (
+                          <ImageIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        ) : (
+                          <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        )}
+                        <span className="truncate">{f.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+
               <div className="space-y-2">
                 <p className="text-sm font-medium">Response files (image or document)</p>
                 <input
@@ -403,10 +481,25 @@ export default function ServiceRequestsManager() {
                 />
               </div>
 
-              <Button className="w-full" onClick={saveRequest} disabled={saving}>
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save changes
-              </Button>
+              <div className="grid gap-2">
+                <Button className="w-full" onClick={saveRequest} disabled={saving}>
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save changes
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full text-destructive"
+                  onClick={requestResubmission}
+                  disabled={saving}
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Request resubmission
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Sends the request back to the customer so they can correct details and re-upload
+                  documents. Add a note explaining what's needed.
+                </p>
+              </div>
             </div>
           )}
         </DialogContent>
