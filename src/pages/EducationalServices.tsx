@@ -214,7 +214,7 @@ const EducationalServices = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="catalog" className="space-y-6">
+        <Tabs defaultValue={searchParams.get("tab") === "requests" ? "requests" : "catalog"} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 max-w-sm">
             <TabsTrigger value="catalog">Services</TabsTrigger>
             <TabsTrigger value="requests">My Requests</TabsTrigger>
