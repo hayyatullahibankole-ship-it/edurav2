@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   Users, BookOpen, TrendingUp, DollarSign, LayoutDashboard, Settings,
-  LogOut, Copy, Building2, HelpCircle, Video, Trophy, Lock, AlertTriangle } from
+  LogOut, Copy, Building2, HelpCircle, Video, Trophy, Lock, AlertTriangle, UserCog } from
 "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
