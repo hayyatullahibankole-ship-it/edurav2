@@ -31,6 +31,7 @@ import {
   Bell,
   Mail,
   Settings2,
+  Layers,
 } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,7 +45,7 @@ import SubjectProgressCard from "@/components/SubjectProgressCard";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { FeatureCard } from "@/components/dashboard/FeatureCard";
 import { ModernQuickAction } from "@/components/dashboard/ModernQuickAction";
-import { ServicesStrip } from "@/components/edura/ServicesStrip";
+import { ServicesShowcase } from "@/components/edura/ServicesShowcase";
 import { MobileStatCard } from "@/components/dashboard/MobileStatCard";
 import { MobileTestCard } from "@/components/dashboard/MobileTestCard";
 import { MobileSubjectCard } from "@/components/dashboard/MobileSubjectCard";
@@ -478,11 +479,11 @@ const Dashboard = () => {
                 </div>
               ) : (
               <>
-              <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-accent/5">
+              <Card className="border">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Award className="h-6 w-6 text-primary" />
+                    <div className="p-2 rounded-lg border bg-muted">
+                      <Award className="h-6 w-6 text-foreground" />
                     </div>
                     <div>
                       <h3 className="font-semibold">2026 Mock Examination</h3>
@@ -495,7 +496,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <ServicesStrip />
+              <ServicesShowcase />
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                 {/* Main Content */}
@@ -706,6 +707,27 @@ const Dashboard = () => {
                                 <p className="text-sm text-muted-foreground">Past questions & materials</p>
                               </div>
                               <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-secondary group-hover:translate-x-1 transition-all" />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+
+                      {/* Educational Services */}
+                      <Link to="/services">
+                        <Card className="group h-full cursor-pointer transition-shadow hover:shadow-md">
+                          <CardContent className="p-5">
+                            <div className="flex items-start gap-4">
+                              <div className="rounded-lg border bg-muted p-2.5">
+                                <Layers className="h-6 w-6 text-foreground" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h3 className="mb-1 flex items-center gap-2 font-semibold">
+                                  Educational Services
+                                  <Badge variant="secondary" className="text-xs">Core</Badge>
+                                </h3>
+                                <p className="text-sm text-muted-foreground">e-PINs, registrations & results</p>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-foreground" />
                             </div>
                           </CardContent>
                         </Card>

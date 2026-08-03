@@ -26,7 +26,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { ArrowLeft, Clock, FileText, Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 type ServiceField = {
   key: string;
@@ -79,6 +79,7 @@ const statusStyles: Record<string, string> = {
 const EducationalServices = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [services, setServices] = useState<Service[]>([]);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -133,9 +134,25 @@ const EducationalServices = () => {
     return services.filter(
       (s) =>
         s.name.toLowerCase().includes(term) ||
+        s.provider.toLowerCase().includes(term) ||
         (s.description || "").toLowerCase().includes(term)
     );
   }, [services, search]);
+
+  useEffect(() => {
+    if (!services.length) return;
+    const provider = searchParams.get("provider");
+    const slug = searchParams.get("service");
+    if (provider) setSearch(provider);
+    if (slug) {
+      const match = services.find((s) => s.slug === slug);
+      if (match) {
+        setActiveService(match);
+        setFormValues({});
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services]);
 
   const openService = (service: Service) => {
     setActiveService(service);

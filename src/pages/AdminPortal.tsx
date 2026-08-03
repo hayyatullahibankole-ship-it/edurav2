@@ -33,6 +33,7 @@ import { AkboyInquiriesManager } from '@/components/admin/AkboyInquiriesManager'
 import { AkboyTutorialsManager } from '@/components/admin/AkboyTutorialsManager';
 import { AkboyRegistrationsManager } from '@/components/admin/AkboyRegistrationsManager';
 import { AkboyNewsletterSubscribersManager } from '@/components/admin/AkboyNewsletterSubscribersManager';
+import ServiceCatalogManager from '@/components/admin/ServiceCatalogManager';
 import MockExamManager from '@/components/admin/MockExamManager';
 import MockResultsManager from '@/components/admin/MockResultsManager';
 import SubjectManager from '@/components/admin/SubjectManager';
@@ -93,6 +94,7 @@ const NAV: NavSection[] = [
   {
     label: 'Commerce & Content',
     items: [
+      { key: 'edu-services', label: 'Educational Services', icon: Briefcase },
       { key: 'pricing', label: 'Pricing', icon: DollarSign },
       { key: 'promos', label: 'Promo Codes', icon: Gift },
       { key: 'blog', label: 'Blog', icon: Newspaper },
@@ -180,6 +182,7 @@ export default function AdminPortal() {
       case 'resources': return <ResourceManagement />;
       case 'security': return <SecurityCenter suspiciousActivities={recentActivities.filter((a: any) => a.suspicious_activity_count > 0)} />;
       case 'analytics': return <AnalyticsHub />;
+      case 'edu-services': return <ServiceCatalogManager />;
       case 'pricing': return <PricingManager />;
       case 'promos': return <CouponManager />;
       case 'schools': return <SchoolManagement />;
