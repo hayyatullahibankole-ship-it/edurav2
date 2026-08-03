@@ -51,6 +51,7 @@ const StudyPlanner = lazy(() => import("@/pages/StudyPlanner"));
 const ReferralProgram = lazy(() => import("@/pages/ReferralProgram"));
 const PerformanceReport = lazy(() => import("@/pages/PerformanceReport"));
 const LessonQuiz = lazy(() => import("@/pages/LessonQuiz"));
+const EducationalServices = lazy(() => import("@/pages/EducationalServices"));
 
 // Akboy Pages
 const AkboyHome = lazy(() => import("@/pages/akboy/AkboyHome"));
