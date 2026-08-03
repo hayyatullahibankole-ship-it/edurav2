@@ -544,7 +544,7 @@ const ServicesHome = () => {
 
                               }}
                             >
-                              {service.product_type === "scratch_card" ? "Buy now" : "Request"}
+                              {service.product_type === "scratch_card" ? "Buy now" : "Pay & request"}
                             </Button>
                           </div>
                         </CardContent>
