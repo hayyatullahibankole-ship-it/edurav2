@@ -160,11 +160,7 @@ const handler = async (req: Request): Promise<Response> => {
     };
 
     if (!subscriptions || subscriptions.length === 0) {
-      console.log('ℹ️ No monthly subscriptions due for renewal reminder');
-      return new Response(JSON.stringify(results), {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+      console.log('ℹ️ No monthly student subscriptions due for renewal reminder');
     }
 
     // Send reminder emails
