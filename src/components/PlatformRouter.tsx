@@ -156,12 +156,17 @@ const EduraRoutes = () => {
       <Route path="/mobile-preview" element={<Navigate to="/mobile-splash" replace />} />
       
       <Route path="/auth" element={<Layout showNavbar={false}><Auth /></Layout>} />
-      <Route path="/dashboard" element={
+      <Route path="/choose" element={
         <ProtectedRoute>
-          {isInstalledApp ? <MobileHome /> : 
-           <Layout showNavbar={false}><Dashboard /></Layout>}
+          <ChooseSide />
         </ProtectedRoute>
       } />
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <DashboardBySide isInstalledApp={isInstalledApp} />
+        </ProtectedRoute>
+      } />
+
       
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin" element={
