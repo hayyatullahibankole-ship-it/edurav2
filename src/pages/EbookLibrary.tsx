@@ -204,15 +204,29 @@ export default function EbookLibrary() {
                     <h2 className="font-semibold text-lg text-stone-900">{b.title}</h2>
                     <p className="text-sm text-stone-500 mb-2">by {b.author}</p>
                     {b.description && <p className="text-sm text-stone-600 line-clamp-3 mb-4">{b.description}</p>}
-                    <div className="mt-auto flex items-center justify-between">
-                      <Badge variant="outline" className={unlocked ? "border-emerald-300 text-emerald-700" : "border-stone-300 text-stone-500"}>
-                        {unlocked ? "Unlocked" : "Access required"}
-                      </Badge>
-                      <Button asChild size="sm" variant={unlocked ? "default" : "outline"} className={unlocked ? "bg-emerald-700 hover:bg-emerald-800" : ""}>
-                        <Link to={`${basePath}/ebooks/${b.slug}`}>
-                          {unlocked ? <>Read <ArrowRight className="w-4 h-4 ml-1" /></> : <><Lock className="w-4 h-4 mr-1" /> Preview</>}
-                        </Link>
-                      </Button>
+                    <div className="mt-auto space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className={unlocked ? "border-emerald-300 text-emerald-700" : "border-stone-300 text-stone-500"}>
+                          {unlocked ? "Unlocked" : "Access required"}
+                        </Badge>
+                        <Button asChild size="sm" variant={unlocked ? "default" : "outline"} className={unlocked ? "bg-emerald-700 hover:bg-emerald-800" : ""}>
+                          <Link to={`${basePath}/ebooks/${b.slug}`}>
+                            {unlocked ? <>Read <ArrowRight className="w-4 h-4 ml-1" /></> : <><Lock className="w-4 h-4 mr-1" /> Preview</>}
+                          </Link>
+                        </Button>
+                      </div>
+                      {!unlocked && (
+                        <Button
+                          size="sm"
+                          className="w-full bg-emerald-700 hover:bg-emerald-800"
+                          onClick={() => {
+                            setRequestBook(b);
+                            setReqName(fullName);
+                          }}
+                        >
+                          <ShoppingCart className="w-4 h-4 mr-2" /> Request / buy access code
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </Card>
@@ -221,6 +235,47 @@ export default function EbookLibrary() {
           </div>
         )}
       </main>
+
+      <Dialog open={!!requestBook} onOpenChange={(open) => !open && setRequestBook(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Request access code</DialogTitle>
+            <DialogDescription>
+              {requestBook ? `For "${requestBook.title}". We'll contact you with payment details and your code.` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="req-name">Full name</Label>
+              <Input id="req-name" value={reqName} onChange={(e) => setReqName(e.target.value)} placeholder="Your full name" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="req-email">Email</Label>
+              <Input id="req-email" type="email" value={reqEmail} onChange={(e) => setReqEmail(e.target.value)} placeholder="you@example.com" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="req-phone">Phone (optional)</Label>
+              <Input id="req-phone" value={reqPhone} onChange={(e) => setReqPhone(e.target.value)} placeholder="080..." />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="req-note">Note (optional)</Label>
+              <Textarea id="req-note" value={reqNote} onChange={(e) => setReqNote(e.target.value)} rows={3} placeholder="Anything we should know?" />
+            </div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            {requestBook && (
+              <Button asChild variant="outline" className="w-full sm:w-auto">
+                <a href={whatsappLink(requestBook)} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="w-4 h-4 mr-2" /> Buy on WhatsApp
+                </a>
+              </Button>
+            )}
+            <Button onClick={submitRequest} disabled={submittingRequest} className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800">
+              {submittingRequest ? "Sending..." : "Send request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
