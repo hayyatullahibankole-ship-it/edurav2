@@ -792,7 +792,7 @@ export default function QuestionManagement() {
                   </SelectContent>
                 </Select>
                 <Select value={selectedDifficulty} onValueChange={(v) => { setSelectedDifficulty(v); setCurrentPage(0); }}>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="flex-1 sm:w-32">
                     <SelectValue placeholder="All Levels" />
                   </SelectTrigger>
                   <SelectContent>
