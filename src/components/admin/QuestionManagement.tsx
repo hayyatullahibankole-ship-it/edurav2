@@ -439,11 +439,12 @@ export default function QuestionManagement() {
 
   const renderQuestionList = (list: Question[]) => (
     <Card>
-      <CardContent className="p-6">
+      <CardContent className="p-3 sm:p-6">
         <ScrollArea className="h-[600px]">
-          <div className="space-y-6 pr-4">
+          <div className="space-y-4 sm:space-y-6 pr-2 sm:pr-4">
             {list.map((question) => (
-              <div key={question.id} className="flex items-start justify-between p-6 bg-card rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+              <div key={question.id} className="flex flex-col sm:flex-row items-stretch sm:items-start sm:justify-between gap-3 p-4 sm:p-6 bg-card rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+
                 <div className="flex-1 space-y-4">
                   <div className="flex items-center space-x-2">
                     <Badge className={`${getDifficultyColor(question.difficulty_level)} text-white`}>
