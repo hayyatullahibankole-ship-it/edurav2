@@ -207,7 +207,12 @@ Deno.serve(async (req) => {
     }
 
     if (!vendorRes.ok) {
-      console.error(`Vendor request failed [${vendorRes.status}]: ${vendorText}`);
+      console.error(`Vendor request failed [${vendorRes.status}] at ${vendorUrl}: ${vendorText}`);
+      if (vendorRes.status === 404 || vendorRes.status === 405) {
+        throw new Error(
+          "Scratch card vendor endpoint is misconfigured (NAIJARESULTSPIN_API_URL is not a POST purchase endpoint). No card was issued.",
+        );
+      }
       throw new Error(vendorJson?.message || `Vendor returned ${vendorRes.status}`);
     }
 
