@@ -128,11 +128,28 @@ Deno.serve(async (req) => {
     const user = userData.user;
 
     const body = await req.json().catch(() => ({}));
+
+    // Admin-only helper: read the vendor's live catalogue so prices can be checked.
+    if (body?.action === "vendor_prices") {
+      const { data: isAdmin } = await admin.rpc("has_role", {
+        _user_id: user.id,
+        _role: "admin",
+      });
+      const { data: isSuper } = await admin.rpc("has_role", {
+        _user_id: user.id,
+        _role: "super_admin",
+      });
+      if (!isAdmin && !isSuper) return json({ error: "Forbidden" }, 403);
+      const cardTypes = await fetchVendorCardTypes();
+      return json({ success: true, card_types: cardTypes ?? [] });
+    }
+
     const serviceId = typeof body?.service_id === "string" ? body.service_id : "";
     const quantity = Math.floor(Number(body?.quantity ?? 1));
     const paymentMethod = body?.payment_method === "wallet" ? "wallet" : "card";
     const paymentReference =
       typeof body?.payment_reference === "string" ? body.payment_reference.trim() : "";
+
 
     if (!serviceId) return json({ error: "service_id is required" }, 400);
     if (!Number.isFinite(quantity) || quantity < 1 || quantity > 20) {
