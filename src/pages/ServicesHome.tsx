@@ -190,6 +190,19 @@ const ServicesHome = () => {
     });
   }, [services, search, provider]);
 
+  const providerCards = useMemo(() => {
+    const keys = Array.from(new Set(services.map((s) => s.provider)));
+    return keys.map((key) => ({
+      key,
+      ...providerInfo(key),
+      count: services.filter((s) => s.provider === key).length,
+    }));
+  }, [services]);
+
+  const showProviderCards = provider === "all" && !search.trim();
+
+
+
   const counts = useMemo(() => {
     const pending = requests.filter((r) =>
       ["pending", "processing"].includes((r.status ?? "").toLowerCase())
