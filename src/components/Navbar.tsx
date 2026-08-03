@@ -37,34 +37,41 @@ const Navbar = () => {
     };
     checkSchoolAdmin();
   }, [user]);
-  return <nav className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
+  return <nav className="bg-background/90 backdrop-blur-md border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <img src={eduraLogo} alt="Edura" className="h-24 w-auto" />
+            <img src={eduraLogo} alt="Edura" className="h-16 md:h-20 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/demo" className="text-foreground hover:text-primary transition-colors">
-              Practice Tests
+          <div className="hidden md:flex items-center gap-7 text-sm font-medium">
+            <Link to="/demo" className="text-muted-foreground hover:text-foreground transition-colors">
+              Practice
             </Link>
-            <Link to="/resources" className="text-foreground hover:text-primary transition-colors">
+            <Link to="/services" className="text-muted-foreground hover:text-foreground transition-colors">
+              Services
+            </Link>
+            <Link to="/resources" className="text-muted-foreground hover:text-foreground transition-colors">
               Resources
             </Link>
             {user && <>
-                <Link to="/study-hub" className="text-foreground hover:text-primary transition-colors">
+                <Link to="/study-hub" className="text-muted-foreground hover:text-foreground transition-colors">
                   Study Hub
                 </Link>
-                <Link to="/forum" className="text-foreground hover:text-primary transition-colors">
+                <Link to="/forum" className="text-muted-foreground hover:text-foreground transition-colors">
                   Forum
                 </Link>
               </>}
-            <Link to="/payment" className="text-foreground hover:text-primary transition-colors">
+            <Link to="/school-landing" className="text-muted-foreground hover:text-foreground transition-colors">
+              For Schools
+            </Link>
+            <Link to="/payment" className="text-muted-foreground hover:text-foreground transition-colors">
               Pricing
             </Link>
           </div>
+
 
           {/* Desktop Auth Buttons */}
           {user ? <div className="hidden md:flex items-center space-x-2">
