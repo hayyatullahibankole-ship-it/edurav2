@@ -59,6 +59,7 @@ const Wallet = () => {
           }
           setFunding(false);
         },
+        () => setFunding(false),
       );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not start payment");
