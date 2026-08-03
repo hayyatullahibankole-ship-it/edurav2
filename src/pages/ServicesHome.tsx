@@ -807,10 +807,24 @@ const ServicesHome = () => {
           ) : (
             <>
               <div className="space-y-4">
-                <div className="flex items-center gap-2 rounded-lg border bg-muted p-3">
-                  <CheckCircle2 className="h-4 w-4 text-success" />
-                  <p className="text-sm font-medium">Payment confirmed</p>
-                </div>
+                {resubmitNote !== null ? (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                    <p className="flex items-center gap-2 text-sm font-medium text-destructive">
+                      <AlertCircle className="h-4 w-4" /> Resubmission requested
+                    </p>
+                    {resubmitNote && (
+                      <p className="mt-1 text-xs text-muted-foreground">{resubmitNote}</p>
+                    )}
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Correct the details below and upload the missing or corrected documents.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 rounded-lg border bg-muted p-3">
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                    <p className="text-sm font-medium">Payment confirmed</p>
+                  </div>
+                )}
                 {activeService?.fields.map((field) => (
                   <div key={field.key} className="space-y-2">
                     <Label htmlFor={field.key}>
