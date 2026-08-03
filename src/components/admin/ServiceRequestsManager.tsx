@@ -480,10 +480,25 @@ export default function ServiceRequestsManager() {
                 />
               </div>
 
-              <Button className="w-full" onClick={saveRequest} disabled={saving}>
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save changes
-              </Button>
+              <div className="grid gap-2">
+                <Button className="w-full" onClick={saveRequest} disabled={saving}>
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save changes
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full text-destructive"
+                  onClick={requestResubmission}
+                  disabled={saving}
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Request resubmission
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Sends the request back to the customer so they can correct details and re-upload
+                  documents. Add a note explaining what's needed.
+                </p>
+              </div>
             </div>
           )}
         </DialogContent>
