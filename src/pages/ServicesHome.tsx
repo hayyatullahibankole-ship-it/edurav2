@@ -606,8 +606,8 @@ const ServicesHome = () => {
           {/* Desktop navigation */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
             <button
-              onClick={() => setView("home")}
-              className={`transition-colors ${view === "home" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              onClick={() => setView("services")}
+              className={`transition-colors ${view === "services" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
               Services
             </button>
