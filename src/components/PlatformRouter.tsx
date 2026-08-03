@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
