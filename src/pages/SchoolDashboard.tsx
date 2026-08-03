@@ -526,6 +526,10 @@ export default function SchoolDashboard() {
               <VideoTutorials />
               }
 
+              {activeTab === "staff" && schoolData &&
+              <SchoolStaffManager schoolId={schoolData.id} />
+              }
+
               {activeTab === "billing" && schoolData &&
               <SchoolBilling
                 schoolId={schoolData.id}
