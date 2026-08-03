@@ -869,16 +869,65 @@ const ServicesHome = () => {
                     )}
                   </div>
                 ))}
+
+                <div className="space-y-2">
+                  <Label>Documents {resubmitNote !== null ? "" : "(optional)"}</Label>
+                  <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed p-4 text-sm text-muted-foreground hover:border-primary hover:text-primary">
+                    {uploadingFile ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    {uploadingFile ? "Uploading..." : "Upload images or documents"}
+                    <input
+                      type="file"
+                      multiple
+                      className="hidden"
+                      accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                      disabled={uploadingFile}
+                      onChange={(e) => {
+                        handleUpload(e.target.files);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                  {uploads.length > 0 && (
+                    <div className="space-y-1">
+                      {uploads.map((file) => (
+                        <div
+                          key={file.path}
+                          className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-xs"
+                        >
+                          <span className="truncate">{file.name}</span>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${file.name}`}
+                            onClick={() =>
+                              setUploads((prev) => prev.filter((f) => f.path !== file.path))
+                            }
+                          >
+                            <X className="h-3.5 w-3.5 text-muted-foreground" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <DialogFooter>
                 <Button variant="outline" onClick={closeDialog}>
                   Later
                 </Button>
-                <Button onClick={submitDetails} disabled={submitting}>
-                  {submitting ? "Submitting..." : "Submit details"}
+                <Button onClick={submitDetails} disabled={submitting || uploadingFile}>
+                  {submitting
+                    ? "Submitting..."
+                    : resubmitNote !== null
+                      ? "Resubmit"
+                      : "Submit details"}
                 </Button>
               </DialogFooter>
+
             </>
           )}
         </DialogContent>
