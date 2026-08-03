@@ -90,7 +90,7 @@ export function AkboyNavbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-stone-200 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-akboy-line shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo */}
@@ -108,27 +108,27 @@ export function AkboyNavbar() {
                 onMouseLeave={() => setOpenGroup(null)}
               >
                 <button
-                  className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-stone-100 transition-colors duration-200"
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-akboy-forest hover:text-akboy-moss hover:bg-akboy-bone transition-colors duration-200"
                 >
                   {g.name}
-                  <ChevronDown className="h-4 w-4 text-gray-500 group-hover:text-gray-700 transition-colors" />
+                  <ChevronDown className="h-4 w-4 text-akboy-muted group-hover:text-akboy-forest transition-colors" />
                 </button>
                 {openGroup === g.name && (
                   <div className="absolute left-0 top-full pt-2 w-56">
-                    <div className="bg-white border border-stone-200 rounded-lg shadow-lg overflow-hidden">
+                    <div className="bg-white border border-akboy-line rounded-lg shadow-lg overflow-hidden">
                       <div className="py-1">
                         {g.children.map((c) =>
                           renderLink(
                             c,
-                            "block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-stone-50 hover:text-gray-900 transition-colors"
+                            "block px-4 py-2 text-sm font-medium text-akboy-forest hover:bg-akboy-bone hover:text-akboy-moss transition-colors"
                           )
                         )}
                       </div>
                       {g.cta && (
-                        <div className="border-t border-stone-200 p-2 bg-stone-50">
+                        <div className="border-t border-akboy-line p-2 bg-akboy-bone">
                           {renderLink(
                             g.cta,
-                            "block text-center px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors"
+                            "block text-center px-4 py-2 text-sm font-semibold text-white bg-akboy-forest hover:bg-akboy-moss rounded-md transition-colors"
                           )}
                         </div>
                       )}
@@ -141,19 +141,19 @@ export function AkboyNavbar() {
 
           {/* CTA Button (desktop) */}
           <div className="hidden lg:flex items-center">
-            <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg px-6 py-2 shadow-sm transition-colors h-10">
+            <Button asChild className="bg-akboy-forest hover:bg-akboy-moss text-white font-semibold rounded-lg px-6 py-2 shadow-sm transition-colors h-10">
               <Link to={`${basePath}/contact`}>Get Started</Link>
             </Button>
           </div>
 
           {/* Mobile CTA + Menu */}
           <div className="lg:hidden flex items-center gap-2">
-            <Button asChild size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg">
+            <Button asChild size="sm" className="bg-akboy-forest hover:bg-akboy-moss text-white font-semibold rounded-lg">
               <Link to={`${basePath}/contact`}>Get Started</Link>
             </Button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg text-gray-700 hover:bg-stone-100 transition-colors"
+              className="p-2 rounded-lg text-akboy-forest hover:bg-akboy-bone transition-colors"
               aria-label="Toggle menu"
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -163,31 +163,31 @@ export function AkboyNavbar() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="lg:hidden py-4 border-t border-stone-200">
+          <div className="lg:hidden py-4 border-t border-akboy-line">
             <div className="flex flex-col">
               {groups.map((g) => {
                 const expanded = mobileGroup === g.name;
                 return (
-                  <div key={g.name} className="border-b border-stone-100">
+                  <div key={g.name} className="border-b border-akboy-line/60">
                     <button
                       onClick={() => setMobileGroup(expanded ? null : g.name)}
-                      className="w-full flex items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-stone-50 transition-colors"
+                      className="w-full flex items-center justify-between px-4 py-3 text-base font-medium text-akboy-forest hover:bg-akboy-bone transition-colors"
                     >
                       {g.name}
-                      <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
+                      <ChevronDown className={`h-5 w-5 text-akboy-muted transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
                     </button>
                     {expanded && (
-                      <div className="pb-3 pl-4 space-y-1 bg-stone-50">
+                      <div className="pb-3 pl-4 space-y-1 bg-akboy-bone">
                         {g.children.map((c) => (
                           <div key={c.name} className="py-1">
-                            {renderLink(c, "block px-2 py-2 text-sm font-medium text-gray-700 hover:text-emerald-700 hover:bg-white rounded transition-colors")}
+                            {renderLink(c, "block px-2 py-2 text-sm font-medium text-akboy-forest hover:text-akboy-forest hover:bg-white rounded transition-colors")}
                           </div>
                         ))}
                         {g.cta && (
-                          <div className="mt-2 pt-2 border-t border-stone-200">
+                          <div className="mt-2 pt-2 border-t border-akboy-line">
                             {renderLink(
                               g.cta,
-                              "block text-center px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded transition-colors"
+                              "block text-center px-4 py-2 text-sm font-semibold text-white bg-akboy-forest hover:bg-akboy-moss rounded transition-colors"
                             )}
                           </div>
                         )}
