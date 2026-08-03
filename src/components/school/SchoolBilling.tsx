@@ -2,22 +2,47 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Plus } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CreditCard, Plus, Wallet as WalletIcon, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useWallet } from "@/hooks/useWallet";
 
 interface Props {
   schoolId: string;
   currentStudentLimit: number;
 }
 
+function seatPrice(seats: number) {
+  if (seats <= 0) return 0;
+  if (seats <= 50) return 1000;
+  if (seats <= 100) return 900;
+  if (seats <= 200) return 850;
+  if (seats <= 250) return 800;
+  return 0;
+}
+
 export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) {
   const navigate = useNavigate();
+  const { balance, loading: walletLoading, refresh: refreshWallet } = useWallet();
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [topUpOpen, setTopUpOpen] = useState(false);
+  const [extraSeats, setExtraSeats] = useState(10);
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => {
     fetchBillingData();
@@ -62,11 +87,79 @@ export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) 
     navigate("/school-subscription");
   };
 
+  const activeSub = subscriptions.find((s) => s.status === "ACTIVE") || null;
+  const daysLeft = activeSub
+    ? Math.ceil((new Date(activeSub.end_date).getTime() - Date.now()) / 86400000)
+    : null;
+  const topUpCost = seatPrice(extraSeats) * extraSeats;
+
+  const handleSeatTopUp = async () => {
+    if (extraSeats < 1 || extraSeats > 250) {
+      toast.error("Enter between 1 and 250 extra seats");
+      return;
+    }
+    setPaying(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("pay-school-subscription-wallet", {
+        body: { seats: extraSeats, mode: "seats_only" },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success(`${extraSeats} seats added to your plan`);
+      setTopUpOpen(false);
+      refreshWallet();
+      fetchBillingData();
+    } catch (e: any) {
+      toast.error(e?.message || "Could not add seats");
+    } finally {
+      setPaying(false);
+    }
+  };
+
+
   return (
     <div className="space-y-6">
+      {activeSub && daysLeft !== null && daysLeft <= 14 && (
+        <Alert variant={daysLeft <= 3 ? "destructive" : "default"}>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            {daysLeft <= 0
+              ? "Your subscription has expired. Renew to keep running exams."
+              : `Your subscription expires in ${daysLeft} day${daysLeft === 1 ? "" : "s"}. Renew to avoid interruption.`}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <WalletIcon className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Wallet balance</CardTitle>
+                <CardDescription>
+                  {walletLoading ? "Loading…" : `₦${Number(balance || 0).toLocaleString()} available`}
+                </CardDescription>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate("/wallet")}>
+                Fund wallet
+              </Button>
+              <Button size="sm" onClick={() => setTopUpOpen(true)} disabled={!activeSub}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add seats
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <CardTitle>Current Plan</CardTitle>
               <CardDescription>Your active subscription details</CardDescription>
@@ -77,6 +170,7 @@ export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) 
             </Button>
           </div>
         </CardHeader>
+
         <CardContent>
           <div className="space-y-2">
             <div className="flex justify-between">
@@ -177,6 +271,64 @@ export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) 
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={topUpOpen} onOpenChange={setTopUpOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add student seats</DialogTitle>
+            <DialogDescription>
+              Extra seats are added to your current plan and expire on the same date.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="extra-seats">Number of seats</Label>
+              <Input
+                id="extra-seats"
+                type="number"
+                min={1}
+                max={250}
+                value={extraSeats}
+                onChange={(e) => setExtraSeats(Number(e.target.value))}
+              />
+            </div>
+            <div className="rounded-lg border p-3 text-sm space-y-1">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Price per seat</span>
+                <span className="font-medium">₦{seatPrice(extraSeats).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total</span>
+                <span className="font-semibold">₦{topUpCost.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Wallet balance</span>
+                <span className="font-medium">₦{Number(balance || 0).toLocaleString()}</span>
+              </div>
+            </div>
+            {topUpCost > Number(balance || 0) && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  Not enough balance. Fund your wallet to continue.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTopUpOpen(false)} disabled={paying}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSeatTopUp}
+              disabled={paying || topUpCost <= 0 || topUpCost > Number(balance || 0)}
+            >
+              {paying && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Pay ₦{topUpCost.toLocaleString()} from wallet
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

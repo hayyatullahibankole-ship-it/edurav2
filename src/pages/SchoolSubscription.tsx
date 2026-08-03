@@ -6,15 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Users, CreditCard, Info } from "lucide-react";
+import { Loader2, Users, CreditCard, Info, Wallet } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
+import { useWallet } from "@/hooks/useWallet";
 import { createSubscriptionPayment } from "@/utils/paystack";
 import { verifyPaymentManually } from "@/utils/manualPaymentVerification";
 export default function SchoolSubscription() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { balance: walletBalance, refresh: refreshWallet } = useWallet();
   const [loading, setLoading] = useState(false);
+  const [walletPaying, setWalletPaying] = useState(false);
   const [fetchingSchool, setFetchingSchool] = useState(true);
   const [studentCount, setStudentCount] = useState(50);
   const [pricePerStudent, setPricePerStudent] = useState(1000);
@@ -23,6 +26,31 @@ export default function SchoolSubscription() {
   const [verifying, setVerifying] = useState(false);
   const [verifyRef, setVerifyRef] = useState("");
   const [lastRef, setLastRef] = useState<string | null>(null);
+
+  const handleWalletPayment = async () => {
+    if (studentCount < 1 || studentCount > 250 || totalAmount <= 0) return;
+    if (totalAmount > Number(walletBalance || 0)) {
+      toast.error("Insufficient wallet balance. Fund your wallet first.");
+      return;
+    }
+    setWalletPaying(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "pay-school-subscription-wallet",
+        { body: { seats: studentCount } },
+      );
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success("Subscription activated from your wallet");
+      refreshWallet();
+      navigate("/school-dashboard");
+    } catch (e: any) {
+      toast.error(e?.message || "Wallet payment failed");
+    } finally {
+      setWalletPaying(false);
+    }
+  };
+
   useEffect(() => {
     if (!user?.id) {
       toast.error("Please log in to continue");
@@ -516,6 +544,36 @@ export default function SchoolSubscription() {
                 </>
               )}
             </Button>
+
+            <Button
+              onClick={handleWalletPayment}
+              disabled={walletPaying || loading || studentCount < 1 || studentCount > 250 || totalAmount === 0}
+              className="w-full"
+              size="lg"
+              variant="outline"
+            >
+              {walletPaying ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Paying from wallet...
+                </>
+              ) : (
+                <>
+                  <Wallet className="mr-2 h-4 w-4" />
+                  Pay from wallet (₦{Number(walletBalance || 0).toLocaleString()} available)
+                </>
+              )}
+            </Button>
+            {totalAmount > Number(walletBalance || 0) && (
+              <p className="text-center text-xs text-muted-foreground">
+                Wallet balance is low.{" "}
+                <button type="button" className="underline" onClick={() => navigate("/wallet")}>
+                  Fund your wallet
+                </button>
+              </p>
+            )}
+
+
 
             <div className="space-y-3">
               <div className="text-center text-sm text-muted-foreground">Already paid?</div>
