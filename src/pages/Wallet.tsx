@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,12 +11,28 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { initializePaystackPayment } from "@/utils/paystack";
 import ServicesMobileNav from "@/components/edura/ServicesMobileNav";
-import { ArrowDownLeft, ArrowLeft, ArrowUpRight, Wallet as WalletIcon } from "lucide-react";
+import {
+  ArrowDownLeft,
+  ArrowLeft,
+  ArrowUpRight,
+  Building2,
+  Copy,
+  Loader2,
+  RefreshCw,
+  Wallet as WalletIcon,
+} from "lucide-react";
 
 const naira = (value: number) =>
   `₦${Number(value || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
 
 const QUICK_AMOUNTS = [1000, 2000, 5000, 10000];
+
+type VirtualAccount = {
+  account_number: string;
+  account_name: string;
+  bank_name: string;
+  status: string;
+};
 
 const Wallet = () => {
   const { user } = useAuth();
@@ -24,6 +40,67 @@ const Wallet = () => {
   const { balance, transactions, loading, refresh } = useWallet();
   const [amount, setAmount] = useState("");
   const [funding, setFunding] = useState(false);
+  const [account, setAccount] = useState<VirtualAccount | null>(null);
+  const [accountLoading, setAccountLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      if (!user) {
+        setAccount(null);
+        setAccountLoading(false);
+        return;
+      }
+      const { data } = await supabase
+        .from("user_virtual_accounts")
+        .select("account_number, account_name, bank_name, status")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (active) {
+        setAccount((data as VirtualAccount) || null);
+        setAccountLoading(false);
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
+
+  const generateAccount = async () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("wallet-virtual-account", {
+        body: {},
+      });
+      if (error || data?.error) {
+        toast.error(data?.error || "Could not generate your account number");
+      } else if (data?.account) {
+        setAccount(data.account as VirtualAccount);
+        toast.success("Your dedicated account number is ready");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not generate account");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const copyAccount = async () => {
+    if (!account) return;
+    try {
+      await navigator.clipboard.writeText(account.account_number);
+      toast.success("Account number copied");
+    } catch {
+      toast.error("Could not copy");
+    }
+  };
+
 
   const fundWallet = async () => {
     const value = Number(amount);
