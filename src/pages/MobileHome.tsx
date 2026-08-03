@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ServicesShowcase } from '@/components/edura/ServicesShowcase';
+import { SideSwitcher } from '@/components/edura/SideSwitcher';
+
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -283,7 +285,11 @@ const MobileHome = () => {
       </div>
 
       {/* Vibrant Modern Header */}
-      <header className="relative px-4 pt-6 pb-4 animate-fade-in">
+      <div className="px-4 pt-4 flex justify-center">
+        <SideSwitcher compact />
+      </div>
+      <header className="relative px-4 pt-4 pb-4 animate-fade-in">
+
         <div 
           className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-primary via-primary-glow to-secondary p-6 shadow-2xl"
           style={{ boxShadow: '0 20px 60px rgba(0, 123, 255, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.2)' }}
