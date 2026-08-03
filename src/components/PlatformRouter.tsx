@@ -26,7 +26,6 @@ const TestResults = lazy(() => import("@/pages/TestResults"));
 const Demo = lazy(() => import("@/pages/Demo"));
 const DemoTest = lazy(() => import("@/pages/DemoTest"));
 const Resources = lazy(() => import("@/pages/Resources"));
-const Consultation = lazy(() => import("@/pages/Consultation"));
 const Payment = lazy(() => import("@/pages/Payment"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
@@ -242,7 +241,6 @@ const EduraRoutes = () => {
       } />
 
       
-      <Route path="/consultation" element={<Layout><Consultation /></Layout>} />
       <Route path="/payment" element={<Layout><Payment /></Layout>} />
       <Route path="/answer-review" element={
         <ProtectedRoute>
