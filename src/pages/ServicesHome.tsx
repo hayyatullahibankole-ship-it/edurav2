@@ -44,6 +44,7 @@ import {
   Wallet as WalletIcon,
 } from "lucide-react";
 import ScratchCardDialog from "@/components/edura/ScratchCardDialog";
+import ScratchCardHistory from "@/components/edura/ScratchCardHistory";
 import { useWallet } from "@/hooks/useWallet";
 import { initializePaystackPayment } from "@/utils/paystack";
 import { CreditCard, Loader2 } from "lucide-react";
