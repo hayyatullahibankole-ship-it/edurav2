@@ -11,6 +11,7 @@ import { offlineStorage } from "./utils/offlineStorage";
 import { useEffect } from "react";
 import { PlatformRouter } from "./components/PlatformRouter";
 import { AppDownloadPopup } from "./components/AppDownloadPopup";
+import { ThemeScope } from "./components/ThemeScope";
 
 // ✅ ADD THIS IMPORT
 import { useAndroidBackButton } from "./hooks/useAndroidBackButton";
@@ -32,6 +33,7 @@ const AppRoutes = () => {
 
   return (
     <>
+      <ThemeScope />
       <OfflineIndicator />
       <AppDownloadPopup />
       <PlatformRouter />
