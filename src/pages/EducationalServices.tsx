@@ -208,12 +208,13 @@ const EducationalServices = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Educational Services</h1>
-            <p className="text-sm text-muted-foreground">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Educational Services</h1>
+            <p className="text-sm text-muted-foreground hidden sm:block">
               e-PINs, registrations, result checking and admission support
             </p>
           </div>
+          <SideSwitcher compact className="shrink-0" />
         </div>
 
         <Tabs defaultValue={searchParams.get("tab") === "requests" ? "requests" : "catalog"} className="space-y-6">
