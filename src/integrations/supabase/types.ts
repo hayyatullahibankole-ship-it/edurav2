@@ -2984,6 +2984,77 @@ export type Database = {
           },
         ]
       }
+      scratch_card_orders: {
+        Row: {
+          amount: number
+          created_at: string
+          error_message: string | null
+          id: string
+          payment_method: string
+          payment_reference: string | null
+          pins: Json
+          provider: string
+          quantity: number
+          service_id: string | null
+          service_name: string
+          service_slug: string
+          status: string
+          unit_price: number
+          updated_at: string
+          user_id: string
+          vendor_reference: string | null
+          vendor_response: Json | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payment_method?: string
+          payment_reference?: string | null
+          pins?: Json
+          provider: string
+          quantity?: number
+          service_id?: string | null
+          service_name: string
+          service_slug: string
+          status?: string
+          unit_price?: number
+          updated_at?: string
+          user_id: string
+          vendor_reference?: string | null
+          vendor_response?: Json | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payment_method?: string
+          payment_reference?: string | null
+          pins?: Json
+          provider?: string
+          quantity?: number
+          service_id?: string | null
+          service_name?: string
+          service_slug?: string
+          status?: string
+          unit_price?: number
+          updated_at?: string
+          user_id?: string
+          vendor_reference?: string | null
+          vendor_response?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scratch_card_orders_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_catalog: {
         Row: {
           created_at: string
@@ -2995,11 +3066,13 @@ export type Database = {
           is_automated: boolean
           name: string
           price: number
+          product_type: string
           provider: string
           slug: string
           sort_order: number
           turnaround: string | null
           updated_at: string
+          vendor_code: string | null
         }
         Insert: {
           created_at?: string
@@ -3011,11 +3084,13 @@ export type Database = {
           is_automated?: boolean
           name: string
           price?: number
+          product_type?: string
           provider: string
           slug: string
           sort_order?: number
           turnaround?: string | null
           updated_at?: string
+          vendor_code?: string | null
         }
         Update: {
           created_at?: string
@@ -3027,11 +3102,13 @@ export type Database = {
           is_automated?: boolean
           name?: string
           price?: number
+          product_type?: string
           provider?: string
           slug?: string
           sort_order?: number
           turnaround?: string | null
           updated_at?: string
+          vendor_code?: string | null
         }
         Relationships: []
       }
@@ -5014,6 +5091,27 @@ export type Database = {
         Args: { p_attempt_id?: string; p_reg_number: string }
         Returns: Json
       }
+      wallet_credit: {
+        Args: {
+          p_amount: number
+          p_description?: string
+          p_metadata?: Json
+          p_reference: string
+          p_user_id: string
+        }
+        Returns: number
+      }
+      wallet_debit: {
+        Args: {
+          p_amount: number
+          p_description?: string
+          p_metadata?: Json
+          p_reference: string
+          p_user_id: string
+        }
+        Returns: number
+      }
+      wallet_ensure: { Args: { p_user_id: string }; Returns: string }
     }
     Enums: {
       app_role:
