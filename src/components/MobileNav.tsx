@@ -99,8 +99,8 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
       {/* Fluid Navigation Bar */}
       <div className="fixed bottom-4 left-4 right-4 z-50 md:hidden">
         <div className="relative max-w-md mx-auto">
-          {/* White Navigation Bar */}
-          <div className="relative h-16 bg-white rounded-[28px] shadow-2xl overflow-visible">
+          {/* Dashboard navigation */}
+          <div className="relative h-16 rounded-2xl border bg-card shadow-card overflow-visible">
             {/* Navigation Buttons */}
             <div className="relative h-full flex items-center justify-around px-4 z-10">
               {/* Home Button */}
@@ -111,11 +111,11 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 >
                   <Home 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "dashboard" ? "text-orange-500" : "text-foreground/60"
+                      activeTab === "dashboard" ? "text-primary" : "text-muted-foreground"
                     }`}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
-                    activeTab === "dashboard" ? "text-orange-500 font-semibold" : "text-foreground/50"
+                    activeTab === "dashboard" ? "text-primary font-semibold" : "text-muted-foreground"
                   }`}>
                     Home
                   </span>
@@ -130,11 +130,11 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 >
                   <Library 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "study" ? "text-orange-500" : "text-foreground/60"
+                      activeTab === "study" ? "text-primary" : "text-muted-foreground"
                     }`}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
-                    activeTab === "study" ? "text-orange-500 font-semibold" : "text-foreground/50"
+                    activeTab === "study" ? "text-primary font-semibold" : "text-muted-foreground"
                   }`}>
                     Study
                   </span>
@@ -148,12 +148,9 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                   className="relative transition-all duration-300 active:scale-90"
                   aria-label="Explore"
                 >
-                  {/* Glow effect */}
-                  <div className="absolute inset-0 bg-orange-500/30 rounded-full blur-xl" />
-
                   {/* Main FAB */}
-                  <div className="relative w-16 h-16 rounded-full bg-orange-500 shadow-2xl flex items-center justify-center border-4 border-white">
-                    <Compass className="h-7 w-7 text-white" />
+                  <div className="relative w-16 h-16 rounded-full bg-primary shadow-card flex items-center justify-center border-4 border-card">
+                    <Compass className="h-7 w-7 text-primary-foreground" />
                   </div>
                 </button>
 
@@ -170,11 +167,11 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 >
                   <MessageSquare 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "forum" ? "text-orange-500" : "text-foreground/60"
+                      activeTab === "forum" ? "text-primary" : "text-muted-foreground"
                     }`}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
-                    activeTab === "forum" ? "text-orange-500 font-semibold" : "text-foreground/50"
+                    activeTab === "forum" ? "text-primary font-semibold" : "text-muted-foreground"
                   }`}>
                     Forum
                   </span>
@@ -192,11 +189,11 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 <div className="flex flex-col items-center justify-center gap-0.5 transition-all duration-300 active:scale-90 py-2">
                   <User 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "profile" || activeTab === "settings" ? "text-orange-500" : "text-foreground/60"
+                      activeTab === "profile" || activeTab === "settings" ? "text-primary" : "text-muted-foreground"
                     }`}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
-                    activeTab === "profile" || activeTab === "settings" ? "text-orange-500 font-semibold" : "text-foreground/50"
+                    activeTab === "profile" || activeTab === "settings" ? "text-primary font-semibold" : "text-muted-foreground"
                   }`}>
                     Profile
                   </span>
