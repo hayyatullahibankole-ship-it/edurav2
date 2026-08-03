@@ -31,6 +31,7 @@ import {
   Bell,
   Mail,
   Settings2,
+  Layers,
 } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
