@@ -30,7 +30,10 @@ import ServicesMobileNav from "@/components/edura/ServicesMobileNav";
 import ProviderLogo, { providerInfo } from "@/components/edura/ProviderLogo";
 import eduraLogo from "@/assets/edura-logo.png";
 import {
+  AlertCircle,
   ArrowLeft,
+  Upload,
+  X,
   Briefcase,
   ClipboardList,
   CheckCircle2,
