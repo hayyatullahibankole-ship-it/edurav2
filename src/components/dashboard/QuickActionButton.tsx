@@ -1,54 +1,37 @@
-import { LucideIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { LucideIcon } from 'lucide-react';
 
 interface QuickActionButtonProps {
   icon: LucideIcon;
   title: string;
   subtitle?: string;
-  variant?: "default" | "outline";
+  variant?: 'default' | 'outline';
   gradient?: string;
   onClick?: () => void;
   children?: React.ReactNode;
 }
 
-export const QuickActionButton = ({ 
-  icon: Icon, 
-  title, 
+export const QuickActionButton = ({
+  icon: Icon,
+  title,
   subtitle,
-  variant = "default",
-  gradient = "from-primary to-secondary",
   onClick,
-  children
+  children,
 }: QuickActionButtonProps) => {
   const content = (
-    <Button 
-      variant={variant} 
-      className={`h-auto p-4 md:p-6 flex-col gap-2 md:gap-3 w-full group transition-all duration-300 ${
-        variant === "default" 
-          ? `bg-gradient-to-br ${gradient} hover:shadow-glow` 
-          : "hover:border-primary/50"
-      }`}
+    <button
+      type="button"
       onClick={onClick}
+      className="flex w-full flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 text-center transition-colors hover:border-primary/50 md:p-5"
     >
-      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${
-        variant === "default" 
-          ? "bg-white/20" 
-          : `bg-gradient-to-br ${gradient} bg-opacity-10`
-      } flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-        <Icon className={`h-5 w-5 md:h-6 md:w-6 ${variant === "default" ? "text-white" : "text-primary"}`} />
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-muted md:h-12 md:w-12">
+        <Icon className="h-5 w-5 text-primary md:h-6 md:w-6" />
       </div>
-      <div className="text-center">
-        <div className={`font-bold text-sm md:text-base ${variant === "default" ? "text-white" : "text-foreground"}`}>
-          {title}
-        </div>
-        {subtitle && (
-          <div className={`text-xs ${variant === "default" ? "text-white/80" : "text-muted-foreground"}`}>
-            {subtitle}
-          </div>
-        )}
+      <div>
+        <div className="text-sm font-bold text-foreground md:text-base">{title}</div>
+        {subtitle && <div className="text-xs text-muted-foreground">{subtitle}</div>}
       </div>
-    </Button>
+    </button>
   );
 
-  return children ? <div onClick={onClick}>{children || content}</div> : content;
+  return children ? <div className="cursor-pointer">{children}</div> : content;
 };

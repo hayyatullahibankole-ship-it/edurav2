@@ -50,7 +50,7 @@ export function PromoCodeActivation({ onSuccess }: PromoCodeActivationProps) {
   };
 
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-background">
+    <Card className="border-primary/20 bg-primary/5">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <Gift className="h-5 w-5 text-primary" />

@@ -1,4 +1,3 @@
-import { Card, CardContent } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -11,43 +10,25 @@ interface StatCardProps {
   iconColor?: string;
 }
 
-export const StatCard = ({ 
-  icon: Icon, 
-  label, 
-  value, 
+export const StatCard = ({
+  icon: Icon,
+  label,
+  value,
   subtext,
-  gradient = "from-primary to-secondary",
-  iconColor = "text-primary"
+  iconColor = 'text-primary',
 }: StatCardProps) => {
   return (
-    <Card className="relative overflow-hidden hover:shadow-lg transition-all duration-300 group border-0 bg-card hover-lift w-full">
-      {/* Colored top border accent */}
-      <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r", gradient)} />
-      
-      <CardContent className="p-4 md:p-6 relative pt-5">
-        <div className="flex flex-col gap-2 md:gap-3">
-          {/* Header with icon */}
-          <div className="flex items-start justify-between gap-2">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide flex-1">{label}</p>
-            <div className={cn(
-              "p-2 rounded-full bg-gradient-to-br shadow-md flex-shrink-0",
-              gradient
-            )}>
-              <Icon className="h-4 w-4 text-white" />
-            </div>
-          </div>
-          
-          {/* Value */}
-          <div>
-            <p className="text-2xl md:text-3xl lg:text-4xl font-bold mb-1 break-words">
-              {value}
-            </p>
-            {subtext && (
-              <p className="text-xs text-muted-foreground">{subtext}</p>
-            )}
-          </div>
+    <div className="w-full rounded-xl border border-border bg-card p-4 md:p-5 transition-colors hover:border-primary/40">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          {label}
+        </p>
+        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+          <Icon className={cn('h-4 w-4', iconColor)} />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      <p className="mt-3 break-words text-2xl font-bold md:text-3xl">{value}</p>
+      {subtext && <p className="mt-1 text-xs text-muted-foreground">{subtext}</p>}
+    </div>
   );
 };
