@@ -4110,6 +4110,51 @@ export type Database = {
           },
         ]
       }
+      user_virtual_accounts: {
+        Row: {
+          account_name: string
+          account_number: string
+          bank_name: string
+          bank_slug: string | null
+          created_at: string
+          currency: string
+          customer_code: string | null
+          id: string
+          provider: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          bank_name: string
+          bank_slug?: string | null
+          created_at?: string
+          currency?: string
+          customer_code?: string | null
+          id?: string
+          provider?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          bank_name?: string
+          bank_slug?: string | null
+          created_at?: string
+          currency?: string
+          customer_code?: string | null
+          id?: string
+          provider?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_wallets: {
         Row: {
           balance: number | null
