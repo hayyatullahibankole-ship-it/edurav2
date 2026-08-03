@@ -101,64 +101,63 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col select-none">
+    <div className="min-h-screen bg-background flex flex-col select-none">
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg">
+      <div className="bg-background border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0">📝</div>
+              <div className="rounded-md border bg-muted p-2 flex-shrink-0">
+                <FileText className="h-4 w-4 text-primary" />
+              </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-base sm:text-lg font-bold truncate">{examTitle}</h1>
-                <p className="text-xs opacity-90 whitespace-nowrap">Q {currentIndex + 1}/{questions.length}</p>
+                <h1 className="text-sm sm:text-base font-semibold truncate">{examTitle}</h1>
+                <p className="text-xs text-muted-foreground whitespace-nowrap">Q {currentIndex + 1}/{questions.length}</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-2 sm:gap-3 justify-end flex-wrap">
+            <div className="flex items-center gap-2 justify-end flex-wrap">
               {/* Timer */}
-              <div className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl font-mono text-sm sm:text-lg font-bold whitespace-nowrap ${
-                timeLeft < 300 ? 'bg-red-600 animate-pulse' : 'bg-white/20'
-              }`}>
-                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
-                <span className="text-sm sm:text-base">{formatTime(timeLeft)}</span>
+              <div className={cn(
+                "flex items-center rounded-lg border px-2 sm:px-3 py-1.5 font-mono text-sm font-semibold whitespace-nowrap",
+                timeLeft < 300 ? "border-destructive/40 bg-destructive/10 text-destructive" : "bg-muted"
+              )}>
+                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 flex-shrink-0" />
+                <span>{formatTime(timeLeft)}</span>
               </div>
               
               {/* Controls */}
               <Button
                 size="sm"
+                variant="outline"
                 onClick={() => setShowCalculator(true)}
-                className="bg-white/20 hover:bg-white/30 h-8 sm:h-9 px-2 sm:px-3 flex-shrink-0"
+                className="h-9 px-2.5 flex-shrink-0"
               >
-                <CalculatorIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <CalculatorIcon className="h-4 w-4" />
               </Button>
               
               <Button
                 size="sm"
                 onClick={() => setShowSubmitDialog(true)}
                 disabled={submitting || disableSubmit}
-                className="bg-white text-orange-600 hover:bg-white/90 font-bold h-8 sm:h-9 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0"
+                className="h-9 px-4 text-sm flex-shrink-0"
               >
-                <span className="hidden sm:inline">{submitting ? 'Submitting...' : 'Submit'}</span>
-                <span className="sm:hidden">{submitting ? '...' : 'OK'}</span>
+                {submitting ? 'Submitting...' : 'Submit'}
               </Button>
             </div>
           </div>
 
           {/* Progress bar */}
           <div className="mt-2">
-            <div className="flex items-center justify-between text-[10px] sm:text-xs mb-1">
-              <span className="whitespace-nowrap">{Object.keys(answers).length}/{questions.length}</span>
+            <div className="flex items-center justify-between text-[10px] sm:text-xs text-muted-foreground mb-1">
+              <span className="whitespace-nowrap">{Object.keys(answers).length}/{questions.length} answered</span>
               <span className="whitespace-nowrap">{Math.round(progressPercentage)}%</span>
             </div>
-            <div className="h-1 sm:h-1.5 bg-white/20 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-white rounded-full transition-all duration-300"
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
+            <Progress value={progressPercentage} className="h-1.5" />
           </div>
         </div>
       </div>
+
 
       <div className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-4 py-3 sm:py-4 overflow-hidden">
         <div className={cn("grid gap-3 sm:gap-4 lg:grid-cols-[1fr_280px]")}>  
