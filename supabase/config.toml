@@ -20,3 +20,9 @@ verify_jwt = false
 
 [functions.school-bulk-questions]
 verify_jwt = false
+
+[functions.wallet-virtual-account]
+verify_jwt = false
+
+[functions.paystack-webhook]
+verify_jwt = false
