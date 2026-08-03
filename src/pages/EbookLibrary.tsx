@@ -9,8 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { BookOpen, Lock, KeyRound, ArrowRight } from "lucide-react";
+import { BookOpen, Lock, KeyRound, ArrowRight, ShoppingCart, MessageCircle } from "lucide-react";
 import { getUnlockedEbookIds, redeemEbookCode, saveEbookAccess } from "@/utils/ebookAccess";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+
+const WHATSAPP_NUMBER = "2347050757085";
 
 interface Ebook {
   id: string;
