@@ -70,13 +70,13 @@ All colors MUST be HSL for consistency across light/dark modes.
 
 
 
-    /* Brand gradients (used by legacy surfaces only) */
-    --gradient-primary: linear-gradient(135deg, hsl(152 82% 39%), hsl(160 75% 33%));
-    --gradient-success: linear-gradient(135deg, hsl(152 82% 39%), hsl(160 75% 33%));
-    --gradient-warning: linear-gradient(135deg, hsl(38 92% 50%), hsl(24 100% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(224 61% 15%) 0%, hsl(224 55% 22%) 60%, hsl(152 82% 39%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 20% 99%));
-    --gradient-feature: linear-gradient(145deg, hsl(152 82% 39% / 0.08), hsl(224 61% 15% / 0.05));
+    /* Brand surfaces (flat, no gradients) */
+    --gradient-primary: hsl(152 82% 39%);
+    --gradient-success: hsl(152 82% 39%);
+    --gradient-warning: hsl(38 92% 50%);
+    --gradient-hero: hsl(224 61% 15%);
+    --gradient-card: hsl(0 0% 100%);
+    --gradient-feature: hsl(152 82% 39% / 0.08);
 
     /* Shadows */
     --shadow-card: 0 1px 2px hsl(224 61% 15% / 0.04), 0 8px 24px -12px hsl(224 61% 15% / 0.12);
