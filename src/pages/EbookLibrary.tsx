@@ -40,7 +40,52 @@ export default function EbookLibrary() {
   const [fullName, setFullName] = useState("");
   const [redeeming, setRedeeming] = useState(false);
 
-  const load = async () => {
+  const [requestBook, setRequestBook] = useState<Ebook | null>(null);
+  const [reqName, setReqName] = useState("");
+  const [reqEmail, setReqEmail] = useState("");
+  const [reqPhone, setReqPhone] = useState("");
+  const [reqNote, setReqNote] = useState("");
+  const [submittingRequest, setSubmittingRequest] = useState(false);
+
+  const submitRequest = async () => {
+    if (!requestBook) return;
+    const name = reqName.trim();
+    const email = reqEmail.trim();
+    if (!name || !email) {
+      toast({ title: "Missing details", description: "Your name and email are required.", variant: "destructive" });
+      return;
+    }
+    setSubmittingRequest(true);
+    try {
+      const { error } = await supabase.from("akboy_inquiries").insert({
+        name,
+        email,
+        phone: reqPhone.trim() || null,
+        subject: `Ebook access code request: ${requestBook.title}`,
+        message:
+          `Request for an access code to "${requestBook.title}" by ${requestBook.author}.` +
+          (reqNote.trim() ? `\n\nNote: ${reqNote.trim()}` : ""),
+        status: "pending",
+      });
+      if (error) throw error;
+      toast({
+        title: "Request sent",
+        description: "We'll send your access code shortly. You can also message us on WhatsApp to speed it up.",
+      });
+      setRequestBook(null);
+      setReqNote("");
+    } catch (error: any) {
+      toast({ title: "Could not send request", description: error?.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setSubmittingRequest(false);
+    }
+  };
+
+  const whatsappLink = (book: Ebook) =>
+    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+      `Hello AKBOY, I'd like to purchase an access code for the ebook "${book.title}".`
+    )}`;
+
     setLoading(true);
     const { data } = await supabase
       .from("ebooks")
