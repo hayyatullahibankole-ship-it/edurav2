@@ -227,11 +227,20 @@ Deno.serve(async (req) => {
       throw new Error(vendorJson?.message || `Vendor returned ${vendorRes.status}`);
     }
 
+    if (vendorJson?.status === false) {
+      const fieldErrors = vendorJson?.errors
+        ? Object.values(vendorJson.errors).flat().join(" ")
+        : "";
+      console.error("Vendor rejected the order:", vendorText);
+      throw new Error(fieldErrors || vendorJson?.message || "Vendor rejected the order");
+    }
+
     const pins = extractPins(vendorJson);
     if (!pins.length) {
       console.error("Vendor returned no pins:", vendorText);
       throw new Error(vendorJson?.message || "Vendor did not return any PIN");
     }
+
 
     await admin
       .from("scratch_card_orders")
