@@ -373,6 +373,7 @@ const ServicesHome = () => {
           await afterPayment({ payment_method: "card", payment_reference: reference });
           setSubmitting(false);
         },
+        () => setSubmitting(false),
       );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not start payment");
