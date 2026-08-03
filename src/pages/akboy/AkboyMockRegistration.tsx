@@ -249,7 +249,7 @@ export default function AkboyMockRegistration() {
     body { font-family:'Segoe UI','Arial',sans-serif; padding:20px; background:#f8fafc; }
     .container { max-width:600px; margin:0 auto; }
     .slip { background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
-    .header { text-align:center; background:linear-gradient(135deg,#f97316,#f59e0b); color:white; padding:24px 20px; }
+    .header { text-align:center; background:#f97316; color:white; padding:24px 20px; }
     .header h1 { font-size:22px; margin-bottom:4px; }
     .header p { font-size:13px; opacity:0.9; }
     .content { padding:24px; }

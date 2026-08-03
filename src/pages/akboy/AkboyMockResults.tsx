@@ -117,11 +117,11 @@ export default function AkboyMockResults() {
     body { font-family:'Segoe UI','Arial',sans-serif; padding:20px; background:#f8fafc; }
     .container { max-width:600px; margin:0 auto; }
     .result-slip { background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
-    .header { text-align:center; background:linear-gradient(135deg,#f97316,#f59e0b); color:white; padding:24px 20px; }
+    .header { text-align:center; background:#f97316; color:white; padding:24px 20px; }
     .header h1 { font-size:22px; margin-bottom:4px; }
     .header p { font-size:13px; opacity:0.9; }
     .content { padding:24px; }
-    .score-box { text-align:center; background:linear-gradient(135deg,#fff7ed,#fefce8); padding:24px; border-radius:12px; border:1px solid #fed7aa; margin:16px 0; }
+    .score-box { text-align:center; background:#fff7ed; padding:24px; border-radius:12px; border:1px solid #fed7aa; margin:16px 0; }
     .score-box .score { font-size:56px; font-weight:800; color:#ea580c; }
     .score-box .max { font-size:16px; color:#9ca3af; }
     .section-title { font-weight:700; color:#f97316; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid #fed7aa; }
