@@ -1,16 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Check, 
-  ArrowRight,
-  Star,
-  Crown,
-  Zap,
-  CreditCard,
-  Loader2
-} from "lucide-react";
+import { Check, ArrowRight, Star, Crown, Zap, CreditCard, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { createSubscriptionPayment } from "@/utils/paystack";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +40,12 @@ const Payment = () => {
         paystack: plan.price > 0,
         cta: plan.price === 0 ? "Start Free" : `Choose ${plan.name}`
       }));
+
+      // Only highlight one plan as popular
+      let highlighted = false;
+      processedPlans.forEach((pl: any) => {
+        if (pl.popular && !highlighted) { highlighted = true; } else { pl.popular = false; }
+      });
 
       setPlans(processedPlans);
     } catch (error) {
@@ -114,182 +111,171 @@ const Payment = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-4 bg-accent/10 text-accent border-accent/20">
-              💰 Affordable Plans
-            </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Choose Your Success Plan
+    <div className="min-h-screen bg-background font-sans">
+      {/* Hero */}
+      <section className="bg-ink text-ink-foreground">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-24">
+          <div className="max-w-3xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Plans &amp; pricing
+            </span>
+            <h1 className="mt-6 font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight">
+              Pay once. Practise all season.
             </h1>
-            <p className="text-xl mb-8 text-muted-foreground max-w-2xl mx-auto">
-              Flexible pricing designed for Nigerian students. Start free, upgrade when ready.
+            <p className="mt-5 max-w-xl text-base sm:text-lg text-ink-foreground/70">
+              Flexible pricing built for Nigerian students. Start free, upgrade whenever you are ready —
+              no hidden charges.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Pricing Cards */}
-      <section className="py-20">
+      {/* Plans */}
+      <section className="py-16 lg:py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 items-start">
             {plans.map((plan: any, index: number) => (
-              <Card 
-                key={index} 
-                className={`relative ${plan.popular ? 'border-accent shadow-lg scale-105' : ''} hover:shadow-lg transition-all`}
+              <div
+                key={index}
+                className={`relative flex h-full flex-col rounded-2xl border bg-card p-6 ${
+                  plan.popular ? "border-primary" : "border-border"
+                }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-accent text-white">
-                      Most Popular
-                    </Badge>
+                  <span className="absolute right-5 top-5 rounded bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">
+                    Popular
+                  </span>
+                )}
+
+                <h3 className="font-display text-lg font-bold">{plan.name}</h3>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="font-display text-3xl font-bold tabular-nums">{plan.displayPrice}</span>
+                  <span className="text-xs text-muted-foreground">/{plan.period}</span>
+                </div>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{plan.description}</p>
+
+                <div className="mt-5 space-y-2.5 border-t border-border pt-5">
+                  {Array.isArray(plan.features) ? (
+                    plan.features.map((feature: string, idx: number) => (
+                      <div key={idx} className="flex items-start gap-2.5">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                        <span className="text-sm text-muted-foreground">{feature}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Features coming soon</p>
+                  )}
+                </div>
+
+                {plan.name !== "Free" && plan.price > 0 && (
+                  <div className="mt-5 rounded-xl bg-surface p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      Yearly billing
+                    </p>
+                    <p className="mt-1 text-sm font-semibold">
+                      {plan.name === "Premium" ? yearlyDiscount.premium : yearlyDiscount.pro}
+                      <span className="ml-2 text-xs font-normal text-muted-foreground">2 months free</span>
+                    </p>
                   </div>
                 )}
-                
-                <CardHeader className="text-center pb-8">
-                  <div className={`mx-auto w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${
-                    plan.popular ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'
-                  }`}>
-                    {plan.icon}
-                  </div>
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">{plan.displayPrice}</span>
-                    <span className="text-muted-foreground">/{plan.period}</span>
-                  </div>
-                  <CardDescription className="mt-2">{plan.description}</CardDescription>
-                </CardHeader>
-                
-                <CardContent className="space-y-6">
-                  <div className="space-y-3">
-                    {Array.isArray(plan.features) ? plan.features.map((feature: string, idx: number) => (
-                      <div key={idx} className="flex items-center gap-3">
-                        <div className="bg-accent/10 rounded-full p-1">
-                          <Check className="h-4 w-4 text-accent" />
-                        </div>
-                        <span className="text-sm">{feature}</span>
-                      </div>
-                    )) : (
-                      <div className="text-sm text-muted-foreground">
-                        {plan.description || "Features coming soon"}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {plan.name !== "Free" && plan.price > 0 && (
-                    <div className="pt-4 border-t">
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Save with yearly billing:
-                      </p>
-                      <div className="bg-muted/50 p-3 rounded-lg">
-                        <span className="font-semibold text-accent">
-                          {plan.name === "Premium" ? yearlyDiscount.premium : yearlyDiscount.pro}
-                        </span>
-                        <span className="text-sm text-muted-foreground ml-2">
-                          (2 months free!)
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                  
+
+                <div className="mt-auto pt-6">
                   {plan.paystack ? (
-                    <Button 
+                    <Button
                       onClick={() => handlePaystackPayment(plan.name, plan.price)}
-                      className={`w-full ${
-                        plan.popular 
-                          ? 'bg-accent hover:bg-accent/90' 
-                          : ''
-                      }`}
-                      variant={plan.popular ? 'default' : 'outline'}
+                      className="w-full h-11 font-bold"
+                      variant={plan.popular ? "default" : "outline"}
                       disabled={!user}
                     >
                       <CreditCard className="mr-2 h-4 w-4" />
-                      {user ? `Get Started Now` : "Login to Subscribe"}
+                      {user ? "Get started now" : "Login to subscribe"}
                     </Button>
                   ) : (
                     <Link to={user ? "/dashboard" : "/auth"} className="block">
-                      <Button 
-                        className="w-full"
-                        variant="outline"
-                      >
-                        {user ? "Current Plan" : plan.cta}
+                      <Button className="w-full h-11 font-bold" variant="outline">
+                        {user ? "Current plan" : plan.cta}
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-20 bg-muted/30">
+      {/* FAQ */}
+      <section className="bg-surface py-16 lg:py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">
-              Frequently Asked Questions
-            </h2>
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Can I change my plan anytime?</h3>
-                <p className="text-muted-foreground">
-                  Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately.
-                </p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">FAQ</p>
+          <h2 className="mt-3 font-display text-3xl sm:text-4xl font-bold tracking-tight">
+            Questions students ask
+          </h2>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-2">
+            {[
+              {
+                q: "Can I change my plan anytime?",
+                a: "Yes. Upgrade or downgrade whenever you like — changes take effect immediately.",
+              },
+              {
+                q: "What payment methods do you accept?",
+                a: "Cards, bank transfers and your Edura wallet balance, all processed through Paystack.",
+              },
+              {
+                q: "Is there a money-back guarantee?",
+                a: "Yes. If the platform isn't for you, tell us within 7 days and we refund you.",
+              },
+              {
+                q: "Can I share my account with friends?",
+                a: "Each account is for one student. We offer group pricing for schools and study groups.",
+              },
+            ].map((item) => (
+              <div key={item.q} className="rounded-2xl border border-border bg-card p-6">
+                <h3 className="font-display text-base font-bold">{item.q}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{item.a}</p>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">What payment methods do you accept?</h3>
-                <p className="text-muted-foreground">
-                  We accept bank transfers, debit cards, and mobile money through Paystack and Flutterwave.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Is there a money-back guarantee?</h3>
-                <p className="text-muted-foreground">
-                  Yes! We offer a 7-day money-back guarantee if you're not satisfied with our platform.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Can I share my account with friends?</h3>
-                <p className="text-muted-foreground">
-                  Each account is for individual use only. We offer group discounts for schools and study groups.
-                </p>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16 lg:py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-2xl bg-ink px-6 py-12 sm:px-12 text-ink-foreground">
+            <div className="max-w-2xl">
+              <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
+                Start your journey today
+              </h2>
+              <p className="mt-4 text-ink-foreground/70">
+                Join over 50,000 students preparing for JAMB and WAEC on Edura.
+              </p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Link to={user ? "/dashboard" : "/auth"}>
+                  <Button size="lg" className="h-12 px-8 text-base font-bold text-ink hover:bg-primary-hover">
+                    {user ? "Go to dashboard" : "Create free account"}
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link to="/demo">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 px-8 text-base font-bold border-white/15 bg-ink-soft text-ink-foreground hover:bg-ink-soft/70 hover:text-ink-foreground"
+                  >
+                    Try the demo first
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-primary">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center text-primary-foreground">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Start Your Journey Today
-            </h2>
-            <p className="text-xl mb-8 opacity-90">
-              Join over 50,000 students who achieved their dream scores with Edura
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to={user ? "/payment?plan=premium" : "/auth"}>
-                <Button size="lg" variant="secondary">
-                  {user ? "Upgrade to Premium" : "Start Free Trial"}
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link to="/demo">
-                <Button size="lg" variant="outline" className="bg-card text-foreground border-primary-foreground hover:bg-card/90">
-                  Try Demo First
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Footer />
     </div>
   );
 };
