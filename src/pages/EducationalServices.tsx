@@ -27,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { ArrowLeft, Calendar as CalendarIcon, Clock, FileText, Search } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { SideSwitcher } from "@/components/edura/SideSwitcher";
 import ServicesMobileNav from "@/components/edura/ServicesMobileNav";
 
 
