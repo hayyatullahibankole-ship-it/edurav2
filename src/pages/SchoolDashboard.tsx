@@ -50,6 +50,7 @@ const menuItems = [
 { id: "mock", title: "Mock Exam", icon: Trophy },
 { id: "reports", title: "Reports", icon: TrendingUp },
 { id: "tutorials", title: "Video Tutorials", icon: Video },
+{ id: "staff", title: "Staff", icon: UserCog },
 { id: "billing", title: "Billing", icon: DollarSign },
 { id: "settings", title: "Settings", icon: Settings }];
 
