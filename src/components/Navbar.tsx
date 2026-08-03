@@ -113,11 +113,18 @@ const Navbar = () => {
         {isMenuOpen && <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-card rounded-lg mt-2 border border-border">
               <Link to="/demo" className="block px-3 py-2 text-foreground hover:bg-muted rounded-md" onClick={() => setIsMenuOpen(false)}>
-                Practice Tests
+                Practice
+              </Link>
+              <Link to="/services" className="block px-3 py-2 text-foreground hover:bg-muted rounded-md" onClick={() => setIsMenuOpen(false)}>
+                Services
               </Link>
               <Link to="/resources" className="block px-3 py-2 text-foreground hover:bg-muted rounded-md" onClick={() => setIsMenuOpen(false)}>
                 Resources
               </Link>
+              <Link to="/school-landing" className="block px-3 py-2 text-foreground hover:bg-muted rounded-md" onClick={() => setIsMenuOpen(false)}>
+                For Schools
+              </Link>
+
               {user && <>
                   <Link to="/study-hub" className="block px-3 py-2 text-foreground hover:bg-muted rounded-md" onClick={() => setIsMenuOpen(false)}>
                     Study Hub
