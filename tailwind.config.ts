@@ -14,10 +14,11 @@ export default {
     },
     extend: {
       fontFamily: {
-        inter: ['Inter', 'sans-serif'],
-        sans: ['Inter', 'sans-serif'],
-        poppins: ['Poppins', 'sans-serif'],
-        lato: ['Lato', 'sans-serif'],
+        sans: ['Figtree', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['Outfit', 'Figtree', 'system-ui', 'sans-serif'],
+        inter: ['Figtree', 'Inter', 'sans-serif'],
+        poppins: ['Outfit', 'Poppins', 'sans-serif'],
+        lato: ['Figtree', 'Lato', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

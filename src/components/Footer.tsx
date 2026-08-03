@@ -1,164 +1,158 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDomainDetection } from '@/hooks/useDomainDetection';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin, BookOpen } from 'lucide-react';
+import { toast } from 'sonner';
+import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
+import eduraLogo from '@/assets/edura-logo.png';
+
 const Footer = () => {
-  const quickLinks = [{
-    label: 'Home',
-    href: '/'
-  }, {
-    label: 'Practice Tests',
-    href: '/demo'
-  }, {
-    label: 'Resources',
-    href: '/resources'
-  }, {
-  }, {
-    label: 'Pricing',
-    href: '/payment'
-  }];
-  const subjects = ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'Economics', 'Geography', 'Government'];
-  const legalLinks = [{
-    label: 'Privacy Policy',
-    href: '/privacy'
-  }, {
-    label: 'Terms of Service',
-    href: '/terms'
-  }, {
-    label: 'Contact Us',
-    href: '/contact'
-  }, {
-    label: 'FAQ',
-    href: '/faq'
-  }];
-  return <footer className="bg-card border-t">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand Section */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <BookOpen className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">Edura</span>
-            </div>
-            <p className="text-muted-foreground">
-              Your trusted partner for WAEC and JAMB exam preparation. 
-              Join thousands of successful students.
+  const { isAkboy } = useDomainDetection();
+  const [email, setEmail] = useState('');
+
+  const columns = [
+    {
+      title: 'Practice',
+      links: [
+        { label: 'Demo test', href: '/demo' },
+        { label: 'Study hub', href: '/study-hub' },
+        { label: 'Resources', href: '/resources' },
+        { label: 'Challenge arena', href: '/challenge-arena' },
+        { label: 'Get the app', href: '/install-app' },
+      ],
+    },
+    {
+      title: 'Services',
+      links: [
+        { label: 'All student services', href: '/services' },
+        { label: 'Result checker PINs', href: '/services' },
+        { label: 'Admissions & Post-UTME', href: '/admissions' },
+        { label: 'Edura Wallet', href: '/wallet' },
+        { label: 'Pricing', href: '/payment' },
+      ],
+    },
+    {
+      title: 'Schools',
+      links: [
+        { label: 'Register your school', href: '/school-landing' },
+        { label: 'School login', href: '/school-login' },
+        { label: 'Mock exams', href: '/school-landing' },
+      ],
+    },
+  ];
+
+  const legalLinks = [
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Terms of Service', href: '/terms' },
+  ];
+
+  const handleSubscribe = () => {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error('Please enter a valid email address.');
+      return;
+    }
+    toast.success('Subscribed — look out for exam tips and product updates.');
+    setEmail('');
+  };
+
+  return (
+    <footer className="bg-card border-t border-border">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-10">
+          {/* Brand */}
+          <div className="col-span-2 space-y-5">
+            <img src={eduraLogo} alt="Edura" className="h-14 w-auto" />
+            <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+              CBT practice and student services in one place — JAMB and WAEC simulations, result checker PINs,
+              admissions processing and a wallet built for Nigerian students.
             </p>
-            <div className="flex space-x-3">
-              <Button variant="ghost" size="icon" className="hover:text-primary">
-                <Facebook className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="hover:text-primary">
-                <Twitter className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="hover:text-primary">
-                <Instagram className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="hover:text-primary">
-                <Youtube className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            {/* Link to AKBOY */}
-            <div className="pt-4 mt-4 border-t border-border">
-              {(() => {
-                const { isAkboy } = useDomainDetection();
-                const basePath = isAkboy ? "" : "/akboy";
-                return (
-                  <Link to={basePath || "/"} className="group inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-all">
-                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <span className="text-white font-bold text-xs">A</span>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">A product by</div>
-                      <div className="font-bold text-primary">AKBOY Creative Hub</div>
-                    </div>
-                  </Link>
-                );
-              })()}
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Quick Links</h3>
-            <div className="space-y-2">
-              {quickLinks.map((link, index) => <Link key={index} to={link.href} className="block text-muted-foreground hover:text-primary transition-colors">
-                  {link.label}
-                </Link>)}
-            </div>
-          </div>
-
-          {/* Subjects */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Popular Subjects</h3>
-            <div className="space-y-2">
-              {subjects.map((subject, index) => <div key={index} className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">
-                  {subject}
-                </div>)}
-            </div>
-          </div>
-
-          {/* Contact & Newsletter */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Stay Connected</h3>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2 text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <span className="text-sm">eduracbt@gmail.com</span>
-              </div>
-              <div className="flex items-center space-x-2 text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                <span className="text-sm">0705 075 7085</span>
-              </div>
-              <div className="flex items-center space-x-2 text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span className="text-sm">Lagos, Nigeria</span>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-medium">Newsletter</h4>
-              <div className="flex space-x-2">
-                <Input placeholder="Enter your email" className="flex-1" />
-                <Button size="sm" onClick={() => {
-                const email = (document.querySelector('input[placeholder="Enter your email"]') as HTMLInputElement)?.value;
-                if (email) {
-                  // Simple validation
-                  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                    alert('Thank you for subscribing! You will receive updates about exam prep tips and new features.');
-                    (document.querySelector('input[placeholder="Enter your email"]') as HTMLInputElement).value = '';
-                  } else {
-                    alert('Please enter a valid email address.');
-                  }
-                } else {
-                  alert('Please enter your email address.');
-                }
-              }}>
-                  Subscribe
+            <div className="flex -ml-2">
+              {[Facebook, Twitter, Instagram, Youtube].map((Icon, i) => (
+                <Button key={i} variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                  <Icon className="h-4 w-4" />
                 </Button>
+              ))}
+            </div>
+            <Link
+              to={isAkboy ? '/' : '/akboy'}
+              className="group inline-flex items-center gap-2.5 rounded-xl border border-border px-3 py-2 transition-colors hover:border-primary/50"
+            >
+              <div className="w-7 h-7 bg-foreground rounded-lg flex items-center justify-center">
+                <span className="text-background font-bold text-xs">A</span>
               </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">A product by</div>
+                <div className="text-sm font-semibold text-foreground">AKBOY Creative Hub</div>
+              </div>
+            </Link>
+          </div>
+
+          {/* Link columns */}
+          {columns.map((col) => (
+            <div key={col.title} className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">{col.title}</h3>
+              <div className="space-y-2">
+                {col.links.map((link) => (
+                  <Link
+                    key={link.label}
+                    to={link.href}
+                    className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-12 grid md:grid-cols-2 gap-8 rounded-2xl border border-border bg-background p-6">
+          <div className="space-y-2.5">
+            <h3 className="text-sm font-semibold text-foreground">Contact</h3>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Mail className="h-4 w-4" /> support@edura.space
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Phone className="h-4 w-4" /> 0705 075 7085
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin className="h-4 w-4" /> Lagos, Nigeria
+            </div>
+          </div>
+
+          <div className="space-y-2.5">
+            <h3 className="text-sm font-semibold text-foreground">Newsletter</h3>
+            <p className="text-sm text-muted-foreground">Exam tips and new features, no spam.</p>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="flex-1"
+              />
+              <Button onClick={handleSubscribe} className="font-semibold">Subscribe</Button>
             </div>
           </div>
         </div>
 
         <Separator className="my-8" />
 
-        {/* Bottom Section */}
-        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <div className="flex flex-wrap justify-center md:justify-start space-x-6">
-            {legalLinks.map((link, index) => <Link key={index} to={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+            {legalLinks.map((link) => (
+              <Link key={link.label} to={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 {link.label}
-              </Link>)}
+              </Link>
+            ))}
           </div>
-          <div className="flex flex-col items-center md:items-end space-y-2">
-            <div className="text-sm text-muted-foreground text-center md:text-right">© 2025 Edura. All rights reserved.</div>
-          </div>
+          <div className="text-sm text-muted-foreground">© {new Date().getFullYear()} Edura. All rights reserved.</div>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
+
 export default Footer;

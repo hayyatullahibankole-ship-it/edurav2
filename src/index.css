@@ -8,40 +8,40 @@ All colors MUST be HSL for consistency across light/dark modes.
 
 @layer base {
   :root {
-    /* Core backgrounds */
-    --background: 220 20% 97%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core backgrounds — Cloud & Green */
+    --background: 210 20% 98%;
+    --foreground: 224 61% 15%;
 
     /* Card system */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 224 61% 15%;
 
     /* Popover system */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 224 61% 15%;
 
-    /* Primary - Emerald/Green Brand Color */
-    --primary: 142 70% 50%;
+    /* Primary - Edura Green */
+    --primary: 152 82% 39%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 142 70% 45%;
-    --primary-glow: 142 70% 60%;
+    --primary-hover: 152 82% 33%;
+    --primary-glow: 152 70% 52%;
 
-    /* Secondary - Teal */
-    --secondary: 158 64% 52%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary - Cool cloud grey */
+    --secondary: 213 24% 93%;
+    --secondary-foreground: 224 61% 15%;
 
     /* Muted elements */
-    --muted: 220 15% 95%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 213 24% 95%;
+    --muted-foreground: 220 14% 46%;
 
-    /* Accent - Vibrant Green */
-    --accent: 142 70% 55%;
+    /* Accent - Deep green */
+    --accent: 160 75% 33%;
     --accent-foreground: 0 0% 100%;
-    
-    /* Success - Bright green for achievements */
-    --success: 142 70% 55%;
+
+    /* Success */
+    --success: 152 82% 39%;
     --success-foreground: 0 0% 100%;
-    --success-glow: 142 70% 65%;
+    --success-glow: 152 70% 52%;
 
     /* Warning - Vibrant orange */
     --warning: 38 92% 50%;
@@ -50,31 +50,32 @@ All colors MUST be HSL for consistency across light/dark modes.
     /* Destructive - Bold red */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    
-    /* Info - Cyan for information */
-    --info: 199 89% 48%;
+
+    /* Info - Navy */
+    --info: 224 61% 25%;
     --info-foreground: 0 0% 100%;
 
     /* Borders and inputs */
-    --border: 220 13% 91%;
-    --input: 220 13% 95%;
-    --ring: 142 70% 50%;
+    --border: 213 24% 90%;
+    --input: 213 24% 93%;
+    --ring: 152 82% 39%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
-    /* Green gradients for brand */
-    --gradient-primary: linear-gradient(135deg, hsl(142 70% 50%), hsl(158 64% 52%));
-    --gradient-success: linear-gradient(135deg, hsl(142 70% 55%), hsl(158 64% 52%));
+    /* Brand gradients (used by legacy surfaces only) */
+    --gradient-primary: linear-gradient(135deg, hsl(152 82% 39%), hsl(160 75% 33%));
+    --gradient-success: linear-gradient(135deg, hsl(152 82% 39%), hsl(160 75% 33%));
     --gradient-warning: linear-gradient(135deg, hsl(38 92% 50%), hsl(24 100% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(142 70% 50%) 0%, hsl(158 64% 52%) 50%, hsl(174 62% 57%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(142 20% 98%));
-    --gradient-feature: linear-gradient(145deg, hsl(142 70% 50% / 0.1), hsl(158 64% 52% / 0.1));
+    --gradient-hero: linear-gradient(135deg, hsl(224 61% 15%) 0%, hsl(224 55% 22%) 60%, hsl(152 82% 39%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 20% 99%));
+    --gradient-feature: linear-gradient(145deg, hsl(152 82% 39% / 0.08), hsl(224 61% 15% / 0.05));
 
-    /* Enhanced shadows with green tint */
-    --shadow-card: 0 4px 6px -1px hsl(142 20% 70% / 0.1), 0 2px 4px -1px hsl(142 20% 70% / 0.06);
-    --shadow-hover: 0 20px 25px -5px hsl(142 70% 50% / 0.3), 0 10px 10px -5px hsl(142 70% 50% / 0.1);
-    --shadow-glow: 0 0 40px hsl(142 70% 55% / 0.4);
-    --shadow-success: 0 10px 20px -5px hsl(142 70% 55% / 0.3);
+    /* Shadows */
+    --shadow-card: 0 1px 2px hsl(224 61% 15% / 0.04), 0 8px 24px -12px hsl(224 61% 15% / 0.12);
+    --shadow-hover: 0 12px 32px -12px hsl(224 61% 15% / 0.18);
+    --shadow-glow: 0 0 40px hsl(152 82% 45% / 0.28);
+    --shadow-success: 0 10px 20px -8px hsl(152 82% 39% / 0.3);
+
 
     /* Animation durations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -82,12 +83,12 @@ All colors MUST be HSL for consistency across light/dark modes.
 
     --sidebar-background: 0 0% 7%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 142 70% 50%;
+    --sidebar-primary: 152 82% 39%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 15%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 142 70% 50%;
+    --sidebar-ring: 152 82% 39%;
   }
 
   .dark {
@@ -101,23 +102,23 @@ All colors MUST be HSL for consistency across light/dark modes.
     --popover: 222 47% 13%;
     --popover-foreground: 214 50% 95%;
 
-    --primary: 142 70% 52%;
+    --primary: 152 76% 45%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 142 70% 47%;
-    --primary-glow: 142 70% 62%;
+    --primary-hover: 152 76% 40%;
+    --primary-glow: 152 70% 58%;
 
-    --secondary: 158 64% 55%;
+    --secondary: 222 40% 20%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 222 47% 16%;
     --muted-foreground: 215 15% 60%;
 
-    --accent: 142 70% 58%;
+    --accent: 152 70% 42%;
     --accent-foreground: 0 0% 100%;
     
-    --success: 142 70% 58%;
+    --success: 152 76% 45%;
     --success-foreground: 0 0% 100%;
-    --success-glow: 142 70% 68%;
+    --success-glow: 152 70% 58%;
 
     --warning: 38 92% 55%;
     --warning-foreground: 0 0% 100%;
@@ -130,16 +131,16 @@ All colors MUST be HSL for consistency across light/dark modes.
 
     --border: 222 47% 20%;
     --input: 222 47% 16%;
-    --ring: 142 70% 52%;
+    --ring: 152 76% 45%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 142 70% 52%;
+    --sidebar-primary: 152 76% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 142 70% 52%;
+    --sidebar-ring: 152 76% 45%;
   }
 }
 
@@ -149,8 +150,14 @@ All colors MUST be HSL for consistency across light/dark modes.
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
+    @apply bg-background text-foreground font-sans;
   }
+
+  h1, h2, h3, h4 {
+    font-family: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
   
   /* Smooth scrolling for mobile */
   html {
