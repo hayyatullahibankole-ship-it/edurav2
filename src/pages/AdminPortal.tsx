@@ -93,6 +93,7 @@ const NAV: NavSection[] = [
   {
     label: 'Commerce & Content',
     items: [
+      { key: 'edu-services', label: 'Educational Services', icon: Briefcase },
       { key: 'pricing', label: 'Pricing', icon: DollarSign },
       { key: 'promos', label: 'Promo Codes', icon: Gift },
       { key: 'blog', label: 'Blog', icon: Newspaper },
