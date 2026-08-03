@@ -17,9 +17,10 @@ import {
   Timer,
   WifiOff,
   BookOpen,
+  Newspaper,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import BlogSection from "@/components/BlogSection";
+
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
