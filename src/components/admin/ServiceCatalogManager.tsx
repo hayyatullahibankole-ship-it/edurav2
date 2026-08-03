@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, ArrowUp, ArrowDown } from "lucide-react";
 
 type ServiceField = {
   key: string;
@@ -58,6 +58,8 @@ type ServiceRequest = {
   created_at: string;
 };
 
+const FIELD_TYPES = ["text", "tel", "email", "number", "date", "textarea", "select"];
+
 const PROVIDERS = ["jamb", "waec", "neco", "nabteb", "admission", "other"];
 const STATUSES = ["pending", "processing", "completed", "failed", "cancelled"];
 
@@ -69,7 +71,6 @@ const emptyForm = {
   price: 0,
   turnaround: "",
   icon: "",
-  fields: "[]",
   is_active: true,
   is_automated: false,
   sort_order: 0,
@@ -94,6 +95,22 @@ export default function ServiceCatalogManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [fields, setFields] = useState<ServiceField[]>([]);
+
+  const addField = () =>
+    setFields((prev) => [...prev, { key: "", label: "", type: "text", required: true }]);
+  const updateField = (index: number, patch: Partial<ServiceField>) =>
+    setFields((prev) => prev.map((f, i) => (i === index ? { ...f, ...patch } : f)));
+  const removeField = (index: number) =>
+    setFields((prev) => prev.filter((_, i) => i !== index));
+  const moveField = (index: number, delta: number) =>
+    setFields((prev) => {
+      const next = [...prev];
+      const target = index + delta;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
   const [saving, setSaving] = useState(false);
 
   const loadAll = async () => {
@@ -133,6 +150,7 @@ export default function ServiceCatalogManager() {
   const openCreate = () => {
     setEditing(null);
     setForm(emptyForm);
+    setFields([]);
     setDialogOpen(true);
   };
 
@@ -146,27 +164,32 @@ export default function ServiceCatalogManager() {
       price: Number(service.price) || 0,
       turnaround: service.turnaround || "",
       icon: service.icon || "",
-      fields: JSON.stringify(service.fields ?? [], null, 2),
       is_active: service.is_active,
       is_automated: service.is_automated,
       sort_order: service.sort_order ?? 0,
     });
+    setFields(Array.isArray(service.fields) ? service.fields : []);
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
-    let parsedFields: ServiceField[] = [];
-    try {
-      parsedFields = form.fields.trim() ? JSON.parse(form.fields) : [];
-      if (!Array.isArray(parsedFields)) throw new Error("Fields must be an array");
-    } catch (error: any) {
+    const cleaned = fields
+      .map((f) => ({
+        ...f,
+        key: (f.key || slugify(f.label).replace(/-/g, "_")).trim(),
+        label: f.label.trim(),
+      }))
+      .filter((f) => f.key && f.label);
+
+    if (cleaned.length !== fields.length) {
       toast({
-        title: "Invalid form fields",
-        description: error.message || "Fields must be valid JSON array",
+        title: "Incomplete field",
+        description: "Every field needs a label and a key.",
         variant: "destructive",
       });
       return;
     }
+    const parsedFields = cleaned;
 
     setSaving(true);
     const payload = {
@@ -434,18 +457,132 @@ export default function ServiceCatalogManager() {
               />
             </div>
 
-            <div>
-              <Label>Form Fields (JSON)</Label>
-              <Textarea
-                rows={8}
-                className="font-mono text-xs"
-                value={form.fields}
-                onChange={(e) => setForm({ ...form, fields: e.target.value })}
-                placeholder='[{"key":"phone","label":"Phone Number","type":"tel","required":true}]'
-              />
-              <p className="mt-1 text-xs text-muted-foreground">
-                Types: text, tel, number, textarea, select (with "options": ["A","B"]).
-              </p>
+            <div className="space-y-3 rounded-lg border p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <Label>Information to collect</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Fields the student fills when requesting this service. Leave empty for
+                    instant products like scratch cards.
+                  </p>
+                </div>
+                <Button type="button" size="sm" variant="outline" onClick={addField}>
+                  <Plus className="mr-1.5 h-4 w-4" /> Add field
+                </Button>
+              </div>
+
+              {fields.length === 0 ? (
+                <p className="rounded border border-dashed p-3 text-center text-xs text-muted-foreground">
+                  No information collected — payment only.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {fields.map((field, index) => (
+                    <div key={index} className="space-y-2 rounded-md border p-3">
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div>
+                          <Label className="text-xs">Label</Label>
+                          <Input
+                            value={field.label}
+                            onChange={(e) =>
+                              updateField(index, {
+                                label: e.target.value,
+                                key: field.key || slugify(e.target.value).replace(/-/g, "_"),
+                              })
+                            }
+                            placeholder="Phone Number"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Key</Label>
+                          <Input
+                            value={field.key}
+                            onChange={(e) => updateField(index, { key: e.target.value })}
+                            placeholder="phone_number"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Type</Label>
+                          <Select
+                            value={field.type}
+                            onValueChange={(value) => updateField(index, { type: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {FIELD_TYPES.map((type) => (
+                                <SelectItem key={type} value={type}>
+                                  {type}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-end gap-3">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={!!field.required}
+                              onCheckedChange={(checked) =>
+                                updateField(index, { required: checked })
+                              }
+                            />
+                            <Label className="text-xs">Required</Label>
+                          </div>
+                          <div className="ml-auto flex gap-1">
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="outline"
+                              className="h-9 w-9"
+                              disabled={index === 0}
+                              onClick={() => moveField(index, -1)}
+                            >
+                              <ArrowUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="outline"
+                              className="h-9 w-9"
+                              disabled={index === fields.length - 1}
+                              onClick={() => moveField(index, 1)}
+                            >
+                              <ArrowDown className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="destructive"
+                              className="h-9 w-9"
+                              onClick={() => removeField(index)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      {field.type === "select" && (
+                        <div>
+                          <Label className="text-xs">Options (comma separated)</Label>
+                          <Input
+                            value={(field.options || []).join(", ")}
+                            onChange={(e) =>
+                              updateField(index, {
+                                options: e.target.value
+                                  .split(",")
+                                  .map((o) => o.trim())
+                                  .filter(Boolean),
+                              })
+                            }
+                            placeholder="Option A, Option B"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex flex-wrap gap-6">
