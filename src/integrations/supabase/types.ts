@@ -2761,31 +2761,49 @@ export type Database = {
       }
       school_staff: {
         Row: {
+          accepted_at: string | null
           created_at: string | null
+          email: string | null
+          full_name: string | null
           id: string
+          invite_status: string
+          invite_token: string | null
+          invited_at: string | null
           is_active: boolean | null
           permissions: Json | null
           role: string | null
           school_id: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
+          accepted_at?: string | null
           created_at?: string | null
+          email?: string | null
+          full_name?: string | null
           id?: string
+          invite_status?: string
+          invite_token?: string | null
+          invited_at?: string | null
           is_active?: boolean | null
           permissions?: Json | null
           role?: string | null
           school_id: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
+          accepted_at?: string | null
           created_at?: string | null
+          email?: string | null
+          full_name?: string | null
           id?: string
+          invite_status?: string
+          invite_token?: string | null
+          invited_at?: string | null
           is_active?: boolean | null
           permissions?: Json | null
           role?: string | null
           school_id?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
