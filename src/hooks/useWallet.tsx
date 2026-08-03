@@ -26,22 +26,32 @@ export const useWallet = () => {
     }
     setLoading(true);
 
-    const { data: wallet } = await supabase
+    const { data: wallet, error: walletError } = await supabase
       .from("user_wallets")
       .select("id, balance")
       .eq("user_id", userProfile.id)
       .maybeSingle();
 
+    if (walletError) {
+      console.error("Wallet balance fetch failed", walletError);
+      setLoading(false);
+      return;
+    }
+
     setBalance(Number(wallet?.balance ?? 0));
 
     if (wallet?.id) {
-      const { data: txns } = await supabase
+      const { data: txns, error: transactionsError } = await supabase
         .from("wallet_transactions")
         .select("id, transaction_type, amount, balance_after, description, created_at")
         .eq("wallet_id", wallet.id)
         .order("created_at", { ascending: false })
         .limit(50);
-      setTransactions((txns as WalletTransaction[]) || []);
+      if (transactionsError) {
+        console.error("Wallet activity fetch failed", transactionsError);
+      } else {
+        setTransactions((txns as WalletTransaction[]) || []);
+      }
     } else {
       setTransactions([]);
     }
