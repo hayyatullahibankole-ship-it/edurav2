@@ -44,7 +44,7 @@ import SubjectProgressCard from "@/components/SubjectProgressCard";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { FeatureCard } from "@/components/dashboard/FeatureCard";
 import { ModernQuickAction } from "@/components/dashboard/ModernQuickAction";
-import { ServicesStrip } from "@/components/edura/ServicesStrip";
+import { ServicesShowcase } from "@/components/edura/ServicesShowcase";
 import { MobileStatCard } from "@/components/dashboard/MobileStatCard";
 import { MobileTestCard } from "@/components/dashboard/MobileTestCard";
 import { MobileSubjectCard } from "@/components/dashboard/MobileSubjectCard";
@@ -478,11 +478,11 @@ const Dashboard = () => {
                 </div>
               ) : (
               <>
-              <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-accent/5">
+              <Card className="border">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Award className="h-6 w-6 text-primary" />
+                    <div className="p-2 rounded-lg border bg-muted">
+                      <Award className="h-6 w-6 text-foreground" />
                     </div>
                     <div>
                       <h3 className="font-semibold">2026 Mock Examination</h3>
@@ -495,7 +495,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <ServicesStrip />
+              <ServicesShowcase />
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                 {/* Main Content */}
