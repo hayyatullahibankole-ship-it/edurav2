@@ -285,6 +285,111 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
+    // ========== School subscription reminders ==========
+    console.log('🏫 Checking school subscriptions for renewal reminders...');
+
+    const { data: schoolSubs, error: schoolErr } = await supabase
+      .from('school_subscriptions')
+      .select(`
+        id,
+        school_id,
+        current_period_end,
+        student_seats,
+        schools!inner (
+          id,
+          name,
+          email,
+          admin_user_id
+        )
+      `)
+      .eq('status', 'ACTIVE')
+      .gt('current_period_end', new Date().toISOString())
+      .lt('current_period_end', new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString());
+
+    if (schoolErr) {
+      console.error('Failed to fetch school subscriptions:', schoolErr.message);
+      results.errors.push(`School subs: ${schoolErr.message}`);
+    }
+
+    if (schoolSubs && schoolSubs.length > 0) {
+      for (const sub of schoolSubs) {
+        const school = Array.isArray(sub.schools) ? sub.schools[0] : sub.schools;
+        if (!school?.email) {
+          results.errors.push(`School ${sub.school_id}: No admin email`);
+          continue;
+        }
+
+        try {
+          const endDate = new Date(sub.current_period_end).toLocaleDateString('en-US', {
+            year: 'numeric', month: 'long', day: 'numeric'
+          });
+          const daysLeft = Math.ceil((new Date(sub.current_period_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          const urgency = daysLeft <= 3 ? 'Final' : daysLeft <= 7 ? 'Important' : 'Friendly';
+
+          const schoolHtml = `
+            <!DOCTYPE html>
+            <html>
+              <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+              <body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f4f4;">
+                <div style="max-width:600px;margin:0 auto;background:#fff;">
+                  <div style="padding:30px;text-align:center;background:#0F3D2E;">
+                    <h1 style="color:#fff;margin:0;font-size:22px;">🏫 School Subscription Reminder</h1>
+                  </div>
+                  <div style="padding:40px 30px;">
+                    <h2 style="color:#111827;margin:0 0 16px;">Hello ${school.name} Team,</h2>
+                    <p style="color:#374151;font-size:16px;line-height:1.6;">
+                      This is your <strong>${urgency} reminder</strong> that your Edura Schools subscription
+                      expires on <strong>${endDate}</strong> — that's in about <strong>${daysLeft} days</strong>.
+                    </p>
+                    <div style="background:#f9fafb;padding:20px;border-radius:8px;margin:20px 0;">
+                      <p style="margin:5px 0;color:#374151;"><strong>Current seats:</strong> ${sub.student_seats} students</p>
+                      <p style="margin:5px 0;color:#374151;"><strong>Expiry date:</strong> ${endDate}</p>
+                    </div>
+                    <p style="color:#374151;font-size:16px;line-height:1.6;">
+                      To keep your students practising without interruption, renew your subscription from the
+                      Billing tab in your school dashboard.
+                    </p>
+                    <div style="text-align:center;margin:25px 0;">
+                      <a href="https://edura.space/school-dashboard" style="display:inline-block;background:#0F3D2E;color:#fff;padding:14px 36px;text-decoration:none;border-radius:8px;font-weight:bold;">Go to Dashboard</a>
+                    </div>
+                    <p style="color:#6b7280;font-size:14px;">If you have questions, contact support@edura.space</p>
+                  </div>
+                  <div style="background:#111827;padding:24px 30px;text-align:center;">
+                    <p style="color:#9ca3af;font-size:12px;margin:0;">© ${new Date().getFullYear()} Edura. All rights reserved.</p>
+                  </div>
+                </div>
+              </body>
+            </html>
+          `;
+
+          const emailRes = await resend.emails.send({
+            from: fromEmail,
+            to: [school.email],
+            subject: `${urgency} reminder: Your Edura Schools subscription expires in ${daysLeft} days`,
+            html: schoolHtml,
+          });
+
+          if (emailRes.error) throw emailRes.error;
+
+          await supabase.from('email_delivery_log').insert({
+            recipient_email: school.email,
+            email_type: 'school_subscription_reminder',
+            subject: `${urgency} reminder: Your Edura Schools subscription expires in ${daysLeft} days`,
+            status: 'sent',
+            provider_message_id: emailRes.data?.id,
+            sent_at: new Date().toISOString()
+          });
+
+          console.log(`✅ School reminder sent to ${school.email}`);
+          results.sent++;
+        } catch (err: any) {
+          console.error(`❌ Failed school reminder to ${school.email}:`, err);
+          results.failed++;
+          results.errors.push(`School ${school.email}: ${err.message}`);
+        }
+      }
+    }
+
     console.log(`📊 Summary: ${results.sent} sent, ${results.failed} failed`);
 
     return new Response(JSON.stringify(results), {
