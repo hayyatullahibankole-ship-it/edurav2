@@ -1,4 +1,5 @@
-import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles, Sword, MessageSquare, Library, Download, Smartphone, Wifi, Bell } from "lucide-react";
+import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles, Sword, MessageSquare, Library, Download, Smartphone, Wifi, Bell, Compass } from "lucide-react";
+import { ExploreSheet } from "@/components/edura/ExploreSheet";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
