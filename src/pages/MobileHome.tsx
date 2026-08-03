@@ -514,6 +514,11 @@ const MobileHome = () => {
           </div>
         </div>
 
+        {/* Educational Services */}
+        <div className="animate-fade-in">
+          <ServicesStrip />
+        </div>
+
         {/* Quick Actions - Modern Cards */}
         <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <div className="mb-5">
