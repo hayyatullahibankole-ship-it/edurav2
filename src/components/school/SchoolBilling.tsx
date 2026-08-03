@@ -119,9 +119,47 @@ export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) 
 
   return (
     <div className="space-y-6">
+      {activeSub && daysLeft !== null && daysLeft <= 14 && (
+        <Alert variant={daysLeft <= 3 ? "destructive" : "default"}>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            {daysLeft <= 0
+              ? "Your subscription has expired. Renew to keep running exams."
+              : `Your subscription expires in ${daysLeft} day${daysLeft === 1 ? "" : "s"}. Renew to avoid interruption.`}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <WalletIcon className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Wallet balance</CardTitle>
+                <CardDescription>
+                  {walletLoading ? "Loading…" : `₦${Number(balance || 0).toLocaleString()} available`}
+                </CardDescription>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate("/wallet")}>
+                Fund wallet
+              </Button>
+              <Button size="sm" onClick={() => setTopUpOpen(true)} disabled={!activeSub}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add seats
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <CardTitle>Current Plan</CardTitle>
               <CardDescription>Your active subscription details</CardDescription>
@@ -132,6 +170,7 @@ export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) 
             </Button>
           </div>
         </CardHeader>
+
         <CardContent>
           <div className="space-y-2">
             <div className="flex justify-between">
