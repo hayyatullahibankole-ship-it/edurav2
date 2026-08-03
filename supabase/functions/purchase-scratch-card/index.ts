@@ -175,10 +175,13 @@ Deno.serve(async (req) => {
     if (orderError) throw new Error(orderError.message);
     orderId = order.id;
 
-    // 3. Buy the PINs from Naijaresultspin
-    const vendorUrl = Deno.env.get("NAIJARESULTSPIN_API_URL");
+    // 3. Buy the PINs from NaijaResultPins
+    const DEFAULT_VENDOR_URL = "https://www.naijaresultpins.com/api/v1/exam-card/buy";
+    const configuredUrl = (Deno.env.get("NAIJARESULTSPIN_API_URL") ?? "").trim();
+    // Only trust the configured value if it actually looks like an API endpoint.
+    const vendorUrl = /\/api\//i.test(configuredUrl) ? configuredUrl : DEFAULT_VENDOR_URL;
     const vendorKey = Deno.env.get("NAIJARESULTSPIN_API_KEY");
-    if (!vendorUrl || !vendorKey) throw new Error("Scratch card vendor is not configured");
+    if (!vendorKey) throw new Error("Scratch card vendor is not configured");
 
     const vendorRes = await fetch(vendorUrl, {
       method: "POST",
