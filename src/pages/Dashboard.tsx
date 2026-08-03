@@ -330,6 +330,281 @@ const Dashboard = () => {
     }
   };
 
+  const examTypes = [
+    { type: "jamb", label: "JAMB", subtitle: "UTME Practice", letter: "J" },
+    { type: "waec", label: "WAEC", subtitle: "SSCE Practice", letter: "W" },
+    { type: "neco", label: "NECO", subtitle: "Senior Secondary", letter: "N" },
+    { type: "post-utme", label: "POST-UTME", subtitle: "University Practice", letter: "P" },
+  ];
+
+  const renderBentoContent = () => {
+    if (showMockResult) {
+      return (
+        <div className="space-y-4">
+          <Button variant="outline" onClick={() => setShowMockResult(false)} className="gap-2">
+            <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+          </Button>
+          <MockResultChecker />
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {/* Free Access Banner */}
+        {hasFreePromoAccess && freeAccessExpiry && <FreeAccessBanner expiryDate={freeAccessExpiry} />}
+        {freeAccessExpired && freeAccessExpiry && <FreeAccessBanner expiryDate={freeAccessExpiry} isExpired />}
+
+        {/* Promo Code Activation */}
+        {!isPremium && !hasFreePromoAccess && !subscriptionLoading && (
+          <PromoCodeActivation onSuccess={() => window.location.reload()} />
+        )}
+
+        {/* Bento Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-4 auto-rows-min">
+          {/* Row 1: Stats */}
+          <div className="bg-card border border-border rounded-2xl p-5 flex flex-col justify-between col-span-2 md:col-span-3">
+            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Total Tests</span>
+            <div className="flex items-end justify-between mt-2">
+              <h3 className="text-3xl font-bold">{loading ? "..." : stats.testsTaken}</h3>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 flex flex-col justify-between col-span-2 md:col-span-3">
+            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Average Score</span>
+            <div className="flex items-end justify-between mt-2">
+              <h3 className="text-3xl font-bold">{loading ? "..." : `${stats.averageScore}%`}</h3>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 flex flex-col justify-between col-span-2 md:col-span-3">
+            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Study Hours</span>
+            <div className="flex items-end justify-between mt-2">
+              <h3 className="text-3xl font-bold">{loading ? "..." : `${stats.studyHours}h`}</h3>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 flex flex-col justify-between col-span-2 md:col-span-3">
+            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Global Rank</span>
+            <div className="flex items-end justify-between mt-2">
+              <h3 className="text-3xl font-bold text-primary">
+                {loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "—"}
+              </h3>
+            </div>
+          </div>
+
+          {/* Row 2: Practice + Wallet */}
+          <div className="bg-card border border-border rounded-2xl p-6 col-span-2 md:col-span-8">
+            <h2 className="text-lg font-bold mb-4">Start Practice</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {examTypes.map((exam) =>
+                isMobileBrowser ? (
+                  <button
+                    key={exam.type}
+                    onClick={() => {
+                      setBlockedFeatureName(`${exam.label} Practice`);
+                      setShowInstallModal(true);
+                    }}
+                    className="bg-background border border-border rounded-xl p-4 text-center hover:border-primary transition-colors group"
+                  >
+                    <div className="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center mx-auto mb-3 font-bold">
+                      {exam.letter}
+                    </div>
+                    <span className="text-sm font-semibold block">{exam.label}</span>
+                    <span className="text-[10px] text-muted-foreground uppercase">{exam.subtitle}</span>
+                  </button>
+                ) : (
+                  <ScheduleTestModal key={exam.type} defaultExamType={exam.type}>
+                    <button className="bg-background border border-border rounded-xl p-4 text-center hover:border-primary transition-colors group w-full">
+                      <div className="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center mx-auto mb-3 font-bold">
+                        {exam.letter}
+                      </div>
+                      <span className="text-sm font-semibold block">{exam.label}</span>
+                      <span className="text-[10px] text-muted-foreground uppercase">{exam.subtitle}</span>
+                    </button>
+                  </ScheduleTestModal>
+                ),
+              )}
+            </div>
+          </div>
+
+          {/* Wallet + Subscription */}
+          <div className="col-span-2 md:col-span-4 flex flex-col gap-3 md:gap-4">
+            <Link
+              to="/wallet"
+              className="bg-primary text-primary-foreground rounded-2xl p-6 flex flex-col justify-between flex-1 hover:opacity-90 transition-opacity"
+            >
+              <div>
+                <span className="text-xs font-bold uppercase tracking-widest opacity-80">Wallet Balance</span>
+                <h2 className="text-2xl md:text-3xl font-black mt-1">
+                  {walletLoading
+                    ? "..."
+                    : `₦${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                </h2>
+              </div>
+              <div className="w-full bg-primary-foreground/10 text-primary-foreground py-2.5 rounded-xl font-bold text-sm text-center mt-4 border border-primary-foreground/20">
+                Fund Wallet
+              </div>
+            </Link>
+
+            <Link
+              to="/payment"
+              className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between hover:border-primary/50 transition-colors"
+            >
+              <div>
+                <span className="text-xs text-muted-foreground block">Subscription</span>
+                <span className="text-sm font-bold">
+                  {subscriptionLoading
+                    ? "Loading..."
+                    : subscription?.subscription_plans?.name || "Free Plan"}
+                </span>
+              </div>
+              <span
+                className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter ${
+                  isPremium ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {subscriptionLoading ? "..." : subscription?.status || "Free"}
+              </span>
+            </Link>
+          </div>
+
+          {/* Row 3: Quick Access + School Exams */}
+          <div className="bg-card border border-border rounded-2xl p-6 col-span-2 md:col-span-5">
+            <h2 className="text-lg font-bold mb-4">Quick Access</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <Link
+                to="/services"
+                className="p-3 bg-background border border-border rounded-xl flex items-center gap-3 hover:border-primary/50 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                  <Layers className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-xs font-medium">Edu Services</span>
+              </Link>
+              <Link
+                to="/study-planner"
+                className="p-3 bg-background border border-border rounded-xl flex items-center gap-3 hover:border-primary/50 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                  <Target className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-xs font-medium">Study Planner</span>
+              </Link>
+              <Link
+                to="/resources"
+                className="p-3 bg-background border border-border rounded-xl flex items-center gap-3 hover:border-primary/50 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                  <FileText className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-xs font-medium">Past Questions</span>
+              </Link>
+              <Link
+                to="/referral-program"
+                className="p-3 bg-background border border-border rounded-xl flex items-center gap-3 hover:border-primary/50 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                  <Trophy className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-xs font-medium">Referrals</span>
+              </Link>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-6 col-span-2 md:col-span-7">
+            <h2 className="text-lg font-bold mb-4">School Exams</h2>
+            <SchoolAvailableExams />
+          </div>
+
+          {/* Row 4: Subject Progress + Recent Results + Mock Checker */}
+          <div className="bg-card border border-border rounded-2xl p-6 col-span-2 md:col-span-4">
+            <h2 className="text-lg font-bold mb-4">Subject Progress</h2>
+            {loading ? (
+              <div className="text-center text-muted-foreground py-4 text-sm">Loading...</div>
+            ) : subjectProgress.length > 0 ? (
+              <div className="space-y-4">
+                {subjectProgress.slice(0, 5).map((subject: any, index: number) => (
+                  <div key={index}>
+                    <div className="flex justify-between text-xs mb-1.5 font-medium">
+                      <span className="text-muted-foreground">{subject.subject}</span>
+                      <span>{subject.progress}%</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-background rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all"
+                        style={{ width: `${subject.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-4 text-sm">
+                Complete tests to track progress
+              </div>
+            )}
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-6 col-span-2 md:col-span-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold">Recent Results</h2>
+              <Link
+                to="/performance-report"
+                className="text-primary text-xs font-semibold hover:underline"
+              >
+                View All
+              </Link>
+            </div>
+            {loading ? (
+              <div className="text-center text-muted-foreground py-4 text-sm">Loading...</div>
+            ) : recentTests.length > 0 ? (
+              <div className="space-y-3">
+                {recentTests.map((test: any, index: number) => (
+                  <Link key={index} to={`/results?attempt=${test.attemptId}`} className="block">
+                    <div className="p-3 bg-background rounded-xl flex items-center justify-between hover:bg-muted/50 transition-colors">
+                      <div>
+                        <p className="text-xs font-bold">{test.subject}</p>
+                        <p className="text-[10px] text-muted-foreground">{test.date}</p>
+                      </div>
+                      <p className="text-xs font-black text-primary">{test.score}%</p>
+                    </div>
+                  </Link>
+                ))}
+                <Link
+                  to="/performance-report"
+                  className="block w-full py-2 mt-2 text-[10px] text-muted-foreground border border-border rounded-lg hover:bg-muted/50 transition-colors text-center"
+                >
+                  View Detailed Reports
+                </Link>
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-4 text-sm">
+                No tests yet. Start practicing!
+              </div>
+            )}
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-6 col-span-2 md:col-span-4 flex flex-col justify-center relative overflow-hidden">
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-2">
+                <Award className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-bold">Mock Checker</h2>
+              </div>
+              <p className="text-xs text-muted-foreground mb-4">
+                Check your official JAMB/WAEC mock examination results.
+              </p>
+              <Button onClick={() => setShowMockResult(true)} className="w-full gap-2">
+                <FileText className="h-4 w-4" /> Check Result
+              </Button>
+            </div>
+            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return <LoadingAnimation />;
   }
