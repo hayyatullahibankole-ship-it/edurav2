@@ -61,9 +61,6 @@ const Navbar = () => {
                   Forum
                 </Link>
               </>}
-            <Link to="/consultation" className="text-foreground hover:text-primary transition-colors">
-              Consultation
-            </Link>
             <Link to="/payment" className="text-foreground hover:text-primary transition-colors">
               Pricing
             </Link>
@@ -122,9 +119,6 @@ const Navbar = () => {
                     Forum
                   </Link>
                 </>}
-              <Link to="/consultation" className="block px-3 py-2 text-foreground hover:bg-muted rounded-md" onClick={() => setIsMenuOpen(false)}>
-                Consultation
-              </Link>
               <Link to="/payment" className="block px-3 py-2 text-foreground hover:bg-muted rounded-md" onClick={() => setIsMenuOpen(false)}>
                 Pricing
               </Link>

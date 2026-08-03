@@ -63,7 +63,7 @@ const tourSteps: TourStep[] = [
     title: "Book 1-on-1 Sessions",
     description: "Need personalized help? Book private tutoring sessions with expert tutors. Get focused attention on topics you find challenging.",
     icon: <Calendar className="h-12 w-12 text-secondary" />,
-    action: { label: "Book Session", href: "/consultation" }
+    action: { label: "Book Session", href: "https://wa.me/2347050757085?text=Hello%20Edura%2C%20I%20would%20like%20to%20book%20an%20expert%20consultation%20session." }
   },
   {
     title: "You're All Set! ✨",
