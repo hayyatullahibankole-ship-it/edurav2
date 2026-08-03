@@ -76,7 +76,10 @@ type ServiceRequest = {
   status: string;
   created_at: string;
   admin_note: string | null;
+  result_files?: ResultFile[];
 };
+
+type ResultFile = { path: string; name: string; type: string };
 
 
 const PROVIDERS = [
@@ -165,14 +168,30 @@ const ServicesHome = () => {
     load();
   }, []);
 
+  const openResultFile = async (file: ResultFile) => {
+    const { data, error } = await supabase.storage
+      .from("service-results")
+      .createSignedUrl(file.path, 600);
+    if (error || !data?.signedUrl) {
+      toast.error("Could not open this file");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener");
+  };
+
   const loadRequests = async () => {
     if (!user) return;
     const { data } = await supabase
       .from("service_requests")
-      .select("id, service_id, service_name, provider, amount, status, created_at, admin_note")
+      .select("id, service_id, service_name, provider, amount, status, created_at, admin_note, result_files")
       .order("created_at", { ascending: false })
       .limit(50);
-    setRequests((data as ServiceRequest[]) || []);
+    setRequests(
+      ((data as any[]) || []).map((r) => ({
+        ...r,
+        result_files: Array.isArray(r.result_files) ? (r.result_files as ResultFile[]) : [],
+      })) as ServiceRequest[]
+    );
   };
 
 
@@ -572,7 +591,7 @@ const ServicesHome = () => {
               requests.map((request) => (
                 <div
                   key={request.id}
-                  className="flex items-center justify-between gap-3 rounded-lg border p-3"
+                  className="flex items-start justify-between gap-3 rounded-lg border p-3"
                 >
                   <div className="min-w-0">
                     <p className="truncate font-medium">{request.service_name}</p>
@@ -581,6 +600,22 @@ const ServicesHome = () => {
                     </p>
                     {request.admin_note && (
                       <p className="mt-1 text-xs text-muted-foreground">{request.admin_note}</p>
+                    )}
+                    {(request.result_files?.length ?? 0) > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {request.result_files!.map((file) => (
+                          <Button
+                            key={file.path}
+                            size="sm"
+                            variant="outline"
+                            className="h-7 gap-1 px-2 text-xs"
+                            onClick={() => openResultFile(file)}
+                          >
+                            <FileText className="h-3 w-3" />
+                            <span className="max-w-[140px] truncate">{file.name}</span>
+                          </Button>
+                        ))}
+                      </div>
                     )}
                   </div>
                   {request.status === "awaiting_details" ? (

@@ -3123,6 +3123,7 @@ export type Database = {
           payment_reference: string | null
           provider: string
           result: Json | null
+          result_files: Json
           service_id: string | null
           service_name: string
           service_slug: string
@@ -3140,6 +3141,7 @@ export type Database = {
           payment_reference?: string | null
           provider: string
           result?: Json | null
+          result_files?: Json
           service_id?: string | null
           service_name: string
           service_slug: string
@@ -3157,6 +3159,7 @@ export type Database = {
           payment_reference?: string | null
           provider?: string
           result?: Json | null
+          result_files?: Json
           service_id?: string | null
           service_name?: string
           service_slug?: string
