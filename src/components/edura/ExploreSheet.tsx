@@ -108,7 +108,9 @@ export const ExploreSheet = ({ open, onOpenChange }: ExploreSheetProps) => {
               <p className="text-sm font-medium">Switch experience</p>
               <p className="text-xs text-muted-foreground">CBT practice or educational services</p>
             </div>
-            <SideSwitcher compact className="shrink-0" />
+            <div onClick={() => onOpenChange(false)} className="shrink-0">
+              <SideSwitcher compact />
+            </div>
           </section>
 
           <section className="space-y-3">
