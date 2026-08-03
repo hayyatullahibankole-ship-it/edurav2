@@ -41,6 +41,10 @@ import {
   Wallet as WalletIcon,
 } from "lucide-react";
 import ScratchCardDialog from "@/components/edura/ScratchCardDialog";
+import { useWallet } from "@/hooks/useWallet";
+import { initializePaystackPayment } from "@/utils/paystack";
+import { CreditCard, Loader2 } from "lucide-react";
+
 
 
 type ServiceField = {
