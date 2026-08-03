@@ -48,7 +48,7 @@ export const StreakCard = () => {
   const milestoneProgress = (currentStreak / nextMilestone) * 100;
 
   return (
-    <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/10 via-warning/10 to-destructive/10 overflow-hidden hover-lift animate-fade-in">
+    <Card className="border border-border bg-card overflow-hidden hover-lift animate-fade-in">
       <div className="absolute top-0 right-0 w-32 h-32 bg-warning/10 rounded-full blur-3xl" />
       
       <CardHeader className="relative pb-2">
@@ -65,7 +65,7 @@ export const StreakCard = () => {
 
       <CardContent className="relative space-y-4">
         {/* Current Streak */}
-        <div className="text-center p-4 bg-gradient-to-r from-primary to-warning rounded-xl text-white shadow-lg">
+        <div className="text-center p-4 bg-primary rounded-xl text-white shadow-lg">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Flame className="h-8 w-8" />
             <div className="text-5xl font-bold">{currentStreak}</div>
@@ -105,7 +105,7 @@ export const StreakCard = () => {
             </div>
             <div className="h-2 bg-muted rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-primary to-warning transition-all duration-500"
+                className="h-full bg-primary transition-all duration-500"
                 style={{ width: `${Math.min(milestoneProgress, 100)}%` }}
               />
             </div>

@@ -16,7 +16,7 @@ export function FreeAccessBanner({ expiryDate, isExpired = false }: FreeAccessBa
 
   if (isExpired) {
     return (
-      <Card className="border-destructive/30 bg-gradient-to-r from-destructive/10 to-background">
+      <Card className="border-destructive/30 bg-destructive/5">
         <CardContent className="flex items-center justify-between gap-4 py-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-full bg-destructive/10">
@@ -42,7 +42,7 @@ export function FreeAccessBanner({ expiryDate, isExpired = false }: FreeAccessBa
   const isExpiringSoon = daysLeft <= 3;
 
   return (
-    <Card className={`border-primary/20 ${isExpiringSoon ? 'bg-gradient-to-r from-amber-500/10 to-background' : 'bg-gradient-to-r from-primary/10 to-background'}`}>
+    <Card className={`border-primary/20 ${isExpiringSoon ? 'bg-warning/5' : 'bg-primary/5'}`}>
       <CardContent className="flex items-center justify-between gap-4 py-4">
         <div className="flex items-center gap-3">
           <div className={`p-2 rounded-full ${isExpiringSoon ? 'bg-amber-500/10' : 'bg-primary/10'}`}>

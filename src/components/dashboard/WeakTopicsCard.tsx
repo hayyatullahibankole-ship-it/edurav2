@@ -41,7 +41,7 @@ export const WeakTopicsCard = () => {
   };
 
   return (
-    <Card className="border-0 shadow-lg backdrop-blur-sm bg-gradient-to-br from-card to-muted/30 overflow-hidden hover-lift">
+    <Card className="border border-border bg-card overflow-hidden hover-lift">
       <div className="absolute top-0 right-0 w-32 h-32 bg-warning/5 rounded-full blur-3xl" />
       
       <CardHeader className="relative">
