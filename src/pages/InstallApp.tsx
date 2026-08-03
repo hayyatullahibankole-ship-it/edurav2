@@ -1,18 +1,89 @@
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, Smartphone, Zap, Wifi, Bell, Shield, Clock, Star, CheckCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Download,
+  Smartphone,
+  Zap,
+  Wifi,
+  Bell,
+  Shield,
+  Clock,
+  Star,
+  CheckCircle,
+  Share,
+  PlusSquare,
+  Info,
+} from "lucide-react";
 import eduraLogo from "@/assets/edura-logo.png";
 
 const UPTODOWN_URL = "https://edura-advanced-cbt-platform.en.uptodown.com/android/download";
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
 export default function InstallApp() {
   const navigate = useNavigate();
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installed, setInstalled] = useState(false);
 
-  const steps = [
-    { num: "1", text: "Tap the download button below" },
-    { num: "2", text: "Install the APK from Uptodown" },
-    { num: "3", text: "Open the app & start practicing" },
+  const platform = useMemo(() => {
+    if (typeof navigator === "undefined") return "other";
+    const ua = navigator.userAgent;
+    if (/iPad|iPhone|iPod/.test(ua)) return "ios";
+    if (/Android/i.test(ua)) return "android";
+    return "desktop";
+  }, []);
+
+  useEffect(() => {
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone === true;
+    setInstalled(isStandalone);
+
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+    const installedHandler = () => {
+      setInstalled(true);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", handler);
+    window.addEventListener("appinstalled", installedHandler);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", installedHandler);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === "accepted") {
+      setInstalled(true);
+      setDeferredPrompt(null);
+    }
+  };
+
+  const iosSteps = [
+    { icon: Share, text: "Tap the Share button in Safari" },
+    { icon: PlusSquare, text: 'Choose "Add to Home Screen"' },
+    { icon: CheckCircle, text: "Tap Add — Edura appears on your home screen" },
   ];
+
+  const androidSteps = [
+    { icon: Download, text: "Tap Install app below (or browser menu → Install app)" },
+    { icon: CheckCircle, text: "Confirm the install prompt" },
+    { icon: Zap, text: "Open Edura from your home screen and start practising" },
+  ];
+
+  const steps = platform === "ios" ? iosSteps : androidSteps;
 
   const features = [
     { icon: Zap, text: "Lightning fast performance" },
@@ -27,12 +98,7 @@ export default function InstallApp() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(-1)}
-          className="shrink-0"
-        >
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="font-semibold text-lg">Get the App</h1>
@@ -52,35 +118,51 @@ export default function InstallApp() {
                 <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> 4.8
               </span>
               <span className="text-xs text-muted-foreground">50K+ downloads</span>
-              <span className="text-xs font-semibold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">FREE</span>
+              <span className="text-xs font-semibold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">
+                FREE
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Download Button */}
-        <a
-          href={UPTODOWN_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block"
-        >
-          <Button
-            size="lg"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base py-6 rounded-xl gap-2 shadow-lg shadow-emerald-600/20"
-          >
-            <Download className="h-5 w-5" />
-            Download from Uptodown
-          </Button>
-        </a>
-
-        {/* How to Install */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-foreground">How to install</h3>
+        {/* Primary install */}
+        {installed ? (
+          <div className="p-5 rounded-2xl border bg-emerald-50 text-emerald-900 flex items-start gap-3">
+            <CheckCircle className="h-5 w-5 mt-0.5 shrink-0 text-emerald-600" />
+            <div>
+              <p className="font-semibold text-sm">You already have the app installed</p>
+              <p className="text-xs mt-1 text-emerald-800">
+                Launch Edura from your home screen — it always stays on the latest version.
+              </p>
+            </div>
+          </div>
+        ) : (
           <div className="space-y-3">
-            {steps.map((step) => (
-              <div key={step.num} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0">
-                  {step.num}
+            <Button
+              size="lg"
+              onClick={handleInstall}
+              disabled={!deferredPrompt}
+              className="w-full font-bold text-base py-6 rounded-xl gap-2"
+            >
+              <Download className="h-5 w-5" />
+              {deferredPrompt ? "Install app" : platform === "ios" ? "Add to Home Screen" : "Install from your browser menu"}
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              Installs the latest version instantly — no app store, no APK file, and it updates itself.
+            </p>
+          </div>
+        )}
+
+        {/* How to install */}
+        <div className="space-y-4">
+          <h3 className="font-semibold text-foreground">
+            {platform === "ios" ? "How to install on iPhone" : "How to install"}
+          </h3>
+          <div className="space-y-3">
+            {steps.map((step, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <step.icon className="h-4 w-4" />
                 </div>
                 <p className="text-sm text-muted-foreground">{step.text}</p>
               </div>
@@ -101,23 +183,46 @@ export default function InstallApp() {
           </div>
         </div>
 
-        {/* iOS Note */}
+        {/* Play Store note */}
         <div className="p-4 rounded-xl bg-muted/50 border">
           <div className="flex items-start gap-3">
             <Smartphone className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium text-foreground mb-1">iPhone Users</p>
+              <p className="text-sm font-medium text-foreground mb-1">Coming to Google Play</p>
               <p className="text-xs text-muted-foreground">
-                Open Safari → tap Share → "Add to Home Screen" for the best experience.
+                The Play Store listing is on the way. Until then, installing from your browser gives you the
+                exact same app — and it updates automatically.
               </p>
             </div>
           </div>
         </div>
 
+        {/* Legacy APK — de-emphasised */}
+        {platform !== "ios" && (
+          <div className="p-4 rounded-xl border border-dashed">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground mb-1">Prefer an APK file?</p>
+                <p className="text-xs text-muted-foreground mb-3">
+                  An older build is hosted on Uptodown. It is not on the latest version — only use it if the
+                  browser install does not work on your device.
+                </p>
+                <a href={UPTODOWN_URL} target="_blank" rel="noopener noreferrer" className="block">
+                  <Button variant="outline" size="sm" className="w-full">
+                    <Download className="h-4 w-4 mr-2" />
+                    Download older APK (Uptodown)
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Trust badge */}
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground pb-4">
           <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
-          <span>Safe & Secure • No Registration Required</span>
+          <span>Safe & Secure • Always the latest version</span>
         </div>
       </div>
     </div>

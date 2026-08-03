@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight, Star, Crown, Zap, CreditCard, Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Check, ArrowRight, Star, Crown, Zap, CreditCard, Loader2, Wallet as WalletIcon } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
+import { useWallet } from "@/hooks/useWallet";
 import { createSubscriptionPayment } from "@/utils/paystack";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
@@ -11,8 +12,48 @@ import { useToast } from "@/hooks/use-toast";
 const Payment = () => {
   const { user, userProfile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { balance, loading: walletLoading, refresh: refreshWallet } = useWallet();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [payingPlan, setPayingPlan] = useState<string | null>(null);
+
+  const handleWalletPayment = async (plan: any) => {
+    if (!user) return;
+    if (balance < plan.price) {
+      toast({
+        title: "Insufficient wallet balance",
+        description: `You need ₦${(plan.price - balance).toLocaleString()} more. Fund your wallet to continue.`,
+        variant: "destructive",
+      });
+      navigate("/wallet");
+      return;
+    }
+    setPayingPlan(plan.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("pay-subscription-wallet", {
+        body: { plan_id: plan.id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({
+        title: "Subscription activated",
+        description: `${plan.name} is now active. ₦${plan.price.toLocaleString()} was debited from your wallet.`,
+      });
+      await refreshWallet();
+      navigate("/dashboard");
+    } catch (err: any) {
+      toast({
+        title: "Payment failed",
+        description: err?.message || "Could not complete the wallet payment. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setPayingPlan(null);
+    }
+  };
+
 
   useEffect(() => {
     fetchPlans();
@@ -180,17 +221,43 @@ const Payment = () => {
                   </div>
                 )}
 
-                <div className="mt-auto pt-6">
+                <div className="mt-auto space-y-2 pt-6">
                   {plan.paystack ? (
-                    <Button
-                      onClick={() => handlePaystackPayment(plan.name, plan.price)}
-                      className="w-full h-11 font-bold"
-                      variant={plan.popular ? "default" : "outline"}
-                      disabled={!user}
-                    >
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      {user ? "Get started now" : "Login to subscribe"}
-                    </Button>
+                    <>
+                      <Button
+                        onClick={() => handlePaystackPayment(plan.name, plan.price)}
+                        className="w-full h-11 font-bold"
+                        variant={plan.popular ? "default" : "outline"}
+                        disabled={!user || payingPlan === plan.id}
+                      >
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        {user ? "Pay with card" : "Login to subscribe"}
+                      </Button>
+                      {user && (
+                        <>
+                          <Button
+                            onClick={() => handleWalletPayment(plan)}
+                            className="w-full h-11 font-bold"
+                            variant="outline"
+                            disabled={payingPlan === plan.id}
+                          >
+                            {payingPlan === plan.id ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <WalletIcon className="mr-2 h-4 w-4" />
+                            )}
+                            {payingPlan === plan.id ? "Processing..." : "Pay from wallet"}
+                          </Button>
+                          <p className="text-center text-[11px] text-muted-foreground">
+                            {walletLoading
+                              ? "Checking wallet..."
+                              : balance >= plan.price
+                                ? `Wallet balance: ₦${balance.toLocaleString()}`
+                                : `Wallet balance: ₦${balance.toLocaleString()} — top up ₦${(plan.price - balance).toLocaleString()} more`}
+                          </p>
+                        </>
+                      )}
+                    </>
                   ) : (
                     <Link to={user ? "/dashboard" : "/auth"} className="block">
                       <Button className="w-full h-11 font-bold" variant="outline">
