@@ -56,6 +56,55 @@ function extractPins(payload: any): Pin[] {
   return [];
 }
 
+const DEFAULT_VENDOR_URL = "https://www.naijaresultpins.com/api/v1/exam-card/buy";
+
+function resolveVendorUrl() {
+  const configured = (Deno.env.get("NAIJARESULTSPIN_API_URL") ?? "").trim();
+  return /\/api\/v1\/exam-card\/buy\/?$/i.test(configured) ? configured : DEFAULT_VENDOR_URL;
+}
+
+/**
+ * Best-effort lookup of the vendor's live card catalogue (id -> unit price).
+ * The vendor exposes it next to the buy action; if it is unreachable we return
+ * null and the caller simply skips the price guard instead of blocking sales.
+ */
+async function fetchVendorCardTypes(): Promise<Array<{ id: number; name: string; price: number }> | null> {
+  const vendorKey = Deno.env.get("NAIJARESULTSPIN_API_KEY");
+  if (!vendorKey) return null;
+  const base = resolveVendorUrl().replace(/\/buy\/?$/i, "");
+  const candidates = [`${base}/types`, `${base}s`, base];
+
+  for (const url of candidates) {
+    try {
+      const res = await fetch(url, {
+        headers: { Accept: "application/json", Authorization: `Bearer ${vendorKey}` },
+      });
+      if (!res.ok) continue;
+      const payload = await res.json().catch(() => null);
+      const list = Array.isArray(payload?.data)
+        ? payload.data
+        : Array.isArray(payload?.card_types)
+          ? payload.card_types
+          : Array.isArray(payload)
+            ? payload
+            : null;
+      if (!list) continue;
+      const mapped = list
+        .map((item: any) => ({
+          id: Number(item?.id ?? item?.card_type_id),
+          name: String(item?.name ?? item?.title ?? ""),
+          price: Number(item?.price ?? item?.amount ?? item?.cost ?? 0),
+        }))
+        .filter((item: any) => Number.isFinite(item.id) && item.price > 0);
+      if (mapped.length) return mapped;
+    } catch (_) {
+      // try the next candidate
+    }
+  }
+  return null;
+}
+
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
