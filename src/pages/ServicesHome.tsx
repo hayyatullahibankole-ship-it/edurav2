@@ -189,8 +189,8 @@ const ServicesHome = () => {
         if (match.product_type === "scratch_card") {
           setScratchService(match);
         } else {
-          setActiveService(match);
-          setFormValues({});
+          openService(match);
+
         }
       }
     }
