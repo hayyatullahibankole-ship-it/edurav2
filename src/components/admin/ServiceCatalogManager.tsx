@@ -45,6 +45,8 @@ type Service = {
   is_active: boolean;
   is_automated: boolean;
   sort_order: number;
+  product_type: string | null;
+  vendor_code: string | null;
 };
 
 type ServiceRequest = {
@@ -74,6 +76,8 @@ const emptyForm = {
   is_active: true,
   is_automated: false,
   sort_order: 0,
+  product_type: "request",
+  vendor_code: "",
 };
 
 const naira = (value: number) =>
@@ -167,6 +171,8 @@ export default function ServiceCatalogManager() {
       is_active: service.is_active,
       is_automated: service.is_automated,
       sort_order: service.sort_order ?? 0,
+      product_type: service.product_type || "request",
+      vendor_code: service.vendor_code || "",
     });
     setFields(Array.isArray(service.fields) ? service.fields : []);
     setDialogOpen(true);
@@ -204,6 +210,8 @@ export default function ServiceCatalogManager() {
       is_active: form.is_active,
       is_automated: form.is_automated,
       sort_order: Number(form.sort_order) || 0,
+      product_type: form.product_type,
+      vendor_code: form.product_type === "scratch_card" ? form.vendor_code || null : null,
     };
 
     const { error } = editing
@@ -300,6 +308,9 @@ export default function ServiceCatalogManager() {
                           {service.provider}
                         </Badge>
                         {service.is_automated && <Badge variant="secondary">Automated</Badge>}
+                        {service.product_type === "scratch_card" && (
+                          <Badge variant="secondary">Instant PIN</Badge>
+                        )}
                         {!service.is_active && <Badge variant="destructive">Inactive</Badge>}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
@@ -446,6 +457,31 @@ export default function ServiceCatalogManager() {
                   onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })}
                 />
               </div>
+              <div>
+                <Label>Product Type</Label>
+                <Select
+                  value={form.product_type}
+                  onValueChange={(value) => setForm({ ...form, product_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="request">Request (collect information)</SelectItem>
+                    <SelectItem value="scratch_card">Scratch card (instant PIN)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {form.product_type === "scratch_card" && (
+                <div>
+                  <Label>Vendor Code (Naijaresultspin)</Label>
+                  <Input
+                    value={form.vendor_code}
+                    onChange={(e) => setForm({ ...form, vendor_code: e.target.value })}
+                    placeholder="e.g. waec_result_checker"
+                  />
+                </div>
+              )}
             </div>
 
             <div>

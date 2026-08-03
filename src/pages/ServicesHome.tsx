@@ -38,7 +38,9 @@ import {
   FileText,
   Search,
   Calendar as CalendarIcon,
+  Wallet as WalletIcon,
 } from "lucide-react";
+import ScratchCardDialog from "@/components/edura/ScratchCardDialog";
 
 
 type ServiceField = {
@@ -58,6 +60,7 @@ type Service = {
   price: number;
   turnaround: string | null;
   fields: ServiceField[];
+  product_type?: string | null;
 };
 
 type ServiceRequest = {
@@ -97,6 +100,7 @@ const ServicesHome = () => {
 
   const [services, setServices] = useState<Service[]>([]);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [scratchService, setScratchService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [provider, setProvider] = useState(searchParams.get("provider") || "all");
@@ -128,7 +132,7 @@ const ServicesHome = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("service_catalog")
-        .select("id, provider, slug, name, description, price, turnaround, fields")
+        .select("id, provider, slug, name, description, price, turnaround, fields, product_type")
         .eq("is_active", true)
         .order("provider")
         .order("sort_order");
@@ -170,8 +174,12 @@ const ServicesHome = () => {
     if (slug) {
       const match = services.find((s) => s.slug === slug);
       if (match) {
-        setActiveService(match);
-        setFormValues({});
+        if (match.product_type === "scratch_card") {
+          setScratchService(match);
+        } else {
+          setActiveService(match);
+          setFormValues({});
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -335,6 +343,23 @@ const ServicesHome = () => {
               </CardContent>
             </Card>
 
+            <Card className="border">
+              <CardContent className="flex items-center gap-3 p-4">
+                <div className="rounded-lg border bg-muted p-2">
+                  <WalletIcon className="h-5 w-5 text-foreground" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-sm font-semibold">Wallet</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Fund once and pay for services instantly
+                  </p>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => navigate("/wallet")}>
+                  Open
+                </Button>
+              </CardContent>
+            </Card>
+
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -407,6 +432,11 @@ const ServicesHome = () => {
                               <p className="line-clamp-2 text-sm text-muted-foreground">
                                 {service.description}
                               </p>
+                              {service.product_type === "scratch_card" && (
+                                <Badge variant="secondary" className="text-[10px]">
+                                  Instant delivery
+                                </Badge>
+                              )}
                             </div>
                           </div>
                           <div className="mt-auto flex items-center justify-between gap-3">
@@ -421,11 +451,15 @@ const ServicesHome = () => {
                             <Button
                               size="sm"
                               onClick={() => {
+                                if (service.product_type === "scratch_card") {
+                                  setScratchService(service);
+                                  return;
+                                }
                                 setActiveService(service);
                                 setFormValues({});
                               }}
                             >
-                              Request
+                              {service.product_type === "scratch_card" ? "Buy now" : "Request"}
                             </Button>
                           </div>
                         </CardContent>
@@ -542,6 +576,8 @@ const ServicesHome = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ScratchCardDialog service={scratchService} onClose={() => setScratchService(null)} />
 
       <ServicesMobileNav activeTab={view === "requests" ? "requests" : "home"} />
     </div>

@@ -56,6 +56,7 @@ const LessonQuiz = lazy(() => import("@/pages/LessonQuiz"));
 
 const ChooseSide = lazy(() => import("@/pages/ChooseSide"));
 const ServicesHome = lazy(() => import("@/pages/ServicesHome"));
+const Wallet = lazy(() => import("@/pages/Wallet"));
 
 // Renders the correct home screen for the side the student picked
 const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
@@ -234,6 +235,11 @@ const EduraRoutes = () => {
         </ProtectedRoute>
       } />
       <Route path="/admissions" element={<Navigate to="/services?provider=admission" replace />} />
+      <Route path="/wallet" element={
+        <ProtectedRoute>
+          <Wallet />
+        </ProtectedRoute>
+      } />
 
       
       <Route path="/consultation" element={<Layout><Consultation /></Layout>} />

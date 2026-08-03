@@ -1,4 +1,4 @@
-import { Home, ClipboardList, CalendarClock, GraduationCap, User } from "lucide-react";
+import { Home, ClipboardList, Wallet, GraduationCap, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { playTapSound } from "@/utils/sounds";
 
@@ -11,7 +11,7 @@ const ITEMS = [
   { key: "home", label: "Services", icon: Home, to: "/dashboard" },
   { key: "admissions", label: "Admissions", icon: GraduationCap, to: "/dashboard?provider=admission" },
   { key: "requests", label: "Requests", icon: ClipboardList, to: "/dashboard?tab=requests" },
-  { key: "consult", label: "Consult", icon: CalendarClock, to: "/consultation" },
+  { key: "wallet", label: "Wallet", icon: Wallet, to: "/wallet" },
 ];
 
 const ServicesMobileNav = ({ activeTab = "home", onTabChange }: ServicesMobileNavProps) => {
