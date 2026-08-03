@@ -209,6 +209,13 @@ const EduraRoutes = () => {
           <DashboardLayout><Resources /></DashboardLayout>
         </ProtectedRoute>
       } />
+
+      <Route path="/services" element={
+        <ProtectedRoute>
+          <Layout showNavbar={false}><EducationalServices /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admissions" element={<Navigate to="/services" replace />} />
       
       <Route path="/consultation" element={<Layout><Consultation /></Layout>} />
       <Route path="/payment" element={<Layout><Payment /></Layout>} />
