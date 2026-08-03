@@ -27,6 +27,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { ArrowLeft, Clock, FileText, Search } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import ServicesMobileNav from "@/components/edura/ServicesMobileNav";
+
 
 type ServiceField = {
   key: string;
@@ -395,7 +397,10 @@ const EducationalServices = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ServicesMobileNav activeTab={searchParams.get("tab") === "requests" ? "requests" : "services"} />
     </div>
+
   );
 };
 
