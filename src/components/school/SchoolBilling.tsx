@@ -2,22 +2,47 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Plus } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CreditCard, Plus, Wallet as WalletIcon, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useWallet } from "@/hooks/useWallet";
 
 interface Props {
   schoolId: string;
   currentStudentLimit: number;
 }
 
+function seatPrice(seats: number) {
+  if (seats <= 0) return 0;
+  if (seats <= 50) return 1000;
+  if (seats <= 100) return 900;
+  if (seats <= 200) return 850;
+  if (seats <= 250) return 800;
+  return 0;
+}
+
 export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) {
   const navigate = useNavigate();
+  const { balance, loading: walletLoading, refresh: refreshWallet } = useWallet();
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [topUpOpen, setTopUpOpen] = useState(false);
+  const [extraSeats, setExtraSeats] = useState(10);
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => {
     fetchBillingData();
@@ -61,6 +86,36 @@ export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) 
   const handleUpgrade = () => {
     navigate("/school-subscription");
   };
+
+  const activeSub = subscriptions.find((s) => s.status === "ACTIVE") || null;
+  const daysLeft = activeSub
+    ? Math.ceil((new Date(activeSub.end_date).getTime() - Date.now()) / 86400000)
+    : null;
+  const topUpCost = seatPrice(extraSeats) * extraSeats;
+
+  const handleSeatTopUp = async () => {
+    if (extraSeats < 1 || extraSeats > 250) {
+      toast.error("Enter between 1 and 250 extra seats");
+      return;
+    }
+    setPaying(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("pay-school-subscription-wallet", {
+        body: { seats: extraSeats, mode: "seats_only" },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success(`${extraSeats} seats added to your plan`);
+      setTopUpOpen(false);
+      refreshWallet();
+      fetchBillingData();
+    } catch (e: any) {
+      toast.error(e?.message || "Could not add seats");
+    } finally {
+      setPaying(false);
+    }
+  };
+
 
   return (
     <div className="space-y-6">
