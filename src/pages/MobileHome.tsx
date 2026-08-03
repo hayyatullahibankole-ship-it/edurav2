@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ServicesShowcase } from '@/components/edura/ServicesShowcase';
+
 import { SideSwitcher } from '@/components/edura/SideSwitcher';
 
 import { useNavigate } from 'react-router-dom';
@@ -521,10 +521,6 @@ const MobileHome = () => {
           </div>
         </div>
 
-        {/* Educational Services */}
-        <div className="animate-fade-in">
-          <ServicesShowcase />
-        </div>
 
         {/* Quick Actions - Modern Cards */}
         <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
