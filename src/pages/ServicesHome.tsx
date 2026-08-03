@@ -577,9 +577,10 @@ const ServicesHome = () => {
         </DialogContent>
       </Dialog>
 
+      <ScratchCardDialog service={scratchService} onClose={() => setScratchService(null)} />
+
       <ServicesMobileNav activeTab={view === "requests" ? "requests" : "home"} />
     </div>
-      <ScratchCardDialog service={scratchService} onClose={() => setScratchService(null)} />
   );
 };
 
