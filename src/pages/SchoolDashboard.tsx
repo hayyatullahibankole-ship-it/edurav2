@@ -41,6 +41,7 @@ import SchoolExamManager from "@/components/school/SchoolExamManagerEnhanced";
 import { AIAssistant } from "@/components/AIAssistant";
 import VideoTutorials from "@/components/school/VideoTutorials";
 import SchoolMockManager from "@/components/school/SchoolMockManager";
+import SchoolStaffManager from "@/components/school/SchoolStaffManager";
 
 const menuItems = [
 { id: "overview", title: "Overview", icon: LayoutDashboard },
