@@ -1,4 +1,4 @@
-import { Home, Briefcase, Wallet, ClipboardList, User } from "lucide-react";
+import { Home, Briefcase, GraduationCap, ClipboardList, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { playTapSound } from "@/utils/sounds";
 
@@ -10,9 +10,10 @@ interface ServicesMobileNavProps {
 const ITEMS = [
   { key: "home", label: "Home", icon: Home, to: "/dashboard" },
   { key: "services", label: "Services", icon: Briefcase, to: "/services" },
-  { key: "wallet", label: "Wallet", icon: Wallet, to: "/wallet" },
+  { key: "admissions", label: "Admissions", icon: GraduationCap, to: "/services?provider=admission" },
   { key: "requests", label: "Requests", icon: ClipboardList, to: "/services?tab=requests" },
 ];
+
 
 const ServicesMobileNav = ({ activeTab = "home", onTabChange }: ServicesMobileNavProps) => {
   const navigate = useNavigate();
