@@ -102,6 +102,22 @@ export const ExploreSheet = ({ open, onOpenChange }: ExploreSheetProps) => {
         </SheetHeader>
 
         <div className="space-y-6 p-6">
+          <section className="space-y-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Start a practice test
+            </h3>
+            <div className="grid grid-cols-4 gap-2">
+              {tests.map((test) => (
+                <ScheduleTestModal key={test.examType} defaultExamType={test.examType}>
+                  <button className="flex flex-col items-center gap-2 rounded-xl border bg-card p-3 transition-colors active:scale-[0.98] hover:border-primary/60">
+                    <test.icon className="h-5 w-5 text-foreground" />
+                    <span className="text-[11px] font-medium leading-tight">{test.label}</span>
+                  </button>
+                </ScheduleTestModal>
+              ))}
+            </div>
+          </section>
+
           {groups.map((group) => (
             <section key={group.title} className="space-y-3">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
