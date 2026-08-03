@@ -65,6 +65,7 @@ type Service = {
 
 type ServiceRequest = {
   id: string;
+  service_id?: string | null;
   service_name: string;
   provider: string;
   amount: number;
@@ -72,6 +73,7 @@ type ServiceRequest = {
   created_at: string;
   admin_note: string | null;
 };
+
 
 const PROVIDERS = [
   { key: "all", label: "All" },
