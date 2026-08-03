@@ -180,17 +180,43 @@ const Payment = () => {
                   </div>
                 )}
 
-                <div className="mt-auto pt-6">
+                <div className="mt-auto space-y-2 pt-6">
                   {plan.paystack ? (
-                    <Button
-                      onClick={() => handlePaystackPayment(plan.name, plan.price)}
-                      className="w-full h-11 font-bold"
-                      variant={plan.popular ? "default" : "outline"}
-                      disabled={!user}
-                    >
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      {user ? "Get started now" : "Login to subscribe"}
-                    </Button>
+                    <>
+                      <Button
+                        onClick={() => handlePaystackPayment(plan.name, plan.price)}
+                        className="w-full h-11 font-bold"
+                        variant={plan.popular ? "default" : "outline"}
+                        disabled={!user || payingPlan === plan.id}
+                      >
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        {user ? "Pay with card" : "Login to subscribe"}
+                      </Button>
+                      {user && (
+                        <>
+                          <Button
+                            onClick={() => handleWalletPayment(plan)}
+                            className="w-full h-11 font-bold"
+                            variant="outline"
+                            disabled={payingPlan === plan.id}
+                          >
+                            {payingPlan === plan.id ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <WalletIcon className="mr-2 h-4 w-4" />
+                            )}
+                            {payingPlan === plan.id ? "Processing..." : "Pay from wallet"}
+                          </Button>
+                          <p className="text-center text-[11px] text-muted-foreground">
+                            {walletLoading
+                              ? "Checking wallet..."
+                              : balance >= plan.price
+                                ? `Wallet balance: ₦${balance.toLocaleString()}`
+                                : `Wallet balance: ₦${balance.toLocaleString()} — top up ₦${(plan.price - balance).toLocaleString()} more`}
+                          </p>
+                        </>
+                      )}
+                    </>
                   ) : (
                     <Link to={user ? "/dashboard" : "/auth"} className="block">
                       <Button className="w-full h-11 font-bold" variant="outline">
