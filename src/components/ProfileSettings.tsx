@@ -170,6 +170,11 @@ export default function ProfileSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Appearance */}
+      <div className="rounded-xl border border-border bg-card p-4">
+        <ThemeToggle />
+      </div>
+
       {/* Profile Overview */}
       <Card>
         <CardHeader>
