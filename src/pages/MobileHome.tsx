@@ -536,7 +536,7 @@ const MobileHome = () => {
               { label: 'Arena', icon: Trophy, color: 'from-purple-500 to-pink-500', path: '/challenge-arena' },
               { label: 'Analytics', icon: TrendingUp, color: 'from-green-500 to-emerald-500', path: '/performance-report' },
               { label: 'Resources', icon: Library, color: 'from-indigo-500 to-violet-500', path: '/resources' },
-              { label: 'Consultation', icon: Video, color: 'from-rose-500 to-pink-500', path: '/consultation' },
+              
               { label: 'Referral', icon: Gift, color: 'from-orange-500 to-amber-500', path: '/referral-program' },
             ].map((action, index) => (
               <button
