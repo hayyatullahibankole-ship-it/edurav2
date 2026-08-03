@@ -115,6 +115,12 @@ const ServicesHome = () => {
   }, []);
 
   useEffect(() => {
+    setProvider(searchParams.get("provider") || "all");
+  }, [searchParams]);
+
+
+
+  useEffect(() => {
     const load = async () => {
       setLoading(true);
       const { data, error } = await supabase
