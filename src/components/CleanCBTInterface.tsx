@@ -163,13 +163,13 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
         <div className={cn("grid gap-3 sm:gap-4 lg:grid-cols-[1fr_280px]")}>  
           {/* Question Area */}
           <div className="space-y-3 sm:space-y-4 min-w-0">
-            <Card className="border shadow-sm">
+            <Card className="border">
               <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
                 <div className="flex items-center justify-between gap-2">
-                  <CardTitle className="text-sm sm:text-base font-bold flex-shrink-0">
+                  <CardTitle className="text-sm sm:text-base font-semibold flex-shrink-0">
                     Q {currentIndex + 1}
                   </CardTitle>
-                  <Badge variant="outline" className="text-[10px] sm:text-xs font-medium border-orange-200 bg-orange-50 text-orange-700 flex-shrink-0">
+                  <Badge variant="secondary" className="text-[10px] sm:text-xs font-medium flex-shrink-0">
                     {currentQuestion.subject}
                   </Badge>
                 </div>
@@ -177,7 +177,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
 
               <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
                 {/* Question Text */}
-                <div className="p-2.5 sm:p-4 rounded-lg sm:rounded-xl bg-gray-50 border text-sm sm:text-base overflow-x-auto">
+                <div className="p-2.5 sm:p-4 rounded-lg bg-muted border text-sm sm:text-base overflow-x-auto">
                   <MathRenderer
                     content={currentQuestion.questionText}
                     className="text-sm sm:text-base font-medium leading-relaxed break-words"
@@ -194,18 +194,18 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
                         key={index}
                         onClick={() => onAnswerSelect(currentQuestion.id, index)}
                         className={cn(
-                          "w-full text-left p-2.5 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all",
+                          "w-full text-left p-2.5 sm:p-4 rounded-lg border transition-colors",
                           isSelected
-                            ? "border-orange-500 bg-orange-50 shadow-md"
-                            : "border-gray-200 hover:border-orange-300 hover:bg-orange-50/30"
+                            ? "border-primary bg-primary/5"
+                            : "bg-card hover:border-primary/60"
                         )}
                       >
                         <div className="flex items-start gap-2 sm:gap-3 min-w-0">
                           <div className={cn(
-                            "w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0 mt-0.5",
+                            "w-6 h-6 sm:w-8 sm:h-8 rounded-md border flex items-center justify-center font-semibold text-xs sm:text-sm flex-shrink-0 mt-0.5",
                             isSelected
-                              ? "border-orange-500 bg-orange-500 text-white"
-                              : "border-gray-300 text-gray-500"
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground"
                           )}>
                             {isSelected ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : String.fromCharCode(65 + index)}
                           </div>
@@ -225,20 +225,20 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
                     onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
                     disabled={currentIndex === 0}
                     size="sm"
-                    className="text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-10 flex-1"
+                    className="text-xs sm:text-sm px-2 sm:px-4 h-9 sm:h-10 flex-1"
                   >
                     <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0.5 sm:mr-1" />
                     <span className="hidden sm:inline">Previous</span>
                   </Button>
 
-                  <span className="text-xs sm:text-sm font-semibold text-orange-600 px-2 flex-shrink-0">
+                  <span className="text-xs sm:text-sm font-semibold text-muted-foreground px-2 flex-shrink-0">
                     {currentIndex + 1}/{questions.length}
                   </span>
 
                   <Button
                     onClick={() => setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1))}
                     disabled={currentIndex === questions.length - 1}
-                    className="bg-orange-500 hover:bg-orange-600 text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-10 flex-1"
+                    className="text-xs sm:text-sm px-2 sm:px-4 h-9 sm:h-10 flex-1"
                     size="sm"
                   >
                     <span className="hidden sm:inline">Next</span>
@@ -253,8 +253,8 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
           <div className="hidden lg:flex lg:flex-col lg:space-y-4">
             {/* Question Navigation Grid */}
             <Card className="border">
-              <CardHeader className="py-2 px-3 border-b bg-gray-50">
-                <CardTitle className="text-[10px] font-semibold text-gray-600">
+              <CardHeader className="py-2 px-3 border-b bg-muted">
+                <CardTitle className="text-[10px] font-semibold text-muted-foreground">
                   Questions
                 </CardTitle>
               </CardHeader>
@@ -269,10 +269,10 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
                         key={q.id}
                         onClick={() => setCurrentIndex(idx)}
                         className={cn(
-                          "w-full aspect-square rounded border text-[10px] font-bold flex items-center justify-center transition-all text-center",
-                          isCurrent && "bg-orange-500 text-white border-orange-500 shadow-md",
-                          !isCurrent && isAnswered && "bg-green-100 text-green-700 border-green-300",
-                          !isCurrent && !isAnswered && "bg-white text-gray-400 border-gray-200 hover:border-orange-300"
+                          "w-full aspect-square rounded border text-[10px] font-semibold flex items-center justify-center transition-colors text-center",
+                          isCurrent && "bg-primary text-primary-foreground border-primary",
+                          !isCurrent && isAnswered && "bg-success/10 text-success border-success/30",
+                          !isCurrent && !isAnswered && "bg-card text-muted-foreground hover:border-primary/60"
                         )}
                         title={`Question ${idx + 1}`}
                       >
@@ -283,20 +283,21 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
                 </div>
 
                 {/* Legend */}
-                <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t text-[9px] text-gray-500 space-y-1">
+                <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t text-[9px] text-muted-foreground space-y-1">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-sm bg-orange-500" /> <span>Current</span>
+                    <div className="w-2.5 h-2.5 rounded-sm bg-primary" /> <span>Current</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-sm bg-green-100 border border-green-300" /> <span>Done</span>
+                    <div className="w-2.5 h-2.5 rounded-sm bg-success/10 border border-success/30" /> <span>Done</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-sm bg-white border border-gray-200" /> <span>Not done</span>
+                    <div className="w-2.5 h-2.5 rounded-sm bg-card border" /> <span>Not done</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
+
         </div>
       </div>
 
