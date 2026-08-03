@@ -66,6 +66,7 @@ import { FreeAccessBanner } from "@/components/dashboard/FreeAccessBanner";
 import { InstallRequiredModal } from "@/components/InstallRequiredModal";
 import MockResultChecker from "@/components/MockResultChecker";
 import { ArrowLeft } from "lucide-react";
+import { DashboardThemeMenu } from "@/components/DashboardThemeMenu";
 
 const Dashboard = () => {
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -1018,6 +1019,8 @@ const Dashboard = () => {
 
                 {/* Right Actions */}
                 <div className="flex items-center gap-3">
+                  <SideSwitcher compact />
+                  <DashboardThemeMenu />
                   <NotificationBell />
 
                   {/* User Profile */}

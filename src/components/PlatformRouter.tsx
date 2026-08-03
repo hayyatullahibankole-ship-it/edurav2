@@ -62,9 +62,12 @@ const Wallet = lazy(() => import("@/pages/Wallet"));
 // Renders the correct home screen for the side the student picked
 const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
   const { side } = useAppSide();
+  const isMobile = useIsMobile();
   if (side === null) return <Navigate to="/choose" replace />;
   if (side === "services") return <ServicesHome />;
-  return isInstalledApp ? <MobileHome /> : <Layout showNavbar={false}><Dashboard /></Layout>;
+  return isInstalledApp || isMobile
+    ? <MobileHome />
+    : <Layout showNavbar={false}><Dashboard /></Layout>;
 };
 
 

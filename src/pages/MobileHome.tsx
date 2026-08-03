@@ -49,6 +49,7 @@ import { MobilePromoCodeActivation } from '@/components/dashboard/MobilePromoCod
 import { useInstalledApp } from '@/hooks/useInstalledApp';
 import { InstallRequiredModal } from '@/components/InstallRequiredModal';
 import eduraLogo from '@/assets/edura-logo.png';
+import { DashboardThemeMenu } from '@/components/DashboardThemeMenu';
 
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
@@ -288,6 +289,7 @@ const MobileHome = () => {
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0">
+            <DashboardThemeMenu />
             <NotificationBell />
             <Button
               variant="ghost"
