@@ -77,6 +77,8 @@ type ServiceRequest = {
   created_at: string;
   admin_note: string | null;
   result_files?: ResultFile[];
+  user_files?: ResultFile[];
+  form_data?: Record<string, string> | null;
 };
 
 type ResultFile = { path: string; name: string; type: string };
