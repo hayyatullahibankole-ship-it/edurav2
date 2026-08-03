@@ -109,6 +109,9 @@ const ServicesHome = () => {
   const [activeService, setActiveService] = useState<Service | null>(null);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [step, setStep] = useState<"pay" | "details">("pay");
+  const [paidRequestId, setPaidRequestId] = useState<string | null>(null);
+
 
   const view = searchParams.get("tab") === "requests" ? "requests" : "services";
 
