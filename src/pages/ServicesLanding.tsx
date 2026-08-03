@@ -6,7 +6,6 @@ import {
   ArrowRight,
   Building2,
   CheckCircle2,
-  ClipboardCheck,
   CreditCard,
   FileText,
   GraduationCap,
