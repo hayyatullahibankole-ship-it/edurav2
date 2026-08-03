@@ -178,8 +178,11 @@ Deno.serve(async (req) => {
     // 3. Buy the PINs from NaijaResultPins
     const DEFAULT_VENDOR_URL = "https://www.naijaresultpins.com/api/v1/exam-card/buy";
     const configuredUrl = (Deno.env.get("NAIJARESULTSPIN_API_URL") ?? "").trim();
-    // Only trust the configured value if it actually looks like an API endpoint.
-    const vendorUrl = /\/api\//i.test(configuredUrl) ? configuredUrl : DEFAULT_VENDOR_URL;
+    // The API root accepts GET only. Use a configured URL solely when it points
+    // to the vendor's concrete exam-card purchase action.
+    const vendorUrl = /\/api\/v1\/exam-card\/buy\/?$/i.test(configuredUrl)
+      ? configuredUrl
+      : DEFAULT_VENDOR_URL;
     const vendorKey = Deno.env.get("NAIJARESULTSPIN_API_KEY");
     if (!vendorKey) throw new Error("Scratch card vendor is not configured");
 
