@@ -41,6 +41,12 @@ const Payment = () => {
         cta: plan.price === 0 ? "Start Free" : `Choose ${plan.name}`
       }));
 
+      // Only highlight one plan as popular
+      let highlighted = false;
+      processedPlans.forEach((pl: any) => {
+        if (pl.popular && !highlighted) { highlighted = true; } else { pl.popular = false; }
+      });
+
       setPlans(processedPlans);
     } catch (error) {
       console.error('Error fetching plans:', error);
@@ -174,7 +180,7 @@ const Payment = () => {
                   </div>
                 )}
 
-                <div className="mt-6 pt-0">
+                <div className="mt-auto pt-6">
                   {plan.paystack ? (
                     <Button
                       onClick={() => handlePaystackPayment(plan.name, plan.price)}
