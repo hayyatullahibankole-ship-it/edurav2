@@ -863,6 +863,8 @@ export default function QuestionManagement() {
               Question Cleanup
             </TabsTrigger>
           </TabsList>
+          </div>
+
 
           <TabsContent value="active">
             {loading ? (
