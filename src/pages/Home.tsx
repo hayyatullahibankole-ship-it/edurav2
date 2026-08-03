@@ -108,14 +108,14 @@ const Home = () => {
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 {user && !isMobileWeb ? (
                   <ScheduleTestModal defaultExamType="jamb">
-                    <Button size="lg" className="h-13 px-7 text-base font-semibold">
+                    <Button size="lg" className="h-12 px-7 text-base font-semibold">
                       Start practising
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </ScheduleTestModal>
                 ) : (
                   <Link to={primaryHref}>
-                    <Button size="lg" className="w-full sm:w-auto h-13 px-7 text-base font-semibold">
+                    <Button size="lg" className="w-full sm:w-auto h-12 px-7 text-base font-semibold">
                       {isMobileWeb ? <LogIn className="mr-2 h-5 w-5" /> : null}
                       Start practising
                       {!isMobileWeb && <ArrowRight className="ml-2 h-5 w-5" />}
@@ -123,7 +123,7 @@ const Home = () => {
                   </Link>
                 )}
                 <Link to="/services">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto h-13 px-7 text-base font-semibold border-2">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 px-7 text-base font-semibold border-2">
                     Explore student services
                   </Button>
                 </Link>
@@ -207,7 +207,7 @@ const Home = () => {
               <ul className="mt-6 space-y-3 flex-1">
                 {["Official JAMB layout and timing", "Instant scoring with full explanations", "Offline mode for poor networks", "Study hub, planner and challenge arena"].map((i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-foreground">
-                    <CheckCircle2 className="h-4.5 w-4.5 text-primary mt-0.5 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                     {i}
                   </li>
                 ))}
@@ -231,7 +231,7 @@ const Home = () => {
               <ul className="mt-6 space-y-3 flex-1">
                 {["Result checker PINs in seconds", "Post-UTME & admission processing", "Wallet with a dedicated account number", "Every request tracked with uploads"].map((i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-background">
-                    <CheckCircle2 className="h-4.5 w-4.5 text-primary mt-0.5 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                     {i}
                   </li>
                 ))}
@@ -387,7 +387,7 @@ const Home = () => {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link to={primaryHref}>
-              <Button size="lg" className="w-full sm:w-auto h-13 px-8 text-base font-semibold">
+              <Button size="lg" className="w-full sm:w-auto h-12 px-8 text-base font-semibold">
                 Get started free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -396,7 +396,7 @@ const Home = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="w-full sm:w-auto h-13 px-8 text-base font-semibold border-2 border-background/30 bg-transparent text-background hover:bg-background hover:text-foreground"
+                className="w-full sm:w-auto h-12 px-8 text-base font-semibold border-2 border-background/30 bg-transparent text-background hover:bg-background hover:text-foreground"
               >
                 <Download className="mr-2 h-5 w-5" />
                 Get the app
