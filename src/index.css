@@ -350,37 +350,14 @@ All colors MUST be HSL for consistency across light/dark modes.
     animation: slide-in-left 0.5s ease-out;
   }
   
-  /* Text gradient animation */
-  .text-gradient {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--primary)),
-      hsl(var(--secondary)),
-      hsl(var(--accent))
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
+  /* Flat brand text (previously gradient) */
+  .text-gradient,
   .text-gradient-animate {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--primary)),
-      hsl(var(--secondary)),
-      hsl(var(--accent))
-    );
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradient-shift 3s ease infinite;
+    color: hsl(var(--primary));
   }
 
-  /* AKBOY gradient animation */
   .animate-gradient {
-    background-size: 200% auto;
-    animation: gradient 8s linear infinite;
+    background-size: auto;
   }
 
   /* Stagger animation for children */
