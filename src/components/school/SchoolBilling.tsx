@@ -271,6 +271,64 @@ export default function SchoolBilling({ schoolId, currentStudentLimit }: Props) 
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={topUpOpen} onOpenChange={setTopUpOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add student seats</DialogTitle>
+            <DialogDescription>
+              Extra seats are added to your current plan and expire on the same date.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="extra-seats">Number of seats</Label>
+              <Input
+                id="extra-seats"
+                type="number"
+                min={1}
+                max={250}
+                value={extraSeats}
+                onChange={(e) => setExtraSeats(Number(e.target.value))}
+              />
+            </div>
+            <div className="rounded-lg border p-3 text-sm space-y-1">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Price per seat</span>
+                <span className="font-medium">₦{seatPrice(extraSeats).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total</span>
+                <span className="font-semibold">₦{topUpCost.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Wallet balance</span>
+                <span className="font-medium">₦{Number(balance || 0).toLocaleString()}</span>
+              </div>
+            </div>
+            {topUpCost > Number(balance || 0) && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  Not enough balance. Fund your wallet to continue.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTopUpOpen(false)} disabled={paying}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSeatTopUp}
+              disabled={paying || topUpCost <= 0 || topUpCost > Number(balance || 0)}
+            >
+              {paying && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Pay ₦{topUpCost.toLocaleString()} from wallet
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
