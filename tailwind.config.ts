@@ -21,6 +21,12 @@ export default {
         lato: ['DM Sans', 'Lato', 'sans-serif'],
       },
       colors: {
+        ink: {
+          DEFAULT: "hsl(var(--ink))",
+          soft: "hsl(var(--ink-soft))",
+          foreground: "hsl(var(--ink-foreground))",
+        },
+        surface: "hsl(var(--surface))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
