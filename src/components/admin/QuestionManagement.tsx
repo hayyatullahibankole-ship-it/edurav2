@@ -776,9 +776,10 @@ export default function QuestionManagement() {
                   />
                 </div>
               </div>
-              <div className="flex gap-3 items-center">
+              <div className="flex gap-2 sm:gap-3 items-center">
                 <Select value={selectedSubject} onValueChange={(v) => { setSelectedSubject(v); setCurrentPage(0); }}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="flex-1 sm:w-40">
+
                     <SelectValue placeholder="All Subjects" />
                   </SelectTrigger>
                   <SelectContent>
