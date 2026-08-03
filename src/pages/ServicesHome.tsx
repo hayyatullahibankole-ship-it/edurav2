@@ -27,8 +27,10 @@ import {
 import { toast } from "sonner";
 import { SideSwitcher } from "@/components/edura/SideSwitcher";
 import ServicesMobileNav from "@/components/edura/ServicesMobileNav";
+import ProviderLogo, { providerInfo } from "@/components/edura/ProviderLogo";
 import eduraLogo from "@/assets/edura-logo.png";
 import {
+  ArrowLeft,
   Briefcase,
   ClipboardList,
   CheckCircle2,
@@ -37,6 +39,7 @@ import {
   Search,
   Calendar as CalendarIcon,
 } from "lucide-react";
+
 
 type ServiceField = {
   key: string;
