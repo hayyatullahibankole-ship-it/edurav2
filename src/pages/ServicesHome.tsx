@@ -68,6 +68,23 @@ type Service = {
   turnaround: string | null;
   fields: ServiceField[];
   product_type?: string | null;
+  pricing_mode?: string | null;
+};
+
+type Institution = {
+  id: string;
+  name: string;
+  short_code: string | null;
+  type: string;
+  state: string | null;
+  form_fee: number;
+  service_fee_override: number | null;
+};
+
+const tierFee = (formFee: number) => {
+  if (formFee <= 5000) return 3000;
+  if (formFee < 10000) return 4000;
+  return 5000;
 };
 
 type ServiceRequest = {
@@ -79,6 +96,9 @@ type ServiceRequest = {
   status: string;
   created_at: string;
   admin_note: string | null;
+  quote_status?: string | null;
+  quoted_amount?: number | null;
+  institution_name?: string | null;
   result_files?: ResultFile[];
   user_files?: ResultFile[];
   form_data?: Record<string, string> | null;
@@ -133,6 +153,13 @@ const ServicesHome = () => {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [resubmitNote, setResubmitNote] = useState<string | null>(null);
   const [paidRequestId, setPaidRequestId] = useState<string | null>(null);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [institutionId, setInstitutionId] = useState("");
+  const [instSearch, setInstSearch] = useState("");
+  const [notListed, setNotListed] = useState(false);
+  const [quoteSchool, setQuoteSchool] = useState("");
+  const [quoteCourse, setQuoteCourse] = useState("");
+  const [payingQuote, setPayingQuote] = useState<ServiceRequest | null>(null);
 
 
   const view = searchParams.get("tab") === "requests" ? "requests" : "services";
@@ -159,7 +186,7 @@ const ServicesHome = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("service_catalog")
-        .select("id, provider, slug, name, description, price, turnaround, fields, product_type")
+        .select("id, provider, slug, name, description, price, turnaround, fields, product_type, pricing_mode")
         .eq("is_active", true)
         .order("provider")
         .order("sort_order");
@@ -177,6 +204,18 @@ const ServicesHome = () => {
       setLoading(false);
     };
     load();
+  }, []);
+
+  useEffect(() => {
+    const loadInstitutions = async () => {
+      const { data } = await supabase
+        .from("institutions")
+        .select("id, name, short_code, type, state, form_fee, service_fee_override")
+        .eq("is_active", true)
+        .order("name");
+      setInstitutions((data as Institution[]) || []);
+    };
+    loadInstitutions();
   }, []);
 
   const openResultFile = async (file: ResultFile) => {
@@ -206,7 +245,7 @@ const ServicesHome = () => {
     const { data } = await supabase
       .from("service_requests")
       .select(
-        "id, service_id, service_name, provider, amount, status, created_at, admin_note, result_files, user_files, form_data"
+        "id, service_id, service_name, provider, amount, status, created_at, admin_note, result_files, user_files, form_data, quote_status, quoted_amount, institution_name"
       )
       .order("created_at", { ascending: false })
       .limit(50);
@@ -284,6 +323,11 @@ const ServicesHome = () => {
     setPaidRequestId(null);
     setUploads([]);
     setResubmitNote(null);
+    setInstitutionId("");
+    setInstSearch("");
+    setNotListed(false);
+    setQuoteSchool("");
+    setQuoteCourse("");
     setStep("pay");
   };
 
@@ -293,7 +337,112 @@ const ServicesHome = () => {
     setPaidRequestId(null);
     setUploads([]);
     setResubmitNote(null);
+    setInstitutionId("");
+    setInstSearch("");
+    setNotListed(false);
+    setQuoteSchool("");
+    setQuoteCourse("");
     setStep("pay");
+  };
+
+  const selectedInstitution = institutions.find((i) => i.id === institutionId) || null;
+  const institutionMatches = useMemo(() => {
+    const q = instSearch.trim().toLowerCase();
+    const list = q
+      ? institutions.filter(
+          (i) =>
+            i.name.toLowerCase().includes(q) ||
+            (i.short_code || "").toLowerCase().includes(q) ||
+            (i.state || "").toLowerCase().includes(q),
+        )
+      : institutions;
+    return list.slice(0, 25);
+  }, [institutions, instSearch]);
+
+  const isInstitutionService = activeService?.pricing_mode === "institution";
+  const institutionFee = selectedInstitution
+    ? selectedInstitution.service_fee_override ?? tierFee(Number(selectedInstitution.form_fee) || 0)
+    : 0;
+  const payableAmount = isInstitutionService
+    ? Number(selectedInstitution?.form_fee || 0) + Number(institutionFee)
+    : Number(activeService?.price || 0);
+
+  const requestQuote = async () => {
+    if (!activeService || !user) {
+      toast.error("Please sign in to continue");
+      return;
+    }
+    if (!quoteSchool.trim()) {
+      toast.error("Enter the name of your institution");
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from("service_requests").insert({
+      user_id: user.id,
+      service_id: activeService.id,
+      service_slug: activeService.slug,
+      service_name: activeService.name,
+      provider: activeService.provider,
+      amount: 0,
+      institution_name: quoteSchool.trim(),
+      status: "quote_requested",
+      quote_status: "requested",
+      form_data: { institution: quoteSchool.trim(), course: quoteCourse.trim() },
+    } as any);
+    setSubmitting(false);
+    if (error) {
+      console.error("quote request failed", error);
+      toast.error("Could not send your request. Please try again.");
+      return;
+    }
+    toast.success("Request sent. We'll price it and notify you shortly.");
+    closeDialog();
+    loadRequests();
+    setView("requests");
+  };
+
+  const payQuote = async (request: ServiceRequest, method: "wallet" | "card") => {
+    if (!user) return;
+    const amount = Number(request.quoted_amount) || 0;
+    setSubmitting(true);
+    const finish = async (payload: Record<string, unknown>) => {
+      const { data, error } = await supabase.functions.invoke("pay-service-request", {
+        body: { request_id: request.id, ...payload },
+      });
+      if (error || data?.error) {
+        toast.error(data?.error || "Payment could not be completed.");
+        return;
+      }
+      toast.success("Payment received. Now complete your details.");
+      setPayingQuote(null);
+      refreshWallet();
+      await loadRequests();
+    };
+
+    if (method === "wallet") {
+      await finish({ payment_method: "wallet" });
+      setSubmitting(false);
+      return;
+    }
+    try {
+      await initializePaystackPayment(
+        {
+          amount: amount * 100,
+          email: user.email || "",
+          reference: `srq_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+          currency: "NGN",
+          metadata: { purpose: "service_quote", request_id: request.id },
+        },
+        async (reference) => {
+          await finish({ payment_method: "card", payment_reference: reference });
+          setSubmitting(false);
+        },
+        () => setSubmitting(false),
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not start payment");
+      setSubmitting(false);
+    }
   };
 
   const handleUpload = async (files: FileList | null) => {
@@ -325,7 +474,7 @@ const ServicesHome = () => {
   const afterPayment = async (payload: Record<string, unknown>) => {
     if (!activeService) return;
     const { data, error } = await supabase.functions.invoke("pay-service-request", {
-      body: { service_id: activeService.id, ...payload },
+      body: { service_id: activeService.id, institution_id: institutionId || undefined, ...payload },
     });
 
     if (error || data?.error) {
@@ -363,7 +512,7 @@ const ServicesHome = () => {
     try {
       await initializePaystackPayment(
         {
-          amount: Number(activeService.price) * 100,
+          amount: payableAmount * 100,
           email: user.email || "",
           reference: `srv_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
           currency: "NGN",
