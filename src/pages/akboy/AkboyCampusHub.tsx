@@ -237,7 +237,7 @@ export default function AkboyCampusHub() {
     return (
       <Link to={`/blog/${post.slug || post.id}`} className="group block h-full">
         <Card className="overflow-hidden border border-gray-200 hover:border-emerald-400 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 rounded-2xl bg-white h-full flex flex-col">
-          <div className={`relative ${compact ? 'h-32' : 'h-44'} overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50 flex-shrink-0`}>
+          <div className={`relative ${compact ? 'h-32' : 'h-44'} overflow-hidden bg-muted flex-shrink-0`}>
             {post.featured_image_url ? (
               <img src={post.featured_image_url} alt={post.title} loading="lazy"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />

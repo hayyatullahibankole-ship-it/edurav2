@@ -18,7 +18,7 @@ const WhatsAppButton = () => {
 return (
     <Button
       onClick={handleClick}
-      className={`fixed z-30 w-14 h-14 rounded-full shadow-2xl hover:scale-110 transition-all animate-bounce-slow bg-gradient-to-br from-primary to-secondary p-0 ${
+      className={`fixed z-30 w-14 h-14 rounded-full shadow-2xl hover:scale-110 transition-all animate-bounce-slow bg-primary p-0 ${
         isMobile ? "bottom-44 right-4" : "bottom-28 right-6"
       }`}
       aria-label="Contact Support"
