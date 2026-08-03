@@ -25,6 +25,7 @@ import {
   Image as ImageIcon,
   Loader2,
   RefreshCw,
+  RotateCcw,
   Search,
   Trash2,
   Upload,
