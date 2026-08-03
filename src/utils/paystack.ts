@@ -48,19 +48,51 @@ const getPaystackPublicKey = async (): Promise<string> => {
 };
 
 /**
+ * Load the Paystack inline SDK on demand (once per page).
+ */
+let paystackLoader: Promise<void> | null = null;
+export const ensurePaystackLoaded = (): Promise<void> => {
+  if (typeof window === 'undefined') return Promise.reject(new Error('Paystack unavailable'));
+  if (window.PaystackPop) return Promise.resolve();
+  if (paystackLoader) return paystackLoader;
+
+  paystackLoader = new Promise<void>((resolve, reject) => {
+    const src = 'https://js.paystack.co/v1/inline.js';
+    let script = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
+    if (!script) {
+      script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      document.head.appendChild(script);
+    }
+    script.addEventListener('load', () => resolve());
+    script.addEventListener('error', () => {
+      paystackLoader = null;
+      reject(new Error('Could not load the payment window. Check your connection and try again.'));
+    });
+    // Already loaded before listener attached
+    if (window.PaystackPop) resolve();
+  });
+
+  return paystackLoader;
+};
+
+/**
  * Initialize Paystack payment
  */
 export const initializePaystackPayment = async (
   payment: PaystackPayment,
-  onSuccess?: (reference: string) => void
+  onSuccess?: (reference: string) => void,
+  onClose?: () => void
 ) => {
   try {
     // Validate input
     const validatedData = PaystackPaymentSchema.parse(payment);
-    
-    // Check if Paystack is loaded
-    if (typeof window === 'undefined' || !window.PaystackPop) {
-      throw new Error('Paystack SDK not loaded. Please include the Paystack script.');
+
+    // Make sure the Paystack SDK is available
+    await ensurePaystackLoaded();
+    if (!window.PaystackPop) {
+      throw new Error('Payment window could not be opened. Please try again.');
     }
     
     // Get the public key from database
@@ -84,7 +116,7 @@ export const initializePaystackPayment = async (
         }
       },
       onClose: function() {
-        // User closed payment dialog
+        onClose?.();
       }
     });
     
