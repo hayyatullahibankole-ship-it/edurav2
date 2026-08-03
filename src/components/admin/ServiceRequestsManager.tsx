@@ -221,6 +221,47 @@ export default function ServiceRequestsManager() {
     window.open(data.signedUrl, "_blank", "noopener");
   };
 
+  const previewUserFile = async (file: ResultFile) => {
+    const { data, error } = await supabase.storage
+      .from("service-uploads")
+      .createSignedUrl(file.path, 600);
+    if (error || !data?.signedUrl) {
+      toast({ title: "Could not open file", variant: "destructive" });
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener");
+  };
+
+  const requestResubmission = async () => {
+    if (!active) return;
+    if (!note.trim()) {
+      toast({
+        title: "Add a note first",
+        description: "Tell the customer what document is missing or wrong.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from("service_requests")
+      .update({ status: "needs_resubmission", admin_note: note.trim() })
+      .eq("id", active.id);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Could not save", description: error.message, variant: "destructive" });
+      return;
+    }
+    setRequests((prev) =>
+      prev.map((r) =>
+        r.id === active.id ? { ...r, status: "needs_resubmission", admin_note: note.trim() } : r
+      )
+    );
+    toast({ title: "Resubmission requested", description: "The customer can now re-upload." });
+    setActive(null);
+  };
+
+
   const saveRequest = async () => {
     if (!active) return;
     setSaving(true);
