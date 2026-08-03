@@ -164,7 +164,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Send reminder emails
-    for (const subscription of subscriptions) {
+    for (const subscription of (subscriptions || [])) {
       const user = Array.isArray(subscription.users) ? subscription.users[0] : subscription.users;
       const plan = Array.isArray(subscription.subscription_plans) ? subscription.subscription_plans[0] : subscription.subscription_plans;
 
