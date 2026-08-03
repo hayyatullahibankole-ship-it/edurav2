@@ -156,11 +156,12 @@ const ServicesHome = () => {
     if (!user) return;
     const { data } = await supabase
       .from("service_requests")
-      .select("id, service_name, provider, amount, status, created_at, admin_note")
+      .select("id, service_id, service_name, provider, amount, status, created_at, admin_note")
       .order("created_at", { ascending: false })
       .limit(50);
     setRequests((data as ServiceRequest[]) || []);
   };
+
 
   useEffect(() => {
     loadRequests();
