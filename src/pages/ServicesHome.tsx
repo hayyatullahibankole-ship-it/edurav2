@@ -595,72 +595,130 @@ const ServicesHome = () => {
         )}
       </main>
 
-      <Dialog open={!!activeService} onOpenChange={(open) => !open && setActiveService(null)}>
+      <Dialog open={!!activeService} onOpenChange={(open) => !open && closeDialog()}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{activeService?.name}</DialogTitle>
             <DialogDescription>
-              {activeService ? `${naira(activeService.price)} · ${activeService.turnaround ?? ""}` : ""}
+              {activeService
+                ? step === "pay"
+                  ? `${naira(activeService.price)} · pay first, then fill in your details`
+                  : `Payment received · ${activeService.turnaround ?? "we'll process shortly"}`
+                : ""}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            {activeService?.fields.map((field) => (
-              <div key={field.key} className="space-y-2">
-                <Label htmlFor={field.key}>
-                  {field.label}
-                  {field.required && <span className="text-destructive"> *</span>}
-                </Label>
-                {field.type === "textarea" ? (
-                  <Textarea
-                    id={field.key}
-                    value={formValues[field.key] || ""}
-                    onChange={(e) =>
-                      setFormValues((prev) => ({ ...prev, [field.key]: e.target.value }))
-                    }
-                  />
-                ) : field.type === "select" ? (
-                  <Select
-                    value={formValues[field.key] || ""}
-                    onValueChange={(value) =>
-                      setFormValues((prev) => ({ ...prev, [field.key]: value }))
-                    }
-                  >
-                    <SelectTrigger id={field.key}>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(field.options || []).map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input
-                    id={field.key}
-                    type={field.type}
-                    value={formValues[field.key] || ""}
-                    onChange={(e) =>
-                      setFormValues((prev) => ({ ...prev, [field.key]: e.target.value }))
-                    }
-                  />
-                )}
+          {step === "pay" ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <span className="text-sm text-muted-foreground">Amount</span>
+                <span className="text-lg font-bold">{naira(activeService?.price || 0)}</span>
               </div>
-            ))}
-          </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setActiveService(null)}>
-              Cancel
-            </Button>
-            <Button onClick={submitRequest} disabled={submitting}>
-              {submitting ? "Submitting..." : "Submit request"}
-            </Button>
-          </DialogFooter>
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div className="flex items-center gap-2">
+                  <WalletIcon className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Wallet balance</span>
+                </div>
+                <Badge variant="secondary">{naira(balance)}</Badge>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                After payment you'll be asked for the details we need to process this service.
+              </p>
+
+              <div className="grid gap-2">
+                <Button
+                  onClick={payWithWallet}
+                  disabled={submitting || balance < Number(activeService?.price || 0)}
+                >
+                  {submitting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <WalletIcon className="mr-2 h-4 w-4" />
+                  )}
+                  Pay from wallet
+                </Button>
+                {balance < Number(activeService?.price || 0) && (
+                  <button
+                    className="text-left text-xs text-muted-foreground underline"
+                    onClick={() => navigate("/wallet")}
+                  >
+                    Balance too low — fund your wallet
+                  </button>
+                )}
+                <Button variant="outline" onClick={payWithCard} disabled={submitting}>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Pay with card
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 rounded-lg border bg-muted p-3">
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                  <p className="text-sm font-medium">Payment confirmed</p>
+                </div>
+                {activeService?.fields.map((field) => (
+                  <div key={field.key} className="space-y-2">
+                    <Label htmlFor={field.key}>
+                      {field.label}
+                      {field.required && <span className="text-destructive"> *</span>}
+                    </Label>
+                    {field.type === "textarea" ? (
+                      <Textarea
+                        id={field.key}
+                        value={formValues[field.key] || ""}
+                        onChange={(e) =>
+                          setFormValues((prev) => ({ ...prev, [field.key]: e.target.value }))
+                        }
+                      />
+                    ) : field.type === "select" ? (
+                      <Select
+                        value={formValues[field.key] || ""}
+                        onValueChange={(value) =>
+                          setFormValues((prev) => ({ ...prev, [field.key]: value }))
+                        }
+                      >
+                        <SelectTrigger id={field.key}>
+                          <SelectValue placeholder="Select an option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(field.options || []).map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        id={field.key}
+                        type={field.type}
+                        value={formValues[field.key] || ""}
+                        onChange={(e) =>
+                          setFormValues((prev) => ({ ...prev, [field.key]: e.target.value }))
+                        }
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={closeDialog}>
+                  Later
+                </Button>
+                <Button onClick={submitDetails} disabled={submitting}>
+                  {submitting ? "Submitting..." : "Submit details"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
+
 
       <ScratchCardDialog service={scratchService} onClose={() => setScratchService(null)} />
 
