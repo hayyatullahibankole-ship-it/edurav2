@@ -467,16 +467,17 @@ export default function QuestionManagement() {
                       className="font-medium text-lg leading-relaxed"
                     />
                   </div>
-                  <div className="flex items-center space-x-4 text-sm text-muted-foreground pt-2 border-t">
+                  <div className="flex items-center gap-x-4 gap-y-1 flex-wrap text-sm text-muted-foreground pt-2 border-t">
                     <span>{question.points} point{question.points !== 1 ? 's' : ''}</span>
                     <span>{new Date(question.created_at).toLocaleDateString()}</span>
                     {question.tags && Array.isArray(question.tags) && question.tags.length > 0 && (
-                      <span>Tags: {question.tags.join(', ')}</span>
+                      <span className="break-all">Tags: {question.tags.join(', ')}</span>
                     )}
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-2 ml-4">
+
+                <div className="flex items-center gap-1 flex-wrap sm:ml-4 border-t sm:border-t-0 pt-2 sm:pt-0">
+
                   <Button variant="ghost" size="sm" onClick={() => handleViewQuestion(question)}>
                     <Eye className="w-4 h-4" />
                   </Button>
