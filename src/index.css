@@ -310,14 +310,8 @@ All colors MUST be HSL for consistency across light/dark modes.
   }
   
   .shimmer {
-    animation: shimmer 2s infinite linear;
-    background: linear-gradient(
-      to right,
-      hsl(var(--muted)) 0%,
-      hsl(var(--muted-foreground) / 0.1) 50%,
-      hsl(var(--muted)) 100%
-    );
-    background-size: 1000px 100%;
+    animation: pulse 2s infinite ease-in-out;
+    background: hsl(var(--muted));
   }
   
   /* Pulsing glow effect */
