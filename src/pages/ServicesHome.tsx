@@ -209,7 +209,7 @@ const ServicesHome = () => {
               </p>
             </div>
           </div>
-          <SideSwitcher compact className="shrink-0 hidden sm:inline-flex" />
+          <SideSwitcher compact className="shrink-0" />
         </Card>
       </main>
 

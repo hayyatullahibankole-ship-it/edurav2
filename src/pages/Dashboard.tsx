@@ -365,7 +365,7 @@ const Dashboard = () => {
 
               {/* Actions */}
               <div className="flex items-center gap-3">
-                <SideSwitcher compact className="hidden sm:inline-flex" />
+                <SideSwitcher compact />
 
                 {!subscriptionLoading && (
                   <Badge variant={isPremium ? "default" : "secondary"} className="hidden md:flex">
