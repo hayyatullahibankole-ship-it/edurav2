@@ -144,6 +144,8 @@ const CampusHubRoutes = () => {
 // Edura Routes Component
 const EduraRoutes = () => {
   const { isInstalledApp } = useInstalledApp();
+  const { user } = useAuth();
+
   
   return (
     <Suspense fallback={<LoadingAnimation />}>
