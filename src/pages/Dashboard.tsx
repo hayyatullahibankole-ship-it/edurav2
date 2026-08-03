@@ -36,6 +36,7 @@ import {
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useWallet } from "@/hooks/useWallet";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ProfileSettings from "@/components/ProfileSettings";
@@ -85,6 +86,7 @@ const Dashboard = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const { isInstalledApp } = useInstalledApp();
+  const { balance: walletBalance, loading: walletLoading } = useWallet();
 
   // Update active tab when URL parameter changes
   useEffect(() => {
@@ -328,6 +330,281 @@ const Dashboard = () => {
     }
   };
 
+  const examTypes = [
+    { type: "jamb", label: "JAMB", subtitle: "UTME Practice", letter: "J" },
+    { type: "waec", label: "WAEC", subtitle: "SSCE Practice", letter: "W" },
+    { type: "neco", label: "NECO", subtitle: "Senior Secondary", letter: "N" },
+    { type: "post-utme", label: "POST-UTME", subtitle: "University Practice", letter: "P" },
+  ];
+
+  const renderBentoContent = () => {
+    if (showMockResult) {
+      return (
+        <div className="space-y-4">
+          <Button variant="outline" onClick={() => setShowMockResult(false)} className="gap-2">
+            <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+          </Button>
+          <MockResultChecker />
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {/* Free Access Banner */}
+        {hasFreePromoAccess && freeAccessExpiry && <FreeAccessBanner expiryDate={freeAccessExpiry} />}
+        {freeAccessExpired && freeAccessExpiry && <FreeAccessBanner expiryDate={freeAccessExpiry} isExpired />}
+
+        {/* Promo Code Activation */}
+        {!isPremium && !hasFreePromoAccess && !subscriptionLoading && (
+          <PromoCodeActivation onSuccess={() => window.location.reload()} />
+        )}
+
+        {/* Bento Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-4 auto-rows-min">
+          {/* Row 1: Stats */}
+          <div className="bg-card border border-border rounded-2xl p-5 flex flex-col justify-between col-span-2 md:col-span-3">
+            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Total Tests</span>
+            <div className="flex items-end justify-between mt-2">
+              <h3 className="text-3xl font-bold">{loading ? "..." : stats.testsTaken}</h3>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 flex flex-col justify-between col-span-2 md:col-span-3">
+            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Average Score</span>
+            <div className="flex items-end justify-between mt-2">
+              <h3 className="text-3xl font-bold">{loading ? "..." : `${stats.averageScore}%`}</h3>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 flex flex-col justify-between col-span-2 md:col-span-3">
+            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Study Hours</span>
+            <div className="flex items-end justify-between mt-2">
+              <h3 className="text-3xl font-bold">{loading ? "..." : `${stats.studyHours}h`}</h3>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 flex flex-col justify-between col-span-2 md:col-span-3">
+            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Global Rank</span>
+            <div className="flex items-end justify-between mt-2">
+              <h3 className="text-3xl font-bold text-primary">
+                {loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "—"}
+              </h3>
+            </div>
+          </div>
+
+          {/* Row 2: Practice + Wallet */}
+          <div className="bg-card border border-border rounded-2xl p-6 col-span-2 md:col-span-8">
+            <h2 className="text-lg font-bold mb-4">Start Practice</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {examTypes.map((exam) =>
+                isMobileBrowser ? (
+                  <button
+                    key={exam.type}
+                    onClick={() => {
+                      setBlockedFeatureName(`${exam.label} Practice`);
+                      setShowInstallModal(true);
+                    }}
+                    className="bg-background border border-border rounded-xl p-4 text-center hover:border-primary transition-colors group"
+                  >
+                    <div className="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center mx-auto mb-3 font-bold">
+                      {exam.letter}
+                    </div>
+                    <span className="text-sm font-semibold block">{exam.label}</span>
+                    <span className="text-[10px] text-muted-foreground uppercase">{exam.subtitle}</span>
+                  </button>
+                ) : (
+                  <ScheduleTestModal key={exam.type} defaultExamType={exam.type}>
+                    <button className="bg-background border border-border rounded-xl p-4 text-center hover:border-primary transition-colors group w-full">
+                      <div className="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center mx-auto mb-3 font-bold">
+                        {exam.letter}
+                      </div>
+                      <span className="text-sm font-semibold block">{exam.label}</span>
+                      <span className="text-[10px] text-muted-foreground uppercase">{exam.subtitle}</span>
+                    </button>
+                  </ScheduleTestModal>
+                ),
+              )}
+            </div>
+          </div>
+
+          {/* Wallet + Subscription */}
+          <div className="col-span-2 md:col-span-4 flex flex-col gap-3 md:gap-4">
+            <Link
+              to="/wallet"
+              className="bg-primary text-primary-foreground rounded-2xl p-6 flex flex-col justify-between flex-1 hover:opacity-90 transition-opacity"
+            >
+              <div>
+                <span className="text-xs font-bold uppercase tracking-widest opacity-80">Wallet Balance</span>
+                <h2 className="text-2xl md:text-3xl font-black mt-1">
+                  {walletLoading
+                    ? "..."
+                    : `₦${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                </h2>
+              </div>
+              <div className="w-full bg-primary-foreground/10 text-primary-foreground py-2.5 rounded-xl font-bold text-sm text-center mt-4 border border-primary-foreground/20">
+                Fund Wallet
+              </div>
+            </Link>
+
+            <Link
+              to="/payment"
+              className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between hover:border-primary/50 transition-colors"
+            >
+              <div>
+                <span className="text-xs text-muted-foreground block">Subscription</span>
+                <span className="text-sm font-bold">
+                  {subscriptionLoading
+                    ? "Loading..."
+                    : subscription?.subscription_plans?.name || "Free Plan"}
+                </span>
+              </div>
+              <span
+                className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter ${
+                  isPremium ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {subscriptionLoading ? "..." : subscription?.status || "Free"}
+              </span>
+            </Link>
+          </div>
+
+          {/* Row 3: Quick Access + School Exams */}
+          <div className="bg-card border border-border rounded-2xl p-6 col-span-2 md:col-span-5">
+            <h2 className="text-lg font-bold mb-4">Quick Access</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <Link
+                to="/services"
+                className="p-3 bg-background border border-border rounded-xl flex items-center gap-3 hover:border-primary/50 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                  <Layers className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-xs font-medium">Edu Services</span>
+              </Link>
+              <Link
+                to="/study-planner"
+                className="p-3 bg-background border border-border rounded-xl flex items-center gap-3 hover:border-primary/50 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                  <Target className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-xs font-medium">Study Planner</span>
+              </Link>
+              <Link
+                to="/resources"
+                className="p-3 bg-background border border-border rounded-xl flex items-center gap-3 hover:border-primary/50 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                  <FileText className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-xs font-medium">Past Questions</span>
+              </Link>
+              <Link
+                to="/referral-program"
+                className="p-3 bg-background border border-border rounded-xl flex items-center gap-3 hover:border-primary/50 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                  <Trophy className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-xs font-medium">Referrals</span>
+              </Link>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-6 col-span-2 md:col-span-7">
+            <h2 className="text-lg font-bold mb-4">School Exams</h2>
+            <SchoolAvailableExams />
+          </div>
+
+          {/* Row 4: Subject Progress + Recent Results + Mock Checker */}
+          <div className="bg-card border border-border rounded-2xl p-6 col-span-2 md:col-span-4">
+            <h2 className="text-lg font-bold mb-4">Subject Progress</h2>
+            {loading ? (
+              <div className="text-center text-muted-foreground py-4 text-sm">Loading...</div>
+            ) : subjectProgress.length > 0 ? (
+              <div className="space-y-4">
+                {subjectProgress.slice(0, 5).map((subject: any, index: number) => (
+                  <div key={index}>
+                    <div className="flex justify-between text-xs mb-1.5 font-medium">
+                      <span className="text-muted-foreground">{subject.subject}</span>
+                      <span>{subject.progress}%</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-background rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all"
+                        style={{ width: `${subject.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-4 text-sm">
+                Complete tests to track progress
+              </div>
+            )}
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-6 col-span-2 md:col-span-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold">Recent Results</h2>
+              <Link
+                to="/performance-report"
+                className="text-primary text-xs font-semibold hover:underline"
+              >
+                View All
+              </Link>
+            </div>
+            {loading ? (
+              <div className="text-center text-muted-foreground py-4 text-sm">Loading...</div>
+            ) : recentTests.length > 0 ? (
+              <div className="space-y-3">
+                {recentTests.map((test: any, index: number) => (
+                  <Link key={index} to={`/results?attempt=${test.attemptId}`} className="block">
+                    <div className="p-3 bg-background rounded-xl flex items-center justify-between hover:bg-muted/50 transition-colors">
+                      <div>
+                        <p className="text-xs font-bold">{test.subject}</p>
+                        <p className="text-[10px] text-muted-foreground">{test.date}</p>
+                      </div>
+                      <p className="text-xs font-black text-primary">{test.score}%</p>
+                    </div>
+                  </Link>
+                ))}
+                <Link
+                  to="/performance-report"
+                  className="block w-full py-2 mt-2 text-[10px] text-muted-foreground border border-border rounded-lg hover:bg-muted/50 transition-colors text-center"
+                >
+                  View Detailed Reports
+                </Link>
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-4 text-sm">
+                No tests yet. Start practicing!
+              </div>
+            )}
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-6 col-span-2 md:col-span-4 flex flex-col justify-center relative overflow-hidden">
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-2">
+                <Award className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-bold">Mock Checker</h2>
+              </div>
+              <p className="text-xs text-muted-foreground mb-4">
+                Check your official JAMB/WAEC mock examination results.
+              </p>
+              <Button onClick={() => setShowMockResult(true)} className="w-full gap-2">
+                <FileText className="h-4 w-4" /> Check Result
+              </Button>
+            </div>
+            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return <LoadingAnimation />;
   }
@@ -409,568 +686,7 @@ const Dashboard = () => {
             </TabsList>
 
             <TabsContent value="dashboard" className="space-y-6">
-              {/* Free Access Banner */}
-              {hasFreePromoAccess && freeAccessExpiry && <FreeAccessBanner expiryDate={freeAccessExpiry} />}
-              {freeAccessExpired && freeAccessExpiry && <FreeAccessBanner expiryDate={freeAccessExpiry} isExpired />}
-
-              {/* Promo Code Activation - only show if no premium/free access */}
-              {!isPremium && !hasFreePromoAccess && !subscriptionLoading && (
-                <PromoCodeActivation onSuccess={() => window.location.reload()} />
-              )}
-
-              {/* Stats Overview */}
-              <div>
-                <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Your Performance</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                  <Card className="border-border/50 hover:border-primary/50 transition-colors">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                          <Target className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="text-3xl font-bold">{loading ? "..." : stats.testsTaken}</div>
-                      </div>
-                      <p className="text-sm font-medium text-muted-foreground">Tests Taken</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-border/50 hover:border-accent/50 transition-colors">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2 bg-accent/10 rounded-lg">
-                          <TrendingUp className="h-5 w-5 text-accent" />
-                        </div>
-                        <div className="text-3xl font-bold">{loading ? "..." : `${stats.averageScore}%`}</div>
-                      </div>
-                      <p className="text-sm font-medium text-muted-foreground">Average Score</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-border/50 hover:border-secondary/50 transition-colors">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2 bg-secondary/10 rounded-lg">
-                          <Clock className="h-5 w-5 text-secondary" />
-                        </div>
-                        <div className="text-3xl font-bold">{loading ? "..." : `${stats.studyHours}h`}</div>
-                      </div>
-                      <p className="text-sm font-medium text-muted-foreground">Study Time</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-border/50 hover:border-warning/50 transition-colors">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2 bg-warning/10 rounded-lg">
-                          <Trophy className="h-5 w-5 text-warning" />
-                        </div>
-                        <div className="text-3xl font-bold">
-                          {loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "—"}
-                        </div>
-                      </div>
-                      <p className="text-sm font-medium text-muted-foreground">Your Rank</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-
-              {/* Check Mock Result */}
-              {showMockResult ? (
-                <div className="space-y-4">
-                  <Button variant="outline" onClick={() => setShowMockResult(false)} className="gap-2">
-                    <ArrowLeft className="h-4 w-4" /> Back to Dashboard
-                  </Button>
-                  <MockResultChecker />
-                </div>
-              ) : (
-              <>
-              <Card className="border">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg border bg-muted">
-                      <Award className="h-6 w-6 text-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">2026 Mock Examination</h3>
-                      <p className="text-sm text-muted-foreground">Check your WAEC-style mock result</p>
-                    </div>
-                  </div>
-                  <Button onClick={() => setShowMockResult(true)} className="gap-2">
-                    <FileText className="h-4 w-4" /> Check Mock Result
-                  </Button>
-                </CardContent>
-              </Card>
-
-
-
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-                {/* Main Content */}
-                <div className="lg:col-span-2 space-y-4 md:space-y-6">
-                  {/* Quick Actions */}
-                  {!isInstalledApp && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg md:text-xl">Start Practice</CardTitle>
-                        <CardDescription>Choose your exam type</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {isMobileBrowser ? (
-                            <>
-                              <Button 
-                                size="lg" 
-                                className="w-full h-auto py-4 flex-col gap-2"
-                                onClick={() => {
-                                  setBlockedFeatureName('JAMB CBT Practice');
-                                  setShowInstallModal(true);
-                                }}
-                              >
-                                <Play className="h-5 w-5" />
-                                <span className="font-semibold">JAMB Practice</span>
-                              </Button>
-                              <Button 
-                                size="lg" 
-                                variant="outline" 
-                                className="w-full h-auto py-4 flex-col gap-2"
-                                onClick={() => {
-                                  setBlockedFeatureName('WAEC CBT Practice');
-                                  setShowInstallModal(true);
-                                }}
-                              >
-                                <Play className="h-5 w-5" />
-                                <span className="font-semibold">WAEC Practice</span>
-                              </Button>
-                              <Button 
-                                size="lg" 
-                                variant="outline" 
-                                className="w-full h-auto py-4 flex-col gap-2"
-                                onClick={() => {
-                                  setBlockedFeatureName('NECO CBT Practice');
-                                  setShowInstallModal(true);
-                                }}
-                              >
-                                <Play className="h-5 w-5" />
-                                <span className="font-semibold">NECO Practice</span>
-                              </Button>
-                              <Button 
-                                size="lg" 
-                                variant="outline" 
-                                className="w-full h-auto py-4 flex-col gap-2"
-                                onClick={() => {
-                                  setBlockedFeatureName('Post-UTME CBT Practice');
-                                  setShowInstallModal(true);
-                                }}
-                              >
-                                <Play className="h-5 w-5" />
-                                <span className="font-semibold">POST-UTME</span>
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <ScheduleTestModal defaultExamType="jamb">
-                                <Button size="lg" className="w-full h-auto py-4 flex-col gap-2">
-                                  <Play className="h-5 w-5" />
-                                  <span className="font-semibold">JAMB Practice</span>
-                                </Button>
-                              </ScheduleTestModal>
-                              <ScheduleTestModal defaultExamType="waec">
-                                <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-                                  <Play className="h-5 w-5" />
-                                  <span className="font-semibold">WAEC Practice</span>
-                                </Button>
-                              </ScheduleTestModal>
-                              <ScheduleTestModal defaultExamType="neco">
-                                <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-                                  <Play className="h-5 w-5" />
-                                  <span className="font-semibold">NECO Practice</span>
-                                </Button>
-                              </ScheduleTestModal>
-                              <ScheduleTestModal defaultExamType="post-utme">
-                                <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-                                  <Play className="h-5 w-5" />
-                                  <span className="font-semibold">POST-UTME</span>
-                                </Button>
-                              </ScheduleTestModal>
-                            </>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Subscription Management - Mobile Only */}
-                  {isMobile && (
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                              <Zap className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                              <h3 className="font-semibold">Subscription</h3>
-                              <p className="text-xs text-muted-foreground">
-                                {isPremium ? "Premium Active" : "Free Plan"}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <Link to="/payment">
-                          <Button className="w-full" variant={isPremium ? "outline" : "default"}>
-                            {isPremium ? "Manage Plan" : "Go Premium"}
-                            <ChevronRight className="h-4 w-4 ml-2" />
-                          </Button>
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Premium Features */}
-                  <div>
-                    <h2 className="text-2xl font-bold mb-6">Explore Features</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                      {/* Study Hub */}
-                      <Link to="/install-app">
-                        <Card className="group hover:shadow-md transition-shadow cursor-pointer h-full">
-                          <CardContent className="p-5">
-                            <div className="flex items-start gap-4">
-                              <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                                <GraduationCap className="h-6 w-6 text-primary" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold mb-1 flex items-center gap-2">
-                                  Study Hub
-                                  <Badge variant="secondary" className="text-xs">
-                                    Popular
-                                  </Badge>
-                                </h3>
-                                <p className="text-sm text-muted-foreground">Lessons & tutorials</p>
-                              </div>
-                              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-
-                      {/* Ask Tutor */}
-                      <Link to="/install-app">
-                        <Card className="group hover:shadow-md transition-shadow cursor-pointer h-full">
-                          <CardContent className="p-5">
-                            <div className="flex items-start gap-4">
-                              <div className="p-2.5 bg-accent/10 rounded-lg group-hover:bg-accent/20 transition-colors">
-                                <MessageSquare className="h-6 w-6 text-accent" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold mb-1 flex items-center gap-2">
-                                  Ask Tutor
-                                  <Badge variant="secondary" className="text-xs">
-                                    24/7
-                                  </Badge>
-                                </h3>
-                                <p className="text-sm text-muted-foreground">Get instant help</p>
-                              </div>
-                              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-
-                      {/* Challenge Arena */}
-                      <Link to="/install-app">
-                        <Card className="group hover:shadow-md transition-shadow cursor-pointer h-full">
-                          <CardContent className="p-5">
-                            <div className="flex items-start gap-4">
-                              <div className="p-2.5 bg-warning/10 rounded-lg group-hover:bg-warning/20 transition-colors">
-                                <Sword className="h-6 w-6 text-warning" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold mb-1 flex items-center gap-2">
-                                  Challenge Arena
-                                  <Badge variant="secondary" className="text-xs">
-                                    New
-                                  </Badge>
-                                </h3>
-                                <p className="text-sm text-muted-foreground">Compete & win prizes</p>
-                              </div>
-                              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-warning group-hover:translate-x-1 transition-all" />
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-
-                      {/* Resources */}
-                      <Link to="/resources">
-                        <Card className="group hover:shadow-md transition-shadow cursor-pointer h-full">
-                          <CardContent className="p-5">
-                            <div className="flex items-start gap-4">
-                              <div className="p-2.5 bg-secondary/10 rounded-lg group-hover:bg-secondary/20 transition-colors">
-                                <FileText className="h-6 w-6 text-secondary" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold mb-1">Study Resources</h3>
-                                <p className="text-sm text-muted-foreground">Past questions & materials</p>
-                              </div>
-                              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-secondary group-hover:translate-x-1 transition-all" />
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-
-
-
-                    </div>
-                  </div>
-
-                  {/* School Assigned Exams - Only show if student is part of a school */}
-                  <div className="mb-8">
-                    <SchoolAvailableExams />
-                  </div>
-
-                  {/* Recent Test Results */}
-                  {isMobile ? (
-                    <div>
-                      <h2 className="text-2xl font-bold mb-6">Recent Tests</h2>
-                      {loading ? (
-                        <div className="text-center text-muted-foreground py-8">Loading...</div>
-                      ) : recentTests.length > 0 ? (
-                        <div className="space-y-3">
-                          {recentTests.map((test: any, index: number) => (
-                            <Card
-                              key={index}
-                              className="cursor-pointer hover:shadow-md transition-shadow"
-                              onClick={() => navigate(`/results?attempt=${test.attemptId}`)}
-                            >
-                              <CardContent className="p-4">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-primary/10 rounded-lg">
-                                      <BookOpen className="h-5 w-5 text-primary" />
-                                    </div>
-                                    <div>
-                                      <h4 className="font-semibold">{test.subject}</h4>
-                                      <p className="text-sm text-muted-foreground">{test.date}</p>
-                                    </div>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="text-2xl font-bold">{test.score}%</div>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      ) : (
-                        <Card>
-                          <CardContent className="p-8 text-center">
-                            <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-30" />
-                            <p className="text-muted-foreground">No tests yet</p>
-                            <p className="text-sm text-muted-foreground mt-1">Take your first test to see results</p>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </div>
-                  ) : (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Recent Tests</CardTitle>
-                        <CardDescription>Your latest performance</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          {loading ? (
-                            <div className="text-center text-muted-foreground py-4">Loading...</div>
-                          ) : recentTests.length > 0 ? (
-                            recentTests.map((test: any, index: number) => (
-                              <Link key={index} to={`/results?attempt=${test.attemptId}`}>
-                                <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                                  <div className="flex items-center gap-4">
-                                    <div className="bg-primary/10 p-2 rounded-lg">
-                                      <BookOpen className="h-5 w-5 text-primary" />
-                                    </div>
-                                    <div>
-                                      <h4 className="font-semibold">{test.subject}</h4>
-                                      <p className="text-sm text-muted-foreground">{test.date}</p>
-                                    </div>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="text-2xl font-bold">{test.score}%</div>
-                                    <p className="text-sm text-muted-foreground">{test.duration}</p>
-                                  </div>
-                                </div>
-                              </Link>
-                            ))
-                          ) : (
-                            <div className="text-center text-muted-foreground py-8">
-                              No test results yet. Take your first test!
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Subject Progress */}
-                  {isMobile ? (
-                    <div>
-                      <h2 className="text-2xl font-bold mb-6">Subject Progress</h2>
-                      {loading ? (
-                        <div className="text-center text-muted-foreground py-8">Loading...</div>
-                      ) : subjectProgress.length > 0 ? (
-                        <div className="space-y-3">
-                          {subjectProgress.map((subject, index) => (
-                            <Card key={index}>
-                              <CardContent className="p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                  <h4 className="font-semibold">{subject.subject}</h4>
-                                  <span className="text-lg font-bold">{subject.progress}%</span>
-                                </div>
-                                <Progress value={subject.progress} className="h-2" />
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      ) : (
-                        <Card>
-                          <CardContent className="p-8 text-center">
-                            <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-30" />
-                            <p className="text-muted-foreground">No progress data yet</p>
-                            <p className="text-sm text-muted-foreground mt-1">Complete tests to track your progress</p>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </div>
-                  ) : (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Subject Progress</CardTitle>
-                        <CardDescription>Track your improvement across subjects</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        {loading ? (
-                          <div className="text-center text-muted-foreground py-4">Loading...</div>
-                        ) : subjectProgress.length > 0 ? (
-                          <div className="space-y-6">
-                            {subjectProgress.map((subject, index) => (
-                              <div key={index}>
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="font-medium">{subject.subject}</span>
-                                  <span className="text-lg font-bold">{subject.progress}%</span>
-                                </div>
-                                <Progress value={subject.progress} className="h-2" />
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center text-muted-foreground py-8">
-                            Complete some tests to track your subject progress!
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-
-                {/* Sidebar */}
-                <div className="space-y-4">
-                  {/* Start Test */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Quick Test</CardTitle>
-                      <CardDescription>Jump into practice mode</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {isMobileBrowser ? (
-                        <Button 
-                          className="w-full"
-                          onClick={() => {
-                            setBlockedFeatureName('CBT Practice');
-                            setShowInstallModal(true);
-                          }}
-                        >
-                          <Play className="h-4 w-4 mr-2" />
-                          Start Test
-                        </Button>
-                      ) : (
-                        <ScheduleTestModal>
-                          <Button className="w-full">
-                            <Play className="h-4 w-4 mr-2" />
-                            Start Test
-                          </Button>
-                        </ScheduleTestModal>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Subscription Status */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Subscription</CardTitle>
-                      <CardDescription>
-                        {subscriptionLoading ? "Loading..." : subscription?.subscription_plans?.name || "Free Plan"}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-center">
-                        <Badge className="mb-4 bg-accent text-accent-foreground">
-                          {subscriptionLoading ? "Loading..." : subscription?.status || "Free"}
-                        </Badge>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          {subscription?.end_date
-                            ? `Expires on ${new Date(subscription.end_date).toLocaleDateString()}`
-                            : "No expiration"}
-                        </p>
-                        <Link to="/payment">
-                          <Button variant="outline" className="w-full">
-                            {subscription ? "Manage Subscription" : "Upgrade Plan"}
-                          </Button>
-                        </Link>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Study Planner */}
-                  <Link to="/study-planner">
-                    <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Target className="h-5 w-5 text-success" />
-                          Study Planner
-                        </CardTitle>
-                        <CardDescription>Schedule study sessions</CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-
-                  {/* Performance Reports */}
-                  <Link to="/performance-report">
-                    <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <TrendingUp className="h-5 w-5 text-info" />
-                          Reports
-                        </CardTitle>
-                        <CardDescription>View & print reports</CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-
-                  {/* Referral Program */}
-                  <Link to="/referral-program">
-                    <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Trophy className="h-5 w-5 text-warning" />
-                          Referrals
-                        </CardTitle>
-                        <CardDescription>Earn rewards</CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                </div>
-              </div>
-              </>
-              )}
+              {renderBentoContent()}
             </TabsContent>
 
             <TabsContent value="profile" className="mt-8">
@@ -1049,146 +765,7 @@ const Dashboard = () => {
           <div className="flex-1 p-8 overflow-auto bg-background">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsContent value="dashboard" className="space-y-6 mt-0 animate-fade-in">
-                {/* Free Access Banner */}
-                {hasFreePromoAccess && freeAccessExpiry && <FreeAccessBanner expiryDate={freeAccessExpiry} />}
-                {freeAccessExpired && freeAccessExpiry && <FreeAccessBanner expiryDate={freeAccessExpiry} isExpired />}
-
-                {/* Promo Code Activation - only show if no premium/free access */}
-                {!isPremium && !hasFreePromoAccess && !subscriptionLoading && (
-                  <PromoCodeActivation onSuccess={() => window.location.reload()} />
-                )}
-
-                {/* Stats Cards Row */}
-                <div className="grid grid-cols-3 gap-6">
-                  {/* Card 1 */}
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-1">Total Tests</p>
-                          <p className="text-3xl font-bold">{stats.testsTaken}</p>
-                          <p className="text-xs text-muted-foreground mt-1">Tests this Month</p>
-                        </div>
-                        <div className="p-3 bg-muted rounded-lg">
-                          <Target className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Card 2 */}
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-1">Average Score</p>
-                          <p className="text-3xl font-bold">{stats.averageScore}%</p>
-                          <p className="text-xs text-muted-foreground mt-1">Tests this Month</p>
-                        </div>
-                        <div className="p-3 bg-muted rounded-lg">
-                          <TrendingUp className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Card 3 - Highlighted */}
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-1">Study Hours</p>
-                          <p className="text-3xl font-bold">{stats.studyHours}h</p>
-                          <p className="text-xs text-muted-foreground mt-1">Total Study Time</p>
-                        </div>
-                        <div className="p-3 bg-muted rounded-lg">
-                          <Clock className="h-6 w-6 text-muted-foreground" />
-                        </div>
-
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Check Mock Result - Desktop */}
-                {showMockResult ? (
-                  <div className="space-y-4">
-                    <Button variant="outline" onClick={() => setShowMockResult(false)} className="gap-2">
-                      <ArrowLeft className="h-4 w-4" /> Back to Dashboard
-                    </Button>
-                    <MockResultChecker />
-                  </div>
-                ) : (
-                <>
-                <Card className="border">
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <Award className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">2026 Mock Examination</h3>
-                        <p className="text-sm text-muted-foreground">Check your WAEC-style mock result</p>
-                      </div>
-                    </div>
-                    <Button onClick={() => setShowMockResult(true)} className="gap-2">
-                      <FileText className="h-4 w-4" /> Check Mock Result
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Quick Actions */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Start Practice</CardTitle>
-                    <CardDescription>Choose your exam type</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
-                      <ScheduleTestModal defaultExamType="jamb">
-                        <Button size="lg" className="w-full h-auto py-4 flex-col gap-2">
-                          <Play className="h-5 w-5" />
-                          <span className="font-semibold">JAMB Practice</span>
-                        </Button>
-                      </ScheduleTestModal>
-                      <ScheduleTestModal defaultExamType="waec">
-                        <Button size="lg" variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-                          <Play className="h-5 w-5" />
-                          <span className="font-semibold">WAEC Practice</span>
-                        </Button>
-                      </ScheduleTestModal>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* School Assigned Exams (desktop) */}
-                <div className="mb-8">
-                  <SchoolAvailableExams />
-                </div>
-
-                {/* Recent Tests */}
-                {recentTests.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Recent Tests</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {recentTests.map((test: any, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                            <div>
-                              <p className="font-medium">{test.subject}</p>
-                              <p className="text-sm text-muted-foreground">{test.date}</p>
-                            </div>
-                            <Badge variant={test.score >= 70 ? "default" : "secondary"}>{test.score}%</Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-                </>
-                )}
+                {renderBentoContent()}
               </TabsContent>
 
               <TabsContent value="profile" className="mt-0">
