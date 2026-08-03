@@ -445,8 +445,9 @@ export default function QuestionManagement() {
             {list.map((question) => (
               <div key={question.id} className="flex flex-col sm:flex-row items-stretch sm:items-start sm:justify-between gap-3 p-4 sm:p-6 bg-card rounded-lg border shadow-sm hover:shadow-md transition-shadow">
 
-                <div className="flex-1 space-y-4">
-                  <div className="flex items-center space-x-2">
+                <div className="flex-1 min-w-0 space-y-4">
+                  <div className="flex items-center gap-2 flex-wrap">
+
                     <Badge className={`${getDifficultyColor(question.difficulty_level)} text-white`}>
                       {getDifficultyLabel(question.difficulty_level)}
                     </Badge>
