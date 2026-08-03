@@ -186,6 +186,13 @@ Deno.serve(async (req) => {
     const vendorKey = Deno.env.get("NAIJARESULTSPIN_API_KEY");
     if (!vendorKey) throw new Error("Scratch card vendor is not configured");
 
+    const cardTypeId = Number(service.vendor_code);
+    if (!Number.isFinite(cardTypeId) || cardTypeId <= 0) {
+      throw new Error(
+        "This card is not mapped to the vendor yet (missing card type ID). No card was issued.",
+      );
+    }
+
     const vendorRes = await fetch(vendorUrl, {
       method: "POST",
       headers: {
@@ -194,15 +201,13 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${vendorKey}`,
       },
       body: JSON.stringify({
-        apikey: vendorKey,
-        api_key: vendorKey,
-        service: service.vendor_code || service.slug,
-        service_code: service.vendor_code || service.slug,
+        card_type_id: cardTypeId,
         quantity,
         request_id: order.id,
         reference: order.id,
       }),
     });
+
 
     const vendorText = await vendorRes.text();
     let vendorJson: any = null;
