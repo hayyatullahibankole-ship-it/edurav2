@@ -1002,7 +1002,7 @@ const Dashboard = () => {
 
         <main className="flex-1 flex flex-col min-h-screen">
           {/* Top Bar */}
-          <header className="border-b bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm sticky top-0 z-50">
+          <header className="border-b bg-background sticky top-0 z-50">
             <div className="px-8 py-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
@@ -1043,7 +1043,7 @@ const Dashboard = () => {
           </header>
 
           {/* Main Content */}
-          <div className="flex-1 p-8 overflow-auto bg-gradient-to-br from-background via-muted/30 to-background">
+          <div className="flex-1 p-8 overflow-auto bg-background">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsContent value="dashboard" className="space-y-6 mt-0 animate-fade-in">
                 {/* Free Access Banner */}
@@ -1090,17 +1090,18 @@ const Dashboard = () => {
                   </Card>
 
                   {/* Card 3 - Highlighted */}
-                  <Card className="bg-primary text-primary-foreground">
+                  <Card>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm opacity-90 mb-1">Study Hours</p>
+                          <p className="text-sm text-muted-foreground mb-1">Study Hours</p>
                           <p className="text-3xl font-bold">{stats.studyHours}h</p>
-                          <p className="text-xs opacity-80 mt-1">Total Study Time</p>
+                          <p className="text-xs text-muted-foreground mt-1">Total Study Time</p>
                         </div>
-                        <div className="p-3 bg-primary-foreground/20 rounded-lg">
-                          <Clock className="h-6 w-6" />
+                        <div className="p-3 bg-muted rounded-lg">
+                          <Clock className="h-6 w-6 text-muted-foreground" />
                         </div>
+
                       </div>
                     </CardContent>
                   </Card>
@@ -1116,7 +1117,7 @@ const Dashboard = () => {
                   </div>
                 ) : (
                 <>
-                <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-accent/5">
+                <Card className="border">
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-primary/10 rounded-lg">
