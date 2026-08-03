@@ -43,8 +43,19 @@ Deno.serve(async (req) => {
       return json({ error: "No dedicated account found for this user" }, 400);
     }
 
+    const customerRes = await fetch(
+      `https://api.paystack.co/customer/${encodeURIComponent(account.customer_code)}`,
+      { headers: { Authorization: `Bearer ${key}` } },
+    );
+    const customerBody = await customerRes.json().catch(() => ({}));
+    const customerId = customerBody?.data?.id;
+    if (!customerRes.ok || !customerId) {
+      console.error("Paystack customer lookup failed", JSON.stringify(customerBody));
+      return json({ error: customerBody?.message || "Could not verify payment profile" }, 400);
+    }
+
     const res = await fetch(
-      `https://api.paystack.co/transaction?customer=${encodeURIComponent(account.customer_code)}&perPage=50&status=success`,
+      `https://api.paystack.co/transaction?customer=${encodeURIComponent(String(customerId))}&perPage=50&status=success`,
       { headers: { Authorization: `Bearer ${key}` } },
     );
     const body = await res.json().catch(() => ({}));
