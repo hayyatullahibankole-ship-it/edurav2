@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import ScheduleTestModal from "@/components/ScheduleTestModal";
+import { SideSwitcher } from "@/components/edura/SideSwitcher";
 import {
   Sheet,
   SheetContent,
@@ -102,6 +103,14 @@ export const ExploreSheet = ({ open, onOpenChange }: ExploreSheetProps) => {
         </SheetHeader>
 
         <div className="space-y-6 p-6">
+          <section className="flex items-center justify-between gap-3 rounded-xl border bg-card p-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">Switch experience</p>
+              <p className="text-xs text-muted-foreground">CBT practice or educational services</p>
+            </div>
+            <SideSwitcher compact className="shrink-0" />
+          </section>
+
           <section className="space-y-3">
             <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Start a practice test
