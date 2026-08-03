@@ -119,7 +119,7 @@ const Home = () => {
 
               <div className="flex flex-wrap gap-3">
                 <Link to={primaryHref}>
-                  <Button size="lg" className="h-13 px-8 text-base font-bold text-ink hover:bg-primary-hover">
+                  <Button size="lg" className="h-12 px-8 text-base font-bold text-ink hover:bg-primary-hover">
                     Get started free
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -128,7 +128,7 @@ const Home = () => {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="h-13 px-8 text-base font-bold border-white/15 bg-ink-soft text-ink-foreground hover:bg-ink-soft/70 hover:text-ink-foreground"
+                    className="h-12 px-8 text-base font-bold border-white/15 bg-ink-soft text-ink-foreground hover:bg-ink-soft/70 hover:text-ink-foreground"
                   >
                     Try a free demo test
                   </Button>
