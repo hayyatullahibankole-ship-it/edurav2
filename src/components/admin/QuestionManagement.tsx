@@ -811,11 +811,12 @@ export default function QuestionManagement() {
         {totalCount > PAGE_SIZE && (
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Showing {currentPage * PAGE_SIZE + 1}–{Math.min((currentPage + 1) * PAGE_SIZE, totalCount)} of {totalCount} questions
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between sm:justify-end gap-2">
+
                   <Button
                     variant="outline"
                     size="sm"
