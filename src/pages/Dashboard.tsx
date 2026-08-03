@@ -44,6 +44,7 @@ import SubjectProgressCard from "@/components/SubjectProgressCard";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { FeatureCard } from "@/components/dashboard/FeatureCard";
 import { ModernQuickAction } from "@/components/dashboard/ModernQuickAction";
+import { ServicesStrip } from "@/components/edura/ServicesStrip";
 import { MobileStatCard } from "@/components/dashboard/MobileStatCard";
 import { MobileTestCard } from "@/components/dashboard/MobileTestCard";
 import { MobileSubjectCard } from "@/components/dashboard/MobileSubjectCard";
@@ -493,6 +494,8 @@ const Dashboard = () => {
                   </Button>
                 </CardContent>
               </Card>
+
+              <ServicesStrip />
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                 {/* Main Content */}

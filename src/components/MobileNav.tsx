@@ -1,4 +1,5 @@
-import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles, Sword, MessageSquare, Library, Download, Smartphone, Wifi, Bell } from "lucide-react";
+import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles, Sword, MessageSquare, Library, Download, Smartphone, Wifi, Bell, Compass } from "lucide-react";
+import { ExploreSheet } from "@/components/edura/ExploreSheet";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -140,89 +141,26 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 </button>
               </Link>
 
-              {/* Center - Tests FAB */}
+              {/* Center - Explore FAB */}
               <div className="flex-1 flex justify-center -mt-8">
-                {/* FAB Button - shows modal for mobile browser, sheet for installed app */}
-                <button 
+                <button
                   onClick={handleTestsClick}
                   className="relative transition-all duration-300 active:scale-90"
+                  aria-label="Explore"
                 >
                   {/* Glow effect */}
                   <div className="absolute inset-0 bg-orange-500/30 rounded-full blur-xl" />
-                  
+
                   {/* Main FAB */}
-                  <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 shadow-2xl flex items-center justify-center border-4 border-white">
-                    <BookOpen className="h-7 w-7 text-white" />
+                  <div className="relative w-16 h-16 rounded-full bg-orange-500 shadow-2xl flex items-center justify-center border-4 border-white">
+                    <Compass className="h-7 w-7 text-white" />
                   </div>
                 </button>
 
-                {/* Tests Sheet - only for installed app */}
-                <Sheet open={testsSheetOpen} onOpenChange={setTestsSheetOpen}>
-                  
-                  <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl p-0 border-t-4 border-orange-500">
-                    {/* Header with Gradient */}
-                    <div className="relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-amber-500/10 to-orange-500/10" />
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl" />
-                      
-                      <SheetHeader className="relative text-left p-6 pb-4">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg">
-                            <GraduationCap className="h-6 w-6 text-white" />
-                          </div>
-                          <div>
-                            <SheetTitle className="text-2xl font-extrabold">Choose Your Test</SheetTitle>
-                            <SheetDescription className="text-base">
-                              Select exam type to begin practice
-                            </SheetDescription>
-                          </div>
-                        </div>
-                      </SheetHeader>
-                    </div>
-
-                    {/* Test Options */}
-                    <div className="p-6 space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 120px)' }}>
-                      <TestCard
-                        examType="jamb"
-                        title="JAMB CBT"
-                        description="Practice for UTME with real exam format"
-                        icon={GraduationCap}
-                        badge="Popular"
-                        gradient="from-orange-500 to-amber-500"
-                        onClose={() => setTestsSheetOpen(false)}
-                      />
-
-                      <TestCard
-                        examType="waec"
-                        title="WAEC"
-                        description="West African Examinations Council"
-                        icon={FileCheck}
-                        gradient="from-secondary to-info"
-                        onClose={() => setTestsSheetOpen(false)}
-                      />
-
-                      <TestCard
-                        examType="neco"
-                        title="NECO"
-                        description="National Examinations Council"
-                        icon={Award}
-                        gradient="from-accent to-success"
-                        onClose={() => setTestsSheetOpen(false)}
-                      />
-
-                      <TestCard
-                        examType="post-utme"
-                        title="Post-UTME"
-                        description="University screening examination"
-                        icon={Zap}
-                        badge="New"
-                        gradient="from-warning to-destructive"
-                        onClose={() => setTestsSheetOpen(false)}
-                      />
-                    </div>
-                  </SheetContent>
-                </Sheet>
+                {/* Explore gateway - only for installed app */}
+                <ExploreSheet open={testsSheetOpen} onOpenChange={setTestsSheetOpen} />
               </div>
+
 
               {/* Forum Button */}
               <Link to="/forum" className="flex-1 flex justify-center">

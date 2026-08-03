@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ServicesStrip } from '@/components/edura/ServicesStrip';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -512,6 +513,11 @@ const MobileHome = () => {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Educational Services */}
+        <div className="animate-fade-in">
+          <ServicesStrip />
         </div>
 
         {/* Quick Actions - Modern Cards */}
