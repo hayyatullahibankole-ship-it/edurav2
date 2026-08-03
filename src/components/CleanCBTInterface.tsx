@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { MathRenderer } from '@/components/ui/math-renderer';
-import { Clock, ChevronLeft, ChevronRight, Check, Lock, Crown, Calculator as CalculatorIcon, Eye } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, Check, Lock, Crown, Calculator as CalculatorIcon, Eye, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CBTQuestion, CBTAnswers } from '@/hooks/useCBTExam';
 import { useSubscription } from '@/hooks/useSubscription';
