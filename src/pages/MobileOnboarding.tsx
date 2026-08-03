@@ -60,7 +60,7 @@ const MobileOnboarding = () => {
   const slide = onboardingSlides[currentSlide];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background/50 flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
       {/* Animated Background Orbs */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -80,7 +80,7 @@ const MobileOnboarding = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col relative z-10">
         {/* Top Section with Gradient */}
-        <div className={`flex-1 bg-gradient-to-br ${slide.gradient} flex items-center justify-center relative overflow-hidden`}>
+        <div className={`flex-1 ${slide.gradient} flex items-center justify-center relative overflow-hidden`}>
           {/* Curved Bottom Shape */}
           <div className="absolute bottom-0 left-0 right-0 h-12">
             <svg viewBox="0 0 1440 48" fill="none" className="w-full h-full">
@@ -111,7 +111,7 @@ const MobileOnboarding = () => {
                     alt={slide.title}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-black/20" />
                 </div>
               </div>
             </div>
@@ -121,7 +121,7 @@ const MobileOnboarding = () => {
         {/* Content Section */}
         <div className="bg-background px-8 pt-10 pb-8 relative">
           <div className="text-center mb-8 animate-fade-in" key={`content-${currentSlide}`} style={{ animationDelay: '0.2s' }}>
-            <h2 className="text-4xl font-black mb-3 bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent leading-tight">
+            <h2 className="text-4xl font-black mb-3 bg-foreground leading-tight">
               {slide.title}
             </h2>
             <p className="text-primary font-bold text-xl mb-4">{slide.subtitle}</p>
@@ -137,7 +137,7 @@ const MobileOnboarding = () => {
                 key={index}
                 className={`h-2.5 rounded-full transition-all duration-300 shadow-lg ${
                   index === currentSlide
-                    ? 'w-10 bg-gradient-to-r from-primary to-primary-glow'
+                    ? 'w-10 bg-primary'
                     : 'w-2.5 bg-muted'
                 }`}
               />
@@ -147,7 +147,7 @@ const MobileOnboarding = () => {
           {/* Button */}
           <Button
             onClick={handleNext}
-            className="w-full h-16 text-lg font-black rounded-[24px] shadow-2xl bg-gradient-to-r from-primary via-primary-glow to-secondary hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="w-full h-16 text-lg font-black rounded-[24px] shadow-2xl bg-primary hover:scale-[1.02] active:scale-[0.98] transition-all"
             style={{ boxShadow: '0 12px 36px rgba(var(--primary), 0.4)' }}
           >
             {currentSlide === onboardingSlides.length - 1 ? "Get Started" : 'Next'}

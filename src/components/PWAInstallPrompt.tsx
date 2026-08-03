@@ -43,7 +43,7 @@ export const PWAInstallPrompt = () => {
       className="border-2 border-primary/30 overflow-hidden shadow-2xl animate-fade-in"
       style={{ boxShadow: '0 20px 60px rgba(0, 123, 255, 0.3)' }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10" />
+      <div className="absolute inset-0 bg-primary/10" />
       <CardContent className="p-6 relative z-10">
         <button
           onClick={() => setShowPrompt(false)}
@@ -54,14 +54,14 @@ export const PWAInstallPrompt = () => {
 
         <div className="flex items-start gap-4">
           <div 
-            className="p-4 rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl flex-shrink-0"
+            className="p-4 rounded-2xl bg-primary shadow-2xl flex-shrink-0"
             style={{ boxShadow: '0 10px 30px rgba(0, 123, 255, 0.5)' }}
           >
             <Smartphone className="h-8 w-8 text-white" strokeWidth={2.5} />
           </div>
           
           <div className="flex-1">
-            <h3 className="text-xl font-black mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h3 className="text-xl font-black mb-2 bg-primary">
               Install EduRa App
             </h3>
             <p className="text-sm text-muted-foreground mb-4 font-semibold">
@@ -70,7 +70,7 @@ export const PWAInstallPrompt = () => {
             
             <Button
               onClick={handleInstall}
-              className="w-full bg-gradient-to-r from-primary via-primary-glow to-secondary hover:shadow-2xl hover:scale-105 active:scale-95 transition-all font-bold shadow-xl"
+              className="w-full bg-primary hover:shadow-2xl hover:scale-105 active:scale-95 transition-all font-bold shadow-xl"
               style={{ boxShadow: '0 10px 30px rgba(0, 123, 255, 0.4)' }}
             >
               <Download className="h-5 w-5 mr-2" strokeWidth={2.5} />

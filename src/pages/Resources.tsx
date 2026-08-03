@@ -37,7 +37,7 @@ const Resources = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           {/* Back Navigation */}
           <div className="flex items-center gap-2 mb-6">

@@ -84,7 +84,7 @@ export default function AkboyMockLogin() {
 
   return (
     <AkboyLayout title="Mock Exam Login" description="Login to take the AKBOY JAMB Mock Examination">
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white">
+      <div className="min-h-screen bg-orange-50">
         <MockBrandBanner />
         <div className="max-w-lg mx-auto space-y-6 py-8 px-4">
           {/* Hero Header */}
@@ -142,7 +142,7 @@ export default function AkboyMockLogin() {
             </Card>
           ) : loginData && (
             <Card className="shadow-lg border-0 overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-center py-6">
+              <CardHeader className="bg-orange-500 text-white text-center py-6">
                 <CardTitle className="text-xl flex items-center justify-center gap-2">
                   <BookOpen className="w-5 h-5" />
                   AKBOY JAMB Mock Examination
@@ -252,7 +252,7 @@ export default function AkboyMockLogin() {
           )}
 
           {/* WhatsApp Group CTA */}
-          <Card className="shadow-lg border-0 bg-gradient-to-r from-green-500 to-emerald-500 text-white overflow-hidden">
+          <Card className="shadow-lg border-0 bg-green-500 text-white overflow-hidden">
             <CardContent className="py-4 px-6 text-center space-y-2">
               <h3 className="text-base font-bold">Join Our WhatsApp Group for Updates</h3>
               <a href="https://chat.whatsapp.com/JQ61pyPVTfT5MlW1X7P4TH?mode=gi_t" target="_blank" rel="noopener noreferrer">

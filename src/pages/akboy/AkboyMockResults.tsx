@@ -174,7 +174,7 @@ export default function AkboyMockResults() {
 
   return (
     <AkboyLayout title="Mock Exam Results" description="Check your AKBOY JAMB Mock Exam results">
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white">
+      <div className="min-h-screen bg-orange-50">
         <MockBrandBanner />
         <div className="max-w-2xl mx-auto space-y-6 py-8 px-4">
           {/* Hero Header */}
@@ -254,7 +254,7 @@ export default function AkboyMockResults() {
           {status === "available" && resultData && (
             <div className="space-y-4">
               <Card className="shadow-lg border-0 overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-center py-6">
+                <CardHeader className="bg-orange-500 text-white text-center py-6">
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <img src="/akboy-logo.png" alt="AKBOY" className="w-8 h-8 rounded-full bg-white p-0.5" />
                     <CardTitle className="text-lg">AKBOY Mock Examination Result</CardTitle>
@@ -274,7 +274,7 @@ export default function AkboyMockResults() {
                   </div>
 
                   {/* Total Score */}
-                  <div className="text-center bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-100">
+                  <div className="text-center bg-orange-50 p-6 rounded-2xl border border-orange-100">
                     <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                       <Trophy className="w-8 h-8 text-orange-500" />
                     </div>
@@ -352,7 +352,7 @@ export default function AkboyMockResults() {
               </Button>
 
               {/* WhatsApp Group CTA */}
-              <Card className="shadow-lg border-0 bg-gradient-to-r from-green-500 to-emerald-500 text-white overflow-hidden">
+              <Card className="shadow-lg border-0 bg-green-500 text-white overflow-hidden">
                 <CardContent className="py-5 px-6 text-center space-y-3">
                   <div>
                     <h3 className="text-lg font-bold">Join Our WhatsApp Group</h3>

@@ -73,7 +73,7 @@ export default function SchoolVerificationPending() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-primary/5 flex items-center justify-center p-4">
       <Card className="max-w-md w-full">
         <CardHeader className="text-center">
           <Mail className="h-16 w-16 mx-auto mb-4 text-primary" />

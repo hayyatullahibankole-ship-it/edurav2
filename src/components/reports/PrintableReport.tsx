@@ -141,7 +141,7 @@ export const PrintableReport = ({ data }: { data: ReportData }) => {
                 <div className="flex-1">
                   <div className="h-8 bg-muted rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-primary to-success flex items-center justify-end pr-2"
+                      className="h-full bg-primary flex items-center justify-end pr-2"
                       style={{ width: `${subject.score}%` }}
                     >
                       <span className="text-white text-xs font-bold">{subject.score}%</span>

@@ -208,7 +208,7 @@ export default function SchoolRegistration() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12 px-4">
+    <div className="min-h-screen bg-primary/5 py-12 px-4">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
           <School className="h-16 w-16 mx-auto mb-4 text-primary" />

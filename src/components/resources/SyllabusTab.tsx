@@ -205,7 +205,7 @@ export const SyllabusTab = () => {
 
       {/* Call to Action */}
       {!canAccessPremium && !loading && (
-        <Card className="mt-12 bg-gradient-to-r from-primary/10 via-primary/5 to-background border-primary/20">
+        <Card className="mt-12 bg-primary/10 border-primary/20">
           <CardContent className="p-8 text-center">
             <Star className="h-12 w-12 mx-auto mb-4 text-primary" />
             <h3 className="text-2xl font-bold mb-2">Unlock Premium Syllabus</h3>

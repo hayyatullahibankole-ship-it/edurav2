@@ -231,7 +231,7 @@ export default function AnalyticsHub() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+      <div className="min-h-screen bg-slate-900 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(4)].map((_, i) => (
@@ -248,7 +248,7 @@ export default function AnalyticsHub() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+    <div className="min-h-screen bg-slate-900 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
@@ -258,7 +258,7 @@ export default function AnalyticsHub() {
 
         {/* Key Performance Indicators */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 border-blue-700">
+          <Card className="bg-blue-900/50 border-blue-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -276,7 +276,7 @@ export default function AnalyticsHub() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-900/50 to-green-800/30 border-green-700">
+          <Card className="bg-green-900/50 border-green-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -294,7 +294,7 @@ export default function AnalyticsHub() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 border-purple-700">
+          <Card className="bg-purple-900/50 border-purple-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -312,7 +312,7 @@ export default function AnalyticsHub() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-orange-900/50 to-orange-800/30 border-orange-700">
+          <Card className="bg-orange-900/50 border-orange-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -481,7 +481,7 @@ export default function AnalyticsHub() {
                         <div className="flex items-center gap-2">
                           <div className="w-20 bg-slate-700 rounded-full h-2">
                             <div 
-                              className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full"
+                              className="bg-blue-500 h-2 rounded-full"
                               style={{ width: `${subject.score}%` }}
                             />
                           </div>

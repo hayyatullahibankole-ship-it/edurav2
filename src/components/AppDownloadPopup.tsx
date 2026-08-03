@@ -52,13 +52,13 @@ export const AppDownloadPopup = () => {
     <div className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-5 duration-300 md:left-auto md:right-6 md:max-w-sm">
       <div className="relative bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
         {/* Gradient accent */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-glow to-secondary" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
         
         <div className="p-4 flex items-center gap-4">
           {/* Mini phone mockup */}
           <div className="shrink-0 relative">
             <div className="w-12 h-20 bg-foreground/90 rounded-xl p-0.5 shadow-lg">
-              <div className="w-full h-full bg-gradient-to-br from-primary to-primary-glow rounded-[10px] flex items-center justify-center">
+              <div className="w-full h-full bg-primary rounded-[10px] flex items-center justify-center">
                 <img src={eduraLogo} alt="Edura" className="h-5 w-auto" />
               </div>
             </div>

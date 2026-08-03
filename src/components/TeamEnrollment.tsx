@@ -93,7 +93,7 @@ const TeamEnrollment = () => {
 
   if (isSuccess) {
     return (
-      <section id="join-team" className="py-24 bg-gradient-to-br from-primary/10 via-background to-accent/10">
+      <section id="join-team" className="py-24 bg-primary/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <Card className="max-w-2xl mx-auto text-center border-2 border-primary/20 shadow-2xl">
             <CardContent className="p-12">
@@ -115,7 +115,7 @@ const TeamEnrollment = () => {
   }
 
   return (
-    <section id="join-team" className="py-24 bg-gradient-to-br from-primary/10 via-background to-accent/10">
+    <section id="join-team" className="py-24 bg-primary/10">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
@@ -123,7 +123,7 @@ const TeamEnrollment = () => {
             <Rocket className="w-4 h-4 mr-2 inline" />
             We're Hiring
           </Badge>
-          <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-primary">
             Join the Edura Team – Help Students Succeed!
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
@@ -377,7 +377,7 @@ const TeamEnrollment = () => {
         </Card>
 
         {/* Testimonial */}
-        <Card className="max-w-2xl mx-auto mt-12 border-2 bg-gradient-to-br from-primary/5 to-accent/5">
+        <Card className="max-w-2xl mx-auto mt-12 border-2 bg-primary/5">
           <CardContent className="p-8 text-center">
             <p className="text-lg italic text-muted-foreground mb-4">
               "Being part of Edura taught me real marketing and tech skills while helping students succeed."

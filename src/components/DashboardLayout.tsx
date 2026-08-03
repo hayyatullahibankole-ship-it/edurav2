@@ -42,7 +42,7 @@ export const DashboardLayout = ({ children, schoolInfo }: DashboardLayoutProps) 
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-background">
         <DashboardSidebar onLogout={handleLogout} schoolInfo={schoolInfo} />
-        <main className="flex-1 flex flex-col min-h-screen bg-gradient-to-br from-background via-muted/30 to-background animate-fade-in overflow-x-hidden">
+        <main className="flex-1 flex flex-col min-h-screen bg-background animate-fade-in overflow-x-hidden">
           {children}
         </main>
       </div>

@@ -484,7 +484,7 @@ export default function ReprintAdmitSlip() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
+    <div className="min-h-screen bg-slate-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -492,7 +492,7 @@ export default function ReprintAdmitSlip() {
           <p className="text-lg text-slate-600">Reprint Your Admit Slip</p>
         </div>
 
-        <Card className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100">
+        <Card className="border-2 border-orange-200 bg-orange-50">
           <CardHeader>
             <CardTitle>Enter Your Registration Number</CardTitle>
             <CardDescription>

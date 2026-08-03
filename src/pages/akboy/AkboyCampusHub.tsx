@@ -291,7 +291,7 @@ export default function AkboyCampusHub() {
       <Link to={`/blog/${post.slug || post.id}`} className="group block">
         <div className="flex gap-4 py-4 px-4 border-b border-gray-200 hover:bg-gray-50 transition-colors rounded-lg">
           {/* Left: Logo/Image */}
-          <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100">
+          <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-emerald-100">
             {post.featured_image_url ? (
               <img src={post.featured_image_url} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
             ) : (
@@ -344,7 +344,7 @@ export default function AkboyCampusHub() {
       description="Latest admission updates, scholarships, JAMB/WAEC news and academic calendars from Nigerian universities, polytechnics and colleges. All in one hub."
     >
       {/* ============= 1. HERO WITH SEARCH ============= */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-900">
+      <section className="relative overflow-hidden bg-emerald-950">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-10 left-10 w-72 h-72 bg-emerald-500 rounded-full blur-3xl"></div>
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-teal-400 rounded-full blur-3xl"></div>
@@ -412,7 +412,7 @@ export default function AkboyCampusHub() {
                       {CATEGORY_META[slideShowPosts[currentSlide].category || "News & Updates"]?.emoji || "📰"}
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/25 to-transparent" />
+                  <div className="absolute inset-0 bg-slate-950/95" />
 
                   <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
                     <div className="flex flex-wrap items-center gap-3 mb-4 justify-center">
@@ -779,7 +779,7 @@ export default function AkboyCampusHub() {
       <CampusHubAdvancedSection posts={posts} schools={featuredSchools} />
 
       {/* ============= 6. CTA ============= */}
-      <section className="py-14 md:py-20 px-4 bg-gradient-to-br from-emerald-900 to-emerald-950 text-white">
+      <section className="py-14 md:py-20 px-4 bg-emerald-900 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-bold font-poppins mb-4">Never miss an admission update</h2>
           <p className="text-emerald-100/85 mb-8 max-w-2xl mx-auto">

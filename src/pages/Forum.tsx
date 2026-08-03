@@ -100,11 +100,11 @@ export default function Forum() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 relative overflow-hidden">
+      <div className="min-h-screen bg-primary/5 relative overflow-hidden">
         {/* Background Elements */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 -right-20 w-80 h-80 bg-gradient-to-br from-primary/10 to-primary-glow/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-secondary/10 to-success/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-20 -right-20 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         </div>
 
         <div className="container mx-auto px-4 py-4 sm:py-8 relative z-10">
@@ -122,7 +122,7 @@ export default function Forum() {
           {/* Vibrant Header */}
           <div className="mb-6 sm:mb-8">
             <div 
-              className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-primary via-primary-glow to-secondary p-6 sm:p-8 shadow-2xl mb-6 animate-fade-in"
+              className="relative overflow-hidden rounded-[32px] bg-primary p-6 sm:p-8 shadow-2xl mb-6 animate-fade-in"
               style={{ boxShadow: '0 20px 60px rgba(0, 123, 255, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.2)' }}
             >
               {/* Animated gradient orbs */}
@@ -174,13 +174,13 @@ export default function Forum() {
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                       {post.is_pinned && (
-                        <Badge variant="default" className="text-xs font-bold rounded-full bg-gradient-to-r from-primary to-primary-glow">
+                        <Badge variant="default" className="text-xs font-bold rounded-full bg-primary">
                           <Pin className="h-3 w-3 mr-1" />
                           Pinned
                         </Badge>
                       )}
                       {post.is_solved && (
-                        <Badge variant="default" className="bg-gradient-to-r from-success to-success-glow text-xs font-bold rounded-full">
+                        <Badge variant="default" className="bg-success text-xs font-bold rounded-full">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           Solved
                         </Badge>
@@ -189,7 +189,7 @@ export default function Forum() {
                         <Badge variant="secondary" className="text-xs font-semibold rounded-full">{post.subjects.name}</Badge>
                       )}
                     </div>
-                    <CardTitle className="text-lg sm:text-xl font-black leading-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                    <CardTitle className="text-lg sm:text-xl font-black leading-tight bg-foreground">
                       {post.title}
                     </CardTitle>
                     <CardDescription className="line-clamp-2 text-sm font-medium">
@@ -232,7 +232,7 @@ export default function Forum() {
                 style={{ boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)' }}
               >
                 <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
-                  <div className="p-6 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 mb-4">
+                  <div className="p-6 rounded-full bg-primary/20 mb-4">
                     <MessageSquare className="h-12 w-12 sm:h-16 sm:w-16 text-primary" />
                   </div>
                   <p className="text-sm sm:text-base text-foreground font-semibold text-center mb-2">

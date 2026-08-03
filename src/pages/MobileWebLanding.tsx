@@ -33,18 +33,18 @@ export default function MobileWebLanding() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 overflow-hidden relative">
+    <div className="min-h-screen bg-primary/5 overflow-hidden relative">
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 -right-20 w-80 h-80 bg-gradient-to-br from-primary/20 to-primary-glow/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-secondary/20 to-success/15 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-20 -right-20 w-80 h-80 bg-primary/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse" />
       </div>
 
       {/* Content */}
       <div className="relative z-10 p-4 md:p-6 space-y-6 max-w-4xl mx-auto pb-24">
         {/* Hero Section */}
         <div 
-          className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-primary via-primary-glow to-secondary p-8 shadow-2xl text-center animate-fade-in"
+          className="relative overflow-hidden rounded-[32px] bg-primary p-8 shadow-2xl text-center animate-fade-in"
           style={{ boxShadow: '0 25px 70px rgba(0, 123, 255, 0.4)' }}
         >
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-3xl animate-pulse" />
@@ -96,10 +96,10 @@ export default function MobileWebLanding() {
               className="border-2 border-primary/20 overflow-hidden shadow-xl hover:scale-105 active:scale-95 transition-all"
               style={{ boxShadow: '0 15px 40px rgba(0, 123, 255, 0.15)' }}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+              <div className="absolute inset-0 bg-primary/5" />
               <CardContent className="p-6 text-center relative z-10">
                 <div 
-                  className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary shadow-2xl mb-4"
+                  className="inline-flex p-4 rounded-2xl bg-primary shadow-2xl mb-4"
                   style={{ boxShadow: '0 10px 30px rgba(0, 123, 255, 0.4)' }}
                 >
                   <feature.icon className="h-6 w-6 text-white" strokeWidth={2.5} />
@@ -113,7 +113,7 @@ export default function MobileWebLanding() {
 
         {/* Quick Links */}
         <div className="space-y-3 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <h2 className="text-2xl font-black mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h2 className="text-2xl font-black mb-4 bg-primary">
             Explore More
           </h2>
           {quickLinks.map((link, index) => (
@@ -122,11 +122,11 @@ export default function MobileWebLanding() {
               onClick={() => navigate(link.path)}
               className="border-2 border-primary/20 overflow-hidden shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
+              <div className="absolute inset-0 bg-primary/5" />
               <CardContent className="p-4 relative z-10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20">
+                    <div className="p-3 rounded-xl bg-primary/20">
                       <link.icon className="h-5 w-5 text-primary" strokeWidth={2.5} />
                     </div>
                     <span className="font-black text-lg">{link.title}</span>
@@ -146,7 +146,7 @@ export default function MobileWebLanding() {
             boxShadow: '0 20px 60px rgba(16, 185, 129, 0.3)' 
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-success/10 to-transparent" />
+          <div className="absolute inset-0 bg-success/10" />
           <CardContent className="p-8 text-center relative z-10">
             <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-success/20 backdrop-blur-xl border border-success/30">
               <CheckCircle className="h-4 w-4 text-success" strokeWidth={2.5} />
@@ -163,7 +163,7 @@ export default function MobileWebLanding() {
             <Button
               onClick={() => navigate('/auth')}
               size="lg"
-              className="h-14 text-base font-bold bg-gradient-to-r from-success via-success to-success/80 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all shadow-xl"
+              className="h-14 text-base font-bold bg-success hover:shadow-2xl hover:scale-105 active:scale-95 transition-all shadow-xl"
               style={{ boxShadow: '0 10px 30px rgba(16, 185, 129, 0.4)' }}
             >
               <Download className="h-5 w-5 mr-2" strokeWidth={2.5} />

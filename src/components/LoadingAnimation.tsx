@@ -17,7 +17,7 @@ const LoadingAnimation = () => {
           </div>
           
           {/* Logo with float animation */}
-          <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 p-4 animate-float">
+          <div className="relative w-24 h-24 rounded-full bg-primary/10 p-4 animate-float">
             <img 
               src={eduraLogo} 
               alt="Edura Logo" 
@@ -27,7 +27,7 @@ const LoadingAnimation = () => {
           
           {/* Glow effect */}
           <div className="absolute inset-0 -z-10 blur-2xl opacity-50">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-r from-primary to-secondary animate-pulse" />
+            <div className="w-24 h-24 rounded-full bg-primary animate-pulse" />
           </div>
         </div>
         

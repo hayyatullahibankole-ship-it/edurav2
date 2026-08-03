@@ -150,7 +150,7 @@ const SubjectProgressCard: React.FC<SubjectProgressCardProps> = ({
   const styles = getProgressStyles(progress);
 
   return (
-    <Card className="h-full hover:shadow-2xl transition-all hover-lift border-0 bg-gradient-to-br from-card to-muted/30 group relative overflow-hidden">
+    <Card className="h-full hover:shadow-2xl transition-all hover-lift border-0 bg-card group relative overflow-hidden">
       {/* Animated background accent */}
       <div className={cn(
         "absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-opacity",
@@ -158,12 +158,12 @@ const SubjectProgressCard: React.FC<SubjectProgressCardProps> = ({
       )} />
       
       {/* Top accent bar */}
-      <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r", styles.gradient)} />
+      <div className={cn("absolute top-0 left-0 right-0 h-1", styles.gradient)} />
       
       <CardHeader className="pb-3 relative">
         <div className="flex items-center gap-3">
           <div className={cn(
-            "p-3 rounded-xl bg-gradient-to-br shadow-lg group-hover:scale-110 transition-transform",
+            "p-3 rounded-xl shadow-lg group-hover:scale-110 transition-transform",
             styles.gradient
           )}>
             <BookOpen className="h-5 w-5 text-white" />
@@ -237,7 +237,7 @@ const SubjectProgressCard: React.FC<SubjectProgressCardProps> = ({
           <ScheduleTestModal>
             <Button 
               className={cn(
-                "w-full bg-gradient-to-r shadow-lg hover:shadow-xl transition-all group-hover:scale-105",
+                "w-full shadow-lg hover:shadow-xl transition-all group-hover:scale-105",
                 styles.gradient
               )}
               size="sm"

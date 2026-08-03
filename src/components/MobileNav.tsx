@@ -46,11 +46,11 @@ const TestCard = ({ examType, title, description, icon: Icon, badge, gradient, o
         className={`relative overflow-hidden cursor-pointer transition-all duration-300 active:scale-[0.97] hover-lift group border-0 shadow-lg`}
         onClick={() => playPopSound()}
       >
-        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-5 group-active:opacity-10 transition-opacity`} />
+        <div className={`absolute inset-0 ${gradient} opacity-5 group-active:opacity-10 transition-opacity`} />
         
         <div className="relative p-5 flex items-center gap-4">
           {/* Icon Container */}
-          <div className={`relative w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
+          <div className={`relative w-14 h-14 rounded-2xl ${gradient} flex items-center justify-center shadow-lg`}>
             <Icon className="h-7 w-7 text-white" />
             <div className="absolute inset-0 rounded-2xl bg-white/20 animate-pulse" />
           </div>

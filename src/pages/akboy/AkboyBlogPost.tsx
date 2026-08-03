@@ -219,7 +219,7 @@ export default function AkboyBlogPost() {
       </Link>
 
       {/* Hero Section with Featured Image */}
-      <div className="relative h-[60vh] min-h-[500px] overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100">
+      <div className="relative h-[60vh] min-h-[500px] overflow-hidden bg-emerald-100">
         {post.featured_image_url ? (
           <>
             <img
@@ -230,7 +230,7 @@ export default function AkboyBlogPost() {
                 e.currentTarget.style.display = 'none';
               }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+            <div className="absolute inset-0 bg-black"></div>
           </>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -352,7 +352,7 @@ export default function AkboyBlogPost() {
           </div>
 
           {/* Back to Blog CTA */}
-          <div className="mt-12 p-8 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl text-center">
+          <div className="mt-12 p-8 bg-emerald-50 rounded-2xl text-center">
             <h3 className="text-2xl font-bold text-gray-900 mb-4 font-poppins">
               Explore More Articles
             </h3>
