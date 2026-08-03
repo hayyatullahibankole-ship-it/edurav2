@@ -126,6 +126,9 @@ const ServicesHome = () => {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [step, setStep] = useState<"pay" | "details">("pay");
+  const [uploads, setUploads] = useState<ResultFile[]>([]);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [resubmitNote, setResubmitNote] = useState<string | null>(null);
   const [paidRequestId, setPaidRequestId] = useState<string | null>(null);
 
 
