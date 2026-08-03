@@ -2,6 +2,8 @@ import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
+import { useAppSide } from "@/hooks/useAppSide";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProtectedRoute from "./ProtectedRoute";
 import Layout from "./Layout";
@@ -52,6 +54,17 @@ const ReferralProgram = lazy(() => import("@/pages/ReferralProgram"));
 const PerformanceReport = lazy(() => import("@/pages/PerformanceReport"));
 const LessonQuiz = lazy(() => import("@/pages/LessonQuiz"));
 const EducationalServices = lazy(() => import("@/pages/EducationalServices"));
+const ChooseSide = lazy(() => import("@/pages/ChooseSide"));
+const ServicesHome = lazy(() => import("@/pages/ServicesHome"));
+
+// Renders the correct home screen for the side the student picked
+const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
+  const { side } = useAppSide();
+  if (side === null) return <Navigate to="/choose" replace />;
+  if (side === "services") return <ServicesHome />;
+  return isInstalledApp ? <MobileHome /> : <Layout showNavbar={false}><Dashboard /></Layout>;
+};
+
 
 // Akboy Pages
 const AkboyHome = lazy(() => import("@/pages/akboy/AkboyHome"));
@@ -156,12 +169,17 @@ const EduraRoutes = () => {
       <Route path="/mobile-preview" element={<Navigate to="/mobile-splash" replace />} />
       
       <Route path="/auth" element={<Layout showNavbar={false}><Auth /></Layout>} />
-      <Route path="/dashboard" element={
+      <Route path="/choose" element={
         <ProtectedRoute>
-          {isInstalledApp ? <MobileHome /> : 
-           <Layout showNavbar={false}><Dashboard /></Layout>}
+          <ChooseSide />
         </ProtectedRoute>
       } />
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <DashboardBySide isInstalledApp={isInstalledApp} />
+        </ProtectedRoute>
+      } />
+
       
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin" element={
