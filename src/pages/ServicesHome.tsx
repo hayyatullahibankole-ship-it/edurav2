@@ -666,8 +666,34 @@ const ServicesHome = () => {
                     <p className="text-xs text-muted-foreground">
                       {new Date(request.created_at).toLocaleDateString()} · {naira(request.amount)}
                     </p>
-                    {request.admin_note && (
+                    {request.status === "needs_resubmission" && (
+                      <div className="mt-2 rounded-md border border-destructive/30 bg-destructive/5 p-2">
+                        <p className="flex items-center gap-1 text-xs font-medium text-destructive">
+                          <AlertCircle className="h-3 w-3" /> Resubmission requested
+                        </p>
+                        {request.admin_note && (
+                          <p className="mt-1 text-xs text-muted-foreground">{request.admin_note}</p>
+                        )}
+                      </div>
+                    )}
+                    {request.admin_note && request.status !== "needs_resubmission" && (
                       <p className="mt-1 text-xs text-muted-foreground">{request.admin_note}</p>
+                    )}
+                    {(request.user_files?.length ?? 0) > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {request.user_files!.map((file) => (
+                          <Button
+                            key={file.path}
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 gap-1 border px-2 text-xs"
+                            onClick={() => openUserFile(file)}
+                          >
+                            <Upload className="h-3 w-3" />
+                            <span className="max-w-[140px] truncate">{file.name}</span>
+                          </Button>
+                        ))}
+                      </div>
                     )}
                     {(request.result_files?.length ?? 0) > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
@@ -690,14 +716,24 @@ const ServicesHome = () => {
                     <Button size="sm" className="shrink-0" onClick={() => resumeRequest(request)}>
                       Complete details
                     </Button>
+                  ) : request.status === "needs_resubmission" ? (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="shrink-0"
+                      onClick={() => resumeRequest(request)}
+                    >
+                      Resubmit
+                    </Button>
                   ) : (
                     <Badge
                       className={`shrink-0 border-0 capitalize ${
                         statusStyles[request.status] || statusStyles.pending
                       }`}
                     >
-                      {request.status}
+                      {request.status.replace(/_/g, " ")}
                     </Badge>
+
                   )}
 
                 </div>
