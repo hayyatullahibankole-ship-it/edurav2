@@ -96,6 +96,7 @@ export const ScratchCardDialog = ({ service, onClose }: Props) => {
           await completePurchase({ payment_method: "card", payment_reference: reference });
           setProcessing(false);
         },
+        () => setProcessing(false),
       );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not start payment");
