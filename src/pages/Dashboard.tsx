@@ -46,6 +46,8 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { FeatureCard } from "@/components/dashboard/FeatureCard";
 import { ModernQuickAction } from "@/components/dashboard/ModernQuickAction";
 import { ServicesShowcase } from "@/components/edura/ServicesShowcase";
+import { SideSwitcher } from "@/components/edura/SideSwitcher";
+
 import { MobileStatCard } from "@/components/dashboard/MobileStatCard";
 import { MobileTestCard } from "@/components/dashboard/MobileTestCard";
 import { MobileSubjectCard } from "@/components/dashboard/MobileSubjectCard";
@@ -363,6 +365,8 @@ const Dashboard = () => {
 
               {/* Actions */}
               <div className="flex items-center gap-3">
+                <SideSwitcher compact className="hidden sm:inline-flex" />
+
                 {!subscriptionLoading && (
                   <Badge variant={isPremium ? "default" : "secondary"} className="hidden md:flex">
                     {isPremium ? (
