@@ -21,6 +21,16 @@ export default {
         lato: ['DM Sans', 'Lato', 'sans-serif'],
       },
       colors: {
+        akboy: {
+          forest: "hsl(var(--akboy-forest))",
+          deep: "hsl(var(--akboy-forest-deep))",
+          moss: "hsl(var(--akboy-moss))",
+          butter: "hsl(var(--akboy-butter))",
+          bone: "hsl(var(--akboy-bone))",
+          paper: "hsl(var(--akboy-paper))",
+          line: "hsl(var(--akboy-line))",
+          muted: "hsl(var(--akboy-muted))",
+        },
         ink: {
           DEFAULT: "hsl(var(--ink))",
           soft: "hsl(var(--ink-soft))",
