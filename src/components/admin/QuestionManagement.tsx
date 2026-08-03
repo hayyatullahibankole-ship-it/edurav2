@@ -504,14 +504,15 @@ export default function QuestionManagement() {
 
   return (
     <ScrollArea className="h-[calc(100vh-120px)]">
-      <div className="space-y-6 p-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-6 p-3 sm:p-6 max-w-full overflow-x-hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold">Question Bank Management</h2>
-            <p className="text-muted-foreground">Create, upload, and manage examination questions</p>
+            <h2 className="text-xl sm:text-2xl font-bold">Question Bank Management</h2>
+            <p className="text-sm text-muted-foreground">Create, upload, and manage examination questions</p>
           </div>
-          
-          <div className="flex items-center gap-4 flex-wrap">
+
+          <div className="grid grid-cols-1 sm:flex sm:items-center gap-2 sm:gap-4 sm:flex-wrap [&_button]:w-full sm:[&_button]:w-auto">
+
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive">
