@@ -16,8 +16,6 @@ const Footer = () => {
     label: 'Resources',
     href: '/resources'
   }, {
-    label: 'Consultation',
-    href: '/consultation'
   }, {
     label: 'Pricing',
     href: '/payment'

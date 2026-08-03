@@ -72,7 +72,7 @@ const MobileHome = () => {
   const [blockedFeatureName, setBlockedFeatureName] = useState('');
 
   // Features that require app installation
-  const premiumFeatures = ['/study-planner', '/challenge-arena', '/performance-report', '/consultation', '/cbt-exam', '/practice'];
+  const premiumFeatures = ['/study-planner', '/challenge-arena', '/performance-report', '/cbt-exam', '/practice'];
   const isMobileBrowser =
   !isInstalledApp &&
   typeof navigator !== 'undefined' &&

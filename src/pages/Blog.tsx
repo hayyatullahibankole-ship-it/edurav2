@@ -417,11 +417,11 @@ const Blog = () => {
                     View All Articles
                   </Button>
                 </Link>
-                <Link to="/consultation">
+                <a href="https://wa.me/2347050757085?text=Hello%20Edura%2C%20I%20would%20like%20to%20book%20an%20expert%20consultation%20session." target="_blank" rel="noopener noreferrer">
                   <Button>
                     Get Expert Consultation
                   </Button>
-                </Link>
+                </a>
               </div>
             </div>
           </article>

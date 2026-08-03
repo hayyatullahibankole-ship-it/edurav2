@@ -515,7 +515,7 @@ const ServicesHome = () => {
                     Book a session with an admission or subject expert
                   </p>
                 </div>
-                <Button size="sm" variant="outline" onClick={() => navigate("/consultation")}>
+                <Button size="sm" variant="outline" onClick={() => window.open("https://wa.me/2347050757085?text=Hello%20Edura%2C%20I%20would%20like%20to%20book%20an%20expert%20consultation%20session.", "_blank", "noopener,noreferrer")}>
                   Book
                 </Button>
               </CardContent>
