@@ -602,9 +602,39 @@ const ServicesHome = () => {
               </p>
             </div>
           </div>
+
+          {/* Desktop navigation */}
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+            <button
+              onClick={() => setView("home")}
+              className={`transition-colors ${view === "home" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Services
+            </button>
+            <button
+              onClick={() => setView("requests")}
+              className={`transition-colors ${view === "requests" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              My requests
+            </button>
+            <button
+              onClick={() => navigate("/wallet")}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Wallet
+            </button>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              CBT
+            </button>
+          </nav>
+
           <SideSwitcher compact />
         </div>
       </header>
+
 
       <main className="container mx-auto max-w-5xl px-4 py-5 space-y-5">
         <section>
