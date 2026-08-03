@@ -95,7 +95,7 @@ export default function ServiceRequestsManager() {
     const { data, error } = await supabase
       .from("service_requests")
       .select(
-        "id, user_id, service_name, provider, amount, status, form_data, admin_note, result_files, created_at"
+        "id, user_id, service_name, provider, amount, status, form_data, admin_note, result_files, user_files, created_at"
       )
       .order("created_at", { ascending: false })
       .limit(200);
@@ -109,6 +109,7 @@ export default function ServiceRequestsManager() {
     const rows = (data || []).map((r: any) => ({
       ...r,
       result_files: Array.isArray(r.result_files) ? (r.result_files as ResultFile[]) : [],
+      user_files: Array.isArray(r.user_files) ? (r.user_files as ResultFile[]) : [],
     })) as ServiceRequest[];
     setRequests(rows);
 
