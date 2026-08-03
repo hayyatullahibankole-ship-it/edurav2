@@ -279,6 +279,8 @@ const ServicesHome = () => {
     setActiveService(service);
     setFormValues({});
     setPaidRequestId(null);
+    setUploads([]);
+    setResubmitNote(null);
     setStep("pay");
   };
 
@@ -286,7 +288,35 @@ const ServicesHome = () => {
     setActiveService(null);
     setFormValues({});
     setPaidRequestId(null);
+    setUploads([]);
+    setResubmitNote(null);
     setStep("pay");
+  };
+
+  const handleUpload = async (files: FileList | null) => {
+    if (!files?.length || !user || !paidRequestId) return;
+    setUploadingFile(true);
+    try {
+      for (const file of Array.from(files)) {
+        if (file.size > 15 * 1024 * 1024) {
+          toast.error(`${file.name} is larger than 15MB`);
+          continue;
+        }
+        const ext = file.name.split(".").pop() || "dat";
+        const path = `${user.id}/${paidRequestId}/${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase.storage.from("service-uploads").upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+        if (error) {
+          toast.error(`Could not upload ${file.name}`);
+          continue;
+        }
+        setUploads((prev) => [...prev, { path, name: file.name, type: file.type }]);
+      }
+    } finally {
+      setUploadingFile(false);
+    }
   };
 
   const afterPayment = async (payload: Record<string, unknown>) => {
