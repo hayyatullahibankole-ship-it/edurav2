@@ -844,7 +844,9 @@ export default function QuestionManagement() {
 
         {/* Questions List */}
         <Tabs defaultValue="active" className="space-y-4">
-          <TabsList>
+          <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto">
+          <TabsList className="w-max min-w-full justify-start">
+
             <TabsTrigger value="active">
               Active Questions ({activeQuestions.length})
             </TabsTrigger>
