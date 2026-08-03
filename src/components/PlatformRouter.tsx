@@ -232,7 +232,7 @@ const EduraRoutes = () => {
         </ProtectedRoute>
       } />
 
-      <Route path="/services" element={user ? <ServicesHome /> : <ServicesLanding />} />
+      <Route path="/services" element={user ? <ServicesHome /> : <Layout><ServicesLanding /></Layout>} />
       <Route path="/admissions" element={<Navigate to="/services?provider=admission" replace />} />
       <Route path="/wallet" element={
         <ProtectedRoute>
