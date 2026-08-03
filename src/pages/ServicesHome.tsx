@@ -225,13 +225,80 @@ const ServicesHome = () => {
     return { total: requests.length, pending, completed };
   }, [requests]);
 
-  const submitRequest = async () => {
+  const openService = (service: Service) => {
+    setActiveService(service);
+    setFormValues({});
+    setPaidRequestId(null);
+    setStep("pay");
+  };
+
+  const closeDialog = () => {
+    setActiveService(null);
+    setFormValues({});
+    setPaidRequestId(null);
+    setStep("pay");
+  };
+
+  const afterPayment = async (payload: Record<string, unknown>) => {
+    if (!activeService) return;
+    const { data, error } = await supabase.functions.invoke("pay-service-request", {
+      body: { service_id: activeService.id, ...payload },
+    });
+
+    if (error || data?.error) {
+      toast.error(data?.error || "Payment could not be completed. Please try again.");
+      return;
+    }
+
+    setPaidRequestId(data.request_id as string);
+    setStep("details");
+    refreshWallet();
+    loadRequests();
+    toast.success("Payment received. Now fill in your details.");
+  };
+
+  const payWithWallet = async () => {
     if (!activeService) return;
     if (!user) {
-      toast.error("Please sign in to request a service");
+      toast.error("Please sign in to continue");
       navigate("/auth");
       return;
     }
+    setSubmitting(true);
+    await afterPayment({ payment_method: "wallet" });
+    setSubmitting(false);
+  };
+
+  const payWithCard = async () => {
+    if (!activeService) return;
+    if (!user) {
+      toast.error("Please sign in to continue");
+      navigate("/auth");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await initializePaystackPayment(
+        {
+          amount: Number(activeService.price) * 100,
+          email: user.email || "",
+          reference: `srv_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+          currency: "NGN",
+          metadata: { purpose: "service_request", service_slug: activeService.slug },
+        },
+        async (reference) => {
+          await afterPayment({ payment_method: "card", payment_reference: reference });
+          setSubmitting(false);
+        },
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not start payment");
+      setSubmitting(false);
+    }
+  };
+
+  const submitDetails = async () => {
+    if (!activeService || !paidRequestId) return;
 
     const missing = activeService.fields.filter(
       (field) => field.required && !formValues[field.key]?.trim()
@@ -242,29 +309,35 @@ const ServicesHome = () => {
     }
 
     setSubmitting(true);
-    const { error } = await supabase.from("service_requests").insert({
-      user_id: user.id,
-      service_id: activeService.id,
-      service_slug: activeService.slug,
-      service_name: activeService.name,
-      provider: activeService.provider,
-      amount: activeService.price,
-      form_data: formValues,
-      status: "pending",
-    });
+    const { error } = await supabase
+      .from("service_requests")
+      .update({ form_data: formValues, status: "pending" })
+      .eq("id", paidRequestId);
     setSubmitting(false);
 
     if (error) {
-      toast.error("Could not submit request. Please try again.");
+      toast.error("Could not save your details. Please try again.");
       return;
     }
 
-    toast.success("Request submitted. We'll process it shortly.");
-    setActiveService(null);
-    setFormValues({});
+    toast.success("Details submitted. We'll process your request shortly.");
+    closeDialog();
     loadRequests();
     setView("requests");
   };
+
+  const resumeRequest = (request: ServiceRequest) => {
+    const service = services.find((s) => s.id === request.service_id);
+    if (!service) {
+      toast.error("This service is no longer available. Please contact support.");
+      return;
+    }
+    setActiveService(service);
+    setFormValues({});
+    setPaidRequestId(request.id);
+    setStep("details");
+  };
+
 
   const firstName = (user?.email ?? "there").split("@")[0];
 
