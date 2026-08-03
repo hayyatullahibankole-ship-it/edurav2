@@ -44,7 +44,7 @@ import { ExamDayVerification } from '@/components/admin/ExamDayVerification';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 type NavItem = { key: string; label: string; icon: any };
 type NavSection = { label: string; items: NavItem[] };
@@ -118,9 +118,18 @@ export default function AdminPortal() {
   const { user, isAdmin, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [activeKey, setActiveKey] = useState('dashboard');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const validKeys = useMemo(() => NAV.flatMap(s => s.items.map(i => i.key)), []);
+  const tabParam = searchParams.get('section') || '';
+  const activeKey = validKeys.includes(tabParam) ? tabParam : 'dashboard';
+  const setActiveKey = (key: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('section', key);
+    setSearchParams(next);
+  };
   const [search, setSearch] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
+
 
   const [stats, setStats] = useState({
     totalUsers: 0,

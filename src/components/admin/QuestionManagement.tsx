@@ -439,13 +439,15 @@ export default function QuestionManagement() {
 
   const renderQuestionList = (list: Question[]) => (
     <Card>
-      <CardContent className="p-6">
+      <CardContent className="p-3 sm:p-6">
         <ScrollArea className="h-[600px]">
-          <div className="space-y-6 pr-4">
+          <div className="space-y-4 sm:space-y-6 pr-2 sm:pr-4">
             {list.map((question) => (
-              <div key={question.id} className="flex items-start justify-between p-6 bg-card rounded-lg border shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex-1 space-y-4">
-                  <div className="flex items-center space-x-2">
+              <div key={question.id} className="flex flex-col sm:flex-row items-stretch sm:items-start sm:justify-between gap-3 p-4 sm:p-6 bg-card rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+
+                <div className="flex-1 min-w-0 space-y-4">
+                  <div className="flex items-center gap-2 flex-wrap">
+
                     <Badge className={`${getDifficultyColor(question.difficulty_level)} text-white`}>
                       {getDifficultyLabel(question.difficulty_level)}
                     </Badge>
@@ -465,16 +467,17 @@ export default function QuestionManagement() {
                       className="font-medium text-lg leading-relaxed"
                     />
                   </div>
-                  <div className="flex items-center space-x-4 text-sm text-muted-foreground pt-2 border-t">
+                  <div className="flex items-center gap-x-4 gap-y-1 flex-wrap text-sm text-muted-foreground pt-2 border-t">
                     <span>{question.points} point{question.points !== 1 ? 's' : ''}</span>
                     <span>{new Date(question.created_at).toLocaleDateString()}</span>
                     {question.tags && Array.isArray(question.tags) && question.tags.length > 0 && (
-                      <span>Tags: {question.tags.join(', ')}</span>
+                      <span className="break-all">Tags: {question.tags.join(', ')}</span>
                     )}
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-2 ml-4">
+
+                <div className="flex items-center gap-1 flex-wrap sm:ml-4 border-t sm:border-t-0 pt-2 sm:pt-0">
+
                   <Button variant="ghost" size="sm" onClick={() => handleViewQuestion(question)}>
                     <Eye className="w-4 h-4" />
                   </Button>
@@ -501,14 +504,15 @@ export default function QuestionManagement() {
 
   return (
     <ScrollArea className="h-[calc(100vh-120px)]">
-      <div className="space-y-6 p-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-6 p-3 sm:p-6 max-w-full overflow-x-hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold">Question Bank Management</h2>
-            <p className="text-muted-foreground">Create, upload, and manage examination questions</p>
+            <h2 className="text-xl sm:text-2xl font-bold">Question Bank Management</h2>
+            <p className="text-sm text-muted-foreground">Create, upload, and manage examination questions</p>
           </div>
-          
-          <div className="flex items-center gap-4 flex-wrap">
+
+          <div className="grid grid-cols-1 sm:flex sm:items-center gap-2 sm:gap-4 sm:flex-wrap [&_button]:w-full sm:[&_button]:w-auto">
+
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive">
@@ -757,8 +761,10 @@ export default function QuestionManagement() {
 
         {/* Filters */}
         <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
+
+
               <div className="flex-1">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -770,9 +776,10 @@ export default function QuestionManagement() {
                   />
                 </div>
               </div>
-              <div className="flex gap-3 items-center">
+              <div className="flex gap-2 sm:gap-3 items-center">
                 <Select value={selectedSubject} onValueChange={(v) => { setSelectedSubject(v); setCurrentPage(0); }}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="flex-1 sm:w-40">
+
                     <SelectValue placeholder="All Subjects" />
                   </SelectTrigger>
                   <SelectContent>
@@ -785,7 +792,7 @@ export default function QuestionManagement() {
                   </SelectContent>
                 </Select>
                 <Select value={selectedDifficulty} onValueChange={(v) => { setSelectedDifficulty(v); setCurrentPage(0); }}>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="flex-1 sm:w-32">
                     <SelectValue placeholder="All Levels" />
                   </SelectTrigger>
                   <SelectContent>
@@ -804,11 +811,12 @@ export default function QuestionManagement() {
         {totalCount > PAGE_SIZE && (
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Showing {currentPage * PAGE_SIZE + 1}–{Math.min((currentPage + 1) * PAGE_SIZE, totalCount)} of {totalCount} questions
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between sm:justify-end gap-2">
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -836,7 +844,9 @@ export default function QuestionManagement() {
 
         {/* Questions List */}
         <Tabs defaultValue="active" className="space-y-4">
-          <TabsList>
+          <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto">
+          <TabsList className="w-max min-w-full justify-start">
+
             <TabsTrigger value="active">
               Active Questions ({activeQuestions.length})
             </TabsTrigger>
@@ -853,6 +863,8 @@ export default function QuestionManagement() {
               Question Cleanup
             </TabsTrigger>
           </TabsList>
+          </div>
+
 
           <TabsContent value="active">
             {loading ? (
