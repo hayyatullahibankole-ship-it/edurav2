@@ -69,6 +69,21 @@ const Wallet = () => {
     };
   }, [user?.id]);
 
+  useEffect(() => {
+    if (!user || !account) return;
+
+    let active = true;
+    const reconcileTransfers = async () => {
+      const { data, error } = await supabase.functions.invoke("wallet-sync", { body: {} });
+      if (active && !error && data?.credited > 0) await refresh();
+    };
+
+    void reconcileTransfers();
+    return () => {
+      active = false;
+    };
+  }, [account?.account_number, refresh, user?.id]);
+
   const generateAccount = async () => {
     if (!user) {
       navigate("/auth");
