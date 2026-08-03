@@ -153,9 +153,11 @@ All colors MUST be HSL for consistency across light/dark modes.
     @apply bg-background text-foreground font-sans;
   }
 
-  h1, h2, h3, h4, .font-display {
-    @apply font-display tracking-tight;
+  h1, h2, h3, h4 {
+    font-family: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
+
   
   /* Smooth scrolling for mobile */
   html {
