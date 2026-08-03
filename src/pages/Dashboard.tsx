@@ -86,6 +86,7 @@ const Dashboard = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const { isInstalledApp } = useInstalledApp();
+  const { balance: walletBalance, loading: walletLoading } = useWallet();
 
   // Update active tab when URL parameter changes
   useEffect(() => {
