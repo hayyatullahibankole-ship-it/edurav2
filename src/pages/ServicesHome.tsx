@@ -329,71 +329,97 @@ const ServicesHome = () => {
               />
             </div>
 
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {PROVIDERS.map((p) => (
-                <button
-                  key={p.key}
-                  onClick={() => setProvider(p.key)}
-                  className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
-                    provider === p.key
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "bg-card text-muted-foreground hover:border-primary/50"
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-
             {loading ? (
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-28 w-full rounded-xl" />
+                  <Skeleton key={i} className="h-36 w-full rounded-xl" />
                 ))}
               </div>
-            ) : filtered.length === 0 ? (
-              <div className="rounded-lg border p-10 text-center">
-                <Briefcase className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">No services match your search.</p>
+            ) : showProviderCards ? (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {providerCards.map((p) => (
+                  <button
+                    key={p.key}
+                    onClick={() => setProvider(p.key)}
+                    className="flex flex-col items-center gap-2 rounded-xl border bg-card p-4 text-center transition-colors hover:border-primary/60"
+                  >
+                    <ProviderLogo provider={p.key} className="h-14 w-14" />
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-semibold leading-tight">{p.label}</p>
+                      <p className="line-clamp-2 text-[11px] text-muted-foreground">{p.full}</p>
+                    </div>
+                    <Badge variant="secondary" className="text-[10px]">
+                      {p.count} service{p.count === 1 ? "" : "s"}
+                    </Badge>
+                  </button>
+                ))}
               </div>
             ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {filtered.map((service) => (
-                  <Card key={service.id} className="border transition-colors hover:border-primary/60">
-                    <CardContent className="flex h-full flex-col gap-3 p-4">
-                      <div className="space-y-1">
-                        <Badge variant="secondary" className="uppercase text-[10px]">
-                          {service.provider}
-                        </Badge>
-                        <h3 className="font-semibold leading-tight">{service.name}</h3>
-                        <p className="line-clamp-2 text-sm text-muted-foreground">
-                          {service.description}
-                        </p>
-                      </div>
-                      <div className="mt-auto flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-lg font-bold">{naira(service.price)}</p>
-                          {service.turnaround && (
-                            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3" /> {service.turnaround}
-                            </p>
-                          )}
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            setActiveService(service);
-                            setFormValues({});
-                          }}
-                        >
-                          Request
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <div className="space-y-3">
+                {provider !== "all" && (
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setProvider("all")}>
+                      <ArrowLeft className="mr-1.5 h-4 w-4" />
+                      All providers
+                    </Button>
+                    <div className="flex items-center gap-2">
+                      <ProviderLogo provider={provider} className="h-7 w-7" />
+                      <span className="text-sm font-semibold">
+                        {providerInfo(provider).label}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {filtered.length === 0 ? (
+                  <div className="rounded-lg border p-10 text-center">
+                    <Briefcase className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">No services match your search.</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {filtered.map((service) => (
+                      <Card
+                        key={service.id}
+                        className="border transition-colors hover:border-primary/60"
+                      >
+                        <CardContent className="flex h-full flex-col gap-3 p-4">
+                          <div className="flex items-start gap-3">
+                            <ProviderLogo provider={service.provider} className="h-10 w-10 shrink-0" />
+                            <div className="min-w-0 space-y-1">
+                              <h3 className="font-semibold leading-tight">{service.name}</h3>
+                              <p className="line-clamp-2 text-sm text-muted-foreground">
+                                {service.description}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-auto flex items-center justify-between gap-3">
+                            <div>
+                              <p className="text-lg font-bold">{naira(service.price)}</p>
+                              {service.turnaround && (
+                                <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Clock className="h-3 w-3" /> {service.turnaround}
+                                </p>
+                              )}
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setActiveService(service);
+                                setFormValues({});
+                              }}
+                            >
+                              Request
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
+
           </div>
         ) : (
           <div className="space-y-3">
