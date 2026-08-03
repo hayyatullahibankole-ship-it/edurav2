@@ -1,73 +1,134 @@
-# Welcome to your Lovable project
+# eduracbt
 
-## Project info
+Design and develop a well-structured, ultra-modern CBT (Computer-Based Test) mobile and web application tailored for WAEC and JAMB candidates.
 
-**URL**: https://lovable.dev/projects/11232991-8e4b-4d8a-ad8f-d15f5b1ed868
+Core Features:
 
-## How can I edit this code?
+1. User Authentication & Profiles
 
-There are several ways of editing your application.
 
-**Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/11232991-8e4b-4d8a-ad8f-d15f5b1ed868) and start prompting.
+Sign up/login via email, phone, or social media.
 
-Changes made via Lovable will be committed automatically to this repo.
+Profile dashboard showing test history, scores, and subscription status.
 
-**Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. CBT Exam Simulation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-Follow these steps:
+
+Full JAMB & WAEC simulation environment with timer, navigation, and subject selection.
+
+Randomized question pool across English, Mathematics, Science, Arts, and Commercial subjects.
+
+Auto-marking, instant results, and performance analytics.
+
+Leaderboard for competitive practice.
+
+
+3. Subscription & Payment System
+
+
+
+Freemium model (limited free tests, full access with subscription).
+
+Multiple payment gateways (Paystack, Flutterwave, card payments, bank transfer).
+
+Monthly, quarterly, and yearly subscription plans.
+
+
+4. Resource Library (PDF and videos Access)
+
+
+
+Section for students to download/view past questions, study guides, and notes in PDF format.
+
+Section for students to watch videos of topics they find difficulties in 
+
+Option for premium resources available only to paid subscribers.
+
+
+5. Consultation & Mentorship Booking
+
+
+
+In-app consultation booking system (students can schedule 1-on-1 or group sessions).
+
+Integration with video call platforms (Zoom/Google Meet) or in-app chat/video feature.
+
+
+6. Analytics & Progress Tracking
+
+
+
+Detailed performance insights per subject, topic, and exam attempt.
+
+Personalized recommendations for weak areas.
+
+
+7. Community & Engagement
+
+
+
+In-app discussion forum or Q&A board.
+
+Notifications for exam updates, new resources, and orientation programs.
+
+
+8. Admin Dashboard
+
+
+
+Upload/manage question bank (MCQs, theory, practice questions).
+
+Upload resources (PDFs, videos).
+
+Manage users, subscriptions, and consultation bookings.
+
+
+Design & UI/UX:
+
+Clean, minimal, and modern design (inspired by Google Classroom & Coursera).
+
+Intuitive navigation with a focus on student-friendly experience.
+
+Mobile-first responsive layout.
+
+
+Technology Stack (Suggested):
+
+Frontend: React Native (mobile) & React (web).
+
+Backend: Node.js / Django.
+
+Database: PostgreSQL / MongoDB.
+
+Payments: Paystack, Flutterwave, Stripe.
+
+Hosting: AWS / Firebase.
+
+
+Target Users: Secondary school students preparing for WAEC & JAMB.
+
+This project was built with [Lovable](https://lovable.dev).
+
+**Live app**: https://eduracbt.lovable.app
+
+## Build with Lovable
+
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/ee95bfa9-a229-42b6-ac9d-0a6c28cde3a7).
+
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+
+## Development
+
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
+git clone <this-repository-url>
+cd <repository-name>
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/11232991-8e4b-4d8a-ad8f-d15f5b1ed868) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
