@@ -53,7 +53,7 @@ const StudyPlanner = lazy(() => import("@/pages/StudyPlanner"));
 const ReferralProgram = lazy(() => import("@/pages/ReferralProgram"));
 const PerformanceReport = lazy(() => import("@/pages/PerformanceReport"));
 const LessonQuiz = lazy(() => import("@/pages/LessonQuiz"));
-const EducationalServices = lazy(() => import("@/pages/EducationalServices"));
+
 const ChooseSide = lazy(() => import("@/pages/ChooseSide"));
 const ServicesHome = lazy(() => import("@/pages/ServicesHome"));
 
@@ -230,10 +230,11 @@ const EduraRoutes = () => {
 
       <Route path="/services" element={
         <ProtectedRoute>
-          <Layout showNavbar={false}><EducationalServices /></Layout>
+          <ServicesHome />
         </ProtectedRoute>
       } />
-      <Route path="/admissions" element={<Navigate to="/services" replace />} />
+      <Route path="/admissions" element={<Navigate to="/services?provider=admission" replace />} />
+
       
       <Route path="/consultation" element={<Layout><Consultation /></Layout>} />
       <Route path="/payment" element={<Layout><Payment /></Layout>} />
