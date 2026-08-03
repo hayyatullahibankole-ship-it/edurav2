@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.wallet-sync]
 verify_jwt = false
+
+[functions.invite-school-staff]
+verify_jwt = true

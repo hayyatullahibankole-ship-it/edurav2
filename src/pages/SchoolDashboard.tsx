@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   Users, BookOpen, TrendingUp, DollarSign, LayoutDashboard, Settings,
-  LogOut, Copy, Building2, HelpCircle, Video, Trophy, Lock, AlertTriangle } from
+  LogOut, Copy, Building2, HelpCircle, Video, Trophy, Lock, AlertTriangle, UserCog } from
 "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -41,6 +41,7 @@ import SchoolExamManager from "@/components/school/SchoolExamManagerEnhanced";
 import { AIAssistant } from "@/components/AIAssistant";
 import VideoTutorials from "@/components/school/VideoTutorials";
 import SchoolMockManager from "@/components/school/SchoolMockManager";
+import SchoolStaffManager from "@/components/school/SchoolStaffManager";
 
 const menuItems = [
 { id: "overview", title: "Overview", icon: LayoutDashboard },
@@ -49,6 +50,7 @@ const menuItems = [
 { id: "mock", title: "Mock Exam", icon: Trophy },
 { id: "reports", title: "Reports", icon: TrendingUp },
 { id: "tutorials", title: "Video Tutorials", icon: Video },
+{ id: "staff", title: "Staff", icon: UserCog },
 { id: "billing", title: "Billing", icon: DollarSign },
 { id: "settings", title: "Settings", icon: Settings }];
 
@@ -522,6 +524,10 @@ export default function SchoolDashboard() {
 
               {activeTab === "tutorials" &&
               <VideoTutorials />
+              }
+
+              {activeTab === "staff" && schoolData &&
+              <SchoolStaffManager schoolId={schoolData.id} />
               }
 
               {activeTab === "billing" && schoolData &&
