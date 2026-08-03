@@ -99,6 +99,9 @@ const naira = (value: number) =>
 const statusStyles: Record<string, string> = {
   pending: "bg-muted text-muted-foreground",
   awaiting_details: "bg-primary/10 text-primary",
+  needs_resubmission: "bg-destructive/10 text-destructive",
+
+
 
   processing: "bg-primary/10 text-primary",
   completed: "bg-success/10 text-success",
