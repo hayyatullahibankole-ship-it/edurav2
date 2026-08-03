@@ -2984,6 +2984,119 @@ export type Database = {
           },
         ]
       }
+      service_catalog: {
+        Row: {
+          created_at: string
+          description: string | null
+          fields: Json
+          icon: string | null
+          id: string
+          is_active: boolean
+          is_automated: boolean
+          name: string
+          price: number
+          provider: string
+          slug: string
+          sort_order: number
+          turnaround: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          fields?: Json
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          is_automated?: boolean
+          name: string
+          price?: number
+          provider: string
+          slug: string
+          sort_order?: number
+          turnaround?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          fields?: Json
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          is_automated?: boolean
+          name?: string
+          price?: number
+          provider?: string
+          slug?: string
+          sort_order?: number
+          turnaround?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      service_requests: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          created_at: string
+          form_data: Json
+          id: string
+          paid_from: string | null
+          payment_reference: string | null
+          provider: string
+          result: Json | null
+          service_id: string | null
+          service_name: string
+          service_slug: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount?: number
+          created_at?: string
+          form_data?: Json
+          id?: string
+          paid_from?: string | null
+          payment_reference?: string | null
+          provider: string
+          result?: Json | null
+          service_id?: string | null
+          service_name: string
+          service_slug: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          created_at?: string
+          form_data?: Json
+          id?: string
+          paid_from?: string | null
+          payment_reference?: string | null
+          provider?: string
+          result?: Json | null
+          service_id?: string | null
+          service_name?: string
+          service_slug?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       settings: {
         Row: {
           description: string | null
