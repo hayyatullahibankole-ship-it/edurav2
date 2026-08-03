@@ -1094,13 +1094,14 @@ const Dashboard = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm opacity-90 mb-1">Study Hours</p>
+                          <p className="text-sm text-muted-foreground mb-1">Study Hours</p>
                           <p className="text-3xl font-bold">{stats.studyHours}h</p>
-                          <p className="text-xs opacity-80 mt-1">Total Study Time</p>
+                          <p className="text-xs text-muted-foreground mt-1">Total Study Time</p>
                         </div>
-                        <div className="p-3 bg-primary-foreground/20 rounded-lg">
-                          <Clock className="h-6 w-6" />
+                        <div className="p-3 bg-muted rounded-lg">
+                          <Clock className="h-6 w-6 text-muted-foreground" />
                         </div>
+
                       </div>
                     </CardContent>
                   </Card>
