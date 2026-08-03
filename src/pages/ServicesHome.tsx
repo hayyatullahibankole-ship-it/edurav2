@@ -102,7 +102,9 @@ const statusStyles: Record<string, string> = {
 const ServicesHome = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { balance, refresh: refreshWallet } = useWallet();
   const [searchParams, setSearchParams] = useSearchParams();
+
 
   const [services, setServices] = useState<Service[]>([]);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
