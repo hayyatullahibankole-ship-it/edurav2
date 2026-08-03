@@ -1,72 +1,49 @@
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
-import { 
-  School, 
-  Users, 
-  TrendingUp, 
-  BarChart3, 
-  Shield,
-  CheckCircle2,
-  ArrowRight,
-  Clock,
-  Award,
-  Target,
-  Bell,
-  FileText,
-  Zap,
-  GraduationCap,
-  Brain,
-  Globe,
-  Sparkles,
-  Home,
-  LayoutDashboard
-} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/Footer";
-import schoolHero from "@/assets/school-hero.jpg";
+import {
+  ArrowRight,
+  BarChart3,
+  Brain,
+  Building2,
+  CheckCircle2,
+  ClipboardCheck,
+  FileText,
+  GraduationCap,
+  Home,
+  LayoutDashboard,
+  School,
+  ShieldCheck,
+  Target,
+  Users,
+} from "lucide-react";
 import dashboardPreview from "@/assets/school-dashboard-preview.jpg";
 
 export default function SchoolLanding() {
   const navigate = useNavigate();
 
   const stats = [
-    { number: "500+", label: "Schools Registered", icon: School },
-    { number: "50,000+", label: "Students Practicing", icon: Users },
-    { number: "98%", label: "JAMB Pass Rate", icon: TrendingUp },
-    { number: "10,000+", label: "Practice Questions", icon: FileText }
+    { number: "500+", label: "Schools registered" },
+    { number: "50,000+", label: "Students practising" },
+    { number: "120,000+", label: "Questions available" },
+    { number: "Free", label: "Mock exams, always" },
   ];
 
   const features = [
-    {
-      icon: Users,
-      title: "Student Management",
-      description: "Track each student's WAEC, JAMB & NECO preparation progress with comprehensive dashboards"
-    },
-    {
-      icon: BarChart3,
-      title: "Real-time Analytics",
-      description: "Monitor performance across all subjects with advanced analytics and insights"
-    },
-    {
-      icon: Target,
-      title: "CBT Practice Tests",
-      description: "Access 10,000+ authentic WAEC, JAMB & NECO questions with instant feedback"
-    },
-    {
-      icon: FileText,
-      title: "Detailed Reports",
-      description: "Generate and export comprehensive exam performance reports in multiple formats"
-    },
-    {
-      icon: Brain,
-      title: "Smart Learning Paths",
-      description: "AI-powered recommendations to help students focus on weak areas"
-    },
-    {
-      icon: Shield,
-      title: "Enterprise Security",
-      description: "Bank-grade security for all student data, results, and school information"
-    }
+    { icon: Users, title: "Student management", description: "Create classes, enrol students in bulk and track each one's WAEC, JAMB and NECO progress." },
+    { icon: BarChart3, title: "Real-time analytics", description: "Per-subject performance, class averages and ranked leaderboards updated as exams are submitted." },
+    { icon: Target, title: "Your own CBT exams", description: "Build exams from our 120,000-question bank or upload your school's own questions by CSV." },
+    { icon: FileText, title: "Printable reports", description: "Generate broadsheets and individual result slips ready for parents and staff meetings." },
+    { icon: Brain, title: "Weak-topic insights", description: "See exactly which topics a class keeps failing so revision time goes where it matters." },
+    { icon: ShieldCheck, title: "Exam integrity", description: "Question shuffling, tab-lock, timed auto-submission and device-level session control." },
+  ];
+
+  const steps = [
+    { n: "01", t: "Register your school", d: "Fill one form and verify your email. No sales call needed." },
+    { n: "02", t: "Add your students", d: "Bulk-upload a class list; each student gets their own login." },
+    { n: "03", t: "Create an exam", d: "Pick subjects, question count and duration, then schedule it." },
+    { n: "04", t: "Read the results", d: "Rankings, subject breakdowns and printable reports the moment it ends." },
   ];
 
   const pricingTiers = [
@@ -77,589 +54,216 @@ export default function SchoolLanding() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-background font-sans">
+      {/* Nav */}
+      <nav className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
-              <GraduationCap className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">Edura Schools</span>
+              <GraduationCap className="h-6 w-6 text-primary" />
+              <span className="font-display text-lg font-bold">Edura Schools</span>
             </div>
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost"
-                onClick={() => navigate("/")}
-              >
-                <Home className="h-4 w-4 mr-2" />
-                Edura Home
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
+                <Home className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Main site</span>
               </Button>
-              <Button 
-                variant="ghost"
-                onClick={() => navigate("/school-login")}
-              >
-                Sign In
-              </Button>
-              <Button 
-                onClick={() => navigate("/school-registration")}
-              >
-                Get Started
+              <Button variant="outline" size="sm" onClick={() => navigate("/school-login")}>
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                School login
               </Button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-primary/5 to-secondary/5">
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0">
-          <img 
-            src={schoolHero} 
-            alt="Students learning in modern classroom" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/98 via-background/90 to-primary/20" />
-        </div>
-
-        {/* Decorative Elements */}
-        <div className="absolute top-20 right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
-
-        <div className="container mx-auto px-4 py-24 relative z-10">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              {/* Left Content */}
-              <div className="space-y-8">
-                <div className="space-y-6">
-                  {/* Badge */}
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/30">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                    <span className="text-sm font-semibold text-primary">Trusted by 500+ Schools Nationwide</span>
-                  </div>
-
-                  <h1 className="text-5xl md:text-6xl xl:text-7xl font-bold leading-tight">
-                    Transforming
-                    <span className="block text-gradient-animate mt-2">Exam Preparation</span>
-                    <span className="block mt-2">For Nigerian Schools</span>
-                  </h1>
-                  
-                  <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
-                    Comprehensive CBT platform for WAEC, JAMB & NECO. Monitor student progress, analyze performance, and achieve outstanding results.
-                  </p>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Button 
-                    size="lg" 
-                    onClick={() => navigate("/school-registration")}
-                    className="h-14 px-8 text-lg font-semibold bg-gradient-to-r from-primary to-secondary hover:shadow-glow transition-all"
-                  >
-                    Get Started Free
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    variant="outline"
-                    onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20want%20to%20schedule%20a%20demo", "_blank")}
-                    className="h-14 px-8 text-lg font-semibold border-2 border-primary/30 hover:bg-primary/5 hover:border-primary"
-                  >
-                    Book a Demo
-                  </Button>
-                </div>
-                
-                <div className="flex items-center gap-6 pt-4">
-                  <div className="flex items-center gap-2 text-sm">
-                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
-                      <CheckCircle2 className="h-3 w-3 text-primary" />
-                    </div>
-                    <span>Free 14-day trial</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
-                      <CheckCircle2 className="h-3 w-3 text-primary" />
-                    </div>
-                    <span>No credit card required</span>
-                  </div>
-                </div>
+      {/* Hero */}
+      <section className="bg-ink text-ink-foreground">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-ink-soft px-3 py-1.5">
+                <Building2 className="h-3.5 w-3.5 text-primary" />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+                  For secondary schools & centres
+                </span>
               </div>
-
-              {/* Right Content - Feature Cards */}
-              <div className="grid grid-cols-1 gap-4">
-                {/* Top Card */}
-                <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 hover:border-primary/50 hover:shadow-xl transition-all group">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <BarChart3 className="h-7 w-7 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">Real-Time Analytics</h3>
-                        <p className="text-sm text-muted-foreground">Track every student's progress with comprehensive performance dashboards and instant insights.</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Middle Card - Highlighted */}
-                <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 backdrop-blur-sm border-2 border-primary hover:border-primary hover:shadow-glow transition-all group">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg">
-                        <Target className="h-7 w-7 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg mb-2 text-primary">10,000+ Practice Questions</h3>
-                        <p className="text-sm text-muted-foreground">Access authentic WAEC, JAMB & NECO questions with detailed explanations and instant feedback.</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Bottom Card */}
-                <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 hover:border-primary/50 hover:shadow-xl transition-all group">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <Shield className="h-7 w-7 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">Enterprise Security</h3>
-                        <p className="text-sm text-muted-foreground">Bank-grade encryption protecting all student data, results, and school information.</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+              <h1 className="font-display text-4xl md:text-5xl xl:text-6xl font-bold leading-[1.06] tracking-tight">
+                Run your school's CBT
+                <br />
+                <span className="text-primary">without the lab headache.</span>
+              </h1>
+              <p className="max-w-xl text-base md:text-lg leading-relaxed text-ink-foreground/70">
+                Set exams, enrol students, and get ranked performance reports the minute a paper closes. Mock exams are
+                free forever — you only pay when you're ready for full exams and reports.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button size="lg" className="h-12 px-8 text-base font-bold text-ink" onClick={() => navigate("/school-registration")}>
+                  Register your school
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-12 px-8 text-base font-bold border-white/15 bg-ink-soft text-ink-foreground hover:bg-ink-soft/70 hover:text-ink-foreground"
+                  onClick={() => navigate("/school-login")}
+                >
+                  School login
+                </Button>
               </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 border-t border-white/10 pt-6">
+                {stats.map((s) => (
+                  <div key={s.label}>
+                    <div className="font-display text-2xl font-bold">{s.number}</div>
+                    <div className="text-xs text-ink-foreground/50">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-ink-soft p-3 shadow-2xl">
+              <img
+                src={dashboardPreview}
+                alt="Edura school dashboard showing student results and analytics"
+                loading="lazy"
+                className="w-full rounded-xl"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Trust Bar */}
-      <section className="py-12 border-y bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 max-w-5xl mx-auto">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center space-y-2">
-                <div className="text-4xl font-bold">{stat.number}</div>
-                <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
+      {/* Features */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Platform</span>
+            <h2 className="mt-4 font-display text-3xl md:text-4xl font-bold text-foreground">
+              Everything an exams officer actually needs
+            </h2>
+          </div>
+          <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {features.map((f) => (
+              <div key={f.title} className="rounded-2xl border border-border bg-card p-6 transition-colors hover:border-primary/40">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
+                  <f.icon className="h-5 w-5 text-primary" />
+                </span>
+                <h3 className="mt-5 font-display text-base font-bold text-foreground">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing Section - Premium Design */}
-      <section className="py-24 relative bg-gradient-to-b from-background via-muted/20 to-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-20 space-y-6 max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-2.5 rounded-full border border-primary/30">
-              <Award className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Flexible Pricing
-              </span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold">
-              Investment in
-              <span className="block mt-2 bg-gradient-to-r from-primary via-primary-hover to-secondary bg-clip-text text-transparent">
-                Academic Excellence
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Scale pricing designed to grow with your institution. Better rates for larger student bodies.
-            </p>
-          </div>
-
-          <div className="max-w-6xl mx-auto">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-              {pricingTiers.map((tier, index) => (
-                <Card 
-                  key={index}
-                  className={`relative border-2 transition-all duration-300 group cursor-pointer overflow-hidden ${
-                    tier.highlight 
-                      ? 'border-primary shadow-xl scale-105' 
-                      : 'hover:border-primary/50 hover:shadow-lg'
-                  }`}
-                >
-                  {tier.highlight && (
-                    <div className="absolute top-0 right-0 bg-gradient-to-r from-primary to-secondary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-lg">
-                      POPULAR
-                    </div>
-                  )}
-                  <CardContent className="p-8 text-center space-y-6">
-                    <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center transition-all ${
-                      tier.highlight 
-                        ? 'bg-gradient-to-br from-primary/20 to-secondary/20' 
-                        : 'bg-gradient-to-br from-muted to-muted/50 group-hover:from-primary/10 group-hover:to-secondary/10'
-                    }`}>
-                      <Users className="h-8 w-8 text-primary" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
-                        {tier.students} students
-                      </div>
-                      <div className="flex items-start justify-center gap-1 mb-2">
-                        <span className="text-2xl font-bold text-primary mt-1">₦</span>
-                        <span className="text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                          {tier.price.replace('₦', '')}
-                        </span>
-                      </div>
-                      <div className="text-sm text-muted-foreground font-medium">
-                        per student / term
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <Card className="border-2 border-primary/30 bg-gradient-to-br from-card via-primary/5 to-secondary/5 shadow-2xl overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-primary-hover to-secondary" />
-              <CardContent className="p-10">
-                <div className="flex flex-col lg:flex-row items-start gap-8">
-                  <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center flex-shrink-0">
-                    <Clock className="h-10 w-10 text-primary" />
-                  </div>
-                  <div className="space-y-6 flex-1">
-                    <div>
-                      <h3 className="text-3xl font-bold mb-3">Complete 3-Month Term Access</h3>
-                      <p className="text-lg text-muted-foreground">
-                        Everything your school needs for comprehensive WAEC, JAMB & NECO preparation
-                      </p>
-                    </div>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {[
-                        { icon: Target, text: "10,000+ WAEC/JAMB/NECO questions" },
-                        { icon: BarChart3, text: "Real-time performance analytics" },
-                        { icon: Users, text: "Unlimited student management" },
-                        { icon: FileText, text: "Export reports (PDF/Excel)" },
-                        { icon: Brain, text: "AI-powered weak area detection" },
-                        { icon: Shield, text: "Priority 24/7 support" }
-                      ].map((benefit, i) => (
-                        <div key={i} className="flex items-start gap-3 group">
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
-                            <benefit.icon className="h-4 w-4 text-primary" />
-                          </div>
-                          <span className="text-sm font-medium leading-tight">{benefit.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+      {/* How it works */}
+      <section className="pb-16 md:pb-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-border bg-surface p-8 md:p-12">
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">Up and running the same day</h2>
+            <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {steps.map((s) => (
+                <div key={s.n}>
+                  <div className="font-display text-sm font-bold text-primary">{s.n}</div>
+                  <div className="mt-2 font-display text-base font-bold text-foreground">{s.t}</div>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{s.d}</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <div className="text-center mt-16 space-y-8">
-              <div className="max-w-2xl mx-auto">
-                <p className="text-lg text-muted-foreground mb-2">
-                  Need more than 250 students?
-                </p>
-                <p className="text-xl font-semibold">
-                  <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    Contact us for custom enterprise solutions
-                  </span>
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-5 justify-center">
-                <Button 
-                  size="lg" 
-                  className="text-lg px-12 h-14 shadow-xl hover:shadow-2xl bg-gradient-to-r from-primary to-primary-hover"
-                  onClick={() => navigate("/school-registration")}
-                >
-                  Get Started Now
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="text-lg px-12 h-14 border-2 hover:bg-accent"
-                  onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20want%20to%20learn%20more%20about%20school%20pricing", "_blank")}
-                >
-                  Talk to Sales
-                </Button>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works Section - Enhanced */}
-      <section className="py-24 relative bg-gradient-to-b from-background via-muted/10 to-background overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 overflow-hidden opacity-40">
-          <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-20 space-y-6 max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-2.5 rounded-full border border-primary/30">
-              <Zap className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Quick Setup Process
-              </span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold">
-              Get Started in
-              <span className="block mt-2 bg-gradient-to-r from-primary via-primary-hover to-secondary bg-clip-text text-transparent">
-                Four Simple Steps
-              </span>
+      {/* Pricing */}
+      <section className="pb-16 md:pb-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Pricing</span>
+            <h2 className="mt-4 font-display text-3xl md:text-4xl font-bold text-foreground">
+              Priced per student, per session
             </h2>
-            <p className="text-xl text-muted-foreground">
-              Your school can be fully operational in less than 30 minutes
+            <p className="mt-3 text-muted-foreground">
+              The more students you enrol, the less you pay each. Mock exams stay free regardless of your plan.
             </p>
           </div>
 
-          <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {[
-                {
-                  step: "01",
-                  icon: School,
-                  title: "Register Your School",
-                  description: "Complete our simple registration form. Instant approval within minutes.",
-                  color: "from-blue-500/20 to-blue-600/20"
-                },
-                {
-                  step: "02",
-                  icon: Award,
-                  title: "Choose Your Plan",
-                  description: "Select the perfect plan for your student count. Secure online payment.",
-                  color: "from-purple-500/20 to-purple-600/20"
-                },
-                {
-                  step: "03",
-                  icon: Users,
-                  title: "Add Students",
-                  description: "Bulk upload via Excel or add students individually. Simple onboarding.",
-                  color: "from-pink-500/20 to-pink-600/20"
-                },
-                {
-                  step: "04",
-                  icon: BarChart3,
-                  title: "Monitor & Excel",
-                  description: "Track progress, analyze performance, and guide students to success.",
-                  color: "from-green-500/20 to-green-600/20"
-                }
-              ].map((item, index) => (
-                <Card 
-                  key={index} 
-                  className="relative border-2 hover:border-primary/50 transition-all duration-500 group overflow-hidden hover:shadow-xl"
-                >
-                  {/* Step number badge */}
-                  <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <span className="text-3xl font-bold text-primary/30 group-hover:text-primary/50 transition-colors">
-                      {item.step}
-                    </span>
-                  </div>
-
-                  <CardContent className="p-8 space-y-5 relative z-10">
-                    <div className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg`}>
-                      <item.icon className="h-8 w-8 text-primary" />
-                    </div>
-                    <div className="space-y-3">
-                      <h3 className="font-bold text-xl">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
-                  </CardContent>
-
-                  {/* Connector line (hidden on last item) */}
-                  {index < 3 && (
-                    <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gradient-to-r from-primary/30 to-transparent" />
-                  )}
-                </Card>
-              ))}
-            </div>
-
-            <div className="mt-16 text-center">
-              <Card className="border-2 border-primary/30 bg-gradient-to-br from-card via-primary/5 to-secondary/5 inline-block max-w-md shadow-xl">
-                <CardContent className="p-8 space-y-4">
-                  <div className="w-12 h-12 mx-auto bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center">
-                    <Bell className="h-6 w-6 text-primary" />
-                  </div>
-                  <p className="text-lg font-semibold">Need assistance getting started?</p>
-                  <p className="text-sm text-muted-foreground">Our team is ready to help you set up your school account</p>
-                  <Button 
-                    size="lg"
-                    variant="outline"
-                    className="border-2 hover:bg-accent"
-                    onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20need%20help%20setting%20up%20my%20school%20account", "_blank")}
-                  >
-                    Contact Support Team
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section - Premium Design */}
-      <section className="py-24 relative bg-gradient-to-b from-background via-primary/5 to-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-20 space-y-6 max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-2.5 rounded-full border border-primary/30">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Comprehensive Platform
-              </span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold">
-              Everything You Need for
-              <span className="block mt-2 bg-gradient-to-r from-primary via-primary-hover to-secondary bg-clip-text text-transparent">
-                Exam Success
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              A complete ecosystem designed to maximize student performance and school results
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-16 items-center mb-20">
-            <div className="grid sm:grid-cols-2 gap-6 order-2 lg:order-1">
-              {features.map((feature, index) => (
-                <Card 
-                  key={index} 
-                  className="border-2 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl group relative overflow-hidden"
-                >
-                  {/* Subtle gradient overlay on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-secondary/0 group-hover:from-primary/5 group-hover:to-secondary/5 transition-all duration-500" />
-                  
-                  <CardContent className="p-7 space-y-4 relative z-10">
-                    <div className="w-14 h-14 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                      <feature.icon className="h-7 w-7 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
-                        {feature.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {feature.description}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Dashboard Preview Image */}
-            <div className="relative order-1 lg:order-2">
-              <div className="relative">
-                {/* Glow effect */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-2xl opacity-50" />
-                
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl border-2 border-primary/20">
-                  <img 
-                    src={dashboardPreview} 
-                    alt="Comprehensive school dashboard showing student analytics and performance metrics" 
-                    className="w-full h-auto object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                </div>
-
-                {/* Floating badges */}
-                <div className="absolute -top-8 -left-8 bg-gradient-to-br from-primary to-primary-hover text-primary-foreground px-6 py-4 rounded-2xl shadow-2xl animate-float">
-                  <div className="flex items-center gap-3">
-                    <BarChart3 className="h-7 w-7" />
-                    <div>
-                      <div className="text-xs font-medium opacity-90">Real-time</div>
-                      <div className="font-bold text-lg">Analytics</div>
-                    </div>
-                  </div>
-                </div>
-
-                <Card className="absolute -bottom-6 -right-6 bg-card/95 backdrop-blur-sm border-2 shadow-2xl max-w-xs animate-float animation-delay-500">
-                  <CardContent className="p-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl flex items-center justify-center">
-                        <CheckCircle2 className="h-6 w-6 text-green-600" />
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground">Student Progress</div>
-                        <div className="text-xl font-bold text-green-600">+45%</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA - Premium Design */}
-      <section className="py-24 relative bg-gradient-to-b from-background via-muted/20 to-background overflow-hidden">
-        {/* Animated background */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse animation-delay-1000" />
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
-          <Card className="border-2 border-primary/30 shadow-2xl max-w-5xl mx-auto overflow-hidden bg-gradient-to-br from-card via-primary/5 to-secondary/5">
-            {/* Top accent bar */}
-            <div className="h-2 bg-gradient-to-r from-primary via-primary-hover to-secondary" />
-            
-            <CardContent className="p-12 md:p-16 text-center space-y-10">
-              <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-secondary/20 backdrop-blur-sm px-5 py-2.5 rounded-full border border-primary/30">
-                  <GraduationCap className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    Start Your Free Trial Today
-                  </span>
-                </div>
-
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                  Ready to Transform
-                  <span className="block mt-2 bg-gradient-to-r from-primary via-primary-hover to-secondary bg-clip-text text-transparent">
-                    Your Students' Results?
-                  </span>
-                </h2>
-                
-                <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                  Join <span className="font-bold text-primary">500+ schools</span> already using Edura to prepare their students for 
-                  <span className="font-semibold text-foreground"> WAEC, JAMB, and NECO success</span>.
+          <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {pricingTiers.map((t) => (
+              <div
+                key={t.students}
+                className={`relative rounded-2xl border bg-card p-6 ${
+                  t.highlight ? "border-primary" : "border-border"
+                }`}
+              >
+                {t.highlight && (
+                  <Badge className="absolute -top-2.5 left-6 rounded-full text-[10px] font-bold uppercase tracking-wide">
+                    Most schools
+                  </Badge>
+                )}
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t.students} students
                 </p>
+                <div className="mt-3 flex items-end gap-1">
+                  <span className="font-display text-3xl font-bold text-foreground tabular-nums">{t.price}</span>
+                  <span className="pb-1 text-xs text-muted-foreground">/ student</span>
+                </div>
+                <ul className="mt-5 space-y-2">
+                  {["Full exam engine", "Reports & analytics", "Unlimited mock exams"].map((i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      {i}
+                    </li>
+                  ))}
+                </ul>
               </div>
+            ))}
+          </div>
 
-              <div className="flex flex-col sm:flex-row gap-5 justify-center pt-6">
-                <Button 
-                  size="lg" 
-                  className="text-xl px-14 h-16 shadow-xl hover:shadow-2xl bg-gradient-to-r from-primary to-primary-hover transition-all"
-                  onClick={() => navigate("/school-registration")}
-                >
-                  Get Started Free
-                  <ArrowRight className="ml-2 h-6 w-6" />
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="text-xl px-14 h-16 border-2 hover:bg-accent transition-all"
-                  onClick={() => window.open("https://wa.me/2347050757085?text=Hello,%20I%20want%20to%20schedule%20a%20demo", "_blank")}
-                >
-                  Schedule a Demo
-                </Button>
+          <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-border bg-surface p-6">
+            <div className="flex items-start gap-3">
+              <School className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <div>
+                <div className="font-display text-sm font-bold text-foreground">More than 250 students?</div>
+                <div className="text-sm text-muted-foreground">
+                  We'll quote a custom rate for large schools and multi-campus groups.
+                </div>
               </div>
+            </div>
+            <Button variant="outline" className="border-2 font-semibold" asChild>
+              <a href="https://wa.me/2347050757085" target="_blank" rel="noopener noreferrer">
+                Talk to us
+              </a>
+            </Button>
+          </div>
+        </div>
+      </section>
 
-              <div className="grid sm:grid-cols-3 gap-8 pt-12 max-w-3xl mx-auto">
-                {[
-                  { icon: CheckCircle2, text: "No credit card required" },
-                  { icon: Zap, text: "Instant account setup" },
-                  { icon: Shield, text: "24/7 support included" }
-                ].map((item, i) => (
-                  <div key={i} className="flex flex-col items-center gap-3 group">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <item.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium text-muted-foreground">{item.text}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+      {/* CTA */}
+      <section className="bg-ink py-16 md:py-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="mx-auto max-w-3xl font-display text-3xl md:text-5xl font-bold leading-tight text-ink-foreground">
+            Give your students the real exam experience
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-ink-foreground/60">
+            Register today and run your first mock exam free.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
+            <Button size="lg" className="h-12 w-full sm:w-auto px-8 text-base font-bold text-ink" onClick={() => navigate("/school-registration")}>
+              Register your school
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-12 w-full sm:w-auto border-white/20 bg-transparent px-8 text-base font-bold text-ink-foreground hover:bg-ink-soft hover:text-ink-foreground"
+              asChild
+            >
+              <Link to="/">
+                <ClipboardCheck className="mr-2 h-5 w-5" />
+                Explore the student side
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 
