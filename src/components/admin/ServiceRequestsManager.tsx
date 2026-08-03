@@ -52,15 +52,24 @@ type ServiceRequest = {
   form_data: any;
   admin_note: string | null;
   result_files: ResultFile[];
+  user_files: ResultFile[];
   created_at: string;
 };
 
-const STATUSES = ["awaiting_details", "pending", "processing", "completed", "failed"];
+const STATUSES = [
+  "awaiting_details",
+  "pending",
+  "processing",
+  "needs_resubmission",
+  "completed",
+  "failed",
+];
 
 const statusStyles: Record<string, string> = {
   pending: "bg-muted text-muted-foreground",
   awaiting_details: "bg-primary/10 text-primary",
   processing: "bg-primary/10 text-primary",
+  needs_resubmission: "bg-destructive/10 text-destructive",
   completed: "bg-success/10 text-success",
   failed: "bg-destructive/10 text-destructive",
 };
