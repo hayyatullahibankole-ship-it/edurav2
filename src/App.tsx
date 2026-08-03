@@ -41,19 +41,21 @@ const AppRoutes = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        {/* shadcn toast system */}
-        <ShadcnToaster />
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <AuthProvider>
+        <TooltipProvider>
+          {/* shadcn toast system */}
+          <ShadcnToaster />
 
-        {/* sonner toast system (used across many pages) */}
-        <SonnerToaster />
+          {/* sonner toast system (used across many pages) */}
+          <SonnerToaster />
 
-        <HashRouter>
-          <AppRoutes />
-        </HashRouter>
-      </TooltipProvider>
-    </AuthProvider>
+          <HashRouter>
+            <AppRoutes />
+          </HashRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
