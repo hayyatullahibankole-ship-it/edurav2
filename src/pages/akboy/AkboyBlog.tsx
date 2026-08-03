@@ -78,7 +78,7 @@ export default function AkboyBlog() {
   return (
     <AkboyLayout>
       {/* Hero Section */}
-      <section className="relative py-32 px-4 overflow-hidden bg-gradient-to-br from-emerald-900 via-teal-800 to-emerald-950">
+      <section className="relative py-32 px-4 overflow-hidden bg-emerald-900">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-float" style={{ top: '10%', left: '5%', animationDelay: '0s' }}></div>
@@ -102,7 +102,7 @@ export default function AkboyBlog() {
       </section>
 
       {/* Search and Filter */}
-      <section className="py-12 px-4 bg-gradient-to-br from-gray-50 to-emerald-50/30">
+      <section className="py-12 px-4 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="relative flex-1 max-w-md w-full group">
@@ -121,7 +121,7 @@ export default function AkboyBlog() {
                   variant={selectedCategory === category ? "default" : "outline"}
                   onClick={() => setSelectedCategory(category)}
                   className={selectedCategory === category 
-                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/30 px-6 py-2.5 rounded-full font-semibold" 
+                    ? "bg-emerald-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/30 px-6 py-2.5 rounded-full font-semibold" 
                     : "border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 px-6 py-2.5 rounded-full font-semibold"}
                 >
                   {category}
@@ -162,7 +162,7 @@ export default function AkboyBlog() {
                   key={post.id} 
                   className="group overflow-hidden border-2 border-gray-100 hover:border-emerald-200 hover:shadow-2xl shadow-xl transition-all duration-500 hover:-translate-y-3 rounded-2xl bg-white flex flex-col h-full"
                 >
-                  <div className="relative h-56 overflow-hidden flex-shrink-0 bg-gradient-to-br from-emerald-100 to-teal-100">
+                  <div className="relative h-56 overflow-hidden flex-shrink-0 bg-emerald-100">
                     {post.featured_image_url ? (
                       <>
                         <img 
@@ -171,10 +171,10 @@ export default function AkboyBlog() {
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
-                            e.currentTarget.parentElement!.classList.add('bg-gradient-to-br', 'from-emerald-100', 'to-teal-100');
+                            e.currentTarget.parentElement!.classList.add('', 'from-emerald-100', 'to-teal-100');
                           }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        <div className="absolute inset-0 bg-black/60"></div>
                       </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
@@ -183,7 +183,7 @@ export default function AkboyBlog() {
                     )}
                     {post.category && (
                       <div className="absolute top-4 left-4 z-10">
-                        <span className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg uppercase">
+                        <span className="bg-emerald-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg uppercase">
                           {post.category}
                         </span>
                       </div>
@@ -238,7 +238,7 @@ export default function AkboyBlog() {
       {/* Newsletter CTA */}
       <section className="relative py-24 px-4 overflow-hidden">
         {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700"></div>
+        <div className="absolute inset-0 bg-emerald-600"></div>
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float" style={{ top: '20%', left: '10%', animationDelay: '0s' }}></div>
           <div className="absolute w-80 h-80 bg-white/10 rounded-full blur-3xl animate-float" style={{ bottom: '20%', right: '10%', animationDelay: '2s' }}></div>

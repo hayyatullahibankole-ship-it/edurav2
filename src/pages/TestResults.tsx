@@ -247,7 +247,7 @@ export default function TestResults() {
                   </div>
                   <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300"
+                      className="h-full bg-blue-500 transition-all duration-300"
                       style={{ width: `${stats.percentage}%` }}
                     />
                   </div>

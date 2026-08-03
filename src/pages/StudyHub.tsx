@@ -162,9 +162,9 @@ if (accessDenied) {
 if (isMobile) {
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-24">
+      <div className="min-h-screen bg-background pb-24">
         {/* Header */}
-        <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 pb-8">
+        <div className="bg-primary/10 p-6 pb-8">
           <Button
             variant="ghost"
             onClick={selectedSubject ? handleBackToSubjects : () => navigate('/dashboard')}
@@ -263,7 +263,7 @@ if (isMobile) {
   // Desktop view
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           {/* Header Section */}
           <div className="mb-8">
@@ -277,7 +277,7 @@ if (isMobile) {
             </Button>
             
             <div className="flex items-center gap-4 mb-3">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10">
+              <div className="p-3 rounded-2xl bg-primary/20">
                 <Book className="h-8 w-8 text-primary" />
               </div>
               <div>
@@ -311,8 +311,8 @@ if (isMobile) {
                         onClick={() => handleSubjectClick(subject.id)}
                       >
                         <CardContent className="p-8 text-center relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                          <div className={`w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br ${iconData.gradient} flex items-center justify-center shadow-xl transform transition-all group-hover:scale-110 group-hover:rotate-3 relative z-10`}>
+                          <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <div className={`w-24 h-24 mx-auto mb-6 rounded-3xl ${iconData.gradient} flex items-center justify-center shadow-xl transform transition-all group-hover:scale-110 group-hover:rotate-3 relative z-10`}>
                             <Icon className="h-12 w-12 text-white" strokeWidth={2.5} />
                           </div>
                           <h3 className="font-bold text-xl relative z-10">{subject.name}</h3>
@@ -347,10 +347,10 @@ if (isMobile) {
                       onClick={() => navigate(`/study-hub/topic/${topic.id}`)}
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-full transform translate-x-8 -translate-y-8"></div>
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-bl-full transform translate-x-8 -translate-y-8"></div>
                       <CardContent className="p-6 relative">
                         <div className="flex items-start gap-4 mb-4">
-                          <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 group-hover:scale-110 transition-transform">
+                          <div className="p-3 rounded-2xl bg-primary/20 group-hover:scale-110 transition-transform">
                             <BookOpen className="h-6 w-6 text-primary" />
                           </div>
                           <div className="flex-1">

@@ -210,15 +210,15 @@ export default function MobileAuthForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-primary/10 flex flex-col relative overflow-hidden">
       {/* Enhanced Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 -right-20 w-80 h-80 bg-gradient-to-br from-primary/20 to-primary-glow/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-gradient-to-br from-secondary/20 to-success/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-20 -right-20 w-80 h-80 bg-primary/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute -bottom-40 -left-20 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
       {/* Vibrant Hero Section */}
-      <div className="relative h-[40vh] bg-gradient-to-br from-primary via-primary-glow to-secondary overflow-hidden">
+      <div className="relative h-[40vh] bg-primary overflow-hidden">
         {/* Animated gradient orbs */}
         <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/30 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -242,7 +242,7 @@ export default function MobileAuthForm() {
       {/* Modern Form Section */}
       <div className="relative flex-1 bg-background px-6 pt-8 pb-8 -mt-8 rounded-t-[2rem] shadow-2xl z-20 animate-slide-up">
         {referralCode && !isLogin && (
-          <div className="bg-gradient-to-br from-success/20 to-success/10 border-2 border-success/30 rounded-2xl p-4 text-sm mb-6 shadow-lg animate-fade-in">
+          <div className="bg-success/20 border-2 border-success/30 rounded-2xl p-4 text-sm mb-6 shadow-lg animate-fade-in">
             <p className="text-success font-bold flex items-center gap-2">
               🎉 Referral code: <span className="font-black">{referralCode}</span>
             </p>
@@ -356,7 +356,7 @@ export default function MobileAuthForm() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-14 text-lg font-black rounded-2xl shadow-2xl bg-gradient-to-r from-primary via-primary-glow to-secondary hover:opacity-90 hover:scale-105 active:scale-95 transition-all mt-8 border-0"
+            className="w-full h-14 text-lg font-black rounded-2xl shadow-2xl bg-primary hover:opacity-90 hover:scale-105 active:scale-95 transition-all mt-8 border-0"
             style={{ boxShadow: '0 15px 40px rgba(0, 123, 255, 0.4)' }}
           >
             {loading ? (

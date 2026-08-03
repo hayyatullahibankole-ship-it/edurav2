@@ -14,7 +14,7 @@ export function ResultsPaywall({ percentage, totalQuestions, correctAnswers }: R
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-accent text-white p-6 shadow-lg">
+      <div className="bg-primary text-white p-6 shadow-lg">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
             <Eye className="h-8 w-8" />
@@ -30,7 +30,7 @@ export function ResultsPaywall({ percentage, totalQuestions, correctAnswers }: R
       <div className="max-w-5xl mx-auto p-6 space-y-6">
         {/* Preview Score Card */}
         <Card className="border-2 border-primary/20 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 pointer-events-none" />
+          <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
           <CardContent className="pt-6 relative">
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-primary/10 mb-4">

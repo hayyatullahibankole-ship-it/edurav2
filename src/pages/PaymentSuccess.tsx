@@ -141,7 +141,7 @@ const PaymentSuccess = () => {
 
   if (verifying) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
+      <div className="min-h-screen flex items-center justify-center bg-primary/20">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="text-center">
@@ -155,7 +155,7 @@ const PaymentSuccess = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/20 to-secondary/20 py-8 px-4">
+    <div className="min-h-screen bg-primary/20 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         <Card className="shadow-xl">
           <CardHeader className="text-center bg-green-50 dark:bg-green-950/20">

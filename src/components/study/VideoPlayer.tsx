@@ -177,7 +177,7 @@ export const VideoPlayer = ({ lessonId, videoUrl, videoPlatform = 'youtube', dur
           }}
         />
         
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+        <div className="absolute bottom-0 left-0 right-0 bg-black/80 p-4">
           <div className="flex items-center gap-2 mb-2">
             <Button
               variant="ghost"

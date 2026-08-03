@@ -473,7 +473,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/5">
+    <div className="min-h-screen bg-background">
       {/* Admin Navigation Header */}
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 w-full max-w-full">
@@ -543,7 +543,7 @@ export default function AdminDashboard() {
 
         {/* Enhanced Stats Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
-          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200 dark:from-blue-950/50 dark:to-blue-900/25 dark:border-blue-800">
+          <Card className="relative overflow-hidden bg-blue-50 border-blue-200 dark:from-blue-950/50 dark:to-blue-900/25 dark:border-blue-800">
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex-1 min-w-0">
@@ -560,7 +560,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
           
-          <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 to-green-100/50 border-green-200 dark:from-green-950/50 dark:to-green-900/25 dark:border-green-800">
+          <Card className="relative overflow-hidden bg-green-50 border-green-200 dark:from-green-950/50 dark:to-green-900/25 dark:border-green-800">
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex-1 min-w-0">
@@ -579,7 +579,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
           
-          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200 dark:from-purple-950/50 dark:to-purple-900/25 dark:border-purple-800">
+          <Card className="relative overflow-hidden bg-purple-50 border-purple-200 dark:from-purple-950/50 dark:to-purple-900/25 dark:border-purple-800">
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex-1 min-w-0">
@@ -596,7 +596,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
           
-          <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200 dark:from-orange-950/50 dark:to-orange-900/25 dark:border-orange-800">
+          <Card className="relative overflow-hidden bg-orange-50 border-orange-200 dark:from-orange-950/50 dark:to-orange-900/25 dark:border-orange-800">
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex-1 min-w-0">
@@ -719,7 +719,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="questions" className="space-y-6">
-            <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-blue-200 dark:border-blue-800">
+            <Card className="bg-blue-50 dark:from-blue-950/30 dark:to-purple-950/30 border-blue-200 dark:border-blue-800">
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <div>
                   <CardTitle className="text-blue-900 dark:text-blue-100">Mathematical Notation Tools</CardTitle>

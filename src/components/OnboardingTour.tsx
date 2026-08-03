@@ -140,7 +140,7 @@ export default function OnboardingTour({ isOpen, onComplete }: OnboardingTourPro
         </DialogHeader>
 
         <div className="space-y-6">
-          <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
+          <Card className="border-2 border-primary/20 bg-primary/5">
             <CardContent className="pt-8 pb-8 text-center space-y-4">
               <div className="flex justify-center mb-4">
                 {step.icon}

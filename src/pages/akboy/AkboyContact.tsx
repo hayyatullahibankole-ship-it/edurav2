@@ -57,7 +57,7 @@ export default function AkboyContact() {
   return (
     <AkboyLayout>
       {/* Hero Header */}
-      <section className="relative py-20 px-4 bg-gradient-to-br from-emerald-600 via-teal-600 to-green-600 overflow-hidden">
+      <section className="relative py-20 px-4 bg-emerald-600 overflow-hidden">
         <div className="absolute inset-0 opacity-10" style={{
           backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
         }}></div>
@@ -162,7 +162,7 @@ export default function AkboyContact() {
 
                 <div className="space-y-6">
                   <Card className="p-6 flex items-start gap-4 hover:shadow-xl transition-all border-2 hover:border-emerald-200">
-                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
                       <Mail className="w-7 h-7 text-white" />
                     </div>
                     <div>
@@ -178,7 +178,7 @@ export default function AkboyContact() {
                   </Card>
 
                   <Card className="p-6 flex items-start gap-4 hover:shadow-xl transition-all border-2 hover:border-emerald-200">
-                    <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <div className="w-14 h-14 bg-teal-500 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
                       <Phone className="w-7 h-7 text-white" />
                     </div>
                     <div>
@@ -194,7 +194,7 @@ export default function AkboyContact() {
                   </Card>
 
                   <Card className="p-6 flex items-start gap-4 hover:shadow-xl transition-all border-2 hover:border-emerald-200">
-                    <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <div className="w-14 h-14 bg-green-500 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
                       <MapPin className="w-7 h-7 text-white" />
                     </div>
                     <div>
@@ -220,7 +220,7 @@ export default function AkboyContact() {
                       href={social.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`w-14 h-14 bg-gradient-to-br ${social.color} rounded-2xl flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg hover:shadow-xl`}
+                      className={`w-14 h-14 ${social.color} rounded-2xl flex items-center justify-center text-white hover:scale-110 transition-all shadow-lg hover:shadow-xl`}
                     >
                       <social.icon className="w-7 h-7" />
                     </a>
@@ -229,7 +229,7 @@ export default function AkboyContact() {
               </div>
 
               {/* Business Hours */}
-              <Card className="p-8 bg-gradient-to-br from-emerald-600 to-teal-600 text-white border-none shadow-xl">
+              <Card className="p-8 bg-emerald-600 text-white border-none shadow-xl">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                     <Clock className="w-6 h-6" />

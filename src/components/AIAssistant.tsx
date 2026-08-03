@@ -297,16 +297,16 @@ if (!isOpen) {
         {/* Main AI Button */}
         <button
           onClick={() => setIsOpen(true)}
-          className="relative flex items-center gap-3 px-5 py-4 rounded-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 hover:shadow-2xl transition-all duration-500 group overflow-hidden animate-fade-in hover:scale-105 active:scale-95"
+          className="relative flex items-center gap-3 px-5 py-4 rounded-full bg-purple-600 hover:shadow-2xl transition-all duration-500 group overflow-hidden animate-fade-in hover:scale-105 active:scale-95"
           style={{ 
             boxShadow: '0 8px 32px rgba(139, 92, 246, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)',
           }}
         >
           {/* Animated gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-purple-400 opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
           
           {/* Shimmer effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+          <div className="absolute inset-0 bg-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
           
           {/* Animated particles */}
           <div className="absolute inset-0 overflow-hidden rounded-full">
@@ -343,7 +343,7 @@ if (!isOpen) {
         
         {/* Mobile AI badge */}
         {isMobile && (
-          <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full shadow-lg animate-bounce" style={{ animationDuration: '2s' }}>
+          <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-yellow-400 rounded-full shadow-lg animate-bounce" style={{ animationDuration: '2s' }}>
             <span className="text-[10px] font-black text-white">AI</span>
           </div>
         )}
@@ -356,7 +356,7 @@ if (!isOpen) {
       style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.1)' }}
     >
       {/* Modern Header with Gradient */}
-      <div className="relative p-6 bg-gradient-to-br from-primary via-primary-glow to-secondary overflow-hidden">
+      <div className="relative p-6 bg-primary overflow-hidden">
         {/* Curved bottom shape */}
         <div className="absolute bottom-0 left-0 right-0 h-4">
           <svg viewBox="0 0 1440 24" fill="none" className="w-full h-full">
@@ -394,18 +394,18 @@ if (!isOpen) {
       </div>
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 p-5 bg-gradient-to-b from-background/50 to-background">
+      <ScrollArea className="flex-1 p-5 bg-background/50">
         {messages.length === 0 && (
           <div className="text-center py-12 animate-fade-in">
             <div className="relative inline-block mb-6">
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl" />
-              <div className="relative h-24 w-24 mx-auto rounded-[28px] bg-gradient-to-br from-primary via-primary-glow to-secondary flex items-center justify-center shadow-2xl"
+              <div className="relative h-24 w-24 mx-auto rounded-[28px] bg-primary flex items-center justify-center shadow-2xl"
                 style={{ boxShadow: '0 20px 60px rgba(var(--primary), 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3)' }}
               >
                 <Sparkles className="h-12 w-12 text-white" strokeWidth={2.5} />
               </div>
             </div>
-            <h4 className="font-black mb-2 text-foreground text-2xl bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+            <h4 className="font-black mb-2 text-foreground text-2xl bg-foreground">
               Welcome to Edura AI! ✨
             </h4>
             <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed font-medium mb-6">
@@ -434,7 +434,7 @@ if (!isOpen) {
             <div
               className={`inline-block px-5 py-4 rounded-[24px] max-w-[85%] shadow-lg ${
                 message.role === "user"
-                  ? "bg-gradient-to-br from-primary to-primary-glow text-white rounded-br-sm"
+                  ? "bg-primary text-white rounded-br-sm"
                   : "bg-card/80 backdrop-blur-sm border border-border/50 rounded-bl-sm"
               }`}
               style={message.role === "user" ? { 
@@ -586,7 +586,7 @@ if (!isOpen) {
               size="icon"
               onClick={handleSend}
               disabled={(!input.trim() && uploadedImages.length === 0) || isLoading}
-              className="bg-gradient-to-br from-primary via-primary-glow to-secondary hover:scale-105 text-white rounded-[18px] h-12 w-12 shadow-xl transition-all"
+              className="bg-primary hover:scale-105 text-white rounded-[18px] h-12 w-12 shadow-xl transition-all"
               title="Send message"
               style={{ boxShadow: '0 8px 24px rgba(var(--primary), 0.4)' }}
             >

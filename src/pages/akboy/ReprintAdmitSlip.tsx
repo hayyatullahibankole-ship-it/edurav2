@@ -113,7 +113,7 @@ export default function ReprintAdmitSlip() {
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
       padding: 20px;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      background: #f5f7fa;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -130,7 +130,7 @@ export default function ReprintAdmitSlip() {
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     }
     .header {
-      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      background: #f97316;
       color: white;
       padding: 32px 24px;
       text-align: center;
@@ -144,7 +144,7 @@ export default function ReprintAdmitSlip() {
       right: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background: transparent;
       background-size: 20px 20px;
       opacity: 0.5;
     }
@@ -171,7 +171,7 @@ export default function ReprintAdmitSlip() {
       padding: 32px;
     }
     .reg-box {
-      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      background: #fef3c7;
       border: 3px dashed #f97316;
       border-radius: 12px;
       padding: 20px;
@@ -230,7 +230,7 @@ export default function ReprintAdmitSlip() {
       font-size: 18px;
     }
     .batch-section {
-      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      background: #eff6ff;
       border: 2px solid #3b82f6;
       border-radius: 12px;
       padding: 20px;
@@ -281,7 +281,7 @@ export default function ReprintAdmitSlip() {
       gap: 10px;
     }
     .subject-badge {
-      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      background: #f97316;
       color: white;
       padding: 10px 12px;
       border-radius: 6px;
@@ -484,7 +484,7 @@ export default function ReprintAdmitSlip() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
+    <div className="min-h-screen bg-slate-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -492,7 +492,7 @@ export default function ReprintAdmitSlip() {
           <p className="text-lg text-slate-600">Reprint Your Admit Slip</p>
         </div>
 
-        <Card className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100">
+        <Card className="border-2 border-orange-200 bg-orange-50">
           <CardHeader>
             <CardTitle>Enter Your Registration Number</CardTitle>
             <CardDescription>

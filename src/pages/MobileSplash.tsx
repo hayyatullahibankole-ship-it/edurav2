@@ -39,7 +39,7 @@ const MobileSplash = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-secondary flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-primary flex items-center justify-center relative overflow-hidden">
       {/* Curved Shape at Top */}
       <div className="absolute top-0 left-0 right-0 h-64">
         <svg viewBox="0 0 1440 320" className="w-full h-full" preserveAspectRatio="none">
@@ -83,7 +83,7 @@ const MobileSplash = () => {
             style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.5)' }}
           >
             {/* Shimmer Effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/50 to-transparent opacity-0 animate-shine" />
+            <div className="absolute inset-0 bg-transparent opacity-0 animate-shine" />
             <img src={eduraLogo} alt="Edura" className="h-20 w-auto relative z-10" />
           </div>
           

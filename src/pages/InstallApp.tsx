@@ -40,7 +40,7 @@ export default function InstallApp() {
 
       <div className="max-w-lg mx-auto px-5 py-8 space-y-8">
         {/* App Card */}
-        <div className="flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r from-primary/10 to-primary/5 border">
+        <div className="flex items-center gap-4 p-5 rounded-2xl bg-primary/10 border">
           <div className="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center p-2 shrink-0">
             <img src={eduraLogo} alt="Edura" className="w-full h-full object-contain" />
           </div>

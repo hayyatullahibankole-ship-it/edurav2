@@ -117,11 +117,11 @@ export default function AkboyMockResults() {
     body { font-family:'Segoe UI','Arial',sans-serif; padding:20px; background:#f8fafc; }
     .container { max-width:600px; margin:0 auto; }
     .result-slip { background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
-    .header { text-align:center; background:linear-gradient(135deg,#f97316,#f59e0b); color:white; padding:24px 20px; }
+    .header { text-align:center; background:#f97316; color:white; padding:24px 20px; }
     .header h1 { font-size:22px; margin-bottom:4px; }
     .header p { font-size:13px; opacity:0.9; }
     .content { padding:24px; }
-    .score-box { text-align:center; background:linear-gradient(135deg,#fff7ed,#fefce8); padding:24px; border-radius:12px; border:1px solid #fed7aa; margin:16px 0; }
+    .score-box { text-align:center; background:#fff7ed; padding:24px; border-radius:12px; border:1px solid #fed7aa; margin:16px 0; }
     .score-box .score { font-size:56px; font-weight:800; color:#ea580c; }
     .score-box .max { font-size:16px; color:#9ca3af; }
     .section-title { font-weight:700; color:#f97316; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid #fed7aa; }
@@ -174,7 +174,7 @@ export default function AkboyMockResults() {
 
   return (
     <AkboyLayout title="Mock Exam Results" description="Check your AKBOY JAMB Mock Exam results">
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white">
+      <div className="min-h-screen bg-orange-50">
         <MockBrandBanner />
         <div className="max-w-2xl mx-auto space-y-6 py-8 px-4">
           {/* Hero Header */}
@@ -254,7 +254,7 @@ export default function AkboyMockResults() {
           {status === "available" && resultData && (
             <div className="space-y-4">
               <Card className="shadow-lg border-0 overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-center py-6">
+                <CardHeader className="bg-orange-500 text-white text-center py-6">
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <img src="/akboy-logo.png" alt="AKBOY" className="w-8 h-8 rounded-full bg-white p-0.5" />
                     <CardTitle className="text-lg">AKBOY Mock Examination Result</CardTitle>
@@ -274,7 +274,7 @@ export default function AkboyMockResults() {
                   </div>
 
                   {/* Total Score */}
-                  <div className="text-center bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-100">
+                  <div className="text-center bg-orange-50 p-6 rounded-2xl border border-orange-100">
                     <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                       <Trophy className="w-8 h-8 text-orange-500" />
                     </div>
@@ -352,7 +352,7 @@ export default function AkboyMockResults() {
               </Button>
 
               {/* WhatsApp Group CTA */}
-              <Card className="shadow-lg border-0 bg-gradient-to-r from-green-500 to-emerald-500 text-white overflow-hidden">
+              <Card className="shadow-lg border-0 bg-green-500 text-white overflow-hidden">
                 <CardContent className="py-5 px-6 text-center space-y-3">
                   <div>
                     <h3 className="text-lg font-bold">Join Our WhatsApp Group</h3>

@@ -611,7 +611,7 @@ const BlogManager = () => {
                         (e.target as HTMLImageElement).style.display = 'none';
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
+                    <div className="absolute inset-0 bg-slate-900"></div>
                   </div>
                 )}
                 

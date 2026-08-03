@@ -241,7 +241,7 @@ export const NewsletterSignup = () => {
   };
 
   return (
-    <div id="newsletter" className="rounded-3xl bg-gradient-to-br from-emerald-700 to-emerald-900 text-white p-8 md:p-10 shadow-xl">
+    <div id="newsletter" className="rounded-3xl bg-emerald-700 text-white p-8 md:p-10 shadow-xl">
       <div className="flex items-center gap-3 mb-3">
         <Mail className="w-6 h-6" />
         <h3 className="text-xl md:text-2xl font-bold">Get admission alerts first</h3>
@@ -349,7 +349,7 @@ export const CampusHubAdvancedSection = ({
   posts, schools,
 }: { posts: any[]; schools: { school: string; count: number }[] }) => {
   return (
-    <section className="py-14 md:py-20 px-4 bg-gradient-to-b from-emerald-50/40 to-white">
+    <section className="py-14 md:py-20 px-4 bg-emerald-50/40">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-3">

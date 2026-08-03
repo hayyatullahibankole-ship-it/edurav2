@@ -285,7 +285,7 @@ export default function AkboyTutorialRegistration() {
   if (submissionData) {
     return (
       <AkboyLayout>
-        <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white py-16">
+        <div className="min-h-screen bg-emerald-50 py-16">
           <div className="container mx-auto px-4 max-w-lg">
             <div ref={printRef} className="print:p-8">
               <Card className="border-emerald-200 shadow-lg">
@@ -331,7 +331,7 @@ export default function AkboyTutorialRegistration() {
   return (
     <AkboyLayout>
       {/* Compact Hero */}
-      <section className="bg-gradient-to-br from-emerald-600 to-emerald-800 py-10 md:py-14">
+      <section className="bg-emerald-600 py-10 md:py-14">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Tutorial Registration</h1>
           <p className="text-emerald-100 text-sm md:text-base">Choose a program, fill your details, and pay — it's that simple!</p>

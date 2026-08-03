@@ -59,7 +59,7 @@ export default function AkboyMockPages() {
 
   return (
     <AkboyLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 pt-32 pb-20">
+      <div className="min-h-screen bg-slate-50 pt-32 pb-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-16">
@@ -80,13 +80,13 @@ export default function AkboyMockPages() {
               {mockPages.map((page, index) => (
                 <div key={page.path} className="flex-1 flex items-center">
                   <div className="flex flex-col items-center flex-1">
-                    <div className={`h-12 w-12 rounded-full bg-gradient-to-br ${page.color} flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
+                    <div className={`h-12 w-12 rounded-full ${page.color} flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
                       {page.step}
                     </div>
                     <p className="text-sm font-semibold text-gray-700 mt-2 text-center">{page.title}</p>
                   </div>
                   {index < mockPages.length - 1 && (
-                    <div className="flex-1 h-1 bg-gradient-to-r from-emerald-400 to-emerald-200 mx-2"></div>
+                    <div className="flex-1 h-1 bg-emerald-400 mx-2"></div>
                   )}
                 </div>
               ))}
@@ -102,13 +102,13 @@ export default function AkboyMockPages() {
                   key={page.path} 
                   className="group hover:shadow-2xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden"
                 >
-                  <div className={`h-2 bg-gradient-to-r ${page.color}`}></div>
+                  <div className={`h-2 ${page.color}`}></div>
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between mb-2">
-                      <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${page.color} flex items-center justify-center text-white`}>
+                      <div className={`h-10 w-10 rounded-lg ${page.color} flex items-center justify-center text-white`}>
                         <Icon className="h-5 w-5" />
                       </div>
-                      <span className={`text-sm font-bold text-white bg-gradient-to-r ${page.color} px-3 py-1 rounded-full`}>
+                      <span className={`text-sm font-bold text-white ${page.color} px-3 py-1 rounded-full`}>
                         Step {page.step}
                       </span>
                     </div>
@@ -119,7 +119,7 @@ export default function AkboyMockPages() {
                     <p className="text-sm text-gray-600 mb-6 leading-relaxed">{page.details}</p>
                     <Button
                       asChild
-                      className={`w-full bg-gradient-to-r ${page.color} hover:shadow-lg transition-all group-hover:translate-x-1`}
+                      className={`w-full ${page.color} hover:shadow-lg transition-all group-hover:translate-x-1`}
                     >
                       <Link to={page.path} className="flex items-center justify-between">
                         Access
@@ -142,13 +142,13 @@ export default function AkboyMockPages() {
               <Card 
                 className="group hover:shadow-2xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden"
               >
-                <div className="h-2 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+                <div className="h-2 bg-blue-500"></div>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between mb-2">
-                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white">
+                    <div className="h-10 w-10 rounded-lg bg-blue-500 flex items-center justify-center text-white">
                       <Download className="h-5 w-5" />
                     </div>
-                    <span className="text-sm font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-500 px-3 py-1 rounded-full">
+                    <span className="text-sm font-bold text-white bg-blue-500 px-3 py-1 rounded-full">
                       Utility
                     </span>
                   </div>
@@ -159,7 +159,7 @@ export default function AkboyMockPages() {
                   <p className="text-sm text-gray-600 mb-6 leading-relaxed">Download or reprint your admit slip with updated exam venue and batch information</p>
                   <Button
                     asChild
-                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:shadow-lg transition-all group-hover:translate-x-1"
+                    className="w-full bg-blue-500 hover:shadow-lg transition-all group-hover:translate-x-1"
                   >
                     <Link to={`${basePath}/reprint-admit-slip`} className="flex items-center justify-between">
                       Reprint Slip
@@ -172,7 +172,7 @@ export default function AkboyMockPages() {
           </div>
 
           {/* Quick Start Section */}
-          <Card className="border-0 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg">
+          <Card className="border-0 bg-emerald-50 shadow-lg">
             <CardHeader>
               <CardTitle className="text-2xl">Quick Start Guide</CardTitle>
               <CardDescription>Follow these steps to complete your mock examination</CardDescription>
@@ -229,7 +229,7 @@ export default function AkboyMockPages() {
           </Card>
 
           {/* WhatsApp Group CTA */}
-          <Card className="border-0 bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg overflow-hidden">
+          <Card className="border-0 bg-green-500 text-white shadow-lg overflow-hidden">
             <CardContent className="py-6 px-6 text-center space-y-3">
               <h3 className="text-xl font-bold">Join Our WhatsApp Group</h3>
               <p className="text-sm opacity-90">Stay updated on exam schedules, results, and tips from other candidates</p>
@@ -246,7 +246,7 @@ export default function AkboyMockPages() {
             <Button
               asChild
               size="lg"
-              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xl hover:shadow-2xl transition-all"
+              className="bg-emerald-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xl hover:shadow-2xl transition-all"
             >
               <Link to={`${basePath}/mock-registration`} className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5" />

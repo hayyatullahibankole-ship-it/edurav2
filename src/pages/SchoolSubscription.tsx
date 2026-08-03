@@ -381,7 +381,7 @@ export default function SchoolSubscription() {
 
   if (fetchingSchool) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center">
+      <div className="min-h-screen bg-primary/5 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
           <p className="text-muted-foreground">Loading school information...</p>
@@ -391,7 +391,7 @@ export default function SchoolSubscription() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12 px-4">
+    <div className="min-h-screen bg-primary/5 py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <CreditCard className="h-16 w-16 mx-auto mb-4 text-primary" />

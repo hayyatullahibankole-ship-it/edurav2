@@ -70,13 +70,13 @@ All colors MUST be HSL for consistency across light/dark modes.
 
 
 
-    /* Brand gradients (used by legacy surfaces only) */
-    --gradient-primary: linear-gradient(135deg, hsl(152 82% 39%), hsl(160 75% 33%));
-    --gradient-success: linear-gradient(135deg, hsl(152 82% 39%), hsl(160 75% 33%));
-    --gradient-warning: linear-gradient(135deg, hsl(38 92% 50%), hsl(24 100% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(224 61% 15%) 0%, hsl(224 55% 22%) 60%, hsl(152 82% 39%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 20% 99%));
-    --gradient-feature: linear-gradient(145deg, hsl(152 82% 39% / 0.08), hsl(224 61% 15% / 0.05));
+    /* Brand surfaces (flat, no gradients) */
+    --gradient-primary: hsl(152 82% 39%);
+    --gradient-success: hsl(152 82% 39%);
+    --gradient-warning: hsl(38 92% 50%);
+    --gradient-hero: hsl(224 61% 15%);
+    --gradient-card: hsl(0 0% 100%);
+    --gradient-feature: hsl(152 82% 39% / 0.08);
 
     /* Shadows */
     --shadow-card: 0 1px 2px hsl(224 61% 15% / 0.04), 0 8px 24px -12px hsl(224 61% 15% / 0.12);
@@ -287,7 +287,7 @@ All colors MUST be HSL for consistency across light/dark modes.
   }
   
   .card-gradient {
-    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--muted)));
+    background: hsl(var(--card));
     border: 1px solid hsl(var(--border) / 0.5);
   }
   
@@ -310,14 +310,8 @@ All colors MUST be HSL for consistency across light/dark modes.
   }
   
   .shimmer {
-    animation: shimmer 2s infinite linear;
-    background: linear-gradient(
-      to right,
-      hsl(var(--muted)) 0%,
-      hsl(var(--muted-foreground) / 0.1) 50%,
-      hsl(var(--muted)) 100%
-    );
-    background-size: 1000px 100%;
+    animation: pulse 2s infinite ease-in-out;
+    background: hsl(var(--muted));
   }
   
   /* Pulsing glow effect */
@@ -350,37 +344,14 @@ All colors MUST be HSL for consistency across light/dark modes.
     animation: slide-in-left 0.5s ease-out;
   }
   
-  /* Text gradient animation */
-  .text-gradient {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--primary)),
-      hsl(var(--secondary)),
-      hsl(var(--accent))
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
+  /* Flat brand text (previously gradient) */
+  .text-gradient,
   .text-gradient-animate {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--primary)),
-      hsl(var(--secondary)),
-      hsl(var(--accent))
-    );
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradient-shift 3s ease infinite;
+    color: hsl(var(--primary));
   }
 
-  /* AKBOY gradient animation */
   .animate-gradient {
-    background-size: 200% auto;
-    animation: gradient 8s linear infinite;
+    background-size: auto;
   }
 
   /* Stagger animation for children */

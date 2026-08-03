@@ -71,7 +71,7 @@ export const InstallRequiredModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm mx-4 rounded-3xl border-2 border-primary/20 p-0 overflow-hidden">
         {/* Header with gradient */}
-        <div className="relative bg-gradient-to-br from-primary via-primary-glow to-secondary p-6 text-center">
+        <div className="relative bg-primary p-6 text-center">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary/30 rounded-full blur-2xl" />
           
@@ -119,7 +119,7 @@ export const InstallRequiredModal = ({
           <Button
             onClick={handleInstall}
             disabled={installing}
-            className="w-full h-14 bg-gradient-to-r from-primary via-primary-glow to-secondary hover:shadow-xl font-bold text-base rounded-2xl mt-4"
+            className="w-full h-14 bg-primary hover:shadow-xl font-bold text-base rounded-2xl mt-4"
           >
             <Download className="h-5 w-5 mr-2" strokeWidth={2.5} />
             {installing ? 'Installing...' : 'Install Now'}

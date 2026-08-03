@@ -191,9 +191,9 @@ if (accessDenied) {
 if (isMobile) {
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-24">
+      <div className="min-h-screen bg-background pb-24">
         {/* Header */}
-        <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 pb-8">
+        <div className="bg-primary/10 p-6 pb-8">
           <Button
             variant="ghost"
             onClick={() => navigate('/dashboard')}
@@ -212,7 +212,7 @@ if (isMobile) {
 
         {/* Streak Card */}
         <div className="px-6 -mt-6 mb-6">
-          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 border-0 shadow-xl overflow-hidden">
+          <Card className="bg-orange-500 border-0 shadow-xl overflow-hidden">
             <CardContent className="p-5 relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
               <div className="flex items-center justify-between relative z-10">
@@ -243,7 +243,7 @@ if (isMobile) {
           <div className="grid grid-cols-3 gap-3">
             <Card className="bg-card border shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-4 text-center">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 w-fit mx-auto mb-2">
+                <div className="p-2 rounded-xl bg-yellow-500/20 w-fit mx-auto mb-2">
                   <Trophy className="h-5 w-5 text-yellow-600" />
                 </div>
                 <p className="text-2xl font-bold">#{userStats.rank || '--'}</p>
@@ -253,7 +253,7 @@ if (isMobile) {
             
             <Card className="bg-card border shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-4 text-center">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 w-fit mx-auto mb-2">
+                <div className="p-2 rounded-xl bg-blue-500/20 w-fit mx-auto mb-2">
                   <Zap className="h-5 w-5 text-blue-600" />
                 </div>
                 <p className="text-2xl font-bold">{userStats.points}</p>
@@ -263,7 +263,7 @@ if (isMobile) {
             
             <Card className="bg-card border shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-4 text-center">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/20 w-fit mx-auto mb-2">
+                <div className="p-2 rounded-xl bg-green-500/20 w-fit mx-auto mb-2">
                   <Award className="h-5 w-5 text-green-600" />
                 </div>
                 <p className="text-2xl font-bold">{userStats.achievements}</p>
@@ -433,9 +433,9 @@ if (isMobile) {
                       className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
                     >
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0 ${
-                        index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white' :
-                        index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-white' :
-                        index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' :
+                        index === 0 ? 'bg-yellow-400 text-white' :
+                        index === 1 ? 'bg-gray-300 text-white' :
+                        index === 2 ? 'bg-orange-400 text-white' :
                         'bg-muted text-muted-foreground'
                       }`}>
                         {index + 1}
@@ -475,7 +475,7 @@ if (isMobile) {
 
         {/* Premium CTA */}
         <div className="px-6 mb-8">
-          <Card className="bg-gradient-to-br from-purple-600 to-purple-800 border-0 shadow-xl overflow-hidden relative">
+          <Card className="bg-purple-600 border-0 shadow-xl overflow-hidden relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
             <CardContent className="p-6 relative">
               <div className="flex items-start gap-4">
@@ -631,7 +631,7 @@ return (
               <div className="space-y-3">
                 {leaderboard.slice(0, 10).map((entry, index) => (
                   <div key={entry.user_id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                    <div className={`${index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white' : index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-white' : index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' : 'bg-muted text-muted-foreground'} w-10 h-10 rounded-full flex items-center justify-center font-bold`}>
+                    <div className={`${index === 0 ? 'bg-yellow-400 text-white' : index === 1 ? 'bg-gray-300 text-white' : index === 2 ? 'bg-orange-400 text-white' : 'bg-muted text-muted-foreground'} w-10 h-10 rounded-full flex items-center justify-center font-bold`}>
                       {index + 1}
                     </div>
                     <Avatar className="h-10 w-10 border-2 border-primary/20">

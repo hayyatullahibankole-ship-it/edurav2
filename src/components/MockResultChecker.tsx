@@ -233,7 +233,7 @@ export default function MockResultChecker() {
     <div className="space-y-6" ref={printRef}>
       {/* WAEC-Style Header */}
       <Card className="border-2 border-primary/20 overflow-hidden">
-        <div className="bg-gradient-to-r from-[#1a1a2e] to-[#16213e] p-6 text-center text-white">
+        <div className="bg-[#1a1a2e] p-6 text-center text-white">
           <h1 className="text-2xl md:text-3xl font-bold tracking-wide uppercase">AL-BARI COLLEGE</h1>
           <h2 className="text-lg md:text-xl mt-1 opacity-90">2026 MOCK EXAMINATION RESULT</h2>
         </div>
