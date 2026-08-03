@@ -303,24 +303,24 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
 
       {/* Submit Confirmation Dialog */}
       {showSubmitDialog && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
-          <Card className="w-full max-w-sm border-2 shadow-2xl">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+          <Card className="w-full max-w-sm border">
             <CardHeader className="text-center pb-3">
-              <CardTitle className="text-xl font-bold">Submit Exam?</CardTitle>
+              <CardTitle className="text-lg font-semibold">Submit Exam?</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="p-3 bg-green-50 rounded-xl border border-green-200">
-                  <div className="text-2xl font-bold text-green-600">{Object.keys(answers).length}</div>
-                  <div className="text-xs text-gray-500">Answered</div>
+                <div className="p-3 rounded-lg border bg-muted">
+                  <div className="text-2xl font-bold text-success">{Object.keys(answers).length}</div>
+                  <div className="text-xs text-muted-foreground">Answered</div>
                 </div>
-                <div className="p-3 bg-red-50 rounded-xl border border-red-200">
-                  <div className="text-2xl font-bold text-red-600">{questions.length - Object.keys(answers).length}</div>
-                  <div className="text-xs text-gray-500">Unanswered</div>
+                <div className="p-3 rounded-lg border bg-muted">
+                  <div className="text-2xl font-bold text-destructive">{questions.length - Object.keys(answers).length}</div>
+                  <div className="text-xs text-muted-foreground">Unanswered</div>
                 </div>
-                <div className="p-3 bg-orange-50 rounded-xl border border-orange-200">
-                  <div className="text-2xl font-bold text-orange-600">{questions.length}</div>
-                  <div className="text-xs text-gray-500">Total</div>
+                <div className="p-3 rounded-lg border bg-muted">
+                  <div className="text-2xl font-bold">{questions.length}</div>
+                  <div className="text-xs text-muted-foreground">Total</div>
                 </div>
               </div>
 
@@ -330,7 +330,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
                 </Button>
                 <Button
                   onClick={handleSubmitClick}
-                  className="flex-1 h-11 bg-orange-500 hover:bg-orange-600 font-bold"
+                  className="flex-1 h-11"
                   disabled={submitting || disableSubmit}
                 >
                   {submitting ? 'Submitting...' : 'Submit Exam'}
@@ -343,30 +343,26 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
 
       {/* Upgrade Required Dialog */}
       {showUpgradeDialog && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
-          <Card className="w-full max-w-sm border-2 shadow-2xl">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+          <Card className="w-full max-w-sm border">
             <CardHeader className="text-center pb-3">
-              <Lock className="h-12 w-12 mx-auto mb-4 text-orange-600" />
-              <CardTitle className="text-lg font-bold">Upgrade to Submit</CardTitle>
+              <div className="mx-auto mb-3 w-fit rounded-lg border bg-muted p-3">
+                <Lock className="h-6 w-6 text-primary" />
+              </div>
+              <CardTitle className="text-lg font-semibold">Upgrade to Submit</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-gray-600 text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 Subscribe to submit your exam and unlock detailed results and explanations.
               </p>
 
               <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Check className="h-4 w-4 text-orange-500" />
-                  Submit tests & view full results
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Check className="h-4 w-4 text-orange-500" />
-                  Detailed answer explanations
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Check className="h-4 w-4 text-orange-500" />
-                  Performance analytics
-                </div>
+                {['Submit tests & view full results', 'Detailed answer explanations', 'Performance analytics'].map((item) => (
+                  <div key={item} className="flex items-center gap-2 text-sm">
+                    <Check className="h-4 w-4 text-primary" />
+                    {item}
+                  </div>
+                ))}
               </div>
 
               <div className="flex gap-3 pt-2">
@@ -374,7 +370,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
                   Continue
                 </Button>
                 <Link to="/payment" className="flex-1">
-                  <Button className="w-full h-11 bg-orange-500 hover:bg-orange-600 font-bold">
+                  <Button className="w-full h-11">
                     <Crown className="h-4 w-4 mr-2" />
                     Upgrade Now
                   </Button>
@@ -384,6 +380,7 @@ export const CleanCBTInterface: React.FC<CleanCBTInterfaceProps> = ({
           </Card>
         </div>
       )}
+
 
       {/* Calculator */}
       <Calculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} />
