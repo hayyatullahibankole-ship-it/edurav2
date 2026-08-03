@@ -761,9 +761,9 @@ export default function QuestionManagement() {
 
         {/* Filters */}
         <Card>
-          <CardContent className="p-6">
           <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
+
 
               <div className="flex-1">
                 <div className="relative">
