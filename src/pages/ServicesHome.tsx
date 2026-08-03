@@ -911,48 +911,173 @@ const ServicesHome = () => {
 
           {step === "pay" ? (
             <div className="space-y-4">
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <span className="text-sm text-muted-foreground">Amount</span>
-                <span className="text-lg font-bold">{naira(activeService?.price || 0)}</span>
-              </div>
+              {isInstitutionService && (
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Choose your institution</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        className="pl-9"
+                        placeholder="Search school name or state"
+                        value={instSearch}
+                        onChange={(e) => {
+                          setInstSearch(e.target.value);
+                          setNotListed(false);
+                        }}
+                      />
+                    </div>
+                  </div>
 
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <div className="flex items-center gap-2">
-                  <WalletIcon className="h-4 w-4 text-primary" />
-                  <span className="text-sm">Wallet balance</span>
-                </div>
-                <Badge variant="secondary">{naira(balance)}</Badge>
-              </div>
-
-              <p className="text-xs text-muted-foreground">
-                After payment you'll be asked for the details we need to process this service.
-              </p>
-
-              <div className="grid gap-2">
-                <Button
-                  onClick={payWithWallet}
-                  disabled={submitting || balance < Number(activeService?.price || 0)}
-                >
-                  {submitting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <WalletIcon className="mr-2 h-4 w-4" />
+                  {!notListed && (
+                    <div className="max-h-52 space-y-1 overflow-y-auto rounded-lg border p-1">
+                      {institutionMatches.length === 0 ? (
+                        <p className="p-3 text-sm text-muted-foreground">No school matched.</p>
+                      ) : (
+                        institutionMatches.map((inst) => {
+                          const fee = inst.service_fee_override ?? tierFee(Number(inst.form_fee) || 0);
+                          const active = inst.id === institutionId;
+                          return (
+                            <button
+                              key={inst.id}
+                              type="button"
+                              onClick={() => setInstitutionId(inst.id)}
+                              className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-sm ${
+                                active ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                              }`}
+                            >
+                              <span className="min-w-0">
+                                <span className="block truncate font-medium">{inst.name}</span>
+                                <span className="block text-xs text-muted-foreground">
+                                  {inst.state || inst.type}
+                                </span>
+                              </span>
+                              <span className="shrink-0 text-xs font-semibold">
+                                {naira(Number(inst.form_fee) + Number(fee))}
+                              </span>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
                   )}
-                  Pay from wallet
-                </Button>
-                {balance < Number(activeService?.price || 0) && (
+
                   <button
-                    className="text-left text-xs text-muted-foreground underline"
-                    onClick={() => navigate("/wallet")}
+                    type="button"
+                    className="text-xs text-muted-foreground underline"
+                    onClick={() => {
+                      setNotListed((v) => !v);
+                      setInstitutionId("");
+                    }}
                   >
-                    Balance too low — fund your wallet
+                    {notListed ? "Back to the school list" : "My school is not listed"}
                   </button>
-                )}
-                <Button variant="outline" onClick={payWithCard} disabled={submitting}>
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Pay with card
-                </Button>
-              </div>
+
+                  {notListed && (
+                    <div className="space-y-3 rounded-lg border p-3">
+                      <div className="space-y-2">
+                        <Label>Institution name</Label>
+                        <Input
+                          value={quoteSchool}
+                          onChange={(e) => setQuoteSchool(e.target.value)}
+                          placeholder="e.g. Federal Polytechnic Offa"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Course / programme (optional)</Label>
+                        <Input
+                          value={quoteCourse}
+                          onChange={(e) => setQuoteCourse(e.target.value)}
+                          placeholder="e.g. Computer Science"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        We'll check the school's form fee and send you a price. You only pay after
+                        we confirm it.
+                      </p>
+                      <Button className="w-full" onClick={requestQuote} disabled={submitting}>
+                        {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Request a price
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {!notListed && (
+                <>
+                  {isInstitutionService && selectedInstitution && (
+                    <div className="rounded-lg border p-3 text-sm">
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>{selectedInstitution.name} form fee</span>
+                        <span>{naira(Number(selectedInstitution.form_fee))}</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Processing fee</span>
+                        <span>{naira(Number(institutionFee))}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between rounded-lg border p-3">
+                    <span className="text-sm text-muted-foreground">Amount</span>
+                    <span className="text-lg font-bold">
+                      {isInstitutionService && !selectedInstitution ? "—" : naira(payableAmount)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="flex items-center gap-2">
+                      <WalletIcon className="h-4 w-4 text-primary" />
+                      <span className="text-sm">Wallet balance</span>
+                    </div>
+                    <Badge variant="secondary">{naira(balance)}</Badge>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground">
+                    After payment you'll be asked for the details we need to process this service.
+                  </p>
+
+                  <div className="grid gap-2">
+                    <Button
+                      onClick={payWithWallet}
+                      disabled={
+                        submitting ||
+                        payableAmount <= 0 ||
+                        (isInstitutionService && !selectedInstitution) ||
+                        balance < payableAmount
+                      }
+                    >
+                      {submitting ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <WalletIcon className="mr-2 h-4 w-4" />
+                      )}
+                      Pay from wallet
+                    </Button>
+                    {balance < payableAmount && (
+                      <button
+                        className="text-left text-xs text-muted-foreground underline"
+                        onClick={() => navigate("/wallet")}
+                      >
+                        Balance too low — fund your wallet
+                      </button>
+                    )}
+                    <Button
+                      variant="outline"
+                      onClick={payWithCard}
+                      disabled={
+                        submitting ||
+                        payableAmount <= 0 ||
+                        (isInstitutionService && !selectedInstitution)
+                      }
+                    >
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Pay with card
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             <>
