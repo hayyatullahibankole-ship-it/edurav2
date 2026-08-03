@@ -2,340 +2,519 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { AkboyLayout } from "@/components/akboy/AkboyLayout";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { BookOpen, Code, Palette, Users, ArrowRight, CheckCircle2, Sparkles, Trophy, Target, Zap, Star, Calendar, Clock, MapPin } from "lucide-react";
+import {
+  BookOpen,
+  Code,
+  Palette,
+  Users,
+  ArrowRight,
+  ArrowUpRight,
+  GraduationCap,
+  MonitorSmartphone,
+  Newspaper,
+  Library,
+  ClipboardCheck,
+  ShieldCheck,
+  Calendar,
+  MapPin,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import hero1 from "@/assets/akboy-hero-1.jpg";
 import hero2 from "@/assets/akboy-hero-2.jpg";
-import hero3 from "@/assets/akboy-hero-3.jpg";
-import hero4 from "@/assets/akboy-hero-4.jpg";
-import eduraMockup from "@/assets/edura-dashboard-mockup.png";
 
 export default function AkboyHome() {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [portfolio, setPortfolio] = useState<any[]>([]);
-  const heroImages = [hero1, hero2, hero3, hero4];
   const { isAkboy } = useDomainDetection();
-  
+
   const basePath = isAkboy ? "" : "/akboy";
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [heroImages.length]);
-
-  useEffect(() => {
-    fetchBlogPosts();
-    fetchEvents();
-    fetchPortfolio();
+    const fetchAll = async () => {
+      try {
+        const [posts, evts, folio] = await Promise.all([
+          supabase
+            .from("blog_posts")
+            .select("*")
+            .eq("is_published", true)
+            .order("created_at", { ascending: false })
+            .limit(3),
+          supabase
+            .from("akboy_events")
+            .select("*")
+            .gte("event_date", new Date().toISOString())
+            .order("event_date", { ascending: true })
+            .limit(2),
+          supabase
+            .from("akboy_portfolio")
+            .select("*")
+            .eq("is_active", true)
+            .order("display_order", { ascending: true })
+            .limit(3),
+        ]);
+        setBlogPosts(posts.data || []);
+        setEvents(evts.data || []);
+        setPortfolio(folio.data || []);
+      } catch (error) {
+        console.error("Error loading homepage data:", error);
+      }
+    };
+    fetchAll();
   }, []);
 
-  const fetchBlogPosts = async () => {
-    try {
-      const { data } = await supabase
-        .from("blog_posts")
-        .select("*")
-        .eq("is_published", true)
-        .order("created_at", { ascending: false })
-        .limit(3);
-      
-      setBlogPosts(data || []);
-    } catch (error) {
-      console.error("Error fetching blog posts:", error);
-    }
-  };
-
-  const fetchEvents = async () => {
-    try {
-      const { data } = await supabase
-        .from("akboy_events")
-        .select("*")
-        .gte("event_date", new Date().toISOString())
-        .order("event_date", { ascending: true })
-        .limit(3);
-      
-      setEvents(data || []);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-    }
-  };
-
-  const fetchPortfolio = async () => {
-    try {
-      const { data } = await supabase
-        .from("akboy_portfolio")
-        .select("*")
-        .eq("is_active", true)
-        .order("display_order", { ascending: true })
-        .order("created_at", { ascending: false })
-        .limit(3);
-      
-      setPortfolio(data || []);
-    } catch (error) {
-      console.error("Error fetching portfolio:", error);
-    }
-  };
-
-  const services = [
+  const capabilities = [
     {
-      icon: BookOpen,
-      title: "Educational Consultancy",
-      description: "Expert guidance for academic excellence and curriculum development",
-      color: "bg-emerald-600"
+      icon: GraduationCap,
+      kicker: "Education",
+      title: "Exam Prep Academy",
+      description:
+        "Structured tutorials, online classes and supervised mock exams for JAMB, WAEC, NECO and Post-UTME candidates.",
+      href: `${basePath}/register`,
     },
     {
-      icon: Users,
-      title: "Tutorial Services",
-      description: "Personalized learning experiences with qualified instructors",
-      color: "bg-teal-600"
+      icon: ClipboardCheck,
+      kicker: "Education",
+      title: "Admission Consultancy",
+      description:
+        "Institution selection, form filling, Post-UTME processing and step-by-step guidance until admission is secured.",
+      href: `${basePath}/services`,
+    },
+    {
+      icon: MonitorSmartphone,
+      kicker: "Technology",
+      title: "EdTech Platforms",
+      description:
+        "We build and operate CBT engines, school portals and learning platforms used by thousands of students.",
+      href: `${basePath}/services`,
     },
     {
       icon: Palette,
-      title: "Graphics Design",
-      description: "Creative visual solutions that bring your brand to life",
-      color: "bg-cyan-600"
+      kicker: "Technology",
+      title: "Design & Brand Systems",
+      description:
+        "Visual identity, campaign design and product interfaces for schools, organisations and growing businesses.",
+      href: `${basePath}/services`,
     },
-    {
-      icon: Code,
-      title: "Web Development",
-      description: "Modern, responsive websites and web applications",
-      color: "bg-blue-600"
-    }
   ];
 
-  const features = [
-    { icon: Trophy, title: "Award-Winning Team", description: "Recognized excellence in creative solutions" },
-    { icon: Target, title: "Result-Driven", description: "Focused on delivering measurable outcomes" },
-    { icon: Sparkles, title: "Innovation First", description: "Cutting-edge approaches to every project" }
+  const ecosystem = [
+    {
+      icon: Code,
+      title: "Edura CBT",
+      description: "Realistic computer-based test practice with 120,000+ questions and instant analytics.",
+      action: { label: "Visit Edura", href: "https://edura.space", external: true },
+    },
+    {
+      icon: Newspaper,
+      title: "Campus Hub",
+      description: "Verified admission lists, exam updates and student opportunities, published daily.",
+      action: { label: "Open Campus Hub", href: `${basePath}/campus-hub` },
+    },
+    {
+      icon: Library,
+      title: "Ebook Library",
+      description: "Access-controlled study material you can read securely from any device.",
+      action: { label: "Browse library", href: `${basePath}/ebooks` },
+    },
+    {
+      icon: Users,
+      title: "Mock Exams",
+      description: "Proctored mock sittings that mirror the real exam hall, with graded WAEC-style reports.",
+      action: { label: "See mock exams", href: `${basePath}/mock` },
+    },
+  ];
+
+  const process = [
+    { step: "01", title: "Consult", body: "We assess the student, school or brand and define a measurable objective." },
+    { step: "02", title: "Design", body: "A tailored academic plan or product/design scope with clear deliverables." },
+    { step: "03", title: "Deliver", body: "Classes, applications or builds executed by our education and tech teams." },
+    { step: "04", title: "Track", body: "Progress reviews, reports and support until the outcome is achieved." },
   ];
 
   return (
     <AkboyLayout>
-      {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-white">
-        {/* Image Carousel Background */}
-        <div className="absolute inset-0 z-0">
-          {heroImages.map((image, index) => (
-            <div
-              key={index}
-              className={`absolute inset-0 transition-opacity duration-1000 ${
-                index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <img 
-                src={image}
-                alt={`AKBOY Creative Hub ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))}
-          <div className="absolute inset-0 bg-black/50"></div>
-          
-          {/* Carousel Indicators */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-3 z-20">
-            {heroImages.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentImageIndex(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  index === currentImageIndex 
-                    ? 'w-12 bg-white' 
-                    : 'w-2 bg-white/50 hover:bg-white/70'
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
+      {/* ================= HERO ================= */}
+      <section className="relative overflow-hidden bg-akboy-forest">
+        <div className="absolute inset-0 opacity-[0.14]">
+          <img src={hero1} alt="" aria-hidden className="h-full w-full object-cover" />
         </div>
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="animate-fade-in">
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-              Education. Consultancy.
-              <span className="block text-emerald-300">
-                Design solutions.
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-12 leading-relaxed">
-              AKBOY Creative Hub is an edtech institution offering education, admission consultancy, and creative design solutions for students and organizations.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                asChild 
-                size="lg" 
-                className="bg-white text-gray-900 hover:bg-gray-100 text-lg px-8 py-6 h-auto font-semibold transition-colors"
-              >
-                <Link to={`${basePath}/services`}>
-                  Explore Our Services
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Link>
-              </Button>
-              <Button 
-                asChild 
-                size="lg" 
-                variant="outline" 
-                className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gray-900 text-lg px-8 py-6 h-auto font-semibold"
-              >
-                <Link to={`${basePath}/contact`}>Contact Us</Link>
-              </Button>
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 pb-16 md:pt-28 md:pb-24">
+          <div className="grid gap-14 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-7">
+              <div className="inline-flex items-center gap-2 rounded-full border border-akboy-butter/40 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-akboy-butter">
+                <span className="h-1.5 w-1.5 rounded-full bg-akboy-butter" />
+                EdTech · Education · Technology
+              </div>
+
+              <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+                Education solved with
+                <span className="block text-akboy-butter">technology that works.</span>
+              </h1>
+
+              <p className="mt-6 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
+                AKBOY Creative Hub is an education technology company. We prepare students for national exams,
+                process admissions end to end, and build the digital platforms that schools and organisations
+                run on.
+              </p>
+
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-12 rounded-xl bg-akboy-butter px-7 text-sm font-semibold text-akboy-forest hover:bg-akboy-butter/90"
+                >
+                  <Link to={`${basePath}/services`}>
+                    Explore our solutions
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="h-12 rounded-xl border-white/25 bg-transparent px-7 text-sm font-semibold text-white hover:bg-white/10 hover:text-white"
+                >
+                  <Link to={`${basePath}/contact`}>Talk to a consultant</Link>
+                </Button>
+              </div>
+
+              <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-white/10 pt-8">
+                {[
+                  { v: "5,000+", l: "Students guided" },
+                  { v: "200+", l: "Projects delivered" },
+                  { v: "5 yrs", l: "In education & tech" },
+                ].map((s) => (
+                  <div key={s.l}>
+                    <dt className="font-display text-2xl font-bold text-white sm:text-3xl">{s.v}</dt>
+                    <dd className="mt-1 text-xs font-medium uppercase tracking-wide text-white/55">{s.l}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+
+            {/* Two-pillar card */}
+            <div className="lg:col-span-5">
+              <div className="rounded-2xl border border-white/12 bg-white/[0.04] p-6 sm:p-7">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/50">
+                  Two disciplines, one company
+                </p>
+                <div className="mt-5 space-y-4">
+                  <div className="rounded-xl border border-white/10 bg-akboy-deep/60 p-5">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-akboy-butter">
+                        <BookOpen className="h-4.5 w-4.5 text-akboy-forest" />
+                      </div>
+                      <h3 className="font-display text-base font-semibold text-white">Education</h3>
+                    </div>
+                    <p className="mt-3 text-sm leading-relaxed text-white/65">
+                      Tutorials, mock exams, admission processing and consultancy for students and schools.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-akboy-deep/60 p-5">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white">
+                        <Code className="h-4.5 w-4.5 text-akboy-forest" />
+                      </div>
+                      <h3 className="font-display text-base font-semibold text-white">Technology</h3>
+                    </div>
+                    <p className="mt-3 text-sm leading-relaxed text-white/65">
+                      Learning platforms, CBT engines, school portals, brand systems and product design.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-xl border border-akboy-butter/25 bg-akboy-butter/10 p-4">
+                    <ShieldCheck className="h-5 w-5 flex-shrink-0 text-akboy-butter" />
+                    <p className="text-sm text-white/80">
+                      Combined, they power <span className="font-semibold text-white">Edura</span> — our flagship
+                      student platform.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Services Grid */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 animate-fade-in">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              What We Offer
+      {/* ================= CAPABILITIES ================= */}
+      <section className="bg-akboy-paper py-20 md:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-akboy-moss">What we do</p>
+            <h2 className="mt-4 font-display text-3xl font-bold tracking-tight text-akboy-forest md:text-4xl">
+              Capabilities across the education value chain
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Comprehensive solutions tailored to your unique needs
+            <p className="mt-4 text-base leading-relaxed text-akboy-muted">
+              From the first tutorial to the admission letter — and the software that makes it scale.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {services.map((service, index) => (
-              <Card 
-                key={index}
-                className="group p-8 hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-emerald-300 bg-white"
+          <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-akboy-line bg-akboy-line sm:grid-cols-2">
+            {capabilities.map((c) => (
+              <Link
+                key={c.title}
+                to={c.href}
+                className="group flex flex-col bg-white p-7 transition-colors hover:bg-akboy-bone md:p-9"
               >
-                <div className={`w-14 h-14 rounded-lg ${service.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                  <service.icon className="w-7 h-7 text-white" />
+                <div className="flex items-start justify-between">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-akboy-forest">
+                    <c.icon className="h-5 w-5 text-akboy-butter" />
+                  </div>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-akboy-moss">
+                    {c.kicker}
+                  </span>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {service.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {service.description}
-                </p>
-              </Card>
+                <h3 className="mt-6 font-display text-xl font-semibold text-akboy-forest">{c.title}</h3>
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-akboy-muted">{c.description}</p>
+                <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-akboy-forest">
+                  Learn more
+                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </span>
+              </Link>
             ))}
           </div>
+        </div>
+      </section>
 
-          <div className="text-center mt-12">
-            <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 font-semibold">
-              <Link to={`${basePath}/services`}>
-                View All Services
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Link>
+      {/* ================= ECOSYSTEM ================= */}
+      <section className="bg-akboy-bone py-20 md:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-akboy-moss">Our products</p>
+              <h2 className="mt-4 font-display text-3xl font-bold tracking-tight text-akboy-forest md:text-4xl">
+                The AKBOY learning ecosystem
+              </h2>
+            </div>
+            <Button
+              asChild
+              variant="outline"
+              className="h-11 w-fit rounded-xl border-akboy-forest/25 bg-transparent px-6 text-sm font-semibold text-akboy-forest hover:bg-akboy-forest hover:text-white"
+            >
+              <Link to={`${basePath}/services`}>All services</Link>
             </Button>
           </div>
-        </div>
-      </section>
 
-      {/* About Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 rounded-lg text-emerald-700 font-semibold">
-                <Sparkles className="w-4 h-4" />
-                About Us
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
-                Where Creativity Meets Innovation
-              </h2>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                AKBOY Creative Hub is a dynamic collective of educators, designers, and developers 
-                passionate about transforming ideas into impactful solutions. Since our inception, 
-                we've been at the forefront of educational technology and creative design in Nigeria.
-              </p>
-              <div className="grid grid-cols-2 gap-6 pt-4">
-                <div className="space-y-2">
-                  <div className="text-3xl font-bold text-emerald-600">5+</div>
-                  <div className="text-sm text-gray-600 font-medium">Years Experience</div>
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {ecosystem.map((p) => (
+              <div
+                key={p.title}
+                className="flex flex-col rounded-2xl border border-akboy-line bg-white p-6 transition-shadow hover:shadow-[0_12px_32px_-18px_hsl(var(--akboy-forest)/0.35)]"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-akboy-bone">
+                  <p.icon className="h-5 w-5 text-akboy-forest" />
                 </div>
-                <div className="space-y-2">
-                  <div className="text-3xl font-bold text-emerald-600">200+</div>
-                  <div className="text-sm text-gray-600 font-medium">Projects Completed</div>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-3xl font-bold text-emerald-600">50+</div>
-                  <div className="text-sm text-gray-600 font-medium">Happy Clients</div>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-3xl font-bold text-emerald-600">15+</div>
-                  <div className="text-sm text-gray-600 font-medium">Team Members</div>
-                </div>
-              </div>
-              <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 font-semibold">
-                <Link to={`${basePath}/about`}>
-                  Learn More About Us
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Link>
-              </Button>
-            </div>
-            <div className="relative">
-              <img 
-                src={hero2}
-                alt="AKBOY Team"
-                className="w-full rounded-2xl shadow-lg"
-              />
-              <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center">
-                    <Trophy className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-emerald-600">4.9★</div>
-                    <div className="text-xs text-gray-600">Client Rating</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Why Choose Us
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((feature, i) => (
-              <div key={i} className="text-center">
-                <div className="w-16 h-16 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-6">
-                  <feature.icon className="w-8 h-8 text-emerald-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <h3 className="mt-5 font-display text-lg font-semibold text-akboy-forest">{p.title}</h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-akboy-muted">{p.description}</p>
+                {p.action.external ? (
+                  <a
+                    href={p.action.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-akboy-moss hover:text-akboy-forest"
+                  >
+                    {p.action.label}
+                    <ArrowUpRight className="h-4 w-4" />
+                  </a>
+                ) : (
+                  <Link
+                    to={p.action.href}
+                    className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-akboy-moss hover:text-akboy-forest"
+                  >
+                    {p.action.label}
+                    <ArrowUpRight className="h-4 w-4" />
+                  </Link>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-emerald-600">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Get Started?
+      {/* ================= APPROACH ================= */}
+      <section className="bg-white py-20 md:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-14 lg:grid-cols-12">
+            <div className="lg:col-span-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-akboy-moss">How we work</p>
+              <h2 className="mt-4 font-display text-3xl font-bold tracking-tight text-akboy-forest md:text-4xl">
+                A disciplined process behind every outcome
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-akboy-muted">
+                Whether it is a student targeting medicine or a school digitising its exams, the same four steps
+                keep the work accountable.
+              </p>
+              <div className="mt-8 overflow-hidden rounded-2xl border border-akboy-line">
+                <img src={hero2} alt="AKBOY Creative Hub team at work" className="h-56 w-full object-cover" loading="lazy" />
+              </div>
+            </div>
+
+            <div className="lg:col-span-7">
+              <div className="divide-y divide-akboy-line border-y border-akboy-line">
+                {process.map((p) => (
+                  <div key={p.step} className="flex gap-6 py-7">
+                    <span className="font-display text-sm font-bold text-akboy-moss">{p.step}</span>
+                    <div>
+                      <h3 className="font-display text-lg font-semibold text-akboy-forest">{p.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-akboy-muted">{p.body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= WORK + INSIGHTS ================= */}
+      {(portfolio.length > 0 || blogPosts.length > 0 || events.length > 0) && (
+        <section className="bg-akboy-paper py-20 md:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-16">
+            {portfolio.length > 0 && (
+              <div>
+                <div className="flex items-end justify-between gap-6">
+                  <h2 className="font-display text-2xl font-bold text-akboy-forest md:text-3xl">Selected work</h2>
+                  <Link
+                    to={`${basePath}/portfolio`}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-akboy-moss hover:text-akboy-forest"
+                  >
+                    View portfolio <ArrowUpRight className="h-4 w-4" />
+                  </Link>
+                </div>
+                <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {portfolio.map((item) => (
+                    <Link
+                      key={item.id}
+                      to={`${basePath}/portfolio`}
+                      className="group overflow-hidden rounded-2xl border border-akboy-line bg-white"
+                    >
+                      {item.image_url && (
+                        <img
+                          src={item.image_url}
+                          alt={item.title}
+                          loading="lazy"
+                          className="h-44 w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                        />
+                      )}
+                      <div className="p-5">
+                        <h3 className="font-display text-base font-semibold text-akboy-forest">{item.title}</h3>
+                        {item.description && (
+                          <p className="mt-2 line-clamp-2 text-sm text-akboy-muted">{item.description}</p>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {events.length > 0 && (
+              <div>
+                <div className="flex items-end justify-between gap-6">
+                  <h2 className="font-display text-2xl font-bold text-akboy-forest md:text-3xl">Upcoming events</h2>
+                  <Link
+                    to={`${basePath}/events`}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-akboy-moss hover:text-akboy-forest"
+                  >
+                    All events <ArrowUpRight className="h-4 w-4" />
+                  </Link>
+                </div>
+                <div className="mt-8 grid gap-5 sm:grid-cols-2">
+                  {events.map((ev) => (
+                    <div key={ev.id} className="rounded-2xl border border-akboy-line bg-white p-6">
+                      <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-akboy-muted">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {new Date(ev.event_date).toLocaleDateString("en-NG", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
+                        {ev.location && (
+                          <span className="inline-flex items-center gap-1.5">
+                            <MapPin className="h-3.5 w-3.5" />
+                            {ev.location}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="mt-3 font-display text-lg font-semibold text-akboy-forest">{ev.title}</h3>
+                      {ev.description && (
+                        <p className="mt-2 line-clamp-2 text-sm text-akboy-muted">{ev.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {blogPosts.length > 0 && (
+              <div>
+                <div className="flex items-end justify-between gap-6">
+                  <h2 className="font-display text-2xl font-bold text-akboy-forest md:text-3xl">
+                    Latest from Campus Hub
+                  </h2>
+                  <Link
+                    to={`${basePath}/campus-hub`}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-akboy-moss hover:text-akboy-forest"
+                  >
+                    Visit Campus Hub <ArrowUpRight className="h-4 w-4" />
+                  </Link>
+                </div>
+                <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {blogPosts.map((post) => (
+                    <Link
+                      key={post.id}
+                      to={`${basePath}/blog/${post.slug}`}
+                      className="rounded-2xl border border-akboy-line bg-white p-6 transition-colors hover:border-akboy-forest/30"
+                    >
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-akboy-moss">
+                        {post.category || "Update"}
+                      </p>
+                      <h3 className="mt-3 line-clamp-2 font-display text-base font-semibold text-akboy-forest">
+                        {post.title}
+                      </h3>
+                      {post.excerpt && (
+                        <p className="mt-2 line-clamp-3 text-sm text-akboy-muted">{post.excerpt}</p>
+                      )}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ================= CTA ================= */}
+      <section className="bg-akboy-forest py-20 md:py-24">
+        <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+          <h2 className="font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
+            Let's build the next step of your education journey
           </h2>
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Let's discuss how we can help bring your ideas to life
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-white/70">
+            Speak with our team about tutorials, admission processing, or a technology project for your school
+            or organisation.
           </p>
-          <Button 
-            asChild 
-            size="lg" 
-            className="bg-white text-emerald-600 hover:bg-gray-100 px-10 py-6 text-lg font-semibold h-auto"
-          >
-            <Link to={`${basePath}/contact`}>
-              Contact Us Today
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Link>
-          </Button>
+          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+            <Button
+              asChild
+              size="lg"
+              className="h-12 rounded-xl bg-akboy-butter px-8 text-sm font-semibold text-akboy-forest hover:bg-akboy-butter/90"
+            >
+              <Link to={`${basePath}/contact`}>Book a consultation</Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="h-12 rounded-xl border-white/25 bg-transparent px-8 text-sm font-semibold text-white hover:bg-white/10 hover:text-white"
+            >
+              <Link to={`${basePath}/register`}>Join the Exam Prep Academy</Link>
+            </Button>
+          </div>
         </div>
       </section>
     </AkboyLayout>
