@@ -322,12 +322,19 @@ function BookDetail({ book: initialBook, onBack }: { book: any; onBack: () => vo
 
       {/* Access codes */}
       <Card className="p-5 space-y-4">
-        <h3 className="font-medium flex items-center gap-2"><KeyRound className="w-4 h-4" /> Access codes (optional)</h3>
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="font-medium flex items-center gap-2"><KeyRound className="w-4 h-4" /> Access codes (optional)</h3>
+          <div className="ml-auto flex gap-2">
+            <Button size="sm" variant="outline" onClick={generateBatch}>Generate batch</Button>
+            <Button size="sm" variant="ghost" onClick={() => copyCodes(codes)} disabled={codes.length === 0}>Copy all</Button>
+          </div>
+        </div>
         <form onSubmit={createCode} className="flex flex-col sm:flex-row gap-2">
           <Input placeholder="Custom code (optional)" value={codeForm.code} onChange={(e) => setCodeForm({ ...codeForm, code: e.target.value.toUpperCase() })} />
           <Input type="number" min={1} className="sm:w-32" value={codeForm.max_uses} onChange={(e) => setCodeForm({ ...codeForm, max_uses: parseInt(e.target.value) || 1 })} />
           <Button type="submit">Generate</Button>
         </form>
+
         <div className="divide-y">
           {codes.map((k) => (
             <div key={k.id} className="py-2 flex items-center gap-3 text-sm">
