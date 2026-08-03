@@ -41,6 +41,10 @@ import {
   Wallet as WalletIcon,
 } from "lucide-react";
 import ScratchCardDialog from "@/components/edura/ScratchCardDialog";
+import { useWallet } from "@/hooks/useWallet";
+import { initializePaystackPayment } from "@/utils/paystack";
+import { CreditCard, Loader2 } from "lucide-react";
+
 
 
 type ServiceField = {
@@ -65,6 +69,7 @@ type Service = {
 
 type ServiceRequest = {
   id: string;
+  service_id?: string | null;
   service_name: string;
   provider: string;
   amount: number;
@@ -72,6 +77,7 @@ type ServiceRequest = {
   created_at: string;
   admin_note: string | null;
 };
+
 
 const PROVIDERS = [
   { key: "all", label: "All" },
@@ -87,6 +93,8 @@ const naira = (value: number) =>
 
 const statusStyles: Record<string, string> = {
   pending: "bg-muted text-muted-foreground",
+  awaiting_details: "bg-primary/10 text-primary",
+
   processing: "bg-primary/10 text-primary",
   completed: "bg-success/10 text-success",
   failed: "bg-destructive/10 text-destructive",
@@ -96,7 +104,9 @@ const statusStyles: Record<string, string> = {
 const ServicesHome = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { balance, refresh: refreshWallet } = useWallet();
   const [searchParams, setSearchParams] = useSearchParams();
+
 
   const [services, setServices] = useState<Service[]>([]);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
@@ -107,6 +117,9 @@ const ServicesHome = () => {
   const [activeService, setActiveService] = useState<Service | null>(null);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [step, setStep] = useState<"pay" | "details">("pay");
+  const [paidRequestId, setPaidRequestId] = useState<string | null>(null);
+
 
   const view = searchParams.get("tab") === "requests" ? "requests" : "services";
 
@@ -156,11 +169,12 @@ const ServicesHome = () => {
     if (!user) return;
     const { data } = await supabase
       .from("service_requests")
-      .select("id, service_name, provider, amount, status, created_at, admin_note")
+      .select("id, service_id, service_name, provider, amount, status, created_at, admin_note")
       .order("created_at", { ascending: false })
       .limit(50);
     setRequests((data as ServiceRequest[]) || []);
   };
+
 
   useEffect(() => {
     loadRequests();
@@ -177,8 +191,8 @@ const ServicesHome = () => {
         if (match.product_type === "scratch_card") {
           setScratchService(match);
         } else {
-          setActiveService(match);
-          setFormValues({});
+          openService(match);
+
         }
       }
     }
@@ -219,13 +233,80 @@ const ServicesHome = () => {
     return { total: requests.length, pending, completed };
   }, [requests]);
 
-  const submitRequest = async () => {
+  const openService = (service: Service) => {
+    setActiveService(service);
+    setFormValues({});
+    setPaidRequestId(null);
+    setStep("pay");
+  };
+
+  const closeDialog = () => {
+    setActiveService(null);
+    setFormValues({});
+    setPaidRequestId(null);
+    setStep("pay");
+  };
+
+  const afterPayment = async (payload: Record<string, unknown>) => {
+    if (!activeService) return;
+    const { data, error } = await supabase.functions.invoke("pay-service-request", {
+      body: { service_id: activeService.id, ...payload },
+    });
+
+    if (error || data?.error) {
+      toast.error(data?.error || "Payment could not be completed. Please try again.");
+      return;
+    }
+
+    setPaidRequestId(data.request_id as string);
+    setStep("details");
+    refreshWallet();
+    loadRequests();
+    toast.success("Payment received. Now fill in your details.");
+  };
+
+  const payWithWallet = async () => {
     if (!activeService) return;
     if (!user) {
-      toast.error("Please sign in to request a service");
+      toast.error("Please sign in to continue");
       navigate("/auth");
       return;
     }
+    setSubmitting(true);
+    await afterPayment({ payment_method: "wallet" });
+    setSubmitting(false);
+  };
+
+  const payWithCard = async () => {
+    if (!activeService) return;
+    if (!user) {
+      toast.error("Please sign in to continue");
+      navigate("/auth");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await initializePaystackPayment(
+        {
+          amount: Number(activeService.price) * 100,
+          email: user.email || "",
+          reference: `srv_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+          currency: "NGN",
+          metadata: { purpose: "service_request", service_slug: activeService.slug },
+        },
+        async (reference) => {
+          await afterPayment({ payment_method: "card", payment_reference: reference });
+          setSubmitting(false);
+        },
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not start payment");
+      setSubmitting(false);
+    }
+  };
+
+  const submitDetails = async () => {
+    if (!activeService || !paidRequestId) return;
 
     const missing = activeService.fields.filter(
       (field) => field.required && !formValues[field.key]?.trim()
@@ -236,29 +317,35 @@ const ServicesHome = () => {
     }
 
     setSubmitting(true);
-    const { error } = await supabase.from("service_requests").insert({
-      user_id: user.id,
-      service_id: activeService.id,
-      service_slug: activeService.slug,
-      service_name: activeService.name,
-      provider: activeService.provider,
-      amount: activeService.price,
-      form_data: formValues,
-      status: "pending",
-    });
+    const { error } = await supabase
+      .from("service_requests")
+      .update({ form_data: formValues, status: "pending" })
+      .eq("id", paidRequestId);
     setSubmitting(false);
 
     if (error) {
-      toast.error("Could not submit request. Please try again.");
+      toast.error("Could not save your details. Please try again.");
       return;
     }
 
-    toast.success("Request submitted. We'll process it shortly.");
-    setActiveService(null);
-    setFormValues({});
+    toast.success("Details submitted. We'll process your request shortly.");
+    closeDialog();
     loadRequests();
     setView("requests");
   };
+
+  const resumeRequest = (request: ServiceRequest) => {
+    const service = services.find((s) => s.id === request.service_id);
+    if (!service) {
+      toast.error("This service is no longer available. Please contact support.");
+      return;
+    }
+    setActiveService(service);
+    setFormValues({});
+    setPaidRequestId(request.id);
+    setStep("details");
+  };
+
 
   const firstName = (user?.email ?? "there").split("@")[0];
 
@@ -455,11 +542,11 @@ const ServicesHome = () => {
                                   setScratchService(service);
                                   return;
                                 }
-                                setActiveService(service);
-                                setFormValues({});
+                                openService(service);
+
                               }}
                             >
-                              {service.product_type === "scratch_card" ? "Buy now" : "Request"}
+                              {service.product_type === "scratch_card" ? "Buy now" : "Pay & request"}
                             </Button>
                           </div>
                         </CardContent>
@@ -496,13 +583,20 @@ const ServicesHome = () => {
                       <p className="mt-1 text-xs text-muted-foreground">{request.admin_note}</p>
                     )}
                   </div>
-                  <Badge
-                    className={`shrink-0 border-0 capitalize ${
-                      statusStyles[request.status] || statusStyles.pending
-                    }`}
-                  >
-                    {request.status}
-                  </Badge>
+                  {request.status === "awaiting_details" ? (
+                    <Button size="sm" className="shrink-0" onClick={() => resumeRequest(request)}>
+                      Complete details
+                    </Button>
+                  ) : (
+                    <Badge
+                      className={`shrink-0 border-0 capitalize ${
+                        statusStyles[request.status] || statusStyles.pending
+                      }`}
+                    >
+                      {request.status}
+                    </Badge>
+                  )}
+
                 </div>
               ))
             )}
@@ -510,72 +604,130 @@ const ServicesHome = () => {
         )}
       </main>
 
-      <Dialog open={!!activeService} onOpenChange={(open) => !open && setActiveService(null)}>
+      <Dialog open={!!activeService} onOpenChange={(open) => !open && closeDialog()}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{activeService?.name}</DialogTitle>
             <DialogDescription>
-              {activeService ? `${naira(activeService.price)} · ${activeService.turnaround ?? ""}` : ""}
+              {activeService
+                ? step === "pay"
+                  ? `${naira(activeService.price)} · pay first, then fill in your details`
+                  : `Payment received · ${activeService.turnaround ?? "we'll process shortly"}`
+                : ""}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            {activeService?.fields.map((field) => (
-              <div key={field.key} className="space-y-2">
-                <Label htmlFor={field.key}>
-                  {field.label}
-                  {field.required && <span className="text-destructive"> *</span>}
-                </Label>
-                {field.type === "textarea" ? (
-                  <Textarea
-                    id={field.key}
-                    value={formValues[field.key] || ""}
-                    onChange={(e) =>
-                      setFormValues((prev) => ({ ...prev, [field.key]: e.target.value }))
-                    }
-                  />
-                ) : field.type === "select" ? (
-                  <Select
-                    value={formValues[field.key] || ""}
-                    onValueChange={(value) =>
-                      setFormValues((prev) => ({ ...prev, [field.key]: value }))
-                    }
-                  >
-                    <SelectTrigger id={field.key}>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(field.options || []).map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input
-                    id={field.key}
-                    type={field.type}
-                    value={formValues[field.key] || ""}
-                    onChange={(e) =>
-                      setFormValues((prev) => ({ ...prev, [field.key]: e.target.value }))
-                    }
-                  />
-                )}
+          {step === "pay" ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <span className="text-sm text-muted-foreground">Amount</span>
+                <span className="text-lg font-bold">{naira(activeService?.price || 0)}</span>
               </div>
-            ))}
-          </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setActiveService(null)}>
-              Cancel
-            </Button>
-            <Button onClick={submitRequest} disabled={submitting}>
-              {submitting ? "Submitting..." : "Submit request"}
-            </Button>
-          </DialogFooter>
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div className="flex items-center gap-2">
+                  <WalletIcon className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Wallet balance</span>
+                </div>
+                <Badge variant="secondary">{naira(balance)}</Badge>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                After payment you'll be asked for the details we need to process this service.
+              </p>
+
+              <div className="grid gap-2">
+                <Button
+                  onClick={payWithWallet}
+                  disabled={submitting || balance < Number(activeService?.price || 0)}
+                >
+                  {submitting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <WalletIcon className="mr-2 h-4 w-4" />
+                  )}
+                  Pay from wallet
+                </Button>
+                {balance < Number(activeService?.price || 0) && (
+                  <button
+                    className="text-left text-xs text-muted-foreground underline"
+                    onClick={() => navigate("/wallet")}
+                  >
+                    Balance too low — fund your wallet
+                  </button>
+                )}
+                <Button variant="outline" onClick={payWithCard} disabled={submitting}>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Pay with card
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 rounded-lg border bg-muted p-3">
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                  <p className="text-sm font-medium">Payment confirmed</p>
+                </div>
+                {activeService?.fields.map((field) => (
+                  <div key={field.key} className="space-y-2">
+                    <Label htmlFor={field.key}>
+                      {field.label}
+                      {field.required && <span className="text-destructive"> *</span>}
+                    </Label>
+                    {field.type === "textarea" ? (
+                      <Textarea
+                        id={field.key}
+                        value={formValues[field.key] || ""}
+                        onChange={(e) =>
+                          setFormValues((prev) => ({ ...prev, [field.key]: e.target.value }))
+                        }
+                      />
+                    ) : field.type === "select" ? (
+                      <Select
+                        value={formValues[field.key] || ""}
+                        onValueChange={(value) =>
+                          setFormValues((prev) => ({ ...prev, [field.key]: value }))
+                        }
+                      >
+                        <SelectTrigger id={field.key}>
+                          <SelectValue placeholder="Select an option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(field.options || []).map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        id={field.key}
+                        type={field.type}
+                        value={formValues[field.key] || ""}
+                        onChange={(e) =>
+                          setFormValues((prev) => ({ ...prev, [field.key]: e.target.value }))
+                        }
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={closeDialog}>
+                  Later
+                </Button>
+                <Button onClick={submitDetails} disabled={submitting}>
+                  {submitting ? "Submitting..." : "Submit details"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
+
 
       <ScratchCardDialog service={scratchService} onClose={() => setScratchService(null)} />
 
