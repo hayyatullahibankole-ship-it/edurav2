@@ -86,6 +86,7 @@ export default function EbookLibrary() {
       `Hello AKBOY, I'd like to purchase an access code for the ebook "${book.title}".`
     )}`;
 
+  const load = async () => {
     setLoading(true);
     const { data } = await supabase
       .from("ebooks")
