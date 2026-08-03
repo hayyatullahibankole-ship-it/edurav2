@@ -1043,7 +1043,7 @@ const Dashboard = () => {
           </header>
 
           {/* Main Content */}
-          <div className="flex-1 p-8 overflow-auto bg-gradient-to-br from-background via-muted/30 to-background">
+          <div className="flex-1 p-8 overflow-auto bg-background">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsContent value="dashboard" className="space-y-6 mt-0 animate-fade-in">
                 {/* Free Access Banner */}
@@ -1090,7 +1090,7 @@ const Dashboard = () => {
                   </Card>
 
                   {/* Card 3 - Highlighted */}
-                  <Card className="bg-primary text-primary-foreground">
+                  <Card>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
@@ -1116,7 +1116,7 @@ const Dashboard = () => {
                   </div>
                 ) : (
                 <>
-                <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-accent/5">
+                <Card className="border">
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-primary/10 rounded-lg">
