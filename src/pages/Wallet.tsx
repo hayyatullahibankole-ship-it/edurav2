@@ -161,15 +161,62 @@ const Wallet = () => {
       <main className="container mx-auto max-w-3xl space-y-5 px-4 py-5">
         <Card className="border">
           <CardContent className="space-y-4 p-5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg border bg-muted p-2.5">
-                <WalletIcon className="h-5 w-5 text-primary" />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg border bg-muted p-2.5">
+                  <WalletIcon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Available balance</p>
+                  <p className="text-3xl font-bold">{loading ? "—" : naira(balance)}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Available balance</p>
-                <p className="text-3xl font-bold">{loading ? "—" : naira(balance)}</p>
+              <Button variant="ghost" size="icon" onClick={refresh} className="h-9 w-9">
+                <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+              </Button>
+            </div>
+
+            <div className="rounded-lg border p-4">
+              <div className="flex items-start gap-3">
+                <div className="rounded-md border bg-muted p-2">
+                  <Building2 className="h-4 w-4 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">Dedicated account number</p>
+                  {accountLoading ? (
+                    <p className="mt-1 text-xs text-muted-foreground">Checking…</p>
+                  ) : account ? (
+                    <div className="mt-2 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-xl font-bold tracking-wider">{account.account_number}</p>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={copyAccount}>
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {account.bank_name} • {account.account_name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Transfer to this account from any bank app and your wallet is funded
+                        automatically.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mt-2 space-y-2">
+                      <p className="text-xs text-muted-foreground">
+                        Generate a permanent account number in your name. Any transfer to it tops up
+                        your wallet instantly.
+                      </p>
+                      <Button size="sm" onClick={generateAccount} disabled={generating}>
+                        {generating && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+                        {generating ? "Generating…" : "Generate account number"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
+
 
             <div className="space-y-2">
               <Label htmlFor="amount">Top up amount</Label>
