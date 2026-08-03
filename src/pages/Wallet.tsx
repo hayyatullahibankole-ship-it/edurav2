@@ -223,7 +223,18 @@ const Wallet = () => {
                         Transfer to this account from any bank app and your wallet is funded
                         automatically.
                       </p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-2"
+                        onClick={syncTransfers}
+                        disabled={syncing}
+                      >
+                        {syncing && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+                        {syncing ? "Checking…" : "I've sent money — check now"}
+                      </Button>
                     </div>
+
                   ) : (
                     <div className="mt-2 space-y-2">
                       <p className="text-xs text-muted-foreground">
