@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import ScheduleTestModal from "@/components/ScheduleTestModal";
 import {
   Sheet,
   SheetContent,
@@ -19,7 +20,17 @@ import {
   Newspaper,
   Library,
   Calendar,
+  FileCheck,
+  Award,
+  Zap,
 } from "lucide-react";
+
+const tests: { examType: "jamb" | "waec" | "neco" | "post-utme"; label: string; icon: React.ElementType }[] = [
+  { examType: "jamb", label: "JAMB", icon: GraduationCap },
+  { examType: "waec", label: "WAEC", icon: FileCheck },
+  { examType: "neco", label: "NECO", icon: Award },
+  { examType: "post-utme", label: "Post-UTME", icon: Zap },
+];
 
 interface ExploreSheetProps {
   open: boolean;
