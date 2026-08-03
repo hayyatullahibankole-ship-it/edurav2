@@ -5163,6 +5163,7 @@ export type Database = {
         Returns: number
       }
       wallet_ensure: { Args: { p_user_id: string }; Returns: string }
+      wallet_resolve_user_id: { Args: { p_user_id: string }; Returns: string }
     }
     Enums: {
       app_role:
