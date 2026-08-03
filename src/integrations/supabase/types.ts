@@ -1687,6 +1687,48 @@ export type Database = {
           },
         ]
       }
+      institutions: {
+        Row: {
+          created_at: string
+          form_fee: number
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          service_fee_override: number | null
+          short_code: string | null
+          state: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          form_fee?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          service_fee_override?: number | null
+          short_code?: string | null
+          state?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          form_fee?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          service_fee_override?: number | null
+          short_code?: string | null
+          state?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lesson_completions: {
         Row: {
           completed_at: string
@@ -3066,6 +3108,7 @@ export type Database = {
           is_automated: boolean
           name: string
           price: number
+          pricing_mode: string
           product_type: string
           provider: string
           slug: string
@@ -3084,6 +3127,7 @@ export type Database = {
           is_automated?: boolean
           name: string
           price?: number
+          pricing_mode?: string
           product_type?: string
           provider: string
           slug: string
@@ -3102,6 +3146,7 @@ export type Database = {
           is_automated?: boolean
           name?: string
           price?: number
+          pricing_mode?: string
           product_type?: string
           provider?: string
           slug?: string
@@ -3118,12 +3163,18 @@ export type Database = {
           amount: number
           created_at: string
           form_data: Json
+          form_fee: number | null
           id: string
+          institution_id: string | null
+          institution_name: string | null
           paid_from: string | null
           payment_reference: string | null
           provider: string
+          quote_status: string | null
+          quoted_amount: number | null
           result: Json | null
           result_files: Json
+          service_fee: number | null
           service_id: string | null
           service_name: string
           service_slug: string
@@ -3137,12 +3188,18 @@ export type Database = {
           amount?: number
           created_at?: string
           form_data?: Json
+          form_fee?: number | null
           id?: string
+          institution_id?: string | null
+          institution_name?: string | null
           paid_from?: string | null
           payment_reference?: string | null
           provider: string
+          quote_status?: string | null
+          quoted_amount?: number | null
           result?: Json | null
           result_files?: Json
+          service_fee?: number | null
           service_id?: string | null
           service_name: string
           service_slug: string
@@ -3156,12 +3213,18 @@ export type Database = {
           amount?: number
           created_at?: string
           form_data?: Json
+          form_fee?: number | null
           id?: string
+          institution_id?: string | null
+          institution_name?: string | null
           paid_from?: string | null
           payment_reference?: string | null
           provider?: string
+          quote_status?: string | null
+          quoted_amount?: number | null
           result?: Json | null
           result_files?: Json
+          service_fee?: number | null
           service_id?: string | null
           service_name?: string
           service_slug?: string
@@ -3171,6 +3234,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "service_requests_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "service_requests_service_id_fkey"
             columns: ["service_id"]
@@ -4963,6 +5033,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      institution_service_fee: { Args: { _form_fee: number }; Returns: number }
       is_account_locked: { Args: { user_email: string }; Returns: boolean }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_ebook_admin: { Args: { _user_id: string }; Returns: boolean }

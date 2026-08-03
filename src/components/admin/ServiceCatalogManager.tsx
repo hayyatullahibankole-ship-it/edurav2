@@ -46,6 +46,7 @@ type Service = {
   is_automated: boolean;
   sort_order: number;
   product_type: string | null;
+  pricing_mode?: string | null;
   vendor_code: string | null;
 };
 
@@ -77,6 +78,7 @@ const emptyForm = {
   is_automated: false,
   sort_order: 0,
   product_type: "request",
+  pricing_mode: "fixed",
   vendor_code: "",
 };
 
@@ -172,6 +174,7 @@ export default function ServiceCatalogManager() {
       is_automated: service.is_automated,
       sort_order: service.sort_order ?? 0,
       product_type: service.product_type || "request",
+      pricing_mode: service.pricing_mode || "fixed",
       vendor_code: service.vendor_code || "",
     });
     setFields(Array.isArray(service.fields) ? service.fields : []);
@@ -211,6 +214,7 @@ export default function ServiceCatalogManager() {
       is_automated: form.is_automated,
       sort_order: Number(form.sort_order) || 0,
       product_type: form.product_type,
+      pricing_mode: form.pricing_mode,
       vendor_code: form.product_type === "scratch_card" ? form.vendor_code || null : null,
     };
 
@@ -434,13 +438,32 @@ export default function ServiceCatalogManager() {
                 />
               </div>
               <div>
-                <Label>Price (₦)</Label>
-                <Input
-                  type="number"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
-                />
+                <Label>Pricing Mode</Label>
+                <Select
+                  value={form.pricing_mode}
+                  onValueChange={(value) => setForm({ ...form, pricing_mode: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fixed">Fixed price</SelectItem>
+                    <SelectItem value="institution">
+                      Per institution (form fee + service fee)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+              {form.pricing_mode !== "institution" && (
+                <div>
+                  <Label>Price (₦)</Label>
+                  <Input
+                    type="number"
+                    value={form.price}
+                    onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                  />
+                </div>
+              )}
               <div>
                 <Label>Turnaround</Label>
                 <Input

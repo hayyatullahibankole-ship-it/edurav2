@@ -55,9 +55,13 @@ type ServiceRequest = {
   result_files: ResultFile[];
   user_files: ResultFile[];
   created_at: string;
+  quote_status?: string | null;
+  quoted_amount?: number | null;
+  institution_name?: string | null;
 };
 
 const STATUSES = [
+  "quote_requested",
   "awaiting_details",
   "pending",
   "processing",
@@ -69,6 +73,7 @@ const STATUSES = [
 const statusStyles: Record<string, string> = {
   pending: "bg-muted text-muted-foreground",
   awaiting_details: "bg-primary/10 text-primary",
+  quote_requested: "bg-warning/10 text-warning",
   processing: "bg-primary/10 text-primary",
   needs_resubmission: "bg-destructive/10 text-destructive",
   completed: "bg-success/10 text-success",
@@ -89,6 +94,7 @@ export default function ServiceRequestsManager() {
   const [status, setStatus] = useState("processing");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [quotePrice, setQuotePrice] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
@@ -96,7 +102,7 @@ export default function ServiceRequestsManager() {
     const { data, error } = await supabase
       .from("service_requests")
       .select(
-        "id, user_id, service_name, provider, amount, status, form_data, admin_note, result_files, user_files, created_at"
+        "id, user_id, service_name, provider, amount, status, form_data, admin_note, result_files, user_files, created_at, quote_status, quoted_amount, institution_name"
       )
       .order("created_at", { ascending: false })
       .limit(200);
@@ -151,6 +157,7 @@ export default function ServiceRequestsManager() {
     setActive(request);
     setNote(request.admin_note || "");
     setStatus(request.status === "awaiting_details" ? "awaiting_details" : request.status);
+    setQuotePrice(request.quoted_amount ? String(request.quoted_amount) : "");
   };
 
   const persistFiles = async (files: ResultFile[]) => {
@@ -262,6 +269,39 @@ export default function ServiceRequestsManager() {
     setActive(null);
   };
 
+
+  const sendQuote = async () => {
+    if (!active) return;
+    const amount = Number(quotePrice);
+    if (!amount || amount <= 0) {
+      toast({ title: "Enter a valid price", variant: "destructive" });
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from("service_requests")
+      .update({
+        quoted_amount: amount,
+        quote_status: "quoted",
+        status: "quote_requested",
+        admin_note: note || null,
+      } as any)
+      .eq("id", active.id);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Could not send price", description: error.message, variant: "destructive" });
+      return;
+    }
+    setRequests((prev) =>
+      prev.map((r) =>
+        r.id === active.id
+          ? { ...r, quoted_amount: amount, quote_status: "quoted", admin_note: note || null }
+          : r
+      )
+    );
+    toast({ title: "Price sent", description: "The customer can now pay for this request." });
+    setActive(null);
+  };
 
   const saveRequest = async () => {
     if (!active) return;
@@ -454,6 +494,28 @@ export default function ServiceRequestsManager() {
                   </div>
                 )}
               </div>
+
+              {(active?.quote_status === "requested" || active?.quote_status === "quoted") && (
+                <div className="space-y-2 rounded-lg border p-3">
+                  <p className="text-sm font-medium">
+                    Price this request
+                    {active?.institution_name ? ` — ${active.institution_name}` : ""}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Enter the total the customer should pay (school form fee + your service fee).
+                  </p>
+                  <Input
+                    type="number"
+                    value={quotePrice}
+                    onChange={(e) => setQuotePrice(e.target.value)}
+                    placeholder="e.g. 9500"
+                  />
+                  <Button className="w-full" onClick={sendQuote} disabled={saving}>
+                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {active?.quote_status === "quoted" ? "Update price" : "Send price"}
+                  </Button>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <p className="text-sm font-medium">Status</p>

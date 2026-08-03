@@ -68,6 +68,23 @@ type Service = {
   turnaround: string | null;
   fields: ServiceField[];
   product_type?: string | null;
+  pricing_mode?: string | null;
+};
+
+type Institution = {
+  id: string;
+  name: string;
+  short_code: string | null;
+  type: string;
+  state: string | null;
+  form_fee: number;
+  service_fee_override: number | null;
+};
+
+const tierFee = (formFee: number) => {
+  if (formFee <= 5000) return 3000;
+  if (formFee < 10000) return 4000;
+  return 5000;
 };
 
 type ServiceRequest = {
@@ -79,6 +96,9 @@ type ServiceRequest = {
   status: string;
   created_at: string;
   admin_note: string | null;
+  quote_status?: string | null;
+  quoted_amount?: number | null;
+  institution_name?: string | null;
   result_files?: ResultFile[];
   user_files?: ResultFile[];
   form_data?: Record<string, string> | null;
@@ -133,6 +153,13 @@ const ServicesHome = () => {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [resubmitNote, setResubmitNote] = useState<string | null>(null);
   const [paidRequestId, setPaidRequestId] = useState<string | null>(null);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [institutionId, setInstitutionId] = useState("");
+  const [instSearch, setInstSearch] = useState("");
+  const [notListed, setNotListed] = useState(false);
+  const [quoteSchool, setQuoteSchool] = useState("");
+  const [quoteCourse, setQuoteCourse] = useState("");
+  const [payingQuote, setPayingQuote] = useState<ServiceRequest | null>(null);
 
 
   const view = searchParams.get("tab") === "requests" ? "requests" : "services";
@@ -159,7 +186,7 @@ const ServicesHome = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("service_catalog")
-        .select("id, provider, slug, name, description, price, turnaround, fields, product_type")
+        .select("id, provider, slug, name, description, price, turnaround, fields, product_type, pricing_mode")
         .eq("is_active", true)
         .order("provider")
         .order("sort_order");
@@ -177,6 +204,18 @@ const ServicesHome = () => {
       setLoading(false);
     };
     load();
+  }, []);
+
+  useEffect(() => {
+    const loadInstitutions = async () => {
+      const { data } = await supabase
+        .from("institutions")
+        .select("id, name, short_code, type, state, form_fee, service_fee_override")
+        .eq("is_active", true)
+        .order("name");
+      setInstitutions((data as Institution[]) || []);
+    };
+    loadInstitutions();
   }, []);
 
   const openResultFile = async (file: ResultFile) => {
@@ -206,7 +245,7 @@ const ServicesHome = () => {
     const { data } = await supabase
       .from("service_requests")
       .select(
-        "id, service_id, service_name, provider, amount, status, created_at, admin_note, result_files, user_files, form_data"
+        "id, service_id, service_name, provider, amount, status, created_at, admin_note, result_files, user_files, form_data, quote_status, quoted_amount, institution_name"
       )
       .order("created_at", { ascending: false })
       .limit(50);
@@ -284,6 +323,11 @@ const ServicesHome = () => {
     setPaidRequestId(null);
     setUploads([]);
     setResubmitNote(null);
+    setInstitutionId("");
+    setInstSearch("");
+    setNotListed(false);
+    setQuoteSchool("");
+    setQuoteCourse("");
     setStep("pay");
   };
 
@@ -293,7 +337,112 @@ const ServicesHome = () => {
     setPaidRequestId(null);
     setUploads([]);
     setResubmitNote(null);
+    setInstitutionId("");
+    setInstSearch("");
+    setNotListed(false);
+    setQuoteSchool("");
+    setQuoteCourse("");
     setStep("pay");
+  };
+
+  const selectedInstitution = institutions.find((i) => i.id === institutionId) || null;
+  const institutionMatches = useMemo(() => {
+    const q = instSearch.trim().toLowerCase();
+    const list = q
+      ? institutions.filter(
+          (i) =>
+            i.name.toLowerCase().includes(q) ||
+            (i.short_code || "").toLowerCase().includes(q) ||
+            (i.state || "").toLowerCase().includes(q),
+        )
+      : institutions;
+    return list.slice(0, 25);
+  }, [institutions, instSearch]);
+
+  const isInstitutionService = activeService?.pricing_mode === "institution";
+  const institutionFee = selectedInstitution
+    ? selectedInstitution.service_fee_override ?? tierFee(Number(selectedInstitution.form_fee) || 0)
+    : 0;
+  const payableAmount = isInstitutionService
+    ? Number(selectedInstitution?.form_fee || 0) + Number(institutionFee)
+    : Number(activeService?.price || 0);
+
+  const requestQuote = async () => {
+    if (!activeService || !user) {
+      toast.error("Please sign in to continue");
+      return;
+    }
+    if (!quoteSchool.trim()) {
+      toast.error("Enter the name of your institution");
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from("service_requests").insert({
+      user_id: user.id,
+      service_id: activeService.id,
+      service_slug: activeService.slug,
+      service_name: activeService.name,
+      provider: activeService.provider,
+      amount: 0,
+      institution_name: quoteSchool.trim(),
+      status: "quote_requested",
+      quote_status: "requested",
+      form_data: { institution: quoteSchool.trim(), course: quoteCourse.trim() },
+    } as any);
+    setSubmitting(false);
+    if (error) {
+      console.error("quote request failed", error);
+      toast.error("Could not send your request. Please try again.");
+      return;
+    }
+    toast.success("Request sent. We'll price it and notify you shortly.");
+    closeDialog();
+    loadRequests();
+    setView("requests");
+  };
+
+  const payQuote = async (request: ServiceRequest, method: "wallet" | "card") => {
+    if (!user) return;
+    const amount = Number(request.quoted_amount) || 0;
+    setSubmitting(true);
+    const finish = async (payload: Record<string, unknown>) => {
+      const { data, error } = await supabase.functions.invoke("pay-service-request", {
+        body: { request_id: request.id, ...payload },
+      });
+      if (error || data?.error) {
+        toast.error(data?.error || "Payment could not be completed.");
+        return;
+      }
+      toast.success("Payment received. Now complete your details.");
+      setPayingQuote(null);
+      refreshWallet();
+      await loadRequests();
+    };
+
+    if (method === "wallet") {
+      await finish({ payment_method: "wallet" });
+      setSubmitting(false);
+      return;
+    }
+    try {
+      await initializePaystackPayment(
+        {
+          amount: amount * 100,
+          email: user.email || "",
+          reference: `srq_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+          currency: "NGN",
+          metadata: { purpose: "service_quote", request_id: request.id },
+        },
+        async (reference) => {
+          await finish({ payment_method: "card", payment_reference: reference });
+          setSubmitting(false);
+        },
+        () => setSubmitting(false),
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not start payment");
+      setSubmitting(false);
+    }
   };
 
   const handleUpload = async (files: FileList | null) => {
@@ -325,7 +474,7 @@ const ServicesHome = () => {
   const afterPayment = async (payload: Record<string, unknown>) => {
     if (!activeService) return;
     const { data, error } = await supabase.functions.invoke("pay-service-request", {
-      body: { service_id: activeService.id, ...payload },
+      body: { service_id: activeService.id, institution_id: institutionId || undefined, ...payload },
     });
 
     if (error || data?.error) {
@@ -363,7 +512,7 @@ const ServicesHome = () => {
     try {
       await initializePaystackPayment(
         {
-          amount: Number(activeService.price) * 100,
+          amount: payableAmount * 100,
           email: user.email || "",
           reference: `srv_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
           currency: "NGN",
@@ -716,7 +865,15 @@ const ServicesHome = () => {
                       </div>
                     )}
                   </div>
-                  {request.status === "awaiting_details" ? (
+                  {request.quote_status === "quoted" ? (
+                    <Button size="sm" className="shrink-0" onClick={() => setPayingQuote(request)}>
+                      Pay {naira(Number(request.quoted_amount) || 0)}
+                    </Button>
+                  ) : request.quote_status === "requested" ? (
+                    <Badge variant="secondary" className="shrink-0">
+                      Awaiting price
+                    </Badge>
+                  ) : request.status === "awaiting_details" ? (
                     <Button size="sm" className="shrink-0" onClick={() => resumeRequest(request)}>
                       Complete details
                     </Button>
@@ -762,48 +919,173 @@ const ServicesHome = () => {
 
           {step === "pay" ? (
             <div className="space-y-4">
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <span className="text-sm text-muted-foreground">Amount</span>
-                <span className="text-lg font-bold">{naira(activeService?.price || 0)}</span>
-              </div>
+              {isInstitutionService && (
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Choose your institution</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        className="pl-9"
+                        placeholder="Search school name or state"
+                        value={instSearch}
+                        onChange={(e) => {
+                          setInstSearch(e.target.value);
+                          setNotListed(false);
+                        }}
+                      />
+                    </div>
+                  </div>
 
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <div className="flex items-center gap-2">
-                  <WalletIcon className="h-4 w-4 text-primary" />
-                  <span className="text-sm">Wallet balance</span>
-                </div>
-                <Badge variant="secondary">{naira(balance)}</Badge>
-              </div>
-
-              <p className="text-xs text-muted-foreground">
-                After payment you'll be asked for the details we need to process this service.
-              </p>
-
-              <div className="grid gap-2">
-                <Button
-                  onClick={payWithWallet}
-                  disabled={submitting || balance < Number(activeService?.price || 0)}
-                >
-                  {submitting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <WalletIcon className="mr-2 h-4 w-4" />
+                  {!notListed && (
+                    <div className="max-h-52 space-y-1 overflow-y-auto rounded-lg border p-1">
+                      {institutionMatches.length === 0 ? (
+                        <p className="p-3 text-sm text-muted-foreground">No school matched.</p>
+                      ) : (
+                        institutionMatches.map((inst) => {
+                          const fee = inst.service_fee_override ?? tierFee(Number(inst.form_fee) || 0);
+                          const active = inst.id === institutionId;
+                          return (
+                            <button
+                              key={inst.id}
+                              type="button"
+                              onClick={() => setInstitutionId(inst.id)}
+                              className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-sm ${
+                                active ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                              }`}
+                            >
+                              <span className="min-w-0">
+                                <span className="block truncate font-medium">{inst.name}</span>
+                                <span className="block text-xs text-muted-foreground">
+                                  {inst.state || inst.type}
+                                </span>
+                              </span>
+                              <span className="shrink-0 text-xs font-semibold">
+                                {naira(Number(inst.form_fee) + Number(fee))}
+                              </span>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
                   )}
-                  Pay from wallet
-                </Button>
-                {balance < Number(activeService?.price || 0) && (
+
                   <button
-                    className="text-left text-xs text-muted-foreground underline"
-                    onClick={() => navigate("/wallet")}
+                    type="button"
+                    className="text-xs text-muted-foreground underline"
+                    onClick={() => {
+                      setNotListed((v) => !v);
+                      setInstitutionId("");
+                    }}
                   >
-                    Balance too low — fund your wallet
+                    {notListed ? "Back to the school list" : "My school is not listed"}
                   </button>
-                )}
-                <Button variant="outline" onClick={payWithCard} disabled={submitting}>
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Pay with card
-                </Button>
-              </div>
+
+                  {notListed && (
+                    <div className="space-y-3 rounded-lg border p-3">
+                      <div className="space-y-2">
+                        <Label>Institution name</Label>
+                        <Input
+                          value={quoteSchool}
+                          onChange={(e) => setQuoteSchool(e.target.value)}
+                          placeholder="e.g. Federal Polytechnic Offa"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Course / programme (optional)</Label>
+                        <Input
+                          value={quoteCourse}
+                          onChange={(e) => setQuoteCourse(e.target.value)}
+                          placeholder="e.g. Computer Science"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        We'll check the school's form fee and send you a price. You only pay after
+                        we confirm it.
+                      </p>
+                      <Button className="w-full" onClick={requestQuote} disabled={submitting}>
+                        {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Request a price
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {!notListed && (
+                <>
+                  {isInstitutionService && selectedInstitution && (
+                    <div className="rounded-lg border p-3 text-sm">
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>{selectedInstitution.name} form fee</span>
+                        <span>{naira(Number(selectedInstitution.form_fee))}</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Processing fee</span>
+                        <span>{naira(Number(institutionFee))}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between rounded-lg border p-3">
+                    <span className="text-sm text-muted-foreground">Amount</span>
+                    <span className="text-lg font-bold">
+                      {isInstitutionService && !selectedInstitution ? "—" : naira(payableAmount)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="flex items-center gap-2">
+                      <WalletIcon className="h-4 w-4 text-primary" />
+                      <span className="text-sm">Wallet balance</span>
+                    </div>
+                    <Badge variant="secondary">{naira(balance)}</Badge>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground">
+                    After payment you'll be asked for the details we need to process this service.
+                  </p>
+
+                  <div className="grid gap-2">
+                    <Button
+                      onClick={payWithWallet}
+                      disabled={
+                        submitting ||
+                        payableAmount <= 0 ||
+                        (isInstitutionService && !selectedInstitution) ||
+                        balance < payableAmount
+                      }
+                    >
+                      {submitting ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <WalletIcon className="mr-2 h-4 w-4" />
+                      )}
+                      Pay from wallet
+                    </Button>
+                    {balance < payableAmount && (
+                      <button
+                        className="text-left text-xs text-muted-foreground underline"
+                        onClick={() => navigate("/wallet")}
+                      >
+                        Balance too low — fund your wallet
+                      </button>
+                    )}
+                    <Button
+                      variant="outline"
+                      onClick={payWithCard}
+                      disabled={
+                        submitting ||
+                        payableAmount <= 0 ||
+                        (isInstitutionService && !selectedInstitution)
+                      }
+                    >
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Pay with card
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             <>
@@ -934,6 +1216,55 @@ const ServicesHome = () => {
         </DialogContent>
       </Dialog>
 
+
+      <Dialog open={!!payingQuote} onOpenChange={(open) => !open && setPayingQuote(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Pay for {payingQuote?.service_name}</DialogTitle>
+            <DialogDescription>
+              {payingQuote?.institution_name
+                ? `${payingQuote.institution_name} — priced by our team.`
+                : "Priced by our team."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <span className="text-sm text-muted-foreground">Amount</span>
+              <span className="text-lg font-bold">
+                {naira(Number(payingQuote?.quoted_amount) || 0)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="flex items-center gap-2">
+                <WalletIcon className="h-4 w-4 text-primary" />
+                <span className="text-sm">Wallet balance</span>
+              </div>
+              <Badge variant="secondary">{naira(balance)}</Badge>
+            </div>
+            <div className="grid gap-2">
+              <Button
+                onClick={() => payingQuote && payQuote(payingQuote, "wallet")}
+                disabled={submitting || balance < (Number(payingQuote?.quoted_amount) || 0)}
+              >
+                {submitting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <WalletIcon className="mr-2 h-4 w-4" />
+                )}
+                Pay from wallet
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => payingQuote && payQuote(payingQuote, "card")}
+                disabled={submitting}
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                Pay with card
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <ScratchCardDialog service={scratchService} onClose={() => setScratchService(null)} />
 
