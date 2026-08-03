@@ -17,9 +17,10 @@ import {
   Timer,
   WifiOff,
   BookOpen,
+  Newspaper,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import BlogSection from "@/components/BlogSection";
+
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
@@ -431,7 +432,32 @@ const Home = () => {
         </div>
       </section>
 
-      <BlogSection />
+      {/* ============ AKBOY CAMPUS HUB ============ */}
+      <section className="pb-16 md:pb-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 rounded-3xl border border-border bg-card p-8 md:p-10">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-2 text-primary">
+                <Newspaper className="h-5 w-5" />
+                <span className="text-xs font-semibold uppercase tracking-[0.18em]">Campus Hub</span>
+              </div>
+              <h2 className="mt-3 font-display text-2xl md:text-3xl font-bold text-foreground">
+                News, scholarships and admission updates
+              </h2>
+              <p className="mt-2 text-muted-foreground">
+                Daily education news, JAMB and WAEC notices, scholarship openings and study guides — all in the Akboy Campus Hub.
+              </p>
+            </div>
+            <Link to="/campus-hub" className="shrink-0">
+              <Button size="lg" className="h-12 w-full md:w-auto px-8 text-base font-semibold">
+                Visit Akboy Campus Hub
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
 
       {/* ============ FINAL CTA ============ */}
       <section className="bg-ink py-16 md:py-24">
