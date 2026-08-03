@@ -829,7 +829,8 @@ const ServicesHome = () => {
 
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
+            <ScratchCardHistory />
             {requests.length === 0 ? (
               <div className="flex flex-col items-center gap-2 rounded-lg border py-12 text-center">
                 <FileText className="h-8 w-8 text-muted-foreground" />
