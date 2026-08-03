@@ -375,6 +375,32 @@ export default function ServiceRequestsManager() {
                 </div>
               )}
 
+              {active.user_files?.length > 0 && (
+                <div className="rounded-lg border p-3">
+                  <p className="mb-2 text-xs font-medium uppercase text-muted-foreground">
+                    Customer documents
+                  </p>
+                  <div className="space-y-2">
+                    {active.user_files.map((f) => (
+                      <button
+                        key={f.path}
+                        type="button"
+                        onClick={() => previewUserFile(f)}
+                        className="flex w-full min-w-0 items-center gap-2 rounded-md border p-2 text-left text-sm hover:underline"
+                      >
+                        {f.type?.startsWith("image/") ? (
+                          <ImageIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        ) : (
+                          <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        )}
+                        <span className="truncate">{f.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+
               <div className="space-y-2">
                 <p className="text-sm font-medium">Response files (image or document)</p>
                 <input
