@@ -417,11 +417,12 @@ const Home = () => {
               <Sparkles className="mr-1.5 h-3.5 w-3.5" />
               Coming soon
             </Badge>
-            <h2 className="mt-5 font-display text-3xl md:text-4xl font-bold text-foreground">Edura v3 is on the way</h2>
+            <h2 className="mt-5 font-display text-3xl md:text-4xl font-bold text-foreground">Edura For Higher Institution is on the way</h2>
             <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              A smarter study companion, richer school tooling and a faster services desk. Everything you build up on Edura
-              today carries straight over.
+              Purpose-built tools for universities, polytechnics and colleges of education — smarter study support, richer
+              school tooling and a faster services desk. Everything you build up on Edura today carries straight over.
             </p>
+
             <Link to="/auth" className="mt-7 inline-block">
               <Button size="lg" variant="outline" className="border-2 font-semibold">
                 Create your account now
