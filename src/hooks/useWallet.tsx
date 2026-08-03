@@ -52,6 +52,23 @@ export const useWallet = () => {
     refresh();
   }, [refresh]);
 
+  useEffect(() => {
+    if (!user || !userProfile?.id) return;
+
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    const interval = window.setInterval(refreshWhenVisible, 15000);
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
+  }, [refresh, user?.id, userProfile?.id]);
+
   return { balance, transactions, loading, refresh };
 };
 
