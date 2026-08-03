@@ -581,13 +581,20 @@ const ServicesHome = () => {
                       <p className="mt-1 text-xs text-muted-foreground">{request.admin_note}</p>
                     )}
                   </div>
-                  <Badge
-                    className={`shrink-0 border-0 capitalize ${
-                      statusStyles[request.status] || statusStyles.pending
-                    }`}
-                  >
-                    {request.status}
-                  </Badge>
+                  {request.status === "awaiting_details" ? (
+                    <Button size="sm" className="shrink-0" onClick={() => resumeRequest(request)}>
+                      Complete details
+                    </Button>
+                  ) : (
+                    <Badge
+                      className={`shrink-0 border-0 capitalize ${
+                        statusStyles[request.status] || statusStyles.pending
+                      }`}
+                    >
+                      {request.status}
+                    </Badge>
+                  )}
+
                 </div>
               ))
             )}
