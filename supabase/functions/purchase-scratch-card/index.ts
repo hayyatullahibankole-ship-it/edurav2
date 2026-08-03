@@ -56,6 +56,55 @@ function extractPins(payload: any): Pin[] {
   return [];
 }
 
+const DEFAULT_VENDOR_URL = "https://www.naijaresultpins.com/api/v1/exam-card/buy";
+
+function resolveVendorUrl() {
+  const configured = (Deno.env.get("NAIJARESULTSPIN_API_URL") ?? "").trim();
+  return /\/api\/v1\/exam-card\/buy\/?$/i.test(configured) ? configured : DEFAULT_VENDOR_URL;
+}
+
+/**
+ * Best-effort lookup of the vendor's live card catalogue (id -> unit price).
+ * The vendor exposes it next to the buy action; if it is unreachable we return
+ * null and the caller simply skips the price guard instead of blocking sales.
+ */
+async function fetchVendorCardTypes(): Promise<Array<{ id: number; name: string; price: number }> | null> {
+  const vendorKey = Deno.env.get("NAIJARESULTSPIN_API_KEY");
+  if (!vendorKey) return null;
+  const base = resolveVendorUrl().replace(/\/buy\/?$/i, "");
+  const candidates = [`${base}/types`, `${base}s`, base];
+
+  for (const url of candidates) {
+    try {
+      const res = await fetch(url, {
+        headers: { Accept: "application/json", Authorization: `Bearer ${vendorKey}` },
+      });
+      if (!res.ok) continue;
+      const payload = await res.json().catch(() => null);
+      const list = Array.isArray(payload?.data)
+        ? payload.data
+        : Array.isArray(payload?.card_types)
+          ? payload.card_types
+          : Array.isArray(payload)
+            ? payload
+            : null;
+      if (!list) continue;
+      const mapped = list
+        .map((item: any) => ({
+          id: Number(item?.id ?? item?.card_type_id),
+          name: String(item?.name ?? item?.title ?? ""),
+          price: Number(item?.price ?? item?.amount ?? item?.cost ?? 0),
+        }))
+        .filter((item: any) => Number.isFinite(item.id) && item.price > 0);
+      if (mapped.length) return mapped;
+    } catch (_) {
+      // try the next candidate
+    }
+  }
+  return null;
+}
+
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -79,11 +128,28 @@ Deno.serve(async (req) => {
     const user = userData.user;
 
     const body = await req.json().catch(() => ({}));
+
+    // Admin-only helper: read the vendor's live catalogue so prices can be checked.
+    if (body?.action === "vendor_prices") {
+      const { data: isAdmin } = await admin.rpc("has_role", {
+        _user_id: user.id,
+        _role: "admin",
+      });
+      const { data: isSuper } = await admin.rpc("has_role", {
+        _user_id: user.id,
+        _role: "super_admin",
+      });
+      if (!isAdmin && !isSuper) return json({ error: "Forbidden" }, 403);
+      const cardTypes = await fetchVendorCardTypes();
+      return json({ success: true, card_types: cardTypes ?? [] });
+    }
+
     const serviceId = typeof body?.service_id === "string" ? body.service_id : "";
     const quantity = Math.floor(Number(body?.quantity ?? 1));
     const paymentMethod = body?.payment_method === "wallet" ? "wallet" : "card";
     const paymentReference =
       typeof body?.payment_reference === "string" ? body.payment_reference.trim() : "";
+
 
     if (!serviceId) return json({ error: "service_id is required" }, 400);
     if (!Number.isFinite(quantity) || quantity < 1 || quantity > 20) {
@@ -108,6 +174,26 @@ Deno.serve(async (req) => {
     const unitPrice = Number(service.price) || 0;
     const amount = unitPrice * quantity;
     if (amount <= 0) return json({ error: "Invalid service price" }, 400);
+
+    // Loss guard: never buy from the vendor for more than the customer paid.
+    const cardTypeIdEarly = Number(service.vendor_code);
+    if (Number.isFinite(cardTypeIdEarly) && cardTypeIdEarly > 0) {
+      const cardTypes = await fetchVendorCardTypes();
+      const vendorCard = cardTypes?.find((c) => c.id === cardTypeIdEarly);
+      if (vendorCard && vendorCard.price > unitPrice) {
+        console.error(
+          `Blocked sale: vendor price ${vendorCard.price} exceeds selling price ${unitPrice} for ${service.slug}`,
+        );
+        return json(
+          {
+            error:
+              "This card is temporarily unavailable at the listed price. Please try again later.",
+          },
+          400,
+        );
+      }
+    }
+
 
     // 1. Take payment
     if (paymentMethod === "card") {
@@ -176,13 +262,8 @@ Deno.serve(async (req) => {
     orderId = order.id;
 
     // 3. Buy the PINs from NaijaResultPins
-    const DEFAULT_VENDOR_URL = "https://www.naijaresultpins.com/api/v1/exam-card/buy";
-    const configuredUrl = (Deno.env.get("NAIJARESULTSPIN_API_URL") ?? "").trim();
-    // The API root accepts GET only. Use a configured URL solely when it points
-    // to the vendor's concrete exam-card purchase action.
-    const vendorUrl = /\/api\/v1\/exam-card\/buy\/?$/i.test(configuredUrl)
-      ? configuredUrl
-      : DEFAULT_VENDOR_URL;
+    const vendorUrl = resolveVendorUrl();
+
     const vendorKey = Deno.env.get("NAIJARESULTSPIN_API_KEY");
     if (!vendorKey) throw new Error("Scratch card vendor is not configured");
 
