@@ -187,17 +187,32 @@ const ServicesHome = () => {
     window.open(data.signedUrl, "_blank", "noopener");
   };
 
+  const openUserFile = async (file: ResultFile) => {
+    const { data, error } = await supabase.storage
+      .from("service-uploads")
+      .createSignedUrl(file.path, 600);
+    if (error || !data?.signedUrl) {
+      toast.error("Could not open this file");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener");
+  };
+
   const loadRequests = async () => {
     if (!user) return;
     const { data } = await supabase
       .from("service_requests")
-      .select("id, service_id, service_name, provider, amount, status, created_at, admin_note, result_files")
+      .select(
+        "id, service_id, service_name, provider, amount, status, created_at, admin_note, result_files, user_files, form_data"
+      )
       .order("created_at", { ascending: false })
       .limit(50);
     setRequests(
       ((data as any[]) || []).map((r) => ({
         ...r,
         result_files: Array.isArray(r.result_files) ? (r.result_files as ResultFile[]) : [],
+        user_files: Array.isArray(r.user_files) ? (r.user_files as ResultFile[]) : [],
+        form_data: (r.form_data && typeof r.form_data === "object" ? r.form_data : {}) as Record<string, string>,
       })) as ServiceRequest[]
     );
   };
