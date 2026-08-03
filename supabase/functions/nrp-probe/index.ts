@@ -8,10 +8,17 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("NAIJARESULTSPIN_API_KEY") ?? "";
   const url = new URL(req.url);
   const path = url.searchParams.get("path") ?? "";
+  const method = url.searchParams.get("method") ?? "GET";
+  const payload = url.searchParams.get("payload");
   const target = `https://www.naijaresultpins.com/api/v1${path}`;
   const res = await fetch(target, {
-    method: url.searchParams.get("method") ?? "GET",
-    headers: { Accept: "application/json", Authorization: `Bearer ${key}` },
+    method,
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${key}`,
+    },
+    body: method === "GET" ? undefined : payload ?? "{}",
   });
   const text = await res.text();
   return new Response(JSON.stringify({ target, status: res.status, body: text.slice(0, 4000) }), {
