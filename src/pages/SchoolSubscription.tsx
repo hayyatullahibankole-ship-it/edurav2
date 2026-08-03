@@ -517,6 +517,36 @@ export default function SchoolSubscription() {
               )}
             </Button>
 
+            <Button
+              onClick={handleWalletPayment}
+              disabled={walletPaying || loading || studentCount < 1 || studentCount > 250 || totalAmount === 0}
+              className="w-full"
+              size="lg"
+              variant="outline"
+            >
+              {walletPaying ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Paying from wallet...
+                </>
+              ) : (
+                <>
+                  <Wallet className="mr-2 h-4 w-4" />
+                  Pay from wallet (₦{Number(walletBalance || 0).toLocaleString()} available)
+                </>
+              )}
+            </Button>
+            {totalAmount > Number(walletBalance || 0) && (
+              <p className="text-center text-xs text-muted-foreground">
+                Wallet balance is low.{" "}
+                <button type="button" className="underline" onClick={() => navigate("/wallet")}>
+                  Fund your wallet
+                </button>
+              </p>
+            )}
+
+
+
             <div className="space-y-3">
               <div className="text-center text-sm text-muted-foreground">Already paid?</div>
               <div className="flex gap-2">
