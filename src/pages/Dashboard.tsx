@@ -45,7 +45,7 @@ import SubjectProgressCard from "@/components/SubjectProgressCard";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { FeatureCard } from "@/components/dashboard/FeatureCard";
 import { ModernQuickAction } from "@/components/dashboard/ModernQuickAction";
-import { ServicesShowcase } from "@/components/edura/ServicesShowcase";
+
 import { SideSwitcher } from "@/components/edura/SideSwitcher";
 
 import { MobileStatCard } from "@/components/dashboard/MobileStatCard";
@@ -500,7 +500,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <ServicesShowcase />
+
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                 {/* Main Content */}
@@ -716,44 +716,8 @@ const Dashboard = () => {
                         </Card>
                       </Link>
 
-                      {/* Educational Services */}
-                      <Link to="/services">
-                        <Card className="group h-full cursor-pointer transition-shadow hover:shadow-md">
-                          <CardContent className="p-5">
-                            <div className="flex items-start gap-4">
-                              <div className="rounded-lg border bg-muted p-2.5">
-                                <Layers className="h-6 w-6 text-foreground" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <h3 className="mb-1 flex items-center gap-2 font-semibold">
-                                  Educational Services
-                                  <Badge variant="secondary" className="text-xs">Core</Badge>
-                                </h3>
-                                <p className="text-sm text-muted-foreground">e-PINs, registrations & results</p>
-                              </div>
-                              <ChevronRight className="h-5 w-5 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-foreground" />
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
 
-                      {/* Consultation */}
-                      <Link to="/consultation">
-                        <Card className="group hover:shadow-md transition-shadow cursor-pointer h-full">
-                          <CardContent className="p-5">
-                            <div className="flex items-start gap-4">
-                              <div className="p-2.5 bg-info/10 rounded-lg group-hover:bg-info/20 transition-colors">
-                                <Calendar className="h-6 w-6 text-info" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold mb-1">Expert Consultation</h3>
-                                <p className="text-sm text-muted-foreground">Book tutor sessions</p>
-                              </div>
-                              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-info group-hover:translate-x-1 transition-all" />
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
+
                     </div>
                   </div>
 

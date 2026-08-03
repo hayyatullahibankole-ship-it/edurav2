@@ -20,6 +20,7 @@ import {
   KeyRound,
   Award,
   BadgeCheck,
+  Calendar,
 } from "lucide-react";
 
 interface RequestRow {
@@ -34,6 +35,7 @@ const QUICK_LINKS = [
   { label: "Registrations", icon: FileCheck, to: "/services?provider=waec" },
   { label: "Check Results", icon: BadgeCheck, to: "/services?provider=neco" },
   { label: "Admissions", icon: GraduationCap, to: "/services?provider=admission" },
+  { label: "Expert Consultation", icon: Calendar, to: "/consultation" },
 ];
 
 const ServicesHome = () => {
