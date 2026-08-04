@@ -22,6 +22,7 @@ import { z } from "zod";
 import { emailSchema, passwordSchema, nameSchema, phoneSchema } from "@/utils/inputValidation";
 import eduraLogo from "@/assets/edura-logo.png";
 import { generateSessionToken, storeSessionToken, setSessionToken } from "@/utils/sessionManager";
+import { ACADEMIC_STAGES, STUDY_LEVELS, isCampusStage } from "@/lib/academicStages";
 
 // Enhanced validation schemas for security
 const loginSchema = z.object({
@@ -34,14 +35,23 @@ const signupSchema = z.object({
   lastName: nameSchema,
   email: emailSchema,
   phone: phoneSchema,
-  examType: z.string().min(1, "Please select an exam type"),
-  currentClass: z.string().min(1, "Please select your current class"),
+  academicStage: z.string().min(1, "Please select where you are right now"),
+  examType: z.string().optional(),
+  currentClass: z.string().optional(),
+  institutionName: z.string().optional(),
+  studyLevel: z.string().optional(),
   password: passwordSchema,
   confirmPassword: z.string(),
   agreedToTerms: z.boolean().refine(val => val === true, "You must agree to the terms")
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
+}).refine((data) => isCampusStage(data.academicStage) || !!data.examType, {
+  message: "Please select an exam type",
+  path: ["examType"],
+}).refine((data) => !isCampusStage(data.academicStage) || !!data.institutionName?.trim(), {
+  message: "Please enter your institution",
+  path: ["institutionName"],
 });
 
 export default function AuthForm() {
