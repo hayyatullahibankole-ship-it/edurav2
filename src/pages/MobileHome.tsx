@@ -72,7 +72,13 @@ const MobileHome = () => {
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [blockedFeatureName, setBlockedFeatureName] = useState('');
 
-  const isProfileIncomplete = !userProfile?.first_name?.trim() || !userProfile?.last_name?.trim() || !userProfile?.phone?.trim();
+  const hasMeaningfulPhone = Boolean(
+    typeof userProfile?.phone === 'string' &&
+    userProfile.phone.trim() !== '' &&
+    userProfile.phone.trim() !== '+234'
+  );
+
+  const isProfileIncomplete = !userProfile?.first_name?.trim() || !userProfile?.last_name?.trim() || !hasMeaningfulPhone;
 
   // Features that require app installation
   const premiumFeatures = ['/study-planner', '/challenge-arena', '/performance-report', '/cbt-exam', '/practice'];

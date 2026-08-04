@@ -11,10 +11,16 @@ export default function Auth() {
   const navigate = useNavigate();
   const { isInstalledApp } = useInstalledApp();
 
+  const hasMeaningfulPhone = Boolean(
+    typeof userProfile?.phone === 'string' &&
+    userProfile.phone.trim() !== '' &&
+    userProfile.phone.trim() !== '+234'
+  );
+
   const isProfileComplete = Boolean(
     userProfile?.first_name?.trim() &&
     userProfile?.last_name?.trim() &&
-    userProfile?.phone?.trim()
+    hasMeaningfulPhone
   );
 
   useEffect(() => {
