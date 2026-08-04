@@ -1,5 +1,4 @@
 export type AcademicStage =
-  | "junior_secondary"
   | "senior_secondary"
   | "waec_candidate"
   | "jamb_candidate"
