@@ -22,6 +22,7 @@ import { z } from "zod";
 import { emailSchema, passwordSchema, nameSchema, phoneSchema } from "@/utils/inputValidation";
 import eduraLogo from "@/assets/edura-logo.png";
 import { generateSessionToken, storeSessionToken, setSessionToken } from "@/utils/sessionManager";
+import { ACADEMIC_STAGES, STUDY_LEVELS, isCampusStage } from "@/lib/academicStages";
 
 // Enhanced validation schemas for security
 const loginSchema = z.object({
@@ -34,14 +35,23 @@ const signupSchema = z.object({
   lastName: nameSchema,
   email: emailSchema,
   phone: phoneSchema,
-  examType: z.string().min(1, "Please select an exam type"),
-  currentClass: z.string().min(1, "Please select your current class"),
+  academicStage: z.string().min(1, "Please select where you are right now"),
+  examType: z.string().optional(),
+  currentClass: z.string().optional(),
+  institutionName: z.string().optional(),
+  studyLevel: z.string().optional(),
   password: passwordSchema,
   confirmPassword: z.string(),
   agreedToTerms: z.boolean().refine(val => val === true, "You must agree to the terms")
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
+}).refine((data) => isCampusStage(data.academicStage) || !!data.examType, {
+  message: "Please select an exam type",
+  path: ["examType"],
+}).refine((data) => !isCampusStage(data.academicStage) || !!data.institutionName?.trim(), {
+  message: "Please enter your institution",
+  path: ["institutionName"],
 });
 
 export default function AuthForm() {
@@ -70,8 +80,11 @@ export default function AuthForm() {
     lastName: '',
     email: '',
     phone: '+234',
+    academicStage: '',
     examType: '',
     currentClass: '',
+    institutionName: '',
+    studyLevel: '',
     password: '',
     confirmPassword: '',
     agreedToTerms: false
@@ -213,7 +226,10 @@ export default function AuthForm() {
               last_name: signupData.lastName,
               phone: signupData.phone,
               exam_type: signupData.examType,
-              current_class: signupData.currentClass
+              current_class: signupData.currentClass,
+              academic_stage: signupData.academicStage,
+              institution_name: signupData.institutionName,
+              study_level: signupData.studyLevel
             }
           }
         });
@@ -272,8 +288,11 @@ export default function AuthForm() {
           lastName: '',
           email: '',
           phone: '+234',
+          academicStage: '',
           examType: '',
           currentClass: '',
+          institutionName: '',
+          studyLevel: '',
           password: '',
           confirmPassword: '',
           agreedToTerms: false
@@ -454,56 +473,120 @@ export default function AuthForm() {
                     )}
                   </div>
 
-                  {/* Exam Type and Current Class */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="examType" className="text-sm font-medium text-foreground">
-                        Exam Type
-                      </Label>
-                      <Select 
-                        value={formData.examType} 
-                        onValueChange={(value) => setFormData({ ...formData, examType: value })}
-                      >
-                        <SelectTrigger className={errors.examType ? 'border-destructive' : ''}>
-                          <SelectValue placeholder="Select exam" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {examTypes.map((exam) => (
-                            <SelectItem key={exam.value} value={exam.value}>
-                              {exam.value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.examType && (
-                        <p className="text-xs text-destructive">{errors.examType}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="currentClass" className="text-sm font-medium text-foreground">
-                        Current Class
-                      </Label>
-                      <Select 
-                        value={formData.currentClass} 
-                        onValueChange={(value) => setFormData({ ...formData, currentClass: value })}
-                      >
-                        <SelectTrigger className={errors.currentClass ? 'border-destructive' : ''}>
-                          <SelectValue placeholder="Select class" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {currentClasses.map((cls) => (
-                            <SelectItem key={cls.value} value={cls.value}>
-                              {cls.value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.currentClass && (
-                        <p className="text-xs text-destructive">{errors.currentClass}</p>
-                      )}
-                    </div>
+                  {/* Academic stage */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-foreground">Where are you right now?</Label>
+                    <Select
+                      value={formData.academicStage}
+                      onValueChange={(value) => setFormData({ ...formData, academicStage: value })}
+                    >
+                      <SelectTrigger className={errors.academicStage ? 'border-destructive' : ''}>
+                        <SelectValue placeholder="Select your stage" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ACADEMIC_STAGES.map((s) => (
+                          <SelectItem key={s.key} value={s.key}>
+                            {s.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.academicStage && (
+                      <p className="text-xs text-destructive">{errors.academicStage}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      This decides your dashboard — exam prep and services for candidates, Edura Campus for higher
+                      institution students.
+                    </p>
                   </div>
+
+                  {isCampusStage(formData.academicStage) ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2 col-span-2">
+                        <Label htmlFor="institutionName" className="text-sm font-medium text-foreground">
+                          Institution
+                        </Label>
+                        <Input
+                          id="institutionName"
+                          value={formData.institutionName}
+                          onChange={(e) => setFormData({ ...formData, institutionName: e.target.value })}
+                          placeholder="University of Ibadan"
+                          className={errors.institutionName ? 'border-destructive' : ''}
+                        />
+                        {errors.institutionName && (
+                          <p className="text-xs text-destructive">{errors.institutionName}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2 col-span-2">
+                        <Label className="text-sm font-medium text-foreground">Level</Label>
+                        <Select
+                          value={formData.studyLevel}
+                          onValueChange={(value) => setFormData({ ...formData, studyLevel: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select level" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {STUDY_LEVELS.map((l) => (
+                              <SelectItem key={l} value={l}>
+                                {l}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="examType" className="text-sm font-medium text-foreground">
+                          Exam Type
+                        </Label>
+                        <Select 
+                          value={formData.examType} 
+                          onValueChange={(value) => setFormData({ ...formData, examType: value })}
+                        >
+                          <SelectTrigger className={errors.examType ? 'border-destructive' : ''}>
+                            <SelectValue placeholder="Select exam" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {examTypes.map((exam) => (
+                              <SelectItem key={exam.value} value={exam.value}>
+                                {exam.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.examType && (
+                          <p className="text-xs text-destructive">{errors.examType}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="currentClass" className="text-sm font-medium text-foreground">
+                          Current Class
+                        </Label>
+                        <Select 
+                          value={formData.currentClass} 
+                          onValueChange={(value) => setFormData({ ...formData, currentClass: value })}
+                        >
+                          <SelectTrigger className={errors.currentClass ? 'border-destructive' : ''}>
+                            <SelectValue placeholder="Select class" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {currentClasses.map((cls) => (
+                              <SelectItem key={cls.value} value={cls.value}>
+                                {cls.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.currentClass && (
+                          <p className="text-xs text-destructive">{errors.currentClass}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
 
@@ -636,8 +719,11 @@ export default function AuthForm() {
                         lastName: '',
                         email: formData.email, // Keep email when switching
                         phone: '+234',
+                        academicStage: '',
                         examType: '',
                         currentClass: '',
+                        institutionName: '',
+                        studyLevel: '',
                         password: '',
                         confirmPassword: '',
                         agreedToTerms: false
@@ -661,8 +747,11 @@ export default function AuthForm() {
                         lastName: '',
                         email: formData.email, // Keep email when switching
                         phone: '+234',
+                        academicStage: '',
                         examType: '',
                         currentClass: '',
+                        institutionName: '',
+                        studyLevel: '',
                         password: '',
                         confirmPassword: '',
                         agreedToTerms: false

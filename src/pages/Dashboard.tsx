@@ -61,6 +61,7 @@ import eduraLogo from "@/assets/edura-logo.png";
 import { AIAssistant } from "@/components/AIAssistant";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import AppShell from "@/components/edura/AppShell";
+import UpgradeToCampus from "@/components/edura/UpgradeToCampus";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SchoolAvailableExams from "@/components/school/SchoolAvailableExams";
@@ -634,6 +635,7 @@ const Dashboard = () => {
       }
       action={
         <div className="flex items-center gap-2">
+          <UpgradeToCampus />
           <Button
             variant={activeTab === "dashboard" ? "default" : "outline"}
             size="sm"

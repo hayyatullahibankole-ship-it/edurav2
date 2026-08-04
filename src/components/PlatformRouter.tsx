@@ -71,21 +71,35 @@ const CampusTools = lazy(() => import("@/pages/campus/CampusTools"));
 const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
   const { side } = useAppSide();
   const { stage, isCampus, loading } = useAcademicStage();
-  const isMobile = useIsMobile();
 
   // Journey first: no stage yet → onboarding
   if (loading) return <LoadingAnimation />;
   if (!stage) return <Navigate to="/campus/journey" replace />;
 
-  // Undergraduates & graduates land on Campus
-  if (isCampus && side !== "cbt" && side !== "services") return <CampusHome />;
+  // Higher institution students live on Campus only
+  if (isCampus) return <Navigate to="/campus" replace />;
 
   if (side === null) return <Navigate to="/choose" replace />;
   if (side === "services") return <ServicesHome />;
-  if (side === "campus") return isCampus ? <CampusHome /> : <Navigate to="/campus/journey" replace />;
-  return isInstalledApp || isMobile
-    ? <MobileHome />
-    : <Layout showNavbar={false}><Dashboard /></Layout>;
+  return <Layout showNavbar={false}><Dashboard /></Layout>;
+};
+
+/** Campus routes are for undergraduates & graduates only */
+const CampusOnly = ({ children }: { children: JSX.Element }) => {
+  const { stage, isCampus, loading } = useAcademicStage();
+  if (loading) return <LoadingAnimation />;
+  if (!stage) return <Navigate to="/campus/journey" replace />;
+  if (!isCampus) return <Navigate to="/dashboard" replace />;
+  return children;
+};
+
+/** CBT & Services routes are for SS3 / WAEC / JAMB candidates only */
+const CoreOnly = ({ children }: { children: JSX.Element }) => {
+  const { stage, isCampus, loading } = useAcademicStage();
+  if (loading) return <LoadingAnimation />;
+  if (!stage) return <Navigate to="/campus/journey" replace />;
+  if (isCampus) return <Navigate to="/campus" replace />;
+  return children;
 };
 
 
@@ -176,11 +190,7 @@ const EduraRoutes = () => {
       {/* Mobile-specific routes */}
       <Route path="/mobile-splash" element={<MobileSplash />} />
       <Route path="/mobile-onboarding" element={<MobileOnboarding />} />
-      <Route path="/mobile-home" element={
-        <ProtectedRoute>
-          <MobileHome />
-        </ProtectedRoute>
-      } />
+      <Route path="/mobile-home" element={<Navigate to="/dashboard" replace />} />
 
       {/* Root route */}
       <Route 
@@ -250,38 +260,39 @@ const EduraRoutes = () => {
       
       <Route path="/resources" element={
         <ProtectedRoute>
-          <DashboardLayout><Resources /></DashboardLayout>
+          <CoreOnly><DashboardLayout><Resources /></DashboardLayout></CoreOnly>
         </ProtectedRoute>
       } />
 
-      <Route path="/services" element={user ? <ServicesHome /> : <Layout><ServicesLanding /></Layout>} />
+      <Route path="/services" element={user ? <CoreOnly><ServicesHome /></CoreOnly> : <Layout><ServicesLanding /></Layout>} />
       <Route path="/admissions" element={<Navigate to="/services?provider=admission" replace />} />
       <Route path="/campus" element={
         <ProtectedRoute>
-          <CampusHome />
+          <CampusOnly><CampusHome /></CampusOnly>
         </ProtectedRoute>
       } />
       <Route path="/campus/academics" element={
         <ProtectedRoute>
-          <CampusAcademics />
+          <CampusOnly><CampusAcademics /></CampusOnly>
         </ProtectedRoute>
       } />
       <Route path="/campus/tools" element={
         <ProtectedRoute>
-          <CampusTools />
+          <CampusOnly><CampusTools /></CampusOnly>
         </ProtectedRoute>
       } />
 
       <Route path="/campus/projects" element={
         <ProtectedRoute>
-          <CampusProjects />
+          <CampusOnly><CampusProjects /></CampusOnly>
         </ProtectedRoute>
       } />
       <Route path="/campus/opportunities" element={
         <ProtectedRoute>
-          <CampusOpportunities />
+          <CampusOnly><CampusOpportunities /></CampusOnly>
         </ProtectedRoute>
       } />
+
       <Route path="/campus/journey" element={
         <ProtectedRoute>
           <CampusJourney />
@@ -304,7 +315,7 @@ const EduraRoutes = () => {
       
       <Route path="/study-hub" element={
         <ProtectedRoute>
-          <DashboardLayout><StudyHub /></DashboardLayout>
+          <CoreOnly><DashboardLayout><StudyHub /></DashboardLayout></CoreOnly>
         </ProtectedRoute>
       } />
       <Route path="/study-hub/topic/:topicId" element={

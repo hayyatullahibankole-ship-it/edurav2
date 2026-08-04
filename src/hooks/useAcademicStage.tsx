@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { writeAppSide } from "@/hooks/useAppSide";
+import { writeAppSide, clearAppSide } from "@/hooks/useAppSide";
 import { isCampusStage, type AcademicStage } from "@/lib/academicStages";
 
 const STAGE_CACHE_KEY = "edura_academic_stage";
@@ -91,7 +91,11 @@ export const useAcademicStage = () => {
           } catch {
             /* ignore */
           }
-          writeAppSide(isCampusStage(patch.academic_stage) ? "campus" : "cbt");
+          if (isCampusStage(patch.academic_stage)) {
+            clearAppSide();
+          } else {
+            writeAppSide("cbt");
+          }
         }
       }
       return { error };

@@ -13,6 +13,8 @@ import { generateSessionToken, storeSessionToken, setSessionToken } from "@/util
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import eduraLogo from "@/assets/edura-logo.png";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ACADEMIC_STAGES, STUDY_LEVELS, isCampusStage } from "@/lib/academicStages";
 
 const loginSchema = z.object({
   email: emailSchema,
@@ -23,6 +25,9 @@ const signupSchema = z.object({
   firstName: nameSchema,
   lastName: nameSchema,
   email: emailSchema,
+  academicStage: z.string().min(1, "Please select where you are right now"),
+  institutionName: z.string().optional(),
+  studyLevel: z.string().optional(),
   password: passwordSchema,
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -52,6 +57,9 @@ export default function MobileAuthForm() {
     firstName: '',
     lastName: '',
     email: '',
+    academicStage: '',
+    institutionName: '',
+    studyLevel: '',
     password: '',
     confirmPassword: ''
   });
@@ -146,6 +154,9 @@ export default function MobileAuthForm() {
             data: {
               first_name: signupData.firstName,
               last_name: signupData.lastName,
+              academic_stage: signupData.academicStage,
+              institution_name: signupData.institutionName,
+              study_level: signupData.studyLevel,
             }
           }
         });
@@ -184,6 +195,9 @@ export default function MobileAuthForm() {
           firstName: '',
           lastName: '',
           email: '',
+          academicStage: '',
+          institutionName: '',
+          studyLevel: '',
           password: '',
           confirmPassword: ''
         });
@@ -281,6 +295,49 @@ export default function MobileAuthForm() {
                 </div>
                 {errors.lastName && <p className="text-xs text-destructive font-medium">{errors.lastName}</p>}
               </div>
+            </div>
+          )}
+
+          {!isLogin && (
+            <div className="space-y-2 animate-fade-in">
+              <Label className="text-sm font-bold text-foreground/80">Where are you right now?</Label>
+              <Select
+                value={formData.academicStage}
+                onValueChange={(value) => setFormData({ ...formData, academicStage: value })}
+              >
+                <SelectTrigger className={`h-14 rounded-xl border-2 ${errors.academicStage ? 'border-destructive' : 'border-border'}`}>
+                  <SelectValue placeholder="Select your stage" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ACADEMIC_STAGES.map((s) => (
+                    <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.academicStage && <p className="text-xs text-destructive font-medium">{errors.academicStage}</p>}
+              {isCampusStage(formData.academicStage) && (
+                <div className="space-y-2 pt-2">
+                  <Input
+                    placeholder="Institution name"
+                    value={formData.institutionName}
+                    onChange={(e) => setFormData({ ...formData, institutionName: e.target.value })}
+                    className="h-14 rounded-xl border-2"
+                  />
+                  <Select
+                    value={formData.studyLevel}
+                    onValueChange={(value) => setFormData({ ...formData, studyLevel: value })}
+                  >
+                    <SelectTrigger className="h-14 rounded-xl border-2">
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STUDY_LEVELS.map((l) => (
+                        <SelectItem key={l} value={l}>{l}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           )}
 
