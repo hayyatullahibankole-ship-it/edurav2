@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-export type AppSide = "cbt" | "services";
+export type AppSide = "cbt" | "services" | "campus";
 
 const STORAGE_KEY = "edura_app_side";
 const EVENT = "edura-app-side-change";
@@ -8,7 +8,7 @@ const EVENT = "edura-app-side-change";
 export const readAppSide = (): AppSide | null => {
   try {
     const value = localStorage.getItem(STORAGE_KEY);
-    return value === "cbt" || value === "services" ? value : null;
+    return value === "cbt" || value === "services" || value === "campus" ? value : null;
   } catch {
     return null;
   }
@@ -36,6 +36,7 @@ export const clearAppSide = () => {
  * Which side of Edura the student is currently in:
  * - "cbt"      → CBT practice, exams, study, forum
  * - "services" → educational services, wallet, requests, admissions
+ * - "campus"   → Edura Campus for undergraduates and graduates
  */
 export const useAppSide = () => {
   const [side, setSide] = useState<AppSide | null>(() => readAppSide());
