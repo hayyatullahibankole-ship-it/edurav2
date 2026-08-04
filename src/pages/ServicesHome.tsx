@@ -27,6 +27,7 @@ import {
 import { toast } from "sonner";
 import { SideSwitcher } from "@/components/edura/SideSwitcher";
 import AppShell from "@/components/edura/AppShell";
+import UpgradeToCampus from "@/components/edura/UpgradeToCampus";
 import ProviderLogo, { providerInfo } from "@/components/edura/ProviderLogo";
 import eduraLogo from "@/assets/edura-logo.png";
 import {
@@ -597,6 +598,7 @@ const ServicesHome = () => {
       subtitle="Pick a service below and we'll handle it for you."
       action={
         <div className="flex items-center gap-2">
+          <UpgradeToCampus />
           <Button
             variant={view === "services" ? "default" : "outline"}
             size="sm"
