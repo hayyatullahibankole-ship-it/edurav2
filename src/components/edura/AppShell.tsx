@@ -42,7 +42,7 @@ const NAV: Record<ShellSide, ShellNavItem[]> = {
   ],
   services: [
     { to: "/services", label: "Services", icon: Briefcase, end: true },
-    { to: "/services?view=requests", label: "Requests", icon: ClipboardList },
+    { to: "/services?tab=requests", label: "Requests", icon: ClipboardList },
     { to: "/wallet", label: "Wallet", icon: WalletIcon },
     { to: "/dashboard", label: "CBT", icon: GraduationCap },
   ],
