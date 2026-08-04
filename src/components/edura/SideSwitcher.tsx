@@ -30,7 +30,7 @@ export const SideSwitcher = ({ className, compact }: SideSwitcherProps) => {
       role="tablist"
       aria-label="Switch Edura side"
     >
-      {OPTIONS.filter((o) => o.key !== "campus" || isCampusStage(readCachedStage())).map((option) => {
+      {OPTIONS.map((option) => {
         const Icon = option.icon;
         const active = side === option.key;
         return (
@@ -40,6 +40,10 @@ export const SideSwitcher = ({ className, compact }: SideSwitcherProps) => {
             aria-selected={active}
             onClick={() => {
               chooseSide(option.key);
+              if (option.key === "campus") {
+                navigate(isCampusStage(readCachedStage()) ? "/campus" : "/campus/journey");
+                return;
+              }
               navigate(option.to);
             }}
             className={cn(
