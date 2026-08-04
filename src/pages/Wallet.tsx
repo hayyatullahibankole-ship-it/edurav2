@@ -97,10 +97,17 @@ const Wallet = () => {
         .eq("auth_user_id", user.id)
         .maybeSingle();
 
-      const rawName = [profileData?.first_name, profileData?.last_name]
-        .filter(Boolean)
-        .join(" ")
-        .trim();
+      const firstName =
+        (profileData?.first_name as string | undefined) ||
+        (user.user_metadata?.first_name as string | undefined) ||
+        undefined;
+
+      const lastName =
+        (profileData?.last_name as string | undefined) ||
+        (user.user_metadata?.last_name as string | undefined) ||
+        undefined;
+
+      const rawName = [firstName, lastName].filter(Boolean).join(" ").trim();
 
       const phone =
         (profileData?.phone as string | undefined) ||
@@ -109,7 +116,10 @@ const Wallet = () => {
 
       const { data, error } = await supabase.functions.invoke("wallet-virtual-account", {
         body: {
+          first_name: firstName || rawName?.split(/\s+/)[0] || undefined,
+          last_name: lastName || rawName?.split(/\s+/).slice(1).join(" ") || undefined,
           full_name: rawName || user.user_metadata?.full_name || user.email?.split("@")[0] || "Edura User",
+          email: user.email,
           phone,
         },
       });

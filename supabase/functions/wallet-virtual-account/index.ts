@@ -56,6 +56,13 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
 
+    const normalizePhone = (value?: string | null) => {
+      if (!value) return undefined;
+      const cleaned = String(value).trim();
+      if (!cleaned) return undefined;
+      return cleaned.startsWith("+") ? cleaned : `+${cleaned.replace(/[^\d+]/g, "")}`;
+    };
+
     // Pull profile details for names / phone and create the missing public profile
     // on the fly for first-time users who have just landed in auth but not yet
     // had a synced `public.users` row.
@@ -110,19 +117,26 @@ Deno.serve(async (req) => {
       }
     }
 
+    const providedFirstName =
+      (typeof body?.first_name === "string" && body.first_name.trim()) || undefined;
+    const providedLastName =
+      (typeof body?.last_name === "string" && body.last_name.trim()) || undefined;
     const rawName =
       (typeof body?.full_name === "string" && body.full_name.trim()) ||
       [profile?.first_name, profile?.last_name].filter(Boolean).join(" ").trim() ||
       (user.user_metadata?.full_name as string | undefined) ||
       (user.email?.split("@")[0] ?? "Edura User");
     const parts = String(rawName).trim().split(/\s+/);
-    const firstName = parts[0] || "Edura";
-    const lastName = parts.slice(1).join(" ") || "User";
-    const phone =
+    const firstName = providedFirstName || parts[0] || "Edura";
+    const lastName = providedLastName || parts.slice(1).join(" ") || "User";
+    const phone = normalizePhone(
       (typeof body?.phone === "string" && body.phone.trim()) ||
-      (profile?.phone as string | undefined) ||
-      (user.user_metadata?.phone as string | undefined) ||
-      undefined;
+        (profile?.phone as string | undefined) ||
+        (user.user_metadata?.phone as string | undefined) ||
+        undefined,
+    );
+    const email =
+      (typeof body?.email === "string" && body.email.trim()) || user.email || undefined;
 
     // 1. Create (or fetch) the Paystack customer.
     // Paystack can reject duplicate customer creation, so we must make the
@@ -130,7 +144,7 @@ Deno.serve(async (req) => {
     const customerRes = await paystack("/customer", key, {
       method: "POST",
       body: JSON.stringify({
-        email: user.email,
+        email,
         first_name: firstName,
         last_name: lastName,
         phone,
@@ -157,16 +171,16 @@ Deno.serve(async (req) => {
       return data.data?.customer_code || data.data?.customer?.customer_code;
     };
 
-    if (!customerCode && user.email) {
+    if (!customerCode && email) {
       const customerLookup = await paystack(
-        `/customer?email=${encodeURIComponent(user.email)}`,
+        `/customer?email=${encodeURIComponent(email)}`,
         key,
       );
       customerCode = extractCustomerCode(customerLookup.body);
     }
 
-    if (!customerCode && user.email) {
-      const fallbackLookup = await paystack(`/customer/${encodeURIComponent(user.email)}`, key);
+    if (!customerCode && email) {
+      const fallbackLookup = await paystack(`/customer/${encodeURIComponent(email)}`, key);
       customerCode = extractCustomerCode(fallbackLookup.body);
     }
 
