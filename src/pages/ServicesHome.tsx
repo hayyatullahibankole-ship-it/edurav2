@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { SideSwitcher } from "@/components/edura/SideSwitcher";
-import ServicesMobileNav from "@/components/edura/ServicesMobileNav";
+import AppShell from "@/components/edura/AppShell";
 import ProviderLogo, { providerInfo } from "@/components/edura/ProviderLogo";
 import eduraLogo from "@/assets/edura-logo.png";
 import {
