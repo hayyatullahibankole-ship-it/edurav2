@@ -81,8 +81,11 @@ export default function AuthForm() {
     email: '',
     phone: '+234',
     academicStage: '',
+    academicStage: '',
     examType: '',
     currentClass: '',
+    institutionName: '',
+    studyLevel: '',
     institutionName: '',
     studyLevel: '',
     password: '',
@@ -285,8 +288,11 @@ export default function AuthForm() {
           lastName: '',
           email: '',
           phone: '+234',
+          academicStage: '',
           examType: '',
           currentClass: '',
+          institutionName: '',
+          studyLevel: '',
           password: '',
           confirmPassword: '',
           agreedToTerms: false
@@ -649,8 +655,11 @@ export default function AuthForm() {
                         lastName: '',
                         email: formData.email, // Keep email when switching
                         phone: '+234',
+                        academicStage: '',
                         examType: '',
                         currentClass: '',
+                        institutionName: '',
+                        studyLevel: '',
                         password: '',
                         confirmPassword: '',
                         agreedToTerms: false
@@ -674,8 +683,11 @@ export default function AuthForm() {
                         lastName: '',
                         email: formData.email, // Keep email when switching
                         phone: '+234',
+                        academicStage: '',
                         examType: '',
                         currentClass: '',
+                        institutionName: '',
+                        studyLevel: '',
                         password: '',
                         confirmPassword: '',
                         agreedToTerms: false
