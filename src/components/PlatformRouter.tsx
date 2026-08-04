@@ -190,11 +190,7 @@ const EduraRoutes = () => {
       {/* Mobile-specific routes */}
       <Route path="/mobile-splash" element={<MobileSplash />} />
       <Route path="/mobile-onboarding" element={<MobileOnboarding />} />
-      <Route path="/mobile-home" element={
-        <ProtectedRoute>
-          <MobileHome />
-        </ProtectedRoute>
-      } />
+      <Route path="/mobile-home" element={<Navigate to="/dashboard" replace />} />
 
       {/* Root route */}
       <Route 
