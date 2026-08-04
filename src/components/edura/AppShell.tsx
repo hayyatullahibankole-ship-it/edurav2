@@ -168,6 +168,16 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
               <Button variant="ghost" size="icon" onClick={() => navigate("/wallet")} aria-label="Wallet">
                 <WalletIcon className="h-4 w-4" />
               </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={handleLogout}
+                aria-label="Log out"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+
             </div>
           </div>
         </header>
