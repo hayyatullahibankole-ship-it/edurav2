@@ -13,6 +13,7 @@ import {
   Library,
   Users,
   Calculator,
+  LogOut,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,10 @@ import { Badge } from "@/components/ui/badge";
 import { SideSwitcher } from "@/components/edura/SideSwitcher";
 import NotificationBell from "@/components/NotificationBell";
 import { DashboardThemeMenu } from "@/components/DashboardThemeMenu";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import eduraLogo from "@/assets/edura-logo.png";
+
 
 export type ShellSide = "cbt" | "services" | "campus";
 
@@ -81,6 +85,22 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
   const navigate = useNavigate();
   const items = nav ?? NAV[side];
   const sideMeta = SIDE_META[side];
+  const { signOut } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      toast({ title: "Logging out...", description: "Please wait" });
+      await signOut();
+      window.sessionStorage.clear();
+    } catch (e) {
+      console.error("Logout error", e);
+    } finally {
+      navigate("/auth", { replace: true });
+    }
+  };
+
+
 
   const railLink = (item: ShellNavItem) => (
     <NavLink
@@ -120,7 +140,16 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
           >
             <UserCog className="h-4 w-4" /> My journey
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-2.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" /> Log out
+          </Button>
         </div>
+
       </aside>
 
       <div className="lg:pl-60 flex min-h-screen flex-col">
@@ -139,6 +168,16 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
               <Button variant="ghost" size="icon" onClick={() => navigate("/wallet")} aria-label="Wallet">
                 <WalletIcon className="h-4 w-4" />
               </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={handleLogout}
+                aria-label="Log out"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+
             </div>
           </div>
         </header>
