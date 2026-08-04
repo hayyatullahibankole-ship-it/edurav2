@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-export type AppSide = "cbt" | "services" | "campus";
+export type AppSide = "cbt" | "services";
 
 const STORAGE_KEY = "edura_app_side";
 const EVENT = "edura-app-side-change";
