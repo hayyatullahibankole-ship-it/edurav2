@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.edura.app',
-  appName: 'EDURA',
+  appName: 'Edura',
   webDir: 'dist',
   plugins: {
     SplashScreen: {
