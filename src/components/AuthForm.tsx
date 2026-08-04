@@ -80,8 +80,11 @@ export default function AuthForm() {
     lastName: '',
     email: '',
     phone: '+234',
+    academicStage: '',
     examType: '',
     currentClass: '',
+    institutionName: '',
+    studyLevel: '',
     password: '',
     confirmPassword: '',
     agreedToTerms: false
