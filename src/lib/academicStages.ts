@@ -15,15 +15,9 @@ export type StageDefinition = {
 
 export const ACADEMIC_STAGES: StageDefinition[] = [
   {
-    key: "junior_secondary",
-    label: "Junior Secondary",
-    description: "JSS 1 – JSS 3",
-    dashboard: "core",
-  },
-  {
     key: "senior_secondary",
-    label: "Senior Secondary",
-    description: "SS 1 – SS 3",
+    label: "SS 3 Student",
+    description: "Final year of senior secondary school",
     dashboard: "core",
   },
   {
