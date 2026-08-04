@@ -56,16 +56,63 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
 
-    // Pull profile details for names / phone
-    const { data: profile } = await admin
+    // Pull profile details for names / phone and create the missing public profile
+    // on the fly for first-time users who have just landed in auth but not yet
+    // had a synced `public.users` row.
+    let profile = null as
+      | {
+          id: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone?: string | null;
+          email?: string | null;
+        }
+      | null;
+
+    const { data: existingProfile, error: existingProfileError } = await admin
       .from("users")
-      .select("full_name, phone")
+      .select("id, first_name, last_name, phone, email")
       .eq("auth_user_id", user.id)
       .maybeSingle();
 
+    if (existingProfileError && existingProfileError.code !== "PGRST116") {
+      console.warn("Profile lookup failed for DVA creation", existingProfileError);
+    }
+
+    if (existingProfile?.id) {
+      profile = existingProfile;
+    } else {
+      const nameMeta = String(user.user_metadata?.full_name ?? "").trim();
+      const firstNameMeta = String(user.user_metadata?.first_name ?? "").trim();
+      const lastNameMeta = String(user.user_metadata?.last_name ?? "").trim();
+      const fallbackProfileName = nameMeta || [firstNameMeta, lastNameMeta].filter(Boolean).join(" ");
+      const profileInsertPayload = {
+        auth_user_id: user.id,
+        email: user.email,
+        first_name: firstNameMeta || (fallbackProfileName ? fallbackProfileName.split(/\s+/)[0] : null),
+        last_name:
+          lastNameMeta ||
+          (fallbackProfileName ? fallbackProfileName.split(/\s+/).slice(1).join(" ") || null : null),
+        phone: (user.user_metadata?.phone as string | undefined) || null,
+        is_verified: !!user.email_confirmed_at,
+      };
+
+      const { data: createdProfile, error: createProfileError } = await admin
+        .from("users")
+        .insert(profileInsertPayload)
+        .select("id, first_name, last_name, phone, email")
+        .single();
+
+      if (createProfileError) {
+        console.warn("Auto-create missing profile failed for DVA creation", createProfileError);
+      } else {
+        profile = createdProfile;
+      }
+    }
+
     const rawName =
       (typeof body?.full_name === "string" && body.full_name.trim()) ||
-      (profile?.full_name as string | undefined) ||
+      [profile?.first_name, profile?.last_name].filter(Boolean).join(" ").trim() ||
       (user.user_metadata?.full_name as string | undefined) ||
       (user.email?.split("@")[0] ?? "Edura User");
     const parts = String(rawName).trim().split(/\s+/);
@@ -100,11 +147,18 @@ Deno.serve(async (req) => {
 
     // 2. Assign a dedicated NUBAN
     const isTest = key.startsWith("sk_test");
-    const preferredBank = isTest ? "test-bank" : (Deno.env.get("PAYSTACK_DVA_BANK") ?? "wema-bank");
+    const configuredBank = isTest
+      ? "test-bank"
+      : (Deno.env.get("PAYSTACK_DVA_BANK") || "").trim();
+
+    const dvaPayload: Record<string, string> = { customer: customerCode };
+    if (configuredBank) {
+      dvaPayload.preferred_bank = configuredBank;
+    }
 
     const dvaRes = await paystack("/dedicated_account", key, {
       method: "POST",
-      body: JSON.stringify({ customer: customerCode, preferred_bank: preferredBank }),
+      body: JSON.stringify(dvaPayload),
     });
 
     const dva = dvaRes.body?.data;
@@ -125,8 +179,8 @@ Deno.serve(async (req) => {
       customer_code: customerCode,
       account_number: dva.account_number,
       account_name: dva.account_name ?? rawName,
-      bank_name: dva.bank?.name ?? preferredBank,
-      bank_slug: dva.bank?.slug ?? preferredBank,
+      bank_name: dva.bank?.name ?? configuredBank || "Paystack",
+      bank_slug: dva.bank?.slug ?? configuredBank || "paystack",
       currency: dva.currency ?? "NGN",
       provider: "paystack",
       status: "active",
