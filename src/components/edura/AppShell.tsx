@@ -13,6 +13,7 @@ import {
   Library,
   Users,
   Calculator,
+  LogOut,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,10 @@ import { Badge } from "@/components/ui/badge";
 import { SideSwitcher } from "@/components/edura/SideSwitcher";
 import NotificationBell from "@/components/NotificationBell";
 import { DashboardThemeMenu } from "@/components/DashboardThemeMenu";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import eduraLogo from "@/assets/edura-logo.png";
+
 
 export type ShellSide = "cbt" | "services" | "campus";
 
