@@ -1,575 +1,328 @@
-import React, { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Shield, 
-  AlertTriangle, 
-  Eye, 
-  Lock,
-  Activity,
+import {
+  Shield,
+  AlertTriangle,
   Ban,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Users,
-  Camera,
-  Monitor,
-  Wifi,
-  Mouse
+  Activity,
+  RefreshCw,
+  Loader2,
+  UserCheck,
+  ScrollText,
+  Search,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface SecurityCenterProps {
-  suspiciousActivities: any[];
+  suspiciousActivities?: any[];
 }
 
-export default function SecurityCenter({ suspiciousActivities }: SecurityCenterProps) {
-  const { toast } = useToast();
-  const [securityAlerts, setSecurityAlerts] = useState([]);
-  const [blockedUsers, setBlockedUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
+type FlaggedAttempt = {
+  id: string;
+  user_id: string | null;
+  suspicious_activity_count: number | null;
+  status: string | null;
+  created_at: string;
+  users?: { id: string; first_name: string | null; last_name: string | null; email: string | null } | null;
+  exams?: { title: string | null } | null;
+};
 
-  useEffect(() => {
-    fetchSecurityData();
-  }, []);
+type SuspendedUser = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  created_at: string | null;
+};
 
-  const fetchSecurityData = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch security alerts from audit logs for enhanced monitoring
-      const { data: auditData, error: auditError } = await supabase
-        .from('audit_logs')
-        .select(`
-          id,
-          action_type,
-          actor_user_id,
-          target_id,
-          details,
-          created_at,
-          ip_address
-        `)
-        .in('action_type', ['PII_ACCESS', 'USER_SUSPENDED', 'UPDATE_SETTING', 'INSERT_SETTING'])
-        .order('created_at', { ascending: false })
-        .limit(10);
+type AuditRow = {
+  id: string;
+  action_type: string;
+  actor_user_id: string | null;
+  target_id: string | null;
+  details: any;
+  ip_address: string | null;
+  created_at: string;
+};
 
-      if (auditError) {
-        console.error('Error fetching audit data:', auditError);
-      }
+const fullName = (u?: { first_name?: string | null; last_name?: string | null } | null) =>
+  [u?.first_name, u?.last_name].filter(Boolean).join(' ') || 'Unknown user';
 
-      // Fetch traditional suspicious activity attempts
-      const { data: attempts, error } = await supabase
+const threatOf = (count: number) => {
+  if (count >= 10) return { label: 'High', cls: 'bg-red-50 text-red-700 border-red-200' };
+  if (count >= 5) return { label: 'Medium', cls: 'bg-amber-50 text-amber-700 border-amber-200' };
+  return { label: 'Low', cls: 'bg-slate-100 text-slate-700 border-slate-200' };
+};
+
+export default function SecurityCenter(_props: SecurityCenterProps) {
+  const [loading, setLoading] = useState(true);
+  const [working, setWorking] = useState<string | null>(null);
+  const [flagged, setFlagged] = useState<FlaggedAttempt[]>([]);
+  const [suspended, setSuspended] = useState<SuspendedUser[]>([]);
+  const [audit, setAudit] = useState<AuditRow[]>([]);
+  const [search, setSearch] = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const [attemptsRes, suspendedRes, auditRes] = await Promise.all([
+      supabase
         .from('attempts')
-        .select(`
-          *,
-          users(first_name, last_name, email),
-          exams(title)
-        `)
+        .select('id, user_id, suspicious_activity_count, status, created_at, users(id, first_name, last_name, email), exams(title)')
         .gt('suspicious_activity_count', 0)
         .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (error) {
-        console.error('Error fetching attempts data:', error);
-        return;
-      }
-
-      // Combine audit logs and suspicious attempts
-      const combinedAlerts = [
-        ...(auditData?.map(log => ({
-          id: log.id,
-          type: 'audit',
-          action_type: log.action_type,
-          suspicious_activity_count: log.action_type === 'PII_ACCESS' ? 3 : 1,
-          created_at: log.created_at,
-          details: log.details,
-          ip_address: log.ip_address,
-          users: { 
-            first_name: 'System', 
-            last_name: 'Event', 
-            email: `${log.action_type.toLowerCase()}@system` 
-          },
-          exams: { title: 'System Operation' }
-        })) || []),
-        ...(attempts?.map(attempt => ({
-          ...attempt,
-          type: 'suspicious_activity'
-        })) || [])
-      ];
-
-      setSecurityAlerts(combinedAlerts.sort((a, b) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      ));
-      
-    } catch (error) {
-      console.error('Error fetching security data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load security data",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleInvestigateAlert = (alertId: string) => {
-    // Implementation for investigating alerts
-    toast({
-      title: "Investigation Started",
-      description: "Security alert is being investigated"
-    });
-  };
-
-  const handleBlockUser = async (userId: string) => {
-    try {
-      // Use enhanced security with audit logging
-      const { error } = await supabase
+        .limit(50),
+      supabase
         .from('users')
-        .update({ is_suspended: true })
-        .eq('id', userId);
+        .select('id, first_name, last_name, email, created_at')
+        .eq('is_suspended', true)
+        .order('created_at', { ascending: false })
+        .limit(100),
+      supabase
+        .from('audit_logs')
+        .select('id, action_type, actor_user_id, target_id, details, ip_address, created_at')
+        .gte('created_at', since)
+        .order('created_at', { ascending: false })
+        .limit(50),
+    ]);
 
-      if (error) throw error;
+    if (attemptsRes.error) console.error('flagged attempts', attemptsRes.error);
+    if (suspendedRes.error) console.error('suspended users', suspendedRes.error);
+    if (auditRes.error) console.error('audit logs', auditRes.error);
 
-      // Log the admin action using the security function
+    if (attemptsRes.error && suspendedRes.error && auditRes.error) {
+      toast.error('Could not load security data');
+    }
+
+    setFlagged((attemptsRes.data as any) || []);
+    setSuspended((suspendedRes.data as any) || []);
+    setAudit((auditRes.data as any) || []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const setSuspension = async (userId: string | null | undefined, suspend: boolean) => {
+    if (!userId) {
+      toast.error('No user linked to this record');
+      return;
+    }
+    setWorking(userId);
+    const { error } = await supabase.from('users').update({ is_suspended: suspend }).eq('id', userId);
+    setWorking(null);
+
+    if (error) {
+      console.error('suspension failed', error);
+      toast.error(suspend ? 'Could not suspend user' : 'Could not restore user');
+      return;
+    }
+
+    try {
       await supabase.rpc('log_admin_action', {
-        action_type: 'USER_SUSPENDED',
-        admin_id: null, // Function will use auth.uid()
-        target_id: userId
+        action_type: suspend ? 'USER_SUSPENDED' : 'USER_RESTORED',
+        admin_id: null,
+        target_id: userId,
       });
-
-      toast({
-        title: "User Blocked",
-        description: "User has been suspended and action logged for audit trail"
-      });
-
-      fetchSecurityData();
-      
-    } catch (error) {
-      console.error('Error blocking user:', error);
-      toast({
-        title: "Error",
-        description: "Failed to block user",
-        variant: "destructive"
-      });
+    } catch (e) {
+      console.warn('audit log failed', e);
     }
+
+    toast.success(suspend ? 'User suspended' : 'User restored');
+    load();
   };
 
-  const getThreatLevel = (suspiciousCount: number) => {
-    if (suspiciousCount >= 10) return { level: 'High', color: 'text-red-400', bg: 'bg-red-500/20' };
-    if (suspiciousCount >= 5) return { level: 'Medium', color: 'text-yellow-400', bg: 'bg-yellow-500/20' };
-    return { level: 'Low', color: 'text-green-400', bg: 'bg-green-500/20' };
-  };
+  const filteredSuspended = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return suspended;
+    return suspended.filter(
+      (u) => fullName(u).toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q)
+    );
+  }, [suspended, search]);
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'tab_switch': return <Monitor className="w-4 h-4" />;
-      case 'right_click': return <Mouse className="w-4 h-4" />;
-      case 'copy_paste': return <Activity className="w-4 h-4" />;
-      case 'window_blur': return <Eye className="w-4 h-4" />;
-      default: return <AlertTriangle className="w-4 h-4" />;
-    }
-  };
+  const highRisk = flagged.filter((f) => (f.suspicious_activity_count || 0) >= 5).length;
+
+  const stats = [
+    { label: 'Flagged attempts', value: flagged.length, icon: AlertTriangle },
+    { label: 'High risk', value: highRisk, icon: Shield },
+    { label: 'Suspended users', value: suspended.length, icon: Ban },
+    { label: 'Audit events (7d)', value: audit.length, icon: Activity },
+  ];
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-white">Security Control Center</h2>
-          <p className="text-slate-400">Monitor and manage system security</p>
+          <h2 className="text-xl font-semibold text-slate-900">Security</h2>
+          <p className="text-sm text-slate-500">Flagged exam activity, suspended accounts and the admin audit trail.</p>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-sm text-slate-400">Security Systems Active</span>
-        </div>
+        <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+          Refresh
+        </Button>
       </div>
 
-      {/* Security Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-slate-800 border-slate-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Active Threats</p>
-                <p className="text-2xl font-bold text-red-400">{securityAlerts.length}</p>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {stats.map((s) => (
+          <Card key={s.label} className="border-slate-200">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{s.label}</p>
+                  <p className="mt-1 text-2xl font-semibold text-slate-900">{loading ? '—' : s.value}</p>
+                </div>
+                <s.icon className="h-4 w-4 shrink-0 text-slate-400" />
               </div>
-              <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-red-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-800 border-slate-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Blocked Users</p>
-                <p className="text-2xl font-bold text-orange-400">{blockedUsers.length}</p>
-              </div>
-              <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
-                <Ban className="w-6 h-6 text-orange-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-800 border-slate-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">System Health</p>
-                <p className="text-2xl font-bold text-green-400">99.9%</p>
-              </div>
-              <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                <Shield className="w-6 h-6 text-green-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-800 border-slate-700">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Active Sessions</p>
-                <p className="text-2xl font-bold text-blue-400">23</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-                <Activity className="w-6 h-6 text-blue-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* High Priority Alerts */}
-      {securityAlerts.filter((alert: any) => alert.suspicious_activity_count >= 5).length > 0 && (
-        <Alert className="bg-red-950 border-red-800 text-red-100">
-          <AlertTriangle className="h-4 w-4 text-red-400" />
-          <AlertDescription>
-            {securityAlerts.filter((alert: any) => alert.suspicious_activity_count >= 5).length} high-priority security incidents detected. 
-            Immediate attention required.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Security Tabs */}
-      <Tabs defaultValue="alerts" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-slate-800">
-          <TabsTrigger value="alerts" className="text-white">Security Alerts</TabsTrigger>
-          <TabsTrigger value="monitoring" className="text-white">Real-time Monitor</TabsTrigger>
-          <TabsTrigger value="blocked" className="text-white">Blocked Users</TabsTrigger>
-          <TabsTrigger value="settings" className="text-white">Security Settings</TabsTrigger>
+      <Tabs defaultValue="flagged" className="space-y-4">
+        <TabsList className="w-full justify-start overflow-x-auto">
+          <TabsTrigger value="flagged">Flagged activity</TabsTrigger>
+          <TabsTrigger value="suspended">Suspended users</TabsTrigger>
+          <TabsTrigger value="audit">Audit log</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="alerts" className="space-y-4">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">Security Incident Log</CardTitle>
+        <TabsContent value="flagged">
+          <Card className="border-slate-200">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-slate-900">Exam sessions with suspicious activity</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {securityAlerts.map((alert: any) => {
-                const threat = getThreatLevel(alert.suspicious_activity_count);
+            <CardContent className="space-y-3">
+              {loading && <p className="py-6 text-center text-sm text-slate-500">Loading…</p>}
+              {!loading && flagged.length === 0 && (
+                <div className="py-10 text-center">
+                  <Shield className="mx-auto mb-3 h-8 w-8 text-slate-300" />
+                  <p className="text-sm text-slate-500">No flagged activity</p>
+                </div>
+              )}
+              {flagged.map((a) => {
+                const threat = threatOf(a.suspicious_activity_count || 0);
                 return (
-                  <div key={alert.id} className="p-4 bg-slate-700 rounded-lg border border-slate-600">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className={`w-12 h-12 ${threat.bg} rounded-full flex items-center justify-center`}>
-                          <AlertTriangle className={`w-6 h-6 ${threat.color}`} />
-                        </div>
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <h3 className="font-medium text-white">
-                              {alert.type === 'audit' ? 
-                                `Security Event: ${alert.action_type.replace('_', ' ')}` :
-                                'Suspicious Activity Detected'
-                              }
-                            </h3>
-                            <Badge className={`${threat.bg} ${threat.color} border-0`}>
-                              {threat.level} Risk
-                            </Badge>
-                          </div>
-                          <div className="text-sm text-slate-400 mt-1">
-                            <span>User: {alert.users?.first_name} {alert.users?.last_name}</span>
-                            {alert.exams?.title && (
-                              <>
-                                <span className="mx-2">•</span>
-                                <span>Exam: {alert.exams?.title}</span>
-                              </>
-                            )}
-                            {alert.type === 'suspicious_activity' && (
-                              <>
-                                <span className="mx-2">•</span>
-                                <span>{alert.suspicious_activity_count} violations</span>
-                              </>
-                            )}
-                            {alert.ip_address && (
-                              <>
-                                <span className="mx-2">•</span>
-                                <span>IP: {alert.ip_address}</span>
-                              </>
-                            )}
-                          </div>
-                          <div className="text-xs text-slate-500 mt-1">
-                            {new Date(alert.created_at).toLocaleString()}
-                            {alert.type === 'audit' && (
-                              <span className="ml-2 px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">
-                                AUDIT LOG
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                  <div
+                    key={a.id}
+                    className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-sm font-medium text-slate-900">{fullName(a.users)}</p>
+                        <Badge variant="outline" className={threat.cls}>{threat.label} risk</Badge>
                       </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleInvestigateAlert(alert.id)}
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                          Investigate
-                        </Button>
-                        
-                        <Button 
-                          variant="destructive" 
-                          size="sm"
-                          onClick={() => handleBlockUser(alert.users?.id)}
-                        >
-                          <Ban className="w-4 h-4 mr-2" />
-                          Block User
-                        </Button>
-                      </div>
+                      <p className="mt-1 truncate text-xs text-slate-500">
+                        {a.users?.email || 'no email'} • {a.exams?.title || 'Exam'} • {a.suspicious_activity_count} violations
+                      </p>
+                      <p className="mt-1 text-xs text-slate-400">{new Date(a.created_at).toLocaleString()}</p>
                     </div>
-                    
-                    {/* Activity Details */}
-                    <div className="mt-4 p-3 bg-slate-800 rounded border border-slate-600">
-                      <h4 className="text-sm font-medium text-white mb-2">Activity Breakdown:</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div className="flex items-center space-x-2">
-                          {getActivityIcon('tab_switch')}
-                          <span className="text-slate-400">Tab Switches</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {getActivityIcon('window_blur')}
-                          <span className="text-slate-400">Window Focus Lost</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {getActivityIcon('right_click')}
-                          <span className="text-slate-400">Right Clicks</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {getActivityIcon('copy_paste')}
-                          <span className="text-slate-400">Copy/Paste</span>
-                        </div>
-                      </div>
-                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="shrink-0"
+                      disabled={working === a.users?.id || !a.users?.id}
+                      onClick={() => setSuspension(a.users?.id, true)}
+                    >
+                      {working === a.users?.id ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Ban className="mr-2 h-4 w-4" />
+                      )}
+                      Suspend
+                    </Button>
                   </div>
                 );
               })}
-              
-              {securityAlerts.length === 0 && (
-                <div className="text-center py-8">
-                  <Shield className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-                  <p className="text-slate-400">No security alerts</p>
-                  <p className="text-sm text-slate-500 mt-2">All systems secure</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="suspended">
+          <Card className="border-slate-200">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-slate-900">Suspended accounts</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search by name or email"
+                  className="h-9 pl-8"
+                />
+              </div>
+
+              {loading && <p className="py-6 text-center text-sm text-slate-500">Loading…</p>}
+              {!loading && filteredSuspended.length === 0 && (
+                <div className="py-10 text-center">
+                  <UserCheck className="mx-auto mb-3 h-8 w-8 text-slate-300" />
+                  <p className="text-sm text-slate-500">No suspended users</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="monitoring">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">Real-time Security Monitoring</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="p-4 bg-slate-700 rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-white">Anti-Cheat System</span>
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              {filteredSuspended.map((u) => (
+                <div
+                  key={u.id}
+                  className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-slate-900">{fullName(u)}</p>
+                    <p className="truncate text-xs text-slate-500">{u.email}</p>
                   </div>
-                  <p className="text-2xl font-bold text-green-400">Active</p>
-                  <p className="text-xs text-slate-400 mt-1">Monitoring 23 sessions</p>
-                </div>
-                
-                <div className="p-4 bg-slate-700 rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-white">Proctoring AI</span>
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  </div>
-                  <p className="text-2xl font-bold text-blue-400">Enabled</p>
-                  <p className="text-xs text-slate-400 mt-1">98.7% accuracy</p>
-                </div>
-                
-                <div className="p-4 bg-slate-700 rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-white">Network Monitor</span>
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                  </div>
-                  <p className="text-2xl font-bold text-purple-400">Scanning</p>
-                  <p className="text-xs text-slate-400 mt-1">All connections secure</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="blocked">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">Blocked Users Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Search and Filter for Blocked Users */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="Search blocked users..."
-                      className="bg-slate-700 border-slate-600"
-                    />
-                  </div>
-                  <Button variant="outline" className="border-slate-600">
-                    <Eye className="w-4 h-4 mr-2" />
-                    View All
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    disabled={working === u.id}
+                    onClick={() => setSuspension(u.id, false)}
+                  >
+                    {working === u.id ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <UserCheck className="mr-2 h-4 w-4" />
+                    )}
+                    Restore access
                   </Button>
                 </div>
-
-                {/* Blocked Users List */}
-                <div className="space-y-3">
-                  {/* Sample blocked user */}
-                  <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg border border-slate-600">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
-                        <Ban className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-white">Sample User</h3>
-                        <p className="text-sm text-slate-400">Blocked for: Multiple violations</p>
-                        <p className="text-xs text-slate-500">Blocked on: {new Date().toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button variant="default" size="sm">
-                        Unblock
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {blockedUsers.length === 0 && (
-                  <div className="text-center py-8">
-                    <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                    <p className="text-slate-400">No users currently blocked</p>
-                    <p className="text-sm text-slate-500 mt-2">All users are in good standing</p>
-                  </div>
-                )}
-              </div>
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="settings">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">Security Configuration</CardTitle>
+        <TabsContent value="audit">
+          <Card className="border-slate-200">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-slate-900">Admin audit trail (last 7 days)</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
-                  <div>
-                    <h3 className="font-medium text-white">Anti-Cheat Detection</h3>
-                    <p className="text-sm text-slate-400">Monitor suspicious behavior during exams</p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-400">ACTIVE</span>
-                  </div>
+            <CardContent className="space-y-2">
+              {loading && <p className="py-6 text-center text-sm text-slate-500">Loading…</p>}
+              {!loading && audit.length === 0 && (
+                <div className="py-10 text-center">
+                  <ScrollText className="mx-auto mb-3 h-8 w-8 text-slate-300" />
+                  <p className="text-sm text-slate-500">No audit events recorded</p>
                 </div>
-                
-                <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
-                  <div>
-                    <h3 className="font-medium text-white">Browser Lock Mode</h3>
-                    <p className="text-sm text-slate-400">Prevent tab switching and minimize windows</p>
+              )}
+              {audit.map((log) => (
+                <div key={log.id} className="rounded-lg border border-slate-200 p-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
+                      {log.action_type.replace(/_/g, ' ')}
+                    </Badge>
+                    <span className="text-xs text-slate-400">{new Date(log.created_at).toLocaleString()}</span>
+                    {log.ip_address && <span className="text-xs text-slate-400">IP {log.ip_address}</span>}
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-400">ENABLED</span>
-                  </div>
+                  {log.target_id && (
+                    <p className="mt-1 break-all text-xs text-slate-500">Target: {log.target_id}</p>
+                  )}
                 </div>
-                
-                <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
-                  <div>
-                    <h3 className="font-medium text-white">Webcam Proctoring</h3>
-                    <p className="text-sm text-slate-400">Monitor users via webcam during exams</p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-blue-400">ENABLED</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
-                  <div>
-                    <h3 className="font-medium text-white">Time Tracking</h3>
-                    <p className="text-sm text-slate-400">Monitor time spent on each question</p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-400">ACTIVE</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
-                  <div>
-                    <h3 className="font-medium text-white">IP Tracking</h3>
-                    <p className="text-sm text-slate-400">Log and monitor user IP addresses</p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-purple-400">TRACKING</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
-                  <div>
-                    <h3 className="font-medium text-white">Device Fingerprinting</h3>
-                    <p className="text-sm text-slate-400">Identify and track unique devices</p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-orange-400">FINGERPRINTING</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-6 border-t border-slate-600">
-                <h4 className="text-white font-medium mb-4">Security Thresholds</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-3 bg-slate-700 rounded">
-                    <label className="text-sm text-slate-300">Violation Threshold</label>
-                    <p className="text-lg font-bold text-yellow-400">5</p>
-                    <p className="text-xs text-slate-400">Before auto-suspension</p>
-                  </div>
-                  <div className="p-3 bg-slate-700 rounded">
-                    <label className="text-sm text-slate-300">Session Timeout</label>
-                    <p className="text-lg font-bold text-blue-400">30min</p>
-                    <p className="text-xs text-slate-400">Idle time limit</p>
-                  </div>
-                </div>
-              </div>
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
