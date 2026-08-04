@@ -72,6 +72,8 @@ const MobileHome = () => {
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [blockedFeatureName, setBlockedFeatureName] = useState('');
 
+  const isProfileIncomplete = !userProfile?.first_name?.trim() || !userProfile?.last_name?.trim() || !userProfile?.phone?.trim();
+
   // Features that require app installation
   const premiumFeatures = ['/study-planner', '/challenge-arena', '/performance-report', '/cbt-exam', '/practice'];
   const isMobileBrowser =
@@ -87,6 +89,12 @@ const MobileHome = () => {
     "Every question you answer brings you closer to your goal.",
     "Consistency is the key to mastering any subject."
   ];
+
+  useEffect(() => {
+    if (isProfileIncomplete && isInstalledApp) {
+      setShowProfileSheet(true);
+    }
+  }, [isProfileIncomplete, isInstalledApp]);
 
   useEffect(() => {
     if (!userProfile?.id) return;
@@ -261,6 +269,11 @@ const MobileHome = () => {
   };
 
   const handleNavigation = async (path: string, featureLabel?: string) => {
+    if (isProfileIncomplete && isInstalledApp) {
+      setShowProfileSheet(true);
+      return;
+    }
+
     if (Capacitor.isNativePlatform()) {
       await Haptics.impact({ style: ImpactStyle.Light });
     }

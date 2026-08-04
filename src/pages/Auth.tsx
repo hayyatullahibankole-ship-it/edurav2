@@ -11,9 +11,20 @@ export default function Auth() {
   const navigate = useNavigate();
   const { isInstalledApp } = useInstalledApp();
 
+  const isProfileComplete = Boolean(
+    userProfile?.first_name?.trim() &&
+    userProfile?.last_name?.trim() &&
+    userProfile?.phone?.trim()
+  );
+
   useEffect(() => {
     const checkSchoolStatus = async () => {
       if (user && !loading && userRole !== null) {
+        if (isInstalledApp && !isProfileComplete) {
+          navigate('/mobile-home', { replace: true });
+          return;
+        }
+
         // Process pending referral if exists
         try {
           const pendingReferral = localStorage.getItem('pending_referral');
@@ -73,7 +84,7 @@ export default function Auth() {
     };
     
     checkSchoolStatus();
-  }, [user, loading, userRole, isAdmin, isSchoolAdmin, navigate, userProfile]);
+  }, [user, loading, userRole, isAdmin, isSchoolAdmin, navigate, userProfile, isInstalledApp, isProfileComplete]);
 
   if (loading) {
     return (

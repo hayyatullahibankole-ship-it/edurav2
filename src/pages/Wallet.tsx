@@ -91,8 +91,27 @@ const Wallet = () => {
     }
     setGenerating(true);
     try {
+      const { data: profileData } = await supabase
+        .from("users")
+        .select("first_name, last_name, phone")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+
+      const rawName = [profileData?.first_name, profileData?.last_name]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+
+      const phone =
+        (profileData?.phone as string | undefined) ||
+        (user.user_metadata?.phone as string | undefined) ||
+        undefined;
+
       const { data, error } = await supabase.functions.invoke("wallet-virtual-account", {
-        body: {},
+        body: {
+          full_name: rawName || user.user_metadata?.full_name || user.email?.split("@")[0] || "Edura User",
+          phone,
+        },
       });
       if (error || data?.error) {
         toast.error(data?.error || "Could not generate your account number");
