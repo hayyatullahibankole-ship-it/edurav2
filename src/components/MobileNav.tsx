@@ -104,7 +104,7 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
             {/* Navigation Buttons */}
             <div className="relative h-full flex items-center justify-around px-4 z-10">
               {/* Home Button */}
-              <Link to="/dashboard" className="flex-1 flex justify-center">
+              <Link to={isInstalledApp ? "/mobile-home" : "/dashboard"} className="flex-1 flex justify-center">
                 <button
                   onClick={() => playTapSound()}
                   className="flex flex-col items-center justify-center gap-0.5 transition-all duration-300 active:scale-90 py-2"

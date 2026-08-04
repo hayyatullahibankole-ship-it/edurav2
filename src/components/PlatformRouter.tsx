@@ -81,6 +81,7 @@ const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
 
   if (side === null) return <Navigate to="/choose" replace />;
   if (side === "services") return <ServicesHome />;
+  if (isInstalledApp) return <MobileHome />;
   return <Layout showNavbar={false}><Dashboard /></Layout>;
 };
 

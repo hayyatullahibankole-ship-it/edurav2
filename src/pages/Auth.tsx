@@ -84,7 +84,7 @@ export default function Auth() {
             navigate('/school-dashboard', { replace: true });
           }
         } else {
-          navigate('/dashboard', { replace: true });
+          navigate(isInstalledApp ? '/mobile-home' : '/dashboard', { replace: true });
         }
       }
     };
@@ -104,7 +104,9 @@ export default function Auth() {
   }
 
   if (user && userRole !== null) {
-    const redirectTo = isAdmin ? "/admin" : (isSchoolAdmin ? "/school-dashboard" : "/dashboard");
+    const redirectTo = isAdmin
+      ? "/admin"
+      : (isSchoolAdmin ? "/school-dashboard" : (isInstalledApp ? "/mobile-home" : "/dashboard"));
     return <Navigate to={redirectTo} replace />;
   }
 
