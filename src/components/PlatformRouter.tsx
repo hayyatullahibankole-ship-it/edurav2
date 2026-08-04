@@ -264,7 +264,7 @@ const EduraRoutes = () => {
       
       <Route path="/resources" element={
         <ProtectedRoute>
-          <DashboardLayout><Resources /></DashboardLayout>
+          <CoreOnly><DashboardLayout><Resources /></DashboardLayout></CoreOnly>
         </ProtectedRoute>
       } />
 
@@ -319,7 +319,7 @@ const EduraRoutes = () => {
       
       <Route path="/study-hub" element={
         <ProtectedRoute>
-          <DashboardLayout><StudyHub /></DashboardLayout>
+          <CoreOnly><DashboardLayout><StudyHub /></DashboardLayout></CoreOnly>
         </ProtectedRoute>
       } />
       <Route path="/study-hub/topic/:topicId" element={
