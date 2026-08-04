@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
 import { useAppSide } from "@/hooks/useAppSide";
+import { useAcademicStage } from "@/hooks/useAcademicStage";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProtectedRoute from "./ProtectedRoute";
@@ -64,17 +65,27 @@ const CampusProjects = lazy(() => import("@/pages/campus/CampusProjects"));
 const CampusOpportunities = lazy(() => import("@/pages/campus/CampusOpportunities"));
 const CampusJourney = lazy(() => import("@/pages/campus/CampusJourney"));
 
-// Renders the correct home screen for the side the student picked
+// Renders the correct home screen for the student's journey stage + chosen side
 const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
   const { side } = useAppSide();
+  const { stage, isCampus, loading } = useAcademicStage();
   const isMobile = useIsMobile();
+
+  // Journey first: no stage yet → onboarding
+  if (loading) return <LoadingAnimation />;
+  if (!stage) return <Navigate to="/campus/journey" replace />;
+
+  // Undergraduates & graduates land on Campus
+  if (isCampus && side !== "cbt" && side !== "services") return <CampusHome />;
+
   if (side === null) return <Navigate to="/choose" replace />;
   if (side === "services") return <ServicesHome />;
-  if (side === "campus") return <CampusHome />;
+  if (side === "campus") return isCampus ? <CampusHome /> : <Navigate to="/campus/journey" replace />;
   return isInstalledApp || isMobile
     ? <MobileHome />
     : <Layout showNavbar={false}><Dashboard /></Layout>;
 };
+
 
 
 // Akboy Pages
