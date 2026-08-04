@@ -1,4 +1,4 @@
-import { Home, BookOpen, User, GraduationCap, FileCheck, Award, Zap, ChevronRight, Sparkles, Sword, MessageSquare, Library, Download, Smartphone, Wifi, Bell, Compass } from "lucide-react";
+import { Home, User, GraduationCap, ChevronRight, Compass, Briefcase } from "lucide-react";
 import { ExploreSheet } from "@/components/edura/ExploreSheet";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -122,21 +122,21 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
                 </button>
               </Link>
 
-              {/* Study Button */}
-              <Link to="/study-hub" className="flex-1 flex justify-center">
+              {/* CBT Button */}
+              <Link to="/dashboard" className="flex-1 flex justify-center">
                 <button 
                   onClick={() => playTapSound()}
                   className="flex flex-col items-center justify-center gap-0.5 transition-all duration-300 active:scale-90 py-2"
                 >
-                  <Library 
+                  <GraduationCap 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "study" ? "text-primary" : "text-muted-foreground"
+                      activeTab === "cbt" || activeTab === "study" ? "text-primary" : "text-muted-foreground"
                     }`}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
-                    activeTab === "study" ? "text-primary font-semibold" : "text-muted-foreground"
+                    activeTab === "cbt" || activeTab === "study" ? "text-primary font-semibold" : "text-muted-foreground"
                   }`}>
-                    Study
+                    CBT
                   </span>
                 </button>
               </Link>
@@ -159,21 +159,21 @@ const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
               </div>
 
 
-              {/* Forum Button */}
-              <Link to="/forum" className="flex-1 flex justify-center">
+              {/* Services Button */}
+              <Link to="/services" className="flex-1 flex justify-center">
                 <button 
                   onClick={() => playTapSound()}
                   className="flex flex-col items-center justify-center gap-0.5 transition-all duration-300 active:scale-90 py-2"
                 >
-                  <MessageSquare 
+                  <Briefcase 
                     className={`h-6 w-6 transition-colors duration-300 ${
-                      activeTab === "forum" ? "text-primary" : "text-muted-foreground"
+                      activeTab === "services" || activeTab === "forum" ? "text-primary" : "text-muted-foreground"
                     }`}
                   />
                   <span className={`text-[9px] font-medium transition-all duration-300 ${
-                    activeTab === "forum" ? "text-primary font-semibold" : "text-muted-foreground"
+                    activeTab === "services" || activeTab === "forum" ? "text-primary font-semibold" : "text-muted-foreground"
                   }`}>
-                    Forum
+                    Services
                   </span>
                 </button>
               </Link>

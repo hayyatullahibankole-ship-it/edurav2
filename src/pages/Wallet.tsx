@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWallet } from "@/hooks/useWallet";
+import MobileNav from "@/components/MobileNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { initializePaystackPayment } from "@/utils/paystack";
-import ServicesMobileNav from "@/components/edura/ServicesMobileNav";
 import {
   ArrowDownLeft,
   ArrowLeft,
@@ -339,7 +339,7 @@ const Wallet = () => {
         </section>
       </main>
 
-      <ServicesMobileNav activeTab="wallet" />
+      <MobileNav activeTab="services" onTabChange={() => {}} />
     </div>
   );
 };

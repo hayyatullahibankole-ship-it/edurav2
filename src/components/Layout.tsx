@@ -36,25 +36,24 @@ const Layout = ({
   // Determine active tab based on current route
   const getActiveTab = () => {
     if (location.pathname === "/dashboard" || location.pathname === "/mobile-home") return "dashboard";
-    if (location.pathname === "/study-hub") return "study";
-    if (location.pathname === "/forum") return "forum";
+    if (location.pathname === "/study-hub" || location.pathname === "/dashboard") return "cbt";
+    if (location.pathname === "/services" || location.pathname === "/wallet") return "services";
     if (
       location.pathname.includes("profile") ||
       location.search.includes("tab=profile") ||
       location.search.includes("tab=settings")
     )
       return "profile";
-    return "";
+    return "dashboard";
   };
 
   const handleTabChange = (tab: string) => {
     if (tab === "dashboard") {
-      // For app users, go to mobile-home, otherwise dashboard
       navigate(isInstalledApp || isNative ? "/mobile-home" : "/dashboard");
-    } else if (tab === "study") {
-      navigate("/study-hub");
-    } else if (tab === "forum") {
-      navigate("/forum");
+    } else if (tab === "cbt") {
+      navigate("/dashboard");
+    } else if (tab === "services") {
+      navigate("/services");
     } else if (tab === "profile") {
       navigate("/dashboard?tab=profile");
     }

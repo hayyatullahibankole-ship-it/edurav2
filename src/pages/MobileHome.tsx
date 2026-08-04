@@ -35,7 +35,8 @@ import {
   Calendar,
   Video,
   Gift,
-  Loader2
+  Loader2,
+  MessageSquare
 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -455,6 +456,7 @@ const MobileHome = () => {
               { label: 'Challenge Arena', icon: Trophy, path: '/challenge-arena' },
               { label: 'Analytics', icon: TrendingUp, path: '/performance-report' },
               { label: 'Resources', icon: Library, path: '/resources' },
+              { label: 'Forum', icon: MessageSquare, path: '/forum' },
               { label: 'Referral', icon: Gift, path: '/referral-program' },
               { label: 'Ebook Library', icon: BookOpen, path: '/ebooks' },
             ].map((action) => (
