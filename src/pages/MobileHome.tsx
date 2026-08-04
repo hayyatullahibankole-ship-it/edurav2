@@ -4,6 +4,7 @@ import { SideSwitcher } from '@/components/edura/SideSwitcher';
 
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useWallet } from '@/hooks/useWallet';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ import {
   FileText,
   TrendingUp,
   Calculator,
+  Wallet,
   Beaker,
   Microscope,
   Globe,
@@ -51,9 +53,12 @@ import { InstallRequiredModal } from '@/components/InstallRequiredModal';
 import eduraLogo from '@/assets/edura-logo.png';
 import { DashboardThemeMenu } from '@/components/DashboardThemeMenu';
 
+const naira = (value: number) => `₦${Number(value || 0).toLocaleString('en-NG')}`;
+
 const MobileHome = () => {
   const { user, userProfile, signOut } = useAuth();
   const { isPremium, hasFreePromoAccess, loading: subscriptionLoading } = useSubscription();
+  const { balance: walletBalance, loading: walletLoading } = useWallet();
   const { isInstalledApp } = useInstalledApp();
   //usePushNotifications();
   const navigate = useNavigate();
@@ -333,6 +338,27 @@ const MobileHome = () => {
           </div>
           <SideSwitcher compact />
         </div>
+
+        <Card className="border bg-gradient-to-br from-primary/10 to-background">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="rounded-xl border bg-background p-2.5">
+                  <Wallet className="h-4 w-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Wallet</p>
+                  <p className="mt-1 text-lg font-bold truncate">
+                    {walletLoading ? 'Loading…' : naira(walletBalance)}
+                  </p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => navigate('/wallet')}>
+                Fund
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Stats */}
         <section className="grid grid-cols-3 gap-3">

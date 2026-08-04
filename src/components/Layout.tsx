@@ -61,7 +61,8 @@ const Layout = ({
   };
 
   // ✅ Mobile Navigation: show ONLY for the app (installed PWA OR native app)
-  const shouldShowMobileNav = showMobileNav && (isInstalledApp || isNative);
+  const isAuthRoute = location.pathname === "/auth";
+  const shouldShowMobileNav = showMobileNav && !isAuthRoute && (isInstalledApp || isNative);
 
   return (
     <div className="min-h-screen bg-background">
