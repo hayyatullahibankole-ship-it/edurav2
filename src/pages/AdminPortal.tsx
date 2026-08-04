@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -226,36 +226,36 @@ export default function AdminPortal() {
   if (!isAdmin) return null;
 
   const SidebarBody = () => (
-    <div className="flex flex-col h-full bg-slate-950 border-r border-slate-800">
+    <div className="flex h-full w-full flex-col bg-white border-r border-slate-200">
       {/* Brand */}
-      <div className="px-5 py-5 border-b border-slate-800 flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-md bg-white grid place-items-center">
-          <Shield className="w-4 h-4 text-slate-950" />
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200">
+        <div className="h-9 w-9 rounded-lg bg-slate-900 grid place-items-center">
+          <Shield className="h-4 w-4 text-white" />
         </div>
-        <div>
-          <p className="text-sm font-bold text-white tracking-tight">Edura Admin</p>
-          <p className="text-[10px] text-slate-500 uppercase tracking-widest">Control Center</p>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-slate-900 leading-tight">Edura Admin</p>
+          <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-slate-400">Control Center</p>
         </div>
       </div>
 
       {/* Search */}
-      <div className="p-3 border-b border-slate-800">
+      <div className="px-3 py-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search..."
-            className="pl-8 h-9 bg-slate-900 border-slate-800 text-slate-200 placeholder:text-slate-600 text-sm focus-visible:ring-slate-700"
+            placeholder="Jump to section"
+            className="h-9 rounded-lg border-slate-200 bg-slate-50 pl-8 text-sm text-slate-800 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-slate-300"
           />
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-3">
+      <nav className="flex-1 overflow-y-auto px-3 pb-4">
         {filteredNav.map((section) => (
-          <div key={section.label} className="mb-4">
-            <p className="px-2 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+          <div key={section.label} className="mb-5">
+            <p className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -266,13 +266,13 @@ export default function AdminPortal() {
                   <button
                     key={item.key}
                     onClick={() => { setActiveKey(item.key); setMobileOpen(false); }}
-                    className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors ${
+                    className={`group relative flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors ${
                       active
-                        ? 'bg-slate-800 text-white font-medium'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                        ? 'bg-slate-900 text-white font-medium'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                     }`}
                   >
-                    <Icon className="w-4 h-4 shrink-0" />
+                    <Icon className={`h-4 w-4 shrink-0 ${active ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
                     <span className="truncate">{item.label}</span>
                   </button>
                 );
@@ -280,25 +280,28 @@ export default function AdminPortal() {
             </div>
           </div>
         ))}
+        {filteredNav.length === 0 && (
+          <p className="px-2 py-6 text-center text-xs text-slate-400">No sections match “{search}”</p>
+        )}
       </nav>
 
       {/* User */}
-      <div className="border-t border-slate-800 p-3">
-        <div className="flex items-center gap-2.5 px-2 py-2">
-          <div className="w-8 h-8 rounded-full bg-slate-800 grid place-items-center text-xs font-bold text-white">
+      <div className="border-t border-slate-200 p-3">
+        <div className="flex items-center gap-2.5 rounded-lg bg-slate-50 px-2.5 py-2">
+          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-slate-900 text-xs font-semibold text-white">
             {user?.email?.[0]?.toUpperCase() || 'A'}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-white truncate">{user?.email}</p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-medium text-slate-900">{user?.email}</p>
             <p className="text-[10px] text-slate-500">Administrator</p>
           </div>
           <Button
             onClick={handleSignOut}
             size="icon"
             variant="ghost"
-            className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800"
+            className="h-8 w-8 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -306,49 +309,50 @@ export default function AdminPortal() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-100 flex">
+    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-slate-50">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 shrink-0 sticky top-0 h-screen">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 lg:flex">
         <SidebarBody />
       </aside>
 
       {/* Mobile sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="p-0 w-72 border-0 bg-slate-950">
+        <SheetContent side="left" className="w-[85vw] max-w-xs border-0 bg-white p-0">
           <SidebarBody />
         </SheetContent>
       </Sheet>
 
       {/* Main */}
-      <main className="flex-1 min-w-0 flex flex-col">
+      <main className="flex min-w-0 flex-1 flex-col">
         {/* Topbar */}
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
-          <div className="px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9">
-                    <Menu className="w-5 h-5" />
-                  </Button>
-                </SheetTrigger>
-              </Sheet>
-              <div className="flex items-center gap-1.5 text-sm min-w-0">
-                <span className="text-slate-500 hidden sm:inline">{activeMeta.section}</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400 hidden sm:inline" />
-                <span className="font-semibold text-slate-900 truncate">{activeMeta.item.label}</span>
+        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+          <div className="flex h-14 items-center justify-between gap-3 px-3 sm:px-6">
+            <div className="flex min-w-0 items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 lg:hidden"
+                onClick={() => setMobileOpen(true)}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+              <div className="flex min-w-0 items-center gap-1.5 text-sm">
+                <span className="hidden text-slate-400 sm:inline">{activeMeta.section}</span>
+                <ChevronRight className="hidden h-3.5 w-3.5 text-slate-300 sm:inline" />
+                <span className="truncate font-semibold text-slate-900">{activeMeta.item.label}</span>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 text-[10px] font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
-                Online
+            <div className="flex shrink-0 items-center gap-2">
+              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-[10px] font-semibold text-emerald-700">
+                <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Live
               </Badge>
             </div>
           </div>
         </header>
 
         {/* Content */}
-        <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
+        <div className="mx-auto w-full min-w-0 max-w-[1500px] flex-1 overflow-x-hidden p-3 sm:p-6 lg:p-8">
           {renderContent()}
         </div>
       </main>
@@ -356,78 +360,76 @@ export default function AdminPortal() {
   );
 }
 
-/* ====================== Dashboard Overview (clean, no gradients) ====================== */
+/* ====================== Dashboard Overview (flat, no gradients) ====================== */
 function DashboardOverview({ stats, activities }: { stats: any; activities: any[] }) {
   const metrics = [
-    { label: 'Total Users', value: stats.totalUsers, icon: Users, accent: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Active Exams', value: stats.activeExams, icon: BookOpen, accent: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Attempts (recent)', value: stats.totalAttempts, icon: Activity, accent: 'text-violet-600', bg: 'bg-violet-50' },
-    { label: 'Security Alerts', value: stats.suspiciousActivities, icon: AlertTriangle, accent: 'text-rose-600', bg: 'bg-rose-50' },
+    { label: 'Total Users', value: stats.totalUsers, icon: Users },
+    { label: 'Active Exams', value: stats.activeExams, icon: BookOpen },
+    { label: 'Recent Attempts', value: stats.totalAttempts, icon: Activity },
+    { label: 'Security Alerts', value: stats.suspiciousActivities, icon: AlertTriangle, alert: true },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">A quick look at your platform health.</p>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">Dashboard</h1>
+        <p className="mt-1 text-sm text-slate-500">A quick look at your platform health.</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {metrics.map((m) => {
           const Icon = m.icon;
           return (
-            <Card key={m.label} className="border-slate-200 shadow-none hover:border-slate-300 transition-colors">
-              <CardContent className="p-4 md:p-5">
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{m.label}</p>
-                  <div className={`w-8 h-8 rounded-md ${m.bg} grid place-items-center`}>
-                    <Icon className={`w-4 h-4 ${m.accent}`} />
-                  </div>
+            <div
+              key={m.label}
+              className="rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-slate-300"
+            >
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <p className="truncate text-[11px] font-medium uppercase tracking-wide text-slate-500">{m.label}</p>
+                <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-md ${m.alert ? 'bg-rose-50' : 'bg-slate-100'}`}>
+                  <Icon className={`h-3.5 w-3.5 ${m.alert ? 'text-rose-600' : 'text-slate-600'}`} />
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-slate-900 tabular-nums">{m.value}</p>
-              </CardContent>
-            </Card>
+              </div>
+              <p className="text-2xl font-semibold tabular-nums text-slate-900 sm:text-3xl">{m.value}</p>
+            </div>
           );
         })}
       </div>
 
-      <Card className="border-slate-200 shadow-none">
-        <CardContent className="p-0">
-          <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900">Recent Activity</h3>
-              <p className="text-xs text-slate-500">Latest exam attempts across the platform</p>
-            </div>
-          </div>
-          <div className="divide-y divide-slate-100">
-            {activities.length === 0 && (
-              <div className="px-5 py-8 text-center text-sm text-slate-500">No recent activity</div>
-            )}
-            {activities.map((a: any) => (
-              <div key={a.id} className="px-5 py-3 flex items-center justify-between gap-3 hover:bg-slate-50">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-slate-100 grid place-items-center text-xs font-semibold text-slate-700 shrink-0">
-                    {a.users?.first_name?.[0]?.toUpperCase() || 'U'}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm text-slate-900 truncate">
-                      <span className="font-medium">{a.users?.first_name} {a.users?.last_name}</span>
-                      <span className="text-slate-500"> attempted </span>
-                      <span className="font-medium">{a.exams?.title || 'Exam'}</span>
-                    </p>
-                    <p className="text-xs text-slate-500">{new Date(a.created_at).toLocaleString()}</p>
-                  </div>
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div className="border-b border-slate-200 px-4 py-3.5 sm:px-5">
+          <h3 className="text-sm font-semibold text-slate-900">Recent Activity</h3>
+          <p className="text-xs text-slate-500">Latest exam attempts across the platform</p>
+        </div>
+        <div className="divide-y divide-slate-100">
+          {activities.length === 0 && (
+            <div className="px-5 py-8 text-center text-sm text-slate-500">No recent activity</div>
+          )}
+          {activities.map((a: any) => (
+            <div key={a.id} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50 sm:px-5">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
+                  {a.users?.first_name?.[0]?.toUpperCase() || 'U'}
                 </div>
-                {a.suspicious_activity_count > 0 && (
-                  <Badge variant="outline" className="border-rose-200 bg-rose-50 text-rose-700 text-[10px]">
-                    Flagged
-                  </Badge>
-                )}
+                <div className="min-w-0">
+                  <p className="truncate text-sm text-slate-900">
+                    <span className="font-medium">{a.users?.first_name} {a.users?.last_name}</span>
+                    <span className="text-slate-500"> attempted </span>
+                    <span className="font-medium">{a.exams?.title || 'Exam'}</span>
+                  </p>
+                  <p className="text-xs text-slate-500">{new Date(a.created_at).toLocaleString()}</p>
+                </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              {a.suspicious_activity_count > 0 && (
+                <Badge variant="outline" className="shrink-0 border-rose-200 bg-rose-50 text-[10px] text-rose-700">
+                  Flagged
+                </Badge>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
+

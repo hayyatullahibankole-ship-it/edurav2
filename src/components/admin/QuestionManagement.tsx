@@ -438,80 +438,78 @@ export default function QuestionManagement() {
   };
 
   const renderQuestionList = (list: Question[]) => (
-    <Card>
-      <CardContent className="p-3 sm:p-6">
-        <ScrollArea className="h-[600px]">
-          <div className="space-y-4 sm:space-y-6 pr-2 sm:pr-4">
+    <Card className="overflow-hidden">
+      <CardContent className="p-2 sm:p-4">
+        <div className="max-h-[600px] overflow-y-auto">
+          <div className="space-y-3 sm:space-y-4 sm:pr-2">
             {list.map((question) => (
-              <div key={question.id} className="flex flex-col sm:flex-row items-stretch sm:items-start sm:justify-between gap-3 p-4 sm:p-6 bg-card rounded-lg border shadow-sm hover:shadow-md transition-shadow">
-
-                <div className="flex-1 min-w-0 space-y-4">
-                  <div className="flex items-center gap-2 flex-wrap">
-
-                    <Badge className={`${getDifficultyColor(question.difficulty_level)} text-white`}>
-                      {getDifficultyLabel(question.difficulty_level)}
-                    </Badge>
-                    <Badge variant="outline">
-                      {question.type.replace('_', ' ')}
-                    </Badge>
-                    <Badge variant="secondary">
-                      {subjects.find(s => s.id === question.subject_id)?.name || 'Unknown'}
-                    </Badge>
-                    {!question.is_active && (
-                      <Badge variant="destructive">Inactive</Badge>
-                    )}
-                  </div>
-                  <div className="py-2">
-                    <MathRenderer 
-                      content={question.question_text}
-                      className="font-medium text-lg leading-relaxed"
-                    />
-                  </div>
-                  <div className="flex items-center gap-x-4 gap-y-1 flex-wrap text-sm text-muted-foreground pt-2 border-t">
-                    <span>{question.points} point{question.points !== 1 ? 's' : ''}</span>
-                    <span>{new Date(question.created_at).toLocaleDateString()}</span>
-                    {question.tags && Array.isArray(question.tags) && question.tags.length > 0 && (
-                      <span className="break-all">Tags: {question.tags.join(', ')}</span>
-                    )}
-                  </div>
+              <div key={question.id} className="rounded-lg border bg-card p-3 sm:p-5">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Badge className={`${getDifficultyColor(question.difficulty_level)} text-white text-[10px]`}>
+                    {getDifficultyLabel(question.difficulty_level)}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px]">
+                    {question.type.replace('_', ' ')}
+                  </Badge>
+                  <Badge variant="secondary" className="text-[10px] max-w-[45vw] truncate sm:max-w-none">
+                    {subjects.find(s => s.id === question.subject_id)?.name || 'Unknown'}
+                  </Badge>
+                  {!question.is_active && (
+                    <Badge variant="destructive" className="text-[10px]">Inactive</Badge>
+                  )}
                 </div>
 
-                <div className="flex items-center gap-1 flex-wrap sm:ml-4 border-t sm:border-t-0 pt-2 sm:pt-0">
+                <div className="mt-3 min-w-0 overflow-x-auto break-words">
+                  <MathRenderer
+                    content={question.question_text}
+                    className="font-medium text-sm sm:text-base leading-relaxed"
+                  />
+                </div>
 
-                  <Button variant="ghost" size="sm" onClick={() => handleViewQuestion(question)}>
+                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-2 text-xs text-muted-foreground">
+                  <span>{question.points} point{question.points !== 1 ? 's' : ''}</span>
+                  <span>{new Date(question.created_at).toLocaleDateString()}</span>
+                  {question.tags && Array.isArray(question.tags) && question.tags.length > 0 && (
+                    <span className="break-all">Tags: {question.tags.join(', ')}</span>
+                  )}
+                </div>
+
+                <div className="mt-2 grid grid-cols-5 gap-1 border-t pt-2 sm:flex sm:justify-end">
+                  <Button variant="ghost" size="sm" className="h-9 w-full sm:w-9 p-0" onClick={() => handleViewQuestion(question)}>
                     <Eye className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleEditQuestion(question)}>
+                  <Button variant="ghost" size="sm" className="h-9 w-full sm:w-9 p-0" onClick={() => handleEditQuestion(question)}>
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDuplicateQuestion(question)}>
+                  <Button variant="ghost" size="sm" className="h-9 w-full sm:w-9 p-0" onClick={() => handleDuplicateQuestion(question)}>
                     <Copy className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleViewAnalytics(question)}>
+                  <Button variant="ghost" size="sm" className="h-9 w-full sm:w-9 p-0" onClick={() => handleViewAnalytics(question)}>
                     <BarChart3 className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteQuestion(question.id)}>
+                  <Button variant="ghost" size="sm" className="h-9 w-full sm:w-9 p-0" onClick={() => handleDeleteQuestion(question.id)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
             ))}
           </div>
-        </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );
 
+
   return (
-    <ScrollArea className="h-[calc(100vh-120px)]">
-      <div className="space-y-6 p-3 sm:p-6 max-w-full overflow-x-hidden">
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="space-y-5 max-w-full">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold">Question Bank Management</h2>
             <p className="text-sm text-muted-foreground">Create, upload, and manage examination questions</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:flex sm:items-center gap-2 sm:gap-4 sm:flex-wrap [&_button]:w-full sm:[&_button]:w-auto">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:flex-wrap [&_button]:w-full [&_button]:text-xs sm:[&_button]:text-sm sm:[&_button]:w-auto">
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -567,13 +565,13 @@ export default function QuestionManagement() {
                   Create Single Question
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[700px]">
+              <DialogContent className="w-[calc(100vw-2rem)] max-w-[700px] sm:w-full">
                 <DialogHeader>
                   <DialogTitle>Create New Question</DialogTitle>
                 </DialogHeader>
                 <ScrollArea className="max-h-[70vh]">
                   <div className="space-y-4 p-1">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="subject">Subject</Label>
                         <Select value={newQuestion.subject_id} onValueChange={(value) => setNewQuestion({...newQuestion, subject_id: value})}>
@@ -657,7 +655,7 @@ export default function QuestionManagement() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="difficulty">Difficulty Level</Label>
                         <Select value={newQuestion.difficulty_level.toString()} onValueChange={(value) => setNewQuestion({...newQuestion, difficulty_level: parseInt(value)})}>
@@ -700,39 +698,39 @@ export default function QuestionManagement() {
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Questions</p>
+                  <p className="text-xs text-muted-foreground">Total Questions</p>
                   <p className="text-2xl font-bold text-primary">{totalCount}</p>
                 </div>
-                <BookOpen className="w-8 h-8 text-primary" />
+                <BookOpen className="w-6 h-6 shrink-0 text-primary" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm text-muted-foreground">Filtered Results</p>
+                  <p className="text-xs text-muted-foreground">Filtered Results</p>
                   <p className="text-2xl font-bold text-accent">{activeQuestions.length}</p>
                 </div>
-                <CheckCircle className="w-8 h-8 text-accent" />
+                <CheckCircle className="w-6 h-6 shrink-0 text-accent" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Subjects</p>
+                  <p className="text-xs text-muted-foreground">Active Subjects</p>
                   <p className="text-2xl font-bold text-foreground">{subjects.length}</p>
                 </div>
-                <BookOpen className="w-8 h-8 text-primary" />
+                <BookOpen className="w-6 h-6 shrink-0 text-primary" />
               </div>
             </CardContent>
           </Card>
@@ -744,7 +742,7 @@ export default function QuestionManagement() {
             <CardTitle>Questions by Subject (Database Totals)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
               {subjects.map(subject => {
                 const subjectQuestions = questions.filter(q => q.subject_id === subject.id);
                 return (
@@ -922,7 +920,7 @@ export default function QuestionManagement() {
 
         {/* View Question Modal */}
         <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="w-[calc(100vw-2rem)] max-w-2xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>View Question</DialogTitle>
             </DialogHeader>
@@ -935,7 +933,7 @@ export default function QuestionManagement() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium">Type</Label>
                     <p className="mt-1 text-sm">{selectedQuestion.type}</p>
@@ -983,13 +981,13 @@ export default function QuestionManagement() {
             resetNewQuestion();
           }
         }}>
-          <DialogContent className="sm:max-w-[700px]">
+          <DialogContent className="w-[calc(100vw-2rem)] max-w-[700px] sm:w-full">
             <DialogHeader>
               <DialogTitle>Edit Question</DialogTitle>
             </DialogHeader>
             <ScrollArea className="max-h-[70vh]">
               <div className="space-y-4 p-1">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="subject">Subject</Label>
                     <Select value={newQuestion.subject_id} onValueChange={(value) => setNewQuestion({...newQuestion, subject_id: value})}>
@@ -1089,7 +1087,7 @@ export default function QuestionManagement() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="difficulty">Difficulty Level</Label>
                     <Select value={newQuestion.difficulty_level.toString()} onValueChange={(value) => setNewQuestion({...newQuestion, difficulty_level: parseInt(value)})}>
@@ -1198,6 +1196,6 @@ export default function QuestionManagement() {
           </DialogContent>
         </Dialog>
       </div>
-    </ScrollArea>
+    </div>
   );
 }
