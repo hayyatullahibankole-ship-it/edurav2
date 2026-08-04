@@ -8,7 +8,7 @@ const EVENT = "edura-app-side-change";
 export const readAppSide = (): AppSide | null => {
   try {
     const value = localStorage.getItem(STORAGE_KEY);
-    return value === "cbt" || value === "services" || value === "campus" ? value : null;
+    return value === "cbt" || value === "services" ? value : null;
   } catch {
     return null;
   }

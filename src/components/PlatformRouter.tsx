@@ -71,21 +71,35 @@ const CampusTools = lazy(() => import("@/pages/campus/CampusTools"));
 const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
   const { side } = useAppSide();
   const { stage, isCampus, loading } = useAcademicStage();
-  const isMobile = useIsMobile();
 
   // Journey first: no stage yet → onboarding
   if (loading) return <LoadingAnimation />;
   if (!stage) return <Navigate to="/campus/journey" replace />;
 
-  // Undergraduates & graduates land on Campus
-  if (isCampus && side !== "cbt" && side !== "services") return <CampusHome />;
+  // Higher institution students live on Campus only
+  if (isCampus) return <Navigate to="/campus" replace />;
 
   if (side === null) return <Navigate to="/choose" replace />;
   if (side === "services") return <ServicesHome />;
-  if (side === "campus") return isCampus ? <CampusHome /> : <Navigate to="/campus/journey" replace />;
-  return isInstalledApp || isMobile
-    ? <MobileHome />
-    : <Layout showNavbar={false}><Dashboard /></Layout>;
+  return <Layout showNavbar={false}><Dashboard /></Layout>;
+};
+
+/** Campus routes are for undergraduates & graduates only */
+const CampusOnly = ({ children }: { children: JSX.Element }) => {
+  const { stage, isCampus, loading } = useAcademicStage();
+  if (loading) return <LoadingAnimation />;
+  if (!stage) return <Navigate to="/campus/journey" replace />;
+  if (!isCampus) return <Navigate to="/dashboard" replace />;
+  return children;
+};
+
+/** CBT & Services routes are for SS3 / WAEC / JAMB candidates only */
+const CoreOnly = ({ children }: { children: JSX.Element }) => {
+  const { stage, isCampus, loading } = useAcademicStage();
+  if (loading) return <LoadingAnimation />;
+  if (!stage) return <Navigate to="/campus/journey" replace />;
+  if (isCampus) return <Navigate to="/campus" replace />;
+  return children;
 };
 
 
