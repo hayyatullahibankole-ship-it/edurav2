@@ -226,7 +226,10 @@ export default function AuthForm() {
               last_name: signupData.lastName,
               phone: signupData.phone,
               exam_type: signupData.examType,
-              current_class: signupData.currentClass
+              current_class: signupData.currentClass,
+              academic_stage: signupData.academicStage,
+              institution_name: signupData.institutionName,
+              study_level: signupData.studyLevel
             }
           }
         });
