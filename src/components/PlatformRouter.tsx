@@ -268,34 +268,35 @@ const EduraRoutes = () => {
         </ProtectedRoute>
       } />
 
-      <Route path="/services" element={user ? <ServicesHome /> : <Layout><ServicesLanding /></Layout>} />
+      <Route path="/services" element={user ? <CoreOnly><ServicesHome /></CoreOnly> : <Layout><ServicesLanding /></Layout>} />
       <Route path="/admissions" element={<Navigate to="/services?provider=admission" replace />} />
       <Route path="/campus" element={
         <ProtectedRoute>
-          <CampusHome />
+          <CampusOnly><CampusHome /></CampusOnly>
         </ProtectedRoute>
       } />
       <Route path="/campus/academics" element={
         <ProtectedRoute>
-          <CampusAcademics />
+          <CampusOnly><CampusAcademics /></CampusOnly>
         </ProtectedRoute>
       } />
       <Route path="/campus/tools" element={
         <ProtectedRoute>
-          <CampusTools />
+          <CampusOnly><CampusTools /></CampusOnly>
         </ProtectedRoute>
       } />
 
       <Route path="/campus/projects" element={
         <ProtectedRoute>
-          <CampusProjects />
+          <CampusOnly><CampusProjects /></CampusOnly>
         </ProtectedRoute>
       } />
       <Route path="/campus/opportunities" element={
         <ProtectedRoute>
-          <CampusOpportunities />
+          <CampusOnly><CampusOpportunities /></CampusOnly>
         </ProtectedRoute>
       } />
+
       <Route path="/campus/journey" element={
         <ProtectedRoute>
           <CampusJourney />
