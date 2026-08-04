@@ -1,12 +1,12 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { GraduationCap, Briefcase, School, ArrowRight, Check } from "lucide-react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { GraduationCap, Briefcase, ArrowRight, Check, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useAppSide, type AppSide } from "@/hooks/useAppSide";
-import { useAuth } from "@/hooks/useAuth";
+import { useAcademicStage } from "@/hooks/useAcademicStage";
+import { stageLabel } from "@/lib/academicStages";
 import eduraLogo from "@/assets/edura-logo.png";
-import { readCachedStage } from "@/hooks/useAcademicStage";
-import { isCampusStage } from "@/lib/academicStages";
 
 const SIDES: {
   key: AppSide;
@@ -37,59 +37,55 @@ const SIDES: {
       "Wallet, requests and scholarships",
     ],
   },
-  {
-    key: "campus",
-    title: "Edura Campus",
-    tagline: "For university & polytechnic students",
-    icon: School,
-    points: [
-      "Course, note and past question organiser",
-      "Final year project hub with milestones",
-      "Scholarships, internships and jobs",
-    ],
-  },
 ];
 
 const ChooseSide = () => {
   const { chooseSide, side } = useAppSide();
+  const { stage, isCampus, loading } = useAcademicStage();
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   useEffect(() => {
     document.title = "Choose your Edura experience";
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Journey first — no stage means onboarding isn't done
+  if (!stage) return <Navigate to="/campus/journey" replace />;
+  // Higher institution students belong on Campus
+  if (isCampus) return <Navigate to="/campus" replace />;
+
   const select = (next: AppSide) => {
     chooseSide(next);
-    if (next === "campus") {
-      navigate(isCampusStage(readCachedStage()) ? "/campus" : "/campus/journey", { replace: true });
-      return;
-    }
     navigate("/dashboard", { replace: true });
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-3">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-3">
           <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
-          <span className="text-sm text-muted-foreground hidden sm:inline">
-            Nigeria's all-in-one student platform
-          </span>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/campus/journey")}>
+            {stageLabel(stage)} · Change
+          </Button>
         </div>
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-10 sm:py-16">
-        <div className="max-w-3xl mx-auto text-center mb-8 sm:mb-12">
-          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">
-            Where do you want to start{user?.email ? "" : " today"}?
-          </h1>
+        <div className="max-w-2xl mx-auto text-center mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Where do you want to start?</h1>
           <p className="mt-3 text-muted-foreground text-sm sm:text-base">
-            Edura has three sides. Pick one to continue — you can switch anytime from your dashboard.
+            Based on your journey, these two are for you. You can switch anytime from your dashboard.
           </p>
         </div>
 
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-3 max-w-5xl mx-auto">
+        <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 max-w-3xl mx-auto">
           {SIDES.map((item) => {
             const Icon = item.icon;
             const active = side === item.key;
