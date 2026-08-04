@@ -1,7 +1,9 @@
-import { GraduationCap, Briefcase } from "lucide-react";
+import { GraduationCap, Briefcase, School } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppSide, type AppSide } from "@/hooks/useAppSide";
 import { cn } from "@/lib/utils";
+import { readCachedStage } from "@/hooks/useAcademicStage";
+import { isCampusStage } from "@/lib/academicStages";
 
 interface SideSwitcherProps {
   className?: string;
@@ -12,6 +14,7 @@ interface SideSwitcherProps {
 const OPTIONS: { key: AppSide; label: string; short: string; icon: typeof GraduationCap; to: string }[] = [
   { key: "cbt", label: "CBT Practice", short: "CBT", icon: GraduationCap, to: "/dashboard" },
   { key: "services", label: "Services", short: "Services", icon: Briefcase, to: "/dashboard" },
+  { key: "campus", label: "Campus", short: "Campus", icon: School, to: "/campus" },
 ];
 
 export const SideSwitcher = ({ className, compact }: SideSwitcherProps) => {
@@ -27,7 +30,7 @@ export const SideSwitcher = ({ className, compact }: SideSwitcherProps) => {
       role="tablist"
       aria-label="Switch Edura side"
     >
-      {OPTIONS.map((option) => {
+      {OPTIONS.filter((o) => o.key !== "campus" || isCampusStage(readCachedStage())).map((option) => {
         const Icon = option.icon;
         const active = side === option.key;
         return (
