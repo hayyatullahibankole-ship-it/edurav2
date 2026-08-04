@@ -195,6 +195,9 @@ export default function MobileAuthForm() {
           firstName: '',
           lastName: '',
           email: '',
+          academicStage: '',
+          institutionName: '',
+          studyLevel: '',
           password: '',
           confirmPassword: ''
         });
