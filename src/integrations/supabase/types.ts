@@ -858,6 +858,48 @@ export type Database = {
           },
         ]
       }
+      campus_courses: {
+        Row: {
+          code: string
+          color: string
+          created_at: string
+          id: string
+          lecturer: string | null
+          semester: string
+          session: string | null
+          title: string
+          units: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          color?: string
+          created_at?: string
+          id?: string
+          lecturer?: string | null
+          semester?: string
+          session?: string | null
+          title: string
+          units?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          color?: string
+          created_at?: string
+          id?: string
+          lecturer?: string | null
+          semester?: string
+          session?: string | null
+          title?: string
+          units?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       campus_hub_consultations: {
         Row: {
           created_at: string
@@ -927,6 +969,239 @@ export type Database = {
           level?: string | null
           school?: string | null
           whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      campus_materials: {
+        Row: {
+          course_code: string | null
+          course_id: string | null
+          created_at: string
+          department: string | null
+          description: string | null
+          download_count: number
+          file_name: string | null
+          file_size: number | null
+          file_url: string | null
+          id: string
+          institution_id: string | null
+          is_library: boolean
+          is_published: boolean
+          kind: string
+          level: string | null
+          price: number
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          course_code?: string | null
+          course_id?: string | null
+          created_at?: string
+          department?: string | null
+          description?: string | null
+          download_count?: number
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          institution_id?: string | null
+          is_library?: boolean
+          is_published?: boolean
+          kind?: string
+          level?: string | null
+          price?: number
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          course_code?: string | null
+          course_id?: string | null
+          created_at?: string
+          department?: string | null
+          description?: string | null
+          download_count?: number
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          institution_id?: string | null
+          is_library?: boolean
+          is_published?: boolean
+          kind?: string
+          level?: string | null
+          price?: number
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campus_materials_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "campus_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campus_materials_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campus_opportunities: {
+        Row: {
+          amount: string | null
+          body: string | null
+          category: string
+          created_at: string
+          deadline: string | null
+          external_url: string | null
+          field: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean
+          is_published: boolean
+          level: string | null
+          location: string | null
+          organisation: string | null
+          summary: string | null
+          title: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          amount?: string | null
+          body?: string | null
+          category?: string
+          created_at?: string
+          deadline?: string | null
+          external_url?: string | null
+          field?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          level?: string | null
+          location?: string | null
+          organisation?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          amount?: string | null
+          body?: string | null
+          category?: string
+          created_at?: string
+          deadline?: string | null
+          external_url?: string | null
+          field?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          level?: string | null
+          location?: string | null
+          organisation?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
+      campus_project_milestones: {
+        Row: {
+          created_at: string
+          due_date: string | null
+          id: string
+          is_done: boolean
+          position: number
+          project_id: string
+          supervisor_feedback: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          is_done?: boolean
+          position?: number
+          project_id: string
+          supervisor_feedback?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          is_done?: boolean
+          position?: number
+          project_id?: string
+          supervisor_feedback?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campus_project_milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "campus_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campus_projects: {
+        Row: {
+          created_at: string
+          deadline: string | null
+          department: string | null
+          id: string
+          notes: string | null
+          stage: string
+          supervisor: string | null
+          title: string
+          topic: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deadline?: string | null
+          department?: string | null
+          id?: string
+          notes?: string | null
+          stage?: string
+          supervisor?: string | null
+          title: string
+          topic?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deadline?: string | null
+          department?: string | null
+          id?: string
+          notes?: string | null
+          stage?: string
+          supervisor?: string | null
+          title?: string
+          topic?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -4280,6 +4555,7 @@ export type Database = {
       }
       users: {
         Row: {
+          academic_stage: string | null
           active_session_token: string | null
           address: string | null
           admin_verified_at: string | null
@@ -4287,25 +4563,33 @@ export type Database = {
           country: string | null
           created_at: string | null
           date_of_birth: string | null
+          department: string | null
           device_fingerprint: string | null
           email: string
+          faculty: string | null
           first_name: string | null
           free_access_expiry_date: string | null
           free_practice_access: boolean | null
           id: string
+          institution_id: string | null
+          institution_name: string | null
           is_suspended: boolean | null
           is_verified: boolean | null
           last_login_at: string | null
           last_login_ip: unknown
           last_name: string | null
+          matric_number: string | null
           phone: string | null
+          previous_stage: string | null
           profile_image_url: string | null
           state: string | null
+          study_level: string | null
           two_fa_enabled: boolean | null
           two_fa_secret: string | null
           updated_at: string | null
         }
         Insert: {
+          academic_stage?: string | null
           active_session_token?: string | null
           address?: string | null
           admin_verified_at?: string | null
@@ -4313,25 +4597,33 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          department?: string | null
           device_fingerprint?: string | null
           email: string
+          faculty?: string | null
           first_name?: string | null
           free_access_expiry_date?: string | null
           free_practice_access?: boolean | null
           id?: string
+          institution_id?: string | null
+          institution_name?: string | null
           is_suspended?: boolean | null
           is_verified?: boolean | null
           last_login_at?: string | null
           last_login_ip?: unknown
           last_name?: string | null
+          matric_number?: string | null
           phone?: string | null
+          previous_stage?: string | null
           profile_image_url?: string | null
           state?: string | null
+          study_level?: string | null
           two_fa_enabled?: boolean | null
           two_fa_secret?: string | null
           updated_at?: string | null
         }
         Update: {
+          academic_stage?: string | null
           active_session_token?: string | null
           address?: string | null
           admin_verified_at?: string | null
@@ -4339,25 +4631,40 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          department?: string | null
           device_fingerprint?: string | null
           email?: string
+          faculty?: string | null
           first_name?: string | null
           free_access_expiry_date?: string | null
           free_practice_access?: boolean | null
           id?: string
+          institution_id?: string | null
+          institution_name?: string | null
           is_suspended?: boolean | null
           is_verified?: boolean | null
           last_login_at?: string | null
           last_login_ip?: unknown
           last_name?: string | null
+          matric_number?: string | null
           phone?: string | null
+          previous_stage?: string | null
           profile_image_url?: string | null
           state?: string | null
+          study_level?: string | null
           two_fa_enabled?: boolean | null
           two_fa_secret?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "users_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       video_progress: {
         Row: {
