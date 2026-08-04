@@ -85,6 +85,22 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
   const navigate = useNavigate();
   const items = nav ?? NAV[side];
   const sideMeta = SIDE_META[side];
+  const { signOut } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      toast({ title: "Logging out...", description: "Please wait" });
+      await signOut();
+      window.sessionStorage.clear();
+    } catch (e) {
+      console.error("Logout error", e);
+    } finally {
+      navigate("/auth", { replace: true });
+    }
+  };
+
+
 
   const railLink = (item: ShellNavItem) => (
     <NavLink
