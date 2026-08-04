@@ -501,15 +501,15 @@ export default function QuestionManagement() {
 
 
   return (
-    <ScrollArea className="h-[calc(100vh-120px)]">
-      <div className="space-y-6 p-3 sm:p-6 max-w-full overflow-x-hidden">
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="space-y-5 max-w-full">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold">Question Bank Management</h2>
             <p className="text-sm text-muted-foreground">Create, upload, and manage examination questions</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:flex sm:items-center gap-2 sm:gap-4 sm:flex-wrap [&_button]:w-full sm:[&_button]:w-auto">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:flex-wrap [&_button]:w-full [&_button]:text-xs sm:[&_button]:text-sm sm:[&_button]:w-auto">
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -565,13 +565,13 @@ export default function QuestionManagement() {
                   Create Single Question
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[700px]">
+              <DialogContent className="w-[calc(100vw-2rem)] max-w-[700px] sm:w-full">
                 <DialogHeader>
                   <DialogTitle>Create New Question</DialogTitle>
                 </DialogHeader>
                 <ScrollArea className="max-h-[70vh]">
                   <div className="space-y-4 p-1">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="subject">Subject</Label>
                         <Select value={newQuestion.subject_id} onValueChange={(value) => setNewQuestion({...newQuestion, subject_id: value})}>
@@ -655,7 +655,7 @@ export default function QuestionManagement() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="difficulty">Difficulty Level</Label>
                         <Select value={newQuestion.difficulty_level.toString()} onValueChange={(value) => setNewQuestion({...newQuestion, difficulty_level: parseInt(value)})}>
@@ -698,39 +698,39 @@ export default function QuestionManagement() {
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Questions</p>
+                  <p className="text-xs text-muted-foreground">Total Questions</p>
                   <p className="text-2xl font-bold text-primary">{totalCount}</p>
                 </div>
-                <BookOpen className="w-8 h-8 text-primary" />
+                <BookOpen className="w-6 h-6 shrink-0 text-primary" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm text-muted-foreground">Filtered Results</p>
+                  <p className="text-xs text-muted-foreground">Filtered Results</p>
                   <p className="text-2xl font-bold text-accent">{activeQuestions.length}</p>
                 </div>
-                <CheckCircle className="w-8 h-8 text-accent" />
+                <CheckCircle className="w-6 h-6 shrink-0 text-accent" />
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Subjects</p>
+                  <p className="text-xs text-muted-foreground">Active Subjects</p>
                   <p className="text-2xl font-bold text-foreground">{subjects.length}</p>
                 </div>
-                <BookOpen className="w-8 h-8 text-primary" />
+                <BookOpen className="w-6 h-6 shrink-0 text-primary" />
               </div>
             </CardContent>
           </Card>
@@ -742,7 +742,7 @@ export default function QuestionManagement() {
             <CardTitle>Questions by Subject (Database Totals)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
               {subjects.map(subject => {
                 const subjectQuestions = questions.filter(q => q.subject_id === subject.id);
                 return (
@@ -920,7 +920,7 @@ export default function QuestionManagement() {
 
         {/* View Question Modal */}
         <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="w-[calc(100vw-2rem)] max-w-2xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>View Question</DialogTitle>
             </DialogHeader>
@@ -933,7 +933,7 @@ export default function QuestionManagement() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium">Type</Label>
                     <p className="mt-1 text-sm">{selectedQuestion.type}</p>
@@ -981,13 +981,13 @@ export default function QuestionManagement() {
             resetNewQuestion();
           }
         }}>
-          <DialogContent className="sm:max-w-[700px]">
+          <DialogContent className="w-[calc(100vw-2rem)] max-w-[700px] sm:w-full">
             <DialogHeader>
               <DialogTitle>Edit Question</DialogTitle>
             </DialogHeader>
             <ScrollArea className="max-h-[70vh]">
               <div className="space-y-4 p-1">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="subject">Subject</Label>
                     <Select value={newQuestion.subject_id} onValueChange={(value) => setNewQuestion({...newQuestion, subject_id: value})}>
@@ -1087,7 +1087,7 @@ export default function QuestionManagement() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="difficulty">Difficulty Level</Label>
                     <Select value={newQuestion.difficulty_level.toString()} onValueChange={(value) => setNewQuestion({...newQuestion, difficulty_level: parseInt(value)})}>
@@ -1196,6 +1196,6 @@ export default function QuestionManagement() {
           </DialogContent>
         </Dialog>
       </div>
-    </ScrollArea>
+    </div>
   );
 }
