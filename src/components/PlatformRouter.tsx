@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
 import { useAppSide } from "@/hooks/useAppSide";
+import { useAcademicStage } from "@/hooks/useAcademicStage";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProtectedRoute from "./ProtectedRoute";
