@@ -438,69 +438,67 @@ export default function QuestionManagement() {
   };
 
   const renderQuestionList = (list: Question[]) => (
-    <Card>
-      <CardContent className="p-3 sm:p-6">
-        <ScrollArea className="h-[600px]">
-          <div className="space-y-4 sm:space-y-6 pr-2 sm:pr-4">
+    <Card className="overflow-hidden">
+      <CardContent className="p-2 sm:p-4">
+        <div className="max-h-[600px] overflow-y-auto">
+          <div className="space-y-3 sm:space-y-4 sm:pr-2">
             {list.map((question) => (
-              <div key={question.id} className="flex flex-col sm:flex-row items-stretch sm:items-start sm:justify-between gap-3 p-4 sm:p-6 bg-card rounded-lg border shadow-sm hover:shadow-md transition-shadow">
-
-                <div className="flex-1 min-w-0 space-y-4">
-                  <div className="flex items-center gap-2 flex-wrap">
-
-                    <Badge className={`${getDifficultyColor(question.difficulty_level)} text-white`}>
-                      {getDifficultyLabel(question.difficulty_level)}
-                    </Badge>
-                    <Badge variant="outline">
-                      {question.type.replace('_', ' ')}
-                    </Badge>
-                    <Badge variant="secondary">
-                      {subjects.find(s => s.id === question.subject_id)?.name || 'Unknown'}
-                    </Badge>
-                    {!question.is_active && (
-                      <Badge variant="destructive">Inactive</Badge>
-                    )}
-                  </div>
-                  <div className="py-2">
-                    <MathRenderer 
-                      content={question.question_text}
-                      className="font-medium text-lg leading-relaxed"
-                    />
-                  </div>
-                  <div className="flex items-center gap-x-4 gap-y-1 flex-wrap text-sm text-muted-foreground pt-2 border-t">
-                    <span>{question.points} point{question.points !== 1 ? 's' : ''}</span>
-                    <span>{new Date(question.created_at).toLocaleDateString()}</span>
-                    {question.tags && Array.isArray(question.tags) && question.tags.length > 0 && (
-                      <span className="break-all">Tags: {question.tags.join(', ')}</span>
-                    )}
-                  </div>
+              <div key={question.id} className="rounded-lg border bg-card p-3 sm:p-5">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Badge className={`${getDifficultyColor(question.difficulty_level)} text-white text-[10px]`}>
+                    {getDifficultyLabel(question.difficulty_level)}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px]">
+                    {question.type.replace('_', ' ')}
+                  </Badge>
+                  <Badge variant="secondary" className="text-[10px] max-w-[45vw] truncate sm:max-w-none">
+                    {subjects.find(s => s.id === question.subject_id)?.name || 'Unknown'}
+                  </Badge>
+                  {!question.is_active && (
+                    <Badge variant="destructive" className="text-[10px]">Inactive</Badge>
+                  )}
                 </div>
 
-                <div className="flex items-center gap-1 flex-wrap sm:ml-4 border-t sm:border-t-0 pt-2 sm:pt-0">
+                <div className="mt-3 min-w-0 overflow-x-auto break-words">
+                  <MathRenderer
+                    content={question.question_text}
+                    className="font-medium text-sm sm:text-base leading-relaxed"
+                  />
+                </div>
 
-                  <Button variant="ghost" size="sm" onClick={() => handleViewQuestion(question)}>
+                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-2 text-xs text-muted-foreground">
+                  <span>{question.points} point{question.points !== 1 ? 's' : ''}</span>
+                  <span>{new Date(question.created_at).toLocaleDateString()}</span>
+                  {question.tags && Array.isArray(question.tags) && question.tags.length > 0 && (
+                    <span className="break-all">Tags: {question.tags.join(', ')}</span>
+                  )}
+                </div>
+
+                <div className="mt-2 grid grid-cols-5 gap-1 border-t pt-2 sm:flex sm:justify-end">
+                  <Button variant="ghost" size="sm" className="h-9 w-full sm:w-9 p-0" onClick={() => handleViewQuestion(question)}>
                     <Eye className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleEditQuestion(question)}>
+                  <Button variant="ghost" size="sm" className="h-9 w-full sm:w-9 p-0" onClick={() => handleEditQuestion(question)}>
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDuplicateQuestion(question)}>
+                  <Button variant="ghost" size="sm" className="h-9 w-full sm:w-9 p-0" onClick={() => handleDuplicateQuestion(question)}>
                     <Copy className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleViewAnalytics(question)}>
+                  <Button variant="ghost" size="sm" className="h-9 w-full sm:w-9 p-0" onClick={() => handleViewAnalytics(question)}>
                     <BarChart3 className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteQuestion(question.id)}>
+                  <Button variant="ghost" size="sm" className="h-9 w-full sm:w-9 p-0" onClick={() => handleDeleteQuestion(question.id)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
             ))}
           </div>
-        </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );
+
 
   return (
     <ScrollArea className="h-[calc(100vh-120px)]">
