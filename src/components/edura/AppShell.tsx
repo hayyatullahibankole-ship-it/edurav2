@@ -140,7 +140,16 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
           >
             <UserCog className="h-4 w-4" /> My journey
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-2.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" /> Log out
+          </Button>
         </div>
+
       </aside>
 
       <div className="lg:pl-60 flex min-h-screen flex-col">
