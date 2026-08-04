@@ -21,6 +21,8 @@ import {
   GraduationCap,
   ClipboardList,
   Lock,
+  Calculator,
+
 } from "lucide-react";
 
 const naira = (v: number) =>
@@ -214,25 +216,36 @@ const CampusHome = () => {
             </CardContent>
           </Card>
 
-          {/* Coming soon */}
+          {/* Study tools */}
           <Card className="col-span-2 md:col-span-5">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <Lock className="h-4 w-4 text-muted-foreground" /> Coming next
+                <Calculator className="h-4 w-4 text-primary" /> Study tools
               </div>
-              <ul className="mt-4 grid grid-cols-2 gap-2">
-                {COMING_SOON.map((item) => (
-                  <li key={item.label} className="flex items-center gap-2 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
-                    <item.icon className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{item.label}</span>
-                  </li>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Track your CGPA, build your class timetable and never miss an assignment deadline.
+              </p>
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {[
+                  { label: "CGPA", icon: Calculator },
+                  { label: "Timetable", icon: CalendarClock },
+                  { label: "Deadlines", icon: ClipboardList },
+                ].map((item) => (
+                  <div key={item.label} className="flex flex-col items-center gap-1.5 rounded-lg border p-3 text-xs">
+                    <item.icon className="h-4 w-4 text-muted-foreground" />
+                    <span>{item.label}</span>
+                  </div>
                 ))}
-              </ul>
-              <p className="mt-3 text-xs text-muted-foreground">
+              </div>
+              <Button variant="ghost" size="sm" className="mt-3 gap-1 px-0" onClick={() => navigate("/campus/tools")}>
+                Open study tools <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">
                 {study_level ? `Tailored for ${study_level} level students.` : "Set your level to personalise Campus."}
               </p>
             </CardContent>
           </Card>
+
         </div>
       )}
     </CampusShell>

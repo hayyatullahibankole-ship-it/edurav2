@@ -60,6 +60,8 @@ import { useInstalledApp } from "@/hooks/useInstalledApp";
 import eduraLogo from "@/assets/edura-logo.png";
 import { AIAssistant } from "@/components/AIAssistant";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import AppShell from "@/components/edura/AppShell";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SchoolAvailableExams from "@/components/school/SchoolAvailableExams";
 import { PromoCodeActivation } from "@/components/dashboard/PromoCodeActivation";
@@ -609,179 +611,69 @@ const Dashboard = () => {
     return <LoadingAnimation />;
   }
 
-  // If on mobile, show the old layout
-  if (isMobile) {
-    return (
-      <div className="min-h-screen bg-background">
-        <OnboardingTour isOpen={showOnboarding} onComplete={() => setShowOnboarding(false)} />
-
-        {/* Modern Clean Header */}
-        <header className="border-b bg-card sticky top-0 z-50 shadow-sm">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              {/* Logo and User Info */}
-              <div className="flex items-center gap-4">
-                {schoolInfo?.logo_url ? (
-                  <Avatar className="h-10 w-10 border-2">
-                    <AvatarImage src={`${schoolInfo.logo_url}?t=${Date.now()}`} alt={schoolInfo.name} />
-                    <AvatarFallback>
-                      <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <div className="bg-primary/10 p-2 rounded-lg">
-                    <img src={eduraLogo} alt="Edura" className="h-8 w-auto" />
-                  </div>
-                )}
-                {schoolInfo && (
-                  <div className="hidden md:block">
-                    <p className="text-xs font-medium text-muted-foreground">{schoolInfo.name}</p>
-                    <p className="text-xs text-muted-foreground">{schoolInfo.school_code}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-3">
-                <SideSwitcher compact />
-
-                {!subscriptionLoading && (
-                  <Badge variant={isPremium ? "default" : "secondary"} className="hidden md:flex">
-                    {isPremium ? (
-                      <>
-                        <Zap className="h-3 w-3 mr-1" />
-                        Premium
-                      </>
-                    ) : (
-                      "Free Plan"
-                    )}
-                  </Badge>
-                )}
-                <NotificationBell />
-                <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <div className={`container mx-auto px-4 sm:px-6 lg:px-8 py-6 ${isInstalledApp ? "pb-24" : ""}`}>
-          <Tabs
-            value={activeTab}
-            onValueChange={(value) => {
-              console.log("Tab changed to:", value);
-              setActiveTab(value);
-            }}
-          >
-            <TabsList className={`w-full md:w-auto mb-6 ${isInstalledApp ? "hidden" : ""}`}>
-              <TabsTrigger value="dashboard" className="gap-2">
-                <Target className="h-4 w-4" />
-                Dashboard
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="gap-2">
-                <User className="h-4 w-4" />
-                Profile
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="dashboard" className="space-y-6">
-              {renderBentoContent()}
-            </TabsContent>
-
-            <TabsContent value="profile" className="mt-8">
-              <div className="space-y-8">
-                <ProfileSettings />
-                <AccountSettings />
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-        <AIAssistant />
-        
-        {/* Install Required Modal for mobile browser users */}
-        <InstallRequiredModal 
-          open={showInstallModal} 
-          onOpenChange={setShowInstallModal}
-          featureName={blockedFeatureName}
-        />
-      </div>
-    );
-  }
-
-  // Desktop Layout with Sidebar
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <OnboardingTour isOpen={showOnboarding} onComplete={() => setShowOnboarding(false)} />
+    <AppShell
+      side="cbt"
+      title={`Welcome back, ${userProfile?.first_name || user?.email?.split("@")[0] || "Student"}`}
+      subtitle={
+        stats.testsTaken > 0
+          ? `You've taken ${stats.testsTaken} test${stats.testsTaken === 1 ? "" : "s"} so far.`
+          : "Ready to start your learning journey?"
+      }
+      meta={
+        <>
+          {!subscriptionLoading && (
+            <Badge variant={isPremium ? "default" : "secondary"} className="text-[11px]">
+              {isPremium ? "Premium" : "Free plan"}
+            </Badge>
+          )}
+          {schoolInfo && (
+            <Badge variant="outline" className="text-[11px]">{schoolInfo.name}</Badge>
+          )}
+        </>
+      }
+      action={
+        <div className="flex items-center gap-2">
+          <Button
+            variant={activeTab === "dashboard" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveTab("dashboard")}
+            className="gap-1.5"
+          >
+            <Target className="h-4 w-4" /> Overview
+          </Button>
+          <Button
+            variant={activeTab === "profile" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveTab("profile")}
+            className="gap-1.5"
+          >
+            <User className="h-4 w-4" /> Profile
+          </Button>
+        </div>
+      }
+    >
+      <OnboardingTour isOpen={showOnboarding} onComplete={() => setShowOnboarding(false)} />
 
-        <DashboardSidebar onLogout={handleLogout} schoolInfo={schoolInfo} />
+      {activeTab === "dashboard" ? (
+        <div className="space-y-6 animate-fade-in">{renderBentoContent()}</div>
+      ) : (
+        <div className="space-y-6 animate-fade-in">
+          <ProfileSettings />
+          <AccountSettings />
+        </div>
+      )}
 
-        <main className="flex-1 flex flex-col min-h-screen">
-          {/* Top Bar */}
-          <header className="border-b bg-background sticky top-0 z-50">
-            <div className="px-8 py-4">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1">
-                  <h1 className="text-2xl font-bold text-foreground">
-                    Welcome back, {userProfile?.first_name || user?.email?.split("@")[0] || "Student"}!
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    {stats.testsTaken > 0
-                      ? `You've taken ${stats.testsTaken} tests`
-                      : "Ready to start your learning journey?"}
-                  </p>
-                </div>
+      <AIAssistant />
 
-                {/* Right Actions */}
-                <div className="flex items-center gap-3">
-                  <SideSwitcher compact />
-                  <DashboardThemeMenu />
-                  <NotificationBell />
-
-                  {/* User Profile */}
-                  <div className="flex items-center gap-3 pl-3 border-l">
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-foreground">
-                        {userProfile?.first_name || user?.email?.split("@")[0] || "User"}
-                      </p>
-                      <Badge variant={isPremium ? "default" : "secondary"} className="text-xs">
-                        {isPremium ? "Premium" : "Free"}
-                      </Badge>
-                    </div>
-                    <Avatar>
-                      <AvatarImage src={userProfile?.avatar_url} />
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {(userProfile?.first_name?.[0] || user?.email?.[0] || "U").toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </header>
-
-          {/* Main Content */}
-          <div className="flex-1 p-8 overflow-auto bg-background">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsContent value="dashboard" className="space-y-6 mt-0 animate-fade-in">
-                {renderBentoContent()}
-              </TabsContent>
-
-              <TabsContent value="profile" className="mt-0">
-                <div className="space-y-6">
-                  <ProfileSettings />
-                  <AccountSettings />
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
-
-        <AIAssistant />
-      </div>
-    </SidebarProvider>
+      <InstallRequiredModal
+        open={showInstallModal}
+        onOpenChange={setShowInstallModal}
+        featureName={blockedFeatureName}
+      />
+    </AppShell>
   );
 };
+
 
 export default Dashboard;

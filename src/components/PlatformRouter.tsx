@@ -64,6 +64,8 @@ const CampusAcademics = lazy(() => import("@/pages/campus/CampusAcademics"));
 const CampusProjects = lazy(() => import("@/pages/campus/CampusProjects"));
 const CampusOpportunities = lazy(() => import("@/pages/campus/CampusOpportunities"));
 const CampusJourney = lazy(() => import("@/pages/campus/CampusJourney"));
+const CampusTools = lazy(() => import("@/pages/campus/CampusTools"));
+
 
 // Renders the correct home screen for the student's journey stage + chosen side
 const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
@@ -264,6 +266,12 @@ const EduraRoutes = () => {
           <CampusAcademics />
         </ProtectedRoute>
       } />
+      <Route path="/campus/tools" element={
+        <ProtectedRoute>
+          <CampusTools />
+        </ProtectedRoute>
+      } />
+
       <Route path="/campus/projects" element={
         <ProtectedRoute>
           <CampusProjects />

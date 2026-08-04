@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { SideSwitcher } from "@/components/edura/SideSwitcher";
-import ServicesMobileNav from "@/components/edura/ServicesMobileNav";
+import AppShell from "@/components/edura/AppShell";
 import ProviderLogo, { providerInfo } from "@/components/edura/ProviderLogo";
 import eduraLogo from "@/assets/edura-logo.png";
 import {
@@ -591,61 +591,31 @@ const ServicesHome = () => {
   const firstName = (user?.email ?? "there").split("@")[0];
 
   return (
-    <div className="min-h-screen bg-background pb-28 md:pb-10">
-      <header className="border-b bg-background sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <img src={eduraLogo} alt="Edura" className="h-7 w-auto shrink-0" />
-            <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">Educational Services</p>
-              <p className="text-xs text-muted-foreground truncate">
-                e-PINs, registrations & admissions
-              </p>
-            </div>
-          </div>
-
-          {/* Desktop navigation */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <button
-              onClick={() => setView("services")}
-              className={`transition-colors ${view === "services" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              Services
-            </button>
-            <button
-              onClick={() => setView("requests")}
-              className={`transition-colors ${view === "requests" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              My requests
-            </button>
-            <button
-              onClick={() => navigate("/wallet")}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Wallet
-            </button>
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              CBT
-            </button>
-          </nav>
-
-          <SideSwitcher compact />
+    <AppShell
+      side="services"
+      title={`Hi, ${firstName}`}
+      subtitle="Pick a service below and we'll handle it for you."
+      action={
+        <div className="flex items-center gap-2">
+          <Button
+            variant={view === "services" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setView("services")}
+          >
+            Services
+          </Button>
+          <Button
+            variant={view === "requests" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setView("requests")}
+          >
+            My requests
+          </Button>
         </div>
-      </header>
+      }
+    >
+      <main className="space-y-5">
 
-
-      <main className="container mx-auto max-w-5xl px-4 py-5 space-y-5">
-        <section>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-            Hi, <span className="capitalize">{firstName}</span>
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Pick a service below and we'll handle it for you.
-          </p>
-        </section>
 
         {/* Stats */}
         <section className="grid grid-cols-3 gap-3">
@@ -1299,9 +1269,8 @@ const ServicesHome = () => {
       </Dialog>
 
       <ScratchCardDialog service={scratchService} onClose={() => setScratchService(null)} />
+    </AppShell>
 
-      <ServicesMobileNav activeTab={view === "requests" ? "requests" : "home"} />
-    </div>
   );
 };
 

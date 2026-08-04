@@ -863,6 +863,7 @@ export type Database = {
           code: string
           color: string
           created_at: string
+          grade: string | null
           id: string
           lecturer: string | null
           semester: string
@@ -876,6 +877,7 @@ export type Database = {
           code: string
           color?: string
           created_at?: string
+          grade?: string | null
           id?: string
           lecturer?: string | null
           semester?: string
@@ -889,6 +891,7 @@ export type Database = {
           code?: string
           color?: string
           created_at?: string
+          grade?: string | null
           id?: string
           lecturer?: string | null
           semester?: string
@@ -1204,6 +1207,103 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      campus_tasks: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          is_done: boolean
+          kind: string
+          notes: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          is_done?: boolean
+          kind?: string
+          notes?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          is_done?: boolean
+          kind?: string
+          notes?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campus_tasks_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "campus_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campus_timetable: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          lecturer: string | null
+          start_time: string
+          title: string
+          updated_at: string
+          user_id: string
+          venue: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          lecturer?: string | null
+          start_time?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          venue?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          lecturer?: string | null
+          start_time?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campus_timetable_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "campus_courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       challenge_attempts: {
         Row: {
