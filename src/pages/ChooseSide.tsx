@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { GraduationCap, Briefcase, ArrowRight, Check } from "lucide-react";
+import { GraduationCap, Briefcase, School, ArrowRight, Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useAppSide, type AppSide } from "@/hooks/useAppSide";
 import { useAuth } from "@/hooks/useAuth";
 import eduraLogo from "@/assets/edura-logo.png";
+import { readCachedStage } from "@/hooks/useAcademicStage";
+import { isCampusStage } from "@/lib/academicStages";
 
 const SIDES: {
   key: AppSide;
@@ -35,6 +37,17 @@ const SIDES: {
       "Wallet, requests and scholarships",
     ],
   },
+  {
+    key: "campus",
+    title: "Edura Campus",
+    tagline: "For university & polytechnic students",
+    icon: School,
+    points: [
+      "Course, note and past question organiser",
+      "Final year project hub with milestones",
+      "Scholarships, internships and jobs",
+    ],
+  },
 ];
 
 const ChooseSide = () => {
@@ -48,6 +61,10 @@ const ChooseSide = () => {
 
   const select = (next: AppSide) => {
     chooseSide(next);
+    if (next === "campus") {
+      navigate(isCampusStage(readCachedStage()) ? "/campus" : "/campus/journey", { replace: true });
+      return;
+    }
     navigate("/dashboard", { replace: true });
   };
 
@@ -68,11 +85,11 @@ const ChooseSide = () => {
             Where do you want to start{user?.email ? "" : " today"}?
           </h1>
           <p className="mt-3 text-muted-foreground text-sm sm:text-base">
-            Edura has two sides. Pick one to continue — you can switch anytime from your dashboard.
+            Edura has three sides. Pick one to continue — you can switch anytime from your dashboard.
           </p>
         </div>
 
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 max-w-4xl mx-auto">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-3 max-w-5xl mx-auto">
           {SIDES.map((item) => {
             const Icon = item.icon;
             const active = side === item.key;

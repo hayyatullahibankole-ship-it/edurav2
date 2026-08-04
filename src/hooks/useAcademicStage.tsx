@@ -1,0 +1,110 @@
+import { useCallback, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { writeAppSide } from "@/hooks/useAppSide";
+import { isCampusStage, type AcademicStage } from "@/lib/academicStages";
+
+const STAGE_CACHE_KEY = "edura_academic_stage";
+
+export type CampusProfile = {
+  academic_stage: AcademicStage | null;
+  previous_stage: string | null;
+  institution_id: string | null;
+  institution_name: string | null;
+  faculty: string | null;
+  department: string | null;
+  study_level: string | null;
+  matric_number: string | null;
+};
+
+const EMPTY: CampusProfile = {
+  academic_stage: null,
+  previous_stage: null,
+  institution_id: null,
+  institution_name: null,
+  faculty: null,
+  department: null,
+  study_level: null,
+  matric_number: null,
+};
+
+export const readCachedStage = (): string | null => {
+  try {
+    return localStorage.getItem(STAGE_CACHE_KEY);
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * The student's academic journey stage. One account, several journey dashboards:
+ * secondary / exam candidates use the core dashboard, undergraduates and
+ * graduates use Edura Campus.
+ */
+export const useAcademicStage = () => {
+  const { user, userProfile } = useAuth();
+  const [profile, setProfile] = useState<CampusProfile>(EMPTY);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    if (!user) {
+      setProfile(EMPTY);
+      setLoading(false);
+      return;
+    }
+    const { data, error } = await supabase
+      .from("users")
+      .select(
+        "academic_stage, previous_stage, institution_id, institution_name, faculty, department, study_level, matric_number"
+      )
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    if (!error && data) {
+      setProfile(data as CampusProfile);
+      try {
+        if (data.academic_stage) localStorage.setItem(STAGE_CACHE_KEY, data.academic_stage);
+      } catch {
+        /* ignore */
+      }
+    }
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const updateProfile = useCallback(
+    async (patch: Partial<CampusProfile>) => {
+      if (!userProfile?.id) return { error: new Error("No profile") };
+      const payload: Record<string, unknown> = { ...patch };
+      if (patch.academic_stage && profile.academic_stage && patch.academic_stage !== profile.academic_stage) {
+        payload.previous_stage = profile.academic_stage;
+      }
+      const { error } = await supabase.from("users").update(payload).eq("id", userProfile.id);
+      if (!error) {
+        setProfile((prev) => ({ ...prev, ...(payload as Partial<CampusProfile>) }));
+        if (patch.academic_stage) {
+          try {
+            localStorage.setItem(STAGE_CACHE_KEY, patch.academic_stage);
+          } catch {
+            /* ignore */
+          }
+          writeAppSide(isCampusStage(patch.academic_stage) ? "campus" : "cbt");
+        }
+      }
+      return { error };
+    },
+    [userProfile?.id, profile.academic_stage]
+  );
+
+  return {
+    ...profile,
+    stage: profile.academic_stage,
+    isCampus: isCampusStage(profile.academic_stage),
+    loading,
+    reload: load,
+    updateProfile,
+  };
+};
