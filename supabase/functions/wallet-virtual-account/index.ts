@@ -123,7 +123,9 @@ Deno.serve(async (req) => {
       (profile?.phone as string | undefined) ||
       undefined;
 
-    // 1. Create (or fetch) the Paystack customer
+    // 1. Create (or fetch) the Paystack customer.
+    // Paystack can reject duplicate customer creation, so we must make the
+    // lookup-by-email path resilient and use the correct customer lookup API.
     const customerRes = await paystack("/customer", key, {
       method: "POST",
       body: JSON.stringify({
@@ -136,10 +138,37 @@ Deno.serve(async (req) => {
     });
 
     let customerCode = customerRes.body?.data?.customer_code as string | undefined;
+
+    const extractCustomerCode = (payload: unknown) => {
+      if (!payload || typeof payload !== "object") return undefined;
+      const data = payload as {
+        data?: {
+          customer_code?: string;
+          customer?: { customer_code?: string };
+          customer_code?: string;
+        } | Array<{ customer_code?: string }>;
+      };
+
+      if (Array.isArray(data.data)) {
+        return data.data[0]?.customer_code;
+      }
+
+      return data.data?.customer_code || data.data?.customer?.customer_code;
+    };
+
     if (!customerCode && user.email) {
-      const fetched = await paystack(`/customer/${encodeURIComponent(user.email)}`, key);
-      customerCode = fetched.body?.data?.customer_code;
+      const customerLookup = await paystack(
+        `/customer?email=${encodeURIComponent(user.email)}`,
+        key,
+      );
+      customerCode = extractCustomerCode(customerLookup.body);
     }
+
+    if (!customerCode && user.email) {
+      const fallbackLookup = await paystack(`/customer/${encodeURIComponent(user.email)}`, key);
+      customerCode = extractCustomerCode(fallbackLookup.body);
+    }
+
     if (!customerCode) {
       console.error("Paystack customer creation failed", JSON.stringify(customerRes.body));
       return json({ error: customerRes.body?.message || "Could not create payment profile" }, 400);
@@ -147,12 +176,10 @@ Deno.serve(async (req) => {
 
     // 2. Assign a dedicated NUBAN
     const isTest = key.startsWith("sk_test");
-    const configuredBank = isTest
-      ? "test-bank"
-      : (Deno.env.get("PAYSTACK_DVA_BANK") || "").trim();
+    const configuredBank = (Deno.env.get("PAYSTACK_DVA_BANK") || "").trim();
 
     const dvaPayload: Record<string, string> = { customer: customerCode };
-    if (configuredBank) {
+    if (!isTest && configuredBank) {
       dvaPayload.preferred_bank = configuredBank;
     }
 
