@@ -60,6 +60,8 @@ import { useInstalledApp } from "@/hooks/useInstalledApp";
 import eduraLogo from "@/assets/edura-logo.png";
 import { AIAssistant } from "@/components/AIAssistant";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import AppShell from "@/components/edura/AppShell";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SchoolAvailableExams from "@/components/school/SchoolAvailableExams";
 import { PromoCodeActivation } from "@/components/dashboard/PromoCodeActivation";
