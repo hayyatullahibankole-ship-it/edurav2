@@ -1,4 +1,4 @@
-import { GraduationCap, Briefcase, School } from "lucide-react";
+import { GraduationCap, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppSide, type AppSide } from "@/hooks/useAppSide";
 import { cn } from "@/lib/utils";
@@ -14,12 +14,17 @@ interface SideSwitcherProps {
 const OPTIONS: { key: AppSide; label: string; short: string; icon: typeof GraduationCap; to: string }[] = [
   { key: "cbt", label: "CBT Practice", short: "CBT", icon: GraduationCap, to: "/dashboard" },
   { key: "services", label: "Services", short: "Services", icon: Briefcase, to: "/dashboard" },
-  { key: "campus", label: "Campus", short: "Campus", icon: School, to: "/campus" },
 ];
 
+/**
+ * Only pre-admission students (SS3 / WAEC / JAMB) can switch sides.
+ * Campus students have no switcher — Campus is their whole app.
+ */
 export const SideSwitcher = ({ className, compact }: SideSwitcherProps) => {
   const { side, chooseSide } = useAppSide();
   const navigate = useNavigate();
+
+  if (isCampusStage(readCachedStage())) return null;
 
   return (
     <div
@@ -40,10 +45,6 @@ export const SideSwitcher = ({ className, compact }: SideSwitcherProps) => {
             aria-selected={active}
             onClick={() => {
               chooseSide(option.key);
-              if (option.key === "campus") {
-                navigate(isCampusStage(readCachedStage()) ? "/campus" : "/campus/journey");
-                return;
-              }
               navigate(option.to);
             }}
             className={cn(
