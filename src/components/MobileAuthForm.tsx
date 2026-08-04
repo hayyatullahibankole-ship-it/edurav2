@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
-import { emailSchema, passwordSchema, nameSchema } from "@/utils/inputValidation";
+import { emailSchema, passwordSchema, nameSchema, phoneSchema } from "@/utils/inputValidation";
 import { generateSessionToken, storeSessionToken, setSessionToken } from "@/utils/sessionManager";
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
@@ -25,6 +25,7 @@ const signupSchema = z.object({
   firstName: nameSchema,
   lastName: nameSchema,
   email: emailSchema,
+  phone: phoneSchema,
   academicStage: z.string().min(1, "Please select where you are right now"),
   institutionName: z.string().optional(),
   studyLevel: z.string().optional(),
@@ -57,6 +58,7 @@ export default function MobileAuthForm() {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '+234',
     academicStage: '',
     institutionName: '',
     studyLevel: '',
@@ -154,6 +156,7 @@ export default function MobileAuthForm() {
             data: {
               first_name: signupData.firstName,
               last_name: signupData.lastName,
+              phone: signupData.phone,
               academic_stage: signupData.academicStage,
               institution_name: signupData.institutionName,
               study_level: signupData.studyLevel,
@@ -195,6 +198,7 @@ export default function MobileAuthForm() {
           firstName: '',
           lastName: '',
           email: '',
+          phone: '+234',
           academicStage: '',
           institutionName: '',
           studyLevel: '',
@@ -265,6 +269,22 @@ export default function MobileAuthForm() {
         )}
         
         <form onSubmit={handleSubmit} className="space-y-5">
+          {!isLogin && (
+            <div className="space-y-2 animate-fade-in">
+              <Label htmlFor="phone" className="text-sm font-bold text-foreground/80">Phone Number</Label>
+              <div className="relative">
+                <Input
+                  id="phone"
+                  placeholder="08101234567"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className={`h-12 rounded-xl border-2 transition-all ${errors.phone ? 'border-destructive' : 'border-border hover:border-primary focus:border-primary'}`}
+                />
+              </div>
+              {errors.phone && <p className="text-xs text-destructive font-medium">{errors.phone}</p>}
+            </div>
+          )}
+
           {!isLogin && (
             <div className="grid grid-cols-2 gap-4 animate-fade-in">
               <div className="space-y-2">

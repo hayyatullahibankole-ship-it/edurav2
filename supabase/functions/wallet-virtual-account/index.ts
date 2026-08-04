@@ -121,6 +121,7 @@ Deno.serve(async (req) => {
     const phone =
       (typeof body?.phone === "string" && body.phone.trim()) ||
       (profile?.phone as string | undefined) ||
+      (user.user_metadata?.phone as string | undefined) ||
       undefined;
 
     // 1. Create (or fetch) the Paystack customer.
@@ -171,7 +172,16 @@ Deno.serve(async (req) => {
 
     if (!customerCode) {
       console.error("Paystack customer creation failed", JSON.stringify(customerRes.body));
-      return json({ error: customerRes.body?.message || "Could not create payment profile" }, 400);
+      return json(
+        {
+          error:
+            customerRes.body?.message ||
+            (phone
+              ? "Could not create payment profile"
+              : "Please add a phone number to your Edura profile so Paystack can create your dedicated account."),
+        },
+        400,
+      );
     }
 
     // 2. Assign a dedicated NUBAN
