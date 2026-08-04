@@ -21,6 +21,8 @@ import {
   GraduationCap,
   ClipboardList,
   Lock,
+  Calculator,
+
 } from "lucide-react";
 
 const naira = (v: number) =>
