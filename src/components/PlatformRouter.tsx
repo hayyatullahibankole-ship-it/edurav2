@@ -58,6 +58,11 @@ const LessonQuiz = lazy(() => import("@/pages/LessonQuiz"));
 const ChooseSide = lazy(() => import("@/pages/ChooseSide"));
 const ServicesHome = lazy(() => import("@/pages/ServicesHome"));
 const Wallet = lazy(() => import("@/pages/Wallet"));
+const CampusHome = lazy(() => import("@/pages/campus/CampusHome"));
+const CampusAcademics = lazy(() => import("@/pages/campus/CampusAcademics"));
+const CampusProjects = lazy(() => import("@/pages/campus/CampusProjects"));
+const CampusOpportunities = lazy(() => import("@/pages/campus/CampusOpportunities"));
+const CampusJourney = lazy(() => import("@/pages/campus/CampusJourney"));
 
 // Renders the correct home screen for the side the student picked
 const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
@@ -65,6 +70,7 @@ const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
   const isMobile = useIsMobile();
   if (side === null) return <Navigate to="/choose" replace />;
   if (side === "services") return <ServicesHome />;
+  if (side === "campus") return <CampusHome />;
   return isInstalledApp || isMobile
     ? <MobileHome />
     : <Layout showNavbar={false}><Dashboard /></Layout>;
@@ -237,6 +243,31 @@ const EduraRoutes = () => {
 
       <Route path="/services" element={user ? <ServicesHome /> : <Layout><ServicesLanding /></Layout>} />
       <Route path="/admissions" element={<Navigate to="/services?provider=admission" replace />} />
+      <Route path="/campus" element={
+        <ProtectedRoute>
+          <CampusHome />
+        </ProtectedRoute>
+      } />
+      <Route path="/campus/academics" element={
+        <ProtectedRoute>
+          <CampusAcademics />
+        </ProtectedRoute>
+      } />
+      <Route path="/campus/projects" element={
+        <ProtectedRoute>
+          <CampusProjects />
+        </ProtectedRoute>
+      } />
+      <Route path="/campus/opportunities" element={
+        <ProtectedRoute>
+          <CampusOpportunities />
+        </ProtectedRoute>
+      } />
+      <Route path="/campus/journey" element={
+        <ProtectedRoute>
+          <CampusJourney />
+        </ProtectedRoute>
+      } />
       <Route path="/wallet" element={
         <ProtectedRoute>
           <Wallet />
