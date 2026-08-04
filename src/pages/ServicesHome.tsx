@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useInstalledApp } from "@/hooks/useInstalledApp";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,8 @@ import {
   Search,
   Calendar as CalendarIcon,
   Wallet as WalletIcon,
+  LayoutGrid,
+  User,
 } from "lucide-react";
 import ScratchCardDialog from "@/components/edura/ScratchCardDialog";
 import ScratchCardHistory from "@/components/edura/ScratchCardHistory";
@@ -137,6 +140,7 @@ const statusStyles: Record<string, string> = {
 const ServicesHome = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isInstalledApp } = useInstalledApp();
   const { balance, refresh: refreshWallet } = useWallet();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -590,12 +594,21 @@ const ServicesHome = () => {
 
 
   const firstName = (user?.email ?? "there").split("@")[0];
+  const homePath = isInstalledApp ? "/mobile-home" : "/dashboard";
+
+  const servicesMobileNav = [
+    { to: homePath, label: "Home", icon: LayoutGrid, end: true },
+    { to: "/services", label: "Services", icon: Briefcase, end: true },
+    { to: "/wallet", label: "Wallet", icon: WalletIcon },
+    { to: "/dashboard?tab=profile", label: "Profile", icon: User },
+  ];
 
   return (
     <AppShell
       side="services"
       title={`Hi, ${firstName}`}
       subtitle="Pick a service below and we'll handle it for you."
+      nav={servicesMobileNav}
       action={
         <div className="flex items-center gap-2">
           <UpgradeToCampus />

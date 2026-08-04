@@ -339,7 +339,7 @@ const Wallet = () => {
         </section>
       </main>
 
-      <ServicesMobileNav activeTab="home" />
+      <ServicesMobileNav activeTab="wallet" />
     </div>
   );
 };
