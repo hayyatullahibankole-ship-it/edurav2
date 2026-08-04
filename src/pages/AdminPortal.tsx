@@ -35,6 +35,7 @@ import { AkboyRegistrationsManager } from '@/components/admin/AkboyRegistrations
 import { AkboyNewsletterSubscribersManager } from '@/components/admin/AkboyNewsletterSubscribersManager';
 import ServiceCatalogManager from '@/components/admin/ServiceCatalogManager';
 import InstitutionsManager from '@/components/admin/InstitutionsManager';
+import CampusManager from '@/components/admin/CampusManager';
 import ServiceRequestsManager from '@/components/admin/ServiceRequestsManager';
 import MockExamManager from '@/components/admin/MockExamManager';
 import MockResultsManager from '@/components/admin/MockResultsManager';
@@ -99,6 +100,7 @@ const NAV: NavSection[] = [
       { key: 'edu-services', label: 'Educational Services', icon: Briefcase },
       { key: 'service-requests', label: 'Service Requests', icon: ClipboardList },
       { key: 'institutions', label: 'Institutions & Fees', icon: School },
+      { key: 'campus', label: 'Edura Campus', icon: GraduationCap },
       { key: 'pricing', label: 'Pricing', icon: DollarSign },
       { key: 'promos', label: 'Promo Codes', icon: Gift },
       { key: 'blog', label: 'Blog', icon: Newspaper },
@@ -198,6 +200,7 @@ export default function AdminPortal() {
       case 'edu-services': return <ServiceCatalogManager />;
       case 'service-requests': return <ServiceRequestsManager />;
       case 'institutions': return <InstitutionsManager />;
+      case 'campus': return <CampusManager />;
       case 'pricing': return <PricingManager />;
       case 'promos': return <CouponManager />;
       case 'schools': return <SchoolManagement />;
