@@ -264,6 +264,12 @@ const EduraRoutes = () => {
           <CampusAcademics />
         </ProtectedRoute>
       } />
+      <Route path="/campus/tools" element={
+        <ProtectedRoute>
+          <CampusTools />
+        </ProtectedRoute>
+      } />
+
       <Route path="/campus/projects" element={
         <ProtectedRoute>
           <CampusProjects />
