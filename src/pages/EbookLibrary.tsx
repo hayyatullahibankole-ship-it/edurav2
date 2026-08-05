@@ -270,12 +270,15 @@ export default function EbookLibrary() {
           </div>
           <DialogFooter className="flex-col sm:flex-row gap-2">
             {requestBook && canPurchaseDigitalInApp() && (
-              <Button asChild variant="outline" className="w-full sm:w-auto">
-                <a href={whatsappLink(requestBook)} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4 mr-2" /> Buy on WhatsApp
-                </a>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => openExternal(whatsappLink(requestBook))}
+              >
+                <MessageCircle className="w-4 h-4 mr-2" /> Buy on WhatsApp
               </Button>
             )}
+
             <Button onClick={submitRequest} disabled={submittingRequest} className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800">
               {submittingRequest ? "Sending..." : "Send request"}
             </Button>
