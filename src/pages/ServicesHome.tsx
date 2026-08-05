@@ -315,10 +315,17 @@ const ServicesHome = () => {
 
 
   const counts = useMemo(() => {
-    const pending = requests.filter((r) =>
-      ["pending", "processing"].includes((r.status ?? "").toLowerCase())
-    ).length;
-    const completed = requests.filter((r) => (r.status ?? "").toLowerCase() === "completed").length;
+    const IN_PROGRESS = [
+      "pending",
+      "processing",
+      "awaiting_details",
+      "needs_resubmission",
+      "quote_requested",
+      "in_progress",
+    ];
+    const DONE = ["completed", "delivered", "success"];
+    const pending = requests.filter((r) => IN_PROGRESS.includes((r.status ?? "").toLowerCase())).length;
+    const completed = requests.filter((r) => DONE.includes((r.status ?? "").toLowerCase())).length;
     return { total: requests.length, pending, completed };
   }, [requests]);
 
