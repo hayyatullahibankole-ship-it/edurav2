@@ -32,9 +32,17 @@ function extractPins(payload: any): Pin[] {
           if (typeof item === "string") return { pin: item };
           const pin = item?.pin ?? item?.pin_code ?? item?.card_pin ?? item?.token ?? item?.code;
           if (!pin) return null;
+          const serial =
+            item?.serial_no ??
+            item?.serial ??
+            item?.serial_number ??
+            item?.serialno ??
+            item?.serialNo ??
+            item?.card_serial ??
+            undefined;
           return {
             pin: String(pin),
-            serial: item?.serial ?? item?.serial_number ?? item?.serialno ?? undefined,
+            serial: serial ? String(serial) : undefined,
             extra: item,
           } as Pin;
         })
@@ -45,14 +53,22 @@ function extractPins(payload: any): Pin[] {
 
   const single = payload.pin ?? payload.data?.pin ?? payload.card_pin ?? payload.data?.card_pin;
   if (single) {
+    const singleSerial =
+      payload.serial_no ??
+      payload.serial ??
+      payload.serial_number ??
+      payload.data?.serial_no ??
+      payload.data?.serial ??
+      payload.data?.serial_number;
     return [
       {
         pin: String(single),
-        serial: payload.serial ?? payload.data?.serial ?? payload.data?.serial_number,
+        serial: singleSerial ? String(singleSerial) : undefined,
         extra: payload.data ?? payload,
       },
     ];
   }
+
   return [];
 }
 

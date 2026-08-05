@@ -101,21 +101,40 @@ export const ScratchCardHistory = () => {
           )}
 
           {order.pins.map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between gap-3 rounded-md border bg-muted/40 p-2"
-            >
-              <div className="min-w-0">
-                <p className="break-all font-mono text-sm font-semibold">{item.pin}</p>
-                {item.serial && (
-                  <p className="text-[11px] text-muted-foreground">Serial: {item.serial}</p>
-                )}
+            <div key={index} className="space-y-2 rounded-md border bg-muted/40 p-2">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] text-muted-foreground">PIN</p>
+                  <p className="break-all font-mono text-sm font-semibold">{item.pin}</p>
+                </div>
+                <Button size="icon" variant="outline" onClick={() => copy(item.pin)}>
+                  <Copy className="h-4 w-4" />
+                </Button>
               </div>
-              <Button size="icon" variant="outline" onClick={() => copy(item.pin)}>
-                <Copy className="h-4 w-4" />
-              </Button>
+              {item.serial && (
+                <>
+                  <div className="flex items-center justify-between gap-3 border-t pt-2">
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-muted-foreground">Serial number</p>
+                      <p className="break-all font-mono text-sm font-semibold">{item.serial}</p>
+                    </div>
+                    <Button size="icon" variant="outline" onClick={() => copy(item.serial!)}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-full text-xs"
+                    onClick={() => copy(`PIN: ${item.pin}\nSerial: ${item.serial}`)}
+                  >
+                    Copy PIN & serial
+                  </Button>
+                </>
+              )}
             </div>
           ))}
+
         </div>
       ))}
     </div>

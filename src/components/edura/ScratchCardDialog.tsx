@@ -127,7 +127,7 @@ export const ScratchCardDialog = ({ service, onClose }: Props) => {
               <p className="text-sm font-medium">Your card{pins.length > 1 ? "s are" : " is"} ready</p>
             </div>
             {pins.map((item, index) => (
-              <div key={index} className="space-y-1 rounded-lg border p-3">
+              <div key={index} className="space-y-2 rounded-lg border p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-xs text-muted-foreground">PIN</p>
@@ -138,10 +138,19 @@ export const ScratchCardDialog = ({ service, onClose }: Props) => {
                   </Button>
                 </div>
                 {item.serial && (
-                  <p className="text-xs text-muted-foreground">Serial: {item.serial}</p>
+                  <div className="flex items-center justify-between gap-3 border-t pt-2">
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground">Serial number</p>
+                      <p className="break-all font-mono text-base font-semibold">{item.serial}</p>
+                    </div>
+                    <Button size="icon" variant="outline" onClick={() => copy(item.serial!)}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
                 )}
               </div>
             ))}
+
             <p className="text-xs text-muted-foreground">
               These PINs are saved in your purchase history.
             </p>
