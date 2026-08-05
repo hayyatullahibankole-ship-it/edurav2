@@ -11,6 +11,8 @@ import Layout from "./Layout";
 import { DashboardLayout } from "./DashboardLayout";
 import { NativeAppWrapper } from "./NativeAppWrapper";
 import LoadingAnimation from "./LoadingAnimation";
+import AkboyLoading from "./AkboyLoading";
+
 
 // Edura Pages
 const Home = lazy(() => import("@/pages/Home"));
