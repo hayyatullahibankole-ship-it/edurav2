@@ -67,9 +67,8 @@ const CampusJourney = lazy(() => import("@/pages/campus/CampusJourney"));
 const CampusTools = lazy(() => import("@/pages/campus/CampusTools"));
 
 
-// Renders the correct home screen for the student's journey stage + chosen side
+// Journey-aware home: candidates get the unified home, campus students go to Campus
 const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
-  const { side } = useAppSide();
   const { stage, isCampus, loading } = useAcademicStage();
 
   // Journey first: no stage yet → onboarding
@@ -79,11 +78,9 @@ const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
   // Higher institution students live on Campus only
   if (isCampus) return <Navigate to="/campus" replace />;
 
-  if (side === null) return <Navigate to="/choose" replace />;
-  if (side === "services") return <ServicesHome />;
-  if (isInstalledApp) return <MobileHome />;
-  return <Layout showNavbar={false}><Dashboard /></Layout>;
+  return <Dashboard />;
 };
+
 
 /** Campus routes are for undergraduates & graduates only */
 const CampusOnly = ({ children }: { children: JSX.Element }) => {
