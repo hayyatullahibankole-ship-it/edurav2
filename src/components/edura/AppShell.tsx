@@ -107,30 +107,46 @@ export const MobileTabBar = ({
       key={item.to}
       to={item.to}
       end={item.end}
-      className={({ isActive }) =>
-        cn(
-          "flex-1 flex flex-col items-center gap-0.5 py-2 text-[9px] font-medium transition-all active:scale-90",
-          isActive ? "text-primary font-semibold" : "text-muted-foreground"
-        )
-      }
+      className="press flex-1 flex flex-col items-center gap-1 py-2"
     >
-      <item.icon className="h-5 w-5" />
-      <span className="truncate max-w-full px-1">{item.label}</span>
+      {({ isActive }) => (
+        <>
+          <span
+            className={cn(
+              "flex h-7 w-11 items-center justify-center rounded-full transition-all duration-300",
+              isActive ? "bg-primary/12 text-primary" : "text-muted-foreground"
+            )}
+          >
+            <item.icon
+              className={cn("h-[18px] w-[18px] transition-transform", isActive && "scale-110")}
+              strokeWidth={isActive ? 2.4 : 1.9}
+            />
+          </span>
+          <span
+            className={cn(
+              "truncate max-w-full px-1 text-[9px] transition-colors",
+              isActive ? "font-bold text-primary" : "font-medium text-muted-foreground"
+            )}
+          >
+            {item.label}
+          </span>
+        </>
+      )}
     </NavLink>
   );
 
   return (
     <>
-      <nav className="lg:hidden fixed bottom-3 inset-x-3 z-40">
-        <div className="relative mx-auto max-w-md h-16 rounded-2xl border bg-card shadow-lg">
-          <div className="relative h-full flex items-center px-2">
+      <nav className="lg:hidden fixed bottom-safe inset-x-3 z-40">
+        <div className="relative mx-auto max-w-md h-[68px] rounded-[22px] border bg-card/95 backdrop-blur-xl shadow-[0_8px_30px_-12px_hsl(var(--foreground)/0.35)]">
+          <div className="relative h-full flex items-center px-1.5">
             {left.map(tab)}
             <div className="flex-1 flex justify-center -mt-8">
               <button
                 type="button"
                 aria-label={action.label}
                 onClick={action.onClick}
-                className="w-14 h-14 rounded-full bg-primary flex items-center justify-center border-4 border-card shadow-lg transition-transform active:scale-90"
+                className="press w-14 h-14 rounded-full bg-primary flex items-center justify-center border-4 border-card shadow-[0_10px_24px_-8px_hsl(var(--primary)/0.7)]"
               >
                 <action.icon className="h-6 w-6 text-primary-foreground" />
               </button>
@@ -139,6 +155,7 @@ export const MobileTabBar = ({
           </div>
         </div>
       </nav>
+
       {!center && <ExploreSheet open={exploreOpen} onOpenChange={setExploreOpen} />}
     </>
   );
