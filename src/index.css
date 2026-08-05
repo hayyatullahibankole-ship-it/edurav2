@@ -537,26 +537,35 @@ All colors MUST be HSL for consistency across light/dark modes.
   }
 }
 
-/* Book-opening loader */
-@keyframes book-left {
-  0%, 100% { transform: rotateY(0deg); }
-  40%, 70% { transform: rotateY(-32deg); }
+/* Modern ripple loader */
+@keyframes loader-ping {
+  0% {
+    transform: scale(0.65);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
 }
-@keyframes book-right {
-  0%, 100% { transform: rotateY(0deg); }
-  40%, 70% { transform: rotateY(32deg); }
-}
-@keyframes page-flip {
-  0% { transform: rotateY(0deg); opacity: 0; }
-  15% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { transform: rotateY(-170deg); opacity: 0; }
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(0.96);
+  }
 }
 @keyframes loading-sweep {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(320%); }
 }
-.animate-book-left { animation: book-left 2.4s ease-in-out infinite; }
-.animate-book-right { animation: book-right 2.4s ease-in-out infinite; }
-.animate-page-flip { animation: page-flip 2s ease-in-out infinite; backface-visibility: hidden; }
+.animate-loader-ping {
+  animation: loader-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
 .animate-loading-sweep { animation: loading-sweep 1.4s ease-in-out infinite; }
