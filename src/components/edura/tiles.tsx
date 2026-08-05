@@ -51,32 +51,65 @@ export const ActionTile = ({
   </Link>
 );
 
-/** A quiet list row for discover-style navigation. */
+/** A quiet list row for discover-style navigation. Pass `href` for external links. */
 export const ListRow = ({
   to,
+  href,
+  onClick,
   icon: Icon,
   title,
   meta,
 }: {
-  to: string;
+  to?: string;
+  href?: string;
+  onClick?: () => void;
   icon: LucideIcon;
   title: string;
   meta?: string;
-}) => (
-  <Link
-    to={to}
-    className="flex items-center gap-3 rounded-xl border bg-card px-3.5 py-3 transition-colors hover:bg-muted/50"
-  >
-    <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-      <Icon className="h-4 w-4 text-primary" />
-    </div>
-    <div className="min-w-0 flex-1">
-      <p className="text-sm font-medium truncate">{title}</p>
-      {meta && <p className="text-[11px] text-muted-foreground truncate">{meta}</p>}
-    </div>
-    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-  </Link>
-);
+}) => {
+  const className =
+    "flex w-full items-center gap-3 rounded-xl border bg-card px-3.5 py-3 text-left transition-colors hover:bg-muted/50";
+
+  const inner = (
+    <>
+      <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium truncate">{title}</p>
+        {meta && <p className="text-[11px] text-muted-foreground truncate">{meta}</p>}
+      </div>
+      {href ? (
+        <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+      ) : (
+        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+      )}
+    </>
+  );
+
+  if (href) {
+    return (
+      <button type="button" className={className} onClick={() => openExternal(href)}>
+        {inner}
+      </button>
+    );
+  }
+
+  if (!to) {
+    return (
+      <button type="button" className={className} onClick={onClick}>
+        {inner}
+      </button>
+    );
+  }
+
+  return (
+    <Link to={to} className={className} onClick={onClick}>
+      {inner}
+    </Link>
+  );
+};
+
 
 /** Section wrapper with a consistent heading. */
 export const Panel = ({
