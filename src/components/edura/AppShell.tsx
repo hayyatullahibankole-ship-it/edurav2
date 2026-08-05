@@ -129,7 +129,7 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
         </div>
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">{items.map(railLink)}</nav>
         <div className="p-3 border-t space-y-1">
-          <SideSwitcher className="w-full" />
+
           <Button
             variant="ghost"
             size="sm"
