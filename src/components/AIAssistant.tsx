@@ -194,29 +194,68 @@ export const AIAssistant = () => {
 
     try {
       console.log("Sending message to AI assistant...", { messageCount: newMessages.length, hasImages: !!images?.length });
-      
-const { data: { session } } = await supabase.auth.getSession();
-const headers: Record<string, string> = { "Content-Type": "application/json" };
-if (session?.access_token) {
-  headers.Authorization = `Bearer ${session.access_token}`;
-}
 
-const response = await fetch(
-  `https://zqapbmllkywsuywpfava.supabase.co/functions/v1/ai-assistant`,
-  {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ messages: newMessages }),
-  }
-);
+      const FN_URL = "https://zqapbmllkywsuywpfava.supabase.co/functions/v1/ai-assistant";
+      const ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYXBibWxsa3l3c3V5d3BmYXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MTA5NDgsImV4cCI6MjA3NDI4Njk0OH0.uZmBzHcTI3oBiigUv_QCVkYF5Nh5_dK21qQtdpzjkUI";
+
+      // Make sure we never send a stale/expired JWT — the Supabase gateway
+      // rejects those with a 401 before the function ever runs.
+      let accessToken: string | null = null;
+      try {
+        const { data } = await supabase.auth.getSession();
+        const session = data.session;
+        if (session?.access_token) {
+          const expiresAt = (session.expires_at ?? 0) * 1000;
+          if (expiresAt && expiresAt - Date.now() < 60_000) {
+            const { data: refreshed } = await supabase.auth.refreshSession();
+            accessToken = refreshed.session?.access_token ?? null;
+          } else {
+            accessToken = session.access_token;
+          }
+        }
+      } catch {
+        accessToken = null;
+      }
+
+      const callFn = (token: string | null) =>
+        fetch(FN_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: ANON_KEY,
+            Authorization: `Bearer ${token || ANON_KEY}`,
+          },
+          body: JSON.stringify({ messages: newMessages }),
+        });
+
+      let response = await callFn(accessToken);
+
+      // If the token was rejected, retry anonymously so the assistant still answers.
+      if (response.status === 401 && accessToken) {
+        console.warn("AI Assistant: session token rejected, retrying anonymously");
+        response = await callFn(null);
+      }
 
       console.log("Response status:", response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
         console.error("AI Assistant error response:", errorText);
-        throw new Error(`Failed to get response: ${response.status} - ${errorText}`);
+        let friendly = "The assistant is unavailable right now. Please try again.";
+        if (response.status === 429) friendly = "Too many requests — wait a moment and try again.";
+        else if (response.status === 402) friendly = "AI service is temporarily unavailable. Please contact support.";
+        else {
+          try {
+            const parsed = JSON.parse(errorText);
+            if (parsed?.error) friendly = String(parsed.error);
+          } catch {
+            /* keep the friendly default */
+          }
+        }
+        throw new Error(friendly);
       }
+
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
