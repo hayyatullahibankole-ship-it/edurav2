@@ -14,7 +14,7 @@ const MobileSplash = () => {
         // Only use native APIs if on native platform
         if (Capacitor.isNativePlatform()) {
           await StatusBar.setStyle({ style: Style.Light });
-          await StatusBar.setBackgroundColor({ color: '#0ea5e9' });
+          await StatusBar.setBackgroundColor({ color: '#12B76A' });
         }
         
         // Auto navigate after short delay

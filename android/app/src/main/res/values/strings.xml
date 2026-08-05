@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Edura</string>
     <string name="title_activity_main">Edura</string>
-    <string name="package_name">app.lovable.ee95bfa9a22942b6ac9d0a6c28cde3a7</string>
-    <string name="custom_url_scheme">app.lovable.ee95bfa9a22942b6ac9d0a6c28cde3a7</string>
+    <string name="package_name">com.edura.app</string>
+    <string name="custom_url_scheme">com.edura.app</string>
 </resources>

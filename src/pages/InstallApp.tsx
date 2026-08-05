@@ -14,11 +14,8 @@ import {
   CheckCircle,
   Share,
   PlusSquare,
-  Info,
 } from "lucide-react";
 import eduraLogo from "@/assets/edura-logo.png";
-
-const UPTODOWN_URL = "https://edura-advanced-cbt-platform.en.uptodown.com/android/download";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -114,12 +111,9 @@ export default function InstallApp() {
             <h2 className="font-bold text-xl">Edura CBT</h2>
             <p className="text-muted-foreground text-sm">Your Gateway to Exam Success</p>
             <div className="flex items-center gap-3 mt-1">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> 4.8
-              </span>
-              <span className="text-xs text-muted-foreground">50K+ downloads</span>
+              <span className="text-xs text-muted-foreground">Free to start</span>
               <span className="text-xs font-semibold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">
-                FREE
+                NIGERIA ED-TECH
               </span>
             </div>
           </div>
@@ -188,36 +182,14 @@ export default function InstallApp() {
           <div className="flex items-start gap-3">
             <Smartphone className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium text-foreground mb-1">Coming to Google Play</p>
+              <p className="text-sm font-medium text-foreground mb-1">Google Play listing coming soon</p>
               <p className="text-xs text-muted-foreground">
-                The Play Store listing is on the way. Until then, installing from your browser gives you the
-                exact same app — and it updates automatically.
+                The Play Store version is going through review. Until it’s live, install from your browser — it’s the
+                same app and updates automatically.
               </p>
             </div>
           </div>
         </div>
-
-        {/* Legacy APK — de-emphasised */}
-        {platform !== "ios" && (
-          <div className="p-4 rounded-xl border border-dashed">
-            <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
-              <div className="flex-1">
-                <p className="text-sm font-medium text-foreground mb-1">Prefer an APK file?</p>
-                <p className="text-xs text-muted-foreground mb-3">
-                  An older build is hosted on Uptodown. It is not on the latest version — only use it if the
-                  browser install does not work on your device.
-                </p>
-                <a href={UPTODOWN_URL} target="_blank" rel="noopener noreferrer" className="block">
-                  <Button variant="outline" size="sm" className="w-full">
-                    <Download className="h-4 w-4 mr-2" />
-                    Download older APK (Uptodown)
-                  </Button>
-                </a>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Trust badge */}
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground pb-4">

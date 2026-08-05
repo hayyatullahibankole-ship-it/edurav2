@@ -1,14 +1,14 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.edura.app',
+  appId: 'com.edura.app',
   appName: 'Edura',
   webDir: 'dist',
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
       launchAutoHide: true,
-      backgroundColor: "#0ea5e9",
+      backgroundColor: "#12B76A",
       androidSplashResourceName: "splash",
       androidScaleType: "CENTER_CROP",
       showSpinner: false,
@@ -17,7 +17,7 @@ const config: CapacitorConfig = {
     },
     StatusBar: {
       style: 'dark',
-      backgroundColor: '#0ea5e9'
+      backgroundColor: '#12B76A'
     }
   }
 };
