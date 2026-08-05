@@ -171,7 +171,8 @@ const AkboyRoutes = () => {
 // Campus Hub standalone routes
 const CampusHubRoutes = () => {
   return (
-    <Suspense fallback={<LoadingAnimation />}>
+    <Suspense fallback={<AkboyLoading />}>
+
       <Routes>
       <Route path="/" element={<AkboyCampusHub />} />
       <Route path="/campus-hub" element={<AkboyCampusHub />} />
