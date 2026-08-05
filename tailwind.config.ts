@@ -14,12 +14,13 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'Figtree', 'system-ui', 'sans-serif'],
-        display: ['Space Grotesk', 'DM Sans', 'system-ui', 'sans-serif'],
-        inter: ['DM Sans', 'Inter', 'sans-serif'],
-        poppins: ['Space Grotesk', 'Outfit', 'sans-serif'],
-        lato: ['DM Sans', 'Lato', 'sans-serif'],
+        sans: ['Manrope', 'DM Sans', 'system-ui', 'sans-serif'],
+        display: ['Sora', 'Manrope', 'system-ui', 'sans-serif'],
+        inter: ['Manrope', 'DM Sans', 'sans-serif'],
+        poppins: ['Sora', 'Space Grotesk', 'sans-serif'],
+        lato: ['Manrope', 'DM Sans', 'sans-serif'],
       },
+
       colors: {
         akboy: {
           forest: "hsl(var(--akboy-forest))",
