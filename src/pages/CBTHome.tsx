@@ -12,7 +12,7 @@ import {
   Trophy,
 } from "lucide-react";
 import AppShell from "@/components/edura/AppShell";
-import { StatTile, ListRow, Panel, EmptyState } from "@/components/edura/tiles";
+import { ListRow, Panel, EmptyState } from "@/components/edura/tiles";
 import ScheduleTestModal from "@/components/ScheduleTestModal";
 import SchoolAvailableExams from "@/components/school/SchoolAvailableExams";
 import MockResultChecker from "@/components/MockResultChecker";
@@ -66,22 +66,26 @@ const CBTHome = () => {
         </Button>
       }
     >
-      <div className="space-y-5">
-        <Panel title="Start a practice test">
+      <div className="space-y-4">
+        <section className="animate-screen-in">
+          <h2 className="mb-2 font-display text-sm font-bold">Choose your exam</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {EXAM_TYPES.map((exam) => {
+            {EXAM_TYPES.map((exam, i) => {
               const inner = (
-                <div className="w-full rounded-xl border bg-background p-4 text-center transition-colors hover:border-primary">
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 font-bold text-primary">
+                <div
+                  className={`app-card press w-full p-4 text-left animate-pop-in stagger-${Math.min(i + 1, 5)}`}
+                >
+                  <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 font-display text-lg font-bold text-primary">
                     {exam.letter}
                   </div>
-                  <span className="block text-sm font-semibold">{exam.label}</span>
-                  <span className="text-[10px] uppercase text-muted-foreground">{exam.subtitle}</span>
+                  <span className="block font-display text-sm font-bold">{exam.label}</span>
+                  <span className="text-[10px] text-muted-foreground">{exam.subtitle}</span>
                 </div>
               );
               return isMobileBrowser ? (
                 <button
                   key={exam.type}
+                  className="text-left"
                   onClick={() => {
                     setBlockedFeature(`${exam.label} Practice`);
                     setShowInstallModal(true);
@@ -91,22 +95,37 @@ const CBTHome = () => {
                 </button>
               ) : (
                 <ScheduleTestModal key={exam.type} defaultExamType={exam.type}>
-                  <button className="w-full">{inner}</button>
+                  <button className="w-full text-left">{inner}</button>
                 </ScheduleTestModal>
               );
             })}
           </div>
-        </Panel>
+        </section>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <StatTile label="Tests taken" value={loading ? "..." : stats.testsTaken} />
-          <StatTile label="Average score" value={loading ? "..." : `${stats.averageScore}%`} />
-          <StatTile label="Study hours" value={loading ? "..." : `${stats.studyHours}h`} />
-          <StatTile
-            label="Global rank"
-            value={loading ? "..." : stats.rank > 0 ? `#${stats.rank}` : "—"}
-          />
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="skeleton h-24 rounded-[1.25rem]" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 animate-screen-in stagger-2">
+            {[
+              { label: "Tests taken", value: `${stats.testsTaken}` },
+              { label: "Average", value: `${stats.averageScore}%` },
+              { label: "Study hours", value: `${stats.studyHours}h` },
+              { label: "Rank", value: stats.rank > 0 ? `#${stats.rank}` : "—" },
+            ].map((m) => (
+              <div key={m.label} className="app-card p-4">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {m.label}
+                </span>
+                <p className="mt-1 font-display text-2xl font-bold tabular">{m.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
 
         <div className="grid gap-3 lg:grid-cols-2">
           <Panel title="Subject progress">
