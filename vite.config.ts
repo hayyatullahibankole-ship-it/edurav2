@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => {
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: null,
       manifestFilename: 'manifest.json',
       includeAssets: ['favicon.png', 'app-icon-white.png', 'robots.txt'],
       manifest: {
@@ -52,10 +53,22 @@ export default defineConfig(({ mode }) => {
         ]
       },
       workbox: {
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         // Increase cache size limit to 10 MB for large bundle
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'app-pages',
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 }
+            }
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',

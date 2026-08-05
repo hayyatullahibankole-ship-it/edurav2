@@ -384,6 +384,7 @@ const EduraRoutes = () => {
           <DashboardLayout><ChallengeArena /></DashboardLayout>
         </ProtectedRoute>
       } />
+      <Route path="/battle" element={<Navigate to="/challenge-arena" replace />} />
       <Route path="/challenge/:challengeId" element={
         <ProtectedRoute>
           <DashboardLayout><ChallengeDetail /></DashboardLayout>

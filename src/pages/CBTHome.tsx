@@ -193,7 +193,7 @@ const CBTHome = () => {
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             <ListRow to="/study-hub" icon={Target} title="Study hub" meta="Plan your sessions" />
             <ListRow to="/resources" icon={FileText} title="Past questions" meta="Browse by exam" />
-            <ListRow to="/battle" icon={Sword} title="Battle mode" meta="Challenge a friend" />
+            <ListRow to="/challenge-arena" icon={Sword} title="Challenge arena" meta="Compete in live challenges" />
             <ListRow to="/forum" icon={MessageSquare} title="Forum" meta="Ask and answer" />
             <ListRow to="/ai-tutor" icon={Bot} title="AI tutor" meta="Instant explanations" />
             <ListRow to="/leaderboard" icon={Trophy} title="Leaderboard" meta="Compare scores" />

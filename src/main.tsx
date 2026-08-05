@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { registerAppServiceWorker } from "./lib/registerAppServiceWorker";
 
 const isInIframe = (() => {
   try {
@@ -23,7 +24,12 @@ if ("serviceWorker" in navigator && (isInIframe || isPreviewHost)) {
     .catch(() => undefined);
 }
 
-createRoot(document.getElementById("root")!).render(
+void registerAppServiceWorker();
+
+const root = document.getElementById("root");
+if (!root) throw new Error("App root element not found");
+
+createRoot(root).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>

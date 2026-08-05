@@ -1,9 +1,21 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, ArrowLeft } from "lucide-react";
+import { Home, ArrowLeft, RefreshCw } from "lucide-react";
 
 const NotFound = () => {
+  const refreshApp = async () => {
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.allSettled(
+        registrations
+          .filter(({ active }) => active?.scriptURL.endsWith("/sw.js") || active?.scriptURL.endsWith("/pwabuilder-sw.js"))
+          .map((registration) => registration.update()),
+      );
+    }
+    window.location.assign(`${window.location.origin}${window.location.pathname}#/dashboard`);
+  };
+
   const location = useLocation();
 
   useEffect(() => {
@@ -20,7 +32,7 @@ const NotFound = () => {
             The page you're looking for doesn't exist or has been moved.
           </p>
         </div>
-        <div className="flex gap-4 justify-center">
+        <div className="flex flex-wrap gap-3 justify-center">
           <Button asChild variant="outline">
             <Link to="/">
               <Home className="w-4 h-4 mr-2" />
@@ -32,6 +44,10 @@ const NotFound = () => {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Go Back
             </button>
+          </Button>
+          <Button variant="secondary" onClick={refreshApp}>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh app
           </Button>
         </div>
       </div>
