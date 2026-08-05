@@ -389,7 +389,7 @@ const Dashboard = () => {
                 <ListRow to="/study-hub" icon={Target} title="Study hub" meta="Planner & materials" />
                 <ListRow to="/resources" icon={FileText} title="Past questions" meta="Downloadables" />
                 <ListRow to="/ebooks" icon={Library} title="Ebook library" meta="Read online" />
-                <ListRow to="/news" icon={Newspaper} title="Education news" meta="Latest updates" />
+                <ListRow href={EDUCATION_NEWS_URL} icon={Newspaper} title="Education news" meta="Admissions, scholarships & updates" />
                 <ListRow to="/leaderboard" icon={Trophy} title="Leaderboard" meta="See your standing" />
                 <ListRow to="/referral-program" icon={Award} title="Referrals" meta="Earn rewards" />
               </div>
