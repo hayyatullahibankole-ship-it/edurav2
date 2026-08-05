@@ -603,25 +603,7 @@ const ServicesHome = () => {
       side="services"
       title={`Hi, ${firstName}`}
       subtitle="Pick a service below and we'll handle it for you."
-      action={
-        <div className="flex items-center gap-2">
-          <UpgradeToCampus />
-          <Button
-            variant={view === "services" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setView("services")}
-          >
-            Services
-          </Button>
-          <Button
-            variant={view === "requests" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setView("requests")}
-          >
-            My requests
-          </Button>
-        </div>
-      }
+      action={<UpgradeToCampus />}
     >
       <main className="space-y-5">
 
