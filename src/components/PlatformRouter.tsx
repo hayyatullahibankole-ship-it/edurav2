@@ -221,6 +221,12 @@ const EduraRoutes = () => {
           <CoreOnly><CBTHome /></CoreOnly>
         </ProtectedRoute>
       } />
+      <Route path="/leaderboard" element={
+        <ProtectedRoute>
+          <Leaderboard />
+        </ProtectedRoute>
+      } />
+
       <Route path="/settings" element={
         <ProtectedRoute>
           <Settings />
