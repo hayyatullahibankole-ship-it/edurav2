@@ -17,8 +17,9 @@ A calm command centre, not a wall of cards:
 2. **"I've been admitted" upgrade card** — prominent on Home. Opens the short form (institution, faculty, department, level, matric no.), flips the account to Campus and lands the student on the Campus dashboard.
 3. **Two workspace tiles** — CBT Practice and Services, each with a one-line status (e.g. "3 tests this week", "1 request in progress").
 4. **Continue where you left off** — last attempt or pending service request, single tap to resume.
-5. **Key numbers** — tests taken, average score, rank, streak, as compact stat tiles.
-6. **Discover** — study hub, resources, forum, referrals as a quiet list, not big colour blocks.
+5. **Access code + upgrade row** — an inline field to enter an access / activation code (redeems subscription, promo or ebook codes with instant feedback) sitting beside an **Upgrade** button that opens the subscription plans (card or wallet payment). If already subscribed, the row shows the active plan and expiry instead.
+6. **Key numbers** — tests taken, average score, rank, streak, as compact stat tiles.
+7. **Discover** — study hub, resources, forum, referrals as a quiet list, not big colour blocks.
 
 ## The CBT page
 
