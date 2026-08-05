@@ -1,7 +1,9 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight, ExternalLink, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { openExternal } from "@/lib/openExternal";
+
 
 /** Compact metric tile used across Home, CBT, Campus and Wallet. */
 export const StatTile = ({
