@@ -17,8 +17,9 @@ A calm command centre, not a wall of cards:
 2. **"I've been admitted" upgrade card** — prominent on Home. Opens the short form (institution, faculty, department, level, matric no.), flips the account to Campus and lands the student on the Campus dashboard.
 3. **Two workspace tiles** — CBT Practice and Services, each with a one-line status (e.g. "3 tests this week", "1 request in progress").
 4. **Continue where you left off** — last attempt or pending service request, single tap to resume.
-5. **Key numbers** — tests taken, average score, rank, streak, as compact stat tiles.
-6. **Discover** — study hub, resources, forum, referrals as a quiet list, not big colour blocks.
+5. **Access code + upgrade row** — an inline field to enter an access / activation code (redeems subscription, promo or ebook codes with instant feedback) sitting beside an **Upgrade** button that opens the subscription plans (card or wallet payment). If already subscribed, the row shows the active plan and expiry instead.
+6. **Key numbers** — tests taken, average score, rank, streak, as compact stat tiles.
+7. **Discover** — study hub, resources, forum, referrals as a quiet list, not big colour blocks.
 
 ## The CBT page
 
@@ -47,14 +48,15 @@ Same page for candidates and campus students; only the journey block changes sha
 
 ## Navigation
 
-The bottom bar keeps its current shape — five slots with the raised centre button:
+Exactly four labelled tabs with the raised centre button sitting between CBT and Services:
 
 ```text
-Candidates:  Home   CBT        [ Services ]   Wallet     Profile
-Campus:      Home   Academics  [ Tools ]      Wallet     Profile
+Candidates:  Home   CBT        ( ⌾ )   Services   Wallet
+Campus:      Home   Academics  ( ⌾ )   Projects   Wallet
 ```
 
-The Profile slot opens the avatar menu / settings. Campus keeps Projects and Opportunities inside the Campus home grid; candidates keep Study, Resources and Forum inside Home's discover list. Desktop shows the full set in the left rail with the avatar and Log out at the bottom. Any attempt to reach the other world's routes redirects home.
+The raised centre button is the quick-action / explore button (start a test for candidates, quick add for campus) — it has no label. Profile and settings are not tabs; they open from the avatar in the topbar. Campus keeps Tools and Opportunities inside the Campus home grid; candidates keep Study, Resources and Forum inside Home's discover list. Desktop shows the full set in the left rail with the avatar and Log out at the bottom. Any attempt to reach the other world's routes redirects home.
+
 
 
 ## Design rules applied throughout
