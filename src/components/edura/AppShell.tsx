@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutGrid,
@@ -9,22 +9,29 @@ import {
   UserCog,
   GraduationCap,
   Briefcase,
-  ClipboardList,
-  Library,
-  Users,
   Calculator,
+  Settings as SettingsIcon,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import NotificationBell from "@/components/NotificationBell";
 import { DashboardThemeMenu } from "@/components/DashboardThemeMenu";
+import { ExploreSheet } from "@/components/edura/ExploreSheet";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import eduraLogo from "@/assets/edura-logo.png";
-
 
 export type ShellSide = "cbt" | "services" | "campus";
 
@@ -35,80 +42,107 @@ export type ShellNavItem = {
   end?: boolean;
 };
 
-/** One unified nav for every candidate surface (CBT + Services). */
+/**
+ * Four labelled tabs for every candidate surface. The raised centre action sits
+ * between CBT and Services and is rendered separately.
+ */
 const CANDIDATE_NAV: ShellNavItem[] = [
   { to: "/dashboard", label: "Home", icon: LayoutGrid, end: true },
-  { to: "/study-hub", label: "Study", icon: BookOpen },
+  { to: "/cbt", label: "CBT", icon: GraduationCap },
   { to: "/services", label: "Services", icon: Briefcase },
-  { to: "/resources", label: "Resources", icon: Library },
   { to: "/wallet", label: "Wallet", icon: WalletIcon },
 ];
 
-const NAV: Record<ShellSide, ShellNavItem[]> = {
-  cbt: CANDIDATE_NAV,
-  services: CANDIDATE_NAV,
+const CAMPUS_NAV: ShellNavItem[] = [
+  { to: "/campus", label: "Home", icon: LayoutGrid, end: true },
+  { to: "/campus/academics", label: "Academics", icon: BookOpen },
+  { to: "/campus/projects", label: "Projects", icon: FolderKanban },
+  { to: "/wallet", label: "Wallet", icon: WalletIcon },
+];
+
+/** Extra destinations that only appear in the desktop rail. */
+const DESKTOP_EXTRAS: Record<ShellSide, ShellNavItem[]> = {
+  cbt: [{ to: "/study-hub", label: "Study hub", icon: BookOpen }],
+  services: [{ to: "/study-hub", label: "Study hub", icon: BookOpen }],
   campus: [
-    { to: "/campus", label: "Home", icon: LayoutGrid, end: true },
-    { to: "/campus/academics", label: "Academics", icon: BookOpen },
-    { to: "/campus/tools", label: "Tools", icon: Calculator },
-    { to: "/campus/projects", label: "Projects", icon: FolderKanban },
+    { to: "/campus/tools", label: "Study tools", icon: Calculator },
     { to: "/campus/opportunities", label: "Opportunities", icon: Compass },
   ],
 };
 
-const SIDE_META: Record<ShellSide, { label: string; settingsTo: string }> = {
-  cbt: { label: "CBT", settingsTo: "/campus/journey" },
-  services: { label: "Services", settingsTo: "/campus/journey" },
-  campus: { label: "Campus", settingsTo: "/campus/journey" },
+const NAV: Record<ShellSide, ShellNavItem[]> = {
+  cbt: CANDIDATE_NAV,
+  services: CANDIDATE_NAV,
+  campus: CAMPUS_NAV,
 };
 
-/** Shared native-style bottom tab bar with a raised center action. */
-export const MobileTabBar = ({ items = CANDIDATE_NAV }: { items?: ShellNavItem[] }) => (
-  <nav className="lg:hidden fixed bottom-3 inset-x-3 z-40">
-    <div className="relative mx-auto max-w-md h-16 rounded-2xl border bg-card shadow-lg">
-      <div className="relative h-full flex items-center justify-around px-2">
-        {items.map((item, i) => {
-          const isCenter = i === Math.floor(items.length / 2);
-          if (isCenter) {
-            return (
-              <div key={item.to} className="flex-1 flex justify-center -mt-8">
-                <NavLink to={item.to} end={item.end} aria-label={item.label}>
-                  {({ isActive }) => (
-                    <div
-                      className={cn(
-                        "w-16 h-16 rounded-full flex items-center justify-center border-4 border-card shadow-lg transition-transform active:scale-90",
-                        isActive ? "bg-primary" : "bg-primary/90"
-                      )}
-                    >
-                      <item.icon className="h-7 w-7 text-primary-foreground" />
-                    </div>
-                  )}
-                </NavLink>
-              </div>
-            );
-          }
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                cn(
-                  "flex-1 flex flex-col items-center gap-0.5 py-2 text-[9px] font-medium transition-all active:scale-90",
-                  isActive ? "text-primary font-semibold" : "text-muted-foreground"
-                )
-              }
-            >
-              <item.icon className="h-6 w-6" />
-              <span className="truncate max-w-full px-1">{item.label}</span>
-            </NavLink>
-          );
-        })}
-      </div>
-    </div>
-  </nav>
-);
+const SIDE_META: Record<ShellSide, { label: string }> = {
+  cbt: { label: "Edura" },
+  services: { label: "Edura" },
+  campus: { label: "Campus" },
+};
 
+type CenterAction = { icon: LucideIcon; onClick: () => void; label: string };
+
+/**
+ * Shared native-style bottom tab bar: four labelled tabs with one raised,
+ * unlabelled action button in the middle.
+ */
+export const MobileTabBar = ({
+  items = CANDIDATE_NAV,
+  center,
+}: {
+  items?: ShellNavItem[];
+  center?: CenterAction;
+}) => {
+  const [exploreOpen, setExploreOpen] = useState(false);
+  const action: CenterAction =
+    center ?? { icon: Compass, label: "Explore", onClick: () => setExploreOpen(true) };
+  const mid = Math.ceil(items.length / 2);
+  const left = items.slice(0, mid);
+  const right = items.slice(mid);
+
+  const tab = (item: ShellNavItem) => (
+    <NavLink
+      key={item.to}
+      to={item.to}
+      end={item.end}
+      className={({ isActive }) =>
+        cn(
+          "flex-1 flex flex-col items-center gap-0.5 py-2 text-[9px] font-medium transition-all active:scale-90",
+          isActive ? "text-primary font-semibold" : "text-muted-foreground"
+        )
+      }
+    >
+      <item.icon className="h-5 w-5" />
+      <span className="truncate max-w-full px-1">{item.label}</span>
+    </NavLink>
+  );
+
+  return (
+    <>
+      <nav className="lg:hidden fixed bottom-3 inset-x-3 z-40">
+        <div className="relative mx-auto max-w-md h-16 rounded-2xl border bg-card shadow-lg">
+          <div className="relative h-full flex items-center px-2">
+            {left.map(tab)}
+            <div className="flex-1 flex justify-center -mt-8">
+              <button
+                type="button"
+                aria-label={action.label}
+                onClick={action.onClick}
+                className="w-14 h-14 rounded-full bg-primary flex items-center justify-center border-4 border-card shadow-lg transition-transform active:scale-90"
+              >
+                <action.icon className="h-6 w-6 text-primary-foreground" />
+              </button>
+            </div>
+            {right.map(tab)}
+          </div>
+        </div>
+      </nav>
+      {!center && <ExploreSheet open={exploreOpen} onOpenChange={setExploreOpen} />}
+    </>
+  );
+};
 
 interface AppShellProps {
   side: ShellSide;
@@ -129,9 +163,11 @@ interface AppShellProps {
 export const AppShell = ({ side, title, subtitle, meta, action, nav, children }: AppShellProps) => {
   const navigate = useNavigate();
   const items = nav ?? NAV[side];
+  const railItems = [...items, ...DESKTOP_EXTRAS[side]];
   const sideMeta = SIDE_META[side];
-  const { signOut } = useAuth();
+  const { signOut, userProfile, user } = useAuth();
   const { toast } = useToast();
+  const [exploreOpen, setExploreOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -145,7 +181,16 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
     }
   };
 
-
+  const displayName =
+    [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(" ") ||
+    user?.email?.split("@")[0] ||
+    "Student";
+  const initials = displayName
+    .split(" ")
+    .map((p: string) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   const railLink = (item: ShellNavItem) => (
     <NavLink
@@ -166,6 +211,43 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
     </NavLink>
   );
 
+  const avatarMenu = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label="Account menu"
+          className="rounded-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Avatar className="h-8 w-8 border">
+            <AvatarImage src={(userProfile as any)?.avatar_url || undefined} alt={displayName} />
+            <AvatarFallback className="text-[11px] font-semibold">{initials}</AvatarFallback>
+          </Avatar>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56 bg-popover z-50">
+        <DropdownMenuLabel className="truncate">{displayName}</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate("/settings")}>
+          <UserCog className="h-4 w-4 mr-2" /> Edit profile
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/settings#journey")}>
+          <GraduationCap className="h-4 w-4 mr-2" /> My journey
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/settings#security")}>
+          <SettingsIcon className="h-4 w-4 mr-2" /> Settings
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="text-destructive focus:text-destructive"
+        >
+          <LogOut className="h-4 w-4 mr-2" /> Log out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       {/* Desktop rail */}
@@ -174,16 +256,15 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
           <img src={eduraLogo} alt="Edura" className="h-7 w-auto" />
           <Badge variant="outline" className="text-[10px] font-semibold">{sideMeta.label}</Badge>
         </div>
-        <nav className="flex-1 overflow-y-auto p-3 space-y-1">{items.map(railLink)}</nav>
+        <nav className="flex-1 overflow-y-auto p-3 space-y-1">{railItems.map(railLink)}</nav>
         <div className="p-3 border-t space-y-1">
-
           <Button
             variant="ghost"
             size="sm"
             className="w-full justify-start gap-2.5 text-muted-foreground"
-            onClick={() => navigate(sideMeta.settingsTo)}
+            onClick={() => navigate("/settings")}
           >
-            <UserCog className="h-4 w-4" /> My journey
+            <SettingsIcon className="h-4 w-4" /> Settings
           </Button>
           <Button
             variant="ghost"
@@ -194,7 +275,6 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
             <LogOut className="h-4 w-4" /> Log out
           </Button>
         </div>
-
       </aside>
 
       <div className="lg:pl-60 flex min-h-screen flex-col">
@@ -209,17 +289,7 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
             <div className="flex items-center gap-1.5">
               <DashboardThemeMenu />
               <NotificationBell />
-
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={handleLogout}
-                aria-label="Log out"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-
+              {avatarMenu}
             </div>
           </div>
         </header>
@@ -240,9 +310,15 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
       </div>
 
       {/* Mobile bottom nav */}
-      <MobileTabBar items={items} />
-
-
+      <MobileTabBar
+        items={items}
+        center={
+          side === "campus"
+            ? { icon: Calculator, label: "Study tools", onClick: () => navigate("/campus/tools") }
+            : { icon: Compass, label: "Explore", onClick: () => setExploreOpen(true) }
+        }
+      />
+      {side !== "campus" && <ExploreSheet open={exploreOpen} onOpenChange={setExploreOpen} />}
     </div>
   );
 };

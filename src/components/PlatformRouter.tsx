@@ -3,7 +3,6 @@ import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
-import { useAppSide } from "@/hooks/useAppSide";
 import { useAcademicStage } from "@/hooks/useAcademicStage";
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -19,7 +18,6 @@ const Auth = lazy(() => import("@/pages/Auth"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const MobileSplash = lazy(() => import("@/pages/MobileSplash"));
 const MobileOnboarding = lazy(() => import("@/pages/MobileOnboarding"));
-const MobileHome = lazy(() => import("@/pages/MobileHome"));
 const InstallApp = lazy(() => import("@/pages/InstallApp"));
 const AdminPortal = lazy(() => import("@/pages/AdminPortal"));
 const AdminLogin = lazy(() => import("@/pages/AdminLogin"));
@@ -56,7 +54,8 @@ const ReferralProgram = lazy(() => import("@/pages/ReferralProgram"));
 const PerformanceReport = lazy(() => import("@/pages/PerformanceReport"));
 const LessonQuiz = lazy(() => import("@/pages/LessonQuiz"));
 
-const ChooseSide = lazy(() => import("@/pages/ChooseSide"));
+const CBTHome = lazy(() => import("@/pages/CBTHome"));
+const Settings = lazy(() => import("@/pages/Settings"));
 const ServicesHome = lazy(() => import("@/pages/ServicesHome"));
 const Wallet = lazy(() => import("@/pages/Wallet"));
 const CampusHome = lazy(() => import("@/pages/campus/CampusHome"));
@@ -67,9 +66,8 @@ const CampusJourney = lazy(() => import("@/pages/campus/CampusJourney"));
 const CampusTools = lazy(() => import("@/pages/campus/CampusTools"));
 
 
-// Renders the correct home screen for the student's journey stage + chosen side
+// Journey-aware home: candidates get the unified home, campus students go to Campus
 const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
-  const { side } = useAppSide();
   const { stage, isCampus, loading } = useAcademicStage();
 
   // Journey first: no stage yet → onboarding
@@ -79,11 +77,9 @@ const DashboardBySide = ({ isInstalledApp }: { isInstalledApp: boolean }) => {
   // Higher institution students live on Campus only
   if (isCampus) return <Navigate to="/campus" replace />;
 
-  if (side === null) return <Navigate to="/choose" replace />;
-  if (side === "services") return <ServicesHome />;
-  if (isInstalledApp) return <MobileHome />;
-  return <Layout showNavbar={false}><Dashboard /></Layout>;
+  return <Dashboard />;
 };
+
 
 /** Campus routes are for undergraduates & graduates only */
 const CampusOnly = ({ children }: { children: JSX.Element }) => {
@@ -191,14 +187,6 @@ const EduraRoutes = () => {
       {/* Mobile-specific routes */}
       <Route path="/mobile-splash" element={<MobileSplash />} />
       <Route path="/mobile-onboarding" element={<MobileOnboarding />} />
-      <Route
-        path="/mobile-home"
-        element={
-          <ProtectedRoute>
-            <MobileHome />
-          </ProtectedRoute>
-        }
-      />
 
       {/* Root route */}
       <Route 
@@ -213,9 +201,16 @@ const EduraRoutes = () => {
       <Route path="/mobile-preview" element={<Navigate to="/mobile-splash" replace />} />
       
       <Route path="/auth" element={<Layout showNavbar={false}><Auth /></Layout>} />
-      <Route path="/choose" element={
+      <Route path="/choose" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/mobile-home" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/cbt" element={
         <ProtectedRoute>
-          <ChooseSide />
+          <CoreOnly><CBTHome /></CoreOnly>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <Settings />
         </ProtectedRoute>
       } />
       <Route path="/dashboard" element={
