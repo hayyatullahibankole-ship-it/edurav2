@@ -31,7 +31,6 @@ export function AkboyNavbar() {
       name: "Learn",
       children: [
         { name: "Akboy Exam Prep Academy", path: `${basePath}/register` },
-        { name: "JAMB CBT Practice", path: "https://edura.space", external: true },
         { name: "Mock Exams", path: `${basePath}/mock` },
         { name: "Online Classes", path: `${basePath}/register` },
         { name: "Events & Workshops", path: `${basePath}/events` },

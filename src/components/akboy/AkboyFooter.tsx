@@ -72,7 +72,6 @@ export function AkboyFooter() {
             <ul className="space-y-2.5 text-sm">
               <li><Link to={`${basePath}/register`} className="text-white/60 hover:text-gray-50 transition-colors">Exam Prep Academy</Link></li>
               <li><Link to={`${basePath}/mock`} className="text-white/60 hover:text-gray-50 transition-colors">Mock Exams</Link></li>
-              <li><a href="https://edura.space" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-gray-50 transition-colors">JAMB CBT Practice</a></li>
               <li><Link to={`${basePath}/register`} className="text-white/60 hover:text-gray-50 transition-colors">Online Classes</Link></li>
             </ul>
           </div>

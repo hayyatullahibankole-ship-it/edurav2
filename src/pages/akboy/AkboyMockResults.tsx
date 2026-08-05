@@ -206,7 +206,7 @@ export default function AkboyMockResults() {
                 <span className="text-muted-foreground">Need to register?</span>
                 <Link to={`${basePath}/mock-registration`} className="text-orange-600 font-semibold hover:underline">Register Now</Link>
                 <span className="text-muted-foreground mx-1">•</span>
-                <a href="https://edura.space/#/school-registration" target="_blank" rel="noopener noreferrer" className="text-orange-600 font-semibold hover:underline inline-flex items-center gap-1">
+                <a href="/contact" className="text-orange-600 font-semibold hover:underline inline-flex items-center gap-1">
                   <School className="w-3.5 h-3.5" /> Register as a School
                 </a>
               </div>
