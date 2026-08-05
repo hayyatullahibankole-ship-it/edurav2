@@ -123,10 +123,14 @@ const AkboyMockResults = lazy(() => import("@/pages/akboy/AkboyMockResults"));
 const AkboyMockPages = lazy(() => import("@/pages/akboy/AkboyMockPages"));
 const ReprintAdmitSlip = lazy(() => import("@/pages/akboy/ReprintAdmitSlip"));
 
+/** Wraps an Akboy page so its lazy-load fallback stays Akboy-branded. */
+const akboy = (el: JSX.Element) => <Suspense fallback={<AkboyLoading />}>{el}</Suspense>;
+
 // Akboy Routes Component
 const AkboyRoutes = () => {
   return (
-    <Suspense fallback={<LoadingAnimation />}>
+    <Suspense fallback={<AkboyLoading />}>
+
       <Routes>
       <Route path="/" element={<AkboyHome />} />
       <Route path="/about" element={<AkboyAbout />} />
