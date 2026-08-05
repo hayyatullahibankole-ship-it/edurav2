@@ -134,7 +134,7 @@ export default function AkboyMockLogin() {
                       Register Now
                     </Link>
                   </div>
-                  <a href="/contact" className="flex items-center gap-2 text-sm text-orange-600 font-semibold hover:underline">
+                  <a href={`${basePath}/contact`} className="flex items-center gap-2 text-sm text-orange-600 font-semibold hover:underline">
                     <School className="w-4 h-4" /> Register as a School
                   </a>
                 </div>
