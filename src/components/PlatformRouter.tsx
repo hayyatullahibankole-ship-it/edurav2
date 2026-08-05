@@ -420,32 +420,33 @@ const EduraRoutes = () => {
       <Route path="/delete-account" element={<Layout><DeleteAccount /></Layout>} />
       
       {/* AKBOY Routes accessible via /akboy path on Edura domain */}
-      <Route path="/akboy" element={<AkboyHome />} />
-      <Route path="/akboy/about" element={<AkboyAbout />} />
-      <Route path="/akboy/services" element={<AkboyServices />} />
-      <Route path="/akboy/portfolio" element={<AkboyPortfolio />} />
-      <Route path="/akboy/events" element={<AkboyEvents />} />
-      <Route path="/akboy/ebooks" element={<EbookLibrary />} />
-      <Route path="/akboy/ebooks/:slug" element={<EbookReader />} />
-      <Route path="/ebooks" element={<EbookLibrary />} />
-      <Route path="/ebooks/:slug" element={<EbookReader />} />
-      <Route path="/akboy/contact" element={<AkboyContact />} />
+      <Route path="/akboy" element={akboy(<AkboyHome />)} />
+      <Route path="/akboy/about" element={akboy(<AkboyAbout />)} />
+      <Route path="/akboy/services" element={akboy(<AkboyServices />)} />
+      <Route path="/akboy/portfolio" element={akboy(<AkboyPortfolio />)} />
+      <Route path="/akboy/events" element={akboy(<AkboyEvents />)} />
+      <Route path="/akboy/ebooks" element={akboy(<EbookLibrary />)} />
+      <Route path="/akboy/ebooks/:slug" element={akboy(<EbookReader />)} />
+      <Route path="/ebooks" element={akboy(<EbookLibrary />)} />
+      <Route path="/ebooks/:slug" element={akboy(<EbookReader />)} />
+      <Route path="/akboy/contact" element={akboy(<AkboyContact />)} />
       <Route path="/akboy/blog" element={<Navigate to="/akboy/campus-hub" replace />} />
-      <Route path="/akboy/campus-hub" element={<AkboyCampusHub />} />
-      <Route path="/akboy/blog/:slug" element={<AkboyBlogPost />} />
+      <Route path="/akboy/campus-hub" element={akboy(<AkboyCampusHub />)} />
+      <Route path="/akboy/blog/:slug" element={akboy(<AkboyBlogPost />)} />
 
       {/* Registration aliases */}
-      <Route path="/akboy/register" element={<AkboyTutorialRegistration />} />
-      <Route path="/akboy/tutorial-registration" element={<AkboyTutorialRegistration />} />
-      <Route path="/akboy/tutorials/register" element={<AkboyTutorialRegistration />} />
+      <Route path="/akboy/register" element={akboy(<AkboyTutorialRegistration />)} />
+      <Route path="/akboy/tutorial-registration" element={akboy(<AkboyTutorialRegistration />)} />
+      <Route path="/akboy/tutorials/register" element={akboy(<AkboyTutorialRegistration />)} />
 
       {/* AKBOY Mock Exam Routes */}
-      <Route path="/akboy/mock" element={<AkboyMockPages />} />
-      <Route path="/akboy/mock-registration" element={<AkboyMockRegistration />} />
-      <Route path="/akboy/mock-login" element={<AkboyMockLogin />} />
-      <Route path="/akboy/mock-exam" element={<AkboyMockExam />} />
-      <Route path="/akboy/mock-submitted" element={<AkboyMockSubmitted />} />
-      <Route path="/akboy/mock-results" element={<AkboyMockResults />} />
+      <Route path="/akboy/mock" element={akboy(<AkboyMockPages />)} />
+      <Route path="/akboy/mock-registration" element={akboy(<AkboyMockRegistration />)} />
+      <Route path="/akboy/mock-login" element={akboy(<AkboyMockLogin />)} />
+      <Route path="/akboy/mock-exam" element={akboy(<AkboyMockExam />)} />
+      <Route path="/akboy/mock-submitted" element={akboy(<AkboyMockSubmitted />)} />
+      <Route path="/akboy/mock-results" element={akboy(<AkboyMockResults />)} />
+
 
       <Route path="*" element={<Layout><NotFound /></Layout>} />
     </Routes>
