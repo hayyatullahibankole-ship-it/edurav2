@@ -309,7 +309,7 @@ export default function AkboyHome() {
                 </div>
                 <h3 className="mt-5 font-display text-lg font-semibold text-akboy-forest">{p.title}</h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-akboy-muted">{p.description}</p>
-                {p.action.external ? (
+                {"external" in p.action && (p.action as { external?: boolean }).external ? (
                   <a
                     href={p.action.href}
                     target="_blank"
