@@ -1,7 +1,7 @@
 import { ReactNode, useEffect } from "react";
 import Navbar from "./Navbar";
 import WhatsAppButton from "./WhatsAppButton";
-import MobileNav from "./MobileNav";
+import { MobileTabBar } from "@/components/edura/AppShell";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
 import { useNativeApp } from "@/hooks/useNativeApp";
@@ -74,7 +74,7 @@ const Layout = ({
       {/* Mobile Navigation - Show ONLY for installed apps / native app */}
       {shouldShowMobileNav && (
         <>
-          <MobileNav activeTab={getActiveTab()} onTabChange={handleTabChange} />
+          <MobileTabBar />
           {/* Add padding to bottom to prevent content being hidden by nav */}
           <div className="h-20" />
         </>
