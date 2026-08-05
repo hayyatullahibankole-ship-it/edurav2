@@ -36,20 +36,18 @@ export type ShellNavItem = {
   end?: boolean;
 };
 
+/** One unified nav for every candidate surface (CBT + Services). */
+const CANDIDATE_NAV: ShellNavItem[] = [
+  { to: "/dashboard", label: "Home", icon: LayoutGrid, end: true },
+  { to: "/study-hub", label: "Study", icon: BookOpen },
+  { to: "/services", label: "Services", icon: Briefcase },
+  { to: "/resources", label: "Resources", icon: Library },
+  { to: "/wallet", label: "Wallet", icon: WalletIcon },
+];
+
 const NAV: Record<ShellSide, ShellNavItem[]> = {
-  cbt: [
-    { to: "/dashboard", label: "Home", icon: LayoutGrid, end: true },
-    { to: "/study-hub", label: "Study", icon: BookOpen },
-    { to: "/resources", label: "Resources", icon: Library },
-    { to: "/forum", label: "Forum", icon: Users },
-    { to: "/wallet", label: "Wallet", icon: WalletIcon },
-  ],
-  services: [
-    { to: "/services", label: "Services", icon: Briefcase, end: true },
-    { to: "/services?tab=requests", label: "Requests", icon: ClipboardList },
-    { to: "/wallet", label: "Wallet", icon: WalletIcon },
-    { to: "/dashboard", label: "CBT", icon: GraduationCap },
-  ],
+  cbt: CANDIDATE_NAV,
+  services: CANDIDATE_NAV,
   campus: [
     { to: "/campus", label: "Home", icon: LayoutGrid, end: true },
     { to: "/campus/academics", label: "Academics", icon: BookOpen },
