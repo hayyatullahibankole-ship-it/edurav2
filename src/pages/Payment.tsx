@@ -222,7 +222,11 @@ const Payment = () => {
                 )}
 
                 <div className="mt-auto space-y-2 pt-6">
-                  {plan.paystack ? (
+                  {plan.paystack && !canPurchaseDigitalInApp() ? (
+                    <p className="rounded-lg border bg-surface p-3 text-[11px] text-muted-foreground">
+                      {DIGITAL_PURCHASE_NOTICE}
+                    </p>
+                  ) : plan.paystack ? (
                     <>
                       <Button
                         onClick={() => handlePaystackPayment(plan.name, plan.price)}

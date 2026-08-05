@@ -177,28 +177,35 @@ export const ScratchCardDialog = ({ service, onClose }: Props) => {
               <Badge variant="secondary">{naira(balance)}</Badge>
             </div>
 
-            <div className="grid gap-2">
-              <Button onClick={payWithWallet} disabled={processing || !canUseWallet}>
-                {processing ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <WalletIcon className="mr-2 h-4 w-4" />
+            {canPurchaseDigitalInApp() ? (
+              <div className="grid gap-2">
+                <Button onClick={payWithWallet} disabled={processing || !canUseWallet}>
+                  {processing ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <WalletIcon className="mr-2 h-4 w-4" />
+                  )}
+                  Pay from wallet
+                </Button>
+                {!canUseWallet && (
+                  <button
+                    className="text-left text-xs text-muted-foreground underline"
+                    onClick={() => navigate("/wallet")}
+                  >
+                    Balance too low — fund your wallet
+                  </button>
                 )}
-                Pay from wallet
-              </Button>
-              {!canUseWallet && (
-                <button
-                  className="text-left text-xs text-muted-foreground underline"
-                  onClick={() => navigate("/wallet")}
-                >
-                  Balance too low — fund your wallet
-                </button>
-              )}
-              <Button variant="outline" onClick={payWithCard} disabled={processing}>
-                <CreditCard className="mr-2 h-4 w-4" />
-                Pay with card
-              </Button>
-            </div>
+                <Button variant="outline" onClick={payWithCard} disabled={processing}>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Pay with card
+                </Button>
+              </div>
+            ) : (
+              <p className="rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
+                Result-checking cards are purchased on your Edura web dashboard. Cards you already
+                own appear here automatically.
+              </p>
+            )}
           </div>
         )}
       </DialogContent>
