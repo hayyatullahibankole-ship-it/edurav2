@@ -62,6 +62,54 @@ const SIDE_META: Record<ShellSide, { label: string; settingsTo: string }> = {
   campus: { label: "Campus", settingsTo: "/campus/journey" },
 };
 
+/** Shared native-style bottom tab bar with a raised center action. */
+export const MobileTabBar = ({ items = CANDIDATE_NAV }: { items?: ShellNavItem[] }) => (
+  <nav className="lg:hidden fixed bottom-3 inset-x-3 z-40">
+    <div className="relative mx-auto max-w-md h-16 rounded-2xl border bg-card shadow-lg">
+      <div className="relative h-full flex items-center justify-around px-2">
+        {items.map((item, i) => {
+          const isCenter = i === Math.floor(items.length / 2);
+          if (isCenter) {
+            return (
+              <div key={item.to} className="flex-1 flex justify-center -mt-8">
+                <NavLink to={item.to} end={item.end} aria-label={item.label}>
+                  {({ isActive }) => (
+                    <div
+                      className={cn(
+                        "w-16 h-16 rounded-full flex items-center justify-center border-4 border-card shadow-lg transition-transform active:scale-90",
+                        isActive ? "bg-primary" : "bg-primary/90"
+                      )}
+                    >
+                      <item.icon className="h-7 w-7 text-primary-foreground" />
+                    </div>
+                  )}
+                </NavLink>
+              </div>
+            );
+          }
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                cn(
+                  "flex-1 flex flex-col items-center gap-0.5 py-2 text-[9px] font-medium transition-all active:scale-90",
+                  isActive ? "text-primary font-semibold" : "text-muted-foreground"
+                )
+              }
+            >
+              <item.icon className="h-6 w-6" />
+              <span className="truncate max-w-full px-1">{item.label}</span>
+            </NavLink>
+          );
+        })}
+      </div>
+    </div>
+  </nav>
+);
+
+
 interface AppShellProps {
   side: ShellSide;
   title: string;
@@ -192,26 +240,9 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t bg-card">
-        <div className="grid" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
-          {items.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                cn(
-                  "flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
-                  isActive ? "text-primary" : "text-muted-foreground"
-                )
-              }
-            >
-              <item.icon className="h-[18px] w-[18px]" />
-              <span className="truncate max-w-full px-1">{item.label}</span>
-            </NavLink>
-          ))}
-        </div>
-      </nav>
+      <MobileTabBar items={items} />
+
+
     </div>
   );
 };
