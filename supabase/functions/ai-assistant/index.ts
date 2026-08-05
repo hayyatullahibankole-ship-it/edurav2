@@ -87,7 +87,9 @@ serve(async (req) => {
 `;
 
     if (user) {
+      try {
       // Fetch user profile and progress data
+
       const userIdQuery = await supabaseClient.from('users').select('id, first_name, last_name, email').eq('auth_user_id', user.id).single();
       const dbUser = userIdQuery.data;
 
