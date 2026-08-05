@@ -61,6 +61,30 @@ export default function AccountSettings() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [verificationLoading, setVerificationLoading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirm.trim().toUpperCase() !== "DELETE") return;
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account");
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({ title: "Account deleted", description: "Your account and data have been permanently removed." });
+      try { localStorage.clear(); } catch { /* ignore */ }
+      await supabase.auth.signOut();
+      window.location.href = "/";
+    } catch (e) {
+      toast({
+        title: "Could not delete account",
+        description: e instanceof Error ? e.message : "Please try again or email support@edura.space",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   // State for settings
   const [notifications, setNotifications] = useState<NotificationSettings>({
@@ -820,6 +844,55 @@ export default function AccountSettings() {
               Your data is automatically backed up daily. Export includes profile, test history, and preferences.
             </AlertDescription>
           </Alert>
+        </CardContent>
+      </Card>
+
+      {/* Danger Zone */}
+      <Card className="border-destructive/40">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="h-5 w-5" />
+            Delete account
+          </CardTitle>
+          <CardDescription>
+            Permanently delete your Edura account and all associated data. This cannot be undone.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Deleting removes your profile, test history, study plans, wallet balance, service requests and
+              uploaded files. Any remaining wallet balance is forfeited. Anonymised payment records may be kept
+              where the law requires.
+            </AlertDescription>
+          </Alert>
+          <div className="space-y-2">
+            <Label htmlFor="delete-confirm">Type DELETE to confirm</Label>
+            <Input
+              id="delete-confirm"
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder="DELETE"
+              autoComplete="off"
+            />
+          </div>
+          <Button
+            variant="destructive"
+            onClick={handleDeleteAccount}
+            disabled={deleting || deleteConfirm.trim().toUpperCase() !== "DELETE"}
+            className="w-full sm:w-auto"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            {deleting ? "Deleting..." : "Delete my account permanently"}
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Can't sign in? See the{" "}
+            <Link to="/delete-account" className="underline">
+              account deletion page
+            </Link>
+            .
+          </p>
         </CardContent>
       </Card>
 
