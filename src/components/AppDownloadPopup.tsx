@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { X, Download, Smartphone } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useInstalledApp } from '@/hooks/useInstalledApp';
 import eduraLogo from '@/assets/edura-logo.png';
 
-const UPTODOWN_URL = "https://edura-advanced-cbt-platform.en.uptodown.com/android/download";
 const POPUP_STORAGE_KEY = "edura_app_popup_dismissed";
 const POPUP_DELAY_MS = 3000;
 
 export const AppDownloadPopup = () => {
   const [visible, setVisible] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { isInstalledApp } = useInstalledApp();
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export const AppDownloadPopup = () => {
   };
 
   const handleDownload = () => {
-    window.open(UPTODOWN_URL, '_blank');
+    navigate('/install-app');
     handleDismiss();
   };
 
@@ -73,7 +73,7 @@ export const AppDownloadPopup = () => {
               Get the Edura App
             </h3>
             <p className="text-muted-foreground text-xs mt-0.5">
-              50K+ downloads • 4.8★ rating
+              Best as an installed app — fast, offline-ready, and exam-focused.
             </p>
           </div>
 
