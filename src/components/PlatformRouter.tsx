@@ -18,7 +18,6 @@ const Auth = lazy(() => import("@/pages/Auth"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const MobileSplash = lazy(() => import("@/pages/MobileSplash"));
 const MobileOnboarding = lazy(() => import("@/pages/MobileOnboarding"));
-const MobileHome = lazy(() => import("@/pages/MobileHome"));
 const InstallApp = lazy(() => import("@/pages/InstallApp"));
 const AdminPortal = lazy(() => import("@/pages/AdminPortal"));
 const AdminLogin = lazy(() => import("@/pages/AdminLogin"));
