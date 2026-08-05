@@ -30,6 +30,7 @@ const ServicesLanding = lazy(() => import("@/pages/ServicesLanding"));
 const Payment = lazy(() => import("@/pages/Payment"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
+const DeleteAccount = lazy(() => import("@/pages/DeleteAccount"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const AnswerReview = lazy(() => import("@/pages/AnswerReview"));
 const PaymentSuccess = lazy(() => import("@/pages/PaymentSuccess"));
@@ -152,6 +153,7 @@ const AkboyRoutes = () => {
       <Route path="/mock-submitted" element={<AkboyMockSubmitted />} />
       <Route path="/mock-results" element={<AkboyMockResults />} />
       <Route path="/privacy" element={<Privacy />} />
+      <Route path="/delete-account" element={<DeleteAccount />} />
         <Route path="/reprint-admit-slip" element={<ReprintAdmitSlip />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="*" element={<NotFound />} />
@@ -408,6 +410,7 @@ const EduraRoutes = () => {
       
       <Route path="/terms" element={<Layout><Terms /></Layout>} />
       <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
+      <Route path="/delete-account" element={<Layout><DeleteAccount /></Layout>} />
       
       {/* AKBOY Routes accessible via /akboy path on Edura domain */}
       <Route path="/akboy" element={<AkboyHome />} />
