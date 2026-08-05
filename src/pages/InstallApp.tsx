@@ -111,12 +111,9 @@ export default function InstallApp() {
             <h2 className="font-bold text-xl">Edura CBT</h2>
             <p className="text-muted-foreground text-sm">Your Gateway to Exam Success</p>
             <div className="flex items-center gap-3 mt-1">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> 4.8
-              </span>
-              <span className="text-xs text-muted-foreground">50K+ downloads</span>
+              <span className="text-xs text-muted-foreground">Free to start</span>
               <span className="text-xs font-semibold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">
-                FREE
+                NIGERIA ED-TECH
               </span>
             </div>
           </div>
