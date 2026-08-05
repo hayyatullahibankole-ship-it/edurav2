@@ -50,7 +50,7 @@ const MobileSplash = () => {
 
       {/* Minimal determinate loading bar */}
       <div className="absolute bottom-16 h-1 w-40 overflow-hidden rounded-full bg-primary-foreground/20">
-        <div className="h-full w-1/2 animate-loader-sweep rounded-full bg-primary-foreground/80" />
+        <div className="h-full w-1/2 animate-loading-sweep rounded-full bg-primary-foreground/80" />
       </div>
     </div>
   );
