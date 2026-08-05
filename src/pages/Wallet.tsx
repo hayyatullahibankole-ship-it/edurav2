@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { initializePaystackPayment } from "@/utils/paystack";
+import { canPurchaseDigitalInApp, DIGITAL_PURCHASE_NOTICE } from "@/lib/nativePayments";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -250,33 +251,41 @@ const Wallet = () => {
             </div>
 
 
-            <div className="space-y-2">
-              <Label htmlFor="amount">Top up amount</Label>
-              <Input
-                id="amount"
-                type="number"
-                inputMode="numeric"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="e.g. 2000"
-              />
-              <div className="flex flex-wrap gap-2">
-                {QUICK_AMOUNTS.map((value) => (
-                  <Button
-                    key={value}
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setAmount(String(value))}
-                  >
-                    {naira(value)}
-                  </Button>
-                ))}
-              </div>
-            </div>
+            {canPurchaseDigitalInApp() ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Top up amount</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    inputMode="numeric"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="e.g. 2000"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    {QUICK_AMOUNTS.map((value) => (
+                      <Button
+                        key={value}
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setAmount(String(value))}
+                      >
+                        {naira(value)}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
 
-            <Button className="w-full" onClick={fundWallet} disabled={funding}>
-              {funding ? "Processing..." : "Fund wallet"}
-            </Button>
+                <Button className="w-full" onClick={fundWallet} disabled={funding}>
+                  {funding ? "Processing..." : "Fund wallet"}
+                </Button>
+              </>
+            ) : (
+              <p className="rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
+                {DIGITAL_PURCHASE_NOTICE}
+              </p>
+            )}
           </CardContent>
         </Card>
 
