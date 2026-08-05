@@ -186,6 +186,28 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
   const { toast } = useToast();
   const [exploreOpen, setExploreOpen] = useState(false);
 
+  // Warm the other tab bundles while the device is idle so switching tabs is
+  // instant instead of showing a loader every time.
+  useEffect(() => {
+    const warm = () => {
+      void import("@/pages/Dashboard");
+      void import("@/pages/CBTHome");
+      void import("@/pages/ServicesHome");
+      void import("@/pages/Wallet");
+    };
+    const ric = (window as any).requestIdleCallback as
+      | ((cb: () => void) => number)
+      | undefined;
+    const id = ric ? ric(warm) : window.setTimeout(warm, 1500);
+    return () => {
+      const cic = (window as any).cancelIdleCallback as ((h: number) => void) | undefined;
+      if (ric && cic) cic(id as number);
+      else window.clearTimeout(id as number);
+    };
+  }, []);
+
+
+
   const handleLogout = async () => {
     try {
       toast({ title: "Logging out...", description: "Please wait" });
