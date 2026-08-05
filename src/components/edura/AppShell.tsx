@@ -296,7 +296,7 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
 
       <div className="lg:pl-60 flex min-h-screen flex-col">
         {/* Topbar */}
-        <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur-xl pt-safe">
           <div className="flex h-14 items-center justify-between gap-3 px-4 sm:px-6">
             <div className="flex items-center gap-2 min-w-0 lg:hidden">
               <img src={eduraLogo} alt="Edura" className="h-7 w-auto" />
@@ -311,14 +311,15 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
           </div>
         </header>
 
-        <main className="flex-1 w-full px-4 sm:px-6 py-5 sm:py-7 pb-28 lg:pb-10">
-          <div className="mx-auto w-full max-w-6xl">
-            <div className="mb-5 sm:mb-7 flex flex-wrap items-start justify-between gap-3">
+        <main className="flex-1 w-full px-4 sm:px-6 py-4 sm:py-7 pb-32 lg:pb-10">
+          <div className="mx-auto w-full max-w-6xl animate-screen-in">
+            <div className="mb-4 sm:mb-7 flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{title}</h1>
+                <h1 className="font-display text-[22px] sm:text-2xl font-bold tracking-tight">{title}</h1>
                 {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
                 {meta && <div className="mt-2 flex flex-wrap gap-1.5">{meta}</div>}
               </div>
+
               {action}
             </div>
             {children}
