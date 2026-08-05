@@ -646,3 +646,13 @@ All colors MUST be HSL for consistency across light/dark modes.
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Respect users who prefer less motion (also reduces jank on low-end phones) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
