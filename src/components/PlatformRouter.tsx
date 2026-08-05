@@ -328,6 +328,12 @@ const EduraRoutes = () => {
       } />
       <Route path="/payment-success" element={<Layout showNavbar={false}><PaymentSuccess /></Layout>} />
       
+      <Route path="/ai-tutor" element={
+        <ProtectedRoute><AITutor /></ProtectedRoute>
+      } />
+      <Route path="/ai-tutor/:threadId" element={
+        <ProtectedRoute><AITutor /></ProtectedRoute>
+      } />
       <Route path="/study-hub" element={
         <ProtectedRoute>
           <CoreOnly><DashboardLayout><StudyHub /></DashboardLayout></CoreOnly>
