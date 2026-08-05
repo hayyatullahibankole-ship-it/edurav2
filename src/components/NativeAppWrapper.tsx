@@ -18,7 +18,7 @@ export const NativeAppWrapper = ({ children }: NativeAppWrapperProps) => {
       try {
         // Configure status bar
         await StatusBar.setStyle({ style: Style.Light });
-        await StatusBar.setBackgroundColor({ color: '#0ea5e9' });
+        await StatusBar.setBackgroundColor({ color: '#12B76A' });
         
         // Hide splash screen after app loads
         await SplashScreen.hide();
