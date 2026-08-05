@@ -592,7 +592,10 @@ const ServicesHome = () => {
   };
 
 
-  const firstName = (user?.email ?? "there").split("@")[0];
+  const firstName =
+    (user?.user_metadata?.first_name as string | undefined)?.trim() ||
+    ((user?.user_metadata?.full_name as string | undefined)?.trim()?.split(" ")[0]) ||
+    "there";
   const homePath = isInstalledApp ? "/mobile-home" : "/dashboard";
 
   return (
