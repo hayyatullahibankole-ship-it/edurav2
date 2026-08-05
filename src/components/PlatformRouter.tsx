@@ -3,7 +3,6 @@ import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useDomainDetection } from "@/hooks/useDomainDetection";
 import { useInstalledApp } from "@/hooks/useInstalledApp";
-import { useAppSide } from "@/hooks/useAppSide";
 import { useAcademicStage } from "@/hooks/useAcademicStage";
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -56,7 +55,8 @@ const ReferralProgram = lazy(() => import("@/pages/ReferralProgram"));
 const PerformanceReport = lazy(() => import("@/pages/PerformanceReport"));
 const LessonQuiz = lazy(() => import("@/pages/LessonQuiz"));
 
-const ChooseSide = lazy(() => import("@/pages/ChooseSide"));
+const CBTHome = lazy(() => import("@/pages/CBTHome"));
+const Settings = lazy(() => import("@/pages/Settings"));
 const ServicesHome = lazy(() => import("@/pages/ServicesHome"));
 const Wallet = lazy(() => import("@/pages/Wallet"));
 const CampusHome = lazy(() => import("@/pages/campus/CampusHome"));
@@ -188,14 +188,6 @@ const EduraRoutes = () => {
       {/* Mobile-specific routes */}
       <Route path="/mobile-splash" element={<MobileSplash />} />
       <Route path="/mobile-onboarding" element={<MobileOnboarding />} />
-      <Route
-        path="/mobile-home"
-        element={
-          <ProtectedRoute>
-            <MobileHome />
-          </ProtectedRoute>
-        }
-      />
 
       {/* Root route */}
       <Route 
@@ -210,9 +202,16 @@ const EduraRoutes = () => {
       <Route path="/mobile-preview" element={<Navigate to="/mobile-splash" replace />} />
       
       <Route path="/auth" element={<Layout showNavbar={false}><Auth /></Layout>} />
-      <Route path="/choose" element={
+      <Route path="/choose" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/mobile-home" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/cbt" element={
         <ProtectedRoute>
-          <ChooseSide />
+          <CoreOnly><CBTHome /></CoreOnly>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <Settings />
         </ProtectedRoute>
       } />
       <Route path="/dashboard" element={
