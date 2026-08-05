@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import AppShell from "@/components/edura/AppShell";
 import { ListRow, Panel, EmptyState } from "@/components/edura/tiles";
+import { EDUCATION_NEWS_URL } from "@/lib/openExternal";
+
 import UpgradeToCampus from "@/components/edura/UpgradeToCampus";
 import OnboardingTour from "@/components/OnboardingTour";
 import { AIAssistant } from "@/components/AIAssistant";
