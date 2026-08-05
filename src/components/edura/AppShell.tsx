@@ -160,12 +160,9 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
             </div>
             <p className="hidden lg:block text-sm font-semibold truncate">{title}</p>
             <div className="flex items-center gap-1.5">
-              <SideSwitcher compact className="lg:hidden" />
               <DashboardThemeMenu />
               <NotificationBell />
-              <Button variant="ghost" size="icon" onClick={() => navigate("/wallet")} aria-label="Wallet">
-                <WalletIcon className="h-4 w-4" />
-              </Button>
+
               <Button
                 variant="ghost"
                 size="icon"
