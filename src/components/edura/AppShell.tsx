@@ -19,7 +19,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { SideSwitcher } from "@/components/edura/SideSwitcher";
 import NotificationBell from "@/components/NotificationBell";
 import { DashboardThemeMenu } from "@/components/DashboardThemeMenu";
 import { useAuth } from "@/hooks/useAuth";
@@ -36,20 +35,18 @@ export type ShellNavItem = {
   end?: boolean;
 };
 
+/** One unified nav for every candidate surface (CBT + Services). */
+const CANDIDATE_NAV: ShellNavItem[] = [
+  { to: "/dashboard", label: "Home", icon: LayoutGrid, end: true },
+  { to: "/study-hub", label: "Study", icon: BookOpen },
+  { to: "/services", label: "Services", icon: Briefcase },
+  { to: "/resources", label: "Resources", icon: Library },
+  { to: "/wallet", label: "Wallet", icon: WalletIcon },
+];
+
 const NAV: Record<ShellSide, ShellNavItem[]> = {
-  cbt: [
-    { to: "/dashboard", label: "Home", icon: LayoutGrid, end: true },
-    { to: "/study-hub", label: "Study", icon: BookOpen },
-    { to: "/resources", label: "Resources", icon: Library },
-    { to: "/forum", label: "Forum", icon: Users },
-    { to: "/wallet", label: "Wallet", icon: WalletIcon },
-  ],
-  services: [
-    { to: "/services", label: "Services", icon: Briefcase, end: true },
-    { to: "/services?tab=requests", label: "Requests", icon: ClipboardList },
-    { to: "/wallet", label: "Wallet", icon: WalletIcon },
-    { to: "/dashboard", label: "CBT", icon: GraduationCap },
-  ],
+  cbt: CANDIDATE_NAV,
+  services: CANDIDATE_NAV,
   campus: [
     { to: "/campus", label: "Home", icon: LayoutGrid, end: true },
     { to: "/campus/academics", label: "Academics", icon: BookOpen },
@@ -131,7 +128,7 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
         </div>
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">{items.map(railLink)}</nav>
         <div className="p-3 border-t space-y-1">
-          <SideSwitcher className="w-full" />
+
           <Button
             variant="ghost"
             size="sm"
@@ -162,12 +159,9 @@ export const AppShell = ({ side, title, subtitle, meta, action, nav, children }:
             </div>
             <p className="hidden lg:block text-sm font-semibold truncate">{title}</p>
             <div className="flex items-center gap-1.5">
-              <SideSwitcher compact className="lg:hidden" />
               <DashboardThemeMenu />
               <NotificationBell />
-              <Button variant="ghost" size="icon" onClick={() => navigate("/wallet")} aria-label="Wallet">
-                <WalletIcon className="h-4 w-4" />
-              </Button>
+
               <Button
                 variant="ghost"
                 size="icon"

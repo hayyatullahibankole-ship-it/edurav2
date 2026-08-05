@@ -47,7 +47,6 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { FeatureCard } from "@/components/dashboard/FeatureCard";
 import { ModernQuickAction } from "@/components/dashboard/ModernQuickAction";
 
-import { SideSwitcher } from "@/components/edura/SideSwitcher";
 
 import { MobileStatCard } from "@/components/dashboard/MobileStatCard";
 import { MobileTestCard } from "@/components/dashboard/MobileTestCard";

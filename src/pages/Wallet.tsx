@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWallet } from "@/hooks/useWallet";
-import MobileNav from "@/components/MobileNav";
+import AppShell from "@/components/edura/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { initializePaystackPayment } from "@/utils/paystack";
 import {
   ArrowDownLeft,
-  ArrowLeft,
   ArrowUpRight,
   Building2,
   Copy,
@@ -189,20 +188,8 @@ const Wallet = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-28 md:pb-10">
-      <header className="sticky top-0 z-40 border-b bg-background">
-        <div className="container mx-auto flex items-center gap-3 px-4 py-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-9 w-9">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <p className="text-sm font-semibold">Wallet</p>
-            <p className="text-xs text-muted-foreground">Fund once, pay instantly</p>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto max-w-3xl space-y-5 px-4 py-5">
+    <AppShell side="cbt" title="Wallet" subtitle="Fund once, pay instantly">
+      <main className="mx-auto max-w-3xl space-y-5">
         <Card className="border">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center justify-between gap-3">
@@ -338,9 +325,7 @@ const Wallet = () => {
           )}
         </section>
       </main>
-
-      <MobileNav activeTab="services" onTabChange={() => {}} />
-    </div>
+    </AppShell>
   );
 };
 
