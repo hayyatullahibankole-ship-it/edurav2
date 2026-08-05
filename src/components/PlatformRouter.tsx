@@ -38,6 +38,7 @@ const Terms = lazy(() => import("@/pages/Terms"));
 const AnswerReview = lazy(() => import("@/pages/AnswerReview"));
 const PaymentSuccess = lazy(() => import("@/pages/PaymentSuccess"));
 const StudyHub = lazy(() => import("@/pages/StudyHub"));
+const AITutor = lazy(() => import("@/pages/AITutor"));
 const StudyTopic = lazy(() => import("@/pages/StudyTopic"));
 const LessonView = lazy(() => import("@/pages/LessonView"));
 const Forum = lazy(() => import("@/pages/Forum"));
