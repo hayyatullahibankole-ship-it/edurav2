@@ -102,10 +102,11 @@ export default function AkboyHome() {
   const ecosystem = [
     {
       icon: Code,
-      title: "Edura CBT",
-      description: "Realistic computer-based test practice with 120,000+ questions and instant analytics.",
-      action: { label: "Visit Edura", href: "https://edura.space", external: true },
+      title: "CBT Practice Engine",
+      description: "Realistic computer-based test practice with instant scoring and performance analytics.",
+      action: { label: "See how it works", href: `${basePath}/services` },
     },
+
     {
       icon: Newspaper,
       title: "Campus Hub",
