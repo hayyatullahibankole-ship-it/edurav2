@@ -53,6 +53,68 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_tutor_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          images: Json
+          role: string
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          images?: Json
+          role: string
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          images?: Json
+          role?: string
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_tutor_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "ai_tutor_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_tutor_threads: {
+        Row: {
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       akboy_events: {
         Row: {
           created_at: string | null
