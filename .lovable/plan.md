@@ -32,12 +32,12 @@ Unchanged in content, restyled to the same card system: service grid, active req
 
 The wallet is one product, not a candidate-only feature. Campus students fund it, pay for services and see the same transaction history, virtual account and top-up flow. It gets a tab in the Campus navigation too, and the balance appears on both Home screens.
 
-## Settings — one page, stage-aware
+## Settings — reached from the profile picture
 
-A single `/settings` screen replaces the scattered profile/account tabs, reachable from the avatar in the topbar (mobile and desktop) and from the Profile tab:
+No Settings tab in the nav. The topbar shows the user's avatar; tapping it opens a menu (Edit profile, My journey, Appearance, Notifications, Security, Log out) that leads to a single `/settings` screen:
 
-- **Profile** — name, photo, phone, email.
-- **My journey** — current stage, institution / faculty / department / level for campus students; "I've been admitted" upgrade lives here as well as on Home.
+- **Profile** — name, photo, phone, email, all editable.
+- **My journey** — current stage, institution / faculty / department / level for campus students; "I've been admitted" upgrade also lives here.
 - **Appearance** — light / dark / system (dashboard scope only).
 - **Notifications** — email and push preferences.
 - **Security** — change password, active session, sign out everywhere.
@@ -47,14 +47,15 @@ Same page for candidates and campus students; only the journey block changes sha
 
 ## Navigation
 
-One bottom tab bar everywhere, keeping the raised centre button. Settings is reached from the topbar avatar, not a tab.
+The bottom bar keeps its current shape — five slots with the raised centre button:
 
 ```text
 Candidates:  Home   CBT        [ Services ]   Wallet     Profile
-Campus:      Home   Academics  [ Tools ]      Projects   Wallet
+Campus:      Home   Academics  [ Tools ]      Wallet     Profile
 ```
 
-Campus keeps Opportunities and Settings inside the Home "more" list; candidates keep Study, Resources and Forum inside Home's discover list. Desktop shows the full set in the left rail (including Settings and Log out). Any attempt to reach the other world's routes redirects home.
+The Profile slot opens the avatar menu / settings. Campus keeps Projects and Opportunities inside the Campus home grid; candidates keep Study, Resources and Forum inside Home's discover list. Desktop shows the full set in the left rail with the avatar and Log out at the bottom. Any attempt to reach the other world's routes redirects home.
+
 
 ## Design rules applied throughout
 
