@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { initializePaystackPayment } from "@/utils/paystack";
 import {
   ArrowDownLeft,
-  ArrowLeft,
   ArrowUpRight,
   Building2,
   Copy,
