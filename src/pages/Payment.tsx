@@ -8,6 +8,7 @@ import { createSubscriptionPayment } from "@/utils/paystack";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { canPurchaseDigitalInApp, DIGITAL_PURCHASE_NOTICE } from "@/lib/nativePayments";
 
 const Payment = () => {
   const { user, userProfile } = useAuth();
