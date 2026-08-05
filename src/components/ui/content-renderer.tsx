@@ -250,7 +250,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
 
   return (
     <div 
-      className={`prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-headings:scroll-mt-20 ${className}`}
+      className={`max-w-none text-foreground break-words [&_img]:rounded-lg [&_img]:my-4 [&_table]:w-full [&_p:last-child]:mb-0 ${className}`}
       dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
     />
   );
