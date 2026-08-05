@@ -62,18 +62,18 @@ export const useWallet = () => {
     refresh();
   }, [refresh]);
 
+  // Refresh on app focus / resume only — no background polling (saves battery
+  // and removes the periodic re-render jank on mobile).
   useEffect(() => {
     if (!user || !userProfile?.id) return;
 
     const refreshWhenVisible = () => {
       if (document.visibilityState === "visible") void refresh();
     };
-    const interval = window.setInterval(refreshWhenVisible, 15000);
     window.addEventListener("focus", refreshWhenVisible);
     document.addEventListener("visibilitychange", refreshWhenVisible);
 
     return () => {
-      window.clearInterval(interval);
       window.removeEventListener("focus", refreshWhenVisible);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
     };

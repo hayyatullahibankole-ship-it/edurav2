@@ -1,160 +1,214 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, GraduationCap, Target, Check } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
-import onboardingStudy from '@/assets/onboarding-study.jpg';
-import onboardingExam from '@/assets/onboarding-exam.jpg';
-import onboardingSuccess from '@/assets/onboarding-success.jpg';
+import onbWelcome from '@/assets/onb-welcome.jpg';
+import onbPractice from '@/assets/onb-practice.jpg';
+import onbServices from '@/assets/onb-services.jpg';
 
-const onboardingSlides = [
+type Slide = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  image?: string;
+};
+
+const slides: Slide[] = [
   {
-    title: 'Practice Anytime, Anywhere',
-    subtitle: 'Master JAMB, WAEC, NECO & Post-UTME',
-    description: 'Access thousands of past questions with real exam simulation',
-    image: onboardingStudy,
-    gradient: 'from-primary to-secondary',
+    eyebrow: 'Welcome to Edura',
+    title: 'Everything you need to pass and move up',
+    description:
+      'One app for exam practice, results, admission services and your student wallet.',
+    image: onbWelcome,
   },
   {
-    title: 'Ace Your Exams',
-    subtitle: 'Focused preparation',
-    description: 'Take timed practice tests that mirror real exam conditions',
-    image: onboardingExam,
-    gradient: 'from-secondary to-accent',
+    eyebrow: 'Practice',
+    title: 'Real CBT for JAMB, WAEC, NECO & Post-UTME',
+    description:
+      'Timed, exam-accurate practice with instant scoring, answer review and progress tracking.',
+    image: onbPractice,
   },
   {
-    title: 'Celebrate Success',
-    subtitle: 'Achieve your dreams',
-    description: 'Join thousands of students who achieved excellence with Edura',
-    image: onboardingSuccess,
-    gradient: 'from-accent to-success',
+    eyebrow: 'Services',
+    title: 'Results, applications and your wallet',
+    description:
+      'Check results, get admission support and keep one balance for every service you use.',
+    image: onbServices,
+  },
+  {
+    eyebrow: 'Your journey',
+    title: 'Where are you right now?',
+    description: 'We will set up the right workspace for you.',
   },
 ];
 
+const haptic = async (style: ImpactStyle = ImpactStyle.Light) => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await Haptics.impact({ style });
+    } catch {
+      /* ignore */
+    }
+  }
+};
+
 const MobileOnboarding = () => {
   const navigate = useNavigate();
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [index, setIndex] = useState(0);
+  const [journey, setJourney] = useState<'candidate' | 'campus' | null>(null);
+  const startX = useRef<number | null>(null);
 
-  const handleNext = async () => {
-    if (Capacitor.isNativePlatform()) {
-      await Haptics.impact({ style: ImpactStyle.Light });
-    }
-    
-    if (currentSlide === onboardingSlides.length - 1) {
-      localStorage.setItem('hasSeenMobileOnboarding', 'true');
-      navigate('/auth');
-    } else {
-      setCurrentSlide(prev => prev + 1);
-    }
-  };
+  const isLast = index === slides.length - 1;
+  const slide = slides[index];
 
-  const handleSkip = async () => {
-    if (Capacitor.isNativePlatform()) {
-      await Haptics.impact({ style: ImpactStyle.Medium });
-    }
+  const finish = async (choice?: 'candidate' | 'campus') => {
+    await haptic(ImpactStyle.Medium);
     localStorage.setItem('hasSeenMobileOnboarding', 'true');
-    navigate('/auth');
+    if (choice) localStorage.setItem('preferredJourney', choice);
+    navigate('/auth', { replace: true });
   };
 
-  const slide = onboardingSlides[currentSlide];
+  const goTo = (next: number) => {
+    if (next < 0 || next > slides.length - 1) return;
+    haptic();
+    setIndex(next);
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    startX.current = e.touches[0].clientX;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (startX.current === null) return;
+    const delta = e.changedTouches[0].clientX - startX.current;
+    startX.current = null;
+    if (Math.abs(delta) < 48) return;
+    goTo(delta < 0 ? index + 1 : index - 1);
+  };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
-      {/* Animated Background Orbs */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-
-      {/* Skip Button */}
-      <div className="absolute top-8 right-6 z-20">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleSkip}
-          className="text-muted-foreground hover:text-foreground font-semibold rounded-[16px] hover:bg-muted/50 backdrop-blur-sm"
-        >
-          Skip
-        </Button>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col relative z-10">
-        {/* Top Section with Gradient */}
-        <div className={`flex-1 ${slide.gradient} flex items-center justify-center relative overflow-hidden`}>
-          {/* Curved Bottom Shape */}
-          <div className="absolute bottom-0 left-0 right-0 h-12">
-            <svg viewBox="0 0 1440 48" fill="none" className="w-full h-full">
-              <path d="M0 48H1440V0C1440 0 1080 48 720 48C360 48 0 0 0 0V48Z" fill="hsl(var(--background))" />
-            </svg>
-          </div>
-
-          {/* Animated Background Orbs */}
-          <div className="absolute inset-0">
-            <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse" />
-            <div className="absolute bottom-20 left-10 w-40 h-40 bg-white/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
-          </div>
-          
-          {/* Image Container */}
-          <div className="relative z-10 px-8 animate-fade-in-up" key={currentSlide}>
-            <div className="relative mx-auto max-w-sm">
-              {/* Glow Effect */}
-              <div className="absolute -inset-6 bg-white/20 rounded-[40px] blur-3xl" />
-              
-              {/* Image Frame */}
-              <div 
-                className="relative bg-white/15 backdrop-blur-xl p-4 rounded-[32px] shadow-2xl border border-white/30"
-                style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.3)' }}
-              >
-                <div className="relative overflow-hidden rounded-[24px] aspect-[4/3]">
-                  <img 
-                    src={slide.image} 
-                    alt={slide.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/20" />
-                </div>
-              </div>
-            </div>
-          </div>
+    <div
+      className="flex min-h-screen flex-col bg-background pt-safe pb-safe"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Top bar: segmented progress + skip */}
+      <header className="flex items-center gap-3 px-6 pt-5">
+        <div className="flex flex-1 gap-1.5">
+          {slides.map((_, i) => (
+            <span
+              key={i}
+              className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                i <= index ? 'bg-primary' : 'bg-muted'
+              }`}
+            />
+          ))}
         </div>
-
-        {/* Content Section */}
-        <div className="bg-background px-8 pt-10 pb-8 relative">
-          <div className="text-center mb-8 animate-fade-in" key={`content-${currentSlide}`} style={{ animationDelay: '0.2s' }}>
-            <h2 className="text-4xl font-black mb-3 bg-foreground leading-tight">
-              {slide.title}
-            </h2>
-            <p className="text-primary font-bold text-xl mb-4">{slide.subtitle}</p>
-            <p className="text-muted-foreground text-base leading-relaxed max-w-md mx-auto font-medium">
-              {slide.description}
-            </p>
-          </div>
-
-          {/* Indicators */}
-          <div className="flex justify-center gap-2.5 mb-8">
-            {onboardingSlides.map((_, index) => (
-              <div
-                key={index}
-                className={`h-2.5 rounded-full transition-all duration-300 shadow-lg ${
-                  index === currentSlide
-                    ? 'w-10 bg-primary'
-                    : 'w-2.5 bg-muted'
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Button */}
-          <Button
-            onClick={handleNext}
-            className="w-full h-16 text-lg font-black rounded-[24px] shadow-2xl bg-primary hover:scale-[1.02] active:scale-[0.98] transition-all"
-            style={{ boxShadow: '0 12px 36px rgba(var(--primary), 0.4)' }}
+        {!isLast && (
+          <button
+            onClick={() => finish()}
+            className="text-sm font-semibold text-muted-foreground"
           >
-            {currentSlide === onboardingSlides.length - 1 ? "Get Started" : 'Next'}
-            <ArrowRight className="ml-2 h-6 w-6" strokeWidth={2.5} />
-          </Button>
-        </div>
-      </div>
+            Skip
+          </button>
+        )}
+      </header>
+
+      {/* Slide body */}
+      <main key={index} className="flex flex-1 flex-col justify-center px-6 animate-fade-in">
+        {slide.image && (
+          <div className="mx-auto mb-8 w-full max-w-sm overflow-hidden rounded-3xl border bg-card">
+            <img
+              src={slide.image}
+              alt=""
+              loading={index === 0 ? 'eager' : 'lazy'}
+              width={1024}
+              height={1024}
+              className="aspect-square w-full object-cover"
+            />
+          </div>
+        )}
+
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
+          {slide.eyebrow}
+        </p>
+        <h1 className="mt-2 font-display text-[28px] font-extrabold leading-tight tracking-tight text-foreground">
+          {slide.title}
+        </h1>
+        <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+          {slide.description}
+        </p>
+
+        {isLast && (
+          <div className="mt-7 space-y-3">
+            {[
+              {
+                id: 'candidate' as const,
+                icon: Target,
+                title: 'Preparing for an exam',
+                sub: 'SS3, JAMB, WAEC, NECO or Post-UTME',
+              },
+              {
+                id: 'campus' as const,
+                icon: GraduationCap,
+                title: 'Already in higher institution',
+                sub: 'Undergraduate or graduate student',
+              },
+            ].map((option) => {
+              const active = journey === option.id;
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => {
+                    haptic();
+                    setJourney(option.id);
+                  }}
+                  className={`press flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-colors ${
+                    active ? 'border-primary bg-primary/5' : 'bg-card'
+                  }`}
+                >
+                  <span
+                    className={`rounded-xl border p-2.5 ${
+                      active ? 'border-primary/30 bg-primary/10' : 'bg-muted'
+                    }`}
+                  >
+                    <option.icon className="h-5 w-5 text-primary" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold text-foreground">
+                      {option.title}
+                    </span>
+                    <span className="block text-xs text-muted-foreground">{option.sub}</span>
+                  </span>
+                  {active && <Check className="h-4 w-4 shrink-0 text-primary" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </main>
+
+      {/* Footer action */}
+      <footer className="px-6 pb-8 pt-4">
+        <Button
+          onClick={() => (isLast ? finish(journey ?? 'candidate') : goTo(index + 1))}
+          disabled={isLast && !journey}
+          className="press h-14 w-full rounded-2xl text-base font-bold"
+        >
+          {isLast ? 'Create my account' : 'Continue'}
+          <ArrowRight className="ml-2 h-5 w-5" />
+        </Button>
+        {isLast && (
+          <button
+            onClick={() => finish(journey ?? undefined)}
+            className="mt-3 w-full text-center text-sm font-medium text-muted-foreground"
+          >
+            I already have an account
+          </button>
+        )}
+      </footer>
     </div>
   );
 };

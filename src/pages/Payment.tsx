@@ -8,6 +8,7 @@ import { createSubscriptionPayment } from "@/utils/paystack";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { canPurchaseDigitalInApp, DIGITAL_PURCHASE_NOTICE } from "@/lib/nativePayments";
 
 const Payment = () => {
   const { user, userProfile } = useAuth();
@@ -222,7 +223,11 @@ const Payment = () => {
                 )}
 
                 <div className="mt-auto space-y-2 pt-6">
-                  {plan.paystack ? (
+                  {plan.paystack && !canPurchaseDigitalInApp() ? (
+                    <p className="rounded-lg border bg-surface p-3 text-[11px] text-muted-foreground">
+                      {DIGITAL_PURCHASE_NOTICE}
+                    </p>
+                  ) : plan.paystack ? (
                     <>
                       <Button
                         onClick={() => handlePaystackPayment(plan.name, plan.price)}

@@ -46,6 +46,9 @@ Rebuild `src/pages/MobileOnboarding.tsx` in the new Sora/Manrope app language:
 - Reduce animation cost: use transform/opacity only, cap simultaneous blurred orbs, respect `prefers-reduced-motion`.
 - Verify with a Lighthouse/profiling pass on the mobile viewport after changes.
 
+5. Redesign Mobile splash 
+6. Push notifications also. 
+
 ## Technical notes
 
 - Files touched: `src/pages/MobileOnboarding.tsx`, `src/pages/MobileSplash.tsx`, `src/hooks/useWallet.tsx`, `src/pages/Wallet.tsx`, `src/components/edura/AppShell.tsx`, `src/pages/Dashboard.tsx`, `src/pages/CBTHome.tsx`, `src/pages/ServicesHome.tsx`, `vite.config.ts`, plus a native-payment gate helper reading `Capacitor.isNativePlatform()`.
