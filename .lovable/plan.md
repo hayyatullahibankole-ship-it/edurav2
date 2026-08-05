@@ -47,14 +47,15 @@ Same page for candidates and campus students; only the journey block changes sha
 
 ## Navigation
 
-The bottom bar keeps its current shape — five slots with the raised centre button:
+Exactly four labelled tabs with the raised centre button sitting between CBT and Services:
 
 ```text
-Candidates:  Home   CBT        [ Services ]   Wallet     Profile
-Campus:      Home   Academics  [ Tools ]      Wallet     Profile
+Candidates:  Home   CBT        ( ⌾ )   Services   Wallet
+Campus:      Home   Academics  ( ⌾ )   Projects   Wallet
 ```
 
-The Profile slot opens the avatar menu / settings. Campus keeps Projects and Opportunities inside the Campus home grid; candidates keep Study, Resources and Forum inside Home's discover list. Desktop shows the full set in the left rail with the avatar and Log out at the bottom. Any attempt to reach the other world's routes redirects home.
+The raised centre button is the quick-action / explore button (start a test for candidates, quick add for campus) — it has no label. Profile and settings are not tabs; they open from the avatar in the topbar. Campus keeps Tools and Opportunities inside the Campus home grid; candidates keep Study, Resources and Forum inside Home's discover list. Desktop shows the full set in the left rail with the avatar and Log out at the bottom. Any attempt to reach the other world's routes redirects home.
+
 
 
 ## Design rules applied throughout
