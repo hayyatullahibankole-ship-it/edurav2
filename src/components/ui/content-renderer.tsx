@@ -244,8 +244,8 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content, className = 
 
   const formattedHTML = formatContent(processedContent);
   const sanitizedHTML = DOMPurify.sanitize(formattedHTML, {
-    ADD_TAGS: ['span', 'div', 'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr'],
-    ADD_ATTR: ['class', 'style'],
+    ADD_TAGS: ['span', 'div', 'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr', 'pre', 'code', 'strong', 'em', 's', 'a'],
+    ADD_ATTR: ['class', 'style', 'href', 'target', 'rel', 'start'],
   });
 
   return (
