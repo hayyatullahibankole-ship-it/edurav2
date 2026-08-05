@@ -60,6 +60,8 @@ const PerformanceReport = lazy(() => import("@/pages/PerformanceReport"));
 const LessonQuiz = lazy(() => import("@/pages/LessonQuiz"));
 
 const CBTHome = lazy(() => import("@/pages/CBTHome"));
+const Leaderboard = lazy(() => import("@/pages/Leaderboard"));
+
 const Settings = lazy(() => import("@/pages/Settings"));
 const ServicesHome = lazy(() => import("@/pages/ServicesHome"));
 const Wallet = lazy(() => import("@/pages/Wallet"));
