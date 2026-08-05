@@ -19,7 +19,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { SideSwitcher } from "@/components/edura/SideSwitcher";
 import NotificationBell from "@/components/NotificationBell";
 import { DashboardThemeMenu } from "@/components/DashboardThemeMenu";
 import { useAuth } from "@/hooks/useAuth";

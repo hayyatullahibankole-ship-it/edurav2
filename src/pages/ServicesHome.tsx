@@ -26,7 +26,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { SideSwitcher } from "@/components/edura/SideSwitcher";
 import AppShell from "@/components/edura/AppShell";
 import UpgradeToCampus from "@/components/edura/UpgradeToCampus";
 import ProviderLogo, { providerInfo } from "@/components/edura/ProviderLogo";
@@ -596,19 +595,11 @@ const ServicesHome = () => {
   const firstName = (user?.email ?? "there").split("@")[0];
   const homePath = isInstalledApp ? "/mobile-home" : "/dashboard";
 
-  const servicesMobileNav = [
-    { to: homePath, label: "Home", icon: LayoutGrid, end: true },
-    { to: "/services", label: "Services", icon: Briefcase, end: true },
-    { to: "/wallet", label: "Wallet", icon: WalletIcon },
-    { to: "/dashboard?tab=profile", label: "Profile", icon: User },
-  ];
-
   return (
     <AppShell
       side="services"
       title={`Hi, ${firstName}`}
       subtitle="Pick a service below and we'll handle it for you."
-      nav={servicesMobileNav}
       action={
         <div className="flex items-center gap-2">
           <UpgradeToCampus />
