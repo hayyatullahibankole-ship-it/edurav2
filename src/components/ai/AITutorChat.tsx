@@ -152,7 +152,7 @@ export const AITutorChat = ({ threadId, onThreadCreated, onThreadTouched }: AITu
         setMessages([...history, { role: "assistant", content: finalText }]);
         await saveMessage(activeThreadId, { role: "assistant", content: finalText });
       } catch (err: any) {
-        setMessages(history);
+        setMessages(history.slice(0, -1));
         setError(err?.message || "Something went wrong. Please try again.");
       } finally {
         setStreaming(false);
@@ -174,13 +174,7 @@ export const AITutorChat = ({ threadId, onThreadCreated, onThreadTouched }: AITu
   const handleRetry = () => {
     const last = lastSentRef.current;
     if (!last || streaming) return;
-    setMessages((prev) => prev.filter((_, i) => i !== prev.length - 1 || prev[i].role !== "user"));
-    setMessages((prev) => {
-      const trimmed = [...prev];
-      if (trimmed[trimmed.length - 1]?.role === "user") trimmed.pop();
-      return trimmed;
-    });
-    setTimeout(() => runTurn(last.text, last.images), 0);
+    runTurn(last.text, last.images);
   };
 
   /* ---------- attachments ---------- */
