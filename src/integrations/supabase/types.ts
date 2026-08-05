@@ -5249,6 +5249,27 @@ export type Database = {
           type: Database["public"]["Enums"]["question_type"]
         }[]
       }
+      get_leaderboard: {
+        Args: { p_limit?: number; p_period?: string }
+        Returns: {
+          avg_score: number
+          display_name: string
+          is_me: boolean
+          rank: number
+          tests: number
+          user_id: string
+        }[]
+      }
+      get_my_leaderboard_rank: {
+        Args: { p_period?: string }
+        Returns: {
+          avg_score: number
+          qualified: boolean
+          rank: number
+          tests: number
+          total: number
+        }[]
+      }
       get_question_explanation: {
         Args: { question_id: string; user_id: string }
         Returns: string
@@ -5532,6 +5553,7 @@ export type Database = {
         Args: { token_to_check: string; user_auth_id: string }
         Returns: boolean
       }
+      leaderboard_period_start: { Args: { p_period: string }; Returns: string }
       log_admin_action: {
         Args: { action_type: string; admin_id: string; target_id?: string }
         Returns: boolean
