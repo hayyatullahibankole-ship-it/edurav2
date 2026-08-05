@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { initializePaystackPayment } from "@/utils/paystack";
+import { canPurchaseDigitalInApp } from "@/lib/nativePayments";
 import { Copy, CreditCard, Loader2, Wallet as WalletIcon, Zap } from "lucide-react";
 
 export type ScratchCardService = {
