@@ -133,7 +133,11 @@ ${topicCoverage.slice(0, 10).map((t: any) => `- ${t.subjects?.name || 'Unknown'}
 **Weak Areas (Need Focus):**
 ${weakTopics.length > 0 ? weakTopics.map((t: any) => `- ${t.subject}: ${t.topic} (${t.accuracy}% accuracy)`).join('\n') : '- No weak areas identified yet - keep practicing!'}
 `;
+      } catch (e) {
+        console.error("Failed to build user context, continuing with defaults:", e);
+      }
     }
+
 
     // System prompt with user context
     const systemPrompt = `You are Edura AI, an intelligent educational assistant for Nigerian students preparing for JAMB, WAEC, and other exams.
