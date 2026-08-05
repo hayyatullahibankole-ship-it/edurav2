@@ -2,6 +2,7 @@ import { ReactNode, useEffect } from 'react';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { useNativeApp } from '@/hooks/useNativeApp';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import eduraLogo from '@/assets/edura-logo.png';
 
 interface NativeAppWrapperProps {
@@ -10,6 +11,10 @@ interface NativeAppWrapperProps {
 
 export const NativeAppWrapper = ({ children }: NativeAppWrapperProps) => {
   const { isNative, platform } = useNativeApp();
+
+  // Register for push notifications once, app-wide (no-op on web)
+  usePushNotifications();
+
 
   useEffect(() => {
     if (!isNative) return;
