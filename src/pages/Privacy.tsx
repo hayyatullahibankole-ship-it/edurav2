@@ -307,6 +307,44 @@ const Privacy = () => {
             <Separator />
 
             <section>
+              <h2 className="text-2xl font-semibold mb-4">Camera and Microphone (Exam Proctoring)</h2>
+              <p className="text-muted-foreground mb-2">
+                Our mobile app requests camera and microphone permission for one purpose only: exam integrity
+                during proctored mock and CBT sessions.
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4">
+                <li>Access is requested only when you start a proctored exam, and you may decline.</li>
+                <li>The camera captures periodic still snapshots and the microphone detects ambient noise levels.</li>
+                <li>No continuous video or audio recording is streamed or stored.</li>
+                <li>Proctoring data is used solely to flag possible malpractice and is deleted after result review.</li>
+                <li>We never use camera or microphone data for advertising, profiling, or sharing with third parties.</li>
+              </ul>
+              <p className="text-muted-foreground mt-2">
+                We also request storage/photo access so you can upload a profile photo or required documents,
+                and notification permission to send exam reminders and result alerts.
+              </p>
+            </section>
+
+            <Separator />
+
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">Account and Data Deletion</h2>
+              <p className="text-muted-foreground mb-2">
+                You can permanently delete your account at any time from <strong>Settings → Account → Delete
+                account</strong> in the app or on the web. Deletion removes your profile, test history, study
+                plans, wallet balance, service requests, ebook access and uploaded files.
+              </p>
+              <p className="text-muted-foreground">
+                Full instructions are on our{" "}
+                <Link to="/delete-account" className="underline">account deletion page</Link>, or email
+                support@edura.space. Anonymised payment and invoice records may be retained for up to 6 years
+                where tax and accounting law requires it.
+              </p>
+            </section>
+
+            <Separator />
+
+            <section>
               <h2 className="text-2xl font-semibold mb-4">Changes to This Policy</h2>
               <p className="text-muted-foreground">
                 We may update this Privacy Policy from time to time. We will notify you of any material changes 

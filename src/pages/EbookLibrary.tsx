@@ -14,6 +14,7 @@ import { getUnlockedEbookIds, redeemEbookCode, saveEbookAccess } from "@/utils/e
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { canPurchaseDigitalInApp } from "@/lib/nativePayments";
 
 const WHATSAPP_NUMBER = "2347050757085";
 
@@ -215,7 +216,12 @@ export default function EbookLibrary() {
                           </Link>
                         </Button>
                       </div>
-                      {!unlocked && (
+                      {!unlocked && !canPurchaseDigitalInApp() && (
+                        <p className="text-xs text-stone-500">
+                          Have an access code? Enter it above to unlock this book.
+                        </p>
+                      )}
+                      {!unlocked && canPurchaseDigitalInApp() && (
                         <Button
                           size="sm"
                           className="w-full bg-emerald-700 hover:bg-emerald-800"
@@ -263,7 +269,7 @@ export default function EbookLibrary() {
             </div>
           </div>
           <DialogFooter className="flex-col sm:flex-row gap-2">
-            {requestBook && (
+            {requestBook && canPurchaseDigitalInApp() && (
               <Button asChild variant="outline" className="w-full sm:w-auto">
                 <a href={whatsappLink(requestBook)} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="w-4 h-4 mr-2" /> Buy on WhatsApp
