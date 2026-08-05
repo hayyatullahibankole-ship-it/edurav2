@@ -12,7 +12,7 @@ import {
   Trophy,
 } from "lucide-react";
 import AppShell from "@/components/edura/AppShell";
-import { StatTile, ListRow, Panel, EmptyState } from "@/components/edura/tiles";
+import { ListRow, Panel, EmptyState } from "@/components/edura/tiles";
 import ScheduleTestModal from "@/components/ScheduleTestModal";
 import SchoolAvailableExams from "@/components/school/SchoolAvailableExams";
 import MockResultChecker from "@/components/MockResultChecker";
