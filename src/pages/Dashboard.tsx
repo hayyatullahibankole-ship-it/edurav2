@@ -16,6 +16,7 @@ import {
   Target,
   Ticket,
   Trophy,
+
   Wallet as WalletIcon,
 } from "lucide-react";
 import AppShell from "@/components/edura/AppShell";
