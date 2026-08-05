@@ -29,6 +29,7 @@ const Demo = lazy(() => import("@/pages/Demo"));
 const DemoTest = lazy(() => import("@/pages/DemoTest"));
 const Resources = lazy(() => import("@/pages/Resources"));
 const ServicesLanding = lazy(() => import("@/pages/ServicesLanding"));
+const CampusLanding = lazy(() => import("@/pages/CampusLanding"));
 const Payment = lazy(() => import("@/pages/Payment"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
@@ -277,6 +278,7 @@ const EduraRoutes = () => {
       } />
 
       <Route path="/services" element={user ? <CoreOnly><ServicesHome /></CoreOnly> : <Layout><ServicesLanding /></Layout>} />
+      <Route path="/campus-landing" element={<Layout><CampusLanding /></Layout>} />
       <Route path="/admissions" element={<Navigate to="/services?provider=admission" replace />} />
       <Route path="/campus" element={
         <ProtectedRoute>

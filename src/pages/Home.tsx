@@ -427,10 +427,15 @@ const Home = () => {
                   tracking for university, polytechnic and college students. Everything you built as a candidate carries over.
                 </p>
                 <div className="mt-7 flex flex-col sm:flex-row gap-3">
-                  <Link to={primaryHref}>
+                  <Link to="/campus-landing">
                     <Button size="lg" className="w-full sm:w-auto font-semibold">
-                      Start with Campus
+                      Explore Campus
                       <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Link to="/auth">
+                    <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 font-semibold">
+                      Start using Campus
                     </Button>
                   </Link>
                 </div>

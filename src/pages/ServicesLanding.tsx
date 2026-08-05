@@ -10,6 +10,7 @@ import {
   FileText,
   GraduationCap,
   Landmark,
+  School,
   ShieldCheck,
   Ticket,
   Timer,
@@ -168,6 +169,30 @@ export default function ServicesLanding() {
               </div>
             ))}
           </div>
+
+          <Link
+            to="/campus-landing"
+            className="mt-4 block rounded-2xl border border-border bg-card p-6 transition-colors hover:border-primary/40"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                  <School className="h-5 w-5 text-primary" />
+                </span>
+                <div>
+                  <h3 className="font-display text-lg font-bold text-foreground">Edura Campus</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Already admitted? Track courses, CGPA, projects, deadlines and campus opportunities — undergraduate
+                    and postgraduate students welcome.
+                  </p>
+                </div>
+              </div>
+              <Button variant="outline" className="shrink-0 border-2 font-semibold">
+                Explore Campus
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </Link>
         </div>
       </section>
 
