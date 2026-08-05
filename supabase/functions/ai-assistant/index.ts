@@ -57,11 +57,16 @@ serve(async (req) => {
       }
     );
 
-    // Try to get authenticated user (optional)
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    if (authError) {
-      console.error("Auth error:", authError);
+    // Try to get authenticated user (optional — never block the chat on this)
+    let user: any = null;
+    try {
+      const { data, error: authError } = await supabaseClient.auth.getUser();
+      if (authError) console.error("Auth error:", authError.message);
+      user = data?.user ?? null;
+    } catch (e) {
+      console.error("Auth lookup failed, continuing anonymously:", e);
     }
+
 
     // Build user context (supports unauthenticated users)
     let userContext = `
@@ -82,7 +87,9 @@ serve(async (req) => {
 `;
 
     if (user) {
+      try {
       // Fetch user profile and progress data
+
       const userIdQuery = await supabaseClient.from('users').select('id, first_name, last_name, email').eq('auth_user_id', user.id).single();
       const dbUser = userIdQuery.data;
 
@@ -126,7 +133,11 @@ ${topicCoverage.slice(0, 10).map((t: any) => `- ${t.subjects?.name || 'Unknown'}
 **Weak Areas (Need Focus):**
 ${weakTopics.length > 0 ? weakTopics.map((t: any) => `- ${t.subject}: ${t.topic} (${t.accuracy}% accuracy)`).join('\n') : '- No weak areas identified yet - keep practicing!'}
 `;
+      } catch (e) {
+        console.error("Failed to build user context, continuing with defaults:", e);
+      }
     }
+
 
     // System prompt with user context
     const systemPrompt = `You are Edura AI, an intelligent educational assistant for Nigerian students preparing for JAMB, WAEC, and other exams.

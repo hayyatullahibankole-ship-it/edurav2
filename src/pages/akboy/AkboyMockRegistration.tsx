@@ -388,7 +388,7 @@ export default function AkboyMockRegistration() {
               <CardContent className="py-8 text-center space-y-4">
                 <p className="text-muted-foreground">Registration for this mock exam session is no longer available.</p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <a href="https://edura.space/#/school-registration" target="_blank" rel="noopener noreferrer">
+                  <a href={`${basePath}/contact`}>
                     <Button variant="outline" className="w-full sm:w-auto h-11">
                       <School className="w-4 h-4 mr-2" /> Register as a School
                     </Button>
@@ -521,7 +521,7 @@ export default function AkboyMockRegistration() {
                     </Button>
 
                     <div className="text-center">
-                      <a href="https://edura.space/#/school-registration" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-orange-600 font-semibold hover:underline">
+                      <a href={`${basePath}/contact`} className="inline-flex items-center gap-2 text-sm text-orange-600 font-semibold hover:underline">
                         <School className="w-4 h-4" /> Register as a School
                       </a>
                     </div>

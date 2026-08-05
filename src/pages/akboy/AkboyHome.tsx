@@ -102,10 +102,11 @@ export default function AkboyHome() {
   const ecosystem = [
     {
       icon: Code,
-      title: "Edura CBT",
-      description: "Realistic computer-based test practice with 120,000+ questions and instant analytics.",
-      action: { label: "Visit Edura", href: "https://edura.space", external: true },
+      title: "CBT Practice Engine",
+      description: "Realistic computer-based test practice with instant scoring and performance analytics.",
+      action: { label: "See how it works", href: `${basePath}/services` },
     },
+
     {
       icon: Newspaper,
       title: "Campus Hub",
@@ -227,9 +228,10 @@ export default function AkboyHome() {
                   <div className="flex items-center gap-3 rounded-xl border border-akboy-butter/25 bg-akboy-butter/10 p-4">
                     <ShieldCheck className="h-5 w-5 flex-shrink-0 text-akboy-butter" />
                     <p className="text-sm text-white/80">
-                      Combined, they power <span className="font-semibold text-white">Edura</span> — our flagship
-                      student platform.
+                      Combined, they power the <span className="font-semibold text-white">Akboy</span> learning
+                      ecosystem — from classrooms to digital products.
                     </p>
+
                   </div>
                 </div>
               </div>
@@ -308,7 +310,7 @@ export default function AkboyHome() {
                 </div>
                 <h3 className="mt-5 font-display text-lg font-semibold text-akboy-forest">{p.title}</h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-akboy-muted">{p.description}</p>
-                {p.action.external ? (
+                {"external" in p.action && (p.action as { external?: boolean }).external ? (
                   <a
                     href={p.action.href}
                     target="_blank"

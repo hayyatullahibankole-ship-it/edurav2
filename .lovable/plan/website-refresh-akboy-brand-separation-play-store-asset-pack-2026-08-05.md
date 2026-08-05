@@ -7,6 +7,7 @@ Three pieces of work: bring the public Edura website up to date with everything 
 Keep the current "Deep Ink + Edura Green" system (flat, no gradients) but rebuild the marketing pages so they reflect the product as it is today, not the old CBT-only story.
 
 **Landing page (`Home.tsx`)**
+
 - New hero positioning: one platform for exam prep, admissions and campus life — not "chat platform" or "CBT app".
 - A three-pillar block: **Prepare** (CBT practice, mock exams, offline mode), **Process** (result e-PINs, admission/Post-UTME processing, scholarships), **Progress** (Edura Campus for undergraduates — courses, materials, projects).
 - Wallet + automated e-PIN delivery section (fund wallet, instant scratch card, pay for services).
@@ -15,13 +16,16 @@ Keep the current "Deep Ink + Edura Green" system (flat, no gradients) but rebuil
 - Trust row (numbers/subjects/schools), FAQ, and a single clear footer CTA.
 
 **Services page (`ServicesLanding.tsx`)**
+
 - Rebuild around the live service catalog: result checker e-PINs (JAMB/WAEC/NECO), admission & Post-UTME processing with per-institution pricing, scholarship guidance, document services.
 - Show the real flow: choose service → pay (card or wallet) → submit details → track status.
 
 **Schools page (`SchoolLanding.tsx`)**
+
 - Update to current features: exam creation, seat-based subscription with top-ups, staff management, mock exams free, performance rankings and reports.
 
 **Mobile web landing (`MobileWebLanding.tsx`)**
+
 - Align copy and visuals with the new landing page, keep the install-app push.
 
 Also: refresh `Resources.tsx` / any stale links, and update page titles + meta descriptions per page for SEO.
@@ -48,6 +52,8 @@ Generated into your Files panel so you can download and upload directly:
 - **Content rating questionnaire answers** and a release checklist (versionCode bump, signing, testing track).
 
 Note: 7-inch/10-inch tablet screenshots are optional unless you opt into tablet distribution — I'll generate phone only unless you want tablets too.
+
+Also fix the ai button in the app, there's an error 
 
 ## Technical notes
 

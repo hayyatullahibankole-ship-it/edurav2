@@ -48,7 +48,7 @@ export default function AkboyMockSubmitted() {
                     <Download className="w-4 h-4 mr-2" /> Reprint Admit Slip
                   </Button>
                 </a>
-                <a href="https://edura.space/#/school-registration" target="_blank" rel="noopener noreferrer">
+                <a href={`${basePath}/contact`}>
                   <Button variant="outline" className="w-full mt-2 h-11">
                     <School className="w-4 h-4 mr-2" /> Register as a School
                   </Button>
