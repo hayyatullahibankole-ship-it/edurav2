@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { canPurchaseDigitalInApp } from "@/lib/nativePayments";
+import { openExternal } from "@/lib/openExternal";
+
 
 const WHATSAPP_NUMBER = "2347050757085";
 
