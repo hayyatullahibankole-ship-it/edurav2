@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
     const today = new Date().toISOString().slice(0, 10);
     let isPremium = false;
     try {
-      const { data } = await admin.rpc("has_premium_access", { user_uuid: user.id });
+      const { data } = await admin.rpc("has_premium_access", { _auth_user_id: user.id });
       isPremium = Boolean(data);
     } catch (_) {
       isPremium = false;
@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
     const { data: profile } = await admin
       .from("users")
       .select("department, study_level, institution_name")
-      .eq("id", user.id)
+      .eq("auth_user_id", user.id)
       .maybeSingle();
     if (profile) {
       ctx.department = (profile as any).department;
