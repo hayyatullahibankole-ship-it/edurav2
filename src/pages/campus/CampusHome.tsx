@@ -23,7 +23,9 @@ import {
   Lock,
   Calculator,
 
+  Sparkles,
 } from "lucide-react";
+
 
 const naira = (v: number) =>
   new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(v || 0);
