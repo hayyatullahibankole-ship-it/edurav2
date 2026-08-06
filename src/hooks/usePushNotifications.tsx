@@ -81,10 +81,12 @@ export const usePushNotifications = () => {
   };
 
   const requestPermission = async () => {
-    if (!Capacitor.isNativePlatform()) {
-      toast.error('Push notifications are only available on mobile devices');
+    if (!PUSH_ENABLED || !Capacitor.isNativePlatform()) {
+      toast.error('Push notifications are not available yet');
       return;
     }
+
+
 
     const permission = await PushNotifications.requestPermissions();
     
