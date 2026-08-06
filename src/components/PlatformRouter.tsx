@@ -71,6 +71,8 @@ const CampusProjects = lazy(() => import("@/pages/campus/CampusProjects"));
 const CampusOpportunities = lazy(() => import("@/pages/campus/CampusOpportunities"));
 const CampusJourney = lazy(() => import("@/pages/campus/CampusJourney"));
 const CampusTools = lazy(() => import("@/pages/campus/CampusTools"));
+const CampusCompanion = lazy(() => import("@/pages/campus/CampusCompanion"));
+
 
 
 // Journey-aware home: candidates get the unified home, campus students go to Campus
