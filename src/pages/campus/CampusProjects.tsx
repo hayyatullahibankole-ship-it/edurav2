@@ -202,7 +202,10 @@ const CampusProjects = () => {
               <p className="mt-2 text-[11px] text-muted-foreground">Saved automatically when you click away.</p>
             </CardContent></Card>
           </div>
+
+          <ProjectAssistant project={project} onMilestonesChanged={load} />
         </div>
+
       )}
     </CampusShell>
   );
