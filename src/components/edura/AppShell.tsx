@@ -10,6 +10,8 @@ import {
   GraduationCap,
   Briefcase,
   Calculator,
+  Sparkles,
+
   Settings as SettingsIcon,
   LogOut,
   type LucideIcon,
