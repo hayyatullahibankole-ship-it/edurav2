@@ -23,7 +23,9 @@ import {
   Lock,
   Calculator,
 
+  Sparkles,
 } from "lucide-react";
+
 
 const naira = (v: number) =>
   new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(v || 0);
@@ -152,7 +154,27 @@ const CampusHome = () => {
             </Button>
           </div>
 
+          {/* AI Course Companion */}
+          <div className="bg-card border border-border rounded-2xl p-5 col-span-2 md:col-span-8">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Sparkles className="h-4 w-4 text-primary" /> AI Course Companion
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Explain any topic from your own courses, generate practice past questions with answers,
+              summarise your uploaded materials and predict what's likely to come out.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => navigate("/campus/companion")} className="gap-1.5">
+                <Sparkles className="h-3.5 w-3.5" /> Open companion
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => navigate("/campus/companion")}>
+                Generate questions
+              </Button>
+            </div>
+          </div>
+
           {/* Wallet action */}
+
           <div className="bg-card border border-border rounded-2xl p-5 col-span-2 md:col-span-4">
             <div className="flex items-center gap-2 text-sm font-medium">
               <WalletIcon className="h-4 w-4 text-primary" /> Wallet

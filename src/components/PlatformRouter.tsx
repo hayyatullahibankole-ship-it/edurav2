@@ -71,6 +71,8 @@ const CampusProjects = lazy(() => import("@/pages/campus/CampusProjects"));
 const CampusOpportunities = lazy(() => import("@/pages/campus/CampusOpportunities"));
 const CampusJourney = lazy(() => import("@/pages/campus/CampusJourney"));
 const CampusTools = lazy(() => import("@/pages/campus/CampusTools"));
+const CampusCompanion = lazy(() => import("@/pages/campus/CampusCompanion"));
+
 
 
 // Journey-aware home: candidates get the unified home, campus students go to Campus
@@ -299,7 +301,13 @@ const EduraRoutes = () => {
           <CampusOnly><CampusAcademics /></CampusOnly>
         </ProtectedRoute>
       } />
+      <Route path="/campus/companion" element={
+        <ProtectedRoute>
+          <CampusOnly><CampusCompanion /></CampusOnly>
+        </ProtectedRoute>
+      } />
       <Route path="/campus/tools" element={
+
         <ProtectedRoute>
           <CampusOnly><CampusTools /></CampusOnly>
         </ProtectedRoute>

@@ -920,6 +920,87 @@ export type Database = {
           },
         ]
       }
+      campus_ai_sessions: {
+        Row: {
+          content: string
+          course_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          project_id: string | null
+          prompt: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          project_id?: string | null
+          prompt?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          project_id?: string | null
+          prompt?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campus_ai_sessions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "campus_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campus_ai_sessions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "campus_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campus_ai_usage: {
+        Row: {
+          count: number
+          created_at: string
+          day: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          day?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          day?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       campus_courses: {
         Row: {
           code: string
@@ -964,6 +1045,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      campus_generated_questions: {
+        Row: {
+          answer: string | null
+          created_at: string
+          explanation: string | null
+          id: string
+          options: Json
+          position: number
+          question: string
+          set_id: string
+          user_id: string
+        }
+        Insert: {
+          answer?: string | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          position?: number
+          question: string
+          set_id: string
+          user_id: string
+        }
+        Update: {
+          answer?: string | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          position?: number
+          question?: string
+          set_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campus_generated_questions_set_id_fkey"
+            columns: ["set_id"]
+            isOneToOne: false
+            referencedRelation: "campus_question_sets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       campus_hub_consultations: {
         Row: {
@@ -1269,6 +1394,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      campus_question_sets: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          difficulty: string
+          id: string
+          question_count: number
+          question_type: string
+          title: string
+          topic: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          difficulty?: string
+          id?: string
+          question_count?: number
+          question_type?: string
+          title: string
+          topic?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          difficulty?: string
+          id?: string
+          question_count?: number
+          question_type?: string
+          title?: string
+          topic?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campus_question_sets_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "campus_courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       campus_tasks: {
         Row: {
