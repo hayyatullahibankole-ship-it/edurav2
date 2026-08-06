@@ -1,4 +1,4 @@
-package app.lovable.ee95bfa9a22942b6ac9d0a6c28cde3a7;
+package com.edura.app;
 
 import com.getcapacitor.BridgeActivity;
 
