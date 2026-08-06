@@ -5,12 +5,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
+// Push registration calls Firebase natively. Without android/app/google-services.json
+// the Android app crashes on launch, so keep this off until Firebase is configured.
+const PUSH_ENABLED = false;
+
 export const usePushNotifications = () => {
   const [permissionStatus, setPermissionStatus] = useState<'prompt' | 'granted' | 'denied'>('prompt');
   const { userProfile } = useAuth();
 
   useEffect(() => {
-    if (!Capacitor.isNativePlatform()) {
+    if (!PUSH_ENABLED || !Capacitor.isNativePlatform()) {
       return;
     }
 
@@ -77,10 +81,12 @@ export const usePushNotifications = () => {
   };
 
   const requestPermission = async () => {
-    if (!Capacitor.isNativePlatform()) {
-      toast.error('Push notifications are only available on mobile devices');
+    if (!PUSH_ENABLED || !Capacitor.isNativePlatform()) {
+      toast.error('Push notifications are not available yet');
       return;
     }
+
+
 
     const permission = await PushNotifications.requestPermissions();
     
