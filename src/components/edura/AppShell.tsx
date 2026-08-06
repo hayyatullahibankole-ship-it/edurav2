@@ -58,8 +58,8 @@ const CANDIDATE_NAV: ShellNavItem[] = [
 const CAMPUS_NAV: ShellNavItem[] = [
   { to: "/campus", label: "Home", icon: LayoutGrid, end: true },
   { to: "/campus/academics", label: "Academics", icon: BookOpen },
+  { to: "/campus/companion", label: "AI", icon: Sparkles },
   { to: "/campus/projects", label: "Projects", icon: FolderKanban },
-  { to: "/wallet", label: "Wallet", icon: WalletIcon },
 ];
 
 /** Extra destinations that only appear in the desktop rail. */
@@ -69,8 +69,10 @@ const DESKTOP_EXTRAS: Record<ShellSide, ShellNavItem[]> = {
   campus: [
     { to: "/campus/tools", label: "Study tools", icon: Calculator },
     { to: "/campus/opportunities", label: "Opportunities", icon: Compass },
+    { to: "/wallet", label: "Wallet", icon: WalletIcon },
   ],
 };
+
 
 const NAV: Record<ShellSide, ShellNavItem[]> = {
   cbt: CANDIDATE_NAV,
